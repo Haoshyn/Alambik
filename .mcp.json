@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "multiagents-peer": {
+      "command": "bun",
+      "args": [
+        "C:\\Users\\giova\\Documents\\MultIA\\cli.ts",
+        "mcp-server",
+        "--agent-type",
+        "claude"
+      ]
+    }
+  }
+}

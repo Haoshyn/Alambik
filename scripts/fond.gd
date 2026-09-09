@@ -20,6 +20,8 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
+	if has_meta("visuel_3d"):
+		return
 	var taille := get_viewport_rect().size
 	# La Mine recule la camera pour montrer davantage de terrain. Le fond doit
 	# donc couvrir la meme surface de monde que les limites physiques ; sinon la

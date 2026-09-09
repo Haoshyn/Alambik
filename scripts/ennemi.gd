@@ -375,6 +375,12 @@ func _mourir() -> void:
 	queue_free()
 
 func _draw() -> void:
+	if has_meta("visuel_3d"):
+		_dessiner_telegraphe(float(donnees["rayon"]))
+		_dessiner_barre_de_vie(float(donnees["rayon"]))
+		if _gel > 0.0:
+			draw_arc(Vector2.ZERO, float(donnees["rayon"]), 0.0, TAU, 24, Palette.GIVRE, 2.0, true)
+		return
 	var r: float = donnees["rayon"] * (0.4 + 0.6 * _apparition)
 	var base: Color = donnees["couleur"]
 	var couleur := base

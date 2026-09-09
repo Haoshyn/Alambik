@@ -149,5 +149,7 @@ func _finir(creer_fragments := true) -> void:
 	queue_free()
 
 func _draw() -> void:
+	if has_meta("visuel_3d"):
+		return
 	Retro16.dessiner_projectile(self, _trainee, position, couleur, hostile,
 		"trait_familier" in tir.drapeaux)

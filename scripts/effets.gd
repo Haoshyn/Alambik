@@ -96,6 +96,9 @@ func texte(position: Vector2, contenu: String, couleur := Palette.TEXTE) -> void
 	_textes.append({"position": position, "contenu": contenu, "vie": 0.9, "vie_max": 0.9, "couleur": couleur})
 
 func _draw() -> void:
+	if has_meta("visuel_3d"):
+		_dessiner_textes()
+		return
 	for o in _ondes:
 		var t: float = 1.0 - o["vie"] / o["vie_max"]
 		var c: Color = o["couleur"]
@@ -120,6 +123,9 @@ func _draw() -> void:
 		Dessin.halo(self, p["position"], taille * 3.2, Color(c, t * 0.38), 3)
 		draw_rect(Rect2(Retro16.pixel(p["position"]) - Vector2.ONE * taille * 0.5,
 			Vector2.ONE * taille), c)
+	_dessiner_textes()
+
+func _dessiner_textes() -> void:
 	var police := ThemeDB.fallback_font
 	for t in _textes:
 		var f: float = t["vie"] / t["vie_max"]

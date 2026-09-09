@@ -84,6 +84,8 @@ func _ennemi_plus_proche() -> Node2D:
 	return resultat
 
 func _draw() -> void:
+	if has_meta("visuel_3d"):
+		return
 	if _reapparition > 0.0:
 		return
 	var image := int(_anim * 8.0) % 4

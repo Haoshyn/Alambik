@@ -160,6 +160,10 @@ func _ready() -> void:
 			add_child(bot)
 
 	_entrer_dans_la_salle()
+	if DisplayServer.get_name() != "headless" and not "--visuel-2d" in arguments:
+		var monde: Node3D = load("res://scenes/3d/monde_3d.tscn").instantiate()
+		add_child(monde)
+		monde.relier(_salle, _heros, _fond)
 	_animer_entree_salle()
 	# Arguments de capture reserves au controle visuel automatise des panneaux.
 	if "--ouvrir-pause" in arguments:

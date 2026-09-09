@@ -1,0 +1,556 @@
+{
+  "blender": "5.2.1 LTS",
+  "assets": [
+    {
+      "nom": "heros",
+      "glb": "assets/3d/characters/heros.glb",
+      "triangles": 5462,
+      "surfaces": 10,
+      "octets": 398548,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "encrier_rampant",
+      "glb": "assets/3d/enemies/encrier_rampant.glb",
+      "triangles": 2516,
+      "surfaces": 3,
+      "octets": 104332,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "plume_sentinelle",
+      "glb": "assets/3d/enemies/plume_sentinelle.glb",
+      "triangles": 712,
+      "surfaces": 4,
+      "octets": 36252,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "tache_veloce",
+      "glb": "assets/3d/enemies/tache_veloce.glb",
+      "triangles": 1232,
+      "surfaces": 2,
+      "octets": 48484,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "scribe_essaimeur",
+      "glb": "assets/3d/enemies/scribe_essaimeur.glb",
+      "triangles": 1112,
+      "surfaces": 3,
+      "octets": 50664,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "folio_orbiteur",
+      "glb": "assets/3d/enemies/folio_orbiteur.glb",
+      "triangles": 944,
+      "surfaces": 5,
+      "octets": 60700,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "sceau_belier",
+      "glb": "assets/3d/enemies/sceau_belier.glb",
+      "triangles": 1020,
+      "surfaces": 4,
+      "octets": 66556,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "marge_harceleuse",
+      "glb": "assets/3d/enemies/marge_harceleuse.glb",
+      "triangles": 1032,
+      "surfaces": 3,
+      "octets": 47628,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "miroir_encre",
+      "glb": "assets/3d/enemies/miroir_encre.glb",
+      "triangles": 920,
+      "surfaces": 3,
+      "octets": 51444,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "cachet_phaseur",
+      "glb": "assets/3d/enemies/cachet_phaseur.glb",
+      "triangles": 664,
+      "surfaces": 3,
+      "octets": 44936,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "fuseau_tisseur",
+      "glb": "assets/3d/enemies/fuseau_tisseur.glb",
+      "triangles": 992,
+      "surfaces": 3,
+      "octets": 49852,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "fiole_volatile",
+      "glb": "assets/3d/enemies/fiole_volatile.glb",
+      "triangles": 892,
+      "surfaces": 2,
+      "octets": 48964,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "miniboss_0",
+      "glb": "assets/3d/bosses/miniboss_0.glb",
+      "triangles": 1824,
+      "surfaces": 3,
+      "octets": 96164,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "miniboss_1",
+      "glb": "assets/3d/bosses/miniboss_1.glb",
+      "triangles": 3072,
+      "surfaces": 3,
+      "octets": 129620,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "miniboss_2",
+      "glb": "assets/3d/bosses/miniboss_2.glb",
+      "triangles": 1104,
+      "surfaces": 4,
+      "octets": 52488,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "miniboss_3",
+      "glb": "assets/3d/bosses/miniboss_3.glb",
+      "triangles": 1100,
+      "surfaces": 6,
+      "octets": 71368,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "miniboss_4",
+      "glb": "assets/3d/bosses/miniboss_4.glb",
+      "triangles": 1184,
+      "surfaces": 3,
+      "octets": 50672,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "miniboss_5",
+      "glb": "assets/3d/bosses/miniboss_5.glb",
+      "triangles": 1488,
+      "surfaces": 2,
+      "octets": 71428,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "miniboss_6",
+      "glb": "assets/3d/bosses/miniboss_6.glb",
+      "triangles": 1100,
+      "surfaces": 3,
+      "octets": 49192,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "miniboss_7",
+      "glb": "assets/3d/bosses/miniboss_7.glb",
+      "triangles": 1220,
+      "surfaces": 5,
+      "octets": 52980,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "miniboss_8",
+      "glb": "assets/3d/bosses/miniboss_8.glb",
+      "triangles": 1104,
+      "surfaces": 5,
+      "octets": 52764,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "miniboss_9",
+      "glb": "assets/3d/bosses/miniboss_9.glb",
+      "triangles": 1080,
+      "surfaces": 5,
+      "octets": 53028,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "boss_0",
+      "glb": "assets/3d/bosses/boss_0.glb",
+      "triangles": 1800,
+      "surfaces": 5,
+      "octets": 83692,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "boss_1",
+      "glb": "assets/3d/bosses/boss_1.glb",
+      "triangles": 1888,
+      "surfaces": 3,
+      "octets": 74352,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "boss_2",
+      "glb": "assets/3d/bosses/boss_2.glb",
+      "triangles": 1376,
+      "surfaces": 5,
+      "octets": 62988,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "boss_3",
+      "glb": "assets/3d/bosses/boss_3.glb",
+      "triangles": 1940,
+      "surfaces": 5,
+      "octets": 84376,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "boss_4",
+      "glb": "assets/3d/bosses/boss_4.glb",
+      "triangles": 2336,
+      "surfaces": 3,
+      "octets": 111520,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "boss_5",
+      "glb": "assets/3d/bosses/boss_5.glb",
+      "triangles": 1800,
+      "surfaces": 6,
+      "octets": 84780,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "boss_6",
+      "glb": "assets/3d/bosses/boss_6.glb",
+      "triangles": 1888,
+      "surfaces": 3,
+      "octets": 74380,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "boss_7",
+      "glb": "assets/3d/bosses/boss_7.glb",
+      "triangles": 1376,
+      "surfaces": 4,
+      "octets": 61848,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "boss_8",
+      "glb": "assets/3d/bosses/boss_8.glb",
+      "triangles": 1940,
+      "surfaces": 4,
+      "octets": 83296,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "boss_9",
+      "glb": "assets/3d/bosses/boss_9.glb",
+      "triangles": 2336,
+      "surfaces": 3,
+      "octets": 111516,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "gardien",
+      "glb": "assets/3d/characters/gardien.glb",
+      "triangles": 944,
+      "surfaces": 5,
+      "octets": 60700,
+      "animations": [
+        "repos",
+        "course",
+        "attaque",
+        "touche",
+        "mort",
+        "victoire"
+      ]
+    },
+    {
+      "nom": "orbe",
+      "glb": "assets/3d/projectiles/orbe.glb",
+      "triangles": 168,
+      "surfaces": 1,
+      "octets": 6060,
+      "animations": []
+    },
+    {
+      "nom": "obstacle_0",
+      "glb": "assets/3d/props/obstacle_0.glb",
+      "triangles": 756,
+      "surfaces": 2,
+      "octets": 32424,
+      "animations": []
+    },
+    {
+      "nom": "obstacle_1",
+      "glb": "assets/3d/props/obstacle_1.glb",
+      "triangles": 948,
+      "surfaces": 2,
+      "octets": 30604,
+      "animations": []
+    },
+    {
+      "nom": "obstacle_2",
+      "glb": "assets/3d/props/obstacle_2.glb",
+      "triangles": 344,
+      "surfaces": 2,
+      "octets": 12752,
+      "animations": []
+    },
+    {
+      "nom": "portail",
+      "glb": "assets/3d/environment/portail.glb",
+      "triangles": 2196,
+      "surfaces": 4,
+      "octets": 108800,
+      "animations": []
+    },
+    {
+      "nom": "dalle",
+      "glb": "assets/3d/environment/dalle.glb",
+      "triangles": 108,
+      "surfaces": 1,
+      "octets": 5556,
+      "animations": []
+    },
+    {
+      "nom": "colonne",
+      "glb": "assets/3d/environment/colonne.glb",
+      "triangles": 152,
+      "surfaces": 2,
+      "octets": 9768,
+      "animations": []
+    }
+  ]
+}

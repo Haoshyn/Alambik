@@ -253,6 +253,11 @@ func _essayer_resurrection_elementaire() -> bool:
 	return true
 
 func _draw() -> void:
+	if has_meta("visuel_3d"):
+		if bouclier > 0:
+			draw_arc(Vector2.ZERO, Reglages.HEROS_RAYON * 1.2, 0.0, TAU, 32, Palette.ESSENCE, 2.0, true)
+		_dessiner_vie()
+		return
 	var r := Reglages.HEROS_RAYON
 	var flotte := sin(_flottement * 2.6) * 3.0
 	var tremble := Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * _secousse * 5.0
@@ -291,6 +296,9 @@ func _draw() -> void:
 		Dessin.halo(self, centre, r * 2.0, Color(0.70, 0.85, 1.0, 0.55), 3)
 
 	# La vie suit le mage : l'oeil ne quitte plus le combat pour lire le haut.
+	_dessiner_vie()
+
+func _dessiner_vie() -> void:
 	var part_pv := clampf(stats.pv / maxf(1.0, stats.pv_max), 0.0, 1.0)
 	var barre := Rect2(Vector2(-76.0, -128.0), Vector2(152.0, 20.0))
 	draw_rect(barre.grow(7.0), Color(0.008, 0.014, 0.026, 0.94))

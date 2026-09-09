@@ -385,6 +385,18 @@ func _mourir() -> void:
 	queue_free()
 
 func _draw() -> void:
+	if has_meta("visuel_3d"):
+		var rayon: float = donnees["rayon"]
+		if _telegraphe_signature > 0.0:
+			var avancee := 1.0 - _telegraphe_signature / Reglages.BOSS_TELEGRAPHE_SIGNATURE
+			draw_arc(Vector2.ZERO, rayon * (2.1 - avancee * 0.72), 0.0, TAU, 42,
+				Color(Palette.DANGER, 0.28 + avancee * 0.52), 4.0 + avancee * 4.0, true)
+		if _motif == "charge" and _minuterie > 2.0:
+			draw_line(_direction_charge * rayon, _direction_charge * 1050.0, Palette.DANGER, 5.0, true)
+		if _eclat_phase > 0.0:
+			draw_arc(Vector2.ZERO, rayon * (1.35 + (1.0 - _eclat_phase) * 1.25), 0.0, TAU, 42,
+				Color(Palette.DANGER, _eclat_phase * 0.72), 4.0, true)
+		return
 	var entree := ease(_apparition, 0.35)
 	var r: float = donnees["rayon"] * (0.28 + entree * 0.72)
 	var couleur: Color = donnees["couleur"]

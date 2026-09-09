@@ -403,6 +403,8 @@ func _tirer_fragments(eclat: Tir, nombre: int, origine: Vector2, direction: Vect
 		tirer(eclat, origine, direction.rotated(angle), hostile, cible_exclue)
 
 func _draw() -> void:
+	if has_meta("visuel_3d"):
+		return
 	# Le fond de l'arene est dessine par le noeud Fond ; ici on ne dessine que ce
 	# qui doit passer par-dessus.
 	for index in _obstacles.size():
