@@ -133,3 +133,19 @@ Le propriétaire conserve la direction simple mais demande un humain avec un cha
 Source `tools/blender/mage_arcade.py`, GLB et Blender régénérés : 47 080 triangles avant LOD, dix objets de matériau, 1 673 916 octets. Aperçu : `tmp/mage-humain-cache-apercu.html` ; capture stable : `tmp/mage-humain-cache.png`. Validation : 30 suites, 12 855 assertions, zéro échec ; 83 contrôles studio et intégration 3D sans échec. Les diagnostics existants de certificats et de ressources au nettoyage persistent. Logs : `tmp/humain-cache-verification.log`, `tmp/humain-cache-studio.log`, `tmp/humain-cache-integration.log`.
 
 Les 32 poses de marche sont maintenant capturées à l'angle de jeu pour contrôler le masquage du visage en mouvement. Vingt simulations terminées : sept victoires, treize défaites, aucune erreur de script ; un blocage du bot en salle 11, graine 1, avec un ennemi à 29 PV. Le script signale donc un échec. Détail : `tmp/humain-cache-vingt-runs.log`.
+
+## Reprise Blender du héros de combat — 10 septembre 2026
+
+Le mage humain conserve sa silhouette compacte, son visage abrité par le chapeau et ses couleurs violet/turquoise. Le chapeau possède désormais un bord ondulé avec liseré cuivre et une pointe construite par sections perpendiculaires à sa courbure. Le manteau comprend deux pans ouverts, une pèlerine, une ceinture et des coutures. Une sacoche, deux fioles, des broches et une tête de baguette en cornue renforcent l'identité d'alchimiste. Les métaux, le tissu et le cristal ont des réponses à la lumière distinctes ; les accessoires utilisent des volumes moins subdivisés.
+
+Exécution locale avec Blender **5.2.1** : le connecteur ChatIA était indisponible (endpoint hors ligne). La géométrie reproductible reste dans `tools/blender/mage_arcade.py`, via `tools/blender/heros_azur.py`. La source `assets/3d/sources/characters/heros.blend` et le modèle réellement chargé en combat `assets/3d/characters/heros.glb` ont été reconstruits. Quatorze os, six animations conservées : repos, course, attaque, touche, mort, victoire. Les accessoires de la baguette suivent la main droite ; les deux pans d'écharpe suivent son os animé.
+
+Export : **51 760 triangles, dix surfaces, 1 846 384 octets** pour le GLB. Le modèle précédent comptait 47 080 triangles et 1 673 916 octets. Aucun changement de statistiques, de collisions ou de caméra. La qualité artistique de cette proposition reste à apprécier par le propriétaire.
+
+Comparaison avec un éclairage Blender identique : `tmp/heros-comparaison.html`, `tmp/heros-avant.png`, `tmp/heros-apres.png`. Captures Godot : `tmp/mage-vue-jeu.png`, `tmp/mage-marche/`, `tmp/retouches-heros-attaque.png`, `tmp/atelier-validation.png`.
+
+Validation Godot **4.7.1** : 30 suites, 12 855 assertions, zéro échec ; selftest compilé. Studio `mage_articule.gd` : 83 contrôles, zéro échec, captures de marche, attaque et quatre côtés. Intégration `integration_3d.gd --fixed-fps 60` : zéro échec, 125 appels de dessin et 19 432 primitives dans la pose mesurée sur Radeon 610M. Un essai à temps réel avait compté sept proxies au lieu de huit ; la vérification avec pas fixe réussit. Les diagnostics de ressources non libérées à la fermeture demeurent. Ce contrôle PC ne mesure pas les performances sur téléphone.
+
+Journaux : `tmp/heros-construction.log`, `tmp/heros-verification.log`, `tmp/heros-studio.log`, `tmp/heros-integration.log`, `tmp/heros-integration-fixe.log`, `tmp/heros-vingt-runs.log`.
+
+Vingt simulations terminées : **neuf victoires, onze défaites, aucune erreur de script**. Un blocage du bot est signalé à la graine 9, salle 9, avec deux ennemis à 13 et 18 PV ; `vingt_runs.sh` retourne donc **un échec sur vingt**. Ces simulations headless ne chargent pas le héros 3D. Le problème de navigation automatique reste ouvert.

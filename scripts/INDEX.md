@@ -7,6 +7,7 @@
 | Combat | `combat/` | projectile, tir, ciblage, stats et priorités |
 | Monde | `monde/` | salle, géométrie, adaptation du terrain |
 | Améliorations | `ameliorations/` | effets et logique des choix de run |
+| Animation du héros 3D | `presentation/animation_heros_3d.gd`, `presentation/suivi_visuel_2d.gd` | mélange des gestes, cadence et interpolation visuelle |
 | Présentation | `presentation/` | dessin procédural, palette, polices, styles |
 | Entrées | `entrees/` | joystick, balayage, raccourcis tactiles |
 | Menu | `menu/` | accueil et navigation principale |

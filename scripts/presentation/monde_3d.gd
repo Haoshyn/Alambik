@@ -73,7 +73,7 @@ func _inscrire(noeud: Node) -> void:
 	var chemin := ""
 	var genre := ""
 	if noeud == heros:
-		chemin = "res://assets/3d/characters/heros.glb"
+		chemin = Visuels3D.HEROS_MODELE
 		genre = "heros"
 	elif noeud.is_in_group("ennemis"):
 		chemin = Visuels3D.chemin_ennemi(noeud.get("donnees"))

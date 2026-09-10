@@ -346,7 +346,13 @@ func _calculer_limites() -> void:
 func _suivre_heros() -> void:
 	if Jeu.mode_run == "mine" or _camera == null or _heros == null: return
 	var vue := get_viewport().get_visible_rect().size / _camera.zoom
-	var visee := _heros.global_position-Vector2(0,vue.y*0.13)
+	var suivi := _heros.get_node_or_null("SuiviVisuel3D")
+	# Camera et modele utilisent le meme instant entre deux pas de physique.
+	if suivi != null:
+		_camera.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+		_camera.process_callback = Camera2D.CAMERA2D_PROCESS_IDLE
+	var position_visuelle: Vector2 = suivi.position_affichee() if suivi != null else _heros.global_position
+	var visee := position_visuelle-Vector2(0,vue.y*0.13)
 	var minimum := _limites.position+vue*0.5-Vector2(70,Reglages.ARENE_HAUT/_camera.zoom.y)
 	var maximum := _limites.end-vue*0.5+Vector2(70,Reglages.ARENE_BAS/_camera.zoom.y)
 	_camera.global_position = Vector2(clampf(visee.x,minimum.x,maximum.x),clampf(visee.y,minimum.y,maximum.y))

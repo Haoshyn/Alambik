@@ -16,7 +16,7 @@ But : arriver au bon fichier avec le moins de contexte possible.
 | Interface | `ui/`, `scripts/presentation/style_azur.gd` | `scripts/presentation/`, `human/interface/` si design demandé |
 | Équilibrage | fichier précis dans `data/` | tests associés ; pas `scripts/run/run.gd` par défaut |
 | Sauvegarde / progression joueur | `autoload/reglages_joueur.gd` | `data/arbre_competences.gd`, `data/catalogue_objets.gd` |
-| Audio | `autoload/sons.gd` | `assets/audio/` |
+| Audio | `autoload/sons.gd`, `data/musiques.gd` | `assets/audio/COMPOSITIONS.md`, `tools/audio/composer.py` |
 | Mobile / safe area | `autoload/ecran.gd` | `docs/ops/MOBILE.md` |
 | Bug de compilation | recherche du symbole/chemin | `./verifier.sh`, `sondes/selftest.gd` |
 | Design global | chercher un titre dans `docs/design/GAME_DESIGN.md` | `human/` seulement si demandé |

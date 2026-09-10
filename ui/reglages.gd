@@ -9,7 +9,7 @@ func _ready() -> void:
 	contenu.add_child(StyleAzur.texte("Audio",36))
 	_volume(contenu,"Musique",ReglagesJoueur.volume_musique,func(v): ReglagesJoueur.definir_reglages_audio(v,ReglagesJoueur.volume_effets))
 	_volume(contenu,"Effets sonores",ReglagesJoueur.volume_effets,func(v): ReglagesJoueur.definir_reglages_audio(ReglagesJoueur.volume_musique,v))
-	contenu.add_child(StyleAzur.texte("Musique du combat",29))
+	contenu.add_child(StyleAzur.texte("Musique des runs",29))
 	var pistes := _selecteur(contenu)
 	for d in Sons.pistes_disponibles():
 		pistes.add_item(str(d["nom"]))
@@ -17,6 +17,14 @@ func _ready() -> void:
 		pistes.set_item_metadata(index,str(d["id"]))
 		if str(d["id"]) == ReglagesJoueur.piste_musique: pistes.selected = index
 	pistes.item_selected.connect(func(i): ReglagesJoueur.definir_piste_musique(str(pistes.get_item_metadata(i))))
+	contenu.add_child(StyleAzur.texte("Musique du menu",29))
+	var pistes_menu := _selecteur(contenu)
+	for d in Sons.pistes_menu_disponibles():
+		pistes_menu.add_item(str(d["nom"]))
+		var index := pistes_menu.item_count-1
+		pistes_menu.set_item_metadata(index,str(d["id"]))
+		if str(d["id"]) == ReglagesJoueur.piste_menu: pistes_menu.selected = index
+	pistes_menu.item_selected.connect(func(i): ReglagesJoueur.definir_piste_menu(str(pistes_menu.get_item_metadata(i))))
 	contenu.add_child(StyleAzur.texte("Affichage & confort",36))
 	_option(contenu,"Secousses d’écran",ReglagesJoueur.secousses_ecran,func(v): ReglagesJoueur.definir_accessibilite(v,ReglagesJoueur.effets_reduits))
 	_option(contenu,"Animations et flashes réduits",ReglagesJoueur.effets_reduits,func(v): ReglagesJoueur.definir_accessibilite(ReglagesJoueur.secousses_ecran,v))

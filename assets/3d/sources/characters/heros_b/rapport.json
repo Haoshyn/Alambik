@@ -1,0 +1,28 @@
+{
+  "source": {
+    "sommets": 133770,
+    "triangles": 267804,
+    "aretes_ouvertes": 0,
+    "aretes_non_manifold": 0
+  },
+  "allege": {
+    "sommets": 17868,
+    "triangles": 36000,
+    "aretes_ouvertes": 0,
+    "aretes_non_manifold": 0
+  },
+  "ecart_source_vers_allege": {
+    "maximum": 0.00591379264369607,
+    "moyenne": 0.00032090900516762655
+  },
+  "ecart_allege_vers_source": {
+    "maximum": 0.0013849626993760467,
+    "moyenne": 0.00029110678225153494
+  },
+  "export": {
+    "fichier": "assets/3d/characters/heros_b_etude.glb",
+    "octets": 11827720,
+    "textures": 2048,
+    "animations": 0
+  }
+}

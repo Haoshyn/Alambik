@@ -20,6 +20,7 @@ var mode_dev := false
 var volume_musique := 1.0
 var volume_effets := 1.0
 var piste_musique := "first_arcade"
+var piste_menu := "accueil"
 var secousses_ecran := true
 var effets_reduits := false
 # Comment le Sort actif part : par son icone seule, par une tape rapide dans la
@@ -70,9 +71,8 @@ func charger() -> void:
 	mode_dev = bool(config.get_value("options", "mode_dev", false))
 	volume_musique = clampf(float(config.get_value("audio", "musique", 1.0)), 0.0, 1.0)
 	volume_effets = clampf(float(config.get_value("audio", "effets", 1.0)), 0.0, 1.0)
-	piste_musique = str(config.get_value("audio", "piste", "first_arcade"))
-	if piste_musique not in ["first_arcade", "dynamic_arcade"]:
-		piste_musique = "first_arcade"
+	piste_musique = Musiques.valider(str(config.get_value("audio", "piste", "first_arcade")))
+	piste_menu = Musiques.valider(str(config.get_value("audio", "piste_menu", "accueil")), true)
 	secousses_ecran = bool(config.get_value("accessibilite", "secousses", true))
 	effets_reduits = bool(config.get_value("accessibilite", "effets_reduits", false))
 	raccourci_sort = RaccourciTactile.mode_valide(str(config.get_value("commandes", "raccourci_sort",
@@ -133,6 +133,7 @@ func sauvegarder() -> void:
 	config.set_value("audio", "musique", volume_musique)
 	config.set_value("audio", "effets", volume_effets)
 	config.set_value("audio", "piste", piste_musique)
+	config.set_value("audio", "piste_menu", piste_menu)
 	config.set_value("accessibilite", "secousses", secousses_ecran)
 	config.set_value("accessibilite", "effets_reduits", effets_reduits)
 	config.set_value("commandes", "raccourci_sort", raccourci_sort)
@@ -275,9 +276,17 @@ func definir_reglages_audio(musique: float, effets: float) -> void:
 	reglages_changes.emit()
 
 func definir_piste_musique(id: String) -> void:
-	if id not in ["first_arcade", "dynamic_arcade"] or id == piste_musique:
+	if not Musiques.contient(id) or id == piste_musique:
 		return
 	piste_musique = id
+	Sons.appliquer_reglages()
+	sauvegarder()
+	reglages_changes.emit()
+
+func definir_piste_menu(id: String) -> void:
+	if not Musiques.contient(id, true) or id == piste_menu:
+		return
+	piste_menu = id
 	Sons.appliquer_reglages()
 	sauvegarder()
 	reglages_changes.emit()

@@ -1,7 +1,6 @@
 extends Node
 
-# Les effets et le menu restent synthetises au demarrage. Toute la run, boss et
-# transitions compris, joue la composition exportee depuis LMMS.
+# Les effets sont synthetises ; les compositions sont lues en boucle depuis Ogg.
 
 const TAUX := 22050
 const TAUX_MUSIQUE := 11025
@@ -10,9 +9,6 @@ const DUREE_FONDU := 2.2
 const DUREE_BLANC_COMBAT := 0.14
 const BUS_MUSIQUE := "Musique"
 const BUS_EFFETS := "Effets"
-const MUSIQUE_ACCUEIL := preload("res://Accueil.ogg")
-const MUSIQUE_FIRST_ARCADE := preload("res://assets/audio/firstarcade.ogg")
-const MUSIQUE_DYNAMIC_ARCADE := preload("res://assets/audio/dynamic_arcade.ogg")
 
 var _banque := {}
 var _voix: Array[AudioStreamPlayer] = []
@@ -21,12 +17,13 @@ var actif := true
 var _musiques: Array[AudioStreamPlayer] = []
 var _volumes_vises := PackedFloat32Array([-80.0, -80.0])
 var _piste_chargee := ""
+var _piste_menu_chargee := "accueil"
 
 func pistes_disponibles() -> Array[Dictionary]:
-	return [
-		{"id": "first_arcade", "nom": "FIRST ARCADE"},
-		{"id": "dynamic_arcade", "nom": "DYNAMIC ARCADE"},
-	]
+	return Musiques.RUNS
+
+func pistes_menu_disponibles() -> Array[Dictionary]:
+	return Musiques.MENU
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -120,28 +117,28 @@ func appliquer_reglages() -> void:
 func _appliquer_piste_selectionnee() -> void:
 	if not actif or _musiques.size() < 2:
 		return
-	var id := str(ReglagesJoueur.piste_musique)
-	if id == _piste_chargee:
+	_remplacer_piste(0, ReglagesJoueur.piste_menu)
+	_remplacer_piste(1, ReglagesJoueur.piste_musique)
+
+func _remplacer_piste(index: int, id: String) -> void:
+	var ancienne := _piste_menu_chargee if index == 0 else _piste_chargee
+	if id == ancienne:
 		return
-	_musiques[1].stop()
-	_musiques[1].stream = _creer_flux_combat(id)
-	_piste_chargee = id
-	_musiques[1].play(0.0)
-	# Si les reglages sont ouverts pendant une run, le choix s'entend sans
-	# devoir quitter l'ecran ni recommencer la salle.
-	_musiques[1].volume_db = _volumes_vises[1]
+	_musiques[index].stop()
+	_musiques[index].stream = Musiques.creer_flux(id, index == 0)
+	if index == 0:
+		_piste_menu_chargee = id
+	else:
+		_piste_chargee = id
+	_musiques[index].play(0.0)
+	# Le changement s'entend dans le contexte courant, meme pendant une pause.
+	_musiques[index].volume_db = _volumes_vises[index]
 
 func _creer_flux_accueil() -> AudioStreamOggVorbis:
-	var flux: AudioStreamOggVorbis = MUSIQUE_ACCUEIL.duplicate()
-	flux.loop = true
-	return flux
+	return Musiques.creer_flux("accueil", true)
 
 func _creer_flux_combat(id: String) -> AudioStreamOggVorbis:
-	var source: AudioStreamOggVorbis = MUSIQUE_DYNAMIC_ARCADE \
-		if id == "dynamic_arcade" else MUSIQUE_FIRST_ARCADE
-	var flux: AudioStreamOggVorbis = source.duplicate()
-	flux.loop = true
-	return flux
+	return Musiques.creer_flux(id)
 
 func _appliquer_volume_bus(nom: String, volume: float) -> void:
 	var index := AudioServer.get_bus_index(nom)
@@ -211,8 +208,7 @@ func _impact_heros() -> AudioStreamWAV:
 	flux.data = donnees
 	return flux
 
-# La piste LMMS est chargee directement plus haut ; seule l'ambiance du menu
-# reste synthetisee pour que le projet ne possede que deux identites musicales.
+# Ancienne esquisse synthetique conservee ; les menus utilisent le catalogue Ogg.
 func _composer_boucle_menu() -> AudioStreamWAV:
 	var tempo := 96.0
 	var battements := 16.0

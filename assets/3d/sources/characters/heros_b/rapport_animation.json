@@ -1,0 +1,47 @@
+{
+  "triangles_main": 1968,
+  "triangles_baton": 3572,
+  "controle_course": {
+    "flexion_genoux_degres": [
+      22.239205220588236,
+      129.36230755918078
+    ],
+    "ecart_lateral_coude_epaule_max": 0.08383011817932129
+  },
+  "os": 20,
+  "triangles": 35543,
+  "influences_max": 4,
+  "animations": {
+    "repos": {
+      "images": 181,
+      "secondes": 3.0,
+      "correction_sol_max": 0.00032906371052376926
+    },
+    "course": {
+      "images": 33,
+      "secondes": 0.5333333333333333,
+      "correction_sol_max": 0.028277046978473663
+    },
+    "attaque": {
+      "images": 31,
+      "secondes": 0.5,
+      "correction_sol_max": 0.00032906371052376926
+    },
+    "touche": {
+      "images": 25,
+      "secondes": 0.4,
+      "correction_sol_max": 0.00032906371052376926
+    },
+    "mort": {
+      "images": 73,
+      "secondes": 1.2,
+      "correction_sol_max": 0.33685103058815
+    },
+    "victoire": {
+      "images": 121,
+      "secondes": 2.0,
+      "correction_sol_max": 0.00032906371052376926
+    }
+  },
+  "export_octets": 12828192
+}

@@ -2,9 +2,9 @@
   {
     "nom": "heros",
     "glb": "assets/3d/characters/heros.glb",
-    "triangles": 47080,
+    "triangles": 51760,
     "surfaces": 10,
-    "octets": 1673916,
+    "octets": 1846384,
     "animations": [
       "repos",
       "course",

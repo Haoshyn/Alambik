@@ -6,7 +6,8 @@ func test_couverture_modeles_et_mondes(v: Verif) -> void:
 		v.vrai(ambiance.size() == 3, "pierre, eau et bordures")
 	for id in CatalogueEnnemis.TOUS:
 		v.vrai(ResourceLoader.exists(Visuels3D.chemin_ennemi(CatalogueEnnemis.par_id(id))), "modele du bestiaire : " + str(id))
-	for chemin in ["characters/heros", "characters/gardien", "environment/socle_atelier"]:
+	v.vrai(ResourceLoader.exists(Visuels3D.HEROS_MODELE), "modele du heros actif")
+	for chemin in ["characters/gardien", "environment/socle_atelier"]:
 		v.vrai(ResourceLoader.exists("res://assets/3d/" + chemin + ".glb"), "modele : " + chemin)
 
 func test_cadrage_portrait(v: Verif) -> void:
@@ -36,7 +37,11 @@ func test_orientation_du_mage(v: Verif) -> void:
 	proxy._jouer_tir(null, Vector2.ZERO, Vector2.RIGHT)
 	proxy.mettre_a_jour(0.0)
 	v.vrai(is_equal_approx(proxy.modele.rotation.y, PI/2), "le nouveau tir oriente le mage vers sa cible")
+	heros.velocity = Vector2(100,100)
+	proxy.mettre_a_jour(0.0)
+	var avant: Vector3 = proxy.modele.basis.z
+	var projete := Vector2(avant.x, avant.z*sin(deg_to_rad(Pont3D.INCLINAISON))).normalized()
+	v.vrai(projete.is_equal_approx(Vector2.ONE.normalized()), "la diagonale 3D suit la direction ecran malgre la projection")
 	Jeu.mode_auto = ancien_auto
 	proxy.free()
 	heros.free()
-
