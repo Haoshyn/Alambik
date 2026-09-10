@@ -9,6 +9,8 @@ var _message := ""
 var _lancement := false
 var _zones_chapitres: Array[Button] = []
 var _bouton_selectionner: Button
+var _bouton_mine: Button
+var _bouton_epreuve: Button
 var _titre: Label
 var _details: Label
 
@@ -35,13 +37,20 @@ func _ready() -> void:
 	_bouton_selectionner = StyleAzur.bouton("Choisir cette campagne",_selectionner,true)
 	contenu.add_child(_bouton_selectionner)
 	contenu.add_child(StyleAzur.texte("Autres aventures",35))
-	contenu.add_child(StyleAzur.bouton("La Mine",func(): _choisir_mode("mine")))
-	contenu.add_child(StyleAzur.bouton("Épreuves de magie",func(): _choisir_mode("epreuve_sorts")))
+	_bouton_mine = StyleAzur.bouton("La Mine",func(): _choisir_mode("mine"))
+	contenu.add_child(_bouton_mine)
+	_bouton_epreuve = StyleAzur.bouton("Épreuves de magie",func(): _choisir_mode("epreuve_sorts"))
+	contenu.add_child(_bouton_epreuve)
 	_rafraichir()
 	Capture.programmer(self)
 
 func _choisir_mode(mode: String) -> void:
-	if _lancement: return
+	if _lancement:
+		return
+	if not ReglagesJoueur.mode_debloque(mode):
+		_message = "Terminez davantage de chapitres pour ouvrir ce mode."
+		_rafraichir()
+		return
 	ReglagesJoueur.choisir_mode_run(mode)
 	selection_changee.emit()
 	_fermer()
@@ -54,6 +63,12 @@ func _rafraichir() -> void:
 		_zones_chapitres[i].text = "%s   ·   %s" % [d["nom"],"Accessible" if ReglagesJoueur.chapitre_debloque(index) else "Verrouillé"]
 		_zones_chapitres[i].add_theme_stylebox_override("normal",StyleAzur.cadre(StyleAzur.PANNEAU,StyleAzur.MAGIE if i == _chapitre_monde else StyleAzur.CUIVRE))
 	_bouton_selectionner.disabled = not ReglagesJoueur.chapitre_debloque(_index_selectionne())
+	_bouton_epreuve.disabled = not ReglagesJoueur.mode_debloque("epreuve_sorts")
+	_bouton_mine.disabled = not ReglagesJoueur.mode_debloque("mine")
+	_bouton_epreuve.text = "Épreuves de magie" if not _bouton_epreuve.disabled else \
+		"Épreuves de magie · niveau %d" % Reglages.EPREUVE_NIVEAU_DEBLOCAGE
+	_bouton_mine.text = "La Mine" if not _bouton_mine.disabled else \
+		"La Mine · niveau %d" % Reglages.MINE_NIVEAU_DEBLOCAGE
 	_details.text = "Meilleur étage : %d / %d\n%s" % [ReglagesJoueur.meilleure_du_chapitre(_index_selectionne()),Chapitres.par_index(_index_selectionne())["salles"],_message]
 
 func _index_selectionne() -> int:

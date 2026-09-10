@@ -257,22 +257,25 @@ const SOIN_ALAMBIC := 0.20   # respiration garantie avant chaque boss
 # avant les salles 5/10/15/20, meme avec les nouvelles vagues plus denses.
 const XP_RUN_SEUILS := [14, 38, 82, 130, 225, 350]
 
-# Economie longue : le premier rang des trente Maitrises accompagne les trente
-# chapitres, les rangs suivants sont la matiere du farm. Une campagne propre
-# rapporte environ 34 k Gouttes via ses grands coffres ; les echecs productifs
-# amenent naturellement le budget vers le cout (~42 k) des trente premiers rangs.
+# Economie longue : les couts restent fixes, c'est le revenu de campagne qui
+# accelere. Avec un grand coffre moyen de 14 Gouttes et x1,20 par chapitre, une
+# campagne sans farm finance environ 30 % des premiers rangs a mi-parcours,
+# 47-50 % vers 70 % du jeu et 80 % a la premiere fin. Les rangs 2-5 restent le
+# vrai puits de farm apres cette premiere progression.
 const MAITRISE_COUTS := [60, 100, 170, 280, 460, 760, 1250, 2050, 3400, 5600]
 const MAITRISE_RANG_MAX := 5
-# Les rangs 2-5 restent du farm, mais x1,85 produisait plus d'un million de
-# Gouttes pour l'arbre complet. x1,55 conserve plusieurs dizaines d'heures de
-# marge sans transformer le dernier rang en mur artificiel.
 const MAITRISE_COUT_PAR_RANG := 1.55
-const GOUTTES_MULT_PAR_CHAPITRE := 1.08
+const GOUTTES_MULT_PAR_CHAPITRE := 1.20
 
 # Capacites d'Epreuve : le premier exemplaire debloque la regle de jeu ; neuf
 # doublons apportent ensuite +54 % au maximum, pas un second exemplaire complet.
 const CAPACITE_RANG_MAX := 10
 const CAPACITE_BONUS_PAR_RANG := 0.06
+# Cinq miniboss donnent cinq jets : a 20 %, une Epreuve complete rapporte en
+# moyenne une capacite, contre cinq auparavant. Le repli monetaire reste faible.
+const EPREUVE_CHANCE_CAPACITE := 0.20
+const EPREUVE_NIVEAU_DEBLOCAGE := 2
+const MINE_NIVEAU_DEBLOCAGE := 4
 
 # La Forge appartient a l'objet. Son cout croit geometriquement pour que les
 # derniers niveaux restent un objectif de farm et non une formalite.
@@ -283,9 +286,10 @@ const FORGE_NIVEAU_MAX := 60
 const FORGE_COUT_BASE := 8
 const FORGE_COUT_CROISSANCE := 1.055
 const MINE_PIERRES_RECOMPENSE := 25
-# La Mine doit rester la source de Pierres apres le dernier Monde : sa
-# recompense suit le palier atteint, comme les Gouttes suivent le chapitre.
-const MINE_PIERRES_MULT_PAR_PALIER := 1.09
+# +12 % par chapitre produit environ x1,40 par Monde et x27 sur les trente
+# paliers. Cela donne une vraie acceleration sans le x512 qu'impliquerait un
+# doublement a chacun des dix Mondes.
+const MINE_PIERRES_MULT_PAR_PALIER := 1.12
 
 static func cout_maitrise(cout_base: int, rang_acquis: int) -> int:
 	return maxi(1, roundi(float(cout_base) * pow(MAITRISE_COUT_PAR_RANG, float(rang_acquis))))
@@ -296,6 +300,15 @@ static func cout_forge(niveau_acquis: int) -> int:
 static func pierres_mine(palier: int) -> int:
 	return maxi(1, roundi(float(MINE_PIERRES_RECOMPENSE) \
 		* pow(MINE_PIERRES_MULT_PAR_PALIER, float(maxi(0, palier)))))
+
+# Les annexes suivent la puissance brute du chapitre atteint sans reprendre la
+# douceur pedagogique des premiers chapitres de campagne.
+static func facteur_annexe_pv(palier: int) -> float:
+	return pow(COURBE_PV_PAR_PALIER, float(maxi(0, palier)))
+
+static func facteur_annexe_degats(palier: int) -> float:
+	return pow(COURBE_DEGATS_PAR_PALIER, float(maxi(0, palier)))
+
 # La Mine est une survie complete : peu de pression au depart, une horde qui
 # monte pendant cinq minutes, puis un boss. Les multiplicateurs s'appliquent
 # progressivement aux ennemis apparus, pas retroactivement a ceux deja presents.

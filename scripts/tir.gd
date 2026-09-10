@@ -14,6 +14,8 @@ var ecart_lateral := 0.0
 var rebonds := 0
 var perforations := 0
 var fragments := 0
+var rayon_explosion := 0.0
+var degats_zone_mult := 0.0
 var effets: Array[String] = []
 var drapeaux: Array[String] = []
 
@@ -63,6 +65,8 @@ func copie() -> Tir:
 	t.rebonds = rebonds
 	t.perforations = perforations
 	t.fragments = fragments
+	t.rayon_explosion = rayon_explosion
+	t.degats_zone_mult = degats_zone_mult
 	t.effets = effets.duplicate()
 	t.drapeaux = drapeaux.duplicate()
 	return t

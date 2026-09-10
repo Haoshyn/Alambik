@@ -7,6 +7,18 @@ func capturer(nom: String) -> void:
 	var lecteur := root.find_child("AnimationPlayer",true,false) as AnimationPlayer
 	exiger(squelette != null and lecteur != null,"squelette et animations charges")
 	if squelette == null or lecteur == null: return
+	var poignet := squelette.find_bone("main_droite")
+	exiger(poignet >= 0,"poignet de la baguette articule")
+	if poignet >= 0:
+		exiger(squelette.get_bone_parent(poignet) == squelette.find_bone("avant_bras_droit"),"main reliee a l'avant-bras")
+	var textures := 0
+	for objet in root.find_children("*","MeshInstance3D",true,false):
+		var instance := objet as MeshInstance3D
+		if instance.mesh == null: continue
+		for i in instance.mesh.get_surface_count():
+			var mat := instance.get_active_material(i) as StandardMaterial3D
+			if mat != null and mat.albedo_texture != null: textures += 1
+	exiger(textures >= 3,"textures du tissu, de l'echarpe et du cuir importees")
 	var genou := squelette.find_bone("tibia_gauche")
 	var cheville := squelette.find_bone("pied_gauche")
 	var racine := squelette.find_bone("racine")
@@ -43,4 +55,9 @@ func capturer(nom: String) -> void:
 		await process_frame
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://tmp/mage-vue-%d.png" % angle)
+	camera.position = Vector3(0,1.0+4.6*tan(deg_to_rad(Pont3D.INCLINAISON)),4.6)
+	camera.look_at(Vector3(0,1.0,0))
+	await process_frame
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("res://tmp/mage-vue-jeu.png")
 	camera.transform = vue_initiale

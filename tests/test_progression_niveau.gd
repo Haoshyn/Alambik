@@ -70,14 +70,24 @@ func test_chaque_boss_d_epreuve_recoit_une_fusion_aleatoire(v: Verif) -> void:
 	v.egal(augments.size(), 5, "les cinq boss recoivent cinq Ameliorations differentes")
 	v.egal(elements.size(), 5, "les cinq premiers Alambics tirent cinq Elements differents")
 
-func test_chaque_miniboss_recompense_par_une_capacite(v: Verif) -> void:
+func test_l_epreuve_a_un_drop_rare_et_respecte_la_pool(v: Verif) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 42
-	for tirage in 100:
-		var recompense := Recompenses.tirer_epreuve(rng, {})
-		v.vrai(recompense["type"] in ["ultime", "actif", "passif"],
-			"un arsenal incomplet ne recoit pas de monnaie a la place d'une capacite")
-		v.vrai(Sorts.contient(str(recompense["id"])), "la capacite tiree existe")
+	var capacites := 0
+	var gouttes := 0
+	for tirage in 1000:
+		var recompense := Recompenses.tirer_epreuve(rng, {}, 2)
+		if recompense["type"] == "gouttes":
+			gouttes += 1
+			v.vrai(int(recompense["quantite"]) <= Recompenses.GOUTTES_EPREUVE_MAX,
+				"le repli monetaire reste volontairement faible")
+		else:
+			capacites += 1
+			v.egal(str(recompense["id"]), "onde_alchimique",
+				"au niveau deux, aucun sort futur ne fuit dans la pool")
+	v.vrai(capacites >= 150 and capacites <= 250,
+		"sur mille jets, le taux reste proche des 20 pour cent vises")
+	v.vrai(gouttes > capacites, "la plupart des miniboss ne donnent pas de capacite")
 
 func test_un_arsenal_complet_recoit_un_repli(v: Verif) -> void:
 	var rangs := {}
@@ -86,5 +96,5 @@ func test_un_arsenal_complet_recoit_un_repli(v: Verif) -> void:
 			rangs[id] = Reglages.CAPACITE_RANG_MAX
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
-	var recompense := Recompenses.tirer_epreuve(rng, rangs)
+	var recompense := Recompenses.tirer_epreuve(rng, rangs, Chapitres.nombre())
 	v.egal(recompense["type"], "gouttes", "un arsenal entierement ameliore garde une recompense")

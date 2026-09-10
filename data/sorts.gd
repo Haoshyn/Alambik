@@ -37,8 +37,46 @@ const PASSIFS := {
 	"echo_alchimique": {"nom": "Écho alchimique", "description": "40 % de chance que le Sort frappe une seconde fois à 70 %"},
 }
 
+# La campagne revele l'arsenal par petites touches. Les deux premieres capacites
+# sont offertes afin que la boucle Sort + Ultime existe des le Monde I ; les
+# suivantes entrent seulement dans la pool des Epreuves au fil des chapitres.
+const NIVEAUX_DEBLOCAGE := {
+	"onde_alchimique": 2,
+	"grand_oeuvre": 3,
+	"rempart_initial": 4,
+	"nova_de_givre": 5,
+	"heritage_reactif": 6,
+	"temps_suspendu": 7,
+	"moisson_vitale": 8,
+	"barrage_de_braise": 10,
+	"riposte_alchimique": 11,
+	"seconde_chance": 13,
+	"impulsion_foudroyante": 15,
+	"reserve_ultime": 17,
+	"sang_froid": 19,
+	"transmutation_totale": 21,
+	"dernier_rempart": 23,
+	"explosion_corrosive": 25,
+	"audace": 27,
+	"echo_alchimique": 29,
+}
+
+const RECOMPENSES_CAMPAGNE := {
+	2: "onde_alchimique",
+	3: "grand_oeuvre",
+}
+
 static func contient(id: String) -> bool:
 	return ACTIFS.has(id) or PASSIFS.has(id) or ULTIMES.has(id)
+
+static func niveau_deblocage(id: String) -> int:
+	return int(NIVEAUX_DEBLOCAGE.get(id, Chapitres.nombre()))
+
+static func disponible_au_niveau(id: String, niveau_campagne: int) -> bool:
+	return contient(id) and niveau_campagne >= niveau_deblocage(id)
+
+static func recompense_campagne(niveau_campagne: int) -> String:
+	return str(RECOMPENSES_CAMPAGNE.get(niveau_campagne, ""))
 
 static func donnees(id: String) -> Dictionary:
 	for catalogue in [ACTIFS, PASSIFS, ULTIMES]:

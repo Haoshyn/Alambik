@@ -142,17 +142,19 @@ func test_l_epreuve_active_un_sort(v: Verif) -> void:
 	var r: Node = load("res://autoload/reglages_joueur.gd").new()
 	r.sauvegarde_active = false
 	r.rangs_sorts = {"onde_alchimique": 0}
-	v.vrai(r.sort_decouvert("onde_alchimique"), "le sort appartient au pool des Epreuves")
+	v.vrai(not r.sort_decouvert("onde_alchimique"), "le premier sort reste cache au niveau un")
+	r.meilleures_par_chapitre = {"0": Reglages.SALLES_PAR_RUN}
+	v.vrai(r.sort_decouvert("onde_alchimique"), "le sort entre dans la pool au niveau deux")
 	v.vrai(not r.sort_debloque("onde_alchimique"), "au rang zero il reste inutilisable")
 	v.vrai(r.debloquer_sort("onde_alchimique"), "le premier loot active le sort")
 	v.egal(r.rang_sort("onde_alchimique"), 1, "le premier exemplaire donne le rang un")
 	for i in Reglages.CAPACITE_RANG_MAX - 1:
 		v.vrai(r.debloquer_sort("onde_alchimique"), "un doublon ameliore encore le sort")
-	v.egal(r.rang_sort("onde_alchimique"), Reglages.CAPACITE_RANG_MAX, "le sort respecte le rang maximal provisoire")
+	v.egal(r.rang_sort("onde_alchimique"), Reglages.CAPACITE_RANG_MAX, "le sort respecte le rang maximal")
 	v.presque(r.efficacite_sort("onde_alchimique"),
 		1.0 + float(Reglages.CAPACITE_RANG_MAX - 1) * Reglages.CAPACITE_BONUS_PAR_RANG,
 		"les doublons ameliorent la capacite sans multiplier sa puissance par cinq")
-	v.vrai(not r.debloquer_sort("onde_alchimique"), "un sixieme exemplaire ne sert pas")
+	v.vrai(not r.debloquer_sort("onde_alchimique"), "un exemplaire au-dela du rang maximal ne sert pas")
 	r.free()
 
 func test_les_deblocages_utilitaires_changent_les_regles(v: Verif) -> void:

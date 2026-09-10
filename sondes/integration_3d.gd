@@ -83,8 +83,11 @@ func verifier() -> void:
 		var bras := squelette.find_bone("bras_droit")
 		lecteur.seek(0.0,true)
 		var avant_tir := squelette.get_bone_pose_rotation(bras)
+		var main_droite := squelette.find_bone("main_droite")
+		var main_avant := squelette.get_bone_global_pose(main_droite).origin
 		lecteur.seek(0.16,true)
 		exiger(not avant_tir.is_equal_approx(squelette.get_bone_pose_rotation(bras)),"le bras et le baton participent au tir")
+		exiger(squelette.get_bone_global_pose(main_droite).origin.distance_to(main_avant)>0.06,"la main accompagne le geste de lancement")
 		proxy_heros.call("_jouer_tir",null,Vector2.ZERO,Vector2.DOWN)
 		exiger(lecteur.current_animation_position < 0.01,"une nouvelle salve relance le geste")
 	await create_timer(1.0).timeout

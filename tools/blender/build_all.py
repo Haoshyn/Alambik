@@ -1,7 +1,7 @@
 """Volumes Alambik reproductibles : blender --background --python tools/blender/build_all.py.
 
-Sources modifiables, sans images plaquees. Le maillage artisanal du chapeau,
-des robes et des rubans complete les volumes tournes des objets alchimiques.
+Sources modifiables. Le mage utilise des maillages articules avec des textures
+peintes ; les autres objets conservent leurs materiaux proceduraux.
 """
 import bpy
 import math
@@ -384,7 +384,11 @@ def animations():
 
 
 def exporter(nom, dossier, construire, anime=False):
-    global ACTEUR, RIG
+    global ACTEUR, RIG, MAT
+    materiaux_avant=MAT
+    if nom=='heros':
+        MAT={cle:mat.copy() for cle,mat in MAT.items()}
+        for cle,mat in MAT.items():mat['alambik_matiere']=cle
     RIG=None
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.object.delete(use_global=False)
@@ -420,6 +424,7 @@ def exporter(nom, dossier, construire, anime=False):
     export.parent.mkdir(parents=True,exist_ok=True)
     bpy.context.scene.render.fps=24
     bpy.context.scene.frame_set(1)
+    if nom=='heros': bpy.ops.file.pack_all()
     bpy.ops.wm.save_as_mainfile(filepath=str(source))
     bpy.ops.export_scene.gltf(filepath=str(export),export_format='GLB',export_yup=True,
         export_animations=anime,export_animation_mode='NLA_TRACKS',export_nla_strips=True,
@@ -427,6 +432,7 @@ def exporter(nom, dossier, construire, anime=False):
     RAPPORT.append({'nom':nom,'glb':str(export.relative_to(RACINE)).replace('\\','/'),
                     'triangles':triangles,'surfaces':len(meshes),'octets':export.stat().st_size,
                     'animations': ['repos','course','attaque','touche','mort','victoire'] if anime else []})
+    if nom=='heros':MAT=materiaux_avant
 
 
 def main():

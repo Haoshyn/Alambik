@@ -160,7 +160,7 @@ func _jouer_immediatement() -> void:
 	_lancer_mode(mode, chapitre if mode == "grimoire" else {"nom":"La Mine" if mode == "mine" else "Épreuves de magie"})
 
 func _lancer_mode(mode: String, destination: Dictionary) -> void:
-	if _lancement:
+	if _lancement or not ReglagesJoueur.mode_debloque(mode):
 		return
 	_lancement = true
 	ReglagesJoueur.choisir_mode_run(mode)

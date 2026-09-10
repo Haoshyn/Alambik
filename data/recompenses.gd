@@ -7,13 +7,13 @@ const GARANTIE_APRES_GRANDS_COFFRES := 5
 # vaincu, meme lorsque la tentative se termine ensuite sur une defaite.
 const COFFRES := [
 	{"palier": 0, "nom": "Aucun coffre", "gouttes_min": 0, "gouttes_max": 0, "chance_objet": 0.0},
-	{"palier": 5, "nom": "Mini coffre", "gouttes_min": 35, "gouttes_max": 55, "chance_objet": 0.02},
-	{"palier": 10, "nom": "Petit coffre", "gouttes_min": 70, "gouttes_max": 100, "chance_objet": 0.05},
-	{"palier": 15, "nom": "Coffre moyen", "gouttes_min": 120, "gouttes_max": 170, "chance_objet": 0.10},
-	{"palier": 20, "nom": "Grand coffre", "gouttes_min": 250, "gouttes_max": 350, "chance_objet": 0.25},
+	{"palier": 5, "nom": "Mini coffre", "gouttes_min": 2, "gouttes_max": 3, "chance_objet": 0.02},
+	{"palier": 10, "nom": "Petit coffre", "gouttes_min": 4, "gouttes_max": 6, "chance_objet": 0.05},
+	{"palier": 15, "nom": "Coffre moyen", "gouttes_min": 7, "gouttes_max": 10, "chance_objet": 0.10},
+	{"palier": 20, "nom": "Grand coffre", "gouttes_min": 12, "gouttes_max": 16, "chance_objet": 0.25},
 ]
-const GOUTTES_EPREUVE_MIN := 6
-const GOUTTES_EPREUVE_MAX := 12
+const GOUTTES_EPREUVE_MIN := 1
+const GOUTTES_EPREUVE_MAX := 2
 
 static func coffre_pour(salles_vaincues: int) -> Dictionary:
 	var resultat: Dictionary = COFFRES[0]
@@ -38,7 +38,8 @@ static func donne_objet(coffre: Dictionary, grands_coffres_sans_objet: int,
 		return true
 	return rng.randf() < float(coffre["chance_objet"])
 
-static func tirer_epreuve(rng: RandomNumberGenerator, rangs: Dictionary) -> Dictionary:
+static func tirer_epreuve(rng: RandomNumberGenerator, rangs: Dictionary,
+		niveau_campagne: int) -> Dictionary:
 	var candidats: Array[Dictionary] = []
 	for source in [
 		{"type": "ultime", "catalogue": Sorts.ULTIMES},
@@ -47,10 +48,11 @@ static func tirer_epreuve(rng: RandomNumberGenerator, rangs: Dictionary) -> Dict
 	]:
 		var catalogue: Dictionary = source["catalogue"]
 		for id in catalogue:
-			# Chaque miniboss donne une capacite tant qu'il en reste a obtenir ou
-			# ameliorer. Les Gouttes ne sont qu'un repli pour un arsenal complet.
-			if int(rangs.get(id, 0)) < Reglages.CAPACITE_RANG_MAX:
+			if Sorts.disponible_au_niveau(str(id), niveau_campagne) \
+					and int(rangs.get(id, 0)) < Reglages.CAPACITE_RANG_MAX:
 				candidats.append({"type": source["type"], "id": id})
-	if candidats.is_empty():
+	# Un jet rate paie seulement un petit repli : l'Epreuve reste le farm des
+	# capacites et ne devient jamais la meilleure route pour les Maitrises.
+	if candidats.is_empty() or rng.randf() >= Reglages.EPREUVE_CHANCE_CAPACITE:
 		return {"type": "gouttes", "quantite": rng.randi_range(GOUTTES_EPREUVE_MIN, GOUTTES_EPREUVE_MAX)}
 	return candidats[rng.randi_range(0, candidats.size() - 1)]

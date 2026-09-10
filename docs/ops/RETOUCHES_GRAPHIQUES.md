@@ -73,3 +73,39 @@ Le proxy du héros utilise maintenant une échelle uniforme : l'anamorphose du s
 Source et GLB régénérés : 115 780 triangles avant LOD Godot, dix surfaces, six animations. Validation : 30 suites, 12 033 assertions, zéro échec ; selftest compilé. Sonde studio : 80 contrôles, zéro échec ; intégration graphique : zéro échec, 120 appels de dessin et 21 188 primitives sur la capture PC. Ces mesures ne valident pas les performances sur téléphone.
 
 Aperçu : `tmp/mage-capuche-apercu.html`, avec marche animée, vues de face/profil/dos et comparaison en salle. Logs : `tmp/mage-capuche-verification.log`, `tmp/mage-capuche-studio.log`, `tmp/mage-capuche-integration.log`. Les diagnostics de certificats et de ressources au nettoyage graphique restent présents.
+
+## Mage manga — transposition de la référence approuvée
+
+Référence validée explicitement par le propriétaire : `assets/3d/references/mage_valide.png`. Elle remplace la capuche rejetée et les silhouettes précédentes. Le modèle reprend chapeau violet courbé, grande tête, visage manga avec bouche et yeux violets, mèches plates en pointe, veste à pans et liserés, écharpe turquoise, bottes et gants sombres, bijoux de cuivre et baguette à cristal violet.
+
+Le visage sculpté possède des UV et une texture peinte. Un atlas distinct fournit le tissu violet, la soie turquoise, le cuir et les cheveux. Ces deux images originales sont dans `assets/3d/textures/mage/` ; elles sont embarquées dans le GLB et empaquetées dans le `.blend`. Les textures ont été générées à partir de la référence approuvée ; la géométrie et le squelette sont construits par Blender. Le résultat en jeu est une reconstruction 3D, distincte du rendu illustré de référence.
+
+`tools/blender/mage_manga.py` contient la géométrie, les UV, les poids et les animations. `heros_azur.py` reste le point d'entrée. Le générateur global isole les matériaux du héros pour ne pas texturer involontairement le bestiaire lors d'un build complet ; contrôle Blender de l'isolation et de l'empaquetage réussi.
+
+Quatorze os : racine, hanches, genoux, chevilles, épaules, coudes, poignets et écharpe. Six animations : repos, course, attaque, touche, mort et victoire. La main avance et le poignet oriente la baguette lors du tir. Les liserés suivent les poids du manteau ; la marche conserve un buste stable. Les poses sont interpolées par Godot et la cadence suit la vitesse de déplacement. Échelle uniforme et MSAA 4× conservés.
+
+Modèle : 90 420 triangles avant LOD Godot, douze objets de matériau, GLB de 6 925 908 octets. Les douze objets peuvent contenir plusieurs surfaces (le visage distingue le dos de la tête). Rendu de contrôle PC : 122 appels de dessin et 24 870 primitives dans la salle. La fluidité, la chauffe et le coût du MSAA sur téléphone physique ne sont pas mesurés.
+
+Validation finale Godot 4.7.1 : 30 suites, 12 033 assertions, zéro échec ; selftest compilé. `mage_articule.gd` : 83 contrôles, zéro échec, dont présence des textures, chaîne du poignet, genoux et chevilles, stabilité des 32 poses. Intégration graphique : zéro échec, dont déplacement effectif de la main pendant l'attaque. Les avertissements Windows de certificats et de ressources au nettoyage persistent.
+
+Vingt runs : vingt fins de partie, sept victoires et treize défaites ; aucune erreur de script, un blocage du bot en salle 2 (graine 3, ennemi à 1 PV). Ce problème de navigation automatique reste ouvert. Les simulations headless ne chargent pas le modèle 3D. Logs : `tmp/manga-verification.log`, `tmp/manga-construction.log`, `tmp/manga-studio.log`, `tmp/manga-integration.log`, `tmp/manga-vingt-runs.log`.
+
+Aperçu du modèle réellement rendu : `tmp/mage-manga-apercu.html` — référence approuvée, repos, marche animée, attaque, quatre côtés et vues en salle.
+
+## Mage compact — lisibilité depuis la caméra du jeu
+
+Correction de la silhouette trop haute : jambes ramenées à 62 % de leur hauteur précédente au-dessus des semelles, buste à 70 %, tête élargie de 14 %. Le haut du chapeau est raccourci. Le visage et le chapeau sont relevés de 14°, la frange remontée et le bord avant raccourci pour dégager les yeux à l'inclinaison de jeu de 48°. Violet, écharpe turquoise et baguette conservés.
+
+L'atlas des matières est remplacé par une peinture plus douce et mate, sans trame grossière. Les raccords UV passent derrière le costume et l'écharpe. Squelette ajusté aux nouvelles proportions, marche recalculée sur les nouvelles longueurs des jambes ; les six animations sont conservées. Barre de vie abaissée pour suivre la nouvelle silhouette. GLB et source Blender régénérés : 90 420 triangles avant LOD, douze objets de matériau, 5 647 636 octets pour le GLB.
+
+Validation : 30 suites, 12 855 assertions, zéro échec ; compilation et selftest réussis. Studio : 83 contrôles, zéro échec ; intégration 3D : zéro échec. La sonde ajoute un gros plan à 48°, disponible dans `tmp/mage-vue-jeu.png`. Aperçu avec ancienne/nouvelle silhouette et marche : `tmp/mage-compact-apercu.html`. Les diagnostics de certificats et de ressources au nettoyage persistent ; performances sur téléphone non mesurées.
+
+Vingt simulations terminées : neuf victoires, onze défaites, aucune erreur de script. Deux blocages de navigation du bot restent ouverts : graine 3, salle 2, ennemi à 1 PV ; graine 5, salle 13, ennemi à 31 PV. Le script signale donc deux runs en échec sur vingt. Les simulations headless ne chargent pas le modèle. Logs : `tmp/compact-verification.log`, `tmp/compact-studio.log`, `tmp/compact-integration.log`, `tmp/compact-vingt-runs.log`.
+
+## Correction du visage pâle et des proportions de tête
+
+Après rejet du visage précédent : largeur de tête réduite d'environ 18 %, hauteur de 10 %, profondeur de 8 %. Cheveux et chapeau suivent les nouvelles proportions. Oreilles plus petites et rapprochées du crâne. Nouvelle texture de visage au teint pêche bronzé, yeux moins larges et moins inclinés, sans reflets blancs peints sur la peau. Le dos de la tête utilise le bord uni de la même texture. Éclairage de contrôle conservé pour comparer les deux versions ; costume, corps compact et animations conservés.
+
+GLB et source Blender reconstruits. Captures à 48°, de profil et en salle vérifiées. Aperçu : `tmp/mage-visage-apercu.html`, comparaison avec `tmp/mage-visage-avant.png`. Validation : 30 suites, 12 855 assertions, zéro échec ; 83 contrôles studio et intégration 3D sans échec. Les diagnostics existants de certificats et de ressources au nettoyage persistent. Logs : `tmp/visage-verification.log`, `tmp/visage-studio.log`, `tmp/visage-integration.log`.
+
+Vingt runs terminées : sept victoires, treize défaites ; aucune erreur de script. Deux blocages du bot : graine 3 en salle 2 (un ennemi à 1 PV), graine 13 en salle 8 (trois ennemis restants). Le script retourne un échec pour ces deux blocages. Détail : `tmp/visage-vingt-runs.log`. Ces simulations headless ne valident pas le rendu du personnage.

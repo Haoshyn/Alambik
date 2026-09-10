@@ -16,7 +16,7 @@ func test_garantie_du_grand_coffre(v: Verif) -> void:
 	v.vrai(Recompenses.donne_objet(grand, Recompenses.GARANTIE_APRES_GRANDS_COFFRES - 1, rng),
 		"le cinquieme grand coffre sans objet est garanti")
 
-func test_les_gouttes_suivent_les_trente_chapitres(v: Verif) -> void:
+func test_les_gouttes_accelerent_sur_les_trente_chapitres(v: Verif) -> void:
 	var grand := Recompenses.coffre_pour(20)
 	var debut := RandomNumberGenerator.new()
 	debut.seed = 17
@@ -25,23 +25,24 @@ func test_les_gouttes_suivent_les_trente_chapitres(v: Verif) -> void:
 	var gouttes_debut := Recompenses.tirer_gouttes_coffre(grand, 0, debut)
 	var gouttes_fin := Recompenses.tirer_gouttes_coffre(grand, Chapitres.nombre() - 1, fin)
 	var ratio := float(gouttes_fin) / float(gouttes_debut)
-	v.vrai(ratio >= 8.5 and ratio <= 10.0,
-		"les recompenses montent nettement sans devenir exponentielles sur dix Mondes")
+	v.vrai(ratio >= 190.0 and ratio <= 205.0,
+		"le dernier chapitre paie environ deux cents fois le premier")
 
-func test_l_economie_finance_l_arbre_sur_la_campagne(v: Verif) -> void:
-	var cout_total := 0
-	for id in ArbreCompetences.NOEUDS:
-		cout_total += ArbreCompetences.cout(id)
+func test_l_economie_suit_les_jalons_de_maitrise_sans_farm(v: Verif) -> void:
 	var grand := Recompenses.coffre_pour(20)
 	var moyenne_base := (float(grand["gouttes_min"]) + float(grand["gouttes_max"])) * 0.5
-	var revenu_campagne := 0.0
+	var revenus := []
+	var cumul := 0.0
 	for chapitre in Chapitres.nombre():
-		revenu_campagne += moyenne_base * pow(Reglages.GOUTTES_MULT_PAR_CHAPITRE, chapitre)
-	var couverture := revenu_campagne / float(cout_total)
-	v.vrai(couverture >= 0.75 and couverture <= 0.90,
-		"trente victoires financent la majorite des premiers rangs, les echecs utiles completent le budget")
-	v.vrai(revenu_campagne < float(cout_total),
-		"une campagne sans aucun echec ne paie pas gratuitement les trente Maitrises")
+		cumul += moyenne_base * pow(Reglages.GOUTTES_MULT_PAR_CHAPITRE, chapitre)
+		if chapitre in [14, 20, 29]:
+			revenus.append(cumul)
+	v.vrai(float(revenus[0]) >= 950.0 and float(revenus[0]) <= 1100.0,
+		"a 50 pour cent du jeu, le revenu couvre environ 30 pour cent des premiers rangs")
+	v.vrai(float(revenus[1]) >= 2900.0 and float(revenus[1]) <= 3300.0,
+		"a 70 pour cent du jeu, le revenu approche 50 pour cent des premiers rangs")
+	v.vrai(float(revenus[2]) >= 15500.0 and float(revenus[2]) <= 17500.0,
+		"la premiere fin couvre environ 80 pour cent des premiers rangs")
 
 func test_l_ouverture_separe_impact_et_revelation(v: Verif) -> void:
 	v.presque(FinDeRun.progression_ouverture(0.5), 0.0, "le coffre reste ferme pendant son arrivee")

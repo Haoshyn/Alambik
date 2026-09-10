@@ -51,7 +51,8 @@ func definir_intention(direction: Vector2, intensite := 1.0) -> void:
 # Appelee a chaque entree de salle : c'est aussi ce qui reforme le bouclier de
 # sel, comme le veut sa description.
 func recalculer() -> void:
-	tir_courant = Mods.appliquer(Tir.de_base(stats), Jeu.mods())
+	var tir_de_run := Mods.appliquer(Tir.de_base(stats), Jeu.mods())
+	tir_courant = CatalogueProjectiles.appliquer(ReglagesJoueur.projectile_equipe_effectif(), tir_de_run)
 	var drapeaux := tir_courant.drapeaux
 	stats.vitesse = Reglages.HEROS_VITESSE * ArbreCompetences.multiplicateur_vitesse(ReglagesJoueur.rangs_competences_effectifs()) \
 		* Sorts.multiplicateur_vitesse(ReglagesJoueur.passifs_equipes_effectifs()) \
@@ -300,7 +301,7 @@ func _draw() -> void:
 
 func _dessiner_vie() -> void:
 	var part := clampf(stats.pv/maxf(1.0,stats.pv_max),0.0,1.0)
-	var hauteur := -164.0 if has_meta("visuel_3d") else -133.0
+	var hauteur := -136.0 if has_meta("visuel_3d") else -133.0
 	var barre := Rect2(-56,hauteur,112,10)
 	draw_style_box(StyleAzur.cadre(StyleAzur.FOND,StyleAzur.CUIVRE,5),barre.grow(3))
 	var contenu := barre.grow(-1)

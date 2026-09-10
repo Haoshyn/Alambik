@@ -85,6 +85,8 @@ func _sur_contact(corps: Node) -> void:
 	# jamais, la perte de puissance vit dans le projectile.
 	var degats_infliges := tir.degats * _facteur_degats * _facteur_tenebres
 	corps.recevoir_degats(degats_infliges, tir.effets)
+	if not hostile and tir.rayon_explosion > 0.0 and tir.degats_zone_mult > 0.0:
+		_exploser_autour(corps, degats_infliges)
 	if not hostile and "lumiere" in tir.effets:
 		soin_demande.emit(degats_infliges * Reglages.LUMIERE_VOL_DE_VIE)
 	impact_visuel.emit(global_position, couleur, 1.0)
@@ -102,6 +104,15 @@ func _sur_contact(corps: Node) -> void:
 			_facteur_degats *= 1.0 - Reglages.PERFORATION_PERTE
 		"fin":
 			_finir()
+
+func _exploser_autour(cible_principale: Node, degats_principaux: float) -> void:
+	for cible in get_tree().get_nodes_in_group("ennemis"):
+		if not is_instance_valid(cible) or cible == cible_principale \
+				or cible.get_instance_id() in _deja_touches:
+			continue
+		if cible.global_position.distance_to(global_position) > tir.rayon_explosion:
+			continue
+		cible.recevoir_degats(degats_principaux * tir.degats_zone_mult, tir.effets)
 
 func _heurter_un_mur(_mur: Node) -> void:
 	if not hostile:

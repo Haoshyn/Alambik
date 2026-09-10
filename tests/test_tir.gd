@@ -56,3 +56,18 @@ func test_copie_independante(v: Verif) -> void:
 	c.degats = 999.0
 	v.egal(t.effets.size(), 0, "la copie ne partage pas la liste d'effets")
 	v.presque(t.degats, Reglages.TIR_DEGATS, "la copie ne modifie pas l'original")
+
+func test_les_projectiles_equipement_changent_le_comportement(v: Verif) -> void:
+	var base := Tir.de_base(Stats.depuis_reglages())
+	var veloce := CatalogueProjectiles.appliquer("veloce", base)
+	v.vrai(veloce.vitesse > base.vitesse and veloce.degats < base.degats,
+		"le projectile veloce echange des degats contre la vitesse")
+	var lourd := CatalogueProjectiles.appliquer("lourd", base)
+	v.vrai(lourd.vitesse < base.vitesse and lourd.degats > base.degats,
+		"le projectile lourd echange la vitesse contre les degats")
+	var chercheur := CatalogueProjectiles.appliquer("chercheur", base)
+	v.vrai("homing" in chercheur.drapeaux, "le projectile chercheur reutilise la trajectoire homing")
+	var explosif := CatalogueProjectiles.appliquer("explosif", base)
+	v.vrai(explosif.rayon_explosion > 0.0 and explosif.degats_zone_mult > 0.0,
+		"le projectile explosif porte un vrai profil de degats de zone")
+	v.presque(base.rayon_explosion, 0.0, "l'equipement ne mute pas le Tir source")

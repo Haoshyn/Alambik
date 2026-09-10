@@ -33,6 +33,7 @@ var objets: Array[String] = []
 var dernier_objet_obtenu := ""
 var grands_coffres_sans_objet := {}
 var equipements := {"anneau_gauche": "", "anneau_droit": "", "collier": ""}
+var projectile_equipe := "standard"
 # La Forge appartient desormais a l'objet, pas a l'emplacement. Changer
 # d'anneau ne transfere donc plus artificiellement tous les niveaux investis.
 var forge_niveaux := {}
@@ -100,6 +101,7 @@ func charger() -> void:
 	dernier_objet_obtenu = str(config.get_value("stuff", "dernier", ""))
 	grands_coffres_sans_objet = config.get_value("stuff", "pities", {})
 	equipements = config.get_value("stuff", "equipements", equipements)
+	projectile_equipe = str(config.get_value("stuff", "projectile", "standard"))
 	forge_niveaux = config.get_value("stuff", "forge", forge_niveaux)
 	pierres_forge = maxi(0, int(config.get_value("stuff", "pierres_forge", 0)))
 	_migrer_equipements()
@@ -107,8 +109,13 @@ func charger() -> void:
 	mode_run_choisi = str(config.get_value("options", "mode_run", "grimoire"))
 	# Le prototype graphique n'est plus un mode : toutes les descentes utilisent
 	# maintenant le rendu 16-bit, donc les anciennes sauvegardes reviennent en campagne.
-	if mode_run_choisi not in ["grimoire", "epreuve_sorts", "mine"]:
+	if mode_run_choisi not in ["grimoire", "epreuve_sorts", "mine"] \
+			or not mode_debloque(mode_run_choisi):
 		mode_run_choisi = "grimoire"
+	# Les anciennes sauvegardes qui avaient deja passe les premiers chapitres
+	# recoivent les deux cadeaux de campagne sans devoir les rejouer.
+	if _synchroniser_recompenses_campagne():
+		sauvegarder()
 
 func sauvegarder() -> void:
 	if not sauvegarde_active:
@@ -137,6 +144,7 @@ func sauvegarder() -> void:
 	config.set_value("stuff", "dernier", dernier_objet_obtenu)
 	config.set_value("stuff", "pities", grands_coffres_sans_objet)
 	config.set_value("stuff", "equipements", equipements)
+	config.set_value("stuff", "projectile", projectile_equipe)
 	config.set_value("stuff", "forge", forge_niveaux)
 	config.set_value("stuff", "pierres_forge", pierres_forge)
 	config.set_value("options", "mode_run", mode_run_choisi)
@@ -205,6 +213,21 @@ func retirer_objet(slot: String) -> bool:
 	if slot not in equipements or str(equipements[slot]).is_empty():
 		return false
 	equipements[slot] = ""
+	sauvegarder()
+	maitrise_changee.emit()
+	return true
+
+func projectiles_disponibles() -> Array[String]:
+	return CatalogueProjectiles.disponibles(niveau_campagne_atteint())
+
+func projectile_equipe_effectif() -> String:
+	return projectile_equipe if CatalogueProjectiles.debloque(projectile_equipe,
+		niveau_campagne_atteint()) else "standard"
+
+func equiper_projectile(id: String) -> bool:
+	if not CatalogueProjectiles.debloque(id, niveau_campagne_atteint()):
+		return false
+	projectile_equipe = id
 	sauvegarder()
 	maitrise_changee.emit()
 	return true
@@ -411,7 +434,8 @@ func sort_debloque(id: String) -> bool:
 	return Sorts.contient(id) and (mode_dev or rang_sort(id) > 0)
 
 func sort_decouvert(id: String) -> bool:
-	return Sorts.contient(id)
+	return Sorts.contient(id) and (mode_dev or rang_sort(id) > 0 \
+		or Sorts.disponible_au_niveau(id, niveau_campagne_atteint()))
 
 func rang_sort(id: String) -> int:
 	return Reglages.CAPACITE_RANG_MAX if mode_dev and Sorts.contient(id) \
@@ -468,6 +492,7 @@ func reinitialiser_progression() -> void:
 	dernier_objet_obtenu = ""
 	grands_coffres_sans_objet.clear()
 	equipements = {"anneau_gauche": "", "anneau_droit": "", "collier": ""}
+	projectile_equipe = "standard"
 	forge_niveaux = {}
 	pierres_forge = 0
 	mode_run_choisi = "grimoire"
@@ -482,7 +507,27 @@ func enregistrer_resultat(salle: int, victoire: bool, chapitre := 0) -> void:
 	var cle := str(chapitre)
 	if salle > int(meilleures_par_chapitre.get(cle, 0)):
 		meilleures_par_chapitre[cle] = salle
+	var capacite_offerte := _synchroniser_recompenses_campagne()
 	sauvegarder()
+	if capacite_offerte:
+		maitrise_changee.emit()
+
+func _synchroniser_recompenses_campagne() -> bool:
+	var change := false
+	var niveau := niveau_campagne_atteint()
+	for cle_niveau in Sorts.RECOMPENSES_CAMPAGNE:
+		if niveau < int(cle_niveau):
+			continue
+		var id := Sorts.recompense_campagne(int(cle_niveau))
+		if id.is_empty() or rang_sort(id) > 0:
+			continue
+		rangs_sorts[id] = 1
+		if Sorts.ACTIFS.has(id) and sort_actif_equipe.is_empty():
+			sort_actif_equipe = id
+		elif Sorts.ULTIMES.has(id) and ultime_equipe.is_empty():
+			ultime_equipe = id
+		change = true
+	return change
 
 func enregistrer_resultat_annexe(victoire: bool) -> void:
 	runs += 1
@@ -493,17 +538,30 @@ func enregistrer_resultat_annexe(victoire: bool) -> void:
 func meilleure_du_chapitre(chapitre: int) -> int:
 	return int(meilleures_par_chapitre.get(str(chapitre), 0))
 
-# Palier de reference des annexes. Sans lui, la Mine rapporterait autant au
-# premier Monde qu'apres le dernier et cesserait d'etre une source de Pierres.
-func palier_atteint() -> int:
+# Le niveau de campagne est le chapitre actuellement ouvert, de 1 a 30. Une
+# simple tentative ne monte donc plus artificiellement les annexes : il faut
+# terminer le chapitre precedent pour faire avancer leur palier.
+func niveau_campagne_atteint() -> int:
 	if mode_dev:
-		return Chapitres.nombre() - 1
-	var meilleur := 0
-	for cle in meilleures_par_chapitre:
-		var index := int(cle)
-		if index >= 0 and index < Chapitres.nombre() and int(meilleures_par_chapitre[cle]) > 0:
-			meilleur = maxi(meilleur, Chapitres.palier(index))
-	return meilleur
+		return Chapitres.nombre()
+	var dernier_debloque := 0
+	for chapitre in range(1, Chapitres.nombre()):
+		if not chapitre_debloque(chapitre):
+			break
+		dernier_debloque = chapitre
+	return dernier_debloque + 1
+
+func palier_atteint() -> int:
+	return niveau_campagne_atteint() - 1
+
+func mode_debloque(mode: String) -> bool:
+	if mode_dev or mode == "grimoire":
+		return true
+	if mode == "epreuve_sorts":
+		return niveau_campagne_atteint() >= Reglages.EPREUVE_NIVEAU_DEBLOCAGE
+	if mode == "mine":
+		return niveau_campagne_atteint() >= Reglages.MINE_NIVEAU_DEBLOCAGE
+	return false
 
 # Les objets deja trouves rattrapent le Monde le plus avance actuellement
 # accessible. Terminer le chapitre 3 d'un Monde suffit donc a faire monter son
@@ -536,7 +594,7 @@ func choisir_chapitre(chapitre: int) -> void:
 	sauvegarder()
 
 func choisir_mode_run(mode: String) -> void:
-	if mode not in ["grimoire", "epreuve_sorts", "mine"]:
+	if mode not in ["grimoire", "epreuve_sorts", "mine"] or not mode_debloque(mode):
 		return
 	mode_run_choisi = mode
 	sauvegarder()

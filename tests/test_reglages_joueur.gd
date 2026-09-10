@@ -71,15 +71,52 @@ func test_le_choix_de_musique_est_valide_et_persistant(v: Verif) -> void:
 	v.egal(r.piste_musique, "dynamic_arcade", "une piste inconnue ne remplace pas le choix")
 	r.free()
 
-func test_l_arsenal_ne_depend_pas_du_niveau_de_compte(v: Verif) -> void:
+func test_l_arsenal_depend_de_la_campagne_pas_du_niveau_de_compte(v: Verif) -> void:
 	var r: Node = load("res://autoload/reglages_joueur.gd").new()
 	r.sauvegarde_active = false
 	r.niveau_compte = 1
 	r.experience_compte = 0
 	r.rangs_sorts = {}
+	v.vrai(not r.sort_decouvert("onde_alchimique"), "le niveau un de campagne garde le premier sort cache")
 	r.ajouter_experience_compte(r.experience_compte_requise())
 	v.egal(r.niveau_compte, 2, "le compte atteint le niveau deux")
-	v.vrai(r.sort_decouvert("onde_alchimique"), "les Epreuves peuvent proposer le sort a tout niveau")
-	v.egal(r.rang_sort("onde_alchimique"), 0, "mais attend toujours son premier drop de defi")
-	v.vrai(not r.sort_debloque("onde_alchimique"), "le rang zero ne peut pas etre equipe")
+	v.vrai(not r.sort_decouvert("onde_alchimique"), "le niveau de compte n'ouvre pas l'arsenal")
+	r.meilleures_par_chapitre = {"0": Reglages.SALLES_PAR_RUN}
+	v.vrai(r.sort_decouvert("onde_alchimique"), "terminer le premier chapitre ouvre sa pool")
+	v.egal(r.rang_sort("onde_alchimique"), 0, "une pool ouverte n'equipe pas artificiellement un rang")
+	r.free()
+
+func test_la_campagne_offre_tot_le_premier_sort_et_l_ultime(v: Verif) -> void:
+	var r: Node = load("res://autoload/reglages_joueur.gd").new()
+	r.sauvegarde_active = false
+	r.meilleures_par_chapitre = {}
+	r.rangs_sorts = {}
+	r.sort_actif_equipe = ""
+	r.ultime_equipe = ""
+	r.enregistrer_resultat(Reglages.SALLES_PAR_RUN, true, 0)
+	v.egal(r.niveau_campagne_atteint(), 2, "le chapitre deux est ouvert")
+	v.egal(r.rang_sort("onde_alchimique"), 1, "le niveau deux offre le premier Sort")
+	v.egal(r.sort_actif_effectif(), "onde_alchimique", "le premier Sort est equipe automatiquement")
+	r.enregistrer_resultat(Reglages.SALLES_PAR_RUN, true, 1)
+	v.egal(r.niveau_campagne_atteint(), 3, "le chapitre trois est ouvert")
+	v.egal(r.rang_sort("grand_oeuvre"), 1, "le niveau trois offre le premier Ultime")
+	v.egal(r.ultime_effectif(), "grand_oeuvre", "le premier Ultime est equipe automatiquement")
+	r.free()
+
+func test_les_annexes_se_debloquent_par_la_campagne(v: Verif) -> void:
+	var r: Node = load("res://autoload/reglages_joueur.gd").new()
+	r.sauvegarde_active = false
+	r.meilleures_par_chapitre = {}
+	v.vrai(not r.mode_debloque("epreuve_sorts"), "l'Epreuve n'est pas ouverte au premier chapitre")
+	v.vrai(not r.mode_debloque("mine"), "la Mine attend la fin du premier Monde")
+	r.meilleures_par_chapitre = {"0": Reglages.SALLES_PAR_RUN}
+	v.vrai(r.mode_debloque("epreuve_sorts"), "l'Epreuve s'ouvre au niveau deux")
+	v.vrai(not r.mode_debloque("mine"), "la Mine reste fermee au niveau deux")
+	r.meilleures_par_chapitre = {
+		"0": Reglages.SALLES_PAR_RUN,
+		"1": Reglages.SALLES_PAR_RUN,
+		"2": Reglages.SALLES_PAR_RUN,
+	}
+	v.egal(r.niveau_campagne_atteint(), 4, "le Monde I termine ouvre le niveau quatre")
+	v.vrai(r.mode_debloque("mine"), "la Mine s'ouvre avec le Monde II")
 	r.free()

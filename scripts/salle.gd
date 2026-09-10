@@ -280,14 +280,18 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 	copie["id"] = id
 	if Jeu.mode_run == "epreuve_sorts":
 		var progression_defi := clampf(float(numero - 1) / 4.0, 0.0, 1.0)
-		copie["pv"] = float(donnees["pv"]) * Reglages.DEFI_PV_BASE * pow(1.0 + Reglages.DEFI_MONTEE_PV, progression_defi)
-		copie["degats"] = float(donnees["degats"]) * Reglages.DEFI_DEGATS_BASE * pow(1.0 + Reglages.DEFI_MONTEE_DEGATS, progression_defi)
+		var palier_defi := ReglagesJoueur.palier_atteint()
+		copie["pv"] = float(donnees["pv"]) * Reglages.facteur_annexe_pv(palier_defi) \
+			* Reglages.DEFI_PV_BASE * pow(1.0 + Reglages.DEFI_MONTEE_PV, progression_defi)
+		copie["degats"] = float(donnees["degats"]) * Reglages.facteur_annexe_degats(palier_defi) \
+			* Reglages.DEFI_DEGATS_BASE * pow(1.0 + Reglages.DEFI_MONTEE_DEGATS, progression_defi)
 	elif Jeu.mode_run == "mine":
 		var progression_mine := clampf(_mine_temps / Reglages.MINE_DUREE, 0.0, 1.0)
-		copie["pv"] = float(donnees["pv"]) * Reglages.MINE_PV_MULT \
-			* pow(1.0 + Reglages.MINE_MONTEE_PV, progression_mine)
-		copie["degats"] = float(donnees["degats"]) * Reglages.MINE_DEGATS_MULT \
-			* pow(1.0 + Reglages.MINE_MONTEE_DEGATS, progression_mine)
+		var palier_mine := ReglagesJoueur.palier_atteint()
+		copie["pv"] = float(donnees["pv"]) * Reglages.facteur_annexe_pv(palier_mine) \
+			* Reglages.MINE_PV_MULT * pow(1.0 + Reglages.MINE_MONTEE_PV, progression_mine)
+		copie["degats"] = float(donnees["degats"]) * Reglages.facteur_annexe_degats(palier_mine) \
+			* Reglages.MINE_DEGATS_MULT * pow(1.0 + Reglages.MINE_MONTEE_DEGATS, progression_mine)
 		if donnees["cerveau"] == "boss":
 			copie["pv"] *= Reglages.MINE_BOSS_PV_MULT
 			copie["degats"] *= Reglages.MINE_BOSS_DEGATS_MULT

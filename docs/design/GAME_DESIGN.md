@@ -1202,64 +1202,64 @@ La Campagne est :
 
 # 41. MINE
 
-La Mine est un mode annexe court.
+La Mine est le mode annexe court destiné à **farmer les Pierres de forge**.
 
-Objectif principal :
+Elle se débloque au niveau de campagne 4, après le premier Monde complet.
 
-**farmer les Pierres de forge.**
+Structure retenue : une arène de survie de **5 minutes**, alimentée en continu,
+puis un boss final. Elle favorise AoE, gestion de foule, déplacement et survie
+sous saturation.
 
-Concept retenu :
-
-une arène avec une **énorme vague de type Vampire Survivors**.
-
-Les ennemis arrivent massivement depuis plusieurs directions.
-
-Le mode doit favoriser :
-
-* AoE ;
-* gestion de foule ;
-* déplacement ;
-* survie sous saturation.
-
-Il doit être court et très dynamique.
-
-Structure exacte / durée :
-
-À CONCEVOIR.
+Sa difficulté possède un palier pour chacun des 30 niveaux de campagne et suit
+le dernier chapitre réellement débloqué. Ses Pierres progressent de x1,12 par
+niveau de campagne, soit environ x1,40 par Monde : croissance volontairement
+non linéaire sans rendre les premiers paliers insignifiants.
 
 ---
 
 # 42. ÉPREUVES RITUELLES
 
-Mode court destiné à obtenir/améliorer :
+Mode court destiné à obtenir/améliorer Sorts, Passifs et Ultimes.
 
-* Sorts ;
-* Passifs ;
-* Ultimes.
+L'Épreuve se débloque au niveau de campagne 2 et enchaîne **5 miniboss
+aléatoires consécutifs**, avec très peu de temps mort. Chaque rencontre prête
+une fusion alchimique aléatoire différente afin de varier le build testé.
 
-Concept retenu :
+Chaque miniboss donne un jet de récompense : **20 % de chance d'obtenir ou
+d'améliorer une capacité**, soit environ une capacité par Épreuve complète en
+moyenne. Un jet raté ne donne que 1–2 Gouttes, afin que ce mode ne remplace pas
+la Campagne pour farmer les Maîtrises.
 
-**5 miniboss aléatoires consécutifs.**
-
-Très peu de temps mort.
-
-Le mode doit davantage tester :
-
-* esquive ;
-* connaissance des patterns ;
-* survie face à des menaces individuelles.
+La récompense ne peut provenir que de la pool déjà révélée par la campagne et
+une capacité au rang maximal sort de la pool. La difficulté des miniboss suit
+elle aussi le dernier niveau de campagne débloqué.
 
 ---
 
 # 43. SORTS / PASSIFS / ULTIMES
 
-Loadout actuel prévu :
+Loadout : **1 Sort + 1 Passif + 1 Ultime**. Une Maîtrise Utilitaire avancée
+ouvre un deuxième slot Passif.
 
-**1 Sort + 1 Passif + 1 Ultime.**
+Les capacités ont **10 rangs**. Le rang 1 rend la capacité utilisable ; chaque
+nouvel exemplaire améliore ensuite son efficacité de 6 %, jusqu'à +54 % au rang
+10. Le farm d'Épreuves sert donc à approfondir les capacités déjà accessibles,
+pas à court-circuiter la progression de campagne.
 
-Une Maîtrise Utilitaire avancée doit pouvoir débloquer :
+La première boucle de build doit apparaître immédiatement : terminer le niveau
+de campagne 1 ouvre le niveau 2 et offre **Onde alchimique rang 1** ; terminer
+le niveau 2 ouvre le niveau 3 et offre **Le Grand Œuvre rang 1**. Les capacités
+suivantes rejoignent progressivement la pool jusqu'au niveau 29.
 
-**un deuxième slot Passif.**
+Les capacités tardives peuvent être objectivement plus puissantes sur leur
+spécialité, mais plusieurs choix précoces doivent rester viables grâce à leur
+recharge, leur contrôle, leur fiabilité ou leurs synergies.
+
+Les équipements peuvent également choisir un **type de projectile** sans changer
+l'arme du héros. Backend actuel : standard (niveau 1), véloce (4), lourd (7),
+chercheur (10) et explosif (13). Le chercheur corrige sa trajectoire ; l'explosif
+inflige des dégâts de zone. Leur différenciation graphique est volontairement
+reportée.
 
 ---
 
@@ -1327,29 +1327,29 @@ Sa puissance contre une cible unique doit être sensiblement plus faible ou moin
 
 # 47. NIVEAU DE COMPTE
 
-Le niveau permanent du compte est différent du niveau de run.
+Le niveau permanent du compte est différent du niveau de run et du niveau de
+campagne. Il ne donne pas de statistiques brutes et ne décide plus des paliers
+de Mine, d'Épreuve ou de capacité : ces déblocages suivent directement
+l'avancement de l'histoire afin d'être lisibles et impossibles à farmer en rond.
 
-Son rôle principal n'est PAS de simplement donner :
-
-+X % ATK par niveau.
-
-Fonction actuellement prévue :
-
-**débloquer progressivement du contenu annexe plus avancé.**
-
-Exemples :
-
-* Mine supérieure ;
-* Épreuves rituelles supérieures ;
-* meilleurs paliers de farm.
-
-Le niveau de compte représente principalement l'avancement global.
+Le niveau de compte reste un indicateur de progression globale et une base
+d'extension future pour des récompenses non indispensables à l'équilibrage.
 
 ---
 
 # 48. MAÎTRISES
 
 Les Gouttes servent à progresser dans un arbre de Maîtrises permanent.
+
+Courbe cible sans farm volontaire, en ne comptant que les victoires de campagne :
+
+* 50 % de campagne → environ 30 % des premiers rangs ;
+* 70 % de campagne → environ 50 % ;
+* première fin → environ 80 %.
+
+Un peu de farm permet de rapprocher la Maîtrise du pourcentage de campagne,
+mais dépasser nettement cette courbe doit coûter de plus en plus cher grâce aux
+rangs supplémentaires et à leur coût géométrique.
 
 Trois branches prévues :
 
