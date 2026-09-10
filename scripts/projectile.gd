@@ -138,7 +138,10 @@ func _appliquer_trajectoire_fusion(delta: float) -> void:
 				positions.append(cible.global_position)
 		var index := Ciblage.plus_proche(global_position, positions)
 		if index != -1:
-			direction = direction.lerp(global_position.direction_to(positions[index]), minf(1.0, delta * 4.5)).normalized()
+			# Homing doit sauver un tir qui aurait manque, pas seulement corriger de
+			# quelques degres une trajectoire deja bonne.
+			direction = direction.lerp(global_position.direction_to(positions[index]),
+				minf(1.0, delta * Reglages.HOMING_ROTATION_PAR_SECONDE)).normalized()
 
 func _finir(creer_fragments := true) -> void:
 	if _termine:

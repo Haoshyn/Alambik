@@ -17,7 +17,10 @@ var limites := Rect2(Vector2(80, 300), Vector2(920, 1400))
 var _cible: Node2D
 var _recharge := 0.0
 var _braise := 0.0
-var _brulure_dps := 0.0
+var _braise_dps := 0.0
+var _feu := 0.0
+var _feu_dps := 0.0
+var _feu_cumuls := 0
 var _givre := 0.0
 var _acide := 0.0
 var _terre_declenchee := false
@@ -334,10 +337,12 @@ func recevoir_degats(montant: float, effets: Array = []) -> void:
 		match effet:
 			"braise":
 				_braise = Reglages.BRAISE_DUREE
-				_brulure_dps += Reglages.BRAISE_DEGATS_PAR_SECONDE
+				_braise_dps = maxf(_braise_dps, Reglages.BRAISE_DEGATS_PAR_SECONDE)
 			"feu":
-				_braise = Reglages.BRAISE_DUREE
-				_brulure_dps += montant * Reglages.FEU_DOT_PART_PAR_SECONDE
+				_feu = Reglages.BRAISE_DUREE
+				if _feu_cumuls < Reglages.FEU_DOT_CUMUL_MAX:
+					_feu_cumuls += 1
+					_feu_dps += montant * Reglages.FEU_DOT_PART_PAR_SECONDE
 			"givre": _givre = Reglages.GIVRE_DUREE
 			"acide": _acide = Reglages.ACIDE_DUREE
 			"eau":
@@ -358,13 +363,22 @@ func _appliquer_effets(delta: float) -> void:
 	_gel = maxf(0.0, _gel - delta)
 	_givre = maxf(0.0, _givre - delta)
 	_acide = maxf(0.0, _acide - delta)
+	var dot_dps := 0.0
 	if _braise > 0.0:
-		_braise -= delta
-		pv -= _brulure_dps * delta
+		_braise = maxf(0.0, _braise - delta)
+		dot_dps += _braise_dps
+	else:
+		_braise_dps = 0.0
+	if _feu > 0.0:
+		_feu = maxf(0.0, _feu - delta)
+		dot_dps += _feu_dps
+	else:
+		_feu_dps = 0.0
+		_feu_cumuls = 0
+	if dot_dps > 0.0:
+		pv -= dot_dps * delta
 		if pv <= 0.0:
 			_mourir()
-	elif _brulure_dps > 0.0:
-		_brulure_dps = 0.0
 
 func _mourir() -> void:
 	if not is_inside_tree():

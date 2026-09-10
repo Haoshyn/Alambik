@@ -24,51 +24,59 @@ func bloc(centre: Vector3, taille: Vector3, couleur: Color) -> MeshInstance3D:
 	add_child(objet)
 	return objet
 
-func construire(limites: Rect2, charger: Callable) -> void:
+func construire(limites: Rect2, charger: Callable, monde := 0, contour := PackedVector2Array()) -> void:
 	for enfant in get_children():
 		enfant.queue_free()
 	var centre := Pont3D.vers_monde(limites.get_center())
 	var taille := Pont3D.vers_monde(limites.size)
-	bloc(centre + Vector3(0,-0.7,0), Vector3(taille.x+12,0.1,taille.z+12), Color("397c80"))
-	bloc(centre + Vector3(0,-0.22,0), Vector3(taille.x+0.5,0.4,taille.z+0.5), Color("7a857e"))
-	# Un seul MultiMesh pour le dallage ; les joints demeurent fins et peu contrastes.
-	var nx := ceili(taille.x / 0.9)
-	var nz := ceili(taille.z / 0.9)
-	var multi := MultiMesh.new()
-	multi.transform_format = MultiMesh.TRANSFORM_3D
-	multi.use_colors = true
-	var dalle := BoxMesh.new()
-	dalle.size = Vector3(taille.x/nx-0.012,0.06,taille.z/nz-0.012)
-	multi.mesh = dalle
-	multi.instance_count = nx*nz
-	for x in nx:
-		for z in nz:
-			var pos := centre + Vector3((x+0.5)*taille.x/nx-taille.x/2, -0.02, (z+0.5)*taille.z/nz-taille.z/2)
-			multi.set_instance_transform(x*nz+z,Transform3D(Basis.IDENTITY,pos))
-			multi.set_instance_color(x*nz+z,Color.WHITE.darkened(float((x*13+z*7)%5)*0.012))
-	var instance := MultiMeshInstance3D.new()
-	instance.multimesh = multi
-	var mat := materiau(Color("838c7c")).duplicate() as StandardMaterial3D
+	var ambiance: Array = Visuels3D.AMBIANCES[clampi(monde, 0, Visuels3D.AMBIANCES.size() - 1)]
+	bloc(centre + Vector3(0,-0.7,0), Vector3(taille.x+12,0.1,taille.z+12), ambiance[1])
+	# Le meme contour pilote le sol, sa tranche et les collisions de la salle.
+	if contour.is_empty():
+		contour = PackedVector2Array([limites.position,Vector2(limites.position.x,limites.end.y),limites.end,Vector2(limites.end.x,limites.position.y)])
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var indices := Geometry2D.triangulate_polygon(contour)
+	for i in range(0,indices.size(),3):
+		var a := Pont3D.vers_monde(contour[indices[i]])
+		var b := Pont3D.vers_monde(contour[indices[i+1]])
+		var c := Pont3D.vers_monde(contour[indices[i+2]])
+		# Godot attend des faces horaires vues du dessus.
+		if (b-a).cross(c-a).y > 0.0:
+			var ancien := b
+			b = c
+			c = ancien
+		for point in [a,b,c]:
+			surface.set_normal(Vector3.UP)
+			surface.set_uv(Vector2(point.x,point.z))
+			surface.add_vertex(point)
+	var instance := MeshInstance3D.new()
+	instance.mesh = surface.commit()
+	var mat := materiau(ambiance[0]).duplicate() as StandardMaterial3D
 	mat.vertex_color_use_as_albedo = true
+	mat.albedo_color = Color.WHITE.lerp(ambiance[0],0.20)
+	mat.albedo_texture = preload("res://assets/visual/azur/calcaire.png")
+	mat.uv1_triplanar = true
+	mat.uv1_world_triplanar = true
+	mat.uv1_scale = Vector3.ONE*0.22
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 	instance.material_override = mat
+	# Le sol recoit les ombres des acteurs sans produire de bandes d'auto-ombre.
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(instance)
-	for cote in [-1.0,1.0]:
-		var x: float = centre.x + float(cote)*(taille.x/2+0.17)
-		bloc(Vector3(x,0.045,centre.z),Vector3(0.27,0.13,taille.z+0.45),Color("919d8e"))
-		for i in 5:
-			var z := centre.z-taille.z/2+float(i)*taille.z/4
-			var scene: PackedScene = charger.call("res://assets/3d/environment/colonne.glb")
-			var colonne := scene.instantiate() as Node3D
-			colonne.position=Vector3(x+cote*.22,-.1,z)
-			colonne.scale=Vector3.ONE*(0.7 if i%2 else 1.0)
+	for i in contour.size():
+		var a := Pont3D.vers_monde(contour[i])
+		var b := Pont3D.vers_monde(contour[(i+1)%contour.size()])
+		var longueur := a.distance_to(b)
+		var bord := bloc((a+b)*0.5+Vector3(0,-0.12,0),Vector3(longueur+0.12,0.32,0.16),ambiance[2])
+		bord.rotation.y = -atan2(b.z-a.z,b.x-a.x)
+		var tranche := bloc((a+b)*0.5+Vector3(0,-0.42,0),Vector3(longueur+0.10,0.4,0.22),Color("677f81"))
+		tranche.rotation.y = bord.rotation.y
+		if i%2 == 0:
+			var colonne := (charger.call("res://assets/3d/environment/colonne.glb") as PackedScene).instantiate() as Node3D
+			colonne.position = a+Vector3(0,-0.12,0)
+			colonne.scale = Vector3.ONE*0.65
 			add_child(colonne)
-			if i%2==1:
-				var plante: Node3D = (charger.call("res://assets/3d/props/obstacle_1.glb") as PackedScene).instantiate()
-				plante.position=Vector3(x+cote*.4,-.03,z+.7)
-				plante.rotation.y=PI/2
-				add_child(plante)
-	for cote in [-1.0,1.0]:
-		bloc(centre+Vector3(0,0.045,cote*(taille.z/2+.14)),Vector3(taille.x+.5,.13,.28),Color("919d8e"))
 	# Ruines et chutes d'eau hors du perimetre physique.
 	for cote in [-1.0,1.0]:
 		for i in 3:

@@ -14,25 +14,25 @@ const SCEAU := "sceau"
 
 static var TOUS := {
 	"tir_multiple": Reactif.creer("tir_multiple", "Tir multiple",
-		"Ajoute un projectile simultané. Chaque trait inflige moins de dégâts.",
-		{"nb_projectiles_add": 1, "ecart_lateral_add": 30.0, "degats_mult": 0.72},
+		"Ajoute un projectile simultané. Chaque trait inflige nettement moins de dégâts.",
+		{"nb_projectiles_add": 1, "ecart_lateral_add": 30.0, "degats_mult": 0.68},
 		false, Color(0.98, 0.82, 0.42), "eventail", 1, PROJECTILE),
 	"salve": Reactif.creer("salve", "Salve",
 		"Chaque attaque devient une salve de deux tirs rapides moins puissants.",
-		{"drapeaux": ["rafale"], "degats_mult": 0.72},
+		{"drapeaux": ["rafale"], "degats_mult": 0.68},
 		false, Color(1.00, 0.72, 0.34), "triple_barre", 1, PROJECTILE),
 	"ricochet": Reactif.creer("ricochet", "Ricochet",
-		"Les projectiles rebondissent d'un ennemi vers un autre. Les murs les arrêtent.",
-		{"rebonds_add": 1}, false, Color(0.62, 0.86, 0.96), "zigzag", 1, PROJECTILE),
+		"Les projectiles rebondissent d'un ennemi vers un autre et gagnent un peu de puissance.",
+		{"rebonds_add": 1, "degats_mult": 1.05}, false, Color(0.62, 0.86, 0.96), "zigzag", 1, PROJECTILE),
 	"perforation": Reactif.creer("perforation", "Perforation",
-		"Les projectiles traversent un ennemi et poursuivent leur trajectoire.",
-		{"perforations_add": 1}, false, Color(0.86, 0.90, 0.98), "lance", 1, PROJECTILE),
+		"Les projectiles traversent jusqu'à deux ennemis supplémentaires et frappent un peu plus fort.",
+		{"perforations_add": 2, "degats_mult": 1.08}, false, Color(0.86, 0.90, 0.98), "lance", 1, PROJECTILE),
 	"fragmentation": Reactif.creer("fragmentation", "Fragmentation",
-		"L'impact libère plusieurs projectiles secondaires.",
-		{"fragments_add": 3, "degats_mult": 0.88}, false, Color(0.80, 0.96, 0.94), "eclats", 1, PROJECTILE),
+		"L'impact libère plusieurs projectiles secondaires sans affaiblir l'impact principal.",
+		{"fragments_add": 3}, false, Color(0.80, 0.96, 0.94), "eclats", 1, PROJECTILE),
 	"homing": Reactif.creer("homing", "Homing",
-		"Les projectiles recherchent leur cible et corrigent leur trajectoire.",
-		{"drapeaux": ["homing"], "vitesse_mult": 0.88}, false, Color(0.72, 0.88, 1.00), "oeil", 1, PROJECTILE),
+		"Les projectiles recherchent fortement leur cible et gagnent légèrement en dégâts.",
+		{"drapeaux": ["homing"], "degats_mult": 1.08}, false, Color(0.72, 0.88, 1.00), "oeil", 1, PROJECTILE),
 	# Un coup rare mais enorme : la brulure du Feu et le bonus de la Terre se
 	# calculent sur l'attaque, donc tout ce qui concentre la frappe les amplifie.
 	"frappe_lourde": Reactif.creer("frappe_lourde", "Frappe lourde",
@@ -44,20 +44,20 @@ static var TOUS := {
 	# Le prix est la portee, pas les degats : trois Améliorations du pool payent
 	# deja en degats, et ces malus s'additionnent au point de briser une main.
 	"cadence_febrile": Reactif.creer("cadence_febrile", "Cadence fébrile",
-		"Les attaques s'enchaînent bien plus vite, mais portent moins loin.",
-		{"cadence_mult": 1.45, "portee_mult": 0.78},
+		"Les attaques s'enchaînent plus vite, au prix d'une portée réduite.",
+		{"cadence_mult": 1.30, "portee_mult": 0.82},
 		false, Color(1.00, 0.88, 0.52), "triple_barre", 1, PROJECTILE),
 	# Une ligne entiere touchee d'un seul trait : l'Eau ralentit tout le rang et
 	# le Feu y pose autant de brulures qu'il y a de corps.
 	# Couvre un arc large plutot qu'une ligne : la reponse aux salles qui
 	# encerclent, la ou Tir multiple reste un mur frontal.
 	"spirale": Reactif.creer("spirale", "Spirale",
-		"Les attaques s'ouvrent en large éventail de projectiles.",
-		{"nb_projectiles_add": 2, "angle_eventail_add": 0.55, "degats_mult": 0.74},
+		"Les attaques s'ouvrent en large éventail de trois projectiles nettement plus légers.",
+		{"nb_projectiles_add": 2, "angle_eventail_add": 0.55, "degats_mult": 0.58},
 		false, Color(0.94, 0.78, 1.00), "eventail", 1, PROJECTILE),
 	"trait_transpercant": Reactif.creer("trait_transpercant", "Trait transperçant",
-		"Les projectiles traversent tous les ennemis sans jamais s'arrêter.",
-		{"drapeaux": ["perfore_tout"], "degats_mult": 0.78, "vitesse_mult": 0.85},
+		"Les projectiles traversent tous les ennemis avec une légère perte de puissance et de vitesse.",
+		{"drapeaux": ["perfore_tout"], "degats_mult": 0.95, "vitesse_mult": 0.95},
 		false, Color(0.78, 0.94, 0.90), "lance", 1, PROJECTILE),
 
 	"egide": Reactif.creer("egide", "Égide",

@@ -13,6 +13,7 @@ const DISTANCE_CONFORT := 460.0
 # Un rayon trop large rendait le bot perpetuellement 'sous le feu' face a deux
 # sentinelles : il fuyait sans jamais s'arreter, donc sans jamais tirer.
 const DANGER_TIR := 150.0
+const NAVIGATION := preload("res://sondes/navigation_bot.gd")
 const MARGE_TIR := 18.0   # rayon du projectile, plus de quoi ne pas raser le bloc
 
 var bavard := false
@@ -24,6 +25,12 @@ var _arret := false
 var _derniere_position := Vector2.ZERO
 var _coince := 0.0
 var _sens_contournement := 1.0
+var _cible_observee := 0
+var _pv_observes := 0.0
+var _sans_impact := 0.0
+var _chemin := PackedVector2Array()
+var _destination := Vector2.ZERO
+var _salle_chemin := -1
 
 # Le bot decide dans la phase physique : les requetes de rayon lancees depuis
 # _process renvoyaient des resultats vides, et le bot croyait sa ligne de tir
@@ -61,6 +68,21 @@ func _physics_process(delta: float) -> void:
 		if d < DISTANCE_CONFORT and d > 1.0:
 			fuite += ecart / d * (1.0 - d / DISTANCE_CONFORT)
 
+	if plus_proche != null:
+		var pv: float = plus_proche.get("pv")
+		if _cible_observee != plus_proche.get_instance_id() or not is_equal_approx(pv,_pv_observes):
+			_sans_impact = 0.0
+			_cible_observee = plus_proche.get_instance_id()
+			_pv_observes = pv
+		else:
+			_sans_impact += delta
+		# Un eventail peut manquer sa cible malgre une ligne centrale libre.
+		if _sans_impact > 2.5 and menace_proche > DISTANCE_CONFORT:
+			var refuge := _point_de_tir(plus_proche.global_position)
+			if refuge != Vector2.ZERO:
+				_heros.definir_intention(_direction_vers(refuge),1.0)
+				return
+
 	# Un bloc d'encre entre le heros et sa cible rend le tir inutile : rester
 	# derriere un mur a tirer dans la pierre etait le blocage le plus frequent
 	# de la sonde. On va chercher un point d'ou la ligne est libre.
@@ -68,7 +90,7 @@ func _physics_process(delta: float) -> void:
 	if vue_bouchee:
 		var refuge := _point_de_tir(plus_proche.global_position)
 		if refuge != Vector2.ZERO:
-			_heros.definir_intention(_devier(_heros.global_position.direction_to(refuge)), 1.0)
+			_heros.definir_intention(_direction_vers(refuge), 1.0)
 			return
 		var lateral: Vector2 = _heros.global_position.direction_to(plus_proche.global_position).orthogonal()
 		fuite += lateral * _sens_contournement * 1.5
@@ -138,23 +160,46 @@ func _ligne_libre(depuis: Vector2, vers: Vector2) -> bool:
 		return true
 	return Geometrie.ligne_libre(depuis, vers, salle.obstacles(), MARGE_TIR)
 
-# Huit directions autour du heros : la premiere qui degage la ligne et reste
-# dans l'arene fait l'affaire. Un joueur fait ce calcul d'un coup d'oeil.
+# Choisir un point atteignable et plus proche evite de longer indefiniment un mur.
 func _point_de_tir(cible: Vector2) -> Vector2:
-	var limites: Rect2 = _heros.limites.grow(-60.0)
+	var limites: Rect2 = _heros.limites.grow(-Reglages.HEROS_RAYON)
+	var meilleur := Vector2.ZERO
+	var cout := INF
 	for rayon in [200.0, 380.0]:
 		for i in 12:
 			var p: Vector2 = _heros.global_position + Vector2.from_angle(TAU * float(i) / 12.0) * rayon
-			if not limites.has_point(p):
-				continue
-			if _ligne_libre(p, cible):
-				return p
-	return Vector2.ZERO
+			if not limites.has_point(p): continue
+			if not _ligne_libre(p,cible) or not _trajet_libre(p,p): continue
+			var distance := p.distance_to(cible)+float(rayon)*0.15
+			if distance < cout:
+				cout = distance
+				meilleur = p
+	return meilleur
+
+func _trajet_libre(depuis: Vector2, vers: Vector2) -> bool:
+	var salle := get_tree().get_first_node_in_group("salle")
+	return salle == null or Geometrie.ligne_libre(depuis,vers,salle.obstacles(),Reglages.HEROS_RAYON-0.5)
 
 func _devier(direction: Vector2) -> Vector2:
 	if _coince <= 0.0:
 		return direction
 	return direction.rotated(_sens_contournement * PI * 0.5).lerp(direction, 0.2).normalized()
+
+func _direction_vers(destination: Vector2) -> Vector2:
+	var salle := get_tree().get_first_node_in_group("salle")
+	if salle == null: return _heros.global_position.direction_to(destination)
+	if _salle_chemin != Jeu.salle_courante or _chemin.is_empty() or _destination.distance_to(destination)>60.0:
+		_destination = destination
+		_salle_chemin = Jeu.salle_courante
+		_chemin = NAVIGATION.chemin(_heros.global_position,destination,_heros.limites,salle.obstacles(),Reglages.HEROS_RAYON)
+		if not _chemin.is_empty(): _chemin.remove_at(0)
+	while _chemin.size()>1 and _heros.global_position.distance_to(_chemin[0])<12.0:
+		_chemin.remove_at(0)
+	if _chemin.is_empty(): return _devier(_heros.global_position.direction_to(destination))
+	if _heros.global_position.distance_to(_chemin[0])<8.0:
+		_chemin.clear()
+		return Vector2.ZERO
+	return _heros.global_position.direction_to(_chemin[0])
 
 func _aller_au_portail() -> void:
 	var salle := get_tree().get_first_node_in_group("salle")
@@ -162,9 +207,4 @@ func _aller_au_portail() -> void:
 		_heros.definir_intention(Vector2.ZERO)
 		return
 	var portail: Vector2 = salle.position_portail()
-	if not _ligne_libre(_heros.global_position, portail):
-		var passage := _point_de_tir(portail)
-		if passage != Vector2.ZERO:
-			_heros.definir_intention(_devier(_heros.global_position.direction_to(passage)), 1.0)
-			return
-	_heros.definir_intention(_devier(_heros.global_position.direction_to(portail)), 1.0)
+	_heros.definir_intention(_direction_vers(portail),1.0)

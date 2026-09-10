@@ -1,85 +1,73 @@
 extends Control
-
 signal ferme
-
-const FOND := preload("res://assets/visual/maitrises_premium.png")
-const HAUT_FIXE := 1740.0
-const BAS_FIXE := 180.0
-const BRANCHES := ["Offensif", "Défensif", "Utilitaire"]
-const COULEURS := {
-	"Offensif": Color(1.0, 0.38, 0.22),
-	"Défensif": Color(0.30, 0.68, 1.0),
-	"Utilitaire": Color(0.42, 0.86, 0.46),
-}
-const RECTS_BRANCHES := [Rect2(82, 380, 290, 120), Rect2(395, 380, 290, 120), Rect2(708, 380, 290, 120)]
-const RECT_AMELIORER := Rect2(216.0, 1518.0, 648.0, 64.0)
-const POSITIONS_NOEUDS := [
-	Vector2(540, 600), Vector2(345, 755), Vector2(735, 755), Vector2(540, 825),
-	Vector2(225, 1010), Vector2(855, 1010), Vector2(540, 1055),
-	Vector2(225, 1240), Vector2(855, 1240), Vector2(540, 1270),
-]
-
 var integre_menu := false
-var _branche := "Offensif"
 var _selection := ""
 var _message := ""
-var _onglets: Array[Button] = []
-var _noeuds: Array[Button] = []
-var _reset: Button
-var _bouton_ameliorer: Button
-var _anim := 0.0
+var _details: Label
+var _solde: Label
+var _achat: Button
+var _noeuds := {}
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
-	mouse_filter = Control.MOUSE_FILTER_STOP
-	_construire_zones()
-	_afficher_branche(_branche)
-	StyleInterface.animer_entree(self, 16.0)
+	var col := StyleAzur.page(self,"Maîtrises",integre_menu)
+	_solde = StyleAzur.texte("",30,StyleAzur.MAGIE)
+	col.add_child(_solde)
+	var contenu := StyleAzur.defilement(col)
+	var branches := HBoxContainer.new()
+	branches.add_theme_constant_override("separation",18)
+	contenu.add_child(branches)
+	var index := 0
+	for branche in ArbreCompetences.BRANCHES:
+		var ligne := VBoxContainer.new()
+		ligne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		branches.add_child(ligne)
+		var titre := StyleAzur.texte(branche,29)
+		titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		ligne.add_child(titre)
+		for identifiant in ArbreCompetences.BRANCHES[branche]:
+			var id := str(identifiant)
+			if _selection.is_empty(): _selection = id
+			var b := StyleAzur.bouton("",func():
+				_selection = id
+				_message = ""
+				_rafraichir())
+			b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			b.custom_minimum_size.y = 205
+			b.add_theme_font_size_override("font_size",25)
+			b.icon = StyleAzur.glyphe(id)
+			b.expand_icon = true
+			b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+			b.add_theme_constant_override("icon_max_width",90)
+			ligne.add_child(b)
+			_noeuds[id] = b
+			var lien := StyleAzur.texte("│",26,StyleAzur.CUIVRE)
+			lien.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			ligne.add_child(lien)
+		index += 1
+	_details = StyleAzur.texte("",28,StyleAzur.ENCRE)
+	StyleAzur.plaque(col,true).add_child(_details)
+	_achat = StyleAzur.bouton("Améliorer",_ameliorer,true)
+	col.add_child(_achat)
+	col.add_child(StyleAzur.bouton("Réinitialiser les maîtrises",_reinitialiser))
+	_rafraichir()
 	Capture.programmer(self)
 
-func _construire_zones() -> void:
-	for index in BRANCHES.size():
-		_onglets.append(_zone(RECTS_BRANCHES[index], func() -> void: _afficher_branche(BRANCHES[index])))
-	for index in 10:
-		_noeuds.append(_zone(Rect2(POSITIONS_NOEUDS[index] - Vector2(88, 82), Vector2(176, 164)),
-			func() -> void: _sur_noeud(index)))
-	_bouton_ameliorer = _zone(RECT_AMELIORER, _ameliorer)
-	_reset = _zone(Rect2(250, 1600, 580, 135), _reinitialiser)
-	resized.connect(_replacer_zones)
-	_replacer_zones()
-
-func _zone(reference: Rect2, action: Callable) -> Button:
-	var bouton := StyleInterface.zone_tactile(action)
-	bouton.set_meta("reference", reference)
-	add_child(bouton)
-	return bouton
-
-func _replacer_zones() -> void:
-	for enfant in get_children():
-		if enfant is Button and enfant.has_meta("reference"):
-			var r: Rect2 = enfant.get_meta("reference")
-			var adapte := FondAdaptatif.rect(size, FOND, r, HAUT_FIXE, BAS_FIXE)
-			enfant.position = adapte.position
-			enfant.size = adapte.size
-
-func _afficher_branche(branche: String) -> void:
-	_branche = branche
-	_message = ""
-	var ids: Array = ArbreCompetences.BRANCHES[_branche]
-	_selection = str(ids[0]) if not ids.is_empty() else ""
-	Sons.jouer("choix", -17.0)
-	queue_redraw()
-
-# Toucher un noeud ne fait que le consulter. Il declenchait l'achat directement,
-# donc un doigt pose au mauvais endroit depensait des Gouttes sans confirmation.
-func _sur_noeud(index: int) -> void:
-	var ids: Array = ArbreCompetences.BRANCHES[_branche]
-	if index >= ids.size():
-		return
-	_selection = str(ids[index])
-	_message = ""
-	Sons.jouer("choix", -18.0)
-	queue_redraw()
+func _rafraichir() -> void:
+	_solde.text = "%s gouttes disponibles" % ReglagesJoueur.gouttes_affichees()
+	for id in _noeuds:
+		var b: Button = _noeuds[id]
+		var ouvert := ReglagesJoueur.mode_dev or ArbreCompetences.prerequis_atteint(id,ReglagesJoueur.rangs_competences)
+		b.modulate = Color.WHITE if ouvert else Color(0.65,0.72,0.75)
+		b.text = "%s\n%d / %d" % [ArbreCompetences.NOEUDS[id]["nom"],ReglagesJoueur.rang_competence(id),ArbreCompetences.rangs(id)]
+		b.add_theme_stylebox_override("normal",StyleAzur.cadre(StyleAzur.PANNEAU,StyleAzur.MAGIE if id == _selection else StyleAzur.CUIVRE))
+	var n: Dictionary = ArbreCompetences.NOEUDS[_selection]
+	_details.text = "%s\n%s\n%s" % [n["nom"],ArbreCompetences.description_effective(_selection),_message]
+	_achat.text = "Améliorer · %d gouttes" % ReglagesJoueur.cout_competence(_selection)
+	_achat.disabled = ReglagesJoueur.rang_competence(_selection) >= ArbreCompetences.rangs(_selection) or (not ReglagesJoueur.mode_dev and (not ArbreCompetences.prerequis_atteint(_selection,ReglagesJoueur.rangs_competences) or ReglagesJoueur.gouttes < ReglagesJoueur.cout_competence(_selection)))
+	var requis := str(n.get("requis",""))
+	if not requis.is_empty() and not ArbreCompetences.prerequis_atteint(_selection,ReglagesJoueur.rangs_competences):
+		_details.text += "\nPrérequis : %s au maximum" % ArbreCompetences.NOEUDS[requis]["nom"]
 
 func _ameliorer() -> void:
 	if _selection.is_empty():
@@ -98,100 +86,10 @@ func _ameliorer() -> void:
 		_message = "%s rang %d/%d : bonus permanent actif." % [noeud["nom"],
 			ReglagesJoueur.rang_competence(id), ArbreCompetences.rangs(id)]
 		Sons.jouer("fusion", -12.0)
-	queue_redraw()
+	_rafraichir()
 
 func _reinitialiser() -> void:
 	var rembourses := ReglagesJoueur.reinitialiser_arbre()
 	_message = "Réinitialisation : %d Gouttes remboursées." % rembourses
 	Sons.jouer("choix", -12.0)
-	queue_redraw()
-
-func _process(delta: float) -> void:
-	_anim += delta
-	queue_redraw()
-
-func _draw() -> void:
-	FondAdaptatif.dessiner_premium(self, FOND, size, HAUT_FIXE, BAS_FIXE)
-	var sx := size.x / 1080.0
-	var sy := sx
-	var police := Polices.CORPS
-	var couleur: Color = COULEURS[_branche]
-	var xp := "%d / %d" % [ReglagesJoueur.experience_compte, ReglagesJoueur.experience_compte_requise()]
-	_draw_centre(police, Vector2(180 * sx, 331 * sy), 720 * sx,
-		"NIVEAU %d  •  XP %s  •  GOUTTES %s" % [ReglagesJoueur.niveau_compte_effectif(), xp, ReglagesJoueur.gouttes_affichees()],
-		26, Palette.TEXTE)
-	for index in BRANCHES.size():
-		if BRANCHES[index] == _branche:
-			var r: Rect2 = RECTS_BRANCHES[index]
-			draw_rect(Rect2(r.position * Vector2(sx, sy), r.size * Vector2(sx, sy)).grow(-10), Color(COULEURS[_branche], 0.16))
-
-	var ids: Array = ArbreCompetences.BRANCHES[_branche]
-	for index in mini(10, ids.size()):
-		var id := str(ids[index])
-		var noeud: Dictionary = ArbreCompetences.NOEUDS[id]
-		var rang := ReglagesJoueur.rang_competence(id)
-		var disponible := ReglagesJoueur.mode_dev or ArbreCompetences.prerequis_atteint(id, ReglagesJoueur.rangs_competences)
-		var centre: Vector2 = POSITIONS_NOEUDS[index] * Vector2(sx, sy)
-		if id == _selection:
-			draw_circle(centre, 78 * sx + sin(_anim * 3.0) * 3.0, Color(couleur, 0.18))
-		var teinte := couleur if rang > 0 else couleur.darkened(0.25) if disponible else Color(0.30, 0.32, 0.38)
-		Retro16.dessiner_icone_interface(self, posmod(index + BRANCHES.find(_branche) * 4, 15),
-			Rect2(centre - Vector2(49, 49) * sx, Vector2(98, 98) * sx), Color.WHITE.lerp(teinte, 0.24))
-		_draw_centre(police, Vector2(centre.x - 70 * sx, centre.y + 71 * sy), 140 * sx,
-			"%d/%d" % [rang, ArbreCompetences.rangs(id)], 22, Palette.TEXTE if disponible else Palette.TEXTE_ATTENUE)
-		# Le prix du prochain rang se lit sur le noeud : sans lui, comparer dix
-		# paliers demandait de les selectionner un par un.
-		var maximal := rang >= ArbreCompetences.rangs(id)
-		var prix := "MAX" if maximal else ("—" if not disponible \
-			else str(ReglagesJoueur.cout_competence(id)))
-		var teinte_prix := Palette.TEXTE_ATTENUE
-		if not maximal and disponible:
-			teinte_prix = Palette.OR if ReglagesJoueur.gouttes >= ReglagesJoueur.cout_competence(id) \
-				or ReglagesJoueur.mode_dev else Palette.DANGER
-		_draw_centre(police, Vector2(centre.x - 70 * sx, centre.y + 96 * sy), 140 * sx,
-			prix, 19, teinte_prix)
-	_dessiner_details(police, sx, sy, couleur)
-
-func _dessiner_details(police: Font, sx: float, sy: float, couleur: Color) -> void:
-	if _selection.is_empty():
-		return
-	var noeud: Dictionary = ArbreCompetences.NOEUDS[_selection]
-	var rang := ReglagesJoueur.rang_competence(_selection)
-	var maximum := ArbreCompetences.rangs(_selection)
-	_draw_centre(police, Vector2(92 * sx, 1424 * sy), 896 * sx, "%s  •  %d/%d" % [
-		str(noeud["nom"]).to_upper(), rang, maximum], 32, couleur)
-	_draw_centre(police, Vector2(120 * sx, 1468 * sy), 840 * sx,
-		ArbreCompetences.description_effective(_selection), 26, Palette.TEXTE)
-	# Ce que le rang suivant apportera, a cote de ce qu'on a deja : c'est la
-	# seule information qui permet de decider avant de depenser.
-	var actuel := ArbreCompetences.valeur_au_rang(_selection, rang)
-	var comparaison := "ACTUEL %s" % actuel if rang >= maximum \
-		else "ACTUEL %s   →   RANG %d  %s" % [actuel, rang + 1,
-			ArbreCompetences.valeur_au_rang(_selection, rang + 1)]
-	_draw_centre(police, Vector2(120 * sx, 1506 * sy), 840 * sx, comparaison, 23, Palette.OR)
-	_dessiner_bouton_ameliorer(police, sx, sy, rang, maximum)
-	if not _message.is_empty():
-		_draw_centre(police, Vector2(120 * sx, 1600 * sy), 840 * sx, _message, 21, Palette.OR)
-
-func _dessiner_bouton_ameliorer(police: Font, sx: float, sy: float, rang: int, maximum: int) -> void:
-	var rect := Rect2(RECT_AMELIORER.position * Vector2(sx, sy),
-		RECT_AMELIORER.size * Vector2(sx, sy))
-	var atteint := rang >= maximum
-	var ouvert := ReglagesJoueur.mode_dev \
-		or ArbreCompetences.prerequis_atteint(_selection, ReglagesJoueur.rangs_competences)
-	var cout := ReglagesJoueur.cout_competence(_selection)
-	var payable := ReglagesJoueur.mode_dev or ReglagesJoueur.gouttes >= cout
-	var libelle := "RANG MAXIMUM" if atteint else \
-		"VERROUILLÉ" if not ouvert else "AMÉLIORER  ·  %d GOUTTES" % cout
-	var actif := not atteint and ouvert and payable
-	var accent := Palette.OR if actif else Palette.TEXTE_ATTENUE
-	draw_rect(rect, Color(0.020, 0.030, 0.062, 0.94))
-	draw_rect(rect, Color(accent, 0.85 if actif else 0.38), false, 3.0)
-	_draw_centre(police, Vector2(rect.position.x, rect.get_center().y + 9.0), rect.size.x,
-		libelle, 24, accent if actif else Palette.TEXTE_ATTENUE)
-	if _bouton_ameliorer != null:
-		_bouton_ameliorer.disabled = atteint
-
-func _draw_centre(police: Font, position: Vector2, largeur: float, texte: String,
-		taille_police: int, couleur: Color) -> void:
-	draw_string(police, position, texte, HORIZONTAL_ALIGNMENT_CENTER, largeur, taille_police, couleur)
+	_rafraichir()

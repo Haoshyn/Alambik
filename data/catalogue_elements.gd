@@ -61,7 +61,7 @@ static func _mods(element: String, famille: String) -> Dictionary:
 	match element:
 		"feu": return {"effets": ["feu"]}
 		"eau": return {"effets": ["eau"]}
-		"air": return {"vitesse_mult": 1.35}
+		"air": return {"vitesse_mult": 1.25, "degats_mult": 1.10}
 		"terre": return {"effets": ["terre"], "degats_mult": Reglages.TERRE_DEGATS_MULT,
 			"vitesse_mult": Reglages.TERRE_VITESSE_MULT}
 		"lumiere": return {"effets": ["lumiere"]}
@@ -90,7 +90,7 @@ static func _description(element: String, famille: String) -> String:
 	match element:
 		"feu": return "Les projectiles appliquent des brûlures cumulatives relatives à l'attaque. L'Amélioration original reste actif."
 		"eau": return "Les projectiles rendent les cibles Mouillées : ralenties et vulnérables. L'Amélioration original reste actif."
-		"air": return "Les projectiles gagnent fortement en vitesse. L'Amélioration original reste actif."
+		"air": return "Les projectiles gagnent en vitesse et légèrement en puissance. L'Amélioration original reste actif."
 		"terre": return "Les projectiles deviennent lents et lourds ; le premier proc retarde la prochaine attaque. L'Amélioration original reste actif."
 		"lumiere": return "Les impacts rendent une part des dégâts sous forme de vie. L'Amélioration original reste actif."
 		"tenebres": return "Certains projectiles deviennent des surcharges dévastatrices. L'Amélioration original reste actif."

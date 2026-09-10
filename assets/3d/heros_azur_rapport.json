@@ -1,0 +1,17 @@
+[
+  {
+    "nom": "heros",
+    "glb": "assets/3d/characters/heros.glb",
+    "triangles": 115780,
+    "surfaces": 10,
+    "octets": 3995240,
+    "animations": [
+      "repos",
+      "course",
+      "attaque",
+      "touche",
+      "mort",
+      "victoire"
+    ]
+  }
+]

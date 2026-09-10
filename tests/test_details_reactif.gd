@@ -2,7 +2,7 @@ extends RefCounted
 
 func test_affiche_les_bonus_chiffres(v: Verif) -> void:
 	var lignes := DetailsReactif.lignes(CatalogueReactifs.par_id("tir_multiple"))
-	v.vrai("Dégâts -28 %" in lignes, "le compromis de dégâts est affiché")
+	v.vrai("Dégâts -32 %" in lignes, "le compromis de dégâts est affiché")
 	v.vrai("+1 projectile" in lignes, "le projectile supplémentaire est affiché")
 
 func test_affiche_les_effets_elementaires(v: Verif) -> void:

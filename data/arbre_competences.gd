@@ -5,45 +5,45 @@ extends RefCounted
 # premier rang accompagne la campagne, les suivants sont ce que le farm pousse
 # au maximum. Les valeurs sont donc exprimees PAR RANG, jamais en total.
 #
-# Budget vise a l'arbre complet : environ x11 en DPS pour la branche offensive
-# et une survie effective comparable pour la defensive, afin qu'aucune des deux
-# ne devienne le seul chemin viable.
+# Budget vise a l'arbre complet : environ x2,35 en DPS pour la branche offensive
+# et x2,15 en survie effective pour la defensive. Les Maitrises sont un tiers de
+# la progression permanente, pas une source x11 qui rend stuff et Passifs caducs.
 const MAX_RANG := Reglages.MAITRISE_RANG_MAX
 const NOEUDS := {
-	"force": {"nom": "Force", "description": "+6 % dégâts par rang", "cout": Reglages.MAITRISE_COUTS[0], "categorie": "Offensif", "degats": 0.06},
-	"cadence": {"nom": "Cadence", "description": "+4 % cadence par rang", "cout": Reglages.MAITRISE_COUTS[1], "categorie": "Offensif", "requis": "force", "cadence": 0.04},
-	"precision": {"nom": "Précision", "description": "+6 % vitesse et portée des tirs par rang", "cout": Reglages.MAITRISE_COUTS[2], "categorie": "Offensif", "requis": "cadence", "projectile": 0.06},
-	"puissance": {"nom": "Puissance", "description": "+10 % dégâts par rang", "cout": Reglages.MAITRISE_COUTS[3], "categorie": "Offensif", "requis": "precision", "degats": 0.10, "fort": true},
-	"rythme": {"nom": "Rythme de guerre", "description": "+5 % cadence par rang", "cout": Reglages.MAITRISE_COUTS[4], "categorie": "Offensif", "requis": "puissance", "cadence": 0.05},
-	"catalyse": {"nom": "Catalyse", "description": "+16 % dégâts par rang", "cout": Reglages.MAITRISE_COUTS[5], "categorie": "Offensif", "requis": "rythme", "degats": 0.16},
-	"trajectoire": {"nom": "Trajectoire absolue", "description": "+9 % vitesse et portée des tirs par rang", "cout": Reglages.MAITRISE_COUTS[6], "categorie": "Offensif", "requis": "catalyse", "projectile": 0.09},
-	"tempete": {"nom": "Tempête", "description": "+7 % cadence par rang", "cout": Reglages.MAITRISE_COUTS[7], "categorie": "Offensif", "requis": "trajectoire", "cadence": 0.07, "fort": true},
-	"domination": {"nom": "Domination", "description": "+26 % dégâts par rang", "cout": Reglages.MAITRISE_COUTS[8], "categorie": "Offensif", "requis": "tempete", "degats": 0.26},
-	"grand_oeuvre": {"nom": "Grand Œuvre", "description": "+45 % dégâts par rang", "cout": Reglages.MAITRISE_COUTS[9], "categorie": "Offensif", "requis": "domination", "degats": 0.45, "fort": true},
+	"force": {"nom": "Force", "description": "+1,2 % dégâts par rang", "cout": Reglages.MAITRISE_COUTS[0], "categorie": "Offensif", "degats": 0.012},
+	"cadence": {"nom": "Cadence", "description": "+0,8 % cadence par rang", "cout": Reglages.MAITRISE_COUTS[1], "categorie": "Offensif", "requis": "force", "cadence": 0.008},
+	"precision": {"nom": "Précision", "description": "+1,2 % vitesse et portée des tirs par rang", "cout": Reglages.MAITRISE_COUTS[2], "categorie": "Offensif", "requis": "cadence", "projectile": 0.012},
+	"puissance": {"nom": "Puissance", "description": "+2 % dégâts par rang", "cout": Reglages.MAITRISE_COUTS[3], "categorie": "Offensif", "requis": "precision", "degats": 0.020, "fort": true},
+	"rythme": {"nom": "Rythme de guerre", "description": "+1 % cadence par rang", "cout": Reglages.MAITRISE_COUTS[4], "categorie": "Offensif", "requis": "puissance", "cadence": 0.010},
+	"catalyse": {"nom": "Catalyse", "description": "+3,2 % dégâts par rang", "cout": Reglages.MAITRISE_COUTS[5], "categorie": "Offensif", "requis": "rythme", "degats": 0.032},
+	"trajectoire": {"nom": "Trajectoire absolue", "description": "+1,8 % vitesse et portée des tirs par rang", "cout": Reglages.MAITRISE_COUTS[6], "categorie": "Offensif", "requis": "catalyse", "projectile": 0.018},
+	"tempete": {"nom": "Tempête", "description": "+1,4 % cadence par rang", "cout": Reglages.MAITRISE_COUTS[7], "categorie": "Offensif", "requis": "trajectoire", "cadence": 0.014, "fort": true},
+	"domination": {"nom": "Domination", "description": "+5,2 % dégâts par rang", "cout": Reglages.MAITRISE_COUTS[8], "categorie": "Offensif", "requis": "tempete", "degats": 0.052},
+	"grand_oeuvre": {"nom": "Grand Œuvre", "description": "+9 % dégâts par rang", "cout": Reglages.MAITRISE_COUTS[9], "categorie": "Offensif", "requis": "domination", "degats": 0.090, "fort": true},
 
-	"constitution": {"nom": "Constitution", "description": "+8 % PV maximum par rang", "cout": Reglages.MAITRISE_COUTS[0], "categorie": "Défensif", "pv_mult": 0.08},
-	"armure": {"nom": "Armure", "description": "-1 % dégâts reçus par rang", "cout": Reglages.MAITRISE_COUTS[1], "categorie": "Défensif", "requis": "constitution", "reduction": 0.010},
-	"vitalite": {"nom": "Vitalité", "description": "+12 % PV maximum par rang", "cout": Reglages.MAITRISE_COUTS[2], "categorie": "Défensif", "requis": "armure", "pv_mult": 0.12},
-	"rempart": {"nom": "Rempart", "description": "-1,4 % dégâts reçus par rang", "cout": Reglages.MAITRISE_COUTS[3], "categorie": "Défensif", "requis": "vitalite", "reduction": 0.014, "fort": true},
-	"robustesse": {"nom": "Robustesse", "description": "+16 % PV maximum par rang", "cout": Reglages.MAITRISE_COUTS[4], "categorie": "Défensif", "requis": "rempart", "pv_mult": 0.16},
-	"carapace": {"nom": "Carapace", "description": "-1,8 % dégâts reçus par rang", "cout": Reglages.MAITRISE_COUTS[5], "categorie": "Défensif", "requis": "robustesse", "reduction": 0.018},
-	"endurance": {"nom": "Endurance", "description": "+24 % PV maximum par rang", "cout": Reglages.MAITRISE_COUTS[6], "categorie": "Défensif", "requis": "carapace", "pv_mult": 0.24},
-	"bastion": {"nom": "Bastion", "description": "-2,2 % dégâts reçus par rang", "cout": Reglages.MAITRISE_COUTS[7], "categorie": "Défensif", "requis": "endurance", "reduction": 0.022, "fort": true},
-	"colosse": {"nom": "Colosse", "description": "+36 % PV maximum par rang", "cout": Reglages.MAITRISE_COUTS[8], "categorie": "Défensif", "requis": "bastion", "pv_mult": 0.36},
-	"immortel": {"nom": "Immortel", "description": "-3 % dégâts reçus par rang", "cout": Reglages.MAITRISE_COUTS[9], "categorie": "Défensif", "requis": "colosse", "reduction": 0.030, "fort": true},
+	"constitution": {"nom": "Constitution", "description": "+1,6 % PV maximum par rang", "cout": Reglages.MAITRISE_COUTS[0], "categorie": "Défensif", "pv_mult": 0.016},
+	"armure": {"nom": "Armure", "description": "-0,2 % dégâts reçus par rang", "cout": Reglages.MAITRISE_COUTS[1], "categorie": "Défensif", "requis": "constitution", "reduction": 0.0020},
+	"vitalite": {"nom": "Vitalité", "description": "+2,4 % PV maximum par rang", "cout": Reglages.MAITRISE_COUTS[2], "categorie": "Défensif", "requis": "armure", "pv_mult": 0.024},
+	"rempart": {"nom": "Rempart", "description": "-0,28 % dégâts reçus par rang", "cout": Reglages.MAITRISE_COUTS[3], "categorie": "Défensif", "requis": "vitalite", "reduction": 0.0028, "fort": true},
+	"robustesse": {"nom": "Robustesse", "description": "+3,2 % PV maximum par rang", "cout": Reglages.MAITRISE_COUTS[4], "categorie": "Défensif", "requis": "rempart", "pv_mult": 0.032},
+	"carapace": {"nom": "Carapace", "description": "-0,36 % dégâts reçus par rang", "cout": Reglages.MAITRISE_COUTS[5], "categorie": "Défensif", "requis": "robustesse", "reduction": 0.0036},
+	"endurance": {"nom": "Endurance", "description": "+4,8 % PV maximum par rang", "cout": Reglages.MAITRISE_COUTS[6], "categorie": "Défensif", "requis": "carapace", "pv_mult": 0.048},
+	"bastion": {"nom": "Bastion", "description": "-0,44 % dégâts reçus par rang", "cout": Reglages.MAITRISE_COUTS[7], "categorie": "Défensif", "requis": "endurance", "reduction": 0.0044, "fort": true},
+	"colosse": {"nom": "Colosse", "description": "+7,2 % PV maximum par rang", "cout": Reglages.MAITRISE_COUTS[8], "categorie": "Défensif", "requis": "bastion", "pv_mult": 0.072},
+	"immortel": {"nom": "Immortel", "description": "-0,6 % dégâts reçus par rang", "cout": Reglages.MAITRISE_COUTS[9], "categorie": "Défensif", "requis": "colosse", "reduction": 0.0060, "fort": true},
 
 	"celerite": {"nom": "Célérité", "description": "+2 % déplacement par rang", "cout": Reglages.MAITRISE_COUTS[0], "categorie": "Utilitaire", "vitesse": 0.02},
-	"collecte": {"nom": "Collecte", "description": "+8 % Gouttes par rang", "cout": Reglages.MAITRISE_COUTS[1], "categorie": "Utilitaire", "requis": "celerite", "collecte": 0.08},
+	"collecte": {"nom": "Collecte", "description": "+2 % Gouttes par rang", "cout": Reglages.MAITRISE_COUTS[1], "categorie": "Utilitaire", "requis": "celerite", "collecte": 0.02},
 	# Un nouveau tirage change une regle du draft : deux rangs suffisent, cinq
 	# rendraient le pool d'Ameliorations entierement choisissable.
 	"distillation": {"nom": "Distillation", "description": "+1 nouveau tirage d’Améliorations par rang", "cout": Reglages.MAITRISE_COUTS[2], "categorie": "Utilitaire", "requis": "collecte", "rerolls": 1, "rangs": 2, "fort": true},
-	"fortune": {"nom": "Fortune", "description": "+10 % Gouttes des coffres par rang", "cout": Reglages.MAITRISE_COUTS[3], "categorie": "Utilitaire", "requis": "distillation", "coffre": 0.10},
-	"sagesse": {"nom": "Sagesse", "description": "+8 % XP de compte par rang", "cout": Reglages.MAITRISE_COUTS[4], "categorie": "Utilitaire", "requis": "fortune", "experience": 0.08},
-	"abondance": {"nom": "Abondance", "description": "+14 % Gouttes par rang", "cout": Reglages.MAITRISE_COUTS[5], "categorie": "Utilitaire", "requis": "sagesse", "collecte": 0.14},
+	"fortune": {"nom": "Fortune", "description": "+2,5 % Gouttes des coffres par rang", "cout": Reglages.MAITRISE_COUTS[3], "categorie": "Utilitaire", "requis": "distillation", "coffre": 0.025},
+	"sagesse": {"nom": "Sagesse", "description": "+4 % XP de compte par rang", "cout": Reglages.MAITRISE_COUTS[4], "categorie": "Utilitaire", "requis": "fortune", "experience": 0.04},
+	"abondance": {"nom": "Abondance", "description": "+3 % Gouttes par rang", "cout": Reglages.MAITRISE_COUTS[5], "categorie": "Utilitaire", "requis": "sagesse", "collecte": 0.03},
 	"savoir": {"nom": "Double discipline", "description": "Permet d’équiper un second Passif", "cout": Reglages.MAITRISE_COUTS[6], "categorie": "Utilitaire", "requis": "abondance", "second_passif": true, "rangs": 1, "fort": true},
 	"elan": {"nom": "Élan", "description": "+3 % déplacement par rang", "cout": Reglages.MAITRISE_COUTS[7], "categorie": "Utilitaire", "requis": "savoir", "vitesse": 0.03},
 	"prescience": {"nom": "Prescience", "description": "+1 nouveau tirage d’Améliorations par rang", "cout": Reglages.MAITRISE_COUTS[8], "categorie": "Utilitaire", "requis": "elan", "rerolls": 1, "rangs": 2},
-	"philosophe": {"nom": "Pierre philosophale", "description": "+18 % coffres et +25 % Pierres de forge par rang", "cout": Reglages.MAITRISE_COUTS[9], "categorie": "Utilitaire", "requis": "prescience", "coffre": 0.18, "pierres": 0.25, "fort": true},
+	"philosophe": {"nom": "Pierre philosophale", "description": "+4 % coffres et +6 % Pierres de forge par rang", "cout": Reglages.MAITRISE_COUTS[9], "categorie": "Utilitaire", "requis": "prescience", "coffre": 0.04, "pierres": 0.06, "fort": true},
 }
 
 const BRANCHES := {

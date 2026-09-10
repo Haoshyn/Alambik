@@ -25,6 +25,9 @@ func verifier() -> void:
 		return
 	var salle: Node2D = run.get("_salle")
 	var heros: CharacterBody2D = run.get("_heros")
+	heros.set_process(false)
+	heros.set_physics_process(false)
+	salle.set_process(false)
 	for enfant in run.get_children():
 		if enfant.get_script() != null and enfant.get_script().resource_path == "res://sondes/bot.gd":
 			enfant.queue_free()
@@ -46,13 +49,17 @@ func verifier() -> void:
 		ennemi.set("_apparition",1.0)
 		ennemi.set_physics_process(false)
 	salle.tirer(heros.tir_courant,Vector2(500,1050),Vector2.UP)
+	for point in [Vector2(450,950),Vector2(750,1250),Vector2(400,1190)]:
+		salle.tirer(heros.tir_courant,point,Vector2.DOWN,true)
 	await process_frame
 	await process_frame
 	for enfant in salle.get_children():
 		if enfant is Area2D:
 			enfant.set_physics_process(false)
 	var proxies: Dictionary = monde.get("_proxies")
-	exiger(proxies.size()==5,"heros, trois ennemis et projectile representes")
+	# process_frame precede la synchronisation des proxies de la frame courante.
+	await RenderingServer.frame_post_draw
+	exiger(proxies.size()==8,"heros, trois ennemis et quatre projectiles representes (%d proxies)" % proxies.size())
 	for proxy in proxies.values():
 		var logique: Node2D = proxy.get("logique")
 		exiger(logique.visible,"le rendu ne doit pas masquer une cible logique")
@@ -72,9 +79,22 @@ func verifier() -> void:
 		lecteur.seek(0.20,true)
 		exiger(not avant.is_equal_approx(squelette.get_bone_pose_rotation(os)),"course articulee effective")
 		lecteur.play("repos")
+		proxy_heros.call("_jouer_tir",null,Vector2.ZERO,Vector2.DOWN)
+		var bras := squelette.find_bone("bras_droit")
+		lecteur.seek(0.0,true)
+		var avant_tir := squelette.get_bone_pose_rotation(bras)
+		lecteur.seek(0.16,true)
+		exiger(not avant_tir.is_equal_approx(squelette.get_bone_pose_rotation(bras)),"le bras et le baton participent au tir")
+		proxy_heros.call("_jouer_tir",null,Vector2.ZERO,Vector2.DOWN)
+		exiger(lecteur.current_animation_position < 0.01,"une nouvelle salve relance le geste")
 	await create_timer(1.0).timeout
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("res://tmp/atelier-validation.png")
+	proxy_heros.set("_orientation",Vector2.RIGHT)
+	proxy_heros.call("mettre_a_jour",0.0)
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("res://tmp/mage-profil-en-jeu.png")
+	proxy_heros.set("_orientation",Vector2.DOWN)
 	print("RENDU_3D draws=%d primitives=%d" % [Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)])
 	# Nettoyer une salle ne doit conserver aucun ennemi ni projectile fantome.
 	for enfant in salle.get_children():

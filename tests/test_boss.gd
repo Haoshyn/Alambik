@@ -51,3 +51,32 @@ func test_les_dix_boss_signatures_ont_des_repertoires_distincts(v: Verif) -> voi
 		profils[signature] = true
 		v.vrai(Boss.motifs_pour(id, 1).size() >= 3, "%s a au moins trois temps en phase un" % id)
 		v.vrai(Boss.motifs_pour(id, 2).size() >= 4, "%s enrichit sa seconde phase" % id)
+
+func test_les_boss_portent_un_vrai_budget_de_rencontre(v: Verif) -> void:
+	var pression_signature := Reglages.BOSS_SIGNATURE_PV_MULT * Reglages.BOSS_SIGNATURE_DEGATS_MULT \
+		* Reglages.BOSS_PROJECTILE_VITESSE_MULT / Reglages.BOSS_CADENCE_MOTIF_MULT
+	v.vrai(pression_signature >= 4.2 and pression_signature <= 5.2,
+		"le boss signature porte environ cinq fois l'ancien budget de rencontre")
+	v.vrai(Reglages.MINIBOSS_PV_MULT >= 1.2 and Reglages.MINIBOSS_PV_MULT < Reglages.BOSS_SIGNATURE_PV_MULT,
+		"les miniboss sont renforces sans devenir aussi longs que les signatures")
+	v.vrai(Reglages.BOSS_SIGNATURE_DEGATS_MULT > Reglages.MINIBOSS_DEGATS_MULT,
+		"le boss signature est aussi plus dangereux, pas seulement plus long")
+	v.vrai(Reglages.BOSS_PROJECTILE_VITESSE_MULT >= 1.20,
+		"les tirs de boss gagnent assez de vitesse pour redevenir une menace")
+	v.vrai(Reglages.BOSS_CADENCE_MOTIF_MULT <= 0.90,
+		"les salves de boss laissent moins de temps mort sans supprimer les telegraphes")
+
+func test_les_tirs_lateraux_naissent_dans_l_arene(v: Verif) -> void:
+	var salle: Node = load("res://scripts/salle.gd").new()
+	salle.limites = Rect2(100.0, 200.0, 800.0, 1200.0)
+	salle._obstacles.clear()
+	salle._obstacles.append(Rect2(100.0, 500.0, 120.0, 160.0))
+	var gauche: Vector2 = salle._origine_projectile_hostile(Vector2(106.0, 400.0), Vector2.RIGHT)
+	var droite: Vector2 = salle._origine_projectile_hostile(Vector2(894.0, 400.0), Vector2.LEFT)
+	var marge := Reglages.TIR_RAYON + 4.0
+	v.vrai(gauche.x >= salle.limites.position.x + marge, "un tir gauche ne chevauche plus le mur perimetre")
+	v.vrai(droite.x <= salle.limites.end.x - marge, "un tir droit ne chevauche plus le mur perimetre")
+	var bloque: Vector2 = salle._origine_projectile_hostile(Vector2(150.0, 550.0), Vector2.RIGHT)
+	v.vrai(not salle._obstacles[0].grow(marge).has_point(bloque),
+		"un tir ne nait plus directement dans un obstacle interieur")
+	salle.free()

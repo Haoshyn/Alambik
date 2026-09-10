@@ -299,23 +299,15 @@ func _draw() -> void:
 	_dessiner_vie()
 
 func _dessiner_vie() -> void:
-	var part_pv := clampf(stats.pv / maxf(1.0, stats.pv_max), 0.0, 1.0)
-	var barre := Rect2(Vector2(-76.0, -128.0), Vector2(152.0, 20.0))
-	draw_rect(barre.grow(7.0), Color(0.008, 0.014, 0.026, 0.94))
-	draw_rect(barre.grow(3.0), Color(Palette.OR, 0.72), false, 3.0)
-	draw_rect(barre, Color(0.18, 0.035, 0.055, 0.96))
-	var barre_pv := barre.grow(-3.0)
-	barre_pv.size.x *= part_pv
-	var couleur_pv := Palette.DANGER.lerp(Color(0.34, 0.92, 0.54), part_pv)
-	draw_rect(barre_pv, couleur_pv.darkened(0.16))
-	if barre_pv.size.x > 4.0:
-		draw_rect(Rect2(barre_pv.position, Vector2(barre_pv.size.x, 5.0)), couleur_pv.lightened(0.22))
-	for cran in 3:
-		var x := barre.position.x + barre.size.x * float(cran + 1) / 4.0
-		draw_line(Vector2(x, barre.position.y + 2), Vector2(x, barre.end.y - 2), Color(0.02, 0.02, 0.03, 0.52), 2.0)
-	var police := ThemeDB.fallback_font
-	draw_string(police, Vector2(-76.0, -137.0), "%d / %d" % [ceili(stats.pv), ceili(stats.pv_max)],
-		HORIZONTAL_ALIGNMENT_CENTER, 152.0, 16, Color.WHITE)
+	var part := clampf(stats.pv/maxf(1.0,stats.pv_max),0.0,1.0)
+	var hauteur := -164.0 if has_meta("visuel_3d") else -133.0
+	var barre := Rect2(-56,hauteur,112,10)
+	draw_style_box(StyleAzur.cadre(StyleAzur.FOND,StyleAzur.CUIVRE,5),barre.grow(3))
+	var contenu := barre.grow(-1)
+	contenu.size.x *= part
+	draw_rect(contenu,Palette.DANGER.lerp(Color("71d9b4"),part))
+	if part < 1.0:
+		draw_string(Polices.CORPS,Vector2(-76,hauteur-9),"%d / %d" % [ceili(stats.pv),ceili(stats.pv_max)],HORIZONTAL_ALIGNMENT_CENTER,152,20,StyleAzur.TEXTE)
 
 func _dessiner_repli(r: float, teinte: Color) -> void:
 	var capuche := Dessin.goutte(Vector2(0, -r * 0.15), r * 1.35, PI, 1.15)

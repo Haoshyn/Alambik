@@ -9,8 +9,9 @@ var degats: float
 var vitesse_projectile: float
 var portee: float
 
-# Le niveau de compte fixe le socle ; Maitrises, Passifs et equipement sont des
-# multiplicateurs appliques dessus.
+# Le parametre niveau est conserve pour compatibilite avec la progression, mais
+# le niveau de compte ne donne plus de statistiques brutes. Maitrises, Passifs
+# et equipement portent la progression permanente de combat.
 static func base_pv(niveau: int) -> float:
 	return Reglages.HEROS_PV * (1.0 + float(maxi(0, niveau - 1)) * Reglages.NIVEAU_PV_PAR_NIVEAU)
 

@@ -5,30 +5,23 @@ func test_valeurs_de_depart(v: Verif) -> void:
 	v.presque(s.pv, Reglages.HEROS_PV, "le heros commence a ses PV max")
 	v.presque(s.pv_max, Reglages.HEROS_PV, "PV max lus dans les reglages")
 
-# Monter de niveau ne changeait rien au combat : le niveau de compte n'apportait
-# aucune statistique. Il porte maintenant le socle que tout le reste multiplie.
-func test_le_niveau_porte_les_statistiques_de_base(v: Verif) -> void:
-	v.presque(Stats.base_degats(1), Reglages.TIR_DEGATS, "le niveau un est la reference")
-	v.presque(Stats.base_pv(1), Reglages.HEROS_PV, "le niveau un est la reference")
-	for niveau in [2, 10, 30]:
-		v.vrai(Stats.base_degats(niveau) > Stats.base_degats(niveau - 1),
-			"le niveau %d frappe plus fort que le precedent" % niveau)
-		v.vrai(Stats.base_pv(niveau) > Stats.base_pv(niveau - 1),
-			"le niveau %d encaisse mieux que le precedent" % niveau)
-	var haut := Stats.depuis_reglages({}, {}, {}, Reglages.NIVEAU_REFERENCE_FIN)
-	var bas := Stats.depuis_reglages({}, {}, {}, 1)
-	v.vrai(haut.degats > bas.degats * 1.4,
-		"un compte de fin de campagne frappe nettement plus fort qu'un compte neuf")
-	v.vrai(haut.pv_max > bas.pv_max * 1.5, "et encaisse nettement mieux")
+# Le niveau de compte mesure l'avancement mais n'ajoute pas une couche de stats :
+# Maitrises, objets et Passifs restent les trois sources permanentes lisibles.
+func test_le_niveau_ne_donne_pas_de_statistiques_de_base(v: Verif) -> void:
+	for niveau in [1, 2, 10, Reglages.NIVEAU_REFERENCE_FIN]:
+		v.presque(Stats.base_degats(niveau), Reglages.TIR_DEGATS,
+			"le niveau %d ne modifie pas les degats" % niveau)
+		v.presque(Stats.base_pv(niveau), Reglages.HEROS_PV,
+			"le niveau %d ne modifie pas les PV" % niveau)
+		v.presque(Stats.base_cadence(niveau), Reglages.HEROS_CADENCE,
+			"le niveau %d ne modifie pas la cadence" % niveau)
 
-# Le socle et les multiplicateurs doivent se composer, pas se remplacer.
-func test_les_bonus_multiplient_le_socle_du_niveau(v: Verif) -> void:
+func test_les_bonus_permanents_restent_independants_du_niveau(v: Verif) -> void:
 	var rangs := {"force": ArbreCompetences.rangs("force")}
-	var sans_niveau := Stats.depuis_reglages(rangs, {}, {}, 1)
-	var avec_niveau := Stats.depuis_reglages(rangs, {}, {}, Reglages.NIVEAU_REFERENCE_FIN)
-	var rapport_attendu := Stats.base_degats(Reglages.NIVEAU_REFERENCE_FIN) / Reglages.TIR_DEGATS
-	v.presque(avec_niveau.degats / sans_niveau.degats, rapport_attendu,
-		"les Maitrises multiplient le socle du niveau au lieu de s'y substituer")
+	var bas := Stats.depuis_reglages(rangs, {}, {}, 1)
+	var haut := Stats.depuis_reglages(rangs, {}, {}, Reglages.NIVEAU_REFERENCE_FIN)
+	v.presque(haut.degats, bas.degats,
+		"le meme investissement de Maitrise vaut pareil quel que soit le niveau de compte")
 
 func test_blesser_retire_des_pv(v: Verif) -> void:
 	var s := Stats.depuis_reglages()
@@ -75,12 +68,14 @@ func test_le_collier_defend_et_l_anneau_attaque(v: Verif) -> void:
 	var offensif := CatalogueObjets.bonus_effectifs({"anneau_gauche": anneau}, {})
 	v.presque(float(offensif["pv"]), 0.0, "l'Anneau I ne donne pas de PV")
 
-# Trente objets rigoureusement identiques ne donnaient aucune raison de chercher
-# l'equipement tardif : seul le niveau de Forge comptait.
-func test_un_objet_tardif_vaut_mieux_qu_un_objet_du_premier_monde(v: Verif) -> void:
+# Le palier du compte rattrape les vieux objets : le choix final pourra donc se
+# faire sur leur effet propre sans qu'un drop tardif invalide automatiquement le
+# meme slot du premier Monde.
+func test_un_objet_ancien_rattrape_le_palier_du_compte(v: Verif) -> void:
 	var premier := CatalogueObjets.objet_du_chapitre(0)
 	var dernier := CatalogueObjets.objet_du_chapitre((Chapitres.MONDES.size() - 1) * 3)
-	var tot := CatalogueObjets.bonus_objet(premier, 0)
-	var tard := CatalogueObjets.bonus_objet(dernier, 0)
-	v.vrai(float(tard["degats"]) > float(tot["degats"]) * 5.0,
-		"l'Anneau du dernier Monde ecrase celui du premier a Forge egale")
+	var monde_final := Chapitres.MONDES.size() - 1
+	var ancien := CatalogueObjets.bonus_objet(premier, 0, monde_final)
+	var tardif := CatalogueObjets.bonus_objet(dernier, 0, monde_final)
+	v.presque(float(ancien["degats"]), float(tardif["degats"]),
+		"deux Anneaux du meme profil ont la meme base une fois le Monde rattrape")

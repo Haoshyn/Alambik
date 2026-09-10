@@ -284,8 +284,10 @@ func ajouter_gouttes(nombre: int) -> void:
 	maitrise_changee.emit()
 
 func experience_compte_requise() -> int:
-	var profondeur := niveau_compte - 1
-	return 70 + profondeur * 30 + profondeur * profondeur * 2
+	var profondeur := maxi(0, niveau_compte - 1)
+	return maxi(1, roundi(Reglages.XP_COMPTE_BASE \
+		+ float(profondeur) * Reglages.XP_COMPTE_PENTE \
+		+ float(profondeur * profondeur) * Reglages.XP_COMPTE_QUADRATIQUE))
 
 func ajouter_experience_compte(nombre: int) -> void:
 	if nombre <= 0:
@@ -331,7 +333,7 @@ func objets_disponibles() -> Array[String]:
 	return tous
 
 func bonus_objets_effectifs() -> Dictionary:
-	return CatalogueObjets.bonus_effectifs(equipements, forge_niveaux)
+	return CatalogueObjets.bonus_effectifs(equipements, forge_niveaux, monde_equipement_atteint())
 
 func passifs_equipes_effectifs() -> Dictionary:
 	var resultat := {}
@@ -502,6 +504,19 @@ func palier_atteint() -> int:
 		if index >= 0 and index < Chapitres.nombre() and int(meilleures_par_chapitre[cle]) > 0:
 			meilleur = maxi(meilleur, Chapitres.palier(index))
 	return meilleur
+
+# Les objets deja trouves rattrapent le Monde le plus avance actuellement
+# accessible. Terminer le chapitre 3 d'un Monde suffit donc a faire monter son
+# ancien equipement avant meme la premiere tentative du Monde suivant.
+func monde_equipement_atteint() -> int:
+	if mode_dev:
+		return Chapitres.MONDES.size() - 1
+	var dernier_debloque := 0
+	for chapitre in Chapitres.nombre():
+		if not chapitre_debloque(chapitre):
+			break
+		dernier_debloque = chapitre
+	return int(Chapitres.par_index(dernier_debloque)["monde"])
 
 func pierres_mine() -> int:
 	return Reglages.pierres_mine(palier_atteint())

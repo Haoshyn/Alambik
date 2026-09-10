@@ -53,6 +53,20 @@ func test_un_element_depend_de_la_famille(v: Verif) -> void:
 		and phenomene.mods.get("effets", []).is_empty(),
 		"le Phenomene porte l'Element sans devenir un projectile")
 
+func test_les_elements_offensifs_restent_dans_le_meme_ordre_de_grandeur(v: Verif) -> void:
+	var air := CatalogueElements.creer_fusion("air", "ricochet")
+	var terre := CatalogueElements.creer_fusion("terre", "ricochet")
+	v.vrai(float(air.mods.get("degats_mult", 1.0)) >= 1.08,
+		"Air apporte maintenant aussi une valeur offensive minimale")
+	v.vrai(float(terre.mods.get("degats_mult", 1.0)) <= 1.50,
+		"Terre ne donne plus soixante-dix pour cent de degats gratuitement")
+	v.vrai(Reglages.ACIDE_VULNERABILITE <= 1.25,
+		"Eau/Acide ne rajoute plus trente-cinq pour cent a tout le build")
+	v.vrai(Reglages.TENEBRES_HEROS_DEGATS_MULT <= 1.40,
+		"la transformation Tenebres du Heros reste un choix offensif sans exploser l'echelle")
+	v.vrai(Reglages.LUMIERE_VOL_DE_VIE <= 0.025,
+		"Lumiere ne convertit pas les builds multi-impact en soin quasi permanent")
+
 func test_une_carte_est_un_vrai_bouton_tactile(v: Verif) -> void:
 	var carte := CarteReactif.new()
 	v.vrai(carte is Button, "le choix ne depend d'aucun bouton secondaire de souris")

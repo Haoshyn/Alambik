@@ -51,6 +51,7 @@ def finir(obj, nom, mat):
     if ACTEUR:
         obj.parent = ACTEUR
     if RIG:
+        obj.parent = RIG
         groupe = 'racine'
         if nom in ('Botte','Jambe'):
             groupe = 'jambe_gauche' if obj.location.x < 0 else 'jambe_droite'
@@ -149,32 +150,10 @@ def yeux(y=-.23,z=.48,ecart=.13,mat='magie'):
 
 
 def heros():
-    for cote in [-1,1]:
-        boule('Botte',(.125*cote,-.025,.09),(.10,.15,.09),'cuir')
-        tige('Jambe',(.125*cote,0,.13),(.13*cote,0,.42),.075,'violet')
-    surface('Tunique',[(0,0,.34,.26,.18),(0,0,.48,.21,.16),(0,0,.67,.16,.13),(0,0,.88,.24,.16)],'violet')
-    anneau('Ceinture',(0,0,.59),.18,.027,'cuir').scale.y=.78
-    boite('Boucle',(0,-.148,.60),(.07,.025,.075),'cuivre',.01)
-    boule('Visage',(0,-.015,1.035),(.18,.15,.20),'peau')
-    boule('Chevelure',(0,.025,1.13),(.20,.17,.17),'cheveux')
-    for i in range(7):
-        a = math.pi + i*math.pi/6
-        cone('Meche',(math.cos(a)*.145,-.11+math.sin(a)*.05,1.13),.045,0,.19,'cheveux',8).rotation_euler.y=(i-3)*.13
-    yeux(-.162,1.035,.07,'cuivre')
-    surface('Bord_chapeau',[(0,0,1.185,.12,.11),(0,0,1.21,.38,.31),(0,0,1.235,.39,.32),(0,0,1.25,.22,.19)],'violet',32)
-    anneau('Liseré_chapeau',(0,0,1.225),.38,.012,'cuivre').scale.y=.82
-    surface('Chapeau_asymetrique',[(0,0,1.24,.23,.20),(-.02,.015,1.42,.18,.16),(-.06,.04,1.61,.12,.105),(-.17,.06,1.72,.067,.06),(-.27,.05,1.65,.015,.018)],'violet')
-    anneau('Bande_chapeau',(0,0,1.29),.217,.024,'cuir').scale.y=.87
-    anneau('Embleme',(.015,-.185,1.34),.065,.012,'cuivre',(math.pi/2,0,0))
-    anneau('Echarpe',(0,0,.91),.19,.06,'turquoise').scale.y=.85
-    surface('Pan_echarpe',[(.13,.10,.9,.065,.025),(.20,.21,.74,.075,.024),(.30,.28,.49,.065,.022),(.24,.30,.38,.04,.02)],'turquoise',8)
-    for cote in [-1,1]:
-        tige('Manche',(.20*cote,0,.84),(.29*cote,-.04,.64),.095,'papier')
-        boule('Gant',(.30*cote,-.08,.58),(.07,.07,.09),'cuir')
-    boite('Sacoche',(-.24,.02,.49),(.18,.16,.21),'cuir',.04)
-    fiole((-.27,-.09,.47),.047,'cristal')
-    tige('Baguette',(.32,-.10,.36),(.35,-.12,.98),.023,'bois')
-    fiole((.35,-.12,.86),.09)
+    import sys
+    sys.path.insert(0,str(Path(__file__).resolve().parent))
+    from heros_azur import construire
+    construire(sys.modules[__name__])
 
 
 def encrier():
@@ -350,15 +329,9 @@ def obstacle(index):
 
 
 def portail():
-    # Ouverture sans disque opaque : le terrain derriere reste lisible.
-    for i in range(13):
-        a=i*math.pi/12
-        obj=boite('Voussoir',(math.cos(a)*.55,0,.45+math.sin(a)*.64),(.17,.25,.19),'pierre_claire')
-        obj.rotation_euler.y=math.pi/2-a
-    for c in [-1,1]:
-        boite('Pilier',(.55*c,0,.25),(.19,.25,.5),'pierre')
-    anneau('Seuil',(0,0,.035),.47,.025,'cristal')
-    anneau('Passage',(0,0,.52),.43,.018,'magie',(math.pi/2,0,0))
+    import portail_azur
+    import sys
+    portail_azur.construire(sys.modules[__name__])
 
 
 def decor():
@@ -395,7 +368,7 @@ def animations():
                         if os.name.startswith('jambe'): os.rotation_euler.x=math.sin(phase)*(.42 if os.name.endswith('gauche') else -.42)
                         if os.name.startswith('bras'): os.rotation_euler.x=math.sin(phase)*(-.22 if os.name.endswith('gauche') else .22)
                     if os.name=='echarpe': os.rotation_euler.x=math.sin(phase)*(.13 if nom=='course' else .045)
-                    if nom=='attaque' and os.name=='bras_droit': os.rotation_euler.x=-math.sin(phase*.5)*.65
+                    if nom=='attaque' and os.name=='bras_droit': os.rotation_euler.x=math.sin(phase*.5)**.6*.85
                     if nom=='victoire' and os.name.startswith('bras'): os.rotation_euler.x=-math.sin(phase*.5)*1.3
                     os.keyframe_insert(data_path='rotation_euler',frame=f)
             piste_rig=RIG.animation_data.nla_tracks.new()
@@ -422,16 +395,8 @@ def exporter(nom, dossier, construire, anime=False):
         RIG=bpy.data.objects.new('Squelette',armature)
         bpy.context.collection.objects.link(RIG)
         RIG.parent=ACTEUR
-        bpy.context.view_layer.objects.active=RIG
-        RIG.select_set(True)
-        bpy.ops.object.mode_set(mode='EDIT')
-        racine=armature.edit_bones.new('racine')
-        racine.head=(0,0,0); racine.tail=(0,0,.4)
-        for n,p in [('jambe_gauche',(-.125,0,.42)),('jambe_droite',(.125,0,.42)),('bras_gauche',(-.20,0,.84)),('bras_droit',(.20,0,.84)),('echarpe',(.13,.1,.90))]:
-            os=armature.edit_bones.new(n)
-            os.head=p; os.tail=Vector(p)+Vector((0,0,.15))
-            os.parent=racine
-        bpy.ops.object.mode_set(mode='OBJECT')
+        from heros_azur import creer_squelette
+        creer_squelette(RIG)
     construire()
     # Un mesh par materiau au maximum, au lieu d'un draw call par petite piece.
     for mat in MAT.values():
@@ -444,7 +409,11 @@ def exporter(nom, dossier, construire, anime=False):
         objets[0].name=mat.name
     meshes=[o for o in bpy.context.scene.objects if o.type=='MESH']
     triangles=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in meshes)
-    if anime: animations()
+    if anime:
+        if nom=='heros':
+            from heros_azur import animer
+            animer()
+        else: animations()
     source=SORTIE/'sources'/dossier/(nom+'.blend')
     export=SORTIE/dossier/(nom+'.glb')
     source.parent.mkdir(parents=True,exist_ok=True)

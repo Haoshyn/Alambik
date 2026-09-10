@@ -47,13 +47,18 @@ func test_le_niveau_de_compte_ne_donne_aucune_statistique(v: Verif) -> void:
 	v.presque(stats.degats, Reglages.TIR_DEGATS, "le compte n'ajoute aucun degat")
 	r.free()
 
-func test_les_niveaux_demandent_un_vrai_farm(v: Verif) -> void:
+func test_les_niveaux_suivent_la_duree_de_campagne(v: Verif) -> void:
 	var r: Node = load("res://autoload/reglages_joueur.gd").new()
 	r.sauvegarde_active = false
 	r.niveau_compte = 1
-	v.vrai(r.experience_compte_requise() >= 70, "le tout premier niveau n'arrive plus gratuitement")
-	r.niveau_compte = 10
-	v.vrai(r.experience_compte_requise() >= 500, "la courbe devient franchement exigeante")
+	v.vrai(r.experience_compte_requise() >= 35 and r.experience_compte_requise() <= 50,
+		"le premier niveau arrive apres une vraie tentative, pas apres plusieurs chapitres")
+	var total := 0
+	for niveau in range(1, Reglages.NIVEAU_REFERENCE_FIN):
+		r.niveau_compte = niveau
+		total += r.experience_compte_requise()
+	v.vrai(total >= 2500 and total <= 3000,
+		"le niveau 30 tient dans environ 30 victoires et plusieurs dizaines d'echecs productifs")
 	r.free()
 
 func test_le_choix_de_musique_est_valide_et_persistant(v: Verif) -> void:

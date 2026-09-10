@@ -236,15 +236,22 @@ Objectifs de durée lorsque le joueur possède une puissance appropriée :
 
 ### Chapitres 1 et 2
 
-Environ **10 minutes**.
+Environ **12 minutes**.
 
 ### Chapitre 3
 
-Environ **15 minutes**.
+Environ **16 minutes**.
+
+La première complétion des 30 chapitres vise environ **12 à 16 heures de jeu**
+au total, avec les défaites, nouveaux essais, choix de build et un peu de farm.
+Le temps de clean théorique est volontairement plus court : le joueur habile
+avance plus vite et le farm compense une partie du manque de skill.
 
 Ces valeurs sont des cibles de rythme, pas des limites artificielles.
 
 Un joueur très puissant doit pouvoir finir un ancien chapitre beaucoup plus rapidement.
+Un compte totalement maxé doit même être clairement overkill pour la campagne :
+le contenu exigeant de ce profil appartient aux modes annexes et au post-game.
 
 Le jeu ne doit jamais ralentir artificiellement un joueur qui clean extrêmement vite.
 
@@ -253,6 +260,17 @@ Le jeu ne doit jamais ralentir artificiellement un joueur qui clean extrêmement
 # 9. SYSTÈME DE VAGUES
 
 Les salles utilisent principalement des combats à plusieurs vagues.
+
+Cible actuelle de densité pour une salle normale :
+
+* **3 vagues** sur l'essentiel du chapitre ;
+* **4 vagues** sur les salles normales 18 et 19 ;
+* **4 ennemis maximum par vague** afin de conserver des menaces lisibles ;
+* environ **150 à 165 ennemis communs écrits par chapitre**, avant invocations ;
+* si une vague survit, la suivante peut arriver après environ **7 secondes**.
+
+Cette densité sert d'abord à augmenter la durée, la variété des décisions et la
+pression. Elle doit remplacer une partie du scaling de PV, pas s'y ajouter.
 
 Le système est hybride :
 
@@ -330,6 +348,12 @@ Miniboss final / rencontre finale renforcée.
 Il existe donc :
 
 **10 boss signature principaux au total.**
+
+Un boss signature doit constituer un vrai pic de difficulté. Sa puissance ne doit pas venir uniquement d'une barre de PV : la cible actuelle combine une endurance nettement supérieure, des projectiles plus rapides, davantage de pression entre les salves et moins de temps mort. En budget de rencontre, il doit être de l'ordre de **quatre à cinq fois plus exigeant** que l'ancien prototype, sans multiplier chaque statistique par cinq.
+
+Ses attaques restent télégraphiées et doivent toujours laisser des trajectoires ou fenêtres d'esquive lisibles. Les projectiles générés depuis un bord de l'arène doivent naître à l'intérieur des collisions afin qu'un pattern ne s'annule jamais instantanément contre le mur qui l'a créé.
+
+Les miniboss servent de paliers intermédiaires : ils sont plus menaçants qu'une vague normale mais nettement plus courts qu'un boss signature. Ils ne doivent pas devenir des murs de farm obligatoires aux salles 5 / 10 / 15.
 
 Les miniboss peuvent être réutilisés mais recevoir de petites modifications correspondant au monde actuel.
 
@@ -799,6 +823,12 @@ L'équilibrage doit empêcher qu'UNE combinaison soit systématiquement la meill
 
 Il ne doit PAS empêcher l'existence de power spikes spectaculaires.
 
+La variance entre mains a cependant une limite : une Amélioration de trajectoire comme Homing, Perforation ou Ricochet ne doit pas être presque inutile dès qu'il n'y a qu'une seule cible. Ces cartes peuvent recevoir un petit rendement offensif minimal en plus de leur utilité afin qu'une mauvaise série de tirages reste jouable.
+
+À l'inverse, les multiplicateurs d'impacts — projectiles simultanés, salves et cadence — doivent se payer entre eux. Les combiner doit produire un build clairement excellent, mais pas multiplier gratuitement le DPS par quatre ou six avant même une Fusion élémentaire.
+
+Même règle pour les Éléments : Feu, Eau, Air, Terre, Lumière et Ténèbres gardent des fonctions très différentes, mais aucun Élément ne doit à lui seul ajouter un multiplicateur disproportionné à une main déjà excellente. Ténèbres reste orienté gros procs, Lumière sustain, Terre impact lourd, Air précision/vitesse, etc., avec des rendements globaux du même ordre de grandeur.
+
 ---
 
 # 27. AMÉLIORATIONS HÉROS — POOL ACTUEL
@@ -1109,18 +1139,18 @@ Ainsi :
 
 **la progression détermine les stats brutes ; le choix d'objet détermine l'effet spécial.**
 
-La cible de fin de jeu est une puissance permanente globale voisine de dix fois
-celle du héros de départ. Stuff, Maîtrises et Passifs représentent chacun
-environ un tiers de ce budget. Cette répartition mesure une puissance équivalente
-incluant attaque, défense et utilitaire ; elle ne signifie pas que chaque source
-multiplie toutes les statistiques par 3,33. Les bonus bruts des trois sources ne
-doivent pas se composer en un multiplicateur proche de ×37.
+La puissance permanente maximale n'est **pas** la puissance requise pour finir
+la campagne. Un joueur habile doit pouvoir vaincre le Monde X avec des Maîtrises,
+une Forge, des objets et des capacités encore très incomplets s'il construit une
+bonne run. Le farm sert à compenser le manque de skill et à préparer les modes
+annexes / post-game.
 
-Le déclencheur exact du rattrapage reste :
+À l'inverse, un compte totalement optimisé doit être clairement **overkill** en
+Campagne. La difficulté destinée à ce profil appartient au Panthéon, au Chaos et
+aux futurs paliers de farm, pas au trentième chapitre.
 
-**À CONCEVOIR.**
-
-Ne pas implémenter arbitrairement une solution définitive.
+Le rattrapage d'équipement suit le Monde le plus avancé débloqué : un ancien objet
+conserve donc son identité spéciale tout en remontant au palier statistique actuel.
 
 ---
 

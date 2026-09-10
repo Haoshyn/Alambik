@@ -87,20 +87,9 @@ func _inscrire(noeud: Node) -> void:
 	if chemin.is_empty():
 		return
 	var proxy := Node3D.new()
-	proxy.set_script(PROXY)
+	proxy.set_script(preload("res://scripts/presentation/projectile_3d.gd") if genre == "projectile" else PROXY)
 	add_child(proxy)
-	proxy.preparer(noeud, charger(chemin), genre)
-	if genre == "projectile":
-		var couleur: Color = noeud.get("couleur")
-		var cle := couleur.to_html()
-		if not _materiaux.has(cle):
-			var mat := StandardMaterial3D.new()
-			mat.albedo_color = couleur.lightened(0.15)
-			mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-			_materiaux[cle] = mat
-		for mesh in proxy.find_children("*", "MeshInstance3D", true, false):
-			mesh.material_override = _materiaux[cle]
-			mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	proxy.preparer(noeud, null if genre == "projectile" else charger(chemin), genre)
 	var id := noeud.get_instance_id()
 	_proxies[id] = proxy
 	noeud.tree_exiting.connect(func():
@@ -118,7 +107,8 @@ func _process(delta: float) -> void:
 	if limites != _limites or numero != _numero:
 		_limites = limites
 		_numero = numero
-		_arene.construire(limites,charger)
+		var chapitre := Jeu.chapitre_courant()
+		_arene.construire(limites,charger,int(chapitre["monde"]),salle.contour_sol())
 		_reconstruire_obstacles()
 	for proxy in _proxies.values():
 		if is_instance_valid(proxy):
@@ -126,6 +116,7 @@ func _process(delta: float) -> void:
 	if salle.portail_ouvert():
 		if not is_instance_valid(_portail):
 			_portail = charger("res://assets/3d/environment/portail.glb").instantiate()
+			_portail.set_script(preload("res://scripts/presentation/portail_3d.gd"))
 			add_child(_portail)
 		_portail.position = Pont3D.vers_monde(salle.position_portail())
 		_portail.visible = true
@@ -137,6 +128,7 @@ func _reconstruire_obstacles() -> void:
 		enfant.queue_free()
 	var index := 0
 	for rect in salle.obstacles():
+		if rect in salle.retraits(): continue
 		var obstacle := charger("res://assets/3d/props/obstacle_%d.glb" % ((_numero+index)%3)).instantiate() as Node3D
 		_obstacles.add_child(obstacle)
 		obstacle.position = Pont3D.vers_monde(rect.get_center())

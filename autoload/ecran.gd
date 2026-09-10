@@ -9,27 +9,33 @@ const CIBLE_TACTILE := 112.0
 # le systeme au lieu du jeu. Les marges sont exprimees dans le viewport de
 # reference (1080 de large), pas en pixels physiques.
 
-func _facteur() -> float:
-	var ecran := DisplayServer.screen_get_size()
-	if ecran.x <= 0:
-		return 1.0
-	return float(ProjectSettings.get_setting("display/window/size/viewport_width")) / float(ecran.x)
+func _zone_sure() -> Rect2:
+	var visible := get_viewport().get_visible_rect()
+	if OS.get_name() != "Android":
+		return visible
+	# La transformation inclut les bandes de cadrage : une encoche dans une
+	# bande ne doit pas decaler une seconde fois toute l'interface.
+	var sure := Rect2(DisplayServer.get_display_safe_area())
+	sure.position -= Vector2(DisplayServer.window_get_position())
+	return convertir_zone_sure(visible, sure, get_viewport().get_screen_transform())
+
+static func convertir_zone_sure(visible: Rect2, sure: Rect2, transformation: Transform2D) -> Rect2:
+	if not sure.has_area():
+		return visible
+	var intersection := visible.intersection(transformation.affine_inverse() * sure)
+	return intersection if intersection.has_area() else visible
 
 func marge_haute() -> float:
 	if OS.get_name() != "Android":
 		return 24.0
-	var sure := DisplayServer.get_display_safe_area()
-	return maxf(24.0, float(sure.position.y) * _facteur())
+	return maxf(24.0, _zone_sure().position.y)
 
 func marge_basse() -> float:
 	if OS.get_name() != "Android":
 		return 24.0
-	var sure := DisplayServer.get_display_safe_area()
-	var ecran := DisplayServer.screen_get_size()
-	return maxf(24.0, float(ecran.y - sure.end.y) * _facteur())
+	return maxf(24.0, hauteur_visible() - _zone_sure().end.y)
 
-# Hauteur reellement visible dans le viewport de reference : l'etirement est
-# keep_width, donc la largeur est garantie et la hauteur varie avec l'appareil.
+# Le cadrage uniforme conserve les proportions, y compris en multifenetre.
 func hauteur_visible() -> float:
 	var taille := get_viewport().get_visible_rect().size
 	return taille.y

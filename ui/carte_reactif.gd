@@ -25,8 +25,8 @@ var _style_actif: StyleBoxFlat
 
 func configurer(reactif_: Reactif) -> void:
 	reactif = reactif_
-	_style_normal = StyleInterface.panneau(Color(0.075, 0.060, 0.115, 0.97), Color(reactif.teinte, 0.28), 28, 10)
-	_style_actif = StyleInterface.panneau(Color(reactif.teinte, 0.16), Color(reactif.teinte, 0.90), 28, 16)
+	_style_normal = StyleAzur.cadre()
+	_style_actif = StyleAzur.cadre(StyleAzur.PANNEAU,StyleAzur.MAGIE)
 	custom_minimum_size = Vector2(0, HAUTEUR)
 	queue_redraw()
 
@@ -73,12 +73,12 @@ func _draw() -> void:
 		draw_string(police, Vector2(r.size.x - 190.0, 34.0), "ÉLÉMENT",
 			HORIZONTAL_ALIGNMENT_RIGHT, 170, 22, Color(Palette.ESSENCE, 0.9 * alpha))
 
-	# Vignette du glyphe, a gauche : une icone dessinee, pas un fichier image.
+	# La fusion conserve sa silhouette de base et porte son element en medaillon.
 	var centre := Vector2(84.0, r.position.y + r.size.y / 2.0)
-	Dessin.halo(self, centre, 60.0, Color(teinte, 0.5 * alpha), 4)
-	draw_circle(centre, 44.0, Color(0.07, 0.06, 0.10, alpha))
-	draw_arc(centre, 44.0, 0.0, TAU, 28, Color(teinte, 0.8 * alpha), 2.5, true)
-	Dessin.glyphe(self, reactif.glyphe, centre, 24.0, Color(teinte, alpha))
+	draw_texture_rect(StyleAzur.glyphe(reactif.id),Rect2(centre-Vector2.ONE*56,Vector2.ONE*112),false)
+
+	if reactif.est_transformation:
+		draw_texture_rect(StyleAzur.glyphe(CatalogueElements.element_de_fusion(reactif.id)),Rect2(centre+Vector2(20,20),Vector2.ONE*48),false)
 
 	var x := 158.0
 	var titre := reactif.nom
@@ -88,6 +88,6 @@ func _draw() -> void:
 		# joueur ne sait pas ce qu'il renforce.
 		titre += "  (déjà x%d)" % possedees
 	draw_string(police, Vector2(x, r.position.y + 62.0), titre, HORIZONTAL_ALIGNMENT_LEFT,
-		r.size.x - x - 24.0, 40, Color(Palette.TEXTE, alpha))
+		r.size.x - x - 24.0, 32, Color(StyleAzur.TEXTE, alpha))
 	draw_multiline_string(police, Vector2(x, r.position.y + 108.0), reactif.description, HORIZONTAL_ALIGNMENT_LEFT,
-		r.size.x - x - 24.0, 28, 3, Color(Palette.TEXTE_ATTENUE, alpha))
+		r.size.x - x - 24.0, 27, 3, Color(StyleAzur.ATTENUE, alpha))

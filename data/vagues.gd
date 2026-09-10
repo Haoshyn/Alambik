@@ -5,26 +5,30 @@ extends RefCounted
 # graine ne change que l'ordre interne de certaines vagues : le joueur peut
 # apprendre une salle tout en gardant une petite variation d'execution.
 
+# Une salle normale contient desormais trois vagues, quatre en toute fin de
+# chapitre. On augmente la duree par le nombre de decisions et de cibles, pas
+# par des PV artificiels. La taille d'une vague reste volontairement bornee a
+# quatre ennemis : la pression vient de l'enchainement et des compositions.
 const RENCONTRES := [
-	[["encrier_rampant", "plume_sentinelle"], ["encrier_rampant", "encrier_rampant"]],
-	[["plume_sentinelle", "encrier_rampant"], ["tache_veloce", "encrier_rampant"]],
-	[["encrier_rampant", "tache_veloce", "plume_sentinelle"], ["encrier_rampant", "encrier_rampant", "plume_sentinelle"]],
-	[["tache_veloce", "plume_sentinelle", "encrier_rampant"], ["tache_veloce", "encrier_rampant", "plume_sentinelle"]],
+	[["encrier_rampant", "plume_sentinelle"], ["encrier_rampant", "encrier_rampant"], ["tache_veloce", "encrier_rampant", "plume_sentinelle"]],
+	[["plume_sentinelle", "encrier_rampant"], ["tache_veloce", "encrier_rampant"], ["plume_sentinelle", "tache_veloce", "encrier_rampant"]],
+	[["encrier_rampant", "tache_veloce", "plume_sentinelle"], ["encrier_rampant", "encrier_rampant", "plume_sentinelle"], ["tache_veloce", "folio_orbiteur", "encrier_rampant"]],
+	[["tache_veloce", "plume_sentinelle", "encrier_rampant"], ["tache_veloce", "encrier_rampant", "plume_sentinelle"], ["folio_orbiteur", "plume_sentinelle", "tache_veloce"]],
 	[],
-	[["plume_sentinelle", "folio_orbiteur", "encrier_rampant"], ["tache_veloce", "tache_veloce", "encrier_rampant"]],
-	[["scribe_essaimeur", "plume_sentinelle"], ["folio_orbiteur", "tache_veloce", "encrier_rampant"]],
-	[["tache_veloce", "marge_harceleuse", "plume_sentinelle"], ["scribe_essaimeur", "encrier_rampant", "folio_orbiteur"]],
-	[["sceau_belier", "plume_sentinelle", "tache_veloce"], ["marge_harceleuse", "encrier_rampant", "folio_orbiteur"]],
+	[["plume_sentinelle", "folio_orbiteur", "encrier_rampant"], ["tache_veloce", "tache_veloce", "encrier_rampant"], ["folio_orbiteur", "plume_sentinelle", "tache_veloce"]],
+	[["scribe_essaimeur", "plume_sentinelle"], ["folio_orbiteur", "tache_veloce", "encrier_rampant"], ["scribe_essaimeur", "folio_orbiteur", "encrier_rampant"]],
+	[["tache_veloce", "marge_harceleuse", "plume_sentinelle"], ["scribe_essaimeur", "encrier_rampant", "folio_orbiteur"], ["marge_harceleuse", "tache_veloce", "plume_sentinelle", "encrier_rampant"]],
+	[["sceau_belier", "plume_sentinelle", "tache_veloce"], ["marge_harceleuse", "encrier_rampant", "folio_orbiteur"], ["sceau_belier", "marge_harceleuse", "tache_veloce", "encrier_rampant"]],
 	[],
-	[["fiole_volatile", "miroir_encre", "tache_veloce"], ["scribe_essaimeur", "encrier_rampant", "marge_harceleuse"]],
-	[["fuseau_tisseur", "folio_orbiteur"], ["plume_sentinelle", "sceau_belier", "encrier_rampant"]],
-	[["cachet_phaseur", "marge_harceleuse", "plume_sentinelle"], ["miroir_encre", "fiole_volatile", "folio_orbiteur"]],
-	[["scribe_essaimeur", "fuseau_tisseur", "folio_orbiteur"], ["sceau_belier", "marge_harceleuse", "encrier_rampant"]],
+	[["fiole_volatile", "miroir_encre", "tache_veloce"], ["scribe_essaimeur", "encrier_rampant", "marge_harceleuse"], ["fiole_volatile", "miroir_encre", "folio_orbiteur", "encrier_rampant"]],
+	[["fuseau_tisseur", "folio_orbiteur"], ["plume_sentinelle", "sceau_belier", "encrier_rampant"], ["fuseau_tisseur", "marge_harceleuse", "folio_orbiteur", "encrier_rampant"]],
+	[["cachet_phaseur", "marge_harceleuse", "plume_sentinelle"], ["miroir_encre", "fiole_volatile", "folio_orbiteur"], ["cachet_phaseur", "miroir_encre", "marge_harceleuse", "encrier_rampant"]],
+	[["scribe_essaimeur", "fuseau_tisseur", "folio_orbiteur"], ["sceau_belier", "marge_harceleuse", "encrier_rampant"], ["scribe_essaimeur", "fuseau_tisseur", "sceau_belier", "encrier_rampant"]],
 	[],
-	[["scribe_essaimeur", "sceau_belier", "cachet_phaseur"], ["miroir_encre", "marge_harceleuse", "tache_veloce"]],
-	[["fuseau_tisseur", "folio_orbiteur", "sceau_belier"], ["scribe_essaimeur", "miroir_encre", "fiole_volatile"]],
-	[["scribe_essaimeur", "tache_veloce", "marge_harceleuse"], ["fuseau_tisseur", "miroir_encre", "folio_orbiteur"]],
-	[["cachet_phaseur", "sceau_belier", "plume_sentinelle"], ["fiole_volatile", "marge_harceleuse", "miroir_encre"]],
+	[["scribe_essaimeur", "sceau_belier", "cachet_phaseur"], ["miroir_encre", "marge_harceleuse", "tache_veloce", "encrier_rampant"], ["fuseau_tisseur", "sceau_belier", "cachet_phaseur", "encrier_rampant"]],
+	[["fuseau_tisseur", "folio_orbiteur", "sceau_belier"], ["scribe_essaimeur", "miroir_encre", "fiole_volatile", "encrier_rampant"], ["fuseau_tisseur", "miroir_encre", "sceau_belier", "marge_harceleuse"]],
+	[["scribe_essaimeur", "tache_veloce", "marge_harceleuse"], ["fuseau_tisseur", "miroir_encre", "folio_orbiteur"], ["scribe_essaimeur", "cachet_phaseur", "fiole_volatile"], ["marge_harceleuse", "sceau_belier", "encrier_rampant"]],
+	[["cachet_phaseur", "sceau_belier", "plume_sentinelle"], ["fiole_volatile", "marge_harceleuse", "miroir_encre"], ["cachet_phaseur", "fuseau_tisseur", "tache_veloce"], ["miroir_encre", "marge_harceleuse", "encrier_rampant"]],
 	[],
 ]
 

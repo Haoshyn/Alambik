@@ -78,22 +78,36 @@ func test_chaque_amelioration_fusionne_avec_les_six_elements(v: Verif) -> void:
 			v.vrai(fusion != null, "%s doit pouvoir fusionner avec %s" % [id, element])
 			v.vrai(fusion.description != "", "la fusion %s · %s doit s'expliquer" % [id, element])
 
-# Les multiplicateurs s'additionnent d'une carte a l'autre. Une main de six
-# Améliorations qui payent toutes en degats produit un tir incapable de tuer :
-# la sonde a mesure x0,28 avec le pool complet. Chaque carte qui coute des
-# degats doit donc rendre des impacts, et aucune ne doit couter trop seule.
-func test_une_amelioration_qui_coute_des_degats_les_rend_en_impacts(v: Verif) -> void:
-	for id in CatalogueReactifs.ids():
-		var mods: Dictionary = CatalogueReactifs.par_id(id).mods
-		if float(mods.get("degats_mult", 1.0)) >= 1.0:
-			continue
-		var drapeaux: Array = mods.get("drapeaux", [])
-		var rend_des_impacts: bool = mods.has("nb_projectiles_add") or mods.has("fragments_add") \
-			or mods.has("perforations_add") or mods.has("rebonds_add") \
-			or "rafale" in drapeaux or "perfore_tout" in drapeaux
-		v.vrai(rend_des_impacts, "%s paie des degats sans multiplier les impacts" % id)
-		v.vrai(float(mods["degats_mult"]) >= 0.70,
-			"%s ne doit pas couter plus de 30 pour cent de degats a lui seul" % id)
+func _rendement_projectile(ids: Array[String]) -> float:
+	var base := Tir.de_base(Stats.depuis_reglages())
+	var mods: Array = []
+	for id in ids:
+		mods.append(CatalogueReactifs.par_id(id).mods)
+	var tir := Mods.appliquer(base, mods)
+	var salves := Reglages.RAFALE_NOMBRE if "rafale" in tir.drapeaux else 1
+	return tir.degats / base.degats * tir.cadence / base.cadence \
+		* float(tir.nb_projectiles) * float(salves)
+
+# Une carte de projectile ne doit plus etre soit autowin, soit presque morte.
+# Le proxy ci-dessous mesure le DPS brut sur une cible assez large pour prendre
+# les projectiles ; les cartes de trajectoire ont en plus leur vraie utilite en jeu.
+func test_les_projectiles_restent_dans_un_budget_resserre(v: Verif) -> void:
+	var minimum := INF
+	var maximum := 0.0
+	for id in CatalogueReactifs.ids_de_famille(CatalogueReactifs.PROJECTILE):
+		var rendement := _rendement_projectile([id])
+		minimum = minf(minimum, rendement)
+		maximum = maxf(maximum, rendement)
+	v.vrai(minimum >= 0.94, "aucune Amélioration projectile n'est presque strictement pire que le tir de base")
+	v.vrai(maximum <= 1.80, "aucune Amélioration projectile seule ne double gratuitement le DPS")
+
+func test_le_trio_multi_salve_cadence_reste_fort_sans_exploser(v: Verif) -> void:
+	var rendement := _rendement_projectile(["tir_multiple", "salve", "cadence_febrile"])
+	v.vrai(rendement >= 1.70 and rendement <= 2.05,
+		"multi + salve + cadence reste un power spike, pas un multiplicateur hors echelle")
+	var moyenne_tenebres := 1.0 + Reglages.TENEBRES_CHANCE_SURCHARGE * (Reglages.TENEBRES_SURCHARGE_MULT - 1.0)
+	v.vrai(moyenne_tenebres <= 1.30,
+		"Tenebres ne rajoute plus pres de cinquante pour cent de DPS moyen a chaque impact")
 
 func test_les_nouvelles_ameliorations_ont_un_vrai_arbitrage(v: Verif) -> void:
 	# Une Amélioration qui ne fait que gagner n'est pas un choix. Les trois
@@ -109,3 +123,19 @@ func test_les_nouvelles_ameliorations_ont_un_vrai_arbitrage(v: Verif) -> void:
 				perd = perd or float(mods[cle]) < 1.0
 		v.vrai(perd, "%s paie son gain par une statistique en baisse" % id)
 		v.vrai(gagne or mods.has("drapeaux"), "%s apporte bien quelque chose" % id)
+
+func test_le_feu_est_borne_sur_les_cibles_longues(v: Verif) -> void:
+	v.vrai(Reglages.FEU_DOT_CUMUL_MAX >= 3 and Reglages.FEU_DOT_CUMUL_MAX <= 5,
+		"Feu garde plusieurs cumuls sans pouvoir croitre pendant tout un boss")
+	var donnees := {"pv": 10000.0, "couleur": Color.WHITE}
+	for chemin in ["res://scripts/ennemi.gd", "res://scripts/boss.gd"]:
+		var acteur: Node = load(chemin).new()
+		acteur.configurer(donnees)
+		for impact in 12:
+			acteur.recevoir_degats(10.0, ["feu"])
+		v.egal(int(acteur.get("_feu_cumuls")), Reglages.FEU_DOT_CUMUL_MAX,
+			"la cible plafonne le nombre de brulures")
+		v.presque(float(acteur.get("_feu_dps")),
+			10.0 * Reglages.FEU_DOT_PART_PAR_SECONDE * float(Reglages.FEU_DOT_CUMUL_MAX),
+			"les impacts au-dela du plafond n'ajoutent plus de DPS")
+		acteur.free()

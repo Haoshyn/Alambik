@@ -28,6 +28,7 @@ var _finie := false
 var _portail_ouvert := false
 var _portail: Area2D
 var _obstacles: Array[Rect2] = []
+var _retraits: Array[Rect2] = []
 var _anim := 0.0
 var _attente_vague := 0.0
 var _mine_active := false
@@ -77,38 +78,61 @@ func _construire_obstacles() -> void:
 			enfant.queue_free()
 	_obstacles.clear()
 	_construire_murs_perimetre()
-	# Quelques blocs d'encre sechee, disposes selon le numero de salle : ils
-	# arretent les projectiles et forcent a se replacer.
-	var alea := RandomNumberGenerator.new()
-	alea.seed = Jeu.graine * 31 + numero
-	# Les blocs restent dans la bande mediane : trop bas, ils bouchent la ligne de
-	# tir des le depart et le joueur ne comprend pas pourquoi rien ne touche.
-	# Les motifs du boss supposent une arene ouverte. Un bloc protegerait le boss
-	# de nos tirs tout en laissant le heros se cacher de ses barrages, ce qui
-	# neutraliserait le combat ; la regle vaut pour chacun des trois boss.
+	_retraits.clear()
 	var combat_de_boss := Jeu.mode_run == "grimoire" and Chapitres.est_boss(Jeu.chapitre, numero) \
 		or Jeu.mode_run in ["epreuve_sorts", "retro"]
-	# Une seule pièce de décor jouable au maximum. Le décor de bord suffit à
-	# donner de la richesse ; le centre doit rester une vraie zone d'esquive.
-	var nombre := 0 if combat_de_boss else alea.randi_range(0, 1)
-	for i in nombre:
-		var taille_visuelle := Vector2(alea.randf_range(78.0, 138.0), alea.randf_range(44.0, 76.0))
-		var taille := Vector2(taille_visuelle.x * 0.76, taille_visuelle.y * 0.42)
-		var centre := Vector2(
-			alea.randf_range(limites.position.x + taille_visuelle.x, limites.end.x - taille_visuelle.x),
-			alea.randf_range(limites.position.y + 260.0, limites.end.y - 430.0))
-		var rect := Rect2(centre - taille / 2.0, taille)
-		_obstacles.append(rect)
-		var corps := StaticBody2D.new()
-		corps.collision_layer = 4
-		corps.collision_mask = 0
-		corps.global_position = centre
-		var forme := CollisionShape2D.new()
-		var rectangle := RectangleShape2D.new()
-		rectangle.size = taille
-		forme.shape = rectangle
-		corps.add_child(forme)
-		add_child(corps)
+	if combat_de_boss or _vagues.is_empty() and Jeu.mode_run != "mine":
+		return
+	var motif := posmod(Jeu.graine+numero,Reglages.ARENE_COMPOSITIONS.size())
+	for retrait: Rect2 in Reglages.ARENE_RETRAITS[motif]:
+		# La Mine fait apparaitre ses ennemis le long des quatre bords.
+		if Jeu.mode_run == "mine": break
+		var rect := Rect2(limites.position+retrait.position*limites.size,retrait.size*limites.size)
+		_retraits.append(rect)
+		_ajouter_obstacle(rect)
+	for point: Vector2 in Reglages.ARENE_COMPOSITIONS[motif]:
+		var centre := limites.position+point*limites.size
+		_ajouter_obstacle(Rect2(centre-Reglages.ARENE_OBSTACLE_TAILLE/2,Reglages.ARENE_OBSTACLE_TAILLE))
+
+func retraits() -> Array[Rect2]:
+	return _retraits
+
+func contour_sol() -> PackedVector2Array:
+	var points := PackedVector2Array([limites.position])
+	var gauche: Array[Rect2] = []
+	var droite: Array[Rect2] = []
+	for rect in _retraits:
+		if is_equal_approx(rect.position.x,limites.position.x): gauche.append(rect)
+		else: droite.append(rect)
+	gauche.sort_custom(func(a: Rect2,b: Rect2): return a.position.y < b.position.y)
+	droite.sort_custom(func(a: Rect2,b: Rect2): return a.position.y > b.position.y)
+	for rect in gauche:
+		points.append(rect.position)
+		points.append(Vector2(rect.end.x,rect.position.y))
+		points.append(rect.end)
+		points.append(Vector2(rect.position.x,rect.end.y))
+	points.append(Vector2(limites.position.x,limites.end.y))
+	points.append(limites.end)
+	for rect in droite:
+		points.append(rect.end)
+		points.append(Vector2(rect.position.x,rect.end.y))
+		points.append(rect.position)
+		points.append(Vector2(rect.end.x,rect.position.y))
+	points.append(Vector2(limites.end.x,limites.position.y))
+	return points
+
+func _ajouter_obstacle(rect: Rect2) -> void:
+	_obstacles.append(rect)
+	var corps := StaticBody2D.new()
+	corps.collision_layer = 4
+	corps.collision_mask = 0
+	corps.position = rect.get_center()
+	var forme := CollisionShape2D.new()
+	var rectangle := RectangleShape2D.new()
+	rectangle.size = rect.size
+	forme.shape = rectangle
+	corps.add_child(forme)
+	add_child(corps)
 
 func _construire_murs_perimetre() -> void:
 	var e := Reglages.ARENE_MUR_EPAISSEUR
@@ -273,6 +297,19 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 	else:
 		copie["pv"] = float(donnees["pv"]) * Chapitres.facteur_pv(Jeu.chapitre, numero)
 		copie["degats"] = float(donnees["degats"]) * Chapitres.facteur_degats(Jeu.chapitre, numero)
+		if donnees["cerveau"] == "boss":
+			var signature := str(donnees.get("rang_boss", "miniboss")) == "signature"
+			copie["pv"] *= Reglages.BOSS_SIGNATURE_PV_MULT if signature else Reglages.MINIBOSS_PV_MULT
+			copie["degats"] *= Reglages.BOSS_SIGNATURE_DEGATS_MULT if signature else Reglages.MINIBOSS_DEGATS_MULT
+	# Les monstres communs gagnent de la menace par leur rythme, pas par des PV.
+	# Le Retro reste volontairement un prototype de demonstration et n'est pas
+	# concerne par cette passe de difficulte.
+	if donnees["cerveau"] != "boss" and not Jeu.est_retro():
+		copie["degats"] = float(copie["degats"]) * Reglages.ENNEMI_DEGATS_MULT
+		if copie.has("vitesse_projectile"):
+			copie["vitesse_projectile"] = float(copie["vitesse_projectile"]) * Reglages.ENNEMI_PROJECTILE_VITESSE_MULT
+		if copie.has("recharge"):
+			copie["recharge"] = float(copie["recharge"]) * Reglages.ENNEMI_RECHARGE_MULT
 	return copie
 
 func _sur_ennemi_touche(position: Vector2, couleur: Color) -> void:
@@ -350,6 +387,31 @@ func _place_libre(position: Vector2) -> bool:
 			return false
 	return true
 
+# Certains motifs de boss naissent volontairement depuis les bords de l'arene.
+# Avec un projectile de rayon 10, une origine a 6 ou 8 px du bord chevauchait le
+# MurPerimetre et le tir mourait avant d'exister. On replace seulement le point
+# de depart ; la trajectoire garde ensuite toutes ses collisions normales.
+func _origine_projectile_hostile(origine: Vector2, direction: Vector2) -> Vector2:
+	var marge := Reglages.TIR_RAYON + 4.0
+	var zone := limites.grow(-marge)
+	var resultat := Vector2(clampf(origine.x, zone.position.x, zone.end.x),
+		clampf(origine.y, zone.position.y, zone.end.y))
+	var avance := direction.normalized()
+	if avance == Vector2.ZERO:
+		avance = Vector2.DOWN
+	for _essai in 16:
+		var bloque := false
+		for rect in _obstacles:
+			if rect.grow(marge).has_point(resultat):
+				bloque = true
+				break
+		if not bloque:
+			return resultat
+		resultat += avance * (marge * 2.0)
+		resultat.x = clampf(resultat.x, zone.position.x, zone.end.x)
+		resultat.y = clampf(resultat.y, zone.position.y, zone.end.y)
+	return resultat
+
 func tirer(tir_source: Tir, origine: Vector2, direction: Vector2, hostile := false,
 		cible_exclue := 0) -> void:
 	var angles := tir_source.angles()
@@ -359,8 +421,12 @@ func tirer(tir_source: Tir, origine: Vector2, direction: Vector2, hostile := fal
 		p.tir = tir_source
 		p.hostile = hostile
 		p.cible_exclue = cible_exclue
-		p.direction = direction.rotated(angles[i])
-		p.global_position = origine + direction.orthogonal() * decalages[i]
+		var direction_projectile := direction.rotated(angles[i])
+		var origine_projectile := origine + direction.orthogonal() * decalages[i]
+		if hostile:
+			origine_projectile = _origine_projectile_hostile(origine_projectile, direction_projectile)
+		p.direction = direction_projectile
+		p.global_position = origine_projectile
 		p.fragments_demandes.connect(_sur_fragments)
 		p.impact_visuel.connect(_sur_impact)
 		p.soin_demande.connect(_sur_soin_demande)

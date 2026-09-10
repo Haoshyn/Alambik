@@ -87,12 +87,26 @@ func test_difficulte_croissante(v: Verif) -> void:
 		var fin := _ennemis(Chapitres.salles(chapitre) - 1, chapitre)
 		v.vrai(fin > debut, "le chapitre %d envoie plus d'ennemis a la fin qu'au debut" % chapitre)
 
-func test_le_mid_et_la_fin_ne_repopent_pas_sans_fin(v: Verif) -> void:
+func test_la_densite_augmente_sans_saturer_une_vague(v: Verif) -> void:
 	for chapitre in Chapitres.nombre():
-		for numero in [12, 15, 18, 19]:
+		for numero in [1, 12, 18, 19]:
 			var vagues := Vagues.pour_salle(numero, chapitre, 9)
-			v.vrai(vagues.size() <= 2, "la page %d reste limitee a deux vagues" % numero)
-			v.vrai(_ennemis(numero, chapitre) <= 11, "la page %d garde une densite mobile lisible" % numero)
+			v.vrai(vagues.size() >= 3 and vagues.size() <= 4,
+				"la page %d utilise trois ou quatre vagues denses" % numero)
+			for vague in vagues:
+				v.vrai(vague.size() <= 4,
+					"la page %d garde au plus quatre ennemis simultanes par vague" % numero)
+	v.vrai(_ennemis(19, 0) >= 12, "la fin du chapitre porte une vraie densite")
+	v.vrai(_ennemis(19, 0) <= 14, "la densite totale reste bornee et lisible")
+
+func test_un_chapitre_contient_environ_cent_cinquante_ennemis_communs(v: Verif) -> void:
+	var total := 0
+	for numero in range(1, Reglages.SALLES_PAR_RUN + 1):
+		if numero in [5, 10, 15, 20]:
+			continue
+		total += _ennemis(numero, 0)
+	v.vrai(total >= 150 and total <= 165,
+		"la densite ecrite soutient des chapitres plus longs sans gonfler les PV")
 
 func test_les_creatures_grossissent(v: Verif) -> void:
 	for chapitre in Chapitres.nombre():

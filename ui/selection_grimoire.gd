@@ -1,14 +1,7 @@
 extends Control
-
 signal ferme
 signal selection_changee
-
-const FOND := preload("res://assets/visual/campagne_premium.png")
-const HAUT_FIXE := 1580.0
-const BAS_FIXE := 340.0
 const TRANSITION := preload("res://ui/transition_grimoire.tscn")
-const RECTS_CHAPITRES := [Rect2(45, 1082, 310, 150), Rect2(385, 1082, 310, 150), Rect2(725, 1082, 310, 150)]
-
 var selection_seulement := false
 var _monde := 0
 var _chapitre_monde := 0
@@ -16,60 +9,52 @@ var _message := ""
 var _lancement := false
 var _zones_chapitres: Array[Button] = []
 var _bouton_selectionner: Button
-var _balayage := BalayagePages.new()
+var _titre: Label
+var _details: Label
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
-	mouse_filter = Control.MOUSE_FILTER_STOP
-	_monde = clampi(ReglagesJoueur.chapitre_choisi / 3, 0, Chapitres.MONDES.size() - 1)
-	_chapitre_monde = posmod(ReglagesJoueur.chapitre_choisi, 3)
-	_construire_zones()
-	resized.connect(_replacer_zones)
-	_replacer_zones()
+	_monde = clampi(ReglagesJoueur.chapitre_choisi / 3,0,Chapitres.MONDES.size()-1)
+	_chapitre_monde = posmod(ReglagesJoueur.chapitre_choisi,3)
+	var col := StyleAzur.page(self,"Campagne & modes")
+	var contenu := StyleAzur.defilement(col)
+	contenu.add_child(StyleAzur.image(10,220))
+	var navigation := HBoxContainer.new()
+	contenu.add_child(navigation)
+	navigation.add_child(StyleAzur.bouton("‹ Monde",func(): _changer_monde(-1)))
+	navigation.add_child(StyleAzur.bouton("Monde ›",func(): _changer_monde(1)))
+	_titre = StyleAzur.texte("",38)
+	contenu.add_child(_titre)
+	for i in 3:
+		var b := StyleAzur.bouton("",func(): _choisir_chapitre(i))
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		b.custom_minimum_size.y = 145
+		contenu.add_child(b)
+		_zones_chapitres.append(b)
+	_details = StyleAzur.texte("",28,StyleAzur.ATTENUE)
+	contenu.add_child(_details)
+	_bouton_selectionner = StyleAzur.bouton("Choisir cette campagne",_selectionner,true)
+	contenu.add_child(_bouton_selectionner)
+	contenu.add_child(StyleAzur.texte("Autres aventures",35))
+	contenu.add_child(StyleAzur.bouton("La Mine",func(): _choisir_mode("mine")))
+	contenu.add_child(StyleAzur.bouton("Épreuves de magie",func(): _choisir_mode("epreuve_sorts")))
 	_rafraichir()
-	StyleInterface.animer_entree(self, 16.0)
 	Capture.programmer(self)
 
-func _construire_zones() -> void:
-	_zone(Rect2(922, 30, 120, 125), _fermer)
-	_zone(Rect2(165, 225, 115, 130), func() -> void: _changer_monde(-1))
-	_zone(Rect2(800, 225, 115, 130), func() -> void: _changer_monde(1))
-	for index in 3:
-		_zones_chapitres.append(_zone(RECTS_CHAPITRES[index], func() -> void: _choisir_chapitre(index)))
-	_bouton_selectionner = _zone(Rect2(145, 1600, 790, 175), _selectionner)
-	_zone(Rect2(315, 1795, 450, 105), _fermer)
+func _choisir_mode(mode: String) -> void:
+	if _lancement: return
+	ReglagesJoueur.choisir_mode_run(mode)
+	selection_changee.emit()
+	_fermer()
 
-func _zone(reference: Rect2, action: Callable) -> Button:
-	var bouton := StyleInterface.zone_tactile()
-	bouton.set_meta("reference", reference)
-	# Un balayage relache son doigt sur une case : sans ce garde-fou il
-	# choisirait aussi le chapitre ou le geste s'arrete.
-	bouton.pressed.connect(func() -> void:
-		if not _balayage.a_balaye():
-			action.call())
-	add_child(bouton)
-	return bouton
-
-func _input(evenement: InputEvent) -> void:
-	if not is_visible_in_tree() or _lancement:
-		return
-	if evenement is InputEventScreenTouch:
-		if evenement.pressed:
-			_balayage.appuyer(evenement.position)
-		else:
-			_balayage.relacher()
-	elif evenement is InputEventScreenDrag:
-		var sens := _balayage.deplacer(evenement.position, size.x)
-		if sens != 0:
-			_changer_monde(sens)
-
-func _replacer_zones() -> void:
-	for enfant in get_children():
-		if enfant is Button and enfant.has_meta("reference"):
-			var r: Rect2 = enfant.get_meta("reference")
-			var adapte := FondAdaptatif.rect(size, FOND, r, HAUT_FIXE, BAS_FIXE)
-			enfant.position = adapte.position
-			enfant.size = adapte.size
+func _rafraichir() -> void:
+	_titre.text = str(Chapitres.MONDES[_monde]["nom"])
+	for i in 3:
+		var index := _monde*3+i
+		var d := Chapitres.par_index(index)
+		_zones_chapitres[i].text = "%s   ·   %s" % [d["nom"],"Accessible" if ReglagesJoueur.chapitre_debloque(index) else "Verrouillé"]
+		_zones_chapitres[i].add_theme_stylebox_override("normal",StyleAzur.cadre(StyleAzur.PANNEAU,StyleAzur.MAGIE if i == _chapitre_monde else StyleAzur.CUIVRE))
+	_bouton_selectionner.disabled = not ReglagesJoueur.chapitre_debloque(_index_selectionne())
+	_details.text = "Meilleur étage : %d / %d\n%s" % [ReglagesJoueur.meilleure_du_chapitre(_index_selectionne()),Chapitres.par_index(_index_selectionne())["salles"],_message]
 
 func _index_selectionne() -> int:
 	return _monde * 3 + _chapitre_monde
@@ -123,65 +108,3 @@ func _fermer() -> void:
 		return
 	Sons.jouer("choix", -14.0)
 	StyleInterface.sortir_puis(self, func() -> void: ferme.emit())
-
-func _rafraichir() -> void:
-	var index := _index_selectionne()
-	_bouton_selectionner.disabled = not ReglagesJoueur.chapitre_debloque(index)
-	queue_redraw()
-
-func _draw() -> void:
-	FondAdaptatif.dessiner_premium(self, FOND, size, HAUT_FIXE, BAS_FIXE)
-	var sx := size.x / 1080.0
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE * sx)
-	var police := Polices.CORPS
-	var monde: Dictionary = Chapitres.MONDES[_monde]
-	var chapitre := Chapitres.par_index(_index_selectionne())
-	_draw_centre(police, Vector2(290, 306), 500, "MONDE %s — %s" % [monde["numero"], str(monde["nom"]).to_upper()], 29, Palette.TEXTE)
-	if _monde == 0:
-		draw_rect(Rect2(165, 225, 115, 130).grow(-12.0), Color(0, 0, 0, 0.42))
-	if _monde == Chapitres.MONDES.size() - 1:
-		draw_rect(Rect2(800, 225, 115, 130).grow(-12.0), Color(0, 0, 0, 0.42))
-	for local in 3:
-		var index_global := _monde * 3 + local
-		var r: Rect2 = RECTS_CHAPITRES[local]
-		var ouvert := ReglagesJoueur.chapitre_debloque(index_global)
-		if local == _chapitre_monde:
-			draw_rect(r.grow(-9.0), Color(monde["teinte"], 0.16))
-		if not ouvert:
-			draw_rect(r.grow(-9.0), Color(0, 0, 0, 0.50))
-			_draw_centre(police, Vector2(r.position.x, r.position.y + 126), r.size.x, "VERROUILLÉ", 18, Palette.TEXTE_ATTENUE)
-		else:
-			var progression := ReglagesJoueur.meilleure_du_chapitre(index_global)
-			_draw_centre(police, Vector2(r.position.x, r.position.y + 126), r.size.x, "%d / %d SALLES" % [progression, Reglages.SALLES_PAR_RUN], 18, Palette.TEXTE_ATTENUE)
-	_dessiner_details(police, chapitre, monde)
-	if _bouton_selectionner.disabled:
-		var bloque := FondAdaptatif.rect(size, FOND, Rect2(145, 1600, 790, 175),
-			HAUT_FIXE, BAS_FIXE)
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-		draw_rect(bloque.grow(-13.0 * sx), Color(0, 0, 0, 0.55))
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE * sx)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-
-func _dessiner_details(police: Font, chapitre: Dictionary, monde: Dictionary) -> void:
-	var index := _index_selectionne()
-	var ouvert := ReglagesJoueur.chapitre_debloque(index)
-	_draw_centre(police, Vector2(72, 1310), 410, "CHAPITRE %d" % (_chapitre_monde + 1), 28, Color(monde["teinte"]))
-	draw_multiline_string(police, Vector2(82, 1365), str(chapitre["sous_titre"]), HORIZONTAL_ALIGNMENT_CENTER, 390, 22, 3, Palette.TEXTE)
-	var boss: Dictionary = CatalogueEnnemis.par_id(str(chapitre["boss"]))
-	_draw_centre(police, Vector2(72, 1495), 410, "GARDIEN : %s" % str(boss.get("nom", "Inconnu")).to_upper(), 19, Palette.TEXTE_ATTENUE)
-	var valeurs := [
-		[1, "%d / %d" % [ReglagesJoueur.meilleure_du_chapitre(index), Reglages.SALLES_PAR_RUN], "PROGRESSION"],
-		[5, "3", "ALAMBICS"],
-		[6, "4", "GARDIENS"],
-	]
-	for i in 3:
-		var centre := Vector2(615 + i * 130, 1380)
-		Retro16.dessiner_icone_interface(self, valeurs[i][0], Rect2(centre - Vector2(42, 42), Vector2(84, 84)), Color.WHITE if ouvert else Color(0.4, 0.4, 0.45))
-		_draw_centre(police, Vector2(centre.x - 58, 1460), 116, str(valeurs[i][1]) if ouvert else "—", 21, Palette.TEXTE)
-		_draw_centre(police, Vector2(centre.x - 60, 1495), 120, str(valeurs[i][2]), 15, Palette.TEXTE_ATTENUE)
-	if not _message.is_empty():
-		_draw_centre(police, Vector2(100, 1570), 880, _message, 20, Palette.DANGER.lightened(0.25))
-
-func _draw_centre(police: Font, position: Vector2, largeur: float, texte: String,
-		taille_police: int, couleur: Color) -> void:
-	draw_string(police, position, texte, HORIZONTAL_ALIGNMENT_CENTER, largeur, taille_police, couleur)

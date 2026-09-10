@@ -21,8 +21,8 @@ const HEROS_ROBE = Color(0.965, 0.900, 0.740)
 const HEROS_OMBRE = Color(0.48, 0.34, 0.67)
 const HEROS_ACCENT = Color(1.00, 0.78, 0.28)
 
-const TIR_NOYAU = Color(1.00, 0.93, 0.72)
-const TIR_HALO = Color(1.00, 0.72, 0.28)
+const TIR_NOYAU = Color(0.96, 0.89, 1.00)
+const TIR_HALO = Color(0.70, 0.36, 1.00)
 const TIR_ENNEMI_NOYAU = Color(1.00, 0.86, 0.90)
 const TIR_ENNEMI_HALO = Color(0.95, 0.32, 0.46)
 

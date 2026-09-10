@@ -1,0 +1,10 @@
+[
+  {
+    "nom": "portail",
+    "glb": "assets/3d/environment/portail.glb",
+    "triangles": 5652,
+    "surfaces": 3,
+    "octets": 153508,
+    "animations": []
+  }
+]

@@ -9,3 +9,6 @@ tmp/
 # Une seule APK courante est suivie, directement a la racine du depot.
 !/alambic.apk
 *.idsig
+
+# Cache Python des generateurs Blender.
+__pycache__/

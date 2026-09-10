@@ -8,15 +8,19 @@ extends RefCounted
 # qu'autoload. Un autoload n'existe que dans une SceneTree ; les suites de
 # tests headless doivent pouvoir lire l'equilibrage sans en monter une.
 
-# Le niveau de compte porte les statistiques de base du heros. Tout le reste —
-# Maitrises, equipement, Passifs — multiplie ce socle. Le niveau ne donnait
-# auparavant aucune statistique : monter de niveau ne changeait rien au combat.
-const NIVEAU_DEGATS_PAR_NIVEAU := 0.025
-const NIVEAU_PV_PAR_NIVEAU := 0.035
-const NIVEAU_CADENCE_PAR_NIVEAU := 0.005
-# Niveau de compte servant de reference aux mesures d'equilibrage : c'est
-# l'ordre de grandeur atteint par un compte qui a termine la campagne.
+# Le niveau de compte mesure l'avancement et ouvre les paliers annexes ; il ne
+# doit pas devenir une quatrieme source de statistiques qui se compose avec
+# Maitrises + equipement + Passifs. La puissance permanente vient de ces trois
+# systemes explicites, comme le fixe le design.
+const NIVEAU_DEGATS_PAR_NIVEAU := 0.0
+const NIVEAU_PV_PAR_NIVEAU := 0.0
+const NIVEAU_CADENCE_PAR_NIVEAU := 0.0
+# Niveau de compte vise aux alentours de la fin de campagne. La courbe d'XP est
+# calibree sur ~30 victoires et plusieurs dizaines de tentatives partielles.
 const NIVEAU_REFERENCE_FIN := 30
+const XP_COMPTE_BASE := 40.0
+const XP_COMPTE_PENTE := 3.0
+const XP_COMPTE_QUADRATIQUE := 0.05
 
 const HEROS_PV := 100.0
 const HEROS_VITESSE := 560.0
@@ -26,6 +30,13 @@ const HEROS_CADENCE := 2.4          # tirs par seconde
 const HEROS_INVULNERABILITE := 0.6  # secondes apres un coup recu
 const HEROS_RAYON := 24.0
 const ENNEMI_VITESSE_MULT := 1.10
+# La densite ne suffit pas si chaque creature laisse trop de temps au joueur.
+# Ces trois multiplicateurs renforcent la menace sans gonfler leurs PV : coups
+# un peu plus lourds, projectiles plus difficiles a distancer et attaques plus
+# frequentes. Les telegraphes restent inchanges, donc le danger reste lisible.
+const ENNEMI_DEGATS_MULT := 1.04
+const ENNEMI_PROJECTILE_VITESSE_MULT := 1.06
+const ENNEMI_RECHARGE_MULT := 0.97
 const ENNEMI_HITBOX_MULT := 0.72
 const BOSS_HITBOX_MULT := 0.74
 
@@ -42,14 +53,18 @@ const BRAISE_DEGATS_PAR_SECONDE := 6.0
 const BRAISE_DUREE := 4.0
 const GIVRE_RALENTISSEMENT := 0.45  # facteur de vitesse applique
 const GIVRE_DUREE := 2.0
-const ACIDE_VULNERABILITE := 1.35   # multiplicateur de degats subis
+const ACIDE_VULNERABILITE := 1.25   # multiplicateur de degats subis
 const ACIDE_DUREE := 4.0
-const TERRE_DEGATS_MULT := 1.70
-const TERRE_VITESSE_MULT := 0.68
+const TERRE_DEGATS_MULT := 1.45
+const TERRE_VITESSE_MULT := 0.75
 const TERRE_RETARD_ATTAQUE := 2.0
-const LUMIERE_VOL_DE_VIE := 0.035
-const TENEBRES_CHANCE_SURCHARGE := 0.22
-const TENEBRES_SURCHARGE_MULT := 3.2
+# Lumiere reste un sustain visible mais ne transforme plus les builds a impacts
+# multiples en source de soin quasi permanente.
+const LUMIERE_VOL_DE_VIE := 0.025
+# Tenebres garde ses gros chiffres ponctuels, avec un rendement moyen bien plus
+# proche des autres Elements : 18 % de chance a x2,6 vaut ~+29 % en moyenne.
+const TENEBRES_CHANCE_SURCHARGE := 0.18
+const TENEBRES_SURCHARGE_MULT := 2.6
 const REGENERATION_PART := 0.06
 const AVIDITE_XP_MULT := 1.20
 const AVIDITE_GOUTTES_MULT := 1.20
@@ -82,7 +97,11 @@ const ORBE_INTERVALLE := 2.0
 const ORBE_MAX := 3
 const ORBE_PART_DEGATS := 0.55
 const PHENOMENE_AIR_INTERVALLE_MULT := 0.75
+# Feu conserve son identite de brulure cumulative, mais quatre couches suffisent :
+# a cadence de base, le plafond represente ~30 % de DPS soutenu supplementaire.
+# Sans plafond, le DPS augmentait lineairement pendant toute la vie d'un boss.
 const FEU_DOT_PART_PAR_SECONDE := 0.18
+const FEU_DOT_CUMUL_MAX := 4
 const PHENIX_RESURRECTIONS := 3
 const PHENIX_PV_PART := 0.38
 const EAU_RESURRECTIONS := 1
@@ -96,7 +115,7 @@ const LUMIERE_RESURRECTIONS := 1
 const LUMIERE_RESURRECTION_PV_PART := 0.55
 const LUMIERE_AUREOLE_DUREE := 8.0
 const LUMIERE_AUREOLE_DEGATS_MULT := 1.65
-const TENEBRES_HEROS_DEGATS_MULT := 1.55
+const TENEBRES_HEROS_DEGATS_MULT := 1.35
 # Un eclat qui frappe presque aussi fort que le tir d'origine transforme
 # Eclat de verre en multiplicateur : c'etait la moitie des mains cassees.
 const FRAGMENT_PART_DEGATS := 0.28
@@ -104,8 +123,12 @@ const FRAGMENT_PORTEE := 260.0
 # Un trait qui traverse quatre ennemis en frappant chacun a pleine puissance
 # est un multiplicateur deguise : il perd de la force a chaque cible, et a
 # chaque rebond. C'est ce qui separe une bonne main d'une main cassee.
-const PERFORATION_PERTE := 0.35
-const REBOND_PERTE := 0.25
+# Perforation et Ricochet sont des choix de trajectoire : ils doivent rester
+# interessants dans les vagues denses au lieu de perdre un tiers de leur force
+# des la premiere cible secondaire.
+const PERFORATION_PERTE := 0.20
+const REBOND_PERTE := 0.22
+const HOMING_ROTATION_PAR_SECONDE := 8.0
 
 # Ameliorations ajoutees au pool. Leurs valeurs pures vivent dans le catalogue ;
 # seules celles que la logique doit lire sont ici.
@@ -139,11 +162,12 @@ const AUDACE_BONUS := 0.45
 const DERNIER_REMPART_SEUIL_PV := 0.40
 const DERNIER_REMPART_REDUCTION := 0.45
 
-# Equipement. Un objet ne vaut plus seulement ses niveaux de Forge : il porte un
-# profil propre a son emplacement, multiplie par le Monde dont il provient. Sans
-# cette croissance, un anneau du Monde I valait un anneau du Monde X et rien ne
-# poussait a chercher les objets tardifs.
-const OBJET_CROISSANCE_PAR_MONDE := 1.30
+# Equipement. Le palier du compte fait monter tous les objets possedes ensemble :
+# une trouvaille ancienne reste donc viable au Monde X au lieu d'etre remplacee
+# automatiquement par la meme silhouette avec dix fois plus de statistiques.
+# +9 % par Monde laisse une progression sensible sans faire du stuff une source
+# de puissance exponentielle a lui seul.
+const OBJET_CROISSANCE_PAR_MONDE := 1.09
 
 # Sceaux. L'aura ne fait aucun degat : elle marque, ce qui la rend lisible face
 # aux Phenomenes qui, eux, frappent.
@@ -179,6 +203,21 @@ const ARENE_HAUT := 244.0
 const ARENE_BAS := 220.0
 const ARENE_MUR_EPAISSEUR := 72.0
 const ARENE_HAUTEUR_MAX := 1540.0
+const ARENE_TAILLE := Vector2(1260.0,1900.0)
+const ARENE_CAMERA_ZOOM := 1.05
+const ARENE_PASSAGE_MIN := 240.0
+const ARENE_OBSTACLE_TAILLE := Vector2(156.0,94.0)
+const ARENE_COMPOSITIONS := [
+	[Vector2(0.40,0.28),Vector2(0.60,0.50),Vector2(0.40,0.72)],
+	[Vector2(0.59,0.29),Vector2(0.39,0.50),Vector2(0.60,0.73)],
+	[Vector2(0.41,0.29),Vector2(0.61,0.51),Vector2(0.39,0.73)],
+]
+# Retraits du sol raccordes aux collisions, hors de l'entree et du portail.
+const ARENE_RETRAITS := [
+	[Rect2(0.0,0.13,0.12,0.22),Rect2(0.90,0.49,0.10,0.25)],
+	[Rect2(0.0,0.45,0.10,0.26),Rect2(0.87,0.15,0.13,0.20)],
+	[Rect2(0.0,0.20,0.11,0.25),Rect2(0.89,0.55,0.11,0.16)],
+]
 const ECHELLE_VISUELLE_COMBAT := 1.08
 
 # La longueur d'un chapitre et la place de ses alambics vivent dans
@@ -186,30 +225,23 @@ const ECHELLE_VISUELLE_COMBAT := 1.08
 # chapitre n'est charge.
 const SALLES_PAR_RUN := 20
 
-# Difficulte de campagne. Elle ne vit plus dans une table de dix Mondes mais
-# dans une progression continue par palier, un palier valant un chapitre. Un
-# Monde qui s'ouvrait sur une marche de +50 % franchie en une salle devient une
-# montee lissee sur ses trois chapitres, et la formule reste definie au-dela du
-# trentieme palier : ajouter des Mondes ne demande plus de recalculer la table.
-const COURBE_PV_PAR_PALIER := 1.132      # x1.45 par Monde une fois ses trois chapitres franchis
-# Les degats montent bien moins vite que les PV : un ennemi de fin de campagne
-# doit rester encaissable deux ou trois fois, sinon toute la defense se resume a
-# ne jamais etre touche.
-const COURBE_DEGATS_PAR_PALIER := 1.060  # x1.19 par Monde
-# Les premiers paliers sont adoucis puis rejoignent la courbe. Un compte neuf
-# n'a ni Maitrise ni objet : mesure faite, il mourait salle 3 du premier
-# chapitre, donc sans jamais atteindre le premier coffre de la salle 5. Une
-# campagne qui ne finance pas sa propre progression n'a pas de premiere heure.
-const COURBE_DOUCEUR_DEBUT := 0.62
-const COURBE_PALIERS_DOUCEUR := 6   # deux Mondes pour rejoindre la courbe pleine
+# La campagne n'est pas le contenu d'optimisation ultime. Avec les vagues denses,
+# +3,5 % PV par chapitre suffit : le chapitre 30 commence vers x2,7 et demande
+# surtout un bon build et de bonnes esquives, pas toutes les Maitrises du jeu.
+const COURBE_PV_PAR_PALIER := 1.035
+# La densite multiplie aussi les occasions d'etre touche. Les degats individuels
+# montent donc plus doucement afin qu'un joueur habile puisse compenser le farm.
+const COURBE_DEGATS_PAR_PALIER := 1.018
+# Le debut est volontairement genereux puis rejoint la courbe sur trois Mondes :
+# apprendre a gerer trois ou quatre vagues ne doit pas exiger de farmer Monde I.
+const COURBE_DOUCEUR_DEBUT := 0.42
+const COURBE_PALIERS_DOUCEUR := 9
 
-# Montee en puissance sur la longueur d'un chapitre. Vingt salles a difficulte
-# plate seraient vingt fois la meme salle.
-# Facteurs atteints a la derniere salle d'un chapitre : les PV sont multiplies
-# par 1 + MONTEE_PV, les degats par 1 + MONTEE_DEGATS, suivant une courbe
-# geometrique. Cales sur la puissance mesuree du heros au meme endroit.
-const MONTEE_PV := 2.6
-const MONTEE_DEGATS := 0.75
+# Le crescendo interne est lui aussi modere : les salles tardives ont deja plus
+# de vagues. Les statistiques servent a maintenir la tension, pas a doubler une
+# seconde fois la difficulte apportee par la densite.
+const MONTEE_PV := 0.75          # x1,75 entre la premiere et la derniere salle
+const MONTEE_DEGATS := 0.30      # x1,30 sur les degats
 const DEFI_MONTEE_PV := 3.0       # x4 entre la premiere et la derniere rencontre
 const DEFI_MONTEE_DEGATS := 1.0   # x2 sur les degats, en plus de la densite
 const DEFI_PV_BASE := 1.25
@@ -220,24 +252,27 @@ const DEFI_DEGATS_BASE := 1.15
 const COPIES_MAX := 3
 const SOIN_ALAMBIC := 0.20   # respiration garantie avant chaque boss
 
-# Seuils provisoires d'XP de run. Ils visent la courbe 2/4/5/6 avant les salles
-# 5/10/15/20 et doivent etre recalibres avec les rencontres definitives.
-const XP_RUN_SEUILS := [9, 25, 50, 78, 130, 195]
+# Avec ~154 ennemis communs par chapitre, l'ancien bareme donnait les six choix
+# beaucoup trop tot. Ces seuils replacent approximativement les choix 2/4/5/6
+# avant les salles 5/10/15/20, meme avec les nouvelles vagues plus denses.
+const XP_RUN_SEUILS := [14, 38, 82, 130, 225, 350]
 
 # Economie longue : le premier rang des trente Maitrises accompagne les trente
-# chapitres, les rangs suivants sont la matiere du farm. Les couts sont partages
-# par les trois branches pour rester lisibles.
+# chapitres, les rangs suivants sont la matiere du farm. Une campagne propre
+# rapporte environ 34 k Gouttes via ses grands coffres ; les echecs productifs
+# amenent naturellement le budget vers le cout (~42 k) des trente premiers rangs.
 const MAITRISE_COUTS := [60, 100, 170, 280, 460, 760, 1250, 2050, 3400, 5600]
 const MAITRISE_RANG_MAX := 5
-# Un rang supplementaire coute nettement plus que le precedent : sans cela, la
-# fin de campagne achete l'arbre entier en deux descentes.
-const MAITRISE_COUT_PAR_RANG := 1.85
-const GOUTTES_MULT_PAR_CHAPITRE := 1.11
+# Les rangs 2-5 restent du farm, mais x1,85 produisait plus d'un million de
+# Gouttes pour l'arbre complet. x1,55 conserve plusieurs dizaines d'heures de
+# marge sans transformer le dernier rang en mur artificiel.
+const MAITRISE_COUT_PAR_RANG := 1.55
+const GOUTTES_MULT_PAR_CHAPITRE := 1.08
 
-# Capacites d'Epreuve : obtenir reste le gros deblocage, les neuf exemplaires
-# suivants doublent la capacite sans jamais la rendre auto-suffisante.
+# Capacites d'Epreuve : le premier exemplaire debloque la regle de jeu ; neuf
+# doublons apportent ensuite +54 % au maximum, pas un second exemplaire complet.
 const CAPACITE_RANG_MAX := 10
-const CAPACITE_BONUS_PAR_RANG := 0.12
+const CAPACITE_BONUS_PAR_RANG := 0.06
 
 # La Forge appartient a l'objet. Son cout croit geometriquement pour que les
 # derniers niveaux restent un objectif de farm et non une formalite.
@@ -278,14 +313,28 @@ const MINE_BOSS_DEGATS_MULT := 0.80
 const MINE_SOIN_NIVEAU := 0.30
 const MINE_CAMERA_ZOOM := 0.74
 
-const DELAI_VAGUE_FORCE := 5.0
+# Plus de vagues ne doit pas provoquer une avalanche instantanee chez un joueur
+# un peu en retard. Un joueur puissant declenche toujours la suivante des que la
+# vague est nettoyee ; ce delai ne ralentit donc jamais artificiellement un clear.
+const DELAI_VAGUE_FORCE := 7.0
 # Un invocateur qui produit plus vite qu'on ne tue rend la salle infinie : la
 # sonde a bloque deux fois dessus. Le plafond est une regle de jeu, pas un
 # pansement — il borne aussi ce que l'ecran doit rester capable d'afficher.
 const PLAFOND_ENNEMIS := 10
 
 # Le rythme des adversaires majeurs est regle ici pour que leurs telegraphes
-# puissent etre ajustes ensemble sans fouiller le moteur de motifs.
+# puissent etre ajustes ensemble sans fouiller le moteur de motifs. L'objectif
+# "environ cinq fois plus fort" est un budget de rencontre, pas cinq fois chaque
+# statistique : x3 endurance, +10 % degats, ~11 % de salves en plus et +20 %
+# vitesse de projectile. La menace vient donc surtout d'un pattern qu'il faut
+# esquiver plus longtemps, sans transformer chaque impact en quasi one-shot.
+# Les miniboss restent nettement plus courts pour ne pas casser le rythme.
+const MINIBOSS_PV_MULT := 1.25
+const BOSS_SIGNATURE_PV_MULT := 3.0
+const MINIBOSS_DEGATS_MULT := 1.00
+const BOSS_SIGNATURE_DEGATS_MULT := 1.10
+const BOSS_PROJECTILE_VITESSE_MULT := 1.20
+const BOSS_CADENCE_MOTIF_MULT := 0.90
 const BOSS_APPARITION_DUREE := 0.85
 const BOSS_TELEGRAPHE_SIGNATURE := 0.42
 const BOSS_CADENCES_SIGNATURE := {
@@ -300,7 +349,7 @@ const BOSS_DUREES_MOTIFS := {
 	"pluie": 3.0, "poursuite": 2.8, "griffure": 2.9, "echo_errata": 3.0,
 	"quadrillage": 3.1, "machoire": 3.0, "calligraphie": 3.1, "indexation": 2.9,
 	"onde_marge": 3.0, "rosace": 3.1, "estampille": 3.0, "copie_double": 3.0,
-	"pause_phase_1": 1.8, "pause_phase_2": 1.4,
+	"pause_phase_1": 1.15, "pause_phase_2": 0.90,
 }
 
 const PORTAIL_RAYON := 82.0

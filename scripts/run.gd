@@ -73,10 +73,13 @@ func _ready() -> void:
 	# toutes au rang maximal.
 	if "--vierge" in arguments:
 		_remettre_progression_a_zero()
-	# --maxe simule au contraire un compte entierement farme : c'est la seule
-	# facon de verifier ce que la progression permanente rend franchissable.
+	# --maxe simule un compte entierement farme. --intermediaire represente un
+	# joueur arrive au dernier Monde avec une progression correcte mais loin du
+	# maximum : c'est le profil critique pour verifier que la campagne reste finie.
 	if "--maxe" in arguments:
 		_doter_progression_maximale()
+	elif "--intermediaire" in arguments:
+		_doter_progression_intermediaire()
 	var mode_argument := _texte_argument(arguments, "--mode=")
 	Jeu.demarrer_run(_valeur_argument(arguments, "--graine="), maxi(1, _valeur_argument(arguments, "--salle=")),
 		maxi(0, _valeur_argument(arguments, "--chapitre=") - 1) if _valeur_argument(arguments, "--chapitre=") > 0 else ReglagesJoueur.chapitre_choisi,
@@ -104,7 +107,7 @@ func _ready() -> void:
 
 	_camera = Camera2D.new()
 	_camera.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
-	_camera.enabled = Jeu.mode_run == "mine"
+	_camera.enabled = true
 	add_child(_camera)
 	_calculer_limites()
 	get_tree().get_root().size_changed.connect(_calculer_limites)
@@ -143,9 +146,10 @@ func _ready() -> void:
 	_couche.add_child(_joystick)
 	_joystick.intention_changee.connect(_sur_intention)
 	_joystick.tape_rapide.connect(_sur_tape_rapide)
-	var cadre_retro := Control.new()
-	cadre_retro.set_script(load("res://scripts/cadre_retro.gd"))
-	_couche.add_child(cadre_retro)
+	if "--visuel-2d" in OS.get_cmdline_user_args():
+		var cadre_retro := Control.new()
+		cadre_retro.set_script(load("res://scripts/cadre_retro.gd"))
+		_couche.add_child(cadre_retro)
 	_construire_voile_salle()
 
 	if Jeu.mode_auto:
@@ -194,6 +198,38 @@ func _remettre_progression_a_zero() -> void:
 	ReglagesJoueur.forge_niveaux.clear()
 	ReglagesJoueur.equipements = {"anneau_gauche": "", "anneau_droit": "", "collier": ""}
 
+func _doter_progression_intermediaire() -> void:
+	# Profil de premiere fin de campagne : deux branches de Maitrises au rang 2,
+	# un ancien set rattrape, Forge 30 et trois capacites rang 5. Cela represente
+	# une progression solide apres ~15 h, mais reste tres loin des rangs 5, Forge
+	# 60, arsenal rang 10 et second Passif d'un compte complet.
+	ReglagesJoueur.sauvegarde_active = false
+	ReglagesJoueur.mode_dev = false
+	ReglagesJoueur.niveau_compte = 22
+	ReglagesJoueur.rangs_competences.clear()
+	for branche in ["Offensif", "Défensif"]:
+		for id in ArbreCompetences.BRANCHES[branche]:
+			ReglagesJoueur.rangs_competences[str(id)] = 2
+	ReglagesJoueur.rangs_sorts.clear()
+	for id in ["onde_alchimique", "seconde_chance", "grand_oeuvre"]:
+		ReglagesJoueur.rangs_sorts[id] = 5
+	ReglagesJoueur.sort_actif_equipe = "onde_alchimique"
+	ReglagesJoueur.ultime_equipe = "grand_oeuvre"
+	ReglagesJoueur.passifs_equipes = ["seconde_chance"]
+	# Simule l'acces au dernier chapitre pour que le rattrapage des anciens objets
+	# soit celui d'une vraie progression de campagne.
+	ReglagesJoueur.meilleures_par_chapitre.clear()
+	for chapitre in range(Chapitres.nombre() - 1):
+		ReglagesJoueur.meilleures_par_chapitre[str(chapitre)] = Reglages.SALLES_PAR_RUN
+	var anciens: Array = CatalogueObjets.IDS_PAR_MONDE[0]
+	ReglagesJoueur.objets.clear()
+	ReglagesJoueur.forge_niveaux.clear()
+	for id in anciens:
+		ReglagesJoueur.objets.append(str(id))
+		ReglagesJoueur.forge_niveaux[str(id)] = 30
+	ReglagesJoueur.equipements = {"anneau_gauche": str(anciens[0]),
+		"anneau_droit": str(anciens[1]), "collier": str(anciens[2])}
+
 func _doter_progression_maximale() -> void:
 	# Outil de sonde : la vraie sauvegarde du joueur ne doit jamais recevoir ca.
 	ReglagesJoueur.sauvegarde_active = false
@@ -206,12 +242,12 @@ func _doter_progression_maximale() -> void:
 	for catalogue in [Sorts.ACTIFS, Sorts.PASSIFS, Sorts.ULTIMES]:
 		for id in catalogue:
 			ReglagesJoueur.rangs_sorts[id] = Reglages.CAPACITE_RANG_MAX
-	ReglagesJoueur.sort_actif_equipe = str(Sorts.ACTIFS.keys()[0])
-	ReglagesJoueur.ultime_equipe = str(Sorts.ULTIMES.keys()[0])
-	ReglagesJoueur.passifs_equipes.clear()
-	for id in Sorts.PASSIFS:
-		if ReglagesJoueur.passifs_equipes.size() < ReglagesJoueur.nombre_slots_passifs():
-			ReglagesJoueur.passifs_equipes.append(str(id))
+	# Un compte maxe choisit un loadout coherent ; prendre les premieres cles du
+	# Dictionary rendait la sonde artificiellement fragile et mesurait l'ordre du
+	# catalogue plutot que le plafond reel de progression.
+	ReglagesJoueur.sort_actif_equipe = "explosion_corrosive"
+	ReglagesJoueur.ultime_equipe = "grand_oeuvre"
+	ReglagesJoueur.passifs_equipes = ["rempart_initial", "seconde_chance"]
 	var derniers: Array = CatalogueObjets.IDS_PAR_MONDE[CatalogueObjets.IDS_PAR_MONDE.size() - 1]
 	ReglagesJoueur.equipements = {"anneau_gauche": str(derniers[0]),
 		"anneau_droit": str(derniers[1]), "collier": str(derniers[2])}
@@ -242,6 +278,7 @@ func _physics_process(_delta: float) -> void:
 		Jeu.images_de_jeu += 1
 
 func _process(delta: float) -> void:
+	_suivre_heros()
 	_recharge_sort_actif = maxf(0.0, _recharge_sort_actif - delta)
 	if _hud != null:
 		_hud.rafraichir_sorts(_recharge_sort_actif, _charge_ultime)
@@ -300,16 +337,20 @@ func _calculer_limites() -> void:
 		if _heros != null:
 			_heros.limites = _limites
 		return
-	var haut := Reglages.ARENE_HAUT + Ecran.marge_haute()
-	var bas := Reglages.ARENE_BAS + Ecran.marge_basse()
-	var hauteur_disponible := maxf(600.0, taille.y - haut - bas)
-	var hauteur_arene := minf(hauteur_disponible, Reglages.ARENE_HAUTEUR_MAX)
-	var respiration_verticale := (hauteur_disponible - hauteur_arene) * 0.5
-	_limites = Rect2(
-		Vector2(Reglages.ARENE_MARGE_LATERALE, haut + respiration_verticale),
-		Vector2(taille.x - 2.0 * Reglages.ARENE_MARGE_LATERALE, hauteur_arene))
+	_limites = Rect2(Vector2(Reglages.ARENE_MARGE_LATERALE,Reglages.ARENE_HAUT),Reglages.ARENE_TAILLE)
+	if _camera != null:
+		_camera.zoom = Vector2.ONE*Reglages.ARENE_CAMERA_ZOOM
 	if _heros != null:
 		_heros.limites = _limites
+
+func _suivre_heros() -> void:
+	if Jeu.mode_run == "mine" or _camera == null or _heros == null: return
+	var vue := get_viewport().get_visible_rect().size / _camera.zoom
+	var visee := _heros.global_position-Vector2(0,vue.y*0.13)
+	var minimum := _limites.position+vue*0.5-Vector2(70,Reglages.ARENE_HAUT/_camera.zoom.y)
+	var maximum := _limites.end-vue*0.5+Vector2(70,Reglages.ARENE_BAS/_camera.zoom.y)
+	_camera.global_position = Vector2(clampf(visee.x,minimum.x,maximum.x),clampf(visee.y,minimum.y,maximum.y))
+	_camera.force_update_scroll()
 
 func _entrer_dans_la_salle() -> void:
 	for enfant in _salle.get_children():
@@ -326,6 +367,7 @@ func _entrer_dans_la_salle() -> void:
 		_heros.recalculer()
 		_sous_titre_voile.text = _texte_fusion_epreuve()
 	_heros.preparer_nouvelle_salle()
+	_suivre_heros()
 	if ReglagesJoueur.passifs_equipes_effectifs().has("reserve_ultime"):
 		_charge_ultime += maxi(1, roundi(float(Reglages.RESERVE_ULTIME_CHARGES) \
 			* float(ReglagesJoueur.passifs_equipes_effectifs()["reserve_ultime"])))

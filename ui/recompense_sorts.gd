@@ -1,6 +1,6 @@
 extends Control
 
-const FOND_PREMIUM := preload("res://assets/visual/recompense_sort_premium.png")
+
 
 signal termine
 
@@ -23,51 +23,19 @@ func _ready() -> void:
 		_quitter()
 
 func _construire() -> void:
-	var marge := MarginContainer.new()
-	marge.set_anchors_preset(Control.PRESET_FULL_RECT)
-	marge.add_theme_constant_override("margin_left", 104)
-	marge.add_theme_constant_override("margin_right", 104)
-	marge.add_theme_constant_override("margin_bottom", int(Ecran.marge_basse()) + 78)
-	add_child(marge)
-	var colonne := VBoxContainer.new()
-	colonne.alignment = BoxContainer.ALIGNMENT_END
-	marge.add_child(colonne)
-	var continuer := Button.new()
-	continuer.text = "CONTINUER LE DÉFI" if etage_recompense < Jeu.salles_du_chapitre() else "TERMINER LE DÉFI"
-	continuer.custom_minimum_size = Vector2(0, 174)
-	continuer.add_theme_font_size_override("font_size", 31)
-	continuer.flat = true
-	continuer.add_theme_color_override("font_color", Palette.TEXTE)
-	continuer.add_theme_color_override("font_hover_color", Color.WHITE)
-	continuer.pressed.connect(_quitter)
-	colonne.add_child(continuer)
+	var col := StyleAzur.page(self,"Récompense des Épreuves")
+	var contenu := StyleAzur.defilement(col)
+	contenu.add_child(StyleAzur.vignette(str(_recompense.get("id","collecte")),250))
+	if _recompense["type"] == "gouttes":
+		contenu.add_child(StyleAzur.texte("+%d gouttes" % int(_recompense["quantite"]),42))
+	else:
+		var id := str(_recompense["id"])
+		var donnees := Sorts.donnees(id)
+		contenu.add_child(StyleAzur.texte(str(donnees["nom"]),42))
+		contenu.add_child(StyleAzur.texte(str(donnees["description"]),31,StyleAzur.ATTENUE))
+		contenu.add_child(StyleAzur.texte("Rang %d / %d" % [ReglagesJoueur.rang_sort(id),Reglages.CAPACITE_RANG_MAX],30,StyleAzur.MAGIE))
+	contenu.add_child(StyleAzur.texte("La récompense a été ajoutée à votre collection.",28))
+	col.add_child(StyleAzur.bouton("Continuer" if etage_recompense < Jeu.salles_du_chapitre() else "Terminer les Épreuves",_quitter,true))
 
 func _quitter() -> void:
 	StyleInterface.sortir_puis(self, func() -> void: termine.emit())
-
-func _process(delta: float) -> void:
-	_anim += delta
-	queue_redraw()
-
-func _draw() -> void:
-	FondAdaptatif.dessiner_premium(self, FOND_PREMIUM, size, 1120.0, 800.0)
-	var police := Polices.CORPS
-	draw_string(police, Vector2(72.0, size.y * 0.105), "RÉCOMPENSE DU MINIBOSS", HORIZONTAL_ALIGNMENT_CENTER,
-		size.x - 144.0, 37, Palette.TEXTE)
-	draw_string(police, Vector2(72.0, size.y * 0.145), "VICTOIRE %d / 5" % etage_recompense,
-		HORIZONTAL_ALIGNMENT_CENTER, size.x - 144.0, 24, Palette.TEXTE_ATTENUE)
-	if _recompense["type"] == "gouttes":
-		draw_string(police, Vector2(82.0, size.y * 0.675), "+%d GOUTTES D'ESSENCE" % int(_recompense["quantite"]),
-			HORIZONTAL_ALIGNMENT_CENTER, size.x - 164.0, 42, Palette.ESSENCE)
-		draw_string(police, Vector2(92.0, size.y * 0.742), "La récompense a été ajoutée à votre réserve.",
-			HORIZONTAL_ALIGNMENT_CENTER, size.x - 184.0, 24, Palette.TEXTE_ATTENUE)
-	else:
-		var donnees := Sorts.donnees(str(_recompense["id"]))
-		draw_string(police, Vector2(82.0, size.y * 0.675), str(donnees["nom"]).to_upper(),
-			HORIZONTAL_ALIGNMENT_CENTER, size.x - 164.0, 42, Palette.OR)
-		draw_string(police, Vector2(92.0, size.y * 0.742), str(donnees["description"]),
-			HORIZONTAL_ALIGNMENT_CENTER, size.x - 184.0, 24, Palette.TEXTE_ATTENUE)
-		draw_string(police, Vector2(82.0, size.y * 0.806), "%s • RANG %d / %d • %d %%" % [
-			str(_recompense["type"]).to_upper(), ReglagesJoueur.rang_sort(str(_recompense["id"])),
-			Reglages.CAPACITE_RANG_MAX, roundi(ReglagesJoueur.efficacite_sort(str(_recompense["id"])) * 100.0)],
-			HORIZONTAL_ALIGNMENT_CENTER, size.x - 164.0, 25, Palette.ESSENCE)

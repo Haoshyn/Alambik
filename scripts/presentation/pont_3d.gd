@@ -2,7 +2,7 @@ class_name Pont3D
 extends RefCounted
 
 const ECHELLE := 0.01
-const INCLINAISON := 55.0
+const INCLINAISON := 48.0
 
 # L'anamorphose du plan annule le raccourcissement orthographique : un cercle
 # de collision reste un cercle a l'ecran et le joystick conserve ses directions.

@@ -47,7 +47,10 @@ var _cadence_motif := 0.0
 var _anim := 0.0
 var _flash := 0.0
 var _braise := 0.0
-var _brulure_dps := 0.0
+var _braise_dps := 0.0
+var _feu := 0.0
+var _feu_dps := 0.0
+var _feu_cumuls := 0
 var _givre := 0.0
 var _acide := 0.0
 var _terre_declenchee := false
@@ -86,14 +89,23 @@ func _physics_process(delta: float) -> void:
 	_gel = maxf(0.0, _gel - delta)
 	_givre = maxf(0.0, _givre - delta)
 	_acide = maxf(0.0, _acide - delta)
+	var dot_dps := 0.0
 	if _braise > 0.0:
-		_braise -= delta
-		pv -= _brulure_dps * delta
+		_braise = maxf(0.0, _braise - delta)
+		dot_dps += _braise_dps
+	else:
+		_braise_dps = 0.0
+	if _feu > 0.0:
+		_feu = maxf(0.0, _feu - delta)
+		dot_dps += _feu_dps
+	else:
+		_feu_dps = 0.0
+		_feu_cumuls = 0
+	if dot_dps > 0.0:
+		pv -= dot_dps * delta
 		if pv <= 0.0:
 			_mourir()
 			return
-	elif _brulure_dps > 0.0:
-		_brulure_dps = 0.0
 	queue_redraw()
 	if _cible == null or not is_instance_valid(_cible) or not _cible.visible:
 		_cible = get_tree().get_first_node_in_group("cibles_ennemis")
@@ -146,7 +158,10 @@ func _executer_motif(motif: String, delta: float) -> void:
 		_telegraphe_signature = maxf(0.0, _telegraphe_signature - delta)
 		_flotter(delta)
 		return
-	_cadence_motif -= delta
+	# Les boss doivent maintenir une pression nettement superieure aux monstres,
+	# sans raccourcir les telegraphes. On accelere donc uniquement le temps entre
+	# deux salves a l'interieur d'un motif.
+	_cadence_motif -= delta / Reglages.BOSS_CADENCE_MOTIF_MULT
 	match motif:
 		"barrage_horizontal":
 			_flotter(delta)
@@ -340,7 +355,7 @@ func _flotter(_delta: float) -> void:
 func _lancer(origine: Vector2, direction: Vector2, part_degats: float) -> void:
 	var t := Tir.new()
 	t.degats = donnees["degats"] * part_degats
-	t.vitesse = donnees.get("vitesse_projectile", 380.0)
+	t.vitesse = donnees.get("vitesse_projectile", 380.0) * Reglages.BOSS_PROJECTILE_VITESSE_MULT
 	t.portee = 2200.0
 	t.cadence = 1.0
 	tir_demande.emit(t, origine, direction)
@@ -356,10 +371,12 @@ func recevoir_degats(montant: float, effets: Array = []) -> void:
 		match effet:
 			"braise":
 				_braise = Reglages.BRAISE_DUREE
-				_brulure_dps += Reglages.BRAISE_DEGATS_PAR_SECONDE
+				_braise_dps = maxf(_braise_dps, Reglages.BRAISE_DEGATS_PAR_SECONDE)
 			"feu":
-				_braise = Reglages.BRAISE_DUREE
-				_brulure_dps += montant * Reglages.FEU_DOT_PART_PAR_SECONDE
+				_feu = Reglages.BRAISE_DUREE
+				if _feu_cumuls < Reglages.FEU_DOT_CUMUL_MAX:
+					_feu_cumuls += 1
+					_feu_dps += montant * Reglages.FEU_DOT_PART_PAR_SECONDE
 			"givre": _givre = Reglages.GIVRE_DUREE
 			"acide": _acide = Reglages.ACIDE_DUREE
 			"eau":

@@ -24,8 +24,9 @@ func test_les_gouttes_suivent_les_trente_chapitres(v: Verif) -> void:
 	fin.seed = 17
 	var gouttes_debut := Recompenses.tirer_gouttes_coffre(grand, 0, debut)
 	var gouttes_fin := Recompenses.tirer_gouttes_coffre(grand, Chapitres.nombre() - 1, fin)
-	v.vrai(gouttes_fin >= gouttes_debut * 15,
-		"le dernier chapitre finance les Maitrises tardives sans invalider le debut")
+	var ratio := float(gouttes_fin) / float(gouttes_debut)
+	v.vrai(ratio >= 8.5 and ratio <= 10.0,
+		"les recompenses montent nettement sans devenir exponentielles sur dix Mondes")
 
 func test_l_economie_finance_l_arbre_sur_la_campagne(v: Verif) -> void:
 	var cout_total := 0
@@ -36,10 +37,11 @@ func test_l_economie_finance_l_arbre_sur_la_campagne(v: Verif) -> void:
 	var revenu_campagne := 0.0
 	for chapitre in Chapitres.nombre():
 		revenu_campagne += moyenne_base * pow(Reglages.GOUTTES_MULT_PAR_CHAPITRE, chapitre)
-	v.vrai(revenu_campagne > float(cout_total),
-		"un grand coffre moyen par chapitre peut financer les trente Maitrises")
-	v.vrai(revenu_campagne < float(cout_total) * 1.50,
-		"la campagne ne distribue pas assez pour rendre tous les choix gratuits trop tot")
+	var couverture := revenu_campagne / float(cout_total)
+	v.vrai(couverture >= 0.75 and couverture <= 0.90,
+		"trente victoires financent la majorite des premiers rangs, les echecs utiles completent le budget")
+	v.vrai(revenu_campagne < float(cout_total),
+		"une campagne sans aucun echec ne paie pas gratuitement les trente Maitrises")
 
 func test_l_ouverture_separe_impact_et_revelation(v: Verif) -> void:
 	v.presque(FinDeRun.progression_ouverture(0.5), 0.0, "le coffre reste ferme pendant son arrivee")

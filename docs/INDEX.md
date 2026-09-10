@@ -11,8 +11,9 @@ But : arriver au bon fichier avec le moins de contexte possible.
 | Tirs / ciblage / impacts | `scripts/combat/` | `data/reglages.gd` |
 | Améliorations / effets de run | `scripts/ameliorations/` | `data/catalogue_reactifs.gd`, `data/catalogue_elements.gd` |
 | Salle, obstacles, géométrie | `scripts/monde/` | `data/vagues.gd` |
-| Menu principal | `scripts/menu/menu.gd` | `ui/`, `scripts/presentation/` |
-| Interface | `ui/` | `scripts/presentation/`, `human/interface/` si design demandé |
+| Menu principal | `scripts/menu.gd` | `ui/accueil_3d.gd`, `ui/onglet_menu.gd` |
+| Rendu 3D / modeles Blender | `scripts/presentation/monde_3d.gd`, `data/visuels_3d.gd` | `tools/blender/`, `docs/ops/RENDU_3D_MOBILE.md` |
+| Interface | `ui/`, `scripts/presentation/style_azur.gd` | `scripts/presentation/`, `human/interface/` si design demandé |
 | Équilibrage | fichier précis dans `data/` | tests associés ; pas `scripts/run/run.gd` par défaut |
 | Sauvegarde / progression joueur | `autoload/reglages_joueur.gd` | `data/arbre_competences.gd`, `data/catalogue_objets.gd` |
 | Audio | `autoload/sons.gd` | `assets/audio/` |

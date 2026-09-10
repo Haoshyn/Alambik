@@ -23,11 +23,11 @@ func test_le_cout_d_un_rang_monte_avec_le_rang(v: Verif) -> void:
 		"maitriser entierement un noeud coute plus que cinq fois son premier rang")
 
 func test_un_rang_supplementaire_ajoute_sa_part(v: Verif) -> void:
-	v.presque(ArbreCompetences.multiplicateur_degats({"force": 1}), 1.06,
+	v.presque(ArbreCompetences.multiplicateur_degats({"force": 1}), 1.012,
 		"un rang de Force vaut sa valeur unitaire")
-	v.presque(ArbreCompetences.multiplicateur_degats({"force": 3}), 1.18,
+	v.presque(ArbreCompetences.multiplicateur_degats({"force": 3}), 1.036,
 		"trois rangs valent trois fois la valeur unitaire")
-	v.presque(ArbreCompetences.multiplicateur_degats({"force": 99}), 1.30,
+	v.presque(ArbreCompetences.multiplicateur_degats({"force": 99}), 1.060,
 		"un rang sauvegarde au-dela du plafond ne donne rien de plus")
 
 func test_les_trois_branches_restent_independantes(v: Verif) -> void:
@@ -53,58 +53,77 @@ func _branche_au_rang(branche: String, rang: int) -> Dictionary:
 	return rangs
 
 func test_la_puissance_va_du_petit_bonus_au_gros_scaling(v: Verif) -> void:
-	v.presque(ArbreCompetences.multiplicateur_pv({"constitution": 1}), 1.08,
+	v.presque(ArbreCompetences.multiplicateur_pv({"constitution": 1}), 1.016,
 		"Constitution applique son premier bonus")
-	v.presque(ArbreCompetences.multiplicateur_degats({"force": 1}), 1.06,
+	v.presque(ArbreCompetences.multiplicateur_degats({"force": 1}), 1.012,
 		"Force applique son premier bonus")
-	v.presque(ArbreCompetences.reduction_degats({"armure": 1}), 0.01,
+	v.presque(ArbreCompetences.reduction_degats({"armure": 1}), 0.002,
 		"Armure applique sa reduction")
 	var offensive_premier := _branche_au_rang("Offensif", 1)
 	var dps_premier := ArbreCompetences.multiplicateur_degats(offensive_premier) \
 		* ArbreCompetences.multiplicateur_cadence(offensive_premier)
-	v.vrai(dps_premier >= 2.2 and dps_premier <= 2.5,
-		"le premier rang des dix paliers accompagne la campagne sans la trivialiser")
+	v.vrai(dps_premier >= 1.20 and dps_premier <= 1.30,
+		"les dix premiers rangs donnent un vrai gain sans devenir la campagne a eux seuls")
 
 func test_l_arbre_entierement_pousse_reste_dans_son_budget(v: Verif) -> void:
 	var offensive := _branche_au_rang("Offensif", ArbreCompetences.MAX_RANG)
 	var dps := ArbreCompetences.multiplicateur_degats(offensive) \
 		* ArbreCompetences.multiplicateur_cadence(offensive)
-	v.vrai(dps >= 10.5 and dps <= 11.6,
-		"la branche offensive entierement poussee vaut environ onze fois le tir de depart")
+	v.vrai(dps >= 2.25 and dps <= 2.45,
+		"la branche offensive maxee reste autour de x2,35")
 	var defensive := _branche_au_rang("Défensif", ArbreCompetences.MAX_RANG)
 	var survie := ArbreCompetences.multiplicateur_pv(defensive) \
 		/ (1.0 - ArbreCompetences.reduction_degats(defensive))
-	v.vrai(survie >= 10.5 and survie <= 11.6,
-		"la branche defensive poussee au meme prix rend une survie comparable")
-	# Une reduction qui atteindrait 100 % rendrait le heros invulnerable : le
-	# plafond est ce qui garde une defense faillible meme entierement achetee.
-	v.vrai(ArbreCompetences.reduction_degats(defensive) < 0.60,
-		"la reduction complete reste sous son propre plafond")
+	v.vrai(survie >= 2.05 and survie <= 2.30,
+		"la branche defensive maxee garde un budget comparable")
+	v.vrai(ArbreCompetences.reduction_degats(defensive) < 0.15,
+		"la Maitrise defensive seule ne s'approche jamais de l'invulnerabilite")
 
-# La difficulte finale doit rester au-dessus de ce qu'un joueur maxe apporte,
-# sinon le dernier Monde se joue tout seul ; et en dessous du total avec les
-# Ameliorations de descente, sinon il est infranchissable.
-func test_le_maximum_permanent_se_compare_au_dernier_monde(v: Verif) -> void:
+# Le dernier chapitre appartient encore a la campagne : un compte totalement
+# farme doit etre au-dessus de sa courbe, pas juste atteindre le minimum requis.
+func test_le_maximum_permanent_est_overkill_sur_la_campagne(v: Verif) -> void:
 	var offensive := _branche_au_rang("Offensif", ArbreCompetences.MAX_RANG)
-	# Les objets du dernier Monde : c'est bien le maximum atteignable qu'on
-	# compare a la difficulte du dernier chapitre.
 	var equipements := {"anneau_gauche": "alambic_royal", "anneau_droit": "robe_grand_oeuvre",
 		"collier": "pierre_philosophale"}
 	var forge := {}
 	for id in equipements.values():
 		forge[id] = Reglages.FORGE_NIVEAU_MAX
-	var bonus := CatalogueObjets.bonus_effectifs(equipements, forge)
-	# Le niveau de compte porte le socle, tout le reste le multiplie.
-	var socle := Stats.base_degats(Reglages.NIVEAU_REFERENCE_FIN) / Reglages.TIR_DEGATS
-	var dps := socle * ArbreCompetences.multiplicateur_degats(offensive) \
+	var bonus := CatalogueObjets.bonus_effectifs(equipements, forge, Chapitres.MONDES.size() - 1)
+	var permanent := ArbreCompetences.multiplicateur_degats(offensive) \
 		* ArbreCompetences.multiplicateur_cadence(offensive) \
-		* (1.0 + float(bonus["degats"]))
+		* (1.0 + float(bonus["degats"])) * (1.0 + float(bonus["cadence"]))
 	var dernier := Chapitres.nombre() - 1
-	var rapport := dps / Chapitres.facteur_pv(dernier, 1)
-	v.vrai(rapport >= 1.5 and rapport <= 2.8,
-		"tout pousser au maximum met le joueur devant la courbe du dernier Monde, sans l'effacer")
-	v.vrai(dps < Chapitres.facteur_pv(dernier, Reglages.SALLES_PAR_RUN),
-		"les dernieres salles demandent encore les Ameliorations de la descente")
+	v.vrai(permanent >= Chapitres.facteur_pv(dernier, 1) * 1.35,
+		"le compte maxe commence le dernier chapitre nettement au-dessus de la courbe")
+	# Deux choix simples de run suffisent deja a depasser le mur statistique de
+	# la salle 20 : le reste du build devient du confort et de l'overkill.
+	var base := Tir.de_base(Stats.depuis_reglages())
+	var tire := Mods.appliquer(base, Mods.depuis_l_inventaire(["sceau_furie", "sceau_celerite"]))
+	var facteur_run := (tire.degats / base.degats) * (tire.cadence / base.cadence)
+	v.vrai(permanent * facteur_run > Chapitres.facteur_pv(dernier, Reglages.SALLES_PAR_RUN) * 1.15,
+		"un compte maxe n'a pas besoin d'un build parfait pour ecraser la campagne")
+
+func test_une_progression_incomplete_peut_finir_avec_un_bon_build(v: Verif) -> void:
+	var offensive := _branche_au_rang("Offensif", 1)
+	var anciens := CatalogueObjets.IDS_PAR_MONDE[0]
+	var equipements := {"anneau_gauche": str(anciens[0]), "anneau_droit": str(anciens[1]),
+		"collier": str(anciens[2])}
+	var forge := {}
+	for id in anciens:
+		forge[str(id)] = 20
+	var bonus := CatalogueObjets.bonus_effectifs(equipements, forge, Chapitres.MONDES.size() - 1)
+	var permanent := ArbreCompetences.multiplicateur_degats(offensive) \
+		* ArbreCompetences.multiplicateur_cadence(offensive) \
+		* (1.0 + float(bonus["degats"])) * (1.0 + float(bonus["cadence"]))
+	var base := Tir.de_base(Stats.depuis_reglages())
+	var build := ["sceau_furie", "sceau_celerite", "frappe_lourde", "cadence_febrile", "salve"]
+	var tire := Mods.appliquer(base, Mods.depuis_l_inventaire(build))
+	var facteur_run := (tire.degats / base.degats) * (tire.cadence / base.cadence)
+	if "rafale" in tire.drapeaux:
+		facteur_run *= float(Reglages.RAFALE_NOMBRE)
+	var dernier := Chapitres.nombre() - 1
+	v.vrai(permanent * facteur_run > Chapitres.facteur_pv(dernier, Reglages.SALLES_PAR_RUN),
+		"deux branches rang 1 et une Forge 20 peuvent finir la campagne avec un bon build")
 
 func test_maitrises_et_capacites_sont_separees(v: Verif) -> void:
 	for catalogue in [Sorts.ACTIFS, Sorts.PASSIFS, Sorts.ULTIMES]:

@@ -14,6 +14,7 @@ var _recharge_active := 0.0
 var _charge_ultime := 0
 
 func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	Jeu.inventaire_change.connect(rafraichir)
@@ -100,25 +101,26 @@ func _dessiner_flash(taille: Vector2) -> void:
 
 func _dessiner_pause(police: Font, rect: Rect2) -> void:
 	_cadre_decoupe(rect, Color(0.52, 0.67, 0.78), Color(0.025, 0.055, 0.085, 0.94), 17.0)
-	Retro16.dessiner_icone_interface(self, 10, rect.grow(-29.0))
+	for x in [46.0,75.0]:
+		draw_rect(Rect2(rect.position+Vector2(x,32),Vector2(11,47)),StyleAzur.TEXTE)
 	_draw_centre(police, Vector2(rect.position.x, rect.end.y - 11), rect.size.x, "PAUSE", 15, Palette.TEXTE_ATTENUE)
 
 func _dessiner_progression(police: Font, rect: Rect2) -> void:
-	_cadre_decoupe(rect, Palette.OR, Color(0.025, 0.050, 0.080, 0.95), 18.0)
+	_cadre_decoupe(rect, StyleAzur.CUIVRE, Color(0.025, 0.050, 0.080, 0.95), 18.0)
 	var salle := "MINE %02d:%02d" % [ceili(Jeu.temps_mine_restant) / 60, ceili(Jeu.temps_mine_restant) % 60] if Jeu.mode_run == "mine" else "SALLE %02d / %02d" % [Jeu.salle_courante, Jeu.salles_du_chapitre()]
 	if Jeu.est_retro(): salle = "VISION ENCHANTÉE"
 	_draw_centre(police, rect.position + Vector2(20, 42), rect.size.x - 40, salle, 25, Palette.TEXTE)
-	_draw_centre(police, rect.position + Vector2(20, 73), rect.size.x - 40, "NIVEAU %d" % Jeu.niveau_run, 18, Palette.OR)
+	_draw_centre(police, rect.position + Vector2(20, 73), rect.size.x - 40, "NIVEAU %d" % Jeu.niveau_run, 18, StyleAzur.CUIVRE)
 	var xp := Jeu.experience_vers_prochain_niveau()
 	var barre := Rect2(rect.position + Vector2(32, 91), Vector2(rect.size.x - 64, 18))
-	_barre_premium(barre, clampf(float(xp["actuelle"]) / maxf(1.0, float(xp["requise"])), 0.0, 1.0), Palette.ESSENCE)
+	_barre_premium(barre, clampf(float(xp["actuelle"]) / maxf(1.0, float(xp["requise"])), 0.0, 1.0), StyleAzur.MAGIE)
 
 func _dessiner_points(police: Font, rect: Rect2) -> void:
-	_cadre_decoupe(rect, Palette.ESSENCE, Color(0.025, 0.050, 0.080, 0.95), 17.0)
-	Retro16.dessiner_icone_interface(self, 7, Rect2(rect.position + Vector2(12, 16), Vector2(45, 45)))
+	_cadre_decoupe(rect, StyleAzur.MAGIE, Color(0.025, 0.050, 0.080, 0.95), 17.0)
+	draw_texture_rect(StyleAzur.icone(11),Rect2(rect.position+Vector2(12,16),Vector2(45,45)),false)
 	draw_string(police, rect.position + Vector2(59, 29), "ESSENCE", HORIZONTAL_ALIGNMENT_LEFT, 84, 12, Palette.TEXTE_ATTENUE)
 	draw_string(police, rect.position + Vector2(59, 55), ReglagesJoueur.gouttes_affichees(), HORIZONTAL_ALIGNMENT_LEFT, 84, 22, Palette.TEXTE)
-	Retro16.dessiner_icone_interface(self, 8, Rect2(rect.position + Vector2(12, 71), Vector2(42, 42)))
+	draw_texture_rect(StyleAzur.icone(8),Rect2(rect.position+Vector2(12,71),Vector2(42,42)),false)
 	draw_string(police, rect.position + Vector2(59, 84), "AMÉLIOR.", HORIZONTAL_ALIGNMENT_LEFT, 84, 12, Palette.TEXTE_ATTENUE)
 	draw_string(police, rect.position + Vector2(59, 110), str(Jeu.inventaire.size()), HORIZONTAL_ALIGNMENT_LEFT, 80, 22, Palette.TEXTE)
 
@@ -137,27 +139,27 @@ func _dessiner_ameliorations(police: Font, y: float, largeur: float) -> void:
 		_cadre_decoupe(rect, reactif.teinte, Color(0.025, 0.035, 0.065, 0.92), 8.0, 2.0)
 		Dessin.glyphe(self, reactif.glyphe, Vector2(x, y), 14.0, reactif.teinte)
 		if int(entree[1]) > 1:
-			draw_string(police, Vector2(x + 13, y + 27), "×%d" % int(entree[1]), HORIZONTAL_ALIGNMENT_LEFT, 38, 17, Palette.OR)
+			draw_string(police, Vector2(x + 13, y + 27), "×%d" % int(entree[1]), HORIZONTAL_ALIGNMENT_LEFT, 38, 17, StyleAzur.CUIVRE)
 		x += espace
 
 func _dessiner_barre_boss(boss: Node, police: Font, rect: Rect2) -> void:
 	var ratio := clampf(float(boss.pv) / maxf(1.0, float(boss.pv_max)), 0.0, 1.0)
 	var nom := str(boss.donnees.get("nom", "BOSS")).to_upper()
-	_cadre_decoupe(rect, Palette.OR, Color(0.035, 0.025, 0.050, 0.96), 18.0)
+	_cadre_decoupe(rect, StyleAzur.CUIVRE, Color(0.035, 0.025, 0.050, 0.96), 18.0)
 	_draw_centre(police, rect.position + Vector2(22, 33), rect.size.x - 44, nom, 24, Palette.TEXTE)
 	var barre := Rect2(rect.position + Vector2(28, 48), Vector2(rect.size.x - 56, 25))
-	_barre_premium(barre, ratio, Palette.DANGER.lerp(Palette.OR, ratio))
+	_barre_premium(barre, ratio, Palette.DANGER.lerp(StyleAzur.CUIVRE, ratio))
 	_draw_centre(police, rect.position + Vector2(20, 72), rect.size.x - 40, "%d / %d" % [maxi(0, ceili(float(boss.pv))), ceili(float(boss.pv_max))], 16, Color.WHITE)
 
 func _dessiner_bouton_sort(police: Font, bouton: Button, ultime: bool) -> void:
 	if bouton == null or not bouton.visible:
 		return
 	var rect := Rect2(bouton.position, bouton.size)
-	var accent := Palette.ESSENCE if ultime else Palette.OR
+	var accent := StyleAzur.MAGIE if ultime else StyleAzur.CUIVRE
 	_cadre_decoupe(rect, accent, Color(0.025, 0.030, 0.065, 0.95), 22.0)
 	var id := ReglagesJoueur.ultime_effectif() if ultime else ReglagesJoueur.sort_actif_effectif()
-	var icone := posmod(_icone_sort(id) + (5 if ultime else 0), 15)
-	Retro16.dessiner_icone_interface(self, icone, rect.grow(-28.0), Color.WHITE if not bouton.disabled else Color(0.48, 0.50, 0.58))
+	if not id.is_empty():
+		draw_texture_rect(StyleAzur.glyphe(id),rect.grow(-28.0),false,Color.WHITE if not bouton.disabled else Color(0.48,0.50,0.58))
 	var ratio := 0.0
 	var texte := "PRÊT"
 	if ultime:
@@ -195,16 +197,10 @@ func _barre_premium(rect: Rect2, ratio: float, couleur: Color) -> void:
 	draw_rect(pleine, couleur.darkened(0.20))
 	if pleine.size.x > 5.0:
 		draw_rect(Rect2(pleine.position, Vector2(pleine.size.x, maxf(2.0, pleine.size.y * 0.32))), couleur.lightened(0.22))
-	draw_rect(rect, Color(Palette.OR, 0.68), false, 3.0)
+	draw_rect(rect, Color(StyleAzur.CUIVRE, 0.68), false, 3.0)
 
-func _cadre_decoupe(rect: Rect2, accent: Color, fond: Color, coupe: float, epaisseur := 4.0) -> void:
-	var points := _points_coupes(rect, coupe)
-	draw_colored_polygon(points, Color(0.008, 0.014, 0.026, 0.96))
-	Dessin.contour(self, points, Color(accent, 0.92), epaisseur)
-	var interieur := rect.grow(-6.0)
-	var dedans := _points_coupes(interieur, maxf(3.0, coupe - 5.0))
-	draw_colored_polygon(dedans, fond)
-	Dessin.contour(self, dedans, Color(accent, 0.32), 2.0)
+func _cadre_decoupe(rect: Rect2, accent: Color, _fond: Color, _coupe: float, _epaisseur := 4.0) -> void:
+	draw_style_box(StyleAzur.cadre(Color(StyleAzur.FOND,0.95),accent,14),rect)
 
 func _points_coupes(rect: Rect2, coupe: float) -> PackedVector2Array:
 	return PackedVector2Array([
