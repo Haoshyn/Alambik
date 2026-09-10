@@ -109,3 +109,27 @@ Après rejet du visage précédent : largeur de tête réduite d'environ 18 %, h
 GLB et source Blender reconstruits. Captures à 48°, de profil et en salle vérifiées. Aperçu : `tmp/mage-visage-apercu.html`, comparaison avec `tmp/mage-visage-avant.png`. Validation : 30 suites, 12 855 assertions, zéro échec ; 83 contrôles studio et intégration 3D sans échec. Les diagnostics existants de certificats et de ressources au nettoyage persistent. Logs : `tmp/visage-verification.log`, `tmp/visage-studio.log`, `tmp/visage-integration.log`.
 
 Vingt runs terminées : sept victoires, treize défaites ; aucune erreur de script. Deux blocages du bot : graine 3 en salle 2 (un ennemi à 1 PV), graine 13 en salle 8 (trois ennemis restants). Le script retourne un échec pour ces deux blocages. Détail : `tmp/visage-vingt-runs.log`. Ces simulations headless ne valident pas le rendu du personnage.
+
+## Visage reconstruit et chapeau abaissé
+
+Le propriétaire rejette encore le visage et autorise un regard à peine visible sous le chapeau. Suppression de la texture faciale plaquée : nouveau maillage à plan frontal plus plat, mâchoire courte, cou raccordé, petits yeux distincts en volume. Le bord du chapeau descend devant le regard à 48° ; le visage n'est plus relevé vers la caméra. Trois mèches de frange asymétriques et quelques masses latérales remplacent les nombreuses bandes texturées. Épaules affinées. La course utilise un appui à vitesse constante et une phase de retour du pied avec raccord de vitesse, en conservant les articulations.
+
+Source Blender et GLB reconstruits : 89 956 triangles avant LOD, douze objets de matériau, 4 519 160 octets. Le contrôle de textures attend désormais les trois matières du costume ; le visage et les cheveux utilisent des matériaux unis. Aperçu réel : `tmp/mage-refonte-apercu.html`, capture à 48° : `tmp/mage-refonte.png`. Cette passe reste une proposition visuelle, sans validation artistique du propriétaire ni équivalence revendiquée avec l'illustration approuvée.
+
+Validation : 30 suites, 12 855 assertions, zéro échec ; selftest compilé ; 83 contrôles studio et intégration 3D sans échec. Vingt runs terminées : onze victoires, neuf défaites, un blocage du bot en salle 11, graine 10, avec deux ennemis restants ; le script retourne donc un échec. Aucune erreur de script, diagnostics de certificats et ressources au nettoyage toujours présents. Logs : `tmp/refonte-verification.log`, `tmp/refonte-studio.log`, `tmp/refonte-integration.log`, `tmp/refonte-vingt-runs.log`.
+
+## Petit mage animal — nouvelle construction arcade
+
+Le propriétaire demande de repartir directement du modèle d'un personnage d'Archero adapté en mage. Référence choisie : Meowgik, qu'il avait cité auparavant, visible sur la fiche de personnage du [guide Archero](https://www.androidauthority.com/archero-guide-heroes-abilities-1086651/). Nouvelle géométrie dans `tools/blender/mage_arcade.py` : robe évasée d'un seul tenant, membres courts, tête animale sombre, petits museau et oreilles, yeux jaunes, chapeau conique recourbé, ruban doré, écharpe turquoise et baguette. Matériaux unis à la place des textures peintes précédentes. Aucune extraction de modèle du jeu ; reconstruction Blender. La validation artistique reste ouverte.
+
+`mage_manga.py` fournit les outils de maillage, le squelette et les animations ; son constructeur appelle maintenant cette nouvelle géométrie. GLB et source Blender régénérés : 47 784 triangles avant LOD, douze objets de matériau, 1 709 460 octets. La sonde contrôle les matériaux importés sans imposer des textures devenues inutiles. Aperçu réel à 48°, trois quarts, côtés et marche : `tmp/mage-arcade-apercu.html` ; capture stable : `tmp/mage-arcade.png`.
+
+Validation : 30 suites, 12 855 assertions, zéro échec ; studio 83 contrôles et intégration 3D sans échec. Vingt simulations terminées avec un blocage du bot, donc un échec signalé par le script. Diagnostics de certificats et de ressources au nettoyage toujours présents. Logs détaillés : `tmp/arcade-verification.log`, `tmp/arcade-studio.log`, `tmp/arcade-integration.log`, `tmp/arcade-vingt-runs.log`.
+
+## Mage humain au grand chapeau
+
+Le propriétaire conserve la direction simple mais demande un humain avec un chapeau plus grand masquant le visage. Suppression du museau, des oreilles pointues et des yeux jaunes ; tête humaine sobre, petites tempes brunes, mains avec pouces. Bord du chapeau élargi de 23 % et abaissé devant le visage. La capture à 48° confirme que le visage est masqué. Robe violette, écharpe turquoise, baguette et animations conservées.
+
+Source `tools/blender/mage_arcade.py`, GLB et Blender régénérés : 47 080 triangles avant LOD, dix objets de matériau, 1 673 916 octets. Aperçu : `tmp/mage-humain-cache-apercu.html` ; capture stable : `tmp/mage-humain-cache.png`. Validation : 30 suites, 12 855 assertions, zéro échec ; 83 contrôles studio et intégration 3D sans échec. Les diagnostics existants de certificats et de ressources au nettoyage persistent. Logs : `tmp/humain-cache-verification.log`, `tmp/humain-cache-studio.log`, `tmp/humain-cache-integration.log`.
+
+Les 32 poses de marche sont maintenant capturées à l'angle de jeu pour contrôler le masquage du visage en mouvement. Vingt simulations terminées : sept victoires, treize défaites, aucune erreur de script ; un blocage du bot en salle 11, graine 1, avec un ennemi à 29 PV. Le script signale donc un échec. Détail : `tmp/humain-cache-vingt-runs.log`.

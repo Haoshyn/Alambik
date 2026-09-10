@@ -23,7 +23,7 @@ def proportion(point,zone='corps'):
     elif zone=='chapeau':
         z-=(hauteur(1.84)-hauteur(1.315))*.10
     if zone in ('tete','chapeau'):
-        pivot=hauteur(1.55);angle=math.radians(2)
+        pivot=hauteur(1.55);angle=math.radians(-8 if zone=='tete' else 2)
         y,z=y*math.cos(angle)-(z-pivot)*math.sin(angle),pivot+y*math.sin(angle)+(z-pivot)*math.cos(angle)
     return Vector((x,y,z))
 
@@ -127,13 +127,11 @@ def preparer_matieres():
     for nom,col in [('cheveux',(.095,.034,.015,1)),('encre',(.025,.012,.038,1))]:
         bsdf=b.MAT[nom].node_tree.nodes.get('Principled BSDF')
         bsdf.inputs['Base Color'].default_value=col;bsdf.inputs['Roughness'].default_value=.95
-    mat=b.MAT['peau'].copy();mat.name='visage';b.MAT['visage']=mat
-    tex=mat.node_tree.nodes.new('ShaderNodeTexImage');tex.image=bpy.data.images.load(str(dossier/'visage.png'),check_existing=True);tex.extension='EXTEND'
-    mat.node_tree.links.new(tex.outputs['Color'],mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
     for nom,col in [('cuivre',(.56,.32,.13,1)),('papier',(.53,.36,.62,1)),('magie',(.43,.09,.8,1))]:
         mat=b.MAT[nom];mat.diffuse_color=col;mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value=col
 
 def visage():
+    volume('Cou',(0,.022,1.355),(.072,.067,.090),'peau')
     # Machoire courte, joues distinctes et plan facial aplati sous le bord du chapeau.
     anneaux=[(1.40,.070,.07),(1.425,.106,.095),(1.45,.140,.119),(1.49,.165,.138),(1.56,.181,.151),(1.66,.18,.151),(1.75,.157,.145),(1.80,.115,.10),(1.82,.04,.04)]
     points=[];uv=[];faces=[];n=64
@@ -170,7 +168,7 @@ def chapeau():
     o=maillage('Bord_du_chapeau',points,faces,'violet',uv)
     bpy.ops.object.select_all(action='DESELECT');o.select_set(True);bpy.context.view_layer.objects.active=o
     mod=o.modifiers.new('Epaisseur','SOLIDIFY');mod.thickness=.016;bpy.ops.object.modifier_apply(modifier=mod.name);lier(o,subdivisions=1)
-    tissu('Pointe_du_chapeau',[(0,0,1.835,.244,.209),(0,.006,1.89,.235,.206),(-.014,.012,2.015,.188,.164),
+    tissu('Pointe_du_chapeau',[(0,0,1.785,.244,.209),(0,.006,1.89,.235,.206),(-.014,.012,2.015,.188,.164),
           (.018,.018,2.15,.142,.125),(.10,.02,2.245,.101,.090),(.23,.012,2.252,.062,.060),
           (.335,-.002,2.175,.045,.043),(.38,-.015,2.07,.020,.022),(.35,-.028,2.01,.002,.003)],'violet')
     tissu('Ruban_du_chapeau',[(0,0,1.855,.247,.214),(0,.004,1.885,.24,.211),(0,.008,1.936,.218,.197)],'turquoise')
@@ -276,10 +274,8 @@ def construire(base=None):
     global b,SQUELETTE,ZONE
     if base is not None:b=base
     SQUELETTE=b.RIG;b.RIG=None
-    preparer_matieres()
-    ZONE='corps';membres();manteau();echarpe();baguette()
-    ZONE='tete';visage();cheveux()
-    ZONE='chapeau';chapeau()
+    import mage_arcade
+    mage_arcade.construire(sys.modules[__name__])
     ZONE='corps' 
     b.RIG=SQUELETTE
 
@@ -315,7 +311,14 @@ def animer():
                 bras=rig.pose.bones[nom_bras];avant=rig.pose.bones['avant_'+nom_bras]
                 if nom=='course':
                     p=phase+(math.pi if cote==1 else 0)
-                    y=.13*math.cos(p);z=.10+.085*max(0,math.sin(p))
+                    cycle=(p/math.tau)%1.
+                    # Appui a vitesse constante puis retour souple du pied leve.
+                    if cycle<.5:
+                        y=.13-.52*cycle;z=.10
+                    else:
+                        retour=(cycle-.5)*2
+                        y=-.13+.26*(-4*retour**3+6*retour**2-retour)
+                        z=.10+.075*math.sin(math.pi*retour)**2
                     distance=math.sqrt(y*y+(hanche_basse-z)**2);distance=min(cuisse+tibia_longueur-.001,distance)
                     flexion=-math.acos(max(-1,min(1,(distance*distance-cuisse**2-tibia_longueur**2)/(2*cuisse*tibia_longueur))))
                     angle=math.atan2(y,hanche_basse-z)-math.atan2(tibia_longueur*math.sin(flexion),cuisse+tibia_longueur*math.cos(flexion))

@@ -11,14 +11,14 @@ func capturer(nom: String) -> void:
 	exiger(poignet >= 0,"poignet de la baguette articule")
 	if poignet >= 0:
 		exiger(squelette.get_bone_parent(poignet) == squelette.find_bone("avant_bras_droit"),"main reliee a l'avant-bras")
-	var textures := 0
+	var materiaux := 0
 	for objet in root.find_children("*","MeshInstance3D",true,false):
 		var instance := objet as MeshInstance3D
 		if instance.mesh == null: continue
 		for i in instance.mesh.get_surface_count():
 			var mat := instance.get_active_material(i) as StandardMaterial3D
-			if mat != null and mat.albedo_texture != null: textures += 1
-	exiger(textures >= 3,"textures du tissu, de l'echarpe et du cuir importees")
+			if mat != null: materiaux += 1
+	exiger(materiaux >= 3,"materiaux du personnage effectivement importes")
 	var genou := squelette.find_bone("tibia_gauche")
 	var cheville := squelette.find_bone("pied_gauche")
 	var racine := squelette.find_bone("racine")
@@ -36,6 +36,11 @@ func capturer(nom: String) -> void:
 	var position_buste := squelette.get_bone_global_pose(racine).origin
 	var repere := squelette.global_transform
 	DirAccess.make_dir_recursive_absolute("res://tmp/mage-marche")
+	var camera := root.get_camera_3d()
+	var vue_initiale := camera.transform
+	# La marche doit montrer ce que le joueur voit sous le chapeau.
+	camera.position = Vector3(0,1.0+4.6*tan(deg_to_rad(Pont3D.INCLINAISON)),4.6)
+	camera.look_at(Vector3(0,1.0,0))
 	for i in 32:
 		lecteur.seek(float(i)/32.0,true)
 		exiger(squelette.get_bone_global_pose(racine).origin.distance_to(position_buste)<0.001,"buste stable pendant le cycle")
@@ -46,8 +51,6 @@ func capturer(nom: String) -> void:
 	lecteur.play("repos")
 	lecteur.seek(0.2,true)
 	lecteur.pause()
-	var camera := root.get_camera_3d()
-	var vue_initiale := camera.transform
 	for angle in [0,90,180,270]:
 		var radians := deg_to_rad(float(angle))
 		camera.position = Vector3(sin(radians)*4.6,1.55,cos(radians)*4.6)
