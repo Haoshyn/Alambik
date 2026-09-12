@@ -131,6 +131,16 @@ func _ready() -> void:
 	_effets = Node2D.new()
 	_effets.set_script(load("res://scripts/effets.gd"))
 	add_child(_effets)
+	var atelier := Node.new()
+	atelier.set_script(load("res://scripts/ameliorations/atelier_fusions.gd"))
+	atelier.heros = _heros
+	atelier.salle = _salle
+	atelier.effets = _effets
+	add_child(atelier)
+	_heros.tir_demande.connect(func(_tir: Tir, origine: Vector2, direction: Vector2): atelier.lancer(origine,direction))
+	_heros.touchee.connect(atelier.protection)
+	_heros.bouclier_brise.connect(atelier.protection)
+	_salle.ennemi_abattu.connect(atelier.elimination)
 
 	_couche = CanvasLayer.new()
 	add_child(_couche)
@@ -359,6 +369,7 @@ func _suivre_heros() -> void:
 	_camera.force_update_scroll()
 
 func _entrer_dans_la_salle() -> void:
+	get_tree().call_group("atelier_fusions","reinitialiser")
 	for enfant in _salle.get_children():
 		enfant.queue_free()
 	_calculer_limites()
@@ -489,6 +500,7 @@ func _texte_fusion_epreuve() -> String:
 func _ouvrir_recompense_etage() -> void:
 	if _terminee or _panneau != null:
 		return
+	_neutraliser_deplacement()
 	get_tree().paused = true
 	Sons.musique_calme()
 	_panneau = DRAFT.instantiate()
@@ -516,6 +528,7 @@ func _sur_palier_defi_termine() -> void:
 	_ouvrir_recompense_sorts(dernier)
 
 func _ouvrir_recompense_sorts(derniere: bool) -> void:
+	_neutraliser_deplacement()
 	get_tree().paused = true
 	Sons.musique_calme()
 	_panneau = RECOMPENSE_SORTS.instantiate()
@@ -534,6 +547,7 @@ func _ouvrir_recompense_sorts(derniere: bool) -> void:
 func _ouvrir_alambic_apres_salle() -> void:
 	if _panneau != null:
 		return
+	_neutraliser_deplacement()
 	get_tree().paused = true
 	Sons.musique_calme()
 	_heros.stats.soigner(_heros.stats.pv_max * Reglages.SOIN_ALAMBIC \
@@ -549,6 +563,7 @@ func _ouvrir_alambic_apres_salle() -> void:
 		_avancer_salle())
 
 func _ouvrir_pause() -> void:
+	_neutraliser_deplacement()
 	get_tree().paused = true
 	Sons.musique_calme()
 	_panneau = PAUSE.instantiate()
@@ -576,8 +591,13 @@ func _notification(quoi: int) -> void:
 		_ouvrir_pause()
 
 func _sur_intention(direction: Vector2, intensite: float) -> void:
-	if _heros != null and not Jeu.mode_auto:
+	if _heros != null and not Jeu.mode_auto and _panneau == null and not get_tree().paused:
 		_heros.definir_intention(direction, intensite)
+
+func _neutraliser_deplacement() -> void:
+	_joystick.annuler()
+	_heros.definir_intention(Vector2.ZERO, 0.0)
+	_heros.velocity = Vector2.ZERO
 
 func _sur_tir_heros(tir_courant: Tir, origine: Vector2, direction: Vector2) -> void:
 	var tir_effectif := tir_courant.copie()
@@ -749,13 +769,17 @@ func _pulser_sceaux(drapeaux: Array[String]) -> void:
 			"tenebres": effets.append("acide")
 	_effets.onde(_heros.global_position, rayon, Palette.ESSENCE, 0.30)
 	var degats: float = _heros.tir_courant.degats * Reglages.SCEAU_AURA_DEGATS
+	var cibles_soin := 0
 	for ennemi in get_tree().get_nodes_in_group("ennemis"):
 		if not is_instance_valid(ennemi) \
 				or ennemi.global_position.distance_to(_heros.global_position) > rayon:
 			continue
 		ennemi.recevoir_degats(degats, effets)
 		if "lumiere" in elements:
-			_heros.stats.soigner(_heros.stats.pv_max * Reglages.SCEAU_AURA_SOIN)
+			cibles_soin += 1
+	# Une foule ne doit pas transformer l'aura en soin illimite.
+	_heros.stats.soigner(_heros.stats.pv_max * Reglages.SCEAU_AURA_SOIN \
+		* mini(cibles_soin, Reglages.SCEAU_AURA_CIBLES_SOIN_MAX))
 
 func _frapper_zone_heros() -> void:
 	var tir := Tir.de_base(_heros.stats)
@@ -771,6 +795,7 @@ func _infliger_phenomene(ennemi: Node, tir: Tir) -> void:
 	if "tenebres" in tir.drapeaux and Jeu.rng.randf() < Reglages.TENEBRES_CHANCE_SURCHARGE:
 		degats *= Reglages.TENEBRES_SURCHARGE_MULT
 	ennemi.recevoir_degats(degats, tir.effets)
+	get_tree().call_group("atelier_fusions","impact",ennemi,"eau" in tir.effets)
 	if "lumiere" in tir.effets:
 		_heros.stats.soigner(degats * Reglages.LUMIERE_VOL_DE_VIE)
 

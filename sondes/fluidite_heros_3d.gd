@@ -9,6 +9,8 @@ func verifier() -> void:
 	test_gestes_sans_interruption_des_jambes(v)
 	test_cadence_independante_de_la_frequence(v)
 	test_suivi_et_teleportation(v)
+	test_corps_engage_dans_la_course(v)
+	test_baguette_solidaire_de_la_main(v)
 	print("FLUIDITE_HEROS : %d assertions, %d echecs" % [v.total, v.echecs.size()])
 	for echec in v.echecs:
 		push_error(echec)
@@ -25,6 +27,67 @@ func _creer() -> Node3D:
 	modele.add_child(animation)
 	animation.preparer(lecteur)
 	return modele
+
+func test_baguette_solidaire_de_la_main(v: Verif) -> void:
+	var modele := _creer()
+	var orbe := modele.find_child("Apprenti_orbe", true, false) as MeshInstance3D
+	var solidaire := orbe != null and orbe.skin != null
+	if solidaire:
+		for surface in orbe.mesh.get_surface_count():
+			var tableaux := orbe.mesh.surface_get_arrays(surface)
+			var os: PackedInt32Array = tableaux[Mesh.ARRAY_BONES]
+			var poids: PackedFloat32Array = tableaux[Mesh.ARRAY_WEIGHTS]
+			for i in poids.size():
+				if poids[i] > .001 and orbe.skin.get_bind_name(os[i]) != &"main_droite":
+					solidaire = false
+	v.vrai(solidaire, "la baguette est liee exclusivement a la main, sans orientation independante")
+	var animation: AnimationTree = modele.get_node("Controleur")
+	var squelette := modele.find_child("Skeleton3D", true, false) as Skeleton3D
+	animation.mettre_a_jour(0.0, 0.0, false)
+	var depart: Dictionary = {}
+	for nom: String in ["bras_droite", "avant_bras_droite", "main_droite"]:
+		depart[nom] = squelette.get_bone_pose_rotation(squelette.find_bone(nom))
+	animation.tirer()
+	for i in 3: animation.mettre_a_jour(1.0 / 60.0, 0.0, false)
+	for nom: String in depart:
+		var avant: Quaternion = depart[nom]
+		v.vrai(avant.angle_to(squelette.get_bone_pose_rotation(squelette.find_bone(nom))) > .05, "le coup engage " + nom)
+	for i in 24:
+		animation.mettre_a_jour(1.0 / 60.0, 0.0, false)
+		v.vrai(Quaternion.IDENTITY.angle_to(squelette.get_bone_pose_rotation(squelette.find_bone("torse"))) < .06, "le lancer garde le buste stable")
+	modele.free()
+
+func test_corps_engage_dans_la_course(v: Verif) -> void:
+	var modele := _creer()
+	var animation: AnimationTree = modele.get_node("Controleur")
+	var squelette := modele.find_child("Skeleton3D", true, false) as Skeleton3D
+	var racine := squelette.find_bone("racine")
+	var torse := squelette.find_bone("torse")
+	var pied := squelette.find_bone("pied_gauche")
+	var minimum := Vector3(INF, INF, INF)
+	var maximum := Vector3(-INF, -INF, -INF)
+	animation.mettre_a_jour(0.0, Reglages.HEROS_VITESSE, false)
+	var orientation := squelette.get_bone_pose_rotation(torse)
+	var rotation_max := 0.0
+	var genou_max := 0.0
+	var bras_max := 0.0
+	for i in 64:
+		animation.mettre_a_jour(1.0 / 120.0, Reglages.HEROS_VITESSE, false)
+		var mesures := Vector3(squelette.get_bone_global_pose(racine).origin.y,
+			squelette.get_bone_global_pose(pied).origin.z,
+			squelette.get_bone_pose_scale(torse).y)
+		minimum = minimum.min(mesures)
+		maximum = maximum.max(mesures)
+		rotation_max = maxf(rotation_max, orientation.angle_to(squelette.get_bone_pose_rotation(torse)))
+		genou_max = maxf(genou_max, Quaternion.IDENTITY.angle_to(squelette.get_bone_pose_rotation(squelette.find_bone("tibia_gauche"))))
+		bras_max = maxf(bras_max, Quaternion.IDENTITY.angle_to(squelette.get_bone_pose_rotation(squelette.find_bone("bras_gauche"))))
+	v.vrai(maximum.x - minimum.x < .03, "le sprint garde une hauteur stable sans rebond elastique")
+	v.vrai(maximum.y - minimum.y > .12, "le pied entier effectue une foulee")
+	v.vrai(maximum.z - minimum.z < .01, "le sprint ne deforme pas le buste comme du caoutchouc")
+	v.vrai(rotation_max > .10, "le buste accompagne les changements d'appui")
+	v.vrai(genou_max > 1.5, "le talon se ramene franchement pendant le sprint")
+	v.vrai(bras_max > .85, "le sprint engage les bras avec amplitude")
+	modele.free()
 
 func test_gestes_sans_interruption_des_jambes(v: Verif) -> void:
 	var temoin := _creer()

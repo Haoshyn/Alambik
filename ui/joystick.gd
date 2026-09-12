@@ -37,6 +37,10 @@ func annuler() -> void:
 func consommer_raccourci() -> void:
 	_raccourci.consommer()
 
+func _notification(quoi: int) -> void:
+	if quoi in [NOTIFICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT]:
+		annuler()
+
 func _temps() -> float:
 	return float(Time.get_ticks_msec()) / 1000.0
 

@@ -16,9 +16,7 @@ func materiau(couleur: Color, emission := false) -> StandardMaterial3D:
 
 func bloc(centre: Vector3, taille: Vector3, couleur: Color) -> MeshInstance3D:
 	var objet := MeshInstance3D.new()
-	var mesh := BoxMesh.new()
-	mesh.size = taille
-	objet.mesh = mesh
+	objet.mesh = preload("res://scripts/presentation/decor_alchimique.gd").pierre(taille)
 	objet.material_override = materiau(couleur)
 	objet.position = centre
 	add_child(objet)
@@ -52,14 +50,10 @@ func construire(limites: Rect2, charger: Callable, monde := 0, contour := Packed
 			surface.add_vertex(point)
 	var instance := MeshInstance3D.new()
 	instance.mesh = surface.commit()
-	var mat := materiau(ambiance[0]).duplicate() as StandardMaterial3D
-	mat.vertex_color_use_as_albedo = true
-	mat.albedo_color = Color.WHITE.lerp(ambiance[0],0.20)
-	mat.albedo_texture = preload("res://assets/visual/azur/calcaire.png")
-	mat.uv1_triplanar = true
-	mat.uv1_world_triplanar = true
-	mat.uv1_scale = Vector3.ONE*0.22
-	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	var mat := ShaderMaterial.new()
+	mat.shader = preload("res://shaders/dalles_alchimiques.gdshader")
+	mat.set_shader_parameter("pierre", ambiance[0])
+	mat.set_shader_parameter("joint", Color("8e9e87"))
 	instance.material_override = mat
 	# Le sol recoit les ombres des acteurs sans produire de bandes d'auto-ombre.
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

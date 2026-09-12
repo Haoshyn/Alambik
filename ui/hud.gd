@@ -85,7 +85,6 @@ func _draw() -> void:
 	var boss_visible := boss != null and is_instance_valid(boss) and float(boss.pv_max) > 0.0
 	if boss_visible:
 		_dessiner_barre_boss(boss, police, Rect2(Vector2(130, haut + 154) + tremble, Vector2(taille.x - 260, 92)))
-	_dessiner_ameliorations(police, haut + (276.0 if boss_visible else 158.0), taille.x)
 	_dessiner_bouton_sort(police, _bouton_actif, false)
 	_dessiner_bouton_sort(police, _bouton_ultime, true)
 
@@ -124,24 +123,6 @@ func _dessiner_points(police: Font, rect: Rect2) -> void:
 	draw_string(police, rect.position + Vector2(59, 84), "AMÉLIOR.", HORIZONTAL_ALIGNMENT_LEFT, 84, 12, Palette.TEXTE_ATTENUE)
 	draw_string(police, rect.position + Vector2(59, 110), str(Jeu.inventaire.size()), HORIZONTAL_ALIGNMENT_LEFT, 80, 22, Palette.TEXTE)
 
-func _dessiner_ameliorations(police: Font, y: float, largeur: float) -> void:
-	var groupe := Jeu.inventaire_groupe()
-	if groupe.is_empty():
-		return
-	var total := groupe.size()
-	var espace := 66.0
-	var x := largeur * 0.5 - float(total - 1) * espace * 0.5
-	for entree in groupe:
-		var id: String = entree[0]
-		var reactif := Jeu.reactif(id)
-		if reactif == null: continue
-		var rect := Rect2(Vector2(x - 28, y - 28), Vector2(56, 56))
-		_cadre_decoupe(rect, reactif.teinte, Color(0.025, 0.035, 0.065, 0.92), 8.0, 2.0)
-		Dessin.glyphe(self, reactif.glyphe, Vector2(x, y), 14.0, reactif.teinte)
-		if int(entree[1]) > 1:
-			draw_string(police, Vector2(x + 13, y + 27), "×%d" % int(entree[1]), HORIZONTAL_ALIGNMENT_LEFT, 38, 17, StyleAzur.CUIVRE)
-		x += espace
-
 func _dessiner_barre_boss(boss: Node, police: Font, rect: Rect2) -> void:
 	var ratio := clampf(float(boss.pv) / maxf(1.0, float(boss.pv_max)), 0.0, 1.0)
 	var nom := str(boss.donnees.get("nom", "BOSS")).to_upper()
@@ -149,7 +130,6 @@ func _dessiner_barre_boss(boss: Node, police: Font, rect: Rect2) -> void:
 	_draw_centre(police, rect.position + Vector2(22, 33), rect.size.x - 44, nom, 24, Palette.TEXTE)
 	var barre := Rect2(rect.position + Vector2(28, 48), Vector2(rect.size.x - 56, 25))
 	_barre_premium(barre, ratio, Palette.DANGER.lerp(StyleAzur.CUIVRE, ratio))
-	_draw_centre(police, rect.position + Vector2(20, 72), rect.size.x - 40, "%d / %d" % [maxi(0, ceili(float(boss.pv))), ceili(float(boss.pv_max))], 16, Color.WHITE)
 
 func _dessiner_bouton_sort(police: Font, bouton: Button, ultime: bool) -> void:
 	if bouton == null or not bouton.visible:

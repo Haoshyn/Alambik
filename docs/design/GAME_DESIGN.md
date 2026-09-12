@@ -2,6 +2,8 @@
 
 ## 0. CONTEXTE CRITIQUE POUR L'IMPLÉMENTATION
 
+**Expérimentation autorisée du 12 septembre 2026 :** les Alambics de campagne et de Mine proposent désormais jusqu'à trois recettes compatibles avec l'inventaire, au lieu d'imposer un Élément aléatoire. Dix comportements, conservation de l'augmentation de départ, une fusion par support, interactions Feu/Eau et charges de mouvement. Cette variante jouable remplace provisoirement les règles d'infusion générique des sections 16–24 pour ces modes ; celles-ci restent la référence de compatibilité et des Épreuves rituelles. Détails : `docs/ops/FUSIONS_EXPERIMENTALES.md`. À orienter selon les essais du propriétaire.
+
 Le jeu existe déjà et possède une base jouable de type Archero-like.
 
 **CE DOCUMENT NE DÉCRIT PAS UN JEU À RECRÉER.**
@@ -353,7 +355,7 @@ Un boss signature doit constituer un vrai pic de difficulté. Sa puissance ne do
 
 Ses attaques restent télégraphiées et doivent toujours laisser des trajectoires ou fenêtres d'esquive lisibles. Les projectiles générés depuis un bord de l'arène doivent naître à l'intérieur des collisions afin qu'un pattern ne s'annule jamais instantanément contre le mur qui l'a créé.
 
-Les miniboss servent de paliers intermédiaires : ils sont plus menaçants qu'une vague normale mais nettement plus courts qu'un boss signature. Ils ne doivent pas devenir des murs de farm obligatoires aux salles 5 / 10 / 15.
+Les miniboss servent de paliers intermédiaires plus menaçants qu'une vague normale. La cible demandée pour les combats de boss de début de campagne est désormais **30 à 45 secondes**, avec un build de débutant et des interruptions de tir pour se déplacer. Les signatures se distinguent aussi par leurs motifs et leur pression. Cette durée reste un objectif de réglage, pas un verrou imposé aux builds puissants. Les mesures et leurs limites sont consignées dans `docs/ops/EQUILIBRAGE_AUGMENTATIONS.md`.
 
 Les miniboss peuvent être réutilisés mais recevoir de petites modifications correspondant au monde actuel.
 

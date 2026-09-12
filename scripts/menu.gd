@@ -7,12 +7,8 @@ const REGLAGES := preload("res://ui/reglages.tscn")
 const EQUIPEMENT := preload("res://ui/equipement.tscn")
 const TRANSITION := preload("res://ui/transition_grimoire.tscn")
 const ONGLET_MENU := preload("res://ui/onglet_menu.gd")
-const DUREE_INTRO := 1.55
 const PAGES := ["equipement", "aventure", "maitrises", "sorts"]
 
-var _anim := 0.0
-var _temps_intro := 0.0
-var _intro_active := false
 var _conteneur_pages: Control
 var _page_actuelle: Control
 var _navigation: Control
@@ -22,7 +18,6 @@ var _onglets: Array[Button] = []
 var _page := 1
 var _lancement := false
 
-static var _intro_deja_vue := false
 
 func _ready() -> void:
 	if OS.get_name() == "Android":
@@ -38,11 +33,7 @@ func _ready() -> void:
 			var page_capture := PAGES.find(argument.trim_prefix("--page-menu="))
 			if page_capture >= 0:
 				_afficher_page(page_capture, false)
-	_intro_active = not _intro_deja_vue
-	_conteneur_pages.visible = not _intro_active
-	_navigation.visible = not _intro_active
-	if not _intro_active:
-		StyleInterface.animer_entree(_conteneur_pages, 28.0)
+	StyleInterface.animer_entree(_conteneur_pages, 28.0)
 	if "--ouvrir-reglages" in OS.get_cmdline_user_args():
 		call_deferred("_ouvrir_reglages")
 	Capture.programmer(self)
@@ -216,28 +207,6 @@ func _notification(quoi: int) -> void:
 	else:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MINIMIZED)
 
-func _process(delta: float) -> void:
-	_anim += delta
-	if _intro_active:
-		_temps_intro += delta
-		if _temps_intro >= DUREE_INTRO:
-			_intro_active = false
-			_intro_deja_vue = true
-			_conteneur_pages.visible = true
-			_navigation.visible = true
-			StyleInterface.animer_entree(_conteneur_pages, 34.0)
-	queue_redraw()
-
 func _draw() -> void:
 	var taille := get_viewport_rect().size
-	draw_rect(Rect2(Vector2.ZERO, taille), Color("192c43"))
-	if _intro_active:
-		_dessiner_intro(Polices.CORPS, taille)
-func _dessiner_intro(police: Font, taille: Vector2) -> void:
-	var alpha := clampf(_temps_intro * 4.0, 0.0, 1.0) * clampf((DUREE_INTRO - _temps_intro) * 5.0, 0.0, 1.0)
-	var y := taille.y * 0.46
-	var centre := Vector2(taille.x * 0.5, y - 118.0)
-	Dessin.halo(self, centre, 150.0, Color(Palette.ESSENCE, alpha * 0.32), 6)
-	Dessin.glyphe(self, "fiole", centre, 28.0, Color(Palette.OR, alpha))
-	draw_string(police, Vector2(0.0, y), "ALAMBIC", HORIZONTAL_ALIGNMENT_CENTER, taille.x, 92, Color(Palette.TEXTE, alpha))
-	draw_string(police, Vector2(0.0, y + 72.0), "Le grimoire vivant s'éveille…", HORIZONTAL_ALIGNMENT_CENTER, taille.x, 29, Color(Palette.TEXTE_ATTENUE, alpha))
+	draw_rect(Rect2(Vector2.ZERO, taille), StyleAzur.FOND)

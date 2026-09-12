@@ -42,3 +42,33 @@ func test_base_non_modifiee(v: Verif) -> void:
 func test_drapeaux(v: Verif) -> void:
 	var t := Mods.appliquer(_base(), [{"drapeaux": ["homing"]}])
 	v.vrai("homing" in t.drapeaux, "le drapeau est transmis")
+
+func test_bonus_et_couts_separes(v: Verif) -> void:
+	var mods := [{"degats_mult": 0.5}, {"degats_mult": 0.5}, {"degats_mult": 1.5}]
+	var t := Mods.appliquer(_base(), mods)
+	v.presque(t.degats, Reglages.TIR_DEGATS * 0.25 * 1.5, "les couts ne s'annulent pas et le bonus ne les efface pas")
+	mods.reverse()
+	v.presque(Mods.appliquer(_base(), mods).degats, t.degats, "ordre des couts et bonus indifferent")
+
+func test_catalogue_complet_et_fusions(v: Verif) -> void:
+	for id in CatalogueReactifs.ids():
+		for autre in CatalogueReactifs.ids():
+			var ids := [id, autre]
+			var t := Mods.appliquer(_base(), Mods.depuis_l_inventaire(ids))
+			ids.reverse()
+			var inverse := Mods.appliquer(_base(), Mods.depuis_l_inventaire(ids))
+			v.vrai(t.degats > 0.0 and t.cadence > 0.0 and t.portee > 0.0, "%s + %s reste jouable" % [id, autre])
+			v.presque(t.degats, inverse.degats, "paire commutative")
+		for element in CatalogueElements.ids():
+			var t := Mods.appliquer(_base(), Mods.depuis_l_inventaire([id, CatalogueElements.id_fusion(element, id)]))
+			v.vrai(t.degats > 0.0 and t.cadence > 0.0, "fusion %s/%s valide" % [id,element])
+
+func test_tirs_combines_ne_perdent_pas_de_puissance_totale(v: Verif) -> void:
+	var inventaire: Array = ["spirale"]
+	var avant := Mods.appliquer(_base(), Mods.depuis_l_inventaire(inventaire))
+	inventaire.append("tir_multiple")
+	var apres := Mods.appliquer(_base(), Mods.depuis_l_inventaire(inventaire))
+	v.vrai(apres.degats * apres.nb_projectiles >= avant.degats * avant.nb_projectiles, "Tir multiple ne penalise plus un eventail complet")
+	inventaire.append("salve")
+	var salve := Mods.appliquer(_base(), Mods.depuis_l_inventaire(inventaire))
+	v.vrai(salve.degats * salve.nb_projectiles * Reglages.RAFALE_NOMBRE > apres.degats * apres.nb_projectiles, "Salve renforce les tirs combines")

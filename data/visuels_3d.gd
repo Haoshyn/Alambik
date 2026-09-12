@@ -2,11 +2,12 @@ class_name Visuels3D
 extends RefCounted
 
 # Profil de rendu uniquement : aucune statistique de combat.
-const HEROS_MODELE := "res://assets/3d/characters/heros_b_anime.glb"
-# Course arcade : 0,533 s par cycle, avec une courte phase aerienne.
+const HEROS_MODELE := "res://assets/3d/characters/apprenti_a.glb"
+# Sprint arcade : 0,4 s par cycle, avec une courte phase aerienne.
 const HEROS_CADENCE_COURSE := 1.0
 const HEROS_TRANSITION_MOUVEMENT := 0.18
-const HEROS_TRANSITION_TIR := 0.12
+const HEROS_TRANSITION_TIR := 0.015
+const HEROS_RETOUR_TIR := 0.045
 const HEROS_LISSAGE_CADENCE := 9.0
 const HEROS_LISSAGE_MOUVEMENT := 14.0
 const HEROS_TRANSITION_IMPACT := 0.06

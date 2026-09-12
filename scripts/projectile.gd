@@ -85,6 +85,8 @@ func _sur_contact(corps: Node) -> void:
 	# jamais, la perte de puissance vit dans le projectile.
 	var degats_infliges := tir.degats * _facteur_degats * _facteur_tenebres
 	corps.recevoir_degats(degats_infliges, tir.effets)
+	if not hostile:
+		get_tree().call_group("atelier_fusions","impact",corps,"eau" in tir.effets)
 	if not hostile and tir.rayon_explosion > 0.0 and tir.degats_zone_mult > 0.0:
 		_exploser_autour(corps, degats_infliges)
 	if not hostile and "lumiere" in tir.effets:

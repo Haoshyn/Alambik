@@ -13,7 +13,9 @@ config_version=5
 config/name="Alambic"
 run/main_scene="res://scenes/menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/icon="res://assets/visual/icone_alambic_v2.png"
+config/icon="res://assets/visual/identite/icone.png"
+boot_splash/show_image=false
+boot_splash/bg_color=Color(0.031373, 0.137255, 0.180392, 1)
 
 [autoload]
 
@@ -56,6 +58,6 @@ renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
 anti_aliasing/quality/msaa_3d=2
-environment/defaults/default_clear_color=Color(0.075, 0.105, 0.19, 1)
+environment/defaults/default_clear_color=Color(0.031373, 0.137255, 0.180392, 1)
 2d/snap/snap_2d_transforms_to_pixel=true
 2d/snap/snap_2d_vertices_to_pixel=true

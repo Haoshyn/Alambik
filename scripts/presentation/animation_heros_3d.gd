@@ -5,6 +5,7 @@ var cadence := 1.0
 var _mort := false
 var _tir_en_attente := false
 var _impact_en_attente := false
+var _projection_en_attente := false
 
 func preparer(lecteur: AnimationPlayer) -> void:
 	anim_player = get_path_to(lecteur)
@@ -15,6 +16,8 @@ func preparer(lecteur: AnimationPlayer) -> void:
 		var clip := AnimationNodeAnimation.new()
 		clip.animation = nom
 		graphe.add_node(nom, clip)
+	graphe.add_node("instant_tir", AnimationNodeTimeSeek.new())
+	graphe.connect_node("instant_tir", 0, "attaque")
 	graphe.add_node("cadence", AnimationNodeTimeScale.new())
 	graphe.connect_node("cadence", 0, "course")
 	var locomotion := AnimationNodeBlend2.new()
@@ -25,7 +28,7 @@ func preparer(lecteur: AnimationPlayer) -> void:
 	for nom: String in ["tir", "impact"]:
 		var geste := AnimationNodeOneShot.new()
 		geste.fadein_time = Visuels3D.HEROS_TRANSITION_TIR if nom == "tir" else Visuels3D.HEROS_TRANSITION_IMPACT
-		geste.fadeout_time = Visuels3D.HEROS_TRANSITION_MOUVEMENT
+		geste.fadeout_time = Visuels3D.HEROS_RETOUR_TIR if nom == "tir" else Visuels3D.HEROS_TRANSITION_MOUVEMENT
 		geste.filter_enabled = true
 		var clip := lecteur.get_animation("attaque" if nom == "tir" else "touche")
 		for piste in clip.get_track_count():
@@ -35,7 +38,7 @@ func preparer(lecteur: AnimationPlayer) -> void:
 				geste.set_filter_path(chemin, true)
 		graphe.add_node(nom, geste)
 	graphe.connect_node("tir", 0, "locomotion")
-	graphe.connect_node("tir", 1, "attaque")
+	graphe.connect_node("tir", 1, "instant_tir")
 	graphe.connect_node("impact", 0, "tir")
 	graphe.connect_node("impact", 1, "touche")
 	var etat := AnimationNodeTransition.new()
@@ -63,6 +66,10 @@ func mettre_a_jour(delta: float, vitesse: float, mort: bool) -> void:
 		_mort = true
 		set("parameters/etat/transition_request", "mort")
 	advance(delta)
+	if _projection_en_attente and not _mort:
+		set("parameters/instant_tir/seek_request", Reglages.TIR_PREPARATION)
+		advance(0.0)
+	_projection_en_attente = false
 	_tir_en_attente = false
 	_impact_en_attente = false
 
@@ -77,3 +84,17 @@ func toucher() -> void:
 		return
 	_impact_en_attente = true
 	set("parameters/impact/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
+func armer() -> void:
+	if _mort: return
+	_projection_en_attente = false
+	set("parameters/tir/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	set("parameters/instant_tir/seek_request", 0.0)
+	advance(0.0)
+
+func projeter() -> void:
+	if _mort: return
+	_projection_en_attente = true
+	# Le signal du projectile fixe la pose, meme si la cadence de rendu varie.
+	set("parameters/instant_tir/seek_request", Reglages.TIR_PREPARATION)
+	advance(0.0)

@@ -134,6 +134,7 @@ func inventaire_groupe() -> Array:
 	return resultat
 
 func reactif(id: String) -> Reactif:
+	if CatalogueRecettes.est_fusion(id): return CatalogueRecettes.creer(id)
 	var r := CatalogueReactifs.par_id(id)
 	if r == null and CatalogueElements.est_fusion(id):
 		r = CatalogueElements.creer_fusion(CatalogueElements.element_de_fusion(id),
@@ -170,7 +171,18 @@ func ajouter_fusion_aleatoire_epreuve() -> Dictionary:
 	return derniere_fusion_epreuve.duplicate()
 
 func augment_deja_fusionne(augment: String) -> bool:
+	for id in inventaire:
+		if CatalogueRecettes.est_fusion(id) and CatalogueRecettes.augment_de(id) == augment: return true
 	return not elements_de_augment(augment).is_empty()
+
+func ajouter_recette(id: String) -> bool:
+	var augment := CatalogueRecettes.augment_de(id)
+	if augment not in inventaire or augment_deja_fusionne(augment) or CatalogueRecettes.creer(id) == null: return false
+	for existante in inventaire:
+		if CatalogueRecettes.recette_de(existante) == CatalogueRecettes.recette_de(id): return false
+	inventaire.append(id)
+	inventaire_change.emit()
+	return true
 
 func tirer_element_alambic() -> String:
 	var disponibles := CatalogueElements.ids()

@@ -71,11 +71,12 @@ func verifier() -> void:
 	var squelette := proxy_heros.find_child("Skeleton3D",true,false) as Skeleton3D
 	var lecteur: AnimationPlayer = proxy_heros.get("lecteur")
 	exiger(squelette!=null,"squelette du heros exporte")
-	exiger(proxy_heros.modele.scene_file_path == Visuels3D.HEROS_MODELE,"modele B utilise dans le combat")
+	exiger(proxy_heros.modele.scene_file_path == Visuels3D.HEROS_MODELE,"modele selectionne utilise dans le combat")
 	if squelette != null:
-		exiger(squelette.get_bone_count() == 20,"squelette B complet avec pointe du chapeau")
-		exiger(proxy_heros.find_child("Baton_heros_B",true,false) != null,"baton exporte dans le modele")
-		exiger(proxy_heros.find_child("Main_prise_heros_B",true,false) != null,"gant ferme exporte avec le baton")
+		for nom: String in ["racine", "bassin", "torse", "tete", "chapeau", "echarpe", "main_droite", "cuisse_gauche", "pied_droite"]:
+			exiger(squelette.find_bone(nom) >= 0,"articulation exportee : " + nom)
+		exiger(proxy_heros.find_child("Apprenti_orbe",true,false) != null,"orbe de la baguette exporte")
+		exiger(proxy_heros.find_child("Apprenti_peau",true,false) != null,"visage et mains exportes")
 		for nom: String in ["repos","course","attaque","touche","mort","victoire"]:
 			exiger(lecteur.has_animation(nom),"clip B importe : "+nom)
 		monde.set_process(false)
@@ -88,6 +89,7 @@ func verifier() -> void:
 		proxy_heros.mettre_a_jour(.20)
 		exiger(not avant.is_equal_approx(squelette.get_bone_pose_rotation(os)),"course articulee effective")
 		var temps_course: float = animation.get("parameters/course/current_position")
+		proxy_heros.call("_armer_tir",Vector2.UP)
 		proxy_heros.call("_jouer_tir",null,Vector2.ZERO,Vector2.UP)
 		proxy_heros.mettre_a_jour(.02)
 		exiger(float(animation.get("parameters/course/current_position")) > temps_course,"rafale mobile sans redemarrage du cycle")
@@ -100,17 +102,23 @@ func verifier() -> void:
 		heros.velocity = Vector2.ZERO
 		for i in 30:
 			proxy_heros.mettre_a_jour(1.0/60.0)
-		proxy_heros.call("_jouer_tir",null,Vector2.ZERO,Vector2.DOWN)
+		proxy_heros.call("_armer_tir",Vector2.DOWN)
 		var bras := squelette.find_bone("bras_droite")
 		var avant_tir := squelette.get_bone_pose_rotation(bras)
 		var main_droite := squelette.find_bone("main_droite")
 		var main_avant := squelette.get_bone_global_pose(main_droite).origin
+		var amplitude_main := 0.0
 		for i in 10:
 			proxy_heros.mettre_a_jour(1.0/60.0)
+			if i == 2: proxy_heros.call("_jouer_tir",null,Vector2.ZERO,Vector2.DOWN)
+			amplitude_main = maxf(amplitude_main, squelette.get_bone_global_pose(main_droite).origin.distance_to(main_avant))
 		exiger(not avant_tir.is_equal_approx(squelette.get_bone_pose_rotation(bras)),"le bras participe au tir")
-		exiger(squelette.get_bone_global_pose(main_droite).origin.distance_to(main_avant)>0.06,"la main accompagne le geste de lancement")
+		print("AMPLITUDE_MAIN : ", amplitude_main)
+		exiger(amplitude_main>0.06,"la main accompagne le geste de lancement")
+		proxy_heros.call("_armer_tir",Vector2.DOWN)
+		proxy_heros.mettre_a_jour(.02)
 		proxy_heros.call("_jouer_tir",null,Vector2.ZERO,Vector2.DOWN)
-		exiger(float(animation.get("parameters/attaque/current_position")) >= 0.15,"les tirs rapproches preservent le geste en cours")
+		exiger(is_equal_approx(float(animation.get("parameters/attaque/current_position")),Reglages.TIR_PREPARATION),"chaque projectile retrouve la pose de projection")
 		monde.set_process(true)
 	var suivi: Node = proxy_heros.get("suivi")
 	heros.set_physics_process(true)

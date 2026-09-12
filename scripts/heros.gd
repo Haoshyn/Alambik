@@ -5,6 +5,7 @@ extends CharacterBody2D
 # rapporter des succes faux ailleurs.
 
 signal tir_demande(tir_courant: Tir, origine: Vector2, direction: Vector2)
+signal attaque_preparee(direction: Vector2)
 signal touchee(position: Vector2)
 signal bouclier_brise(position: Vector2)
 signal morte
@@ -19,6 +20,7 @@ var limites := Rect2(Vector2(80, 300), Vector2(920, 1400))
 var _intention := Vector2.ZERO
 var _intensite := 0.0
 var _temps_immobile := 0.0
+var _a_bouge_dans_la_salle := false
 var _recharge := 0.0
 var _invulnerable := 0.0
 var _rafale_restante := 0
@@ -29,6 +31,7 @@ var _flottement := 0.0
 var _secousse := 0.0
 var _inclinaison := 0.0
 var _attaque := 0.0
+var _tirs_prepares: Array[Dictionary] = []
 var _seconde_chance_disponible := true
 var _transformations_initialisees: Array[String] = []
 var _resurrections_feu := 0
@@ -61,6 +64,9 @@ func recalculer() -> void:
 	_initialiser_transformations(drapeaux)
 
 func preparer_nouvelle_salle() -> void:
+	_a_bouge_dans_la_salle = false
+	_tirs_prepares.clear()
+	_rafale_restante = 0
 	recalculer()
 	# Seconde chance se rearme a chaque salle : une seule fois par grimoire, elle
 	# ne servait qu'une fois sur vingt rencontres.
@@ -80,6 +86,7 @@ func _physics_process(delta: float) -> void:
 	global_position = Geometrie.contraindre_dans_rect(global_position, limites, Reglages.HEROS_RAYON)
 
 func _process(delta: float) -> void:
+	_avancer_tirs_prepares(delta)
 	_flottement += delta
 	_attaque = maxf(0.0, _attaque - delta)
 	var inclinaison_visee := clampf(velocity.x / maxf(1.0, stats.vitesse), -1.0, 1.0) * 0.10
@@ -91,6 +98,8 @@ func _process(delta: float) -> void:
 	_recharge = maxf(0.0, _recharge - delta)
 	_avancer_rafale(delta)
 	var immobile := _intention == Vector2.ZERO
+	if not immobile and _intensite > 0.0:
+		_a_bouge_dans_la_salle = true
 	_temps_immobile = _temps_immobile + delta if immobile else 0.0
 	queue_redraw()
 
@@ -115,10 +124,7 @@ func _process(delta: float) -> void:
 		_rafale_minuterie = 0.0
 		_rafale_direction = direction
 	else:
-		Jeu.tirs_emis += 1
-		_attaque = 0.42
-		tir_demande.emit(tir_courant, global_position, direction)
-		Sons.jouer("tir", -20.0, randf_range(0.95, 1.08))
+		_preparer_tir(direction)
 
 func _avancer_rafale(delta: float) -> void:
 	if _rafale_restante <= 0:
@@ -135,10 +141,31 @@ func _avancer_rafale(delta: float) -> void:
 	if index != -1:
 		_rafale_direction = global_position.direction_to(_point_vise(index))
 		_visee = _rafale_direction
-	Jeu.tirs_emis += 1
-	_attaque = 0.42
-	tir_demande.emit(tir_courant, global_position, _rafale_direction)
-	Sons.jouer("tir", -22.0, randf_range(1.0, 1.15))
+	_preparer_tir(_rafale_direction)
+
+func _preparer_tir(direction: Vector2) -> void:
+	if stats.pv <= 0: return
+	_tirs_prepares.append({"reste": Reglages.TIR_PREPARATION, "direction": direction, "tir": tir_courant})
+	attaque_preparee.emit(direction)
+
+func _avancer_tirs_prepares(delta: float) -> void:
+	if stats.pv <= 0:
+		_tirs_prepares.clear()
+		return
+	var attentes: Array[Dictionary] = []
+	var prets: Array[Dictionary] = []
+	for preparation: Dictionary in _tirs_prepares:
+		preparation["reste"] = float(preparation["reste"]) - delta
+		if float(preparation["reste"]) <= 0.000001: prets.append(preparation)
+		else: attentes.append(preparation)
+	_tirs_prepares = attentes
+	for preparation: Dictionary in prets:
+		var direction: Vector2 = preparation["direction"]
+		var tir: Tir = preparation["tir"]
+		Jeu.tirs_emis += 1
+		_attaque = 0.18
+		tir_demande.emit(tir, global_position, direction)
+		Sons.jouer("tir", -20.0, randf_range(0.95, 1.08))
 
 func cibles_visibles() -> Array[Vector2]:
 	var positions: Array[Vector2] = []
@@ -205,7 +232,7 @@ func multiplicateur_degats_passif() -> float:
 		resultat *= Reglages.MANNEQUIN_DEGATS_MULT
 	# Elan vital recompense le deplacement : le bonus persiste un court instant
 	# apres l'arret, sinon il ne servirait jamais — on tire a l'arret.
-	if "elan_vital" in tir_courant.drapeaux and _temps_immobile <= Reglages.ELAN_VITAL_DUREE:
+	if "elan_vital" in tir_courant.drapeaux and _a_bouge_dans_la_salle and _temps_immobile <= Reglages.ELAN_VITAL_DUREE:
 		resultat *= Reglages.ELAN_VITAL_DEGATS_MULT
 	if "transformation_heros_tenebres" in tir_courant.drapeaux:
 		resultat *= Reglages.TENEBRES_HEROS_DEGATS_MULT
@@ -307,8 +334,6 @@ func _dessiner_vie() -> void:
 	var contenu := barre.grow(-1)
 	contenu.size.x *= part
 	draw_rect(contenu,Palette.DANGER.lerp(Color("71d9b4"),part))
-	if part < 1.0:
-		draw_string(Polices.CORPS,Vector2(-76,hauteur-9),"%d / %d" % [ceili(stats.pv),ceili(stats.pv_max)],HORIZONTAL_ALIGNMENT_CENTER,152,20,StyleAzur.TEXTE)
 
 func _dessiner_repli(r: float, teinte: Color) -> void:
 	var capuche := Dessin.goutte(Vector2(0, -r * 0.15), r * 1.35, PI, 1.15)

@@ -1,7 +1,7 @@
 class_name CatalogueReactifs
 extends RefCounted
 
-# Catalogue exact des seize Améliorations actuellement decides. Les Elements vivent
+# Catalogue des trente ameliorations. Les Elements vivent
 # dans leur propre catalogue et ne peuvent donc jamais polluer les level-ups.
 
 const PROJECTILE := "projectile"
@@ -15,11 +15,11 @@ const SCEAU := "sceau"
 static var TOUS := {
 	"tir_multiple": Reactif.creer("tir_multiple", "Tir multiple",
 		"Ajoute un projectile simultané. Chaque trait inflige nettement moins de dégâts.",
-		{"nb_projectiles_add": 1, "ecart_lateral_add": 30.0, "degats_mult": 0.68},
+		{"nb_projectiles_add": 1, "ecart_lateral_add": 30.0, "degats_mult": 0.78},
 		false, Color(0.98, 0.82, 0.42), "eventail", 1, PROJECTILE),
 	"salve": Reactif.creer("salve", "Salve",
 		"Chaque attaque devient une salve de deux tirs rapides moins puissants.",
-		{"drapeaux": ["rafale"], "degats_mult": 0.68},
+		{"drapeaux": ["rafale"], "degats_mult": 0.72},
 		false, Color(1.00, 0.72, 0.34), "triple_barre", 1, PROJECTILE),
 	"ricochet": Reactif.creer("ricochet", "Ricochet",
 		"Les projectiles rebondissent d'un ennemi vers un autre et gagnent un peu de puissance.",
@@ -37,15 +37,14 @@ static var TOUS := {
 	# calculent sur l'attaque, donc tout ce qui concentre la frappe les amplifie.
 	"frappe_lourde": Reactif.creer("frappe_lourde", "Frappe lourde",
 		"Les attaques deviennent lentes et écrasantes.",
-		{"degats_mult": 1.62, "cadence_mult": 0.68},
+		{"degats_mult": 1.70, "cadence_mult": 0.72},
 		false, Color(0.92, 0.60, 0.32), "masse", 1, PROJECTILE),
 	# L'inverse exact : beaucoup d'impacts faibles. Le vol de vie de la Lumière et
 	# la surcharge des Ténèbres se declenchent par impact, pas par degat.
-	# Le prix est la portee, pas les degats : trois Améliorations du pool payent
-	# deja en degats, et ces malus s'additionnent au point de briser une main.
+	# La portee paie la cadence pour conserver un choix face au Sceau de celerite.
 	"cadence_febrile": Reactif.creer("cadence_febrile", "Cadence fébrile",
 		"Les attaques s'enchaînent plus vite, au prix d'une portée réduite.",
-		{"cadence_mult": 1.30, "portee_mult": 0.82},
+		{"cadence_mult": 1.38, "portee_mult": 0.82},
 		false, Color(1.00, 0.88, 0.52), "triple_barre", 1, PROJECTILE),
 	# Une ligne entiere touchee d'un seul trait : l'Eau ralentit tout le rang et
 	# le Feu y pose autant de brulures qu'il y a de corps.

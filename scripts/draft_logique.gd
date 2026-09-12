@@ -14,9 +14,17 @@ static func candidats(inventaire: Array) -> Array[String]:
 static func proposer(inventaire: Array, rng: RandomNumberGenerator, nb := 3) -> Array[String]:
 	var restants := candidats(inventaire)
 	var tirage: Array[String] = []
+	var familles: Array[String] = []
 	while tirage.size() < nb and not restants.is_empty():
-		var index := rng.randi_range(0, restants.size() - 1)
-		tirage.append(restants.pop_at(index))
+		# Trois familles donnent des choix de jeu distincts sans imposer un build.
+		var varies: Array[String] = []
+		for id in restants:
+			if CatalogueReactifs.par_id(id).famille not in familles: varies.append(id)
+		if varies.is_empty(): varies = restants.duplicate()
+		var choix: String = varies[rng.randi_range(0,varies.size()-1)]
+		tirage.append(choix)
+		familles.append(CatalogueReactifs.par_id(choix).famille)
+		restants.erase(choix)
 	return tirage
 
 static func copies(inventaire: Array, id: String) -> int:

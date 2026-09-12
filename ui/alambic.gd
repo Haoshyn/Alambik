@@ -1,116 +1,66 @@
 extends Control
-
-
-
-# L'Alambic genere un Element et l'attache a un Amélioration existant. La fusion
-# ajoute une transformation : elle ne retire ni ne remplace jamais l'original.
-
 signal termine
 
-var _liste: VBoxContainer
-var _cartes: Array[CarteReactif] = []
+var _propositions: Array[String] = []
 var _selection := ""
-var _element := ""
+var _boutons: Array[Button] = []
 var _bouton_fusionner: Button
 var _apercu: Label
-var _anim := 0.0
 var _fusion_en_cours := false
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
-	mouse_filter = Control.MOUSE_FILTER_STOP
-	_element = Jeu.tirer_element_alambic()
-	_construire()
-	StyleInterface.animer_entree(self)
-	if Jeu.mode_auto:
-		_jouer_automatiquement()
-
-func _process(delta: float) -> void:
-	_anim += delta
-	queue_redraw()
-
-func _construire() -> void:
-	var col := StyleAzur.page(self,"Infusion élémentaire")
-	var element := CatalogueElements.par_id(_element)
-	col.add_child(StyleAzur.image(14,180))
-	col.add_child(StyleAzur.texte(str(element.get("nom","Alambic")),36,StyleAzur.MAGIE))
-	_liste = StyleAzur.defilement(col)
-	_apercu = StyleAzur.texte("",28)
+	_propositions = CatalogueRecettes.proposer(Jeu.inventaire,Jeu.rng)
+	var col := StyleAzur.page(self,"L’Alambic des possibles")
+	col.add_child(StyleAzur.texte("Une fusion pour orienter cette aventure",28,StyleAzur.ATTENUE))
+	var liste := StyleAzur.defilement(col)
+	for id in _propositions:
+		var recette := CatalogueRecettes.creer(id)
+		var base := CatalogueReactifs.par_id(CatalogueRecettes.augment_de(id))
+		var element := CatalogueElements.par_id(CatalogueRecettes.TOUS[CatalogueRecettes.recette_de(id)]["element"])
+		var bouton := StyleAzur.bouton("%s\n%s + %s\n\n%s" % [recette.nom,base.nom,element["nom"],recette.description],func(): _sur_choix(id))
+		bouton.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		bouton.custom_minimum_size.y = 300
+		bouton.add_theme_font_size_override("font_size",28)
+		liste.add_child(bouton)
+		_boutons.append(bouton)
+	_apercu = StyleAzur.texte("L’amélioration de départ reste active. Les réactions peuvent combiner plusieurs fusions.",25,StyleAzur.ATTENUE)
 	col.add_child(_apercu)
-	_bouton_fusionner = StyleAzur.bouton("Infuser l’amélioration",_sur_fusionner,true)
+	_bouton_fusionner = StyleAzur.bouton("Choisir une recette",_sur_fusionner,true)
+	_bouton_fusionner.disabled = true
 	col.add_child(_bouton_fusionner)
-	_construire_cartes()
-	if _cartes.is_empty() or _element.is_empty():
-		col.add_child(StyleAzur.bouton("Continuer",func(): StyleInterface.sortir_puis(self,func(): termine.emit())))
-
-func _construire_cartes() -> void:
-	var deja_vus: Array[String] = []
-	for id in Jeu.inventaire:
-		if id in deja_vus or id not in CatalogueReactifs.ids() or Jeu.augment_deja_fusionne(id):
-			continue
-		deja_vus.append(id)
-		var reactif := CatalogueReactifs.par_id(id)
-		var carte := CarteReactif.new()
-		carte.configurer(reactif)
-		carte.custom_minimum_size = Vector2(0, 150)
-		carte.selectionnee = id == _selection
-		carte.choisie.connect(_sur_choix)
-		_liste.add_child(carte)
-		_cartes.append(carte)
-	_rafraichir()
-	call_deferred("_animer_cartes")
-
-func _animer_cartes() -> void:
-	if is_instance_valid(_liste):
-		StyleInterface.animer_liste(_liste, 0.045)
+	if _propositions.is_empty():
+		_apercu.text = "Toutes vos améliorations sont déjà transformées. Le soin de l’Alambic est conservé."
+		col.add_child(StyleAzur.bouton("Continuer",_fermer))
+	StyleInterface.animer_entree(self)
+	Capture.programmer(self)
+	if Jeu.mode_auto: _jouer_automatiquement()
 
 func _sur_choix(id: String) -> void:
-	if _fusion_en_cours:
-		return
-	_selection = "" if _selection == id else id
-	_rafraichir()
-
-func _rafraichir() -> void:
-	for carte in _cartes:
-		if is_instance_valid(carte):
-			carte.selectionnee = carte.reactif.id == _selection
-			carte.queue_redraw()
-	_bouton_fusionner.disabled = _selection.is_empty() or _element.is_empty()
-	var donnees := CatalogueElements.par_id(_element)
-	if donnees.is_empty():
-		_apercu.text = "L'Alambic reste silencieux."
-	elif _cartes.is_empty():
-		_apercu.text = "%s\n\nAucune Amélioration non fusionnée n'est disponible." % donnees["nom"]
-	elif _selection.is_empty():
-		_apercu.text = "%s\n\nChoisissez l'Amélioration à transformer." % donnees["nom"]
-	else:
-		var augment := CatalogueReactifs.par_id(_selection)
-		var fusion := CatalogueElements.creer_fusion(_element, _selection)
-		_apercu.text = "%s + %s\n%s" % [augment.nom, donnees["nom"], fusion.description]
-	_apercu.add_theme_color_override("font_color", _teinte_element())
+	if _fusion_en_cours: return
+	_selection = id
+	for i in _boutons.size():
+		_boutons[i].modulate = Color.WHITE if _propositions[i] == id else Color(0.72,0.78,0.85)
+	_bouton_fusionner.disabled = false
+	_bouton_fusionner.text = "Créer · " + CatalogueRecettes.creer(id).nom
 
 func _sur_fusionner() -> void:
-	if _fusion_en_cours or _selection.is_empty():
-		return
+	if _fusion_en_cours or _selection.is_empty(): return
+	if not Jeu.ajouter_recette(_selection): return
 	_fusion_en_cours = true
-	if not Jeu.ajouter_fusion_elementaire(_element, _selection):
-		_fusion_en_cours = false
-		return
-	Sons.jouer("fusion", -8.0)
-	var fusion := CatalogueElements.creer_fusion(_element, _selection)
-	_apercu.text = "%s !\n%s" % [fusion.nom, fusion.description]
-	await get_tree().create_timer(0.85).timeout
-	StyleInterface.sortir_puis(self, func() -> void: termine.emit())
+	_bouton_fusionner.disabled = true
+	for bouton in _boutons: bouton.disabled = true
+	Sons.jouer("fusion",-8.0)
+	_apercu.text = CatalogueRecettes.creer(_selection).nom + " créée !"
+	await get_tree().create_timer(0.65).timeout
+	_fermer()
+
+func _fermer() -> void:
+	StyleInterface.sortir_puis(self,func(): termine.emit())
 
 func _jouer_automatiquement() -> void:
 	await get_tree().create_timer(0.2).timeout
-	if _cartes.is_empty():
-		StyleInterface.sortir_puis(self, func() -> void: termine.emit())
+	if _propositions.is_empty():
+		_fermer()
 		return
-	_selection = _cartes[0].reactif.id
-	_rafraichir()
+	_sur_choix(_propositions[Jeu.rng.randi_range(0,_propositions.size()-1)])
 	_sur_fusionner()
-
-func _teinte_element() -> Color:
-	var donnees := CatalogueElements.par_id(_element)
-	return donnees.get("teinte", Palette.ESSENCE)

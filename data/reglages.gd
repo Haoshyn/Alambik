@@ -41,6 +41,7 @@ const ENNEMI_HITBOX_MULT := 0.72
 const BOSS_HITBOX_MULT := 0.74
 
 const TIR_DEGATS := 10.0
+const MODS_PLANCHER := 0.05
 # Mesure : la creature la plus rapide file a 704 px/s. A 900, le projectile
 # n'allait qu'a 1,28 fois sa vitesse et se faisait esquiver systematiquement ;
 # un tir doit devancer sa cible d'un facteur deux au minimum.
@@ -48,6 +49,7 @@ const TIR_VITESSE := 1550.0
 const TIR_RAYON := 10.0
 const TIR_PORTEE := 1400.0
 const TIR_DELAI_ARRET := 0.12       # temps d'arret avant que le tir reprenne
+const TIR_PREPARATION := 0.05      # anticipation du bras avant la projection
 
 const BRAISE_DEGATS_PAR_SECONDE := 6.0
 const BRAISE_DUREE := 4.0
@@ -70,8 +72,8 @@ const AVIDITE_XP_MULT := 1.20
 const AVIDITE_GOUTTES_MULT := 1.20
 const COURAGEUX_BONUS_MAX := 0.70
 const MANNEQUIN_DELAI := 1.2
-const MANNEQUIN_DEGATS_MULT := 1.35
-const MANNEQUIN_CADENCE_MULT := 1.25
+const MANNEQUIN_DEGATS_MULT := 1.25
+const MANNEQUIN_CADENCE_MULT := 1.15
 const FAMILIER_TIR_INTERVALLE := 0.85
 const FAMILIER_TIR_PART_DEGATS := 0.42
 # Le familier tire depuis ce decalage, pas depuis le heros. Sa visee doit donc
@@ -132,8 +134,8 @@ const HOMING_ROTATION_PAR_SECONDE := 8.0
 
 # Ameliorations ajoutees au pool. Leurs valeurs pures vivent dans le catalogue ;
 # seules celles que la logique doit lire sont ici.
-const PEAU_DE_PIERRE_REDUCTION := 0.24
-const SOIF_DE_SANG_PART := 0.012      # part des PV max rendue par elimination
+const PEAU_DE_PIERRE_REDUCTION := 0.30
+const SOIF_DE_SANG_PART := 0.006      # part des PV max rendue par elimination
 const CHAINE_INTERVALLE := 1.6
 const CHAINE_PART_DEGATS := 0.52
 const CHAINE_CIBLES := 4
@@ -172,6 +174,7 @@ const OBJET_CROISSANCE_PAR_MONDE := 1.09
 # Sceaux. L'aura ne fait aucun degat : elle marque, ce qui la rend lisible face
 # aux Phenomenes qui, eux, frappent.
 const SCEAU_GARDE_REDUCTION := 0.22
+const SCEAU_AURA_CIBLES_SOIN_MAX := 3
 const SCEAU_RUINE_VULNERABILITE := 1.30
 const SCEAU_AURA_INTERVALLE := 0.55
 const SCEAU_AURA_RAYON := 240.0
@@ -185,7 +188,7 @@ const ONDE_CHOC_PART_DEGATS := 1.15
 const ONDE_CHOC_REPOUSSEE := 300.0
 
 # Elan vital : l'inverse de Mannequin, il recompense le deplacement.
-const ELAN_VITAL_DEGATS_MULT := 1.45
+const ELAN_VITAL_DEGATS_MULT := 1.35
 const ELAN_VITAL_DUREE := 1.1       # secondes de bonus apres s'etre deplace
 
 const FLAQUE_DUREE := 3.0
@@ -342,8 +345,8 @@ const PLAFOND_ENNEMIS := 10
 # vitesse de projectile. La menace vient donc surtout d'un pattern qu'il faut
 # esquiver plus longtemps, sans transformer chaque impact en quasi one-shot.
 # Les miniboss restent nettement plus courts pour ne pas casser le rythme.
-const MINIBOSS_PV_MULT := 1.25
-const BOSS_SIGNATURE_PV_MULT := 3.0
+const MINIBOSS_PV_MULT := 6.5
+const BOSS_SIGNATURE_PV_MULT := 5.0
 const MINIBOSS_DEGATS_MULT := 1.00
 const BOSS_SIGNATURE_DEGATS_MULT := 1.10
 const BOSS_PROJECTILE_VITESSE_MULT := 1.20

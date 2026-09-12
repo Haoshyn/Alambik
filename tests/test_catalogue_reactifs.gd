@@ -103,7 +103,9 @@ func test_les_projectiles_restent_dans_un_budget_resserre(v: Verif) -> void:
 
 func test_le_trio_multi_salve_cadence_reste_fort_sans_exploser(v: Verif) -> void:
 	var rendement := _rendement_projectile(["tir_multiple", "salve", "cadence_febrile"])
-	v.vrai(rendement >= 1.70 and rendement <= 2.05,
+	# Trois choix offensifs peuvent tripler le DPS si tous les traits touchent.
+	# L'ancien plafond reposait sur des malus additifs qui cassaient les synergies.
+	v.vrai(rendement >= 2.50 and rendement <= 3.20,
 		"multi + salve + cadence reste un power spike, pas un multiplicateur hors echelle")
 	var moyenne_tenebres := 1.0 + Reglages.TENEBRES_CHANCE_SURCHARGE * (Reglages.TENEBRES_SURCHARGE_MULT - 1.0)
 	v.vrai(moyenne_tenebres <= 1.30,

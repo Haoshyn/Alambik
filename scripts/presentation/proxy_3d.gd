@@ -27,6 +27,7 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 		var donnees: Dictionary = logique.get("donnees")
 		facteur = float(donnees["rayon"]) / (65.0 if donnees.get("cerveau", "") == "boss" else 30.0)
 	if genre == "heros":
+		preload("res://scripts/presentation/materiaux_apprenti.gd").appliquer(modele)
 		var peau := modele.find_child("Heros_B_peau", true, false) as MeshInstance3D
 		if peau != null:
 			var source := peau.get_active_material(0) as StandardMaterial3D
@@ -44,6 +45,7 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 			add_child(animation_heros)
 			animation_heros.preparer(lecteur)
 		logique.connect("tir_demande", _jouer_tir)
+		logique.connect("attaque_preparee", _armer_tir)
 		logique.connect("touchee", func(_position):
 			if animation_heros != null:
 				animation_heros.toucher())
@@ -110,7 +112,12 @@ func _jouer_tir(_tir, _origine: Vector2, direction: Vector2) -> void:
 	_orientation = direction.normalized()
 	if animation_heros != null:
 		if not _mort:
-			animation_heros.tirer()
+			animation_heros.projeter()
+
+func _armer_tir(direction: Vector2) -> void:
+	_orientation = direction.normalized()
+	if animation_heros != null and not _mort:
+		animation_heros.armer()
 
 func _exit_tree() -> void:
 	if is_instance_valid(suivi):

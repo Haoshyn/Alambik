@@ -53,12 +53,11 @@ func test_les_dix_boss_signatures_ont_des_repertoires_distincts(v: Verif) -> voi
 		v.vrai(Boss.motifs_pour(id, 2).size() >= 4, "%s enrichit sa seconde phase" % id)
 
 func test_les_boss_portent_un_vrai_budget_de_rencontre(v: Verif) -> void:
-	var pression_signature := Reglages.BOSS_SIGNATURE_PV_MULT * Reglages.BOSS_SIGNATURE_DEGATS_MULT \
-		* Reglages.BOSS_PROJECTILE_VITESSE_MULT / Reglages.BOSS_CADENCE_MOTIF_MULT
-	v.vrai(pression_signature >= 4.2 and pression_signature <= 5.2,
-		"le boss signature porte environ cinq fois l'ancien budget de rencontre")
-	v.vrai(Reglages.MINIBOSS_PV_MULT >= 1.2 and Reglages.MINIBOSS_PV_MULT < Reglages.BOSS_SIGNATURE_PV_MULT,
-		"les miniboss sont renforces sans devenir aussi longs que les signatures")
+	# Mesure les PV reels du premier palier, pas un produit abstrait de facteurs.
+	for id in CatalogueEnnemis.ids_miniboss():
+		var pv := float(CatalogueEnnemis.par_id(id)["pv"]) * Chapitres.facteur_pv(0, 5) * Reglages.MINIBOSS_PV_MULT
+		var secondes := pv / (Reglages.TIR_DEGATS * Reglages.HEROS_CADENCE)
+		v.vrai(secondes >= 30.0 and secondes <= 45.0, "%s demande 30-45 s de tir de base continu" % id)
 	v.vrai(Reglages.BOSS_SIGNATURE_DEGATS_MULT > Reglages.MINIBOSS_DEGATS_MULT,
 		"le boss signature est aussi plus dangereux, pas seulement plus long")
 	v.vrai(Reglages.BOSS_PROJECTILE_VITESSE_MULT >= 1.20,

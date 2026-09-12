@@ -2,7 +2,7 @@ extends RefCounted
 
 func test_affiche_les_bonus_chiffres(v: Verif) -> void:
 	var lignes := DetailsReactif.lignes(CatalogueReactifs.par_id("tir_multiple"))
-	v.vrai("Dégâts -32 %" in lignes, "le compromis de dégâts est affiché")
+	v.vrai("Dégâts -22 %" in lignes, "le compromis de dégâts est affiché")
 	v.vrai("+1 projectile" in lignes, "le projectile supplémentaire est affiché")
 
 func test_affiche_les_effets_elementaires(v: Verif) -> void:
@@ -13,3 +13,8 @@ func test_affiche_les_effets_elementaires(v: Verif) -> void:
 func test_detaille_les_augments_du_heros(v: Verif) -> void:
 	var texte := DetailsReactif.texte(CatalogueReactifs.par_id("egide"))
 	v.vrai("première attaque" in texte, "Égide affiche sa règle")
+
+func test_les_copies_affichent_le_cout_compose(v: Verif) -> void:
+	var reactif := CatalogueReactifs.par_id("tir_multiple")
+	var texte := DetailsReactif.texte(reactif, 2)
+	v.vrai("Dégâts -32.3 %" in texte, "deux copies ponderees composent leur cout comme le combat")

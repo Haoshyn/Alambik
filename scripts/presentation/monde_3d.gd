@@ -129,10 +129,9 @@ func _reconstruire_obstacles() -> void:
 	var index := 0
 	for rect in salle.obstacles():
 		if rect in salle.retraits(): continue
-		var obstacle := charger("res://assets/3d/props/obstacle_%d.glb" % ((_numero+index)%3)).instantiate() as Node3D
+		var taille := Pont3D.vers_monde(rect.size)
+		var obstacle := preload("res://scripts/presentation/decor_alchimique.gd").obstacle(taille, (_numero+index)%3)
 		_obstacles.add_child(obstacle)
 		obstacle.position = Pont3D.vers_monde(rect.get_center())
-		var taille := Pont3D.vers_monde(rect.size)
-		# La base du mesh couvre le rectangle physique, sans agrandir la hitbox.
-		obstacle.scale = Vector3(taille.x/.95, minf(.85,taille.x), taille.z/.45)
+		# La base couvre exactement le rectangle physique de l'obstacle.
 		index += 1
