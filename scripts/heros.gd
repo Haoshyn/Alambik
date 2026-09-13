@@ -15,6 +15,7 @@ var stats := Stats.depuis_reglages(ReglagesJoueur.rangs_competences_effectifs(),
 	ReglagesJoueur.niveau_compte_effectif())
 var tir_courant: Tir
 var bouclier := 0
+var _bouclier_accorde := false
 var limites := Rect2(Vector2(80, 300), Vector2(920, 1400))
 
 var _intention := Vector2.ZERO
@@ -43,6 +44,11 @@ var _protection_terre := 0.0
 var _aureole_lumiere := 0.0
 func _ready() -> void:
 	add_to_group("heros")
+	var collision := get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if collision != null:
+		collision.shape = collision.shape.duplicate()
+		(collision.shape as CircleShape2D).radius = Reglages.HEROS_RAYON
+	stats.soin_restant = stats.pv_max * Reglages.SOIN_COMBAT_PAR_SALLE
 	add_to_group("cibles_ennemis")
 	tir_courant = Tir.de_base(stats)
 	recalculer()
@@ -60,17 +66,19 @@ func recalculer() -> void:
 	stats.vitesse = Reglages.HEROS_VITESSE * ArbreCompetences.multiplicateur_vitesse(ReglagesJoueur.rangs_competences_effectifs()) \
 		* Sorts.multiplicateur_vitesse(ReglagesJoueur.passifs_equipes_effectifs()) \
 		* (1.0 + float(ReglagesJoueur.bonus_objets_effectifs()["vitesse"]))
-	bouclier = 1 if "egide" in drapeaux or ArbreCompetences.donne_bouclier(ReglagesJoueur.rangs_competences_effectifs()) or Sorts.donne_bouclier(ReglagesJoueur.passifs_equipes_effectifs()) else 0
+	if not _bouclier_accorde and ("egide" in drapeaux or ArbreCompetences.donne_bouclier(ReglagesJoueur.rangs_competences_effectifs()) or Sorts.donne_bouclier(ReglagesJoueur.passifs_equipes_effectifs())):
+		bouclier = 1
+		_bouclier_accorde = true
 	_initialiser_transformations(drapeaux)
 
 func preparer_nouvelle_salle() -> void:
+	_bouclier_accorde = false
+	stats.soin_restant = stats.pv_max * Reglages.SOIN_COMBAT_PAR_SALLE
 	_a_bouge_dans_la_salle = false
 	_tirs_prepares.clear()
 	_rafale_restante = 0
 	recalculer()
-	# Seconde chance se rearme a chaque salle : une seule fois par grimoire, elle
-	# ne servait qu'une fois sur vingt rencontres.
-	_seconde_chance_disponible = true
+	# La resurrection reste consommee entre les salles.
 	if "regeneration" in tir_courant.drapeaux:
 		stats.soigner(stats.pv_max * Reglages.REGENERATION_PART \
 			* ArbreCompetences.multiplicateur_soin(ReglagesJoueur.rangs_competences_effectifs()))

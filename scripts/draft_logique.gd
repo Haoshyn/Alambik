@@ -29,3 +29,11 @@ static func proposer(inventaire: Array, rng: RandomNumberGenerator, nb := 3) -> 
 
 static func copies(inventaire: Array, id: String) -> int:
 	return inventaire.count(id)
+
+static func proposer_halte(inventaire: Array, rng: RandomNumberGenerator) -> Array[String]:
+	var exclus := inventaire.duplicate()
+	for id in CatalogueReactifs.ids():
+		if CatalogueReactifs.par_id(id).famille not in [CatalogueReactifs.PROJECTILE, CatalogueReactifs.PHENOMENE]:
+			exclus.append(id)
+	var choix := proposer(exclus, rng)
+	return choix if not choix.is_empty() else proposer(inventaire, rng)

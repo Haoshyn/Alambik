@@ -3,6 +3,7 @@ extends RefCounted
 
 var pv_max: float
 var pv: float
+var soin_restant := INF
 var vitesse: float
 var cadence: float          # tirs par seconde
 var degats: float
@@ -39,7 +40,12 @@ func blesser(montant: float) -> void:
 	pv = maxf(0.0, pv - montant)
 
 func soigner(montant: float) -> void:
-	pv = minf(pv_max, pv + montant)
+	var rendu := minf(maxf(0.0, montant), minf(pv_max - pv, soin_restant))
+	pv += rendu
+	soin_restant -= rendu
+
+func soigner_garanti(montant: float) -> void:
+	pv = minf(pv_max, pv + maxf(0.0, montant))
 
 func est_mort() -> bool:
 	return pv <= 0.0

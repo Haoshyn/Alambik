@@ -56,3 +56,6 @@ static func tirer_epreuve(rng: RandomNumberGenerator, rangs: Dictionary,
 	if candidats.is_empty() or rng.randf() >= Reglages.EPREUVE_CHANCE_CAPACITE:
 		return {"type": "gouttes", "quantite": rng.randi_range(GOUTTES_EPREUVE_MIN, GOUTTES_EPREUVE_MAX)}
 	return candidats[rng.randi_range(0, candidats.size() - 1)]
+
+static func gouttes_progression(salles: int, chapitre: int) -> int:
+	return roundi(float(maxi(0, salles) * Reglages.GOUTTES_PAR_SALLE) * pow(Reglages.GOUTTES_MULT_PAR_CHAPITRE, clampi(chapitre, 0, Chapitres.nombre()-1)))

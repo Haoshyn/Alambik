@@ -25,6 +25,7 @@ var _distance_parcourue := 0.0
 var _rebonds_restants := 0
 var _perforations_restantes := 0
 var _deja_touches: Array[int] = []
+var _corps_exclus: Array[RID] = []
 var _trainee: Array[Vector2] = []
 var _age := 0.0
 var _facteur_tenebres := 1.0
@@ -40,6 +41,8 @@ func _ready() -> void:
 	_perforations_restantes = tir.perforations
 	if cible_exclue != 0:
 		_deja_touches.append(cible_exclue)
+		var exclusion := instance_from_id(cible_exclue) as CollisionObject2D
+		if exclusion != null: _corps_exclus.append(exclusion.get_rid())
 	if not hostile and "tenebres" in tir.drapeaux and Jeu.rng.randf() < Reglages.TENEBRES_CHANCE_SURCHARGE:
 		_facteur_tenebres = Reglages.TENEBRES_SURCHARGE_MULT
 	couleur = Palette.TIR_ENNEMI_HALO if hostile else Palette.teinte_du_tir(tir.effets)
@@ -53,9 +56,18 @@ func _ready() -> void:
 	body_entered.connect(_sur_contact)
 
 func _physics_process(delta: float) -> void:
+	if _termine: return
 	_appliquer_trajectoire_fusion(delta)
 	var pas := direction * tir.vitesse * delta
-	position += pas
+	# Le segment bouche les trous entre deux positions de l'Area2D rapide.
+	# Les contacts lateraux restent geres par sa forme circulaire.
+	var requete := PhysicsRayQueryParameters2D.create(global_position, global_position + pas, collision_mask, _corps_exclus)
+	var impact := get_world_2d().direct_space_state.intersect_ray(requete)
+	if not impact.is_empty():
+		global_position = impact["position"]
+		_sur_contact(impact["collider"])
+	else:
+		position += pas
 	_distance_parcourue += pas.length()
 	_age += delta
 	_trainee.push_front(position)
@@ -77,6 +89,7 @@ func _sur_contact(corps: Node) -> void:
 	if corps.get_instance_id() in _deja_touches:
 		return
 	_deja_touches.append(corps.get_instance_id())
+	if corps is CollisionObject2D: _corps_exclus.append(corps.get_rid())
 	_dernier_touche = corps.get_instance_id()
 
 	if not hostile:
@@ -86,7 +99,7 @@ func _sur_contact(corps: Node) -> void:
 	var degats_infliges := tir.degats * _facteur_degats * _facteur_tenebres
 	corps.recevoir_degats(degats_infliges, tir.effets)
 	if not hostile:
-		get_tree().call_group("atelier_fusions","impact",corps,"eau" in tir.effets)
+		get_tree().call_group("charge_combat", "charger_sort")
 	if not hostile and tir.rayon_explosion > 0.0 and tir.degats_zone_mult > 0.0:
 		_exploser_autour(corps, degats_infliges)
 	if not hostile and "lumiere" in tir.effets:
@@ -95,6 +108,7 @@ func _sur_contact(corps: Node) -> void:
 	Sons.jouer("impact", -18.0, randf_range(0.9, 1.2))
 
 	if "perfore_tout" in tir.drapeaux:
+		_facteur_degats *= 1.0 - Reglages.PERFORATION_PERTE
 		return
 	match PrioriteProjectile.apres_impact(_rebonds_restants, _perforations_restantes):
 		"rebond":

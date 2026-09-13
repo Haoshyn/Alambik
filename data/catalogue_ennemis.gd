@@ -13,15 +13,15 @@ static func _construire() -> Dictionary:
 			"nom": "Encrier rampant",
 			"pv": 30.0, "vitesse": 150.0, "degats": 8.0, "portee": 60.0,
 			"cerveau": "rampant", "couleur": Color(0.70, 0.62, 1.00), "rayon": 30.0,
-			"forme": "goutte", "experience": 1, "recharge": 1.95, "portee_tir": 680.0,
+			"forme": "goutte", "experience": 1, "recharge": 1.95, "portee_tir": 0.0,
 			"vitesse_projectile": 420.0, "portee_projectile": 780.0, "part_degats_projectile": 0.60,
 		},
 		"plume_sentinelle": {
 			"nom": "Plume-sentinelle",
 			"pv": 24.0, "vitesse": 0.0, "degats": 10.0, "portee": 2100.0,
 			"cerveau": "sentinelle", "couleur": Color(0.84, 0.78, 1.00), "rayon": 28.0,
-			"forme": "plume", "experience": 2, "recharge": 1.15, "vitesse_projectile": 620.0,
-			"portee_projectile": 2200.0, "telegraphe": 0.40,
+			"forme": "plume", "experience": 2, "recharge": 1.70, "vitesse_projectile": 620.0,
+			"portee_projectile": 2200.0, "telegraphe": 0.65,
 			"projectiles": 3, "angle_eventail": 0.30, "part_degats_projectile": 0.72,
 		},
 		"tache_veloce": {

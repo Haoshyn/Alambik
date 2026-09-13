@@ -65,7 +65,12 @@ func relier(salle_: Node2D, heros_: Node2D, fond: Node2D) -> void:
 
 func _noeud_ajoute(noeud: Node) -> void:
 	if noeud is Node2D and (noeud.get_parent() == salle or noeud is Gardien):
-		call_deferred("_inscrire", noeud)
+		call_deferred("_inscrire_identifiant", noeud.get_instance_id())
+
+func _inscrire_identifiant(identifiant: int) -> void:
+	# Un tir peut deja avoir percute avant l'inscription differee de son visuel.
+	var noeud := instance_from_id(identifiant) as Node
+	if is_instance_valid(noeud): _inscrire(noeud)
 
 func _inscrire(noeud: Node) -> void:
 	if not is_instance_valid(noeud) or noeud.is_queued_for_deletion() or _proxies.has(noeud.get_instance_id()):

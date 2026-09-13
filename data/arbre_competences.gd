@@ -76,11 +76,11 @@ static func _somme(rangs_joueur: Dictionary, champ: String) -> float:
 		if not NOEUDS.has(id):
 			continue
 		var rang := clampi(int(rangs_joueur[id]), 0, rangs(id))
-		total += float(rang) * float(NOEUDS[id].get(champ, 0.0))
+		total += (float(rang) if champ == "rerolls" else poids_rang(rang)) * float(NOEUDS[id].get(champ, 0.0))
 	return total
 
 static func description_effective(id: String) -> String:
-	return str(NOEUDS[id]["description"])
+	return str(NOEUDS[id]["description"]) + (". Progression plus douce après le rang 3." if rangs(id) > 3 else "")
 
 const CHAMPS_LISIBLES := ["degats", "pv_mult", "cadence", "projectile", "reduction",
 	"vitesse", "collecte", "coffre", "experience", "pierres"]
@@ -97,7 +97,7 @@ static func valeur_au_rang(id: String, rang: int) -> String:
 	for champ in CHAMPS_LISIBLES:
 		if noeud.has(champ):
 			return "%s%s %%" % ["-" if champ == "reduction" else "+",
-				_nombre(float(acquis) * float(noeud[champ]) * 100.0)]
+				_nombre(poids_rang(acquis) * float(noeud[champ]) * 100.0)]
 	if noeud.has("rerolls"):
 		var tirages := acquis * int(noeud["rerolls"])
 		return "+%d tirage%s" % [tirages, "s" if tirages > 1 else ""]
@@ -156,3 +156,6 @@ static func nombre_rerolls(rangs_joueur: Dictionary) -> int:
 
 static func donne_second_passif(rangs_joueur: Dictionary) -> bool:
 	return _somme(rangs_joueur, "second_passif") > 0.0
+
+static func poids_rang(rang: int) -> float:
+	return float(mini(rang, Reglages.MAITRISE_RANGS_PLEINS)) + float(maxi(0, rang - Reglages.MAITRISE_RANGS_PLEINS)) * Reglages.MAITRISE_POIDS_TARDIF

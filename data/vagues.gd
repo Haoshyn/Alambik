@@ -54,7 +54,7 @@ static func pour_salle(numero: int, chapitre := 0, graine := 0, mode := "grimoir
 	if Chapitres.est_boss(chapitre, numero):
 		return [[donnees["boss"]]] if numero == 20 else _miniboss_campagne(numero, chapitre, graine)
 	var index := clampi(numero - 1, 0, RENCONTRES.size() - 1)
-	var resultat: Array = RENCONTRES[index].duplicate(true)
+	var resultat: Array = RENCONTRES[index].slice(0, 2).duplicate(true)
 	var alea := RandomNumberGenerator.new()
 	alea.seed = graine * 7919 + chapitre * 104729 + numero * 31
 	for vague in resultat:

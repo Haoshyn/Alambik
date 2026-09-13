@@ -12,6 +12,7 @@ var _temps_touche := 0.0
 var _mort := false
 var _derniere_animation := ""
 var _orientation := Vector2.DOWN
+var _visee_mesh: MeshInstance3D
 
 func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 	logique = cible
@@ -27,6 +28,7 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 		var donnees: Dictionary = logique.get("donnees")
 		facteur = float(donnees["rayon"]) / (65.0 if donnees.get("cerveau", "") == "boss" else 30.0)
 	if genre == "heros":
+		facteur = Reglages.HEROS_ECHELLE
 		preload("res://scripts/presentation/materiaux_apprenti.gd").appliquer(modele)
 		var peau := modele.find_child("Heros_B_peau", true, false) as MeshInstance3D
 		if peau != null:
@@ -51,6 +53,13 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 				animation_heros.toucher())
 		logique.connect("morte", func(): _mort = true)
 	elif genre == "ennemi":
+		_visee_mesh = MeshInstance3D.new()
+		_visee_mesh.mesh = ImmediateMesh.new()
+		var matiere := StandardMaterial3D.new()
+		matiere.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		matiere.albedo_color = Color("ff965b")
+		_visee_mesh.material_override = matiere
+		add_child(_visee_mesh)
 		logique.connect("tir_demande", func(_tir, _origine, _direction): _temps_attaque = 0.25)
 		logique.connect("touche", func(_position, _couleur): _temps_touche = 0.22)
 	logique.set_meta("visuel_3d", true)
@@ -62,6 +71,7 @@ func mettre_a_jour(delta: float) -> void:
 		queue_free()
 		return
 	visible = logique.is_visible_in_tree()
+	if _visee_mesh != null: _dessiner_visee()
 	position = Pont3D.vers_monde(suivi.position_affichee() if is_instance_valid(suivi) else logique.global_position)
 	# Le mage conserve ses volumes dans toutes les orientations.
 	scale = Vector3.ONE * facteur if genre == "heros" else Vector3(facteur, facteur, facteur / sin(deg_to_rad(Pont3D.INCLINAISON)))
@@ -81,6 +91,9 @@ func mettre_a_jour(delta: float) -> void:
 		var cible: Node2D = logique.get("_cible")
 		if is_instance_valid(cible):
 			direction = logique.global_position.direction_to(cible.global_position)
+		var cerveau := str(logique.get("donnees").get("cerveau", ""))
+		if cerveau in ["sentinelle", "harceleur"] and str(logique.get("_etat")) == "vise":
+			direction = logique.global_position.direction_to(logique.get("_point_vise"))
 	elif genre == "projectile":
 		direction = logique.get("direction")
 	# Les GLB regardent +Z (Blender -Y). La rotation ne touche que le modele.
@@ -125,3 +138,19 @@ func _exit_tree() -> void:
 	if is_instance_valid(logique):
 		logique.remove_meta("visuel_3d")
 		logique.queue_redraw()
+
+func _dessiner_visee() -> void:
+	var maillage := _visee_mesh.mesh as ImmediateMesh
+	maillage.clear_surfaces()
+	var donnees: Dictionary = logique.get("donnees")
+	var cerveau := str(donnees.get("cerveau", ""))
+	if cerveau not in ["sentinelle", "harceleur", "veloce"]: return
+	var etat := str(logique.get("_etat"))
+	if etat not in ["vise", "preparer"]: return
+	var cible: Vector2 = logique.get("_point_vise") if cerveau != "veloce" else logique.global_position + Vector2(logique.get("_direction_charge")) * 650.0
+	var debut := to_local(Pont3D.vers_monde(logique.global_position, 0.035))
+	var fin := to_local(Pont3D.vers_monde(cible, 0.035))
+	maillage.surface_begin(Mesh.PRIMITIVE_LINES)
+	maillage.surface_add_vertex(debut)
+	maillage.surface_add_vertex(fin)
+	maillage.surface_end()

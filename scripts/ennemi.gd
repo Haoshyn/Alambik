@@ -26,6 +26,7 @@ var _acide := 0.0
 var _terre_declenchee := false
 var _gel := 0.0
 var _etat := "repos"
+var _point_vise := Vector2.ZERO
 var _minuterie := 0.0
 var _direction_charge := Vector2.ZERO
 var _anim := 0.0
@@ -64,7 +65,7 @@ func _physics_process(delta: float) -> void:
 	if _cible == null:
 		return
 	_recharge = maxf(0.0, _recharge - delta)
-	_minuterie = maxf(0.0, _minuterie - delta)
+	if _gel <= 0.0: _minuterie = maxf(0.0, _minuterie - delta)
 	if _gel > 0.0:
 		velocity = Vector2.ZERO
 		return
@@ -114,7 +115,7 @@ func _avancer_vers(cible: Vector2, vitesse: float) -> void:
 
 func _agir_rampant(_delta: float) -> void:
 	var distance := global_position.distance_to(_cible.global_position)
-	if Cerveaux.rampant(distance, donnees["portee"]) == "avancer":
+	if Cerveaux.rampant(distance, _distance_contact()) == "avancer":
 		_avancer_vers(_cible.global_position, donnees["vitesse"])
 	elif _recharge <= 0.0:
 		_recharge = 1.0
@@ -126,19 +127,16 @@ func _agir_rampant(_delta: float) -> void:
 		_tirer_vers(_cible.global_position)
 
 func _agir_sentinelle() -> void:
-	var distance := global_position.distance_to(_cible.global_position)
-	if Cerveaux.sentinelle(distance, donnees["portee"], _recharge) != "tirer":
+	if _etat == "vise":
+		if _minuterie <= 0.0:
+			_etat = "repos"
+			_tirer_vers(_point_vise)
 		return
-	_recharge = donnees.get("recharge", 1.8)
-	# Le tir est telegraphie : la sentinelle vise avant de lacher son trait.
+	if _recharge > 0.0: return
+	_recharge = float(donnees.get("recharge", 1.8))
 	_etat = "vise"
-	_minuterie = donnees.get("telegraphe", 0.6)
-	var attente := _minuterie
-	await get_tree().create_timer(attente).timeout
-	if not is_instance_valid(self) or _cible == null or not is_instance_valid(_cible) or _gel > 0.0:
-		return
-	_etat = "repos"
-	_tirer_vers(_cible.global_position)
+	_minuterie = float(donnees.get("telegraphe", 0.6))
+	_point_vise = _cible.global_position
 
 func _tirer_vers(cible: Vector2) -> void:
 	var t := Tir.new()
@@ -173,7 +171,7 @@ func _agir_veloce(_delta: float) -> void:
 			if _etat != "preparer":
 				_etat = "preparer"
 				_minuterie = donnees.get("preparation", 0.7)
-			_direction_charge = global_position.direction_to(_cible.global_position)
+				_direction_charge = global_position.direction_to(_cible.global_position)
 		"charger":
 			if _etat != "charger":
 				_etat = "charger"
@@ -181,7 +179,7 @@ func _agir_veloce(_delta: float) -> void:
 			velocity = _direction_charge * donnees["vitesse"] * _facteur_vitesse()
 			move_and_slide()
 			_contraindre_aux_murs()
-			if distance <= donnees["portee"] and _recharge <= 0.0:
+			if distance <= _distance_contact() and _recharge <= 0.0:
 				_recharge = 1.0
 				_cible.recevoir_degats(donnees["degats"])
 		"repos":
@@ -225,6 +223,11 @@ func _agir_orbiteur(_delta: float) -> void:
 			_tirer_vers(_cible.global_position)
 
 func _agir_harceleur(_delta: float) -> void:
+	if _etat == "vise":
+		if _minuterie <= 0.0:
+			_etat = "repos"
+			_tirer_vers(_point_vise)
+		return
 	var distance := global_position.distance_to(_cible.global_position)
 	match Cerveaux.harceleur(distance, donnees["portee"], _recharge):
 		"reculer": _avancer_vers(global_position * 2.0 - _cible.global_position, donnees["vitesse"])
@@ -237,14 +240,14 @@ func _agir_harceleur(_delta: float) -> void:
 			_recharge = donnees.get("recharge", 1.45)
 			_etat = "vise"
 			_minuterie = donnees.get("telegraphe", 0.48)
-			var attente := _minuterie
-			await get_tree().create_timer(attente).timeout
-			if not is_instance_valid(self) or _cible == null or not is_instance_valid(_cible) or _gel > 0.0:
-				return
-			_etat = "repos"
-			_tirer_vers(_cible.global_position)
+			_point_vise = _cible.global_position
 
 func _agir_miroir(_delta: float) -> void:
+	if _etat == "pulse":
+		if _minuterie <= 0.0:
+			_etat = "repos"
+			_tirer_cercle(int(donnees.get("projectiles_cercle", 8)))
+		return
 	var distance := global_position.distance_to(_cible.global_position)
 	match Cerveaux.miroir(distance, donnees["portee"], _recharge):
 		"avancer": _avancer_vers(_cible.global_position, donnees["vitesse"])
@@ -252,12 +255,6 @@ func _agir_miroir(_delta: float) -> void:
 			_recharge = donnees.get("recharge", 2.35)
 			_etat = "pulse"
 			_minuterie = donnees.get("telegraphe", 0.65)
-			var attente := _minuterie
-			await get_tree().create_timer(attente).timeout
-			if not is_instance_valid(self) or _gel > 0.0:
-				return
-			_etat = "repos"
-			_tirer_cercle(int(donnees.get("projectiles_cercle", 8)))
 
 func _agir_phaseur(_delta: float) -> void:
 	var distance := global_position.distance_to(_cible.global_position)
@@ -285,6 +282,13 @@ func _agir_phaseur(_delta: float) -> void:
 
 func _rayon_collision() -> float:
 	return ($CollisionShape2D.shape as CircleShape2D).radius
+
+func _distance_contact() -> float:
+	var collision := _cible.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	var rayon := Reglages.HEROS_RAYON
+	if collision != null and collision.shape is CircleShape2D:
+		rayon = (collision.shape as CircleShape2D).radius
+	return _rayon_collision() + rayon
 
 func _contraindre_aux_murs() -> void:
 	global_position = Geometrie.contraindre_dans_rect(global_position, limites, _rayon_collision())

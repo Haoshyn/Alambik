@@ -18,9 +18,9 @@ const NIVEAU_CADENCE_PAR_NIVEAU := 0.0
 # Niveau de compte vise aux alentours de la fin de campagne. La courbe d'XP est
 # calibree sur ~30 victoires et plusieurs dizaines de tentatives partielles.
 const NIVEAU_REFERENCE_FIN := 30
-const XP_COMPTE_BASE := 40.0
-const XP_COMPTE_PENTE := 3.0
-const XP_COMPTE_QUADRATIQUE := 0.05
+const XP_COMPTE_BASE := 10.0
+const XP_COMPTE_PENTE := 4.0
+const XP_COMPTE_QUADRATIQUE := 1.2
 
 const HEROS_PV := 100.0
 const HEROS_VITESSE := 560.0
@@ -28,7 +28,13 @@ const HEROS_ACCELERATION := 3100.0
 const HEROS_FREINAGE := 4200.0
 const HEROS_CADENCE := 2.4          # tirs par seconde
 const HEROS_INVULNERABILITE := 0.6  # secondes apres un coup recu
-const HEROS_RAYON := 24.0
+const HEROS_RAYON := 20.0
+const HEROS_ECHELLE := 0.78
+const DEGATS_COUP_REFERENCE := 15.0
+const SOIN_COMBAT_PAR_SALLE := 0.05
+const ULTIMES_PAR_RUN := 4
+const SORT_INTERVALLE_CHARGE := 0.18
+const GOUTTES_PAR_SALLE := 3
 const ENNEMI_VITESSE_MULT := 1.10
 # La densite ne suffit pas si chaque creature laisse trop de temps au joueur.
 # Ces trois multiplicateurs renforcent la menace sans gonfler leurs PV : coups
@@ -67,7 +73,7 @@ const LUMIERE_VOL_DE_VIE := 0.025
 # proche des autres Elements : 18 % de chance a x2,6 vaut ~+29 % en moyenne.
 const TENEBRES_CHANCE_SURCHARGE := 0.18
 const TENEBRES_SURCHARGE_MULT := 2.6
-const REGENERATION_PART := 0.06
+const REGENERATION_PART := 0.02
 const AVIDITE_XP_MULT := 1.20
 const AVIDITE_GOUTTES_MULT := 1.20
 const COURAGEUX_BONUS_MAX := 0.70
@@ -146,15 +152,15 @@ const CHAINE_PORTEE := 340.0          # distance maximale entre deux maillons
 # Chacun porte en plus un effet permanent, faute de quoi la moitie d'entre eux
 # ne se remarquait jamais en combat.
 const MOISSON_SEUIL := 6
-const MOISSON_PART := 0.12
+const MOISSON_PART := 0.02
 const SANG_FROID_SEUIL := 8
 const SANG_FROID_RECHARGE := 0.30      # recharge du Sort en moins, en permanence
 const REMPART_REDUCTION := 0.18        # degats recus en moins, en permanence
 const RIPOSTE_RAYON := 320.0
 const RIPOSTE_PART_DEGATS := 2.80
 const RIPOSTE_REPOUSSEE := 420.0
-const SECONDE_CHANCE_PART := 0.50      # une fois par salle, plus par grimoire
-const RESERVE_ULTIME_CHARGES := 8
+const SECONDE_CHANCE_PART := 0.30      # une seule resurrection par run
+const RESERVE_ULTIME_CHARGES := 1
 const RESERVE_ULTIME_REMISE := 0.20    # charge requise en moins
 const HERITAGE_AMELIORATIONS := 2
 const ECHO_CHANCE := 0.40
@@ -253,21 +259,23 @@ const DEFI_DEGATS_BASE := 1.15
 # Un Amélioration se reprend, mais pas indefiniment : six choix doivent construire
 # un build, pas empiler automatiquement la meme carte.
 const COPIES_MAX := 3
-const SOIN_ALAMBIC := 0.20   # respiration garantie avant chaque boss
+const SOIN_ALAMBIC := 0.50   # respiration garantie avant chaque boss
 
 # Avec ~154 ennemis communs par chapitre, l'ancien bareme donnait les six choix
 # beaucoup trop tot. Ces seuils replacent approximativement les choix 2/4/5/6
 # avant les salles 5/10/15/20, meme avec les nouvelles vagues plus denses.
-const XP_RUN_SEUILS := [14, 38, 82, 130, 225, 350]
+const XP_RUN_SEUILS := [10, 26, 55, 80, 145, 220]
 
 # Economie longue : les couts restent fixes, c'est le revenu de campagne qui
 # accelere. Avec un grand coffre moyen de 14 Gouttes et x1,20 par chapitre, une
 # campagne sans farm finance environ 30 % des premiers rangs a mi-parcours,
 # 47-50 % vers 70 % du jeu et 80 % a la premiere fin. Les rangs 2-5 restent le
 # vrai puits de farm apres cette premiere progression.
-const MAITRISE_COUTS := [60, 100, 170, 280, 460, 760, 1250, 2050, 3400, 5600]
-const MAITRISE_RANG_MAX := 5
-const MAITRISE_COUT_PAR_RANG := 1.55
+const MAITRISE_COUTS := [8, 12, 20, 35, 60, 100, 170, 280, 460, 760]
+const MAITRISE_RANG_MAX := 10
+const MAITRISE_RANGS_PLEINS := 3
+const MAITRISE_POIDS_TARDIF := 2.0 / 7.0
+const MAITRISE_COUT_PAR_RANG := 1.35
 const GOUTTES_MULT_PAR_CHAPITRE := 1.20
 
 # Capacites d'Epreuve : le premier exemplaire debloque la regle de jeu ; neuf

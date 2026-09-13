@@ -51,14 +51,14 @@ func test_les_niveaux_suivent_la_duree_de_campagne(v: Verif) -> void:
 	var r: Node = load("res://autoload/reglages_joueur.gd").new()
 	r.sauvegarde_active = false
 	r.niveau_compte = 1
-	v.vrai(r.experience_compte_requise() >= 35 and r.experience_compte_requise() <= 50,
+	v.vrai(r.experience_compte_requise() == 10,
 		"le premier niveau arrive apres une vraie tentative, pas apres plusieurs chapitres")
 	var total := 0
 	for niveau in range(1, Reglages.NIVEAU_REFERENCE_FIN):
 		r.niveau_compte = niveau
 		total += r.experience_compte_requise()
-	v.vrai(total >= 2500 and total <= 3000,
-		"le niveau 30 tient dans environ 30 victoires et plusieurs dizaines d'echecs productifs")
+	v.vrai(total >= 10000 and total <= 12000,
+		"la courbe reserve une progression longue aux derniers niveaux")
 	r.free()
 
 func test_le_choix_de_musique_est_valide_et_persistant(v: Verif) -> void:

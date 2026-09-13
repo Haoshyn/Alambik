@@ -13,6 +13,9 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 	var hostile: bool = logique.get("hostile")
 	if hostile:
 		_couleur = Color("ff493a")
+	var tir: Tir = logique.get("tir")
+	if not hostile:
+		_couleur = {"standard": Color("7deeff"), "veloce": Color("e6ff9c"), "lourd": Color("ffbf74"), "chercheur": Color("c2a5ff"), "explosif": Color("ff8b60")}.get(tir.arme, _couleur)
 	var cle := _couleur.to_html()+str(hostile)
 	if not _matieres.has(cle):
 		var mat := ShaderMaterial.new()
@@ -32,6 +35,8 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 	var coeur := MeshInstance3D.new()
 	var plan := QuadMesh.new()
 	plan.size = Vector2(0.52,0.62) if hostile else Vector2(0.42,0.56)
+	if not hostile:
+		plan.size *= 1.35 if tir.arme == "lourd" else 0.75 if tir.arme == "veloce" else 1.0
 	coeur.mesh = plan
 	coeur.rotation.x = -PI/2
 	coeur.position.y = 0.10

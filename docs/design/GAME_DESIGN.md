@@ -2,7 +2,7 @@
 
 ## 0. CONTEXTE CRITIQUE POUR L'IMPLÉMENTATION
 
-**Expérimentation autorisée du 12 septembre 2026 :** les Alambics de campagne et de Mine proposent désormais jusqu'à trois recettes compatibles avec l'inventaire, au lieu d'imposer un Élément aléatoire. Dix comportements, conservation de l'augmentation de départ, une fusion par support, interactions Feu/Eau et charges de mouvement. Cette variante jouable remplace provisoirement les règles d'infusion générique des sections 16–24 pour ces modes ; celles-ci restent la référence de compatibilité et des Épreuves rituelles. Détails : `docs/ops/FUSIONS_EXPERIMENTALES.md`. À orienter selon les essais du propriétaire.
+**Décision du propriétaire du 13 septembre 2026 :** abandonner les fusions élémentaires expérimentales. La version actuelle utilise des augmentations classiques, des haltes de soin à 50 %, des armes à ratios sans statistiques permanentes, des sorts ciblés en pause rechargés par impacts et quatre ultimes maximum par run. Héros compact, menaces annoncées et progression initiale accélérée. Cette décision remplace les règles élémentaires et de fusion ci-dessous, y compris pour les Épreuves. Voir `docs/ops/REWORK_ARCADE.md` pour les règles intégrées, les mesures et les limites.
 
 Le jeu existe déjà et possède une base jouable de type Archero-like.
 

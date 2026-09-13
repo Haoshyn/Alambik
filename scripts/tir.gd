@@ -4,6 +4,7 @@ extends RefCounted
 # Description d'un tir, pas un comportement : le projectile lit ces champs et
 # les execute. Une fusion n'est donc qu'une composition de valeurs.
 
+var arme := "standard"
 var degats: float
 var vitesse: float
 var portee: float
@@ -55,6 +56,7 @@ func decalages() -> Array[float]:
 
 func copie() -> Tir:
 	var t := Tir.new()
+	t.arme = arme
 	t.degats = degats
 	t.vitesse = vitesse
 	t.portee = portee

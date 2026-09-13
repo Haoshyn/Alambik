@@ -4,7 +4,7 @@ Ce fichier sert à s'orienter, pas à remplacer les données du jeu. Pour une va
 
 ## Jouable
 
-- Fusions experimentales actives dans les Alambics de campagne/Mine : dix recettes, trois propositions compatibles, synergie Feu/Eau en vapeur, charges de mouvement et effets differes. Choix de niveau par familles distinctes. Essai direct et profil isole : `tools/essayer_fusions.ps1` ; protocole et limites dans `docs/ops/FUSIONS_EXPERIMENTALES.md`. Epreuves rituelles encore sur l'ancien systeme elementaire pour cette iteration.
+- Reprise arcade du 13 septembre : fusions retirées de la boucle active, haltes à +50 % de PV et choix classique, coups de référence à 15, soins de combat plafonnés, cinq armes de comportement, sorts ciblés en pause et rechargés aux impacts, quatre ultimes maximum. Héros réduit, contact physique corrigé, accueil avec le vrai modèle animé, récompenses précoces et dix rangs de maîtrise. État mesuré et limites : `docs/ops/REWORK_ARCADE.md`.
 
 - HUD et augmentations : PV chiffres et rangee d'inventaire sous l'XP retires ; commandes neutralisees avant les choix/pause pour eviter la course bloquee. Audit des trente augmentations, couts multiplicatifs separes des bonus, reequilibrage offensif/soin/defense. Boss de campagne renforces ; banc controle debutant a 33–41 s, premiere signature a 37 s. Protocole, limites et catalogue complet : `docs/ops/EQUILIBRAGE_AUGMENTATIONS.md`.
 
@@ -17,16 +17,14 @@ Ce fichier sert à s'orienter, pas à remplacer les données du jeu. Pour une va
 - Essai visuel actif : **Apprenti A chibi**, choisi sur la planche du 12 septembre. Nouvelle geometrie Blender originale, sans Meshy, grosse tete, chapeau violet souple, echarpe turquoise, fiole et baguette. 18 os et six animations ; export selectionne en combat. Atelier interactif : `tools/atelier_apprenti.ps1`. Premiere interpretation a valider visuellement ; optimisation mobile encore ouverte. Details : `docs/ops/APPRENTI_A.md`. Le modele B decrit plus bas est conserve mais n'est plus selectionne.
 
 - Campagne structurée en mondes, chapitres et salles, avec miniboss et boss.
-- XP de run, choix d'Améliorations et fusions élémentaires via les Alambics.
+- XP de run, augmentations classiques et choix supplémentaires aux haltes ; fusions élémentaires désactivées.
 - Équipement, Forge et progression permanente.
 - Mine de survie et Épreuves rituelles.
 - Sort actif, Passif(s) et Ultime équipables.
 - Interface portrait mobile, joystick/tactile, réglages, pause et navigation paginée.
 - Combat 3D : modèles GLB existants du héros, gardien, bestiaire, boss, projectiles et décor ; palettes lumineuses des dix mondes.
-- Accueil Cuivre & Azur sur fond portrait continu, animé par shader ; compteurs réels et commandes Godot. La barre illustrée est commune aux quatre pages. Le chapitre ouvre campagne, Mine et Épreuves.
+- Accueil Cuivre & Azur : Apprenti A en 3D animé sur socle, éclairage et commandes natives ; aucune illustration humaine en arrière-plan.
 - Menus natifs Cuivre & Azur : équipements Anneau/Collier/Bague, maîtrises, sorts, trois cartes d’amélioration superposées, paramètres, pause, infusion et bilan. Aucun portrait du héros sur ces écrans.
-- Mage humain violet retravaillé dans Blender : chapeau souple à bord cuivre, manteau à pans et pèlerine, écharpe turquoise, sacoche de fioles et baguette en cornue. Visage abrité à la caméra de jeu, quatorze os et six animations. Géométrie dans `tools/blender/mage_arcade.py`, rig dans `mage_manga.py` ; source Blender et GLB reconstruits. Ce modèle a été rejeté visuellement par le propriétaire ; il reste provisoirement intégré. Bilan : `docs/ops/RETOUCHES_GRAPHIQUES.md`.
-- Héros **B — Mage compact** intégré au combat : 41 083 triangles avec bâton et nouveau gant fermé, textures 2K, 20 os. Course arcade de 0,533 s à 60 Hz, genoux remontés, suspension et légère compression du buste ; pointe du chapeau souple. Prise devant la paume, bâton incliné à l’écart du chapeau. Mélange continu repos/course ; tirs et impacts filtrés sur le haut du corps. Caméra et modèle partagent une interpolation du mouvement 2D ; matières cuivre/tissu différenciées dans Godot. Contrôles : 609 assertions de fluidité, intégration graphique réussie. Mesure Android et retopologie manuelle restent à faire. Détails : `docs/ops/HEROS_B_MESHY.md` (section « Reprise de la fluidité et des matières »).
 - Salles de campagne 1260 × 1900, trois obstacles centraux décalés et retraits latéraux raccordés aux collisions. Boss et Épreuves dégagés ; Mine sans retraits sur les bords d’apparition. Caméra de suivi avec vue 3D à 48°.
 - 83 glyphes SVG : silhouettes distinctes par amélioration, maîtrise et sort. Bijoux absents dans les emplacements vides. Captures et validation des retouches : `docs/ops/RETOUCHES_GRAPHIQUES.md`.
 - Cadrage portrait 1080 × 1920 conservé sans déformation ni rognage, avec bandes sur les autres ratios. Vérifications et limites : `docs/ops/RENDU_3D_MOBILE.md`.

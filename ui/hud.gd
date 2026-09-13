@@ -12,6 +12,7 @@ var _bouton_actif: Button
 var _bouton_ultime: Button
 var _recharge_active := 0.0
 var _charge_ultime := 0
+var _ultimes_utilises := 0
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
@@ -41,7 +42,8 @@ func _replacer_boutons() -> void:
 	_bouton_ultime.position = Vector2(taille.x - 164, taille.y - Ecran.marge_basse() - 535)
 	_bouton_ultime.size = Vector2(146, 146)
 
-func rafraichir_sorts(recharge_active: float, charge_ultime: int) -> void:
+func rafraichir_sorts(recharge_active: float, charge_ultime: int, utilisations := 0) -> void:
+	_ultimes_utilises = utilisations
 	_recharge_active = maxf(0.0, recharge_active)
 	_charge_ultime = maxi(0, charge_ultime)
 	var actif := ReglagesJoueur.sort_actif_effectif()
@@ -52,7 +54,7 @@ func rafraichir_sorts(recharge_active: float, charge_ultime: int) -> void:
 	if _bouton_ultime.visible:
 		var d: Dictionary = Sorts.ULTIMES[ultime]
 		var requis := ceili(float(d["charge"]) * Sorts.multiplicateur_charge_ultime(ReglagesJoueur.passifs_equipes_effectifs()))
-		_bouton_ultime.disabled = _charge_ultime < requis
+		_bouton_ultime.disabled = _charge_ultime < requis or _ultimes_utilises >= Reglages.ULTIMES_PAR_RUN
 	queue_redraw()
 
 func rafraichir() -> void:
@@ -146,12 +148,12 @@ func _dessiner_bouton_sort(police: Font, bouton: Button, ultime: bool) -> void:
 		var d: Dictionary = Sorts.ULTIMES.get(id, {})
 		var requis := ceili(float(d.get("charge", 1)) * Sorts.multiplicateur_charge_ultime(ReglagesJoueur.passifs_equipes_effectifs()))
 		ratio = clampf(float(_charge_ultime) / maxf(1.0, float(requis)), 0.0, 1.0)
-		texte = "%d / %d" % [mini(_charge_ultime, requis), requis]
+		texte = "ÉPUISÉ" if _ultimes_utilises >= Reglages.ULTIMES_PAR_RUN else "%d / %d · %d restants" % [mini(_charge_ultime, requis), requis, Reglages.ULTIMES_PAR_RUN - _ultimes_utilises]
 	else:
 		var d: Dictionary = Sorts.ACTIFS.get(id, {})
 		var recharge_max := float(d.get("recharge", 1.0)) * Sorts.multiplicateur_recharge_active(ReglagesJoueur.passifs_equipes_effectifs())
 		ratio = 1.0 - clampf(_recharge_active / maxf(0.01, recharge_max), 0.0, 1.0)
-		texte = "%.1f s" % _recharge_active if _recharge_active > 0.0 else "PRÊT"
+		texte = "%d impacts" % ceili(_recharge_active) if _recharge_active > 0.0 else "PRÊT"
 	var jauge := Rect2(rect.position + Vector2(17, rect.size.y - 24), Vector2(rect.size.x - 34, 10))
 	_barre_premium(jauge, ratio, accent)
 	_draw_centre(police, Vector2(rect.position.x, rect.end.y + 22), rect.size.x, texte, 18, Palette.TEXTE)

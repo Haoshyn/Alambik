@@ -29,6 +29,8 @@ var _temps_dans_la_salle := 0.0
 var _musique_minuterie := 0.0
 var _recharge_sort_actif := 0.0
 var _charge_ultime := 0
+var _ultimes_utilises := 0
+var _delai_charge := 0.0
 var _compteur_moisson := 0
 var _compteur_sang_froid := 0
 var _niveaux_en_attente := 0
@@ -50,6 +52,7 @@ var _transition_salle := false
 var _dernier_rituel_prepare := 0
 
 func _ready() -> void:
+	add_to_group("charge_combat")
 	if OS.get_name() == "Android":
 		get_tree().set_auto_accept_quit(false)
 	var arguments := OS.get_cmdline_user_args()
@@ -131,16 +134,7 @@ func _ready() -> void:
 	_effets = Node2D.new()
 	_effets.set_script(load("res://scripts/effets.gd"))
 	add_child(_effets)
-	var atelier := Node.new()
-	atelier.set_script(load("res://scripts/ameliorations/atelier_fusions.gd"))
-	atelier.heros = _heros
-	atelier.salle = _salle
-	atelier.effets = _effets
-	add_child(atelier)
-	_heros.tir_demande.connect(func(_tir: Tir, origine: Vector2, direction: Vector2): atelier.lancer(origine,direction))
-	_heros.touchee.connect(atelier.protection)
-	_heros.bouclier_brise.connect(atelier.protection)
-	_salle.ennemi_abattu.connect(atelier.elimination)
+
 
 	_couche = CanvasLayer.new()
 	add_child(_couche)
@@ -151,7 +145,7 @@ func _ready() -> void:
 			_ouvrir_pause())
 	_hud.sort_actif_demande.connect(_lancer_sort_actif)
 	_hud.ultime_demande.connect(_lancer_ultime)
-	_hud.rafraichir_sorts(_recharge_sort_actif, _charge_ultime)
+	_hud.rafraichir_sorts(_recharge_sort_actif, _charge_ultime, _ultimes_utilises)
 	_joystick = JOYSTICK.instantiate()
 	_couche.add_child(_joystick)
 	_joystick.intention_changee.connect(_sur_intention)
@@ -289,9 +283,9 @@ func _physics_process(_delta: float) -> void:
 
 func _process(delta: float) -> void:
 	_suivre_heros()
-	_recharge_sort_actif = maxf(0.0, _recharge_sort_actif - delta)
+	_delai_charge = maxf(0.0, _delai_charge - delta)
 	if _hud != null:
-		_hud.rafraichir_sorts(_recharge_sort_actif, _charge_ultime)
+		_hud.rafraichir_sorts(_recharge_sort_actif, _charge_ultime, _ultimes_utilises)
 	_avancer_phenomenes(delta)
 	_musique_minuterie -= delta
 	if _musique_minuterie <= 0.0 and not _terminee and _panneau == null:
@@ -369,7 +363,6 @@ func _suivre_heros() -> void:
 	_camera.force_update_scroll()
 
 func _entrer_dans_la_salle() -> void:
-	get_tree().call_group("atelier_fusions","reinitialiser")
 	for enfant in _salle.get_children():
 		enfant.queue_free()
 	_calculer_limites()
@@ -379,10 +372,11 @@ func _entrer_dans_la_salle() -> void:
 		_salle.terminee.connect(_sur_salle_terminee)
 	_heros.global_position = Vector2((_limites.position.x + _limites.end.x) / 2.0, _limites.end.y - 120.0)
 	if Jeu.mode_run == "epreuve_sorts" and _dernier_rituel_prepare < Jeu.salle_courante:
-		Jeu.ajouter_fusion_aleatoire_epreuve()
+		var choix := DraftLogique.proposer(Jeu.inventaire, Jeu.rng, 1)
+		if not choix.is_empty(): Jeu.ajouter_reactif(choix[0])
 		_dernier_rituel_prepare = Jeu.salle_courante
 		_heros.recalculer()
-		_sous_titre_voile.text = _texte_fusion_epreuve()
+		_sous_titre_voile.text = "Une nouvelle augmentation pour cette épreuve"
 	_heros.preparer_nouvelle_salle()
 	_suivre_heros()
 	if ReglagesJoueur.passifs_equipes_effectifs().has("reserve_ultime"):
@@ -476,7 +470,7 @@ func _animer_entree_salle() -> void:
 	_sous_titre_voile.text = Jeu.nom_run().to_upper() if Jeu.mode_run == "grimoire" else (
 			"SURVIVEZ 5 MINUTES" if Jeu.mode_run == "mine" else "UNE SALLE D'ESSAI" if Jeu.mode_run == "retro" else "CINQ RITUELS")
 	if Jeu.mode_run == "epreuve_sorts":
-		_sous_titre_voile.text = _texte_fusion_epreuve()
+		_sous_titre_voile.text = "Une nouvelle augmentation pour cette épreuve"
 	_voile_salle.visible = true
 	_voile_salle.modulate.a = 1.0
 	await get_tree().create_timer(0.10 if ReglagesJoueur.effets_reduits else 0.38).timeout
@@ -550,8 +544,7 @@ func _ouvrir_alambic_apres_salle() -> void:
 	_neutraliser_deplacement()
 	get_tree().paused = true
 	Sons.musique_calme()
-	_heros.stats.soigner(_heros.stats.pv_max * Reglages.SOIN_ALAMBIC \
-		* ArbreCompetences.multiplicateur_soin(ReglagesJoueur.rangs_competences_effectifs()))
+	_heros.stats.soigner_garanti(_heros.stats.pv_max * Reglages.SOIN_ALAMBIC)
 	_panneau = ALAMBIC.instantiate()
 	_panneau.process_mode = Node.PROCESS_MODE_ALWAYS
 	_couche.add_child(_panneau)
@@ -795,7 +788,6 @@ func _infliger_phenomene(ennemi: Node, tir: Tir) -> void:
 	if "tenebres" in tir.drapeaux and Jeu.rng.randf() < Reglages.TENEBRES_CHANCE_SURCHARGE:
 		degats *= Reglages.TENEBRES_SURCHARGE_MULT
 	ennemi.recevoir_degats(degats, tir.effets)
-	get_tree().call_group("atelier_fusions","impact",ennemi,"eau" in tir.effets)
 	if "lumiere" in tir.effets:
 		_heros.stats.soigner(degats * Reglages.LUMIERE_VOL_DE_VIE)
 
@@ -834,7 +826,7 @@ func _sur_bouclier_brise(position: Vector2) -> void:
 	_effets.onde(position, 200.0, Color(0.85, 0.92, 1.0), 0.5)
 
 func _sur_ennemi_abattu(experience: int) -> void:
-	_charge_ultime += 1
+	if _ultimes_utilises < Reglages.ULTIMES_PAR_RUN: _charge_ultime += 1
 	if Jeu.mode_run in ["grimoire", "mine"]:
 		_niveaux_en_attente += Jeu.gagner_experience_run(experience)
 		if _niveaux_en_attente > 0 and _panneau == null and not _terminee:
@@ -865,21 +857,67 @@ func _sur_tape_rapide(nombre: int) -> void:
 	_joystick.consommer_raccourci()
 	_lancer_sort_actif()
 
+func charger_sort() -> void:
+	if _delai_charge > 0.0 or _terminee or get_tree().paused: return
+	_delai_charge = Reglages.SORT_INTERVALLE_CHARGE
+	_recharge_sort_actif = maxf(0.0, _recharge_sort_actif - 1.0)
+
+func _point_sort(position_ecran: Vector2) -> Vector2:
+	var camera3d := get_viewport().get_camera_3d()
+	var point: Vector2
+	if camera3d != null:
+		var intersection: Variant = Plane(Vector3.UP, 0).intersects_ray(camera3d.project_ray_origin(position_ecran), camera3d.project_ray_normal(position_ecran))
+		point = Pont3D.vers_logique(intersection) if intersection != null else _heros.global_position
+	else:
+		point = _heros.get_canvas_transform().affine_inverse() * position_ecran
+	return Geometrie.contraindre_dans_rect(point, _limites, 0.0)
+
+func _ecran_sort(point: Vector2) -> Vector2:
+	var camera3d := get_viewport().get_camera_3d()
+	return camera3d.unproject_position(Pont3D.vers_monde(point)) if camera3d != null else _heros.get_canvas_transform() * point
+
 func _lancer_sort_actif() -> void:
+	var id := ReglagesJoueur.sort_actif_effectif()
+	if _terminee or _panneau != null or get_tree().paused or _recharge_sort_actif > 0.0 or not Sorts.ACTIFS.has(id): return
+	if Jeu.mode_auto:
+		var ennemis := get_tree().get_nodes_in_group("ennemis")
+		if not ennemis.is_empty(): _confirmer_sort(ennemis[0].global_position)
+		return
+	_neutraliser_deplacement()
+	_panneau = load("res://ui/visee_sort.gd").new()
+	_panneau.point = _heros.global_position
+	_panneau.rayon = float(Sorts.ACTIFS[id]["rayon"])
+	_panneau.vers_logique = _point_sort
+	_panneau.vers_ecran = _ecran_sort
+	_panneau.confirme.connect(func(point: Vector2):
+		_fermer_visee()
+		_confirmer_sort(point))
+	_panneau.annule.connect(_fermer_visee)
+	get_tree().paused = true
+	_couche.add_child(_panneau)
+
+func _fermer_visee() -> void:
+	_panneau.queue_free()
+	_panneau = null
+	_neutraliser_deplacement()
+	get_tree().paused = false
+
+func _confirmer_sort(point: Vector2) -> void:
 	var id := ReglagesJoueur.sort_actif_effectif()
 	if _recharge_sort_actif > 0.0 or not Sorts.ACTIFS.has(id):
 		return
 	var sort: Dictionary = Sorts.ACTIFS[id]
 	var efficacite := ReglagesJoueur.efficacite_sort(id)
 	_recharge_sort_actif = float(sort["recharge"]) * Sorts.multiplicateur_recharge_active(ReglagesJoueur.passifs_equipes_effectifs())
-	_appliquer_sort(float(sort["rayon"]), float(sort["degats"]) * efficacite, str(sort["effet"]), false)
+	_appliquer_sort(float(sort["rayon"]), float(sort["degats"]) * efficacite, str(sort["effet"]), false, point)
 	var passifs := ReglagesJoueur.passifs_equipes_effectifs()
 	if passifs.has("echo_alchimique") \
 			and Jeu.rng.randf() < Reglages.ECHO_CHANCE * float(passifs["echo_alchimique"]):
 		_appliquer_sort(float(sort["rayon"]),
-			float(sort["degats"]) * efficacite * Reglages.ECHO_PART_DEGATS, str(sort["effet"]), false)
+			float(sort["degats"]) * efficacite * Reglages.ECHO_PART_DEGATS, str(sort["effet"]), false, point)
 
 func _lancer_ultime() -> void:
+	if _terminee or _panneau != null or get_tree().paused or _ultimes_utilises >= Reglages.ULTIMES_PAR_RUN: return
 	var id := ReglagesJoueur.ultime_effectif()
 	if not Sorts.ULTIMES.has(id):
 		return
@@ -888,13 +926,16 @@ func _lancer_ultime() -> void:
 	if _charge_ultime < charge_requise:
 		return
 	_charge_ultime -= charge_requise
+	_ultimes_utilises += 1
+	if _ultimes_utilises >= Reglages.ULTIMES_PAR_RUN: _charge_ultime = 0
 	_appliquer_sort(INF, float(sort["degats"]) * ReglagesJoueur.efficacite_sort(id), str(sort["effet"]), true)
 
-func _appliquer_sort(rayon: float, multiplicateur: float, effet: String, ultime: bool) -> void:
+func _appliquer_sort(rayon: float, multiplicateur: float, effet: String, ultime: bool, cible := Vector2.INF) -> void:
+	var centre := _heros.global_position if cible == Vector2.INF else cible
 	var couleur := Palette.ESSENCE if ultime else (Palette.GIVRE if effet == "givre" else Palette.ACIDE if effet == "acide" else Palette.OR)
-	_effets.onde(_heros.global_position, 620.0 if is_inf(rayon) else rayon, couleur, 0.85)
+	_effets.onde(centre, 620.0 if is_inf(rayon) else rayon, couleur, 0.85)
 	for ennemi in get_tree().get_nodes_in_group("ennemis"):
-		if not is_instance_valid(ennemi) or (not is_inf(rayon) and ennemi.global_position.distance_to(_heros.global_position) > rayon):
+		if not is_instance_valid(ennemi) or (not is_inf(rayon) and ennemi.global_position.distance_to(centre) > rayon):
 			continue
 		var effets_sort: Array[String] = []
 		if effet in ["braise", "givre", "acide"]:
@@ -903,7 +944,7 @@ func _appliquer_sort(rayon: float, multiplicateur: float, effet: String, ultime:
 		if effet == "givre" and ennemi.has_method("geler"):
 			ennemi.geler(2.2 if ultime else 1.2)
 		elif effet == "repousse":
-			_repousser(ennemi, _heros.global_position, 120.0)
+			_repousser(ennemi, centre, 120.0)
 	Sons.jouer("fusion" if ultime else "choix", -9.0)
 
 # Une poussee qui traverse le decor sortirait la creature de l'arene : elle est

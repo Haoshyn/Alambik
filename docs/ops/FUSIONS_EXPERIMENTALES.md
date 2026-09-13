@@ -1,5 +1,7 @@
 # Fusions expérimentales — 12 septembre 2026
 
+> Expérience abandonnée le 13 septembre 2026 à la demande du propriétaire. Ce document est historique ; voir [la reprise arcade](REWORK_ARCADE.md) pour le jeu actuel.
+
 Première version jouable autorisée par le propriétaire : expérimenter des runs différentes, découvrir des interactions et orienter la suite à partir des essais. Cette version ne prétend pas figer l'équilibrage de toute la campagne.
 
 ## Essayer

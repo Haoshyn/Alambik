@@ -13,11 +13,15 @@ var _precedent: Button
 var _suivant: Button
 var _resume: Label
 var _details: Label
+var _armes: VBoxContainer
 var _vide: VBoxContainer
 
 func _ready() -> void:
 	var col := StyleAzur.page(self,"Équipement",integre_menu)
 	var contenu := StyleAzur.defilement(col)
+	_armes = VBoxContainer.new()
+	contenu.add_child(_armes)
+	_afficher_armes()
 	var slots := HBoxContainer.new()
 	slots.add_theme_constant_override("separation",16)
 	contenu.add_child(slots)
@@ -177,3 +181,25 @@ func _rafraichir() -> void:
 func _resume_heros() -> String:
 	var stats := Stats.depuis_reglages(ReglagesJoueur.rangs_competences_effectifs(),ReglagesJoueur.passifs_equipes_effectifs(),ReglagesJoueur.bonus_objets_effectifs(),ReglagesJoueur.niveau_compte_effectif())
 	return "Dégâts %d   ·   PV %d   ·   Cadence %.2f /s\nNiveau %d   ·   %d pierres de forge" % [roundi(stats.degats),roundi(stats.pv_max),stats.cadence,ReglagesJoueur.niveau_compte_effectif(),ReglagesJoueur.pierres_forge]
+
+func _afficher_armes() -> void:
+	for enfant in _armes.get_children():
+		_armes.remove_child(enfant)
+		enfant.queue_free()
+	_armes.add_child(StyleAzur.texte("Votre arme", 35))
+	_armes.add_child(StyleAzur.texte("Choisissez votre rythme de combat. Aucune amélioration d’arme à acheter.", 25, StyleAzur.ATTENUE))
+	for id: String in CatalogueProjectiles.TYPES:
+		var arme: Dictionary = CatalogueProjectiles.TYPES[id]
+		var disponible := id in ReglagesJoueur.projectiles_disponibles()
+		var texte := ("✓ " if id == ReglagesJoueur.projectile_equipe_effectif() else "") + str(arme["nom"])
+		texte += " · dégâts ×%.2f · cadence ×%.2f" % [float(arme["degats_mult"]), float(arme.get("cadence_mult", 1.0))]
+		texte += "\n" + str(arme["description"])
+		if not disponible: texte += " · Chapitre %d" % int(arme["niveau"])
+		var bouton := StyleAzur.bouton(texte, func():
+			ReglagesJoueur.equiper_projectile(id)
+			_afficher_armes())
+		bouton.disabled = not disponible
+		bouton.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		bouton.add_theme_font_size_override("font_size", 24)
+		bouton.custom_minimum_size.y = 125
+		_armes.add_child(bouton)

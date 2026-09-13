@@ -314,6 +314,8 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 			copie["vitesse_projectile"] = float(copie["vitesse_projectile"]) * Reglages.ENNEMI_PROJECTILE_VITESSE_MULT
 		if copie.has("recharge"):
 			copie["recharge"] = float(copie["recharge"]) * Reglages.ENNEMI_RECHARGE_MULT
+	if Jeu.mode_run == "grimoire":
+		copie["degats"] = maxf(float(copie["degats"]), Reglages.DEGATS_COUP_REFERENCE)
 	return copie
 
 func _sur_ennemi_touche(position: Vector2, couleur: Color) -> void:
@@ -437,7 +439,10 @@ func tirer(tir_source: Tir, origine: Vector2, direction: Vector2, hostile := fal
 		add_child(p)
 
 func _sur_tir_ennemi(tir_ennemi: Tir, origine: Vector2, direction: Vector2) -> void:
-	tirer(tir_ennemi, origine, direction, true)
+	var projectile := tir_ennemi.copie()
+	if Jeu.mode_run == "grimoire":
+		projectile.degats = maxf(projectile.degats, Reglages.DEGATS_COUP_REFERENCE)
+	tirer(projectile, origine, direction, true)
 
 func _sur_impact(position: Vector2, couleur: Color, ampleur: float) -> void:
 	if effets != null:

@@ -9,11 +9,11 @@ extends RefCounted
 # valait donc jamais son emplacement. Les degats sont maintenant cales pour
 # qu'un Sort ajoute environ un quart de la puissance soutenue.
 const ACTIFS := {
-	"onde_alchimique": {"nom": "Onde alchimique", "description": "Repousse autour de vous • recharge très courte", "recharge": 8.0, "rayon": 340.0, "degats": 9.0, "effet": "repousse"},
-	"nova_de_givre": {"nom": "Nova de givre", "description": "Gèle une large zone • contrôle total", "recharge": 13.0, "rayon": 440.0, "degats": 12.0, "effet": "givre"},
-	"barrage_de_braise": {"nom": "Barrage de braise", "description": "Embrase une très large zone • brûlure prolongée", "recharge": 15.0, "rayon": 540.0, "degats": 16.0, "effet": "braise"},
-	"impulsion_foudroyante": {"nom": "Impulsion foudroyante", "description": "Portée immense • frappe pure", "recharge": 16.0, "rayon": 640.0, "degats": 20.0, "effet": ""},
-	"explosion_corrosive": {"nom": "Explosion corrosive", "description": "Dévastatrice et corrosive • portée moyenne", "recharge": 18.0, "rayon": 480.0, "degats": 26.0, "effet": "acide"},
+	"onde_alchimique": {"nom": "Onde alchimique", "description": "Repousse la zone ciblée • 24 impacts pour recharger", "recharge": 24.0, "rayon": 180.0, "degats": 9.0, "effet": "repousse"},
+	"nova_de_givre": {"nom": "Nova de givre", "description": "Gèle la zone ciblée • 32 impacts pour recharger", "recharge": 32.0, "rayon": 210.0, "degats": 12.0, "effet": "givre"},
+	"barrage_de_braise": {"nom": "Barrage de braise", "description": "Embrase la zone ciblée • 36 impacts pour recharger", "recharge": 36.0, "rayon": 190.0, "degats": 16.0, "effet": "braise"},
+	"impulsion_foudroyante": {"nom": "Impulsion foudroyante", "description": "Frappe précise ciblée • 38 impacts pour recharger", "recharge": 38.0, "rayon": 130.0, "degats": 20.0, "effet": ""},
+	"explosion_corrosive": {"nom": "Explosion corrosive", "description": "Fragilise la zone ciblée • 42 impacts pour recharger", "recharge": 42.0, "rayon": 170.0, "degats": 26.0, "effet": "acide"},
 }
 
 # Les Ultimes frappent toute la salle : leur prix est le nombre d'eliminations.
@@ -27,10 +27,10 @@ const ULTIMES := {
 const PASSIFS := {
 	"rempart_initial": {"nom": "Rempart initial", "description": "Bouclier à chaque salle • -18 % de dégâts subis en permanence"},
 	"heritage_reactif": {"nom": "Héritage réactif", "description": "Commence chaque grimoire avec 2 Améliorations aléatoires"},
-	"moisson_vitale": {"nom": "Moisson vitale", "description": "Toutes les 6 éliminations, récupère 12 % des PV"},
+	"moisson_vitale": {"nom": "Moisson vitale", "description": "Toutes les 6 éliminations, récupère 2 % des PV • soins limités à 5 % par salle"},
 	"riposte_alchimique": {"nom": "Riposte alchimique", "description": "Être touché déclenche une déflagration massive qui repousse"},
-	"seconde_chance": {"nom": "Seconde chance", "description": "Une fois par salle, survit à la mort avec 50 % des PV"},
-	"reserve_ultime": {"nom": "Réserve d’ultime", "description": "+8 charges par salle • l’ultime coûte 20 % de charge en moins"},
+	"seconde_chance": {"nom": "Seconde chance", "description": "Une fois par aventure, survit à la mort avec 30 % des PV"},
+	"reserve_ultime": {"nom": "Réserve d’ultime", "description": "+1 charge par salle • l’ultime coûte 20 % de charge en moins"},
 	"sang_froid": {"nom": "Sang-froid", "description": "-30 % de recharge du Sort • réinitialisé toutes les 8 éliminations"},
 	"dernier_rempart": {"nom": "Dernier rempart", "description": "Sous 40 % de PV, subit 45 % de dégâts en moins"},
 	"audace": {"nom": "Audace", "description": "Sous 60 % de PV, inflige 45 % de dégâts en plus"},

@@ -48,6 +48,10 @@ func afficher(victoire: bool, salle_atteinte: int) -> void:
 			ReglagesJoueur.enregistrer_grand_coffre(Jeu.chapitre, not _objet_obtenu.is_empty())
 	elif Jeu.mode_run == "mine" and victoire:
 		_pierres_gagnees = ReglagesJoueur.ajouter_pierres_forge(ReglagesJoueur.pierres_mine())
+	if Jeu.mode_run == "grimoire":
+		var progression := Recompenses.gouttes_progression(_salles_vaincues, Jeu.chapitre)
+		ReglagesJoueur.ajouter_gouttes(progression)
+		_coffre_gouttes += progression
 	_xp_gagnee = 0 if Jeu.est_retro() else \
 		_salle * (2 if Jeu.mode_run == "grimoire" else 1) + (20 if victoire and Jeu.mode_run == "grimoire" else 0)
 	if _xp_gagnee > 0:

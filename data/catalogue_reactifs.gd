@@ -63,7 +63,7 @@ static var TOUS := {
 		"Annule la première attaque subie dans chaque salle.",
 		{"drapeaux": ["egide"]}, false, Color(0.88, 0.92, 1.00), "hexagone", 1, HEROS),
 	"regeneration": Reactif.creer("regeneration", "Régénération",
-		"Récupère une part des PV entre les salles.",
+		"Récupère 2 % des PV entre les salles. Les soins de combat partagent un plafond de 5 % par salle.",
 		{"drapeaux": ["regeneration"]}, false, Color(0.54, 0.92, 0.62), "goutte", 1, HEROS),
 	"avidite": Reactif.creer("avidite", "Avidité",
 		"Augmente l'XP de run et les Gouttes obtenues pendant cette tentative.",
