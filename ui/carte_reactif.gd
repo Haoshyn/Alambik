@@ -20,8 +20,8 @@ var _survol := 0.0
 var _anim := 0.0
 var _pulsation := 0.0
 var _pointeur := false
-var _style_normal: StyleBoxFlat
-var _style_actif: StyleBoxFlat
+var _style_normal: StyleBox
+var _style_actif: StyleBox
 
 func configurer(reactif_: Reactif) -> void:
 	reactif = reactif_

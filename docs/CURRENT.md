@@ -2,7 +2,60 @@
 
 Ce fichier sert à s'orienter, pas à remplacer les données du jeu. Pour une valeur exacte, lire le catalogue ou `data/reglages.gd` concerné.
 
+## Direction visuelle intégrée
+
+Confort combat : Tir multiple + Spirale conserve deux tirs droits et deux
+latéraux ; huit compositions d'obstacles de tailles et nombres variés. Soin
+garanti de 30 % à l'entrée des boss 5/10/15/20, une fois par rencontre ; les
+alambics gardent leur choix mais ne donnent plus le soin automatique de 50 %.
+Sort ciblé lancé au premier appui sur la zone, monde ralenti à 10 %, vitesse
+restaurée à l'annulation, la pause, la mort et la sortie. Une arme initiale ;
+aiguille à longue portée (0,70 dégâts × 1,40 cadence), sceptre perforant
+(1,20 × 0,70, trois cibles), projectiles aux silhouettes distinctes.
+Menus lavande/prune, cadres de maîtrise carrés, textes DM Sans en MSDF,
+filtrage linéaire, boutons principaux nets, slogan retiré. HUD adaptatif et
+compteurs sans libellés ; PV du héros plus contrastés. Option secousses retirée.
+Contrôles : 15 120 assertions, 37 de combat ciblé, 834 de disposition, 38
+d'interface, 1 774 de formats. Vingt runs sans blocage ; le bot meurt encore
+souvent au premier boss, ce qui ne mesure pas le ressenti humain. Avertissements
+de ressources du moteur headless à la fermeture du selftest inchangés.
+APK exporté et signature vérifiée : `build/alambic-confort-combat.apk`. Rendu et toucher à valider sur
+Pixel ; aucun test avec fenêtre visible.
+
+Paramètres Atelier v3 : listes de musiques et de raccourci harmonisées, hauteur
+bornée, curseurs cuivre/turquoise, options multilignes. Parcours réel testé
+pendant la pause (38 contrôles), disposition (840), six formats (1 774), tests
+généraux et vingt runs réussis. APK : `build/alambic-menus-atelier-v3.apk`.
+
+Menus Atelier vivant v2 : reprise sur la planche du propriétaire, cadres gravés
+à neuf tranches, titres Cinzel, cases violettes, armes illustrées, médaillons de
+maîtrise et cartes de sorts structurées. Masque rectangulaire de l'accueil
+remplacé, compteurs et icône des paramètres corrigés. Contrôles headless :
+14 397 assertions, 1 774 contrôles de formats, 19 d'actions et 844 de disposition.
+APK : `build/alambic-menus-atelier-v2.apk`. Rendu sur Pixel à valider ; détails
+dans `docs/ops/ATELIER_VIVANT.md`. Aucun test avec fenêtre visible.
+
+Atelier vivant intégré : accueil illustré avec héros 3D, menus ivoire/cuivre, navigation originale, dix profils de décors dont Encres en pierre crème et turquoise. Affichage adaptatif sans bandes sur les six formats testés ; 14 397 assertions, 1 775 contrôles de formats et vingt runs terminés. APK : `build/alambic-atelier-vivant.apk`. Validation sur Pixel encore à faire ; détails et diagnostics moteur : `docs/ops/ATELIER_VIVANT.md`.
+
 ## Jouable
+
+- Difficulté : miniboss −41,5 % de PV et boss signatures −40 % en campagne ;
+  boss des annexes −35 %. Évolution des 31 profils aux mondes 2, 5 et 8 :
+  éventails, anneaux décalés, salves successives, charges doubles annoncées et
+  variantes des motifs majeurs. Début de campagne conservé. 15 044 assertions
+  et 11 957 contrôles des patterns réussis. APK :
+  `build/alambic-patterns-evolutifs.apk`. Détails : `docs/ops/PATTERNS_EVOLUTIFS.md`.
+
+- Musiques : dix choix en jeu et dix au menu, dont treize nouvelles compositions
+  synthétisées originales (flûte, célesta, cordes pincées, clochettes). Sélection
+  dans les paramètres existants ; page d'écoute `tmp/musiques-20/ecouter.html`.
+  14 443 assertions et 38 contrôles d'interface réussis, décodage des treize Ogg
+  sans écrêtage. APK : `build/alambic-20-musiques.apk`. Détails et reproduction :
+  `assets/audio/COMPOSITIONS.md`.
+
+- Apprenti A v9 : finition v8 conservée, buste et jambes moins tassés, bras plus longs avec manches légèrement épaissies, échelle générale augmentée de 2,4 %. GLB et source Blender reconstruits ; 14 397 assertions générales, 643 de fluidité et 30 de synchronisation réussies ; vingt runs sans blocage. APK : `build/alambic-apprenti-v9.apk`. Préférence du propriétaire : aucun test avec fenêtre visible ou prise de focus (voir `AGENTS.md`). Détails : `docs/ops/APPRENTI_A.md`.
+
+- Apprenti A v8 : modèle retravaillé après rejet de la qualité de finition. Pointe et bord du chapeau resculptés, écharpe continue, joues dans la peau, reflets des yeux et rendu doux commun accueil/combat. 74 965 triangles, 12 surfaces, rig et gestes conservés. Vérifications générales, mouvement, synchronisation et vingt runs valides ; approbation artistique encore à faire. APK : `build/alambic-apprenti-v8.apk`. Détails : `docs/ops/APPRENTI_A.md`.
 
 - Reprise arcade du 13 septembre : fusions retirées de la boucle active, haltes à +50 % de PV et choix classique, coups de référence à 15, soins de combat plafonnés, cinq armes de comportement, sorts ciblés en pause et rechargés aux impacts, quatre ultimes maximum. Héros réduit, contact physique corrigé, accueil avec le vrai modèle animé, récompenses précoces et dix rangs de maîtrise. État mesuré et limites : `docs/ops/REWORK_ARCADE.md`.
 
@@ -23,11 +76,11 @@ Ce fichier sert à s'orienter, pas à remplacer les données du jeu. Pour une va
 - Sort actif, Passif(s) et Ultime équipables.
 - Interface portrait mobile, joystick/tactile, réglages, pause et navigation paginée.
 - Combat 3D : modèles GLB existants du héros, gardien, bestiaire, boss, projectiles et décor ; palettes lumineuses des dix mondes.
-- Accueil Cuivre & Azur : Apprenti A en 3D animé sur socle, éclairage et commandes natives ; aucune illustration humaine en arrière-plan.
-- Menus natifs Cuivre & Azur : équipements Anneau/Collier/Bague, maîtrises, sorts, trois cartes d’amélioration superposées, paramètres, pause, infusion et bilan. Aucun portrait du héros sur ces écrans.
+- Accueil Atelier vivant : fond original d’atelier, Apprenti A 3D animé, éclairage et commandes natives.
+- Menus natifs Atelier vivant : équipements Anneau/Collier/Bague, maîtrises, sorts, trois cartes d’amélioration superposées, paramètres, pause, infusion et bilan. Aucun portrait du héros sur ces écrans.
 - Salles de campagne 1260 × 1900, trois obstacles centraux décalés et retraits latéraux raccordés aux collisions. Boss et Épreuves dégagés ; Mine sans retraits sur les bords d’apparition. Caméra de suivi avec vue 3D à 48°.
 - 83 glyphes SVG : silhouettes distinctes par amélioration, maîtrise et sort. Bijoux absents dans les emplacements vides. Captures et validation des retouches : `docs/ops/RETOUCHES_GRAPHIQUES.md`.
-- Cadrage portrait 1080 × 1920 conservé sans déformation ni rognage, avec bandes sur les autres ratios. Vérifications et limites : `docs/ops/RENDU_3D_MOBILE.md`.
+- Base portrait 1080 × 1920 avec extension adaptative du viewport, sans déformation ni bandes sur les formats testés. Vérifications : `docs/ops/ATELIER_VIVANT.md`.
 - Sondes headless et suites de tests maison.
 
 ## Architecture de données

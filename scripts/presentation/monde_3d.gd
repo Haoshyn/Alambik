@@ -135,8 +135,9 @@ func _reconstruire_obstacles() -> void:
 	for rect in salle.obstacles():
 		if rect in salle.retraits(): continue
 		var taille := Pont3D.vers_monde(rect.size)
-		var obstacle := preload("res://scripts/presentation/decor_alchimique.gd").obstacle(taille, (_numero+index)%3)
+		var obstacle := preload("res://scripts/presentation/decor_alchimique.gd").obstacle(taille, (_numero+index)%3, int(Jeu.chapitre_courant()["monde"]))
 		_obstacles.add_child(obstacle)
 		obstacle.position = Pont3D.vers_monde(rect.get_center())
 		# La base couvre exactement le rectangle physique de l'obstacle.
 		index += 1
+	preload("res://scripts/presentation/decor_statique.gd").regrouper(_obstacles)

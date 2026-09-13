@@ -57,7 +57,7 @@ func test_les_boss_portent_un_vrai_budget_de_rencontre(v: Verif) -> void:
 	for id in CatalogueEnnemis.ids_miniboss():
 		var pv := float(CatalogueEnnemis.par_id(id)["pv"]) * Chapitres.facteur_pv(0, 5) * Reglages.MINIBOSS_PV_MULT
 		var secondes := pv / (Reglages.TIR_DEGATS * Reglages.HEROS_CADENCE)
-		v.vrai(secondes >= 30.0 and secondes <= 45.0, "%s demande 30-45 s de tir de base continu" % id)
+		v.vrai(secondes >= 17.0 and secondes <= 27.0, "%s demande 17-27 s de tir de base continu" % id)
 	v.vrai(Reglages.BOSS_SIGNATURE_DEGATS_MULT > Reglages.MINIBOSS_DEGATS_MULT,
 		"le boss signature est aussi plus dangereux, pas seulement plus long")
 	v.vrai(Reglages.BOSS_PROJECTILE_VITESSE_MULT >= 1.20,

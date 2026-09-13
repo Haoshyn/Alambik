@@ -34,6 +34,11 @@ Ne pas lire par défaut : `docs/archive/`, `human/`, les `.uid`, les `.import`, 
 
 ## Vérification
 
+Exécuter les vérifications sans fenêtre visible ni prise de focus : Godot en
+`--headless`, Blender en `--background`, processus Windows lancés avec
+`-WindowStyle Hidden`. Ne pas ouvrir l'atelier interactif ou une fenêtre de jeu
+sauf demande explicite du propriétaire ; il peut jouer à LoL pendant le travail.
+
 Après modification de code ou de données :
 
 ```sh

@@ -9,23 +9,32 @@ var _suivant: Button
 var _cartes: VBoxContainer
 var _statut: Label
 var _slots: Array[Button] = []
+var _categories: Dictionary = {}
 
 func _ready() -> void:
-	var col := StyleAzur.page(self,"Grimoire des sorts",integre_menu)
+	var col := StyleAzur.page(self,"Sorts",integre_menu)
 	var categories := HBoxContainer.new()
-	col.add_child(categories)
 	for cat in ["Actifs","Passifs","Ultimes"]:
-		categories.add_child(StyleAzur.bouton(cat,func(): _afficher(cat)))
+		var bouton := StyleAzur.bouton(cat,func(): _afficher(cat))
+		categories.add_child(bouton)
+		_categories[cat] = bouton
 	var equipe := GridContainer.new()
-	equipe.columns = 2
-	col.add_child(equipe)
+	equipe.columns = 4
+	equipe.add_theme_constant_override("h_separation",12)
+	var prepares := StyleAzur.plaque(col)
+	prepares.add_child(StyleAzur.texte("SORTS ÉQUIPÉS",28))
+	prepares.add_child(equipe)
 	for i in 4:
 		var b := StyleAzur.bouton("",func(): _retirer_slot(i))
-		b.add_theme_font_size_override("font_size",23)
+		b.add_theme_font_size_override("font_size",22)
+		b.custom_minimum_size.y = 190
+		b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		equipe.add_child(b)
 		_slots.append(b)
-	_statut = StyleAzur.texte("",26,StyleAzur.MAGIE)
+	col.add_child(categories)
+	_statut = StyleAzur.texte("",26,StyleAzur.IVOIRE)
 	col.add_child(_statut)
 	_cartes = StyleAzur.defilement(col)
 	var pagination := HBoxContainer.new()
@@ -39,13 +48,20 @@ func _ready() -> void:
 
 func _rendre() -> void:
 	_statut.text = _message
+	_statut.visible = not _message.is_empty()
+	for cat: String in _categories:
+		_categories[cat].add_theme_stylebox_override("normal",StyleAzur.cadre(StyleAzur.VIOLET if cat == _categorie else StyleAzur.PANNEAU))
+		_categories[cat].add_theme_color_override("font_color",StyleAzur.IVOIRE if cat == _categorie else StyleAzur.ENCRE)
+	_precedent.get_parent().visible = _ids().size() > 6
 	var passifs := ReglagesJoueur.passifs_equipes
 	var equipes := [ReglagesJoueur.sort_actif_equipe,str(passifs[0]) if passifs.size()>0 else "",str(passifs[1]) if passifs.size()>1 else "",ReglagesJoueur.ultime_equipe]
 	for i in 4:
-		_slots[i].text = "%s : %s" % [["Actif","Passif I","Passif II","Ultime"][i],Sorts.donnees(equipes[i]).get("nom","Vide") if not str(equipes[i]).is_empty() else "Vide"]
+		_slots[i].text = ["Actif","Passif I","Passif II","Ultime"][i]
+		_slots[i].tooltip_text = str(Sorts.donnees(equipes[i]).get("nom","Vide")) if not str(equipes[i]).is_empty() else "Emplacement vide"
 		_slots[i].icon = null if str(equipes[i]).is_empty() else StyleAzur.glyphe(str(equipes[i]))
 		_slots[i].expand_icon = true
-		_slots[i].add_theme_constant_override("icon_max_width",48)
+		_slots[i].add_theme_constant_override("icon_max_width",104)
+		StyleAzur.case_objet(_slots[i],not str(equipes[i]).is_empty())
 	for enfant in _cartes.get_children():
 		_cartes.remove_child(enfant)
 		enfant.queue_free()
@@ -56,11 +72,26 @@ func _rendre() -> void:
 		var b := StyleAzur.bouton("",func(): _choisir_index(i))
 		b.custom_minimum_size.y = 230
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		b.icon = StyleAzur.glyphe(id)
-		b.expand_icon = true
-		b.add_theme_constant_override("icon_max_width",120)
-		b.text = "%s\n%s\n%s" % [d["nom"],d["description"],"Équipé · toucher pour retirer" if id in equipes else "Toucher pour équiper" if ReglagesJoueur.sort_debloque(id) else "À obtenir dans les Épreuves"]
-		b.add_theme_font_size_override("font_size",26)
+		var marge := MarginContainer.new()
+		marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		for cote in ["left","right","top","bottom"]: marge.add_theme_constant_override("margin_"+cote,26)
+		marge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(marge)
+		var ligne := HBoxContainer.new()
+		ligne.add_theme_constant_override("separation",24)
+		ligne.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		marge.add_child(ligne)
+		ligne.add_child(StyleAzur.vignette(id,144))
+		var texte := VBoxContainer.new()
+		texte.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		texte.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		ligne.add_child(texte)
+		texte.add_child(StyleAzur.texte(str(d["nom"]),34))
+		texte.add_child(StyleAzur.texte(str(d["description"]),27,StyleAzur.ATTENUE))
+		texte.add_child(StyleAzur.texte("Équipé · toucher pour retirer" if id in equipes else "Toucher pour équiper" if ReglagesJoueur.sort_debloque(id) else "À obtenir dans les Épreuves",24,StyleAzur.MAGIE))
+		marge.minimum_size_changed.connect(func(): b.custom_minimum_size.y = maxf(230.0,marge.get_combined_minimum_size().y))
+		if id in equipes:
+			b.add_theme_stylebox_override("normal",StyleAzur.cadre(Color("e0f2e7"),StyleAzur.MAGIE))
 		_cartes.add_child(b)
 
 func _catalogue() -> Dictionary:

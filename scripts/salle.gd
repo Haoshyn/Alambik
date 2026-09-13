@@ -90,9 +90,8 @@ func _construire_obstacles() -> void:
 		var rect := Rect2(limites.position+retrait.position*limites.size,retrait.size*limites.size)
 		_retraits.append(rect)
 		_ajouter_obstacle(rect)
-	for point: Vector2 in Reglages.ARENE_COMPOSITIONS[motif]:
-		var centre := limites.position+point*limites.size
-		_ajouter_obstacle(Rect2(centre-Reglages.ARENE_OBSTACLE_TAILLE/2,Reglages.ARENE_OBSTACLE_TAILLE))
+	for bloc: Rect2 in Reglages.ARENE_COMPOSITIONS[motif]:
+		_ajouter_obstacle(Rect2(limites.position+bloc.position*limites.size,bloc.size*limites.size))
 
 func retraits() -> Array[Rect2]:
 	return _retraits
@@ -316,6 +315,11 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 			copie["recharge"] = float(copie["recharge"]) * Reglages.ENNEMI_RECHARGE_MULT
 	if Jeu.mode_run == "grimoire":
 		copie["degats"] = maxf(float(copie["degats"]), Reglages.DEGATS_COUP_REFERENCE)
+	if not Jeu.est_retro():
+		var chapitre_patterns := Jeu.chapitre if Jeu.mode_run == "grimoire" else ReglagesJoueur.palier_atteint()
+		copie = EvolutionEnnemis.appliquer(copie,chapitre_patterns)
+		if donnees["cerveau"] == "boss" and Jeu.mode_run != "grimoire":
+			copie["pv"] = float(copie["pv"])*EvolutionEnnemis.ANNEXE_PV_BOSS
 	return copie
 
 func _sur_ennemi_touche(position: Vector2, couleur: Color) -> void:

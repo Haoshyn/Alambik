@@ -1,5 +1,19 @@
 extends RefCounted
 
+func test_spirale_conserve_les_deux_tirs_centraux(v: Verif) -> void:
+	for ids in [["tir_multiple","spirale"],["spirale","tir_multiple"]]:
+		var mods: Array = []
+		for id in ids: mods.append(CatalogueReactifs.par_id(id).mods)
+		var tir := Mods.appliquer(Tir.de_base(Stats.depuis_reglages()),mods)
+		for copie in [tir,tir.copie()]:
+			var angles: Array[float] = copie.angles()
+			v.egal(angles.size(),4,"deux tirs centraux et deux lateraux")
+			v.presque(angles[0],0.0,"premier tir droit")
+			v.presque(angles[1],0.0,"second tir droit")
+			v.vrai(angles[2]<0.0 and angles[3]>0.0,"un tir de chaque cote")
+			v.presque(copie.decalages()[0],-15.0,"premier canon central")
+			v.presque(copie.decalages()[1],15.0,"second canon central")
+
 func test_tir_de_base(v: Verif) -> void:
 	var t := Tir.de_base(Stats.depuis_reglages())
 	v.egal(t.nb_projectiles, 1, "un seul projectile par defaut")

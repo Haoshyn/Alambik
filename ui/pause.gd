@@ -7,7 +7,7 @@ var _reglages: Control
 func _ready() -> void:
 	var col := StyleAzur.page(self,"Pause")
 	var contenu := StyleAzur.defilement(col)
-	contenu.add_child(StyleAzur.image(10,280))
+	contenu.add_child(StyleAzur.image(10,160))
 	contenu.add_child(StyleAzur.texte("%s · Salle %d / %d" % [Jeu.nom_run(),Jeu.salle_courante,Jeu.salles_du_chapitre()],36))
 	contenu.add_child(StyleAzur.texte("Niveau %d · %d améliorations" % [Jeu.niveau_run,Jeu.inventaire.size()],29,StyleAzur.ATTENUE))
 	contenu.add_child(StyleAzur.bouton("Reprendre",_reprendre,true))

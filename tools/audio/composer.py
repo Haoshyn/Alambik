@@ -5,6 +5,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 import wave
+import os
 import numpy as np
 
 TAUX = 44100
@@ -28,7 +29,12 @@ def note(degre, tonique):
     return tonique + GAMME[degre % 7] + 12 * (degre // 7)
 
 
-def composer(nom, tempo, tonique, accords, style):
+def composer(nom, tempo, tonique, accords, style, gamme=None, motif=None, instrument='cloche', arpege=None):
+    gamme = gamme or GAMME
+    motif = motif or MOTIFS[style]
+    arpege = arpege or [0, 4, 2, 6, 4, 2, 7, 4]
+    def note(degre, tonique):
+        return tonique + gamme[degre % 7] + 12 * (degre // 7)
     hasard = np.random.default_rng(310 + style)
     temps = 60 / tempo
     longueur = round(32 * 4 * temps * TAUX)
@@ -55,6 +61,15 @@ def composer(nom, tempo, tonique, accords, style):
         elif timbre == 'basse':
             son = np.sin(phase) + .25 * np.sin(phase * 2) + .12 * np.sin(phase * 3)
             enveloppe = np.minimum(t / .008, 1) * np.exp(-t * 2) * relache
+        elif timbre == 'flute':
+            son = np.sin(phase + .012*np.sin(2*np.pi*5*t)) + .15*np.sin(phase*2)
+            enveloppe = np.minimum(t/.07,1)*np.exp(-t*.8)*relache
+        elif timbre == 'corde':
+            son = sum(np.sin(phase*k)*np.exp(-t*k*1.8)/k for k in range(1,7))
+            enveloppe = np.minimum(t/.012,1)*relache
+        elif timbre == 'celesta':
+            son = np.sin(phase)*np.exp(-t*2)+.35*np.sin(phase*2.01)*np.exp(-t*5)
+            enveloppe = np.minimum(t/.005,1)*relache
         else:
             son = np.sin(phase + 1.5 * np.sin(phase * 2) * np.exp(-t * 9))
             son += .22 * np.sin(phase * 3) * np.exp(-t * 7)
@@ -88,15 +103,15 @@ def composer(nom, tempo, tonique, accords, style):
                   .24 if style != 3 else .16, 'basse')
         if not respiration or style == 3:
             for pas in range(8):
-                intervalle = [0, 4, 2, 6, 4, 2, 7, 4][(pas + style) % 8]
+                intervalle = arpege[(pas + style) % 8]
                 jouer(note(degre + intervalle, tonique + 12), debut + pas * .5, .4,
                       .055 if style != 1 else .085, 'pince', (-1 if pas % 2 else 1) * .45)
         if mesure % 4 != 3 or mesure >= 24:
             for pas in range(4):
-                motif = MOTIFS[style][(mesure % 2) * 4 + pas]
-                jouer(note(motif + (degre if mesure % 4 >= 2 else 0), tonique),
+                hauteur = motif[(mesure % 2) * 4 + pas]
+                jouer(note(hauteur + (degre if mesure % 4 >= 2 else 0), tonique),
                       debut + pas + (0.25 if style == 2 and pas % 2 else 0),
-                      1.6 if style == 3 else .85, .15 if style != 3 else .17, 'cloche', -.12)
+                      1.6 if style == 3 else .85, .15 if style != 3 else .17, instrument, -.12)
         if style != 3 and not respiration:
             for position in ([0, 1, 2, 3] if style != 2 else [0, 1.5, 2.75]):
                 percussion(debut + position, 'pied', .42)
@@ -118,9 +133,10 @@ def composer(nom, tempo, tonique, accords, style):
             flux.setsampwidth(2)
             flux.setframerate(TAUX)
             flux.writeframes((mixage * 32767).astype('<i2').tobytes())
-        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(wav), '-c:a', 'libvorbis',
+        subprocess.run([os.environ.get('FFMPEG', 'ffmpeg'), '-v', 'error', '-y', '-i', str(wav), '-c:a', 'libvorbis',
                         '-q:a', '5', '-metadata', f'title={nom}', '-metadata',
-                        'artist=Alambik - composition originale', str(DESTINATION / f'{nom}.ogg')], check=True)
+                        'artist=Alambik - composition originale', str(DESTINATION / f'{nom}.ogg')], check=True,
+                       creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
     print(f'{nom}: {longueur / TAUX:.2f} s, {tempo} BPM', flush=True)
 
 

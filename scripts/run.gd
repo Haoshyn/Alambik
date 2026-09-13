@@ -23,6 +23,9 @@ var _hud: Control
 var _joystick: Control
 var _couche: CanvasLayer
 var _panneau: Control
+var _visee_active := false
+var _vitesse_avant_visee := 1.0
+var _boss_soignes: Array[int] = []
 var _limites := Rect2()
 var _terminee := false
 var _temps_dans_la_salle := 0.0
@@ -359,7 +362,11 @@ func _suivre_heros() -> void:
 	var visee := position_visuelle-Vector2(0,vue.y*0.13)
 	var minimum := _limites.position+vue*0.5-Vector2(70,Reglages.ARENE_HAUT/_camera.zoom.y)
 	var maximum := _limites.end-vue*0.5+Vector2(70,Reglages.ARENE_BAS/_camera.zoom.y)
-	_camera.global_position = Vector2(clampf(visee.x,minimum.x,maximum.x),clampf(visee.y,minimum.y,maximum.y))
+	# Sur un ecran allonge, la vue peut depasser la salle : centrer cet axe
+	# plutot que passer des bornes inversees a clampf.
+	_camera.global_position = Vector2(
+		clampf(visee.x,minimum.x,maximum.x) if minimum.x <= maximum.x else _limites.get_center().x,
+		clampf(visee.y,minimum.y,maximum.y) if minimum.y <= maximum.y else _limites.get_center().y)
 	_camera.force_update_scroll()
 
 func _entrer_dans_la_salle() -> void:
@@ -378,6 +385,7 @@ func _entrer_dans_la_salle() -> void:
 		_heros.recalculer()
 		_sous_titre_voile.text = "Une nouvelle augmentation pour cette épreuve"
 	_heros.preparer_nouvelle_salle()
+	_soigner_avant_boss()
 	_suivre_heros()
 	if ReglagesJoueur.passifs_equipes_effectifs().has("reserve_ultime"):
 		_charge_ultime += maxi(1, roundi(float(Reglages.RESERVE_ULTIME_CHARGES) \
@@ -544,7 +552,6 @@ func _ouvrir_alambic_apres_salle() -> void:
 	_neutraliser_deplacement()
 	get_tree().paused = true
 	Sons.musique_calme()
-	_heros.stats.soigner_garanti(_heros.stats.pv_max * Reglages.SOIN_ALAMBIC)
 	_panneau = ALAMBIC.instantiate()
 	_panneau.process_mode = Node.PROCESS_MODE_ALWAYS
 	_couche.add_child(_panneau)
@@ -555,7 +562,15 @@ func _ouvrir_alambic_apres_salle() -> void:
 		Sons.musique_combat(0.35)
 		_avancer_salle())
 
+func _soigner_avant_boss() -> void:
+	if Jeu.mode_run != "grimoire" or not Chapitres.est_boss(Jeu.chapitre, Jeu.salle_courante) or _boss_soignes.has(Jeu.salle_courante): return
+	_boss_soignes.append(Jeu.salle_courante)
+	_heros.stats.soigner_garanti(_heros.stats.pv_max * Reglages.SOIN_AVANT_BOSS)
+	_effets.onde(_heros.global_position,130.0,Color("71d9b4"),0.5)
+
 func _ouvrir_pause() -> void:
+	if _visee_active: _fermer_visee()
+	if _panneau != null: return
 	_neutraliser_deplacement()
 	get_tree().paused = true
 	Sons.musique_calme()
@@ -578,7 +593,9 @@ func _fermer_pause() -> void:
 func _notification(quoi: int) -> void:
 	if quoi != NOTIFICATION_WM_GO_BACK_REQUEST or _terminee:
 		return
-	if _panneau != null and _panneau.scene_file_path == "res://ui/pause.tscn":
+	if _visee_active:
+		_fermer_visee()
+	elif _panneau != null and _panneau.scene_file_path == "res://ui/pause.tscn":
 		_fermer_pause()
 	elif _panneau == null:
 		_ouvrir_pause()
@@ -893,14 +910,32 @@ func _lancer_sort_actif() -> void:
 		_fermer_visee()
 		_confirmer_sort(point))
 	_panneau.annule.connect(_fermer_visee)
-	get_tree().paused = true
+	_visee_active = true
+	_vitesse_avant_visee = Engine.time_scale
+	Engine.time_scale = Reglages.VISEE_VITESSE_TEMPS
 	_couche.add_child(_panneau)
 
 func _fermer_visee() -> void:
+	if not _visee_active: return
+	_visee_active = false
+	Engine.time_scale = _vitesse_avant_visee
 	_panneau.queue_free()
 	_panneau = null
 	_neutraliser_deplacement()
 	get_tree().paused = false
+	_reprendre_apres_visee.call_deferred()
+
+func _reprendre_apres_visee() -> void:
+	if _terminee or _panneau != null: return
+	if _niveaux_en_attente > 0:
+		_ouvrir_recompense_etage()
+	elif _fin_salle_en_attente:
+		_fin_salle_en_attente = false
+		_traiter_fin_salle()
+
+func _exit_tree() -> void:
+	if _visee_active:
+		Engine.time_scale = _vitesse_avant_visee
 
 func _confirmer_sort(point: Vector2) -> void:
 	var id := ReglagesJoueur.sort_actif_effectif()
@@ -959,6 +994,7 @@ func _repousser(ennemi: Node2D, origine: Vector2, distance: float) -> void:
 func _sur_run_terminee(victoire: bool) -> void:
 	if _terminee:
 		return
+	if _visee_active: _fermer_visee()
 	_terminee = true
 	Sons.musique_calme()
 	get_tree().paused = true

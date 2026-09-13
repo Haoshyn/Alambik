@@ -4,7 +4,7 @@ var _choisi := false
 
 func _ready() -> void:
 	var col := StyleAzur.page(self, "La halte")
-	col.add_child(StyleAzur.texte("+50 % de vos PV maximum\nChoisissez une nouvelle augmentation", 30, StyleAzur.ATTENUE))
+	col.add_child(StyleAzur.texte("Choisissez une nouvelle augmentation\n30 % de soin à l’entrée du prochain boss", 30, StyleAzur.ATTENUE))
 	var liste := StyleAzur.defilement(col)
 	var propositions := DraftLogique.proposer_halte(Jeu.inventaire, Jeu.rng)
 	for id in propositions:
@@ -12,6 +12,9 @@ func _ready() -> void:
 		var bouton := StyleAzur.bouton(reactif.nom + "\n\n" + reactif.description, func(): _choisir(id))
 		bouton.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		bouton.custom_minimum_size.y = 260
+		bouton.icon = StyleAzur.glyphe(id)
+		bouton.expand_icon = true
+		bouton.add_theme_constant_override("icon_max_width",130)
 		liste.add_child(bouton)
 	if propositions.is_empty():
 		liste.add_child(StyleAzur.bouton("Reprendre la route", func(): _choisir("")))

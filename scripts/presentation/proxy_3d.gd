@@ -144,10 +144,10 @@ func _dessiner_visee() -> void:
 	maillage.clear_surfaces()
 	var donnees: Dictionary = logique.get("donnees")
 	var cerveau := str(donnees.get("cerveau", ""))
-	if cerveau not in ["sentinelle", "harceleur", "veloce"]: return
+	if cerveau not in ["sentinelle", "harceleur", "veloce", "rampant", "tisseur"]: return
 	var etat := str(logique.get("_etat"))
-	if etat not in ["vise", "preparer"]: return
-	var cible: Vector2 = logique.get("_point_vise") if cerveau != "veloce" else logique.global_position + Vector2(logique.get("_direction_charge")) * 650.0
+	if etat not in ["vise", "preparer", "tisser"]: return
+	var cible: Vector2 = logique.get("_point_vise") if cerveau not in ["veloce","rampant"] else logique.global_position + Vector2(logique.get("_direction_charge")) * 650.0
 	var debut := to_local(Pont3D.vers_monde(logique.global_position, 0.035))
 	var fin := to_local(Pont3D.vers_monde(cible, 0.035))
 	maillage.surface_begin(Mesh.PRIMITIVE_LINES)

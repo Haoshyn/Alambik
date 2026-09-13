@@ -11,6 +11,7 @@ extends RefCounted
 
 const CHAMPS_ADD := {
 	"nb_projectiles_add": "nb_projectiles",
+	"projectiles_lateraux_add": "projectiles_lateraux",
 	"rebonds_add": "rebonds",
 	"perforations_add": "perforations",
 	"fragments_add": "fragments",

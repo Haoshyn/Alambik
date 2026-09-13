@@ -15,16 +15,17 @@ RIG = None
 
 def compacter(point):
     x,y,z=point
+    # Le corps porte la tete : garder des membres lisibles sous le grand chapeau.
     if z < .36:
         h=z*.90
     elif z < .64:
-        h=.324+(z-.36)*.45
+        h=.324+(z-.36)*.60
     elif z < 1.30:
-        h=.450+(z-.64)*.52
+        h=.492+(z-.64)*.72
     else:
-        h=.7932+(z-1.30)*1.04
+        h=.9672+(z-1.30)*1.04
     largeur=1.12
-    return Vector((x*largeur,y*1.10,h))*.83
+    return Vector((x*largeur,y*1.10,h))*.85
 
 
 def matiere(nom, couleur, metal=0, rugosite=.65):
@@ -57,7 +58,7 @@ def finir(o, nom, mat, os):
 
 
 def boule(nom, pos, taille, mat, os='torse'):
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=20, location=pos)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=64 if nom=='Visage' else 32, ring_count=40 if nom=='Visage' else 20, location=pos)
     o = bpy.context.object
     o.scale = taille
     return finir(o, nom, mat, os)
@@ -126,7 +127,7 @@ def bras_souple(s,c):
     # Une surface continue et des poids progressifs remplacent les coques superposees.
     epaule=compacter((s*.30,0,1.12));coude=compacter((s*.42,-.02,.99));main=compacter((s*.48,-.11,.89))
     centres=[epaule,epaule.lerp(coude,.65),coude,coude.lerp(main,.45),coude.lerp(main,.78),main]
-    rayons=[.056,.052,.047,.043,.039,.033]
+    rayons=[.060,.056,.050,.046,.041,.035]
     points=[];faces=[];n=16
     for j,(centre,rayon) in enumerate(zip(centres,rayons)):
         axe=(centres[min(j+1,len(centres)-1)]-centres[max(0,j-1)]).normalized()
@@ -185,7 +186,7 @@ def meche(nom, points, largeur, mat='cheveux', os='tete'):
 
 def galber(o):
     bpy.context.view_layer.objects.active=o
-    mod=o.modifiers.new('Galbe','SUBSURF');mod.levels=2
+    mod=o.modifiers.new('Galbe','SUBSURF');mod.levels=1
     bpy.ops.object.modifier_move_up(modifier=mod.name)
     bpy.ops.object.modifier_apply(modifier=mod.name)
 
@@ -215,11 +216,11 @@ def squelette():
 
 def construire():
     for nom,col,met,rug in [
-        ('violet',(.20,.052,.31),0,.76),('violet_clair',(.31,.085,.40),0,.7),
+        ('violet',(.22,.057,.34),0,.64),('violet_clair',(.31,.085,.40),0,.7),
         ('turquoise',(.025,.43,.48),0,.65),('turquoise_clair',(.055,.56,.58),0,.58),
-        ('cuivre',(.63,.29,.12),.58,.3),('cuir',(.13,.063,.039),0,.75),
-        ('semelle',(.066,.034,.026),0,.9),('peau',(.91,.53,.30),0,.8),
-        ('joues',(.85,.30,.20),0,.85),('yeux',(.036,.020,.025),0,.5),
+        ('cuivre',(.67,.36,.15),.38,.34),('cuir',(.13,.063,.039),0,.75),
+        ('semelle',(.066,.034,.026),0,.9),('peau',(.91,.57,.36),0,.62),
+        ('joues',(.85,.30,.20),0,.85),('yeux',(.027,.014,.020),0,.22),
         ('cheveux',(.095,.044,.024),0,.75),('cheveux_clair',(.14,.064,.034),0,.68),
         ('potion',(.012,.48,.57),.2,.19),('orbe',(.36,.045,.62),.32,.19),
         ('reflet',(.73,.91,.88),.1,.22)]:
@@ -236,7 +237,7 @@ def construire():
     for s in [-1,1]:
         boule('Oreille',(s*.448,-.014,1.54),(.081,.095,.112),'peau','tete')
         boule('Oeil',(s*.175,-.367,1.64),(.040,.016,.087),'yeux','tete')
-        boule('Joue',(s*.292,-.325,1.515),(.049,.012,.027),'joues','tete')
+        boule('Joue',(s*.292,-.292,1.515),(.052,.009,.029),'joues','tete')
         meche('Patte',[(s*.40,-.045,1.92),(s*.455,-.12,1.78),(s*.46,-.11,1.60),(s*.39,-.15,1.47)],.09)
     meche('Meche_centrale',[(-.17,-.28,2.01),(-.07,-.37,1.95),(.08,-.393,1.86),(.08,-.375,1.73)],.145)
     meche('Meche_balaye',[(-.23,-.22,2.01),(-.35,-.30,1.91),(-.40,-.28,1.77),(-.48,-.19,1.72)],.14)
@@ -295,6 +296,69 @@ def construire():
     anneaux('Goulot_fiole',[(x,y,.79,.045,.045),(x,y,.86,.045,.045),(x,y,.865,.049,.049)],'cuivre')
     anneaux('Bouchon_fiole',[(x,y,.858,.034,.034),(x,y,.906,.036,.036)],'cuir')
     courbe('Reflet_fiole',[(x-.065,y-.068,.74),(x-.073,y-.066,.69)],.008,'reflet')
+
+
+def resculpter():
+    # Le bord est une surface annulaire fermee : aucun eventail de triangles
+    # superposes au centre, et une levre arrondie plutot qu'une plaque mince.
+    for o in list(bpy.context.scene.objects):
+        if o.name.startswith(('Bord_chapeau','Chapeau_souple','Echarpe_col','Echarpe_plastron','Pli_echarpe','Pan_echarpe','Noeud_echarpe','Joue')):
+            bpy.data.objects.remove(o,do_unlink=True)
+    n=64;points=[];faces=[]
+    profil=[(.34,2.005),(.55,1.982),(.685,1.968),(.722,1.986),(.725,2.012),(.697,2.038),(.55,2.057),(.34,2.065)]
+    for r,z in profil:
+        for i in range(n):
+            a=math.tau*i/n
+            levee=.022*math.cos(a+.4)*(r/.725)**2
+            points.append((r*math.cos(a),.035+r*1.12/1.10*math.sin(a),z+levee))
+    for j in range(len(profil)):
+        for i in range(n):
+            a=j*n+i;b=j*n+(i+1)%n;c=((j+1)%len(profil))*n+(i+1)%n;d=((j+1)%len(profil))*n+i
+            faces.append((a,b,c,d))
+    mesh=bpy.data.meshes.new('Bord_cousu');mesh.from_pydata(points,[],faces);mesh.update()
+    o=bpy.data.objects.new('Bord_chapeau',mesh);bpy.context.collection.objects.link(o)
+    finir(o,'Bord_chapeau','violet','tete');galber(o)
+    # Les sections deviennent perpendiculaires a la pointe recourbee ; elles
+    # ne se replient plus les unes dans les autres au sommet.
+    profils=[(0,.065,2.005,.423,.361),(0,.065,2.025,.423,.361),(0,.07,2.065,.411,.349),(0,.075,2.09,.405,.345),(-.018,.09,2.22,.345,.291),
+        (-.07,.105,2.37,.276,.233),(-.16,.10,2.51,.193,.166),(-.27,.075,2.57,.133,.117),
+        (-.38,.038,2.55,.090,.084),(-.45,.0,2.48,.060,.056),(-.475,-.018,2.40,.027,.027),(-.473,-.02,2.37,.006,.006)]
+    points=[];faces=[];n=48
+    for j,prof in enumerate(profils):
+        centre=Vector(prof[:3]);rayon,profondeur=prof[3:]
+        axe=(Vector(profils[min(j+1,len(profils)-1)][:3])-Vector(profils[max(0,j-1)][:3])).normalized()
+        if j<5:axe=Vector((0,0,1))
+        u=Vector((axe.z,0,-axe.x)).normalized();v=axe.cross(u).normalized()
+        for i in range(n):
+            a=math.tau*i/n;points.append(centre+u*math.cos(a)*rayon+v*math.sin(a)*profondeur)
+    for j in range(len(profils)-1):
+        for i in range(n):
+            a=j*n+i;b=j*n+(i+1)%n;faces.append((a,b,b+n,a+n))
+    faces += [tuple(reversed(range(n))),tuple(range((len(profils)-1)*n,len(profils)*n))]
+    mesh=bpy.data.meshes.new('Feutre_continu');mesh.from_pydata(points,[],faces);mesh.update()
+    o=bpy.data.objects.new('Chapeau_souple',mesh);bpy.context.collection.objects.link(o)
+    finir(o,'Chapeau_souple','violet','chapeau');galber(o)
+    # Une echarpe pleine raccorde le cou a la tunique, sans trou ni deux bouees.
+    profils=[(0,0,1.10,.205,.20),(0,0,1.125,.28,.23),(0,.01,1.20,.305,.25),
+        (0,.012,1.27,.275,.235),(0,.015,1.325,.205,.19),(0,.015,1.33,.13,.13)]
+    galber(anneaux('Echarpe_drapee',profils,'turquoise','torse',n=48))
+    boule('Noeud_echarpe',(-.255,.055,1.23),(.075,.072,.073),'turquoise')
+    # Ruban plat a epaisseur reelle, dont les sections restent larges jusqu'a l'ourlet.
+    centres=[(-.26,.10,1.235,.075),(-.33,.19,1.18,.09),(-.40,.24,1.08,.087),(-.49,.25,.99,.078),(-.52,.23,.955,.072)]
+    points=[];faces=[]
+    for x,y,z,r in centres:
+        points += [(x-r,y-.023,z),(x+r,y-.023,z),(x+r,y+.023,z),(x-r,y+.023,z)]
+    for j in range(len(centres)-1):
+        for i in range(4):faces.append((j*4+i,j*4+(i+1)%4,(j+1)*4+(i+1)%4,(j+1)*4+i))
+    faces += [(3,2,1,0),tuple(range((len(centres)-1)*4,len(centres)*4))]
+    mesh=bpy.data.meshes.new('Tissu_pan');mesh.from_pydata(points,[],faces);mesh.update()
+    o=bpy.data.objects.new('Pan_echarpe',mesh);bpy.context.collection.objects.link(o)
+    finir(o,'Pan_echarpe','turquoise','echarpe');galber(o)
+    # La fiole est accrochee au cuir ; un petit passant rend son attache lisible.
+    courbe('Attache_fiole',[(-.28,-.325,.84),(-.28,-.385,.84),(-.28,-.385,.77)],.025,'cuir')
+    for signe in [-1,1]:
+        # Un reflet discret apporte de la vie aux yeux sans changer leur expression.
+        boule('Reflet_oeil',(signe*.175-.012,-.488,1.676),(.009,.004,.012),'reflet','tete')
 
 
 def animer():
@@ -401,6 +465,11 @@ def exporter():
             profondeur=max(v.co.y for v in o.data.vertices)-min(v.co.y for v in o.data.vertices)
             sections[o.name]={'largeur':round(largeur,5),'profondeur':round(profondeur,5)}
             assert abs(largeur/profondeur-1)<.01, 'Section non circulaire : '+o.name
+    import importlib.util
+    chemin=Path(__file__).with_name('occlusion_apprenti.py')
+    spec=importlib.util.spec_from_file_location('occlusion_apprenti',chemin)
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    module.appliquer(compacter)
     # Fusion par matiere pour limiter les appels de dessin sur mobile.
     for m in MAT.values():
         objets=[o for o in bpy.context.scene.objects if o.type=='MESH' and o.data.materials[0]==m]
@@ -424,6 +493,7 @@ def exporter():
     bpy.ops.wm.save_as_mainfile(filepath=str(source))
     glb=SORTIE/'characters/apprenti_a.glb'
     bpy.ops.export_scene.gltf(filepath=str(glb),export_format='GLB',export_yup=True,
+        export_vertex_color='NAME',export_vertex_color_name='Occlusion_douce',
         export_animations=True,export_animation_mode='NLA_TRACKS',export_nla_strips=True,
         export_force_sampling=True,export_cameras=False,export_lights=False)
     meshes=[o for o in bpy.context.scene.objects if o.type=='MESH']
@@ -450,8 +520,8 @@ def rendu():
         o=bpy.data.objects.new(nom,d);scene.collection.objects.link(o);o.location=pos
         o.rotation_euler=(Vector((0,0,.9))-o.location).to_track_quat('-Z','Y').to_euler()
     d=bpy.data.cameras.new('Camera');o=bpy.data.objects.new('Camera',d);scene.collection.objects.link(o)
-    o.location=(2.5,-5,2.7);o.rotation_euler=(Vector((0,0,.92))-o.location).to_track_quat('-Z','Y').to_euler()
-    d.type='ORTHO';d.ortho_scale=2.25;scene.camera=o
+    o.location=(2.5,-5,2.7);o.rotation_euler=(Vector((0,0,1.02))-o.location).to_track_quat('-Z','Y').to_euler()
+    d.type='ORTHO';d.ortho_scale=2.45;scene.camera=o
     scene.view_settings.view_transform='AgX'
     scene.render.filepath=str(APERCU/'apprenti-blender.png');bpy.ops.render.render(write_still=True)
 
@@ -461,4 +531,4 @@ if __name__=='__main__':
     bpy.context.preferences.filepaths.save_version=0
     APERCU.mkdir(parents=True,exist_ok=True)
     (APERCU/'.gdignore').touch()
-    construire();exporter();rendu()
+    construire();resculpter();exporter();rendu()

@@ -11,7 +11,20 @@ func test_couverture_modeles_et_mondes(v: Verif) -> void:
 		v.vrai(ResourceLoader.exists("res://assets/3d/" + chemin + ".glb"), "modele : " + chemin)
 
 func test_cadrage_portrait(v: Verif) -> void:
-	v.egal(ProjectSettings.get_setting("display/window/stretch/aspect"), "keep", "aucun etirement ni rognage du cadre")
+	v.egal(ProjectSettings.get_setting("display/window/stretch/aspect"), "expand", "ecran rempli sans etirer les proportions")
+
+func test_decors_campagne(v: Verif) -> void:
+	v.egal(DecorsMondes.PROFILS.size(),Chapitres.MONDES.size(),"chaque monde possede un decor")
+	var formes := {}
+	var motifs := {}
+	for monde in Chapitres.MONDES.size():
+		var profil := DecorsMondes.profil(monde)
+		formes[int(profil["forme"])] = true
+		motifs[int(profil["motif"])] = true
+		v.vrai(int(profil["motif"]) in range(5),"motif pris en charge par le shader")
+		for cle in ["sol","joint","mur","accent","dehors","detail"]:
+			v.vrai(Color.html_is_valid(str(profil[cle])),"couleur valide du decor : "+cle)
+	v.vrai(formes.size()>1 and motifs.size()>1,"les mondes different aussi par leur geometrie")
 
 func test_orientation_du_mage(v: Verif) -> void:
 	var heros := CharacterBody2D.new()

@@ -56,7 +56,7 @@ func _choisir_mode(mode: String) -> void:
 	_fermer()
 
 func _rafraichir() -> void:
-	_titre.text = str(Chapitres.MONDES[_monde]["nom"])
+	_titre.text = "%s · %s" % [Chapitres.MONDES[_monde]["nom"],DecorsMondes.profil(_monde)["nom"]]
 	for i in 3:
 		var index := _monde*3+i
 		var d := Chapitres.par_index(index)

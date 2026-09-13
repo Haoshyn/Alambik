@@ -49,10 +49,10 @@ func _construire_navigation() -> void:
 	_navigation.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_navigation.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_navigation)
-	var socle := ColorRect.new()
+	var socle := Panel.new()
 	socle.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	socle.offset_top = -StyleAzur.HAUTEUR_NAVIGATION - Ecran.marge_basse()
-	socle.color = Color("002333")
+	socle.add_theme_stylebox_override("panel",StyleAzur.cadre(StyleAzur.VIOLET))
 	socle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_navigation.add_child(socle)
 	var barre := HBoxContainer.new()

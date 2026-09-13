@@ -215,17 +215,26 @@ const ARENE_HAUTEUR_MAX := 1540.0
 const ARENE_TAILLE := Vector2(1260.0,1900.0)
 const ARENE_CAMERA_ZOOM := 1.05
 const ARENE_PASSAGE_MIN := 240.0
-const ARENE_OBSTACLE_TAILLE := Vector2(156.0,94.0)
 const ARENE_COMPOSITIONS := [
-	[Vector2(0.40,0.28),Vector2(0.60,0.50),Vector2(0.40,0.72)],
-	[Vector2(0.59,0.29),Vector2(0.39,0.50),Vector2(0.60,0.73)],
-	[Vector2(0.41,0.29),Vector2(0.61,0.51),Vector2(0.39,0.73)],
+	[Rect2(0.32,0.42,0.36,0.07)],
+	[Rect2(0.27,0.25,0.09,0.24),Rect2(0.64,0.57,0.09,0.20)],
+	[Rect2(0.25,0.26,0.12,0.08),Rect2(0.64,0.26,0.10,0.08),Rect2(0.43,0.66,0.16,0.07)],
+	[Rect2(0.26,0.30,0.23,0.06),Rect2(0.52,0.65,0.23,0.06)],
+	[Rect2(0.43,0.30,0.14,0.35)],
+	[Rect2(0.25,0.25,0.10,0.07),Rect2(0.65,0.25,0.10,0.07),Rect2(0.25,0.67,0.10,0.07),Rect2(0.65,0.67,0.10,0.07)],
+	[Rect2(0.27,0.30,0.11,0.32),Rect2(0.64,0.43,0.10,0.10)],
+	[Rect2(0.34,0.27,0.32,0.06),Rect2(0.40,0.66,0.20,0.10)],
 ]
 # Retraits du sol raccordes aux collisions, hors de l'entree et du portail.
 const ARENE_RETRAITS := [
-	[Rect2(0.0,0.13,0.12,0.22),Rect2(0.90,0.49,0.10,0.25)],
-	[Rect2(0.0,0.45,0.10,0.26),Rect2(0.87,0.15,0.13,0.20)],
-	[Rect2(0.0,0.20,0.11,0.25),Rect2(0.89,0.55,0.11,0.16)],
+	[],
+	[Rect2(0.0,0.68,0.09,0.10)],
+	[Rect2(0.91,0.53,0.09,0.12)],
+	[Rect2(0.0,0.61,0.10,0.13)],
+	[Rect2(0.0,0.22,0.09,0.15),Rect2(0.91,0.65,0.09,0.12)],
+	[],
+	[Rect2(0.89,0.74,0.11,0.09)],
+	[Rect2(0.0,0.46,0.11,0.10),Rect2(0.91,0.46,0.09,0.10)],
 ]
 const ECHELLE_VISUELLE_COMBAT := 1.08
 
@@ -259,7 +268,8 @@ const DEFI_DEGATS_BASE := 1.15
 # Un Amélioration se reprend, mais pas indefiniment : six choix doivent construire
 # un build, pas empiler automatiquement la meme carte.
 const COPIES_MAX := 3
-const SOIN_ALAMBIC := 0.50   # respiration garantie avant chaque boss
+const SOIN_AVANT_BOSS := 0.30
+const VISEE_VITESSE_TEMPS := 0.10
 
 # Avec ~154 ennemis communs par chapitre, l'ancien bareme donnait les six choix
 # beaucoup trop tot. Ces seuils replacent approximativement les choix 2/4/5/6
@@ -346,15 +356,10 @@ const DELAI_VAGUE_FORCE := 7.0
 # pansement — il borne aussi ce que l'ecran doit rester capable d'afficher.
 const PLAFOND_ENNEMIS := 10
 
-# Le rythme des adversaires majeurs est regle ici pour que leurs telegraphes
-# puissent etre ajustes ensemble sans fouiller le moteur de motifs. L'objectif
-# "environ cinq fois plus fort" est un budget de rencontre, pas cinq fois chaque
-# statistique : x3 endurance, +10 % degats, ~11 % de salves en plus et +20 %
-# vitesse de projectile. La menace vient donc surtout d'un pattern qu'il faut
-# esquiver plus longtemps, sans transformer chaque impact en quasi one-shot.
-# Les miniboss restent nettement plus courts pour ne pas casser le rythme.
-const MINIBOSS_PV_MULT := 6.5
-const BOSS_SIGNATURE_PV_MULT := 5.0
+# Les boss doivent durer moins longtemps ; la progression de leurs attaques
+# vit dans EvolutionEnnemis au lieu d'allonger encore leurs barres de vie.
+const MINIBOSS_PV_MULT := 3.8
+const BOSS_SIGNATURE_PV_MULT := 3.0
 const MINIBOSS_DEGATS_MULT := 1.00
 const BOSS_SIGNATURE_DEGATS_MULT := 1.10
 const BOSS_PROJECTILE_VITESSE_MULT := 1.20

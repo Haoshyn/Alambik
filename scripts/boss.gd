@@ -140,7 +140,7 @@ func _physics_process(delta: float) -> void:
 func _duree_du_motif(motif: String) -> float:
 	if Reglages.BOSS_DUREES_MOTIFS.has(motif):
 		return float(Reglages.BOSS_DUREES_MOTIFS[motif])
-	return float(Reglages.BOSS_DUREES_MOTIFS["pause_phase_2" if _phase == 2 else "pause_phase_1"])
+	return float(Reglages.BOSS_DUREES_MOTIFS["pause_phase_2" if _phase == 2 else "pause_phase_1"])*EvolutionEnnemis.REPOS_BOSS[int(donnees.get("evolution",0))]
 
 func _commencer_motif(motif: String) -> void:
 	if motif == "invocation":
@@ -161,7 +161,8 @@ func _executer_motif(motif: String, delta: float) -> void:
 	# Les boss doivent maintenir une pression nettement superieure aux monstres,
 	# sans raccourcir les telegraphes. On accelere donc uniquement le temps entre
 	# deux salves a l'interieur d'un motif.
-	_cadence_motif -= delta / Reglages.BOSS_CADENCE_MOTIF_MULT
+	var evolution := int(donnees.get("evolution",0))
+	_cadence_motif -= delta / (Reglages.BOSS_CADENCE_MOTIF_MULT*EvolutionEnnemis.RECHARGE[evolution])
 	match motif:
 		"barrage_horizontal":
 			_flotter(delta)
@@ -179,7 +180,7 @@ func _executer_motif(motif: String, delta: float) -> void:
 			if _cadence_motif <= 0.0:
 				_cadence_motif = 0.85
 				var vers := global_position.direction_to(_cible.global_position)
-				for k in [-0.5, -0.25, 0.0, 0.25, 0.5]:
+				for k in EvolutionEnnemis.BOSS_EVENTAIL if evolution >= 2 else [-0.5, -0.25, 0.0, 0.25, 0.5]:
 					_lancer(global_position, vers.rotated(k), 0.8)
 		"barrage_croise":
 			_flotter(delta)
@@ -193,11 +194,12 @@ func _executer_motif(motif: String, delta: float) -> void:
 			if _cadence_motif <= 0.0:
 				_cadence_motif = 0.13 if _phase == 2 else 0.17
 				_lancer(global_position, Vector2.RIGHT.rotated(_anim * 2.65), 0.62)
+				if evolution >= 2: _lancer(global_position,Vector2.RIGHT.rotated(_anim*2.65+PI),0.62)
 		"anneau_breche":
 			_flotter(delta)
 			if _cadence_motif <= 0.0:
 				_cadence_motif = 0.95
-				var nombre := 14
+				var nombre: int = 14+EvolutionEnnemis.BOSS_ANNEAU_AJOUT[evolution]
 				var angle_cible := global_position.direction_to(_cible.global_position).angle()
 				var breche := posmod(roundi(angle_cible / TAU * nombre), nombre)
 				for k in nombre:
@@ -210,7 +212,7 @@ func _executer_motif(motif: String, delta: float) -> void:
 				_cadence_motif = 0.52
 				var voie_sure := int(fmod(_anim * 1.7, 7.0))
 				for k in 7:
-					if k == voie_sure or k == (voie_sure + 1) % 7:
+					if k == voie_sure or (evolution < 3 and k == (voie_sure + 1) % 7):
 						continue
 					var origine := Vector2(140.0 + float(k) * 125.0, limites.position.y + 15.0)
 					_lancer(origine, Vector2.DOWN, 0.58)
@@ -249,12 +251,12 @@ func _executer_motif(motif: String, delta: float) -> void:
 				var breche := posmod(_alternance * 2, 6)
 				if _alternance % 2 == 0:
 					for k in 6:
-						if k == breche or k == (breche + 1) % 6:
+						if k == breche or (evolution < 2 and k == (breche + 1) % 6):
 							continue
 						_lancer(Vector2(limites.position.x + 8.0, limites.position.y + limites.size.y * (float(k) + 0.5) / 6.0), Vector2.RIGHT, 0.66)
 				else:
 					for k in 6:
-						if k == breche or k == (breche + 1) % 6:
+						if k == breche or (evolution < 2 and k == (breche + 1) % 6):
 							continue
 						_lancer(Vector2(limites.position.x + limites.size.x * (float(k) + 0.5) / 6.0, limites.position.y + 8.0), Vector2.DOWN, 0.66)
 		"machoire":
@@ -264,7 +266,7 @@ func _executer_motif(motif: String, delta: float) -> void:
 				var hauteur := _cible.global_position.y + sin(float(_alternance)) * 150.0
 				for cote in [-1.0, 1.0]:
 					var x := limites.position.x + 8.0 if cote < 0.0 else limites.end.x - 8.0
-					for dent in [-1.0, 0.0, 1.0]:
+					for dent in EvolutionEnnemis.BOSS_DENTS if evolution >= 3 else [-1.0, 0.0, 1.0]:
 						var origine := Vector2(x, clampf(hauteur + float(dent) * 95.0, limites.position.y, limites.end.y))
 						_lancer(origine, Vector2(float(cote), 0.0) * -1.0, 0.62)
 		"calligraphie":
@@ -297,7 +299,7 @@ func _executer_motif(motif: String, delta: float) -> void:
 			_flotter(delta)
 			if _signature_prete(motif):
 				_alternance += 1
-				var nombre := 10 if _phase == 1 else 14
+				var nombre: int = (10 if _phase == 1 else 14)+EvolutionEnnemis.BOSS_ANNEAU_AJOUT[evolution]
 				for k in nombre:
 					var angle := TAU * float(k) / float(nombre) + float(_alternance) * 0.19
 					_lancer(global_position, Vector2.RIGHT.rotated(angle + sin(angle * 3.0) * 0.12), 0.54)
@@ -319,7 +321,7 @@ func _executer_motif(motif: String, delta: float) -> void:
 				for cote in [-1.0, 1.0]:
 					var origine := global_position + vers.orthogonal() * float(cote) * 175.0
 					_lancer(origine, origine.direction_to(_cible.global_position), 0.64)
-					if _phase == 2:
+					if _phase == 2 or evolution >= 2:
 						_lancer(origine, origine.direction_to(_cible.global_position).rotated(float(cote) * 0.18), 0.48)
 		"charge":
 			# Six dixiemes de seconde de visee avant le mouvement : une charge

@@ -8,7 +8,7 @@ var etage_recompense := 1
 
 func _ready() -> void:
 	var col := StyleAzur.page(self,"Choisissez une amélioration")
-	col.add_child(StyleAzur.texte("Une nouvelle magie pour cette aventure",30,StyleAzur.ATTENUE))
+	col.add_child(StyleAzur.texte("Une nouvelle magie pour cette aventure",30,StyleAzur.IVOIRE))
 	_cartes = StyleAzur.defilement(col)
 	_bouton_reroll = StyleAzur.bouton("",_sur_reroll)
 	col.add_child(_bouton_reroll)
@@ -45,6 +45,7 @@ func _nouveau_tirage() -> void:
 		ligne.add_child(texte)
 		texte.add_child(StyleAzur.texte(reactif.nom,35))
 		texte.add_child(StyleAzur.texte(reactif.description,29,StyleAzur.ATTENUE))
+		marge.minimum_size_changed.connect(func(): b.custom_minimum_size.y = maxf(310.0,marge.get_combined_minimum_size().y))
 	_bouton_reroll.text = "Nouveau tirage · %d restant(s)" % Jeu.rerolls_restants
 	_bouton_reroll.disabled = Jeu.rerolls_restants <= 0
 

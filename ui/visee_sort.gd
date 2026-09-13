@@ -5,12 +5,13 @@ var point := Vector2.ZERO
 var rayon := 180.0
 var vers_logique: Callable
 var vers_ecran: Callable
+var _valide := false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	var titre := StyleAzur.texte("Choisissez une cible · combat en pause", 28)
+	var titre := StyleAzur.texte("Touchez la zone · temps ralenti", 28)
 	titre.add_theme_color_override("font_color", StyleAzur.ENCRE)
 	titre.position = Vector2(30, Ecran.marge_haute() + 140)
 	titre.size = Vector2(get_viewport_rect().size.x - 60, 80)
@@ -23,16 +24,18 @@ func _ready() -> void:
 	actions.offset_left = 30
 	actions.offset_right = -30
 	actions.add_child(StyleAzur.bouton("Annuler", func(): annule.emit()))
-	actions.add_child(StyleAzur.bouton("Lancer ici", func(): confirme.emit(point), true))
 	queue_redraw()
 
 func _gui_input(event: InputEvent) -> void:
+	if _valide: return
 	if event is InputEventScreenTouch and event.pressed:
 		point = vers_logique.call(event.position)
-		queue_redraw()
+		_valide = true
+		confirme.emit(point)
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		point = vers_logique.call(event.position)
-		queue_redraw()
+		_valide = true
+		confirme.emit(point)
 
 func _draw() -> void:
 	if not vers_ecran.is_valid(): return

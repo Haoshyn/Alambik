@@ -11,3 +11,9 @@ func test_encoche_dans_les_bandes(v: Verif) -> void:
 		"encoche et barre systeme converties dans le cadre logique")
 	v.egal(ECRAN.convertir_zone_sure(visible,Rect2(),transformation),visible,
 		"zone systeme inconnue sans faire disparaitre les menus")
+
+func test_encoche_ecran_allonge(v: Verif) -> void:
+	var visible := Rect2(0,0,1080,2400)
+	var transformation := Transform2D(Vector2(.5,0),Vector2(0,.5),Vector2.ZERO)
+	v.egal(ECRAN.convertir_zone_sure(visible,Rect2(0,48,540,1128),transformation),Rect2(0,96,1080,2256),
+		"encoche et gestes proteges sur ecran rempli sans bandes")

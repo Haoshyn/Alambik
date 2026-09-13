@@ -13,18 +13,19 @@ const TYPES := {
 	},
 	"veloce": {
 		"nom": "Aiguille vive",
-		"description": "Tirs fréquents et rapides, chaque impact est plus léger.",
+		"description": "Tirs rapides à longue portée. Davantage d’impacts pour recharger vos sorts.",
 		"niveau": 2,
-		"degats_mult": 0.75,
-		"cadence_mult": 1.35,
+		"degats_mult": 0.70,
+		"cadence_mult": 1.40,
 		"vitesse_mult": 1.55,
-		"portee_mult": 1.10,
+		"portee_mult": 1.25,
 	},
 	"lourd": {
 		"nom": "Sceptre de cuivre",
-		"description": "Lent et court, mais nettement plus destructeur.",
-		"niveau": 1,
-		"degats_mult": 1.50,
+		"description": "Tirs lents qui traversent jusqu’à trois ennemis alignés, avec perte de puissance.",
+		"niveau": 3,
+		"degats_mult": 1.20,
+		"perforations": 2,
 		"cadence_mult": 0.70,
 		"vitesse_mult": 0.68,
 		"portee_mult": 0.90,
@@ -32,7 +33,7 @@ const TYPES := {
 	"chercheur": {
 		"nom": "Branche astrale",
 		"description": "Corrige sa trajectoire vers les ennemis au prix de dégâts.",
-		"niveau": 3,
+		"niveau": 4,
 		"degats_mult": 0.88,
 		"vitesse_mult": 0.95,
 		"portee_mult": 1.10,
@@ -41,7 +42,7 @@ const TYPES := {
 	"explosif": {
 		"nom": "Bâton à étincelles",
 		"description": "Faible sur une cible, mais son impact frappe la zone proche.",
-		"niveau": 4,
+		"niveau": 5,
 		"degats_mult": 0.85,
 		"vitesse_mult": 0.82,
 		"portee_mult": 0.95,
@@ -71,6 +72,7 @@ static func appliquer(id: String, source: Tir) -> Tir:
 	var donnees: Dictionary = TYPES[type_id]
 	var tir := source.copie()
 	tir.arme = type_id
+	tir.perforations += int(donnees.get("perforations",0))
 	tir.cadence *= float(donnees.get("cadence_mult", 1.0))
 	tir.degats *= float(donnees.get("degats_mult", 1.0))
 	tir.vitesse *= float(donnees.get("vitesse_mult", 1.0))

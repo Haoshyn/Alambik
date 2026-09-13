@@ -21,7 +21,7 @@ func preparer() -> void:
 	root.get_node("ReglagesJoueur").sauvegarde_active = false
 	root.size = Vector2i(1000, 1000)
 	root.content_scale_size = root.size
-	root.title = "Alambik — Apprenti A · corps rond et lancer du bras"
+	root.title = "Alambik — Apprenti A · finition v8"
 	root.msaa_3d = Viewport.MSAA_4X
 	var scene := Node3D.new()
 	root.add_child(scene)
@@ -76,7 +76,7 @@ func preparer() -> void:
 	titre.add_theme_font_size_override("font_size", 26)
 	interface.add_child(titre)
 	legende = Label.new()
-	legende.text = "Silhouette ronde vue du dessus · bras continus · mains retravaillées"
+	legende.text = "Finition v8 · chapeau et écharpe resculptés · matières douces"
 	legende.add_theme_color_override("font_color", Color("594d56"))
 	interface.add_child(legende)
 	var boutons := HBoxContainer.new()

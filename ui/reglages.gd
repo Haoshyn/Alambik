@@ -9,7 +9,7 @@ func _ready() -> void:
 	contenu.add_child(StyleAzur.texte("Audio",36))
 	_volume(contenu,"Musique",ReglagesJoueur.volume_musique,func(v): ReglagesJoueur.definir_reglages_audio(v,ReglagesJoueur.volume_effets))
 	_volume(contenu,"Effets sonores",ReglagesJoueur.volume_effets,func(v): ReglagesJoueur.definir_reglages_audio(ReglagesJoueur.volume_musique,v))
-	contenu.add_child(StyleAzur.texte("Musique des runs",29))
+	contenu.add_child(StyleAzur.texte("Musique en jeu",29))
 	var pistes := _selecteur(contenu)
 	for d in Sons.pistes_disponibles():
 		pistes.add_item(str(d["nom"]))
@@ -26,7 +26,6 @@ func _ready() -> void:
 		if str(d["id"]) == ReglagesJoueur.piste_menu: pistes_menu.selected = index
 	pistes_menu.item_selected.connect(func(i): ReglagesJoueur.definir_piste_menu(str(pistes_menu.get_item_metadata(i))))
 	contenu.add_child(StyleAzur.texte("Affichage & confort",36))
-	_option(contenu,"Secousses d’écran",ReglagesJoueur.secousses_ecran,func(v): ReglagesJoueur.definir_accessibilite(v,ReglagesJoueur.effets_reduits))
 	_option(contenu,"Animations et flashes réduits",ReglagesJoueur.effets_reduits,func(v): ReglagesJoueur.definir_accessibilite(ReglagesJoueur.secousses_ecran,v))
 	contenu.add_child(StyleAzur.texte("Raccourci du sort actif",29))
 	var raccourci := _selecteur(contenu)
@@ -36,13 +35,18 @@ func _ready() -> void:
 		raccourci.set_item_metadata(index,mode)
 		if mode == ReglagesJoueur.raccourci_sort: raccourci.selected = index
 	raccourci.item_selected.connect(func(i): ReglagesJoueur.definir_raccourci_sort(str(raccourci.get_item_metadata(i))))
-	contenu.add_child(StyleAzur.texte("Progression",36))
+	var progression := StyleAzur.plaque(contenu)
+	progression.get_parent().visible = false
+	var ouvrir_progression := StyleAzur.bouton("Progression ›",func(): progression.get_parent().visible = not progression.get_parent().visible)
+	contenu.add_child(ouvrir_progression)
+	contenu.move_child(ouvrir_progression,progression.get_parent().get_index())
 	_bouton_reset = StyleAzur.bouton("Réinitialiser la progression",_sur_reset)
-	contenu.add_child(_bouton_reset)
+	progression.add_child(_bouton_reset)
 	var developpement := StyleAzur.plaque(contenu)
 	developpement.get_parent().visible = false
 	var ouvrir := StyleAzur.bouton("Outils de développement",func(): developpement.get_parent().visible = not developpement.get_parent().visible)
 	contenu.add_child(ouvrir)
+	contenu.move_child(ouvrir,developpement.get_parent().get_index())
 	_option(developpement,"Mode développeur",ReglagesJoueur.mode_dev,func(v): ReglagesJoueur.definir_mode_dev(v))
 	Capture.programmer(self)
 
@@ -50,7 +54,30 @@ func _selecteur(parent: Node) -> OptionButton:
 	var b := OptionButton.new()
 	b.custom_minimum_size.y = Ecran.CIBLE_TACTILE
 	StyleInterface.styliser_selecteur(b,StyleAzur.MAGIE)
+	b.fit_to_longest_item = false
+	b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.add_theme_font_override("font",Polices.CORPS)
+	for etat in ["normal","hover","pressed"]:
+		b.add_theme_stylebox_override(etat,StyleAzur.cadre())
+	for etat in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:
+		b.add_theme_color_override(etat,StyleAzur.ENCRE)
 	b.add_theme_font_size_override("font_size",29)
+	b.add_theme_stylebox_override("focus",StyleAzur.cadre(Color.TRANSPARENT,StyleAzur.MAGIE))
+	var liste := b.get_popup()
+	liste.add_theme_font_override("font",Polices.CORPS)
+	liste.add_theme_font_size_override("font_size",29)
+	liste.add_theme_stylebox_override("panel",StyleAzur.cadre())
+	liste.add_theme_stylebox_override("hover",StyleAzur.cadre(Color("d3f5e9"),StyleAzur.MAGIE))
+	for etat in ["font_color","font_hover_color","font_accelerator_color"]:
+		liste.add_theme_color_override(etat,StyleAzur.ENCRE)
+	liste.add_theme_color_override("font_disabled_color",StyleAzur.ATTENUE)
+	liste.add_theme_constant_override("v_separation",64)
+	liste.add_theme_icon_override("radio_checked",preload("res://assets/visual/atelier/oui.svg"))
+	liste.add_theme_icon_override("radio_unchecked",preload("res://assets/visual/atelier/non.svg"))
+	liste.about_to_popup.connect(func():
+		# La liste defile au lieu de depasser la zone accessible du telephone.
+		liste.max_size = Vector2i(int(get_viewport_rect().size.x-72),int(get_viewport_rect().size.y-Ecran.marge_haute()-Ecran.marge_basse()-96)))
 	parent.add_child(b)
 	return b
 
@@ -63,19 +90,39 @@ func _volume(parent: Node, titre: String, valeur: float, action: Callable) -> vo
 	slider.step = 0.01
 	slider.value = valeur
 	slider.custom_minimum_size.y = Ecran.CIBLE_TACTILE
+	var rail := StyleBoxFlat.new()
+	rail.bg_color = Color("deccb6")
+	rail.set_corner_radius_all(6)
+	rail.content_margin_top = 6
+	rail.content_margin_bottom = 6
+	var rempli := rail.duplicate() as StyleBoxFlat
+	rempli.bg_color = StyleAzur.MAGIE
+	slider.add_theme_stylebox_override("slider",rail)
+	for etat in ["grabber_area","grabber_area_highlight"]:
+		slider.add_theme_stylebox_override(etat,rempli)
+	for etat in ["grabber","grabber_highlight","grabber_disabled"]:
+		slider.add_theme_icon_override(etat,preload("res://assets/visual/atelier/curseur.svg"))
 	col.add_child(slider)
 	slider.value_changed.connect(func(v):
 		label.text = "%s · %d %%" % [titre,roundi(v*100)]
 		action.call(v))
 
 func _option(parent: Node, titre: String, valeur: bool, action: Callable) -> void:
-	var b := StyleAzur.bouton(titre)
-	b.toggle_mode = true
+	var b := CheckButton.new()
+	b.text = titre
+	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	b.button_pressed = valeur
-	b.text = titre+ (" · Oui" if valeur else " · Non")
-	b.toggled.connect(func(v):
-		b.text = titre+ (" · Oui" if v else " · Non")
-		action.call(v))
+	b.custom_minimum_size.y = Ecran.CIBLE_TACTILE
+	b.add_theme_font_override("font",Polices.CORPS)
+	b.add_theme_font_size_override("font_size",28)
+	for etat in ["normal","hover","pressed","hover_pressed"]:
+		b.add_theme_stylebox_override(etat,StyleAzur.cadre())
+	b.add_theme_stylebox_override("focus",StyleAzur.cadre(Color.TRANSPARENT,StyleAzur.MAGIE))
+	for etat in ["font_color","font_hover_color","font_pressed_color","font_hover_pressed_color"]:
+		b.add_theme_color_override(etat,StyleAzur.ENCRE)
+	b.add_theme_icon_override("checked",preload("res://assets/visual/atelier/oui.svg"))
+	b.add_theme_icon_override("unchecked",preload("res://assets/visual/atelier/non.svg"))
+	b.toggled.connect(func(v): action.call(v))
 	parent.add_child(b)
 
 func _sur_reset() -> void:

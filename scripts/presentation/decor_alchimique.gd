@@ -35,26 +35,26 @@ static func bloc(parent: Node3D, centre: Vector3, taille: Vector3, couleur: Colo
 	parent.add_child(objet)
 	return objet
 
-static func obstacle(taille: Vector3, variante: int) -> Node3D:
+static func obstacle(taille: Vector3, variante: int, monde := 0) -> Node3D:
 	var ensemble := Node3D.new()
 	var hauteur := .65
-	bloc(ensemble,Vector3(0,.10,0),Vector3(taille.x,.20,taille.z),Color("647f79"))
+	bloc(ensemble,Vector3(0,.10,0),Vector3(taille.x,.20,taille.z),DecorsMondes.couleur(monde,"mur").darkened(.18))
 	var colonnes := maxi(1, int(ceil(taille.x/1.1)))
 	for i in colonnes:
 		var largeur := taille.x/colonnes
 		var x := -taille.x*.5+largeur*(i+.5)
-		var teinte := Color("c0c6ac") if (i+variante)%2 == 0 else Color("a8b69e")
+		var teinte := DecorsMondes.couleur(monde,"mur") if (i+variante)%2 == 0 else DecorsMondes.couleur(monde,"mur").darkened(.06)
 		bloc(ensemble,Vector3(x,.22+hauteur*.5,0),Vector3(largeur-.035,hauteur,taille.z*.92),teinte)
-		bloc(ensemble,Vector3(x,.22+hauteur+.07,0),Vector3(largeur-.02,.14,taille.z*.98),Color("d1d2b8"))
+		bloc(ensemble,Vector3(x,.22+hauteur+.07,0),Vector3(largeur-.02,.14,taille.z*.98),DecorsMondes.couleur(monde,"accent"))
 		# Un sceau cuivre et turquoise donne une fonction aux blocs de pierre.
 		if (i+variante)%2 == 0:
 			bloc(ensemble,Vector3(x,.58,taille.z*.465),Vector3(minf(.30,largeur*.5),.30,.055),Color("987447"))
-			bloc(ensemble,Vector3(x,.58,taille.z*.50),Vector3(minf(.15,largeur*.25),.15,.035),Color("53aaa2"))
+			bloc(ensemble,Vector3(x,.58,taille.z*.50),Vector3(minf(.15,largeur*.25),.15,.035),DecorsMondes.couleur(monde,"accent"))
 			var sceau := bloc(ensemble,Vector3(x,1.035,0),Vector3(.27,.04,.27),Color("b19a6b"))
 			sceau.rotation.y = PI*.25
-			var coeur := bloc(ensemble,Vector3(x,1.067,0),Vector3(.13,.025,.13),Color("559b92"))
+			var coeur := bloc(ensemble,Vector3(x,1.067,0),Vector3(.13,.025,.13),DecorsMondes.couleur(monde,"accent"))
 			coeur.rotation.y = PI*.25
-		else:
+		elif monde in [0,4,7]:
 			for pousse in 3:
 				var mousse := MeshInstance3D.new()
 				var forme := SphereMesh.new()
@@ -66,7 +66,7 @@ static func obstacle(taille: Vector3, variante: int) -> Node3D:
 				mousse.scale = Vector3(1,.35,1)
 				mousse.position = Vector3(x+(pousse-1)*.14,1.025,-taille.z*.18)
 				var mat := StandardMaterial3D.new()
-				mat.albedo_color = Color("7e9c6c").lightened(pousse*.035)
+				mat.albedo_color = DecorsMondes.couleur(monde,"detail").lightened(pousse*.035)
 				mat.roughness = 1.0
 				mousse.material_override = mat
 				ensemble.add_child(mousse)

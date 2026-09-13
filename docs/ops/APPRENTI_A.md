@@ -1,5 +1,80 @@
 # Apprenti A — essai 3D du 12 septembre 2026
 
+## Proportions v9 — 13 septembre 2026
+
+La finition v8 plaît au propriétaire ; cette passe conserve son identité et
+redonne du corps à la silhouette. Le haut des jambes est moins comprimé
+(facteur vertical 0,60 au lieu de 0,45), ainsi que le buste (0,72 au lieu de
+0,52). Les raccords de hauteur restent continus. L'échelle générale passe de
+0,83 à 0,85 et les manches gagnent légèrement en épaisseur. Les bras et leur
+squelette suivent les nouvelles proportions ; tête et chapeau gardent leur forme.
+Les accessoires conservent leur volume et la baguette reste solidaire du poing.
+
+Les sources Blender et le GLB actif ont été reconstruits : 74 965 triangles,
+12 surfaces, 18 os et six animations. Le rendu de contrôle est produit par
+Blender en arrière-plan : `tmp/apprenti-v9/apres.png`. Il s'agit du rendu studio,
+pas d'une capture Godot. Aucune fenêtre graphique de test n'a été ouverte,
+conformément à la demande du propriétaire qui joue à LoL pendant le travail.
+
+Vérifications sans affichage : 34 suites / 14 397 assertions ; fluidité
+643 assertions et synchronisation du tir 30 assertions, sans échec.
+Le harnais général signale encore des ressources non libérées à la fermeture
+(RendererDummy, police et ObjectDB), sans erreur de script ni échec d'assertion.
+APK de cette passe : `build/alambic-apprenti-v9.apk`.
+Les vingt runs se terminent sans blocage ni erreur de script : défaites entre
+les salles 5 et 8, zéro run en échec technique. Export Android et vérification
+de l'APK par Godot réussis ; pas de validation sur téléphone pendant cette passe.
+
+## Finition v8 — 13 septembre 2026
+
+Le propriétaire conserve le style mais rejette la qualité d'exécution du modèle
+précédent. La v8 reprend la fabrication des volumes et leur rendu réel dans Godot.
+
+- Chapeau : bord annulaire fermé et arrondi ; sections de la pointe orientées
+  suivant sa courbure pour supprimer le pincement et les replis du sommet.
+- Écharpe : pièce pleine reliant le cou et la tunique, pan aplati avec épaisseur ;
+  suppression des deux anneaux et de leurs raccords ouverts.
+- Visage : suppression des disques de joues ; rose intégré aux couleurs de
+  sommets de la peau, visage plus finement subdivisé et petits reflets des yeux.
+- Attache de fiole rendue visible ; matières de peau, feutre et cuivre ajustées.
+- Occlusion de contact douce calculée dans Blender, stockée dans `COLOR_0` et
+  exportée dans le GLB. Source : `tools/blender/occlusion_apprenti.py`.
+- Rendu commun accueil/combat : shader de figurine à éclairage continu,
+  évitant les bandes très dures observées avec le rendu standard. Ombre de contact
+  légère sous les pieds ; auto-ombres du maillage désactivées. Ce choix privilégie
+  un rendu stylisé stable plutôt qu'une réponse physique aux lumières des salles.
+
+Sources : `tools/blender/apprenti_a.py`,
+`scripts/presentation/materiaux_apprenti.gd`,
+`shaders/apprenti_surface.gdshader` et `shaders/ombre_apprenti.gdshader`.
+Le `.blend` et le `.glb` actifs ont été reconstruits ; leur import Godot a été
+vérifié. La sauvegarde temporaire du modèle précédent est ignorée par l'importeur,
+afin que Blender ne bloque pas la réimportation du GLB en mode headless.
+
+Maillage final : **74 965 triangles, 12 surfaces, 18 os, GLB de 2 948 188 octets**,
+contre 95 269 triangles et 14 surfaces précédemment. Les six animations et les
+temps de course/tir sont conservés. Largeur/profondeur du visage : 0,88312/0,88312 ;
+tunique : 0,63146/0,63146 ; bord du chapeau : 1,34046/1,34046.
+
+Vérifications :
+
+- `verifier.sh` via le wrapper Windows : **34 suites, 14 397 assertions, zéro
+  échec**, compilation et cohérence réussies.
+- Fluidité : **643 assertions, zéro échec** ; synchronisation du tir : **30
+  assertions, zéro échec** ; intégration graphique : **zéro échec**.
+- `vingt_runs.sh` : **20 runs terminés, aucun blocage ni erreur de script**.
+  Le bot perd les vingt parties ; ces fins ne valident pas l'équilibrage humain.
+- Captures Godot de face, dos, profil, dessus, angle de combat, course et attaque.
+- APK debug exportée et signature vérifiée : `build/alambic-apprenti-v8.apk`.
+
+Des ressources restent signalées à l'arrêt de certaines sondes Godot. La
+validation artistique et les performances sur Pixel restent ouvertes : les tests
+techniques ne constituent pas une approbation visuelle du propriétaire.
+
+Comparatif réel : `tmp/apprenti-v8/comparatif.html`. Journaux :
+`tmp/apprenti-v8/{verification,fluidite,synchronisation,integration,vingt-runs,export}.log`.
+Les sections suivantes conservent l'historique des versions précédentes.
+
 Le proprietaire a retenu la proposition A de la planche chibi. Le nouveau modele
 est construit dans Blender par `tools/blender/apprenti_a.py`, sans Meshy ni nouvelle
 generation d'image. C'est une premiere interpretation 3D de la reference, a valider

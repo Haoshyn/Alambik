@@ -52,7 +52,7 @@ static var TOUS := {
 	# encerclent, la ou Tir multiple reste un mur frontal.
 	"spirale": Reactif.creer("spirale", "Spirale",
 		"Les attaques s'ouvrent en large éventail de trois projectiles nettement plus légers.",
-		{"nb_projectiles_add": 2, "angle_eventail_add": 0.55, "degats_mult": 0.58},
+		{"nb_projectiles_add": 2, "projectiles_lateraux_add": 2, "angle_eventail_add": 0.55, "degats_mult": 0.58},
 		false, Color(0.94, 0.78, 1.00), "eventail", 1, PROJECTILE),
 	"trait_transpercant": Reactif.creer("trait_transpercant", "Trait transperçant",
 		"Les projectiles traversent tous les ennemis avec une légère perte de puissance et de vitesse.",

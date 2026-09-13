@@ -16,12 +16,13 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 	var tir: Tir = logique.get("tir")
 	if not hostile:
 		_couleur = {"standard": Color("7deeff"), "veloce": Color("e6ff9c"), "lourd": Color("ffbf74"), "chercheur": Color("c2a5ff"), "explosif": Color("ff8b60")}.get(tir.arme, _couleur)
-	var cle := _couleur.to_html()+str(hostile)
+	var cle := _couleur.to_html()+str(hostile)+tir.arme
 	if not _matieres.has(cle):
 		var mat := ShaderMaterial.new()
 		mat.shader = preload("res://shaders/trait_magique.gdshader")
 		mat.set_shader_parameter("teinte",_couleur)
 		mat.set_shader_parameter("hostile",hostile)
+		mat.set_shader_parameter("forme",0 if hostile else int({"veloce":1,"lourd":2,"chercheur":3,"explosif":4}.get(tir.arme,0)))
 		var ruban := StandardMaterial3D.new()
 		ruban.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		ruban.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -36,7 +37,7 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 	var plan := QuadMesh.new()
 	plan.size = Vector2(0.52,0.62) if hostile else Vector2(0.42,0.56)
 	if not hostile:
-		plan.size *= 1.35 if tir.arme == "lourd" else 0.75 if tir.arme == "veloce" else 1.0
+		plan.size = {"veloce":Vector2(0.28,0.85),"lourd":Vector2(0.55,0.9),"chercheur":Vector2(0.6,0.6),"explosif":Vector2(0.7,0.7)}.get(tir.arme,plan.size)
 	coeur.mesh = plan
 	coeur.rotation.x = -PI/2
 	coeur.position.y = 0.10

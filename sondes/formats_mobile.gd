@@ -16,7 +16,7 @@ func exiger(condition: bool, texte: String) -> void:
 func attendre() -> void:
 	await process_frame
 	await process_frame
-	await RenderingServer.frame_post_draw
+	if DisplayServer.get_name() != "headless": await RenderingServer.frame_post_draw
 
 func verifier() -> void:
 	root.get_node("ReglagesJoueur").sauvegarde_active = false
@@ -24,13 +24,14 @@ func verifier() -> void:
 	root.add_child(menu)
 	current_scene = menu
 	await create_timer(2.0).timeout
-	for format in [Vector2i(540,960), Vector2i(540,1200), Vector2i(480,800), Vector2i(768,1024), Vector2i(960,540)]:
+	for format in [Vector2i(540,960), Vector2i(540,1200), Vector2i(540,1320), Vector2i(480,800), Vector2i(768,1024), Vector2i(960,540)]:
 		root.size = format
 		await attendre()
 		var transformation := root.get_screen_transform()
 		# Le rectangle physique est arrondi au pixel, notamment en paysage.
 		exiger(absf(transformation.x.length()-transformation.y.length())*1080.0 <= 1.0, "Proportions conservees : %s" % format)
-		exiger(root.get_visible_rect().size.is_equal_approx(Vector2(1080,1920)), "Cadre de jeu complet : %s" % format)
+		var physique := transformation * root.get_visible_rect()
+		exiger(physique.position.length() <= 2.0 and physique.size.distance_to(Vector2(format)) <= 2.0, "Ecran rempli sans bandes : %s" % format)
 		for page in [1,0,2,3]:
 			menu.call("_afficher_page",page,false)
 			await create_timer(0.45).timeout
@@ -49,7 +50,7 @@ func verifier() -> void:
 				for bouton in contenu.find_children("*","Button",true,false):
 					if bouton.is_visible_in_tree():
 						exiger(not _rectangle_visible(bouton).intersects(onglet.get_global_rect()), "Navigation recouvre %s / page %s" % [bouton.name,page])
-			if page == 1:
+			if page == 1 and DisplayServer.get_name() != "headless":
 				root.get_texture().get_image().save_png("res://tmp/accueil-%dx%d.png" % [format.x,format.y])
 		print("FORMAT_VERIFIE %s / echecs cumules %d" % [format,echecs])
 	menu.call("_afficher_page",1,false)

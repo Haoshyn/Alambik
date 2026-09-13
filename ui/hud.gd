@@ -81,7 +81,7 @@ func _draw() -> void:
 	var tremble := Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * _secousse * 4.0
 	_dessiner_flash(taille)
 	_dessiner_pause(police, Rect2(Vector2(18, haut) + tremble, Vector2(130, 130)))
-	_dessiner_progression(police, Rect2(Vector2(170, haut) + tremble, Vector2(710, 130)))
+	_dessiner_progression(police, Rect2(Vector2(170, haut) + tremble, Vector2(taille.x - 366, 130)))
 	_dessiner_points(police, Rect2(Vector2(taille.x - 178, haut) + tremble, Vector2(160, 130)))
 	var boss := get_tree().get_first_node_in_group("boss")
 	var boss_visible := boss != null and is_instance_valid(boss) and float(boss.pv_max) > 0.0
@@ -104,13 +104,13 @@ func _dessiner_pause(police: Font, rect: Rect2) -> void:
 	_cadre_decoupe(rect, Color(0.52, 0.67, 0.78), Color(0.025, 0.055, 0.085, 0.94), 17.0)
 	for x in [46.0,75.0]:
 		draw_rect(Rect2(rect.position+Vector2(x,32),Vector2(11,47)),StyleAzur.TEXTE)
-	_draw_centre(police, Vector2(rect.position.x, rect.end.y - 11), rect.size.x, "PAUSE", 15, Palette.TEXTE_ATTENUE)
+	_draw_centre(police, Vector2(rect.position.x, rect.end.y - 11), rect.size.x, "PAUSE", 15, StyleAzur.ATTENUE)
 
 func _dessiner_progression(police: Font, rect: Rect2) -> void:
 	_cadre_decoupe(rect, StyleAzur.CUIVRE, Color(0.025, 0.050, 0.080, 0.95), 18.0)
 	var salle := "MINE %02d:%02d" % [ceili(Jeu.temps_mine_restant) / 60, ceili(Jeu.temps_mine_restant) % 60] if Jeu.mode_run == "mine" else "SALLE %02d / %02d" % [Jeu.salle_courante, Jeu.salles_du_chapitre()]
 	if Jeu.est_retro(): salle = "VISION ENCHANTÉE"
-	_draw_centre(police, rect.position + Vector2(20, 42), rect.size.x - 40, salle, 25, Palette.TEXTE)
+	_draw_centre(police, rect.position + Vector2(20, 42), rect.size.x - 40, salle, 25, StyleAzur.TEXTE)
 	_draw_centre(police, rect.position + Vector2(20, 73), rect.size.x - 40, "NIVEAU %d" % Jeu.niveau_run, 18, StyleAzur.CUIVRE)
 	var xp := Jeu.experience_vers_prochain_niveau()
 	var barre := Rect2(rect.position + Vector2(32, 91), Vector2(rect.size.x - 64, 18))
@@ -118,18 +118,16 @@ func _dessiner_progression(police: Font, rect: Rect2) -> void:
 
 func _dessiner_points(police: Font, rect: Rect2) -> void:
 	_cadre_decoupe(rect, StyleAzur.MAGIE, Color(0.025, 0.050, 0.080, 0.95), 17.0)
-	draw_texture_rect(StyleAzur.icone(11),Rect2(rect.position+Vector2(12,16),Vector2(45,45)),false)
-	draw_string(police, rect.position + Vector2(59, 29), "ESSENCE", HORIZONTAL_ALIGNMENT_LEFT, 84, 12, Palette.TEXTE_ATTENUE)
-	draw_string(police, rect.position + Vector2(59, 55), ReglagesJoueur.gouttes_affichees(), HORIZONTAL_ALIGNMENT_LEFT, 84, 22, Palette.TEXTE)
-	draw_texture_rect(StyleAzur.icone(8),Rect2(rect.position+Vector2(12,71),Vector2(42,42)),false)
-	draw_string(police, rect.position + Vector2(59, 84), "AMÉLIOR.", HORIZONTAL_ALIGNMENT_LEFT, 84, 12, Palette.TEXTE_ATTENUE)
-	draw_string(police, rect.position + Vector2(59, 110), str(Jeu.inventaire.size()), HORIZONTAL_ALIGNMENT_LEFT, 80, 22, Palette.TEXTE)
+	draw_texture_rect(preload("res://assets/visual/atelier/fiole.svg"),Rect2(rect.position+Vector2(12,16),Vector2(45,45)),false)
+	draw_string(police, rect.position + Vector2(59, 55), ReglagesJoueur.gouttes_affichees(), HORIZONTAL_ALIGNMENT_LEFT, 84, 22, StyleAzur.TEXTE)
+	draw_texture_rect(preload("res://assets/visual/atelier/livre.svg"),Rect2(rect.position+Vector2(12,71),Vector2(42,42)),false)
+	draw_string(police, rect.position + Vector2(59, 110), str(Jeu.inventaire.size()), HORIZONTAL_ALIGNMENT_LEFT, 80, 22, StyleAzur.TEXTE)
 
 func _dessiner_barre_boss(boss: Node, police: Font, rect: Rect2) -> void:
 	var ratio := clampf(float(boss.pv) / maxf(1.0, float(boss.pv_max)), 0.0, 1.0)
 	var nom := str(boss.donnees.get("nom", "BOSS")).to_upper()
 	_cadre_decoupe(rect, StyleAzur.CUIVRE, Color(0.035, 0.025, 0.050, 0.96), 18.0)
-	_draw_centre(police, rect.position + Vector2(22, 33), rect.size.x - 44, nom, 24, Palette.TEXTE)
+	_draw_centre(police, rect.position + Vector2(22, 33), rect.size.x - 44, nom, 24, StyleAzur.TEXTE)
 	var barre := Rect2(rect.position + Vector2(28, 48), Vector2(rect.size.x - 56, 25))
 	_barre_premium(barre, ratio, Palette.DANGER.lerp(StyleAzur.CUIVRE, ratio))
 
@@ -156,13 +154,13 @@ func _dessiner_bouton_sort(police: Font, bouton: Button, ultime: bool) -> void:
 		texte = "%d impacts" % ceili(_recharge_active) if _recharge_active > 0.0 else "PRÊT"
 	var jauge := Rect2(rect.position + Vector2(17, rect.size.y - 24), Vector2(rect.size.x - 34, 10))
 	_barre_premium(jauge, ratio, accent)
-	_draw_centre(police, Vector2(rect.position.x, rect.end.y + 22), rect.size.x, texte, 18, Palette.TEXTE)
+	_draw_centre(police, Vector2(rect.position.x, rect.end.y + 22), rect.size.x, texte, 18, StyleAzur.TEXTE)
 	# Un raccourci invisible n'est jamais utilise : l'icone rappelle le geste
 	# choisi dans les Réglages tant qu'il en existe un.
 	if not ultime and RaccourciTactile.tapes_requises(ReglagesJoueur.raccourci_sort) > 0:
 		_draw_centre(police, Vector2(rect.position.x - 20, rect.end.y + 44), rect.size.x + 40,
 			"TAPE ×%d" % RaccourciTactile.tapes_requises(ReglagesJoueur.raccourci_sort),
-			14, Palette.TEXTE_ATTENUE)
+			14, StyleAzur.ATTENUE)
 
 func _icone_sort(id: String) -> int:
 	var clefs: Array[String] = []

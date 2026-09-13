@@ -10,6 +10,7 @@ var vitesse: float
 var portee: float
 var cadence: float
 var nb_projectiles := 1
+var projectiles_lateraux := 0
 var angle_eventail := 0.0
 var ecart_lateral := 0.0
 var rebonds := 0
@@ -31,6 +32,13 @@ static func de_base(stats: Stats) -> Tir:
 # Decalages angulaires, centres sur la visee, quel que soit le nombre.
 func angles() -> Array[float]:
 	var resultat: Array[float] = []
+	if projectiles_lateraux > 0:
+		var lateraux := mini(projectiles_lateraux,nb_projectiles-1)
+		for i in nb_projectiles-lateraux: resultat.append(0.0)
+		for i in lateraux:
+			var rang := i/2+1
+			resultat.append((-1.0 if i%2 == 0 else 1.0)*angle_eventail*0.5*float(rang)/ceilf(lateraux/2.0))
+		return resultat
 	if nb_projectiles <= 1:
 		resultat.append(0.0)
 		return resultat
@@ -45,6 +53,12 @@ func angles() -> Array[float]:
 # simplement ecartes, touchent la ou l'eventail passait de chaque cote.
 func decalages() -> Array[float]:
 	var resultat: Array[float] = []
+	if projectiles_lateraux > 0:
+		var lateraux := mini(projectiles_lateraux,nb_projectiles-1)
+		var frontaux := nb_projectiles-lateraux
+		for i in frontaux: resultat.append((i-(frontaux-1)/2.0)*ecart_lateral)
+		for i in lateraux: resultat.append(0.0)
+		return resultat
 	if nb_projectiles <= 1:
 		resultat.append(0.0)
 		return resultat
@@ -62,6 +76,7 @@ func copie() -> Tir:
 	t.portee = portee
 	t.cadence = cadence
 	t.nb_projectiles = nb_projectiles
+	t.projectiles_lateraux = projectiles_lateraux
 	t.angle_eventail = angle_eventail
 	t.ecart_lateral = ecart_lateral
 	t.rebonds = rebonds

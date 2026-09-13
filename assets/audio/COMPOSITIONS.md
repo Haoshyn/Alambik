@@ -1,5 +1,43 @@
 # Musiques additionnelles
 
+## Collection de vingt choix
+
+Le catalogue propose maintenant **10 musiques en jeu et 10 pour le menu**.
+Les sept fichiers précédents et les choix sauvegardés sont conservés. Treize
+compositions originales supplémentaires sont synthétisées sans samples externes.
+
+| Nouvelle piste | Usage | BPM | Timbre principal |
+|---|---|---|---|
+| Étincelles | Run | 146 | Célesta |
+| Ronde des automates | Run | 118 | Cordes pincées |
+| Course en canopée | Run | 132 | Flûte |
+| Fournaise de cuivre | Run | 104 | Cordes pincées |
+| Marées arcanes | Run | 126 | Clochettes |
+| Matin à l’atelier | Menu | 88 | Cordes pincées |
+| Jardin de verre | Menu | 76 | Célesta |
+| Bibliothèque secrète | Menu | 72 | Clochettes |
+| Le thé de l’alchimiste | Menu | 94 | Cordes pincées |
+| Serre à l’aube | Menu | 80 | Flûte |
+| Poussière d’étoiles | Menu | 68 | Célesta |
+| Comptoir de cuivre | Menu | 102 | Cordes pincées |
+| Carnet de voyage | Menu | 86 | Flûte |
+
+Chaque piste possède son motif, sa progression et sa tonalité ; gammes majeure,
+mineure et dorienne. Le moteur de synthèse est commun : ce sont des propositions
+musicales à comparer, pas des enregistrements acoustiques. Export Ogg stéréo
+44,1 kHz, 32 mesures, queues repliées pour la boucle. Durées de 52,6 à 112,94 s,
+pics décodés de 0,839 à 0,876, RMS de −15,12 à −12,88 dBFS ; pas d'écrêtage.
+La qualité subjective et la transition de boucle restent à apprécier à l'écoute.
+
+Génération : `python tools/audio/collection.py` avec numpy et ffmpeg (variable
+`FFMPEG` facultative pour choisir l'exécutable). Mesures et page d'écoute :
+`python tools/audio/verifier_collection.py` avec `FFMPEG` défini. Sorties dans
+`tmp/musiques-20/`, dont `ecouter.html`, sans lecture automatique. Aucune musique
+n'a été diffusée sur le poste pendant la génération ou les contrôles.
+APK : `build/alambic-20-musiques.apk`.
+
+## Première collection
+
 Quatre compositions instrumentales originales, synthétisées sans samples ni mélodies externes. Les fichiers existants `firstarcade.ogg`, `dynamic_arcade.ogg` et `Accueil.ogg` sont conservés et restent les choix par défaut.
 
 | Piste | Usage | Tempo | Durée | Couleur |

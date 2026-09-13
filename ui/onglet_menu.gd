@@ -32,13 +32,15 @@ func _process(delta: float) -> void:
 		queue_redraw()
 
 func _draw() -> void:
-	# Les quatre vignettes viennent de la barre d'accueil approuvee.
-	var source := Rect2(index_icone * 256, 1350, 256, 150)
-	var hauteur := size.x * 150.0 / 256.0
-	draw_texture_rect_region(preload("res://assets/visual/azur/accueil_valide.png"),
-		Rect2(0, 0, size.x, hauteur), source, Color.WHITE.darkened(_pression * 0.12))
-	if _selection > 0.001:
-		var y := hauteur + 8.0
-		draw_line(Vector2(size.x * 0.18, y), Vector2(size.x * 0.82, y), Color(StyleAzur.MAGIE, 0.16 * _selection), 12.0, true)
-		draw_line(Vector2(size.x * 0.22, y), Vector2(size.x * 0.78, y), Color(StyleAzur.MAGIE, _selection), 3.0, true)
-		draw_circle(Vector2(size.x * 0.5, y), 3.0, Color(StyleAzur.TEXTE, _selection))
+	var r := Rect2(Vector2(8, 8), size - Vector2(16, 16))
+	if actif or _pression > 0.0:
+		draw_style_box(StyleAzur.cadre(Color("614675"), StyleAzur.CUIVRE, 22), r)
+	var cote := minf(86.0, size.y * 0.52)
+	var icones := [preload("res://assets/visual/atelier/sac.svg"),preload("res://assets/visual/atelier/boussole.svg"),preload("res://assets/visual/atelier/livre.svg"),preload("res://assets/visual/atelier/fiole.svg")]
+	draw_texture_rect(icones[index_icone], Rect2(Vector2((size.x-cote)*0.5,16),Vector2.ONE*cote), false)
+	var police := Polices.CORPS
+	var taille := 23
+	var largeur := police.get_string_size(libelle,HORIZONTAL_ALIGNMENT_LEFT,-1,taille).x
+	draw_string(police,Vector2((size.x-largeur)*0.5,size.y-30),libelle,HORIZONTAL_ALIGNMENT_LEFT,-1,taille,Color("fff2dc"))
+	if actif:
+		draw_line(Vector2(size.x*.3,size.y-13),Vector2(size.x*.7,size.y-13),Color("59d7ca"),4.0,true)

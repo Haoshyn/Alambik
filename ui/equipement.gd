@@ -15,6 +15,7 @@ var _resume: Label
 var _details: Label
 var _armes: VBoxContainer
 var _vide: VBoxContainer
+var _portrait_objet: TextureRect
 
 func _ready() -> void:
 	var col := StyleAzur.page(self,"Équipement",integre_menu)
@@ -31,7 +32,7 @@ func _ready() -> void:
 		b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 		b.expand_icon = true
-		b.add_theme_constant_override("icon_max_width",120)
+		b.add_theme_constant_override("icon_max_width",150)
 		slots.add_child(b)
 		_boutons_slots.append(b)
 	_resume = StyleAzur.texte("",27,StyleAzur.ATTENUE)
@@ -44,11 +45,11 @@ func _ready() -> void:
 	contenu.add_child(grille)
 	for i in 6:
 		var b := StyleAzur.bouton("",func(): _selectionner_objet(i))
-		b.custom_minimum_size.y = 230
+		b.custom_minimum_size.y = 240
 		b.expand_icon = true
 		b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
-		b.add_theme_constant_override("icon_max_width",130)
+		b.add_theme_constant_override("icon_max_width",150)
 		b.add_theme_font_size_override("font_size",24)
 		grille.add_child(b)
 		_boutons_objets.append(b)
@@ -61,13 +62,20 @@ func _ready() -> void:
 	_suivant = StyleAzur.bouton("Suivant ›",func(): _changer_page(1))
 	pages.add_child(_precedent)
 	pages.add_child(_suivant)
-	_details = StyleAzur.texte("",29,StyleAzur.ENCRE)
-	StyleAzur.plaque(contenu,true).add_child(_details)
+	var fiche := StyleAzur.plaque(col,true)
+	var apercu := HBoxContainer.new()
+	apercu.add_theme_constant_override("separation",20)
+	fiche.add_child(apercu)
+	_portrait_objet = StyleAzur.image(0,128)
+	apercu.add_child(_portrait_objet)
+	_details = StyleAzur.texte("",26,StyleAzur.ENCRE)
+	_details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	apercu.add_child(_details)
 	var actions := HBoxContainer.new()
 	actions.add_theme_constant_override("separation",12)
 	col.add_child(actions)
-	for d in [["Équiper",_equiper],["Retirer",_retirer],["Améliorer",_ameliorer]]:
-		var b := StyleAzur.bouton(d[0],d[1],true)
+	for d in [["Équiper",_equiper],["Retirer",_retirer],["Forge",_ameliorer]]:
+		var b := StyleAzur.bouton(d[0],d[1],d[0] == "Équiper")
 		actions.add_child(b)
 		_actions.append(b)
 	_selectionner_slot(_slot_selectionne)
@@ -79,7 +87,7 @@ func _afficher_inventaire() -> void:
 		var id := str(ReglagesJoueur.equipements.get(SLOTS[i],""))
 		_boutons_slots[i].icon = null if id.is_empty() else StyleAzur.icone(StyleAzur.icone_objet(id))
 		_boutons_slots[i].text = NOMS_SLOTS[SLOTS[i]]+ (" · vide" if id.is_empty() else " · niv. %d" % ReglagesJoueur.niveau_objet(id))
-		_boutons_slots[i].add_theme_stylebox_override("normal",StyleAzur.cadre(StyleAzur.PANNEAU,StyleAzur.MAGIE if SLOTS[i] == _slot_selectionne else StyleAzur.CUIVRE))
+		StyleAzur.case_objet(_boutons_slots[i],SLOTS[i] == _slot_selectionne)
 	var ids := _objets_page()
 	_vide.get_parent().visible = ids.is_empty()
 	_precedent.get_parent().visible = _objets_compatibles().size() > 6
@@ -89,11 +97,14 @@ func _afficher_inventaire() -> void:
 		if i >= ids.size(): continue
 		var id := ids[i]
 		b.icon = StyleAzur.icone(StyleAzur.icone_objet(id))
-		b.text = "%s\nNiveau %d" % [CatalogueObjets.OBJETS[id]["nom"],ReglagesJoueur.niveau_objet(id)]
-		b.add_theme_stylebox_override("normal",StyleAzur.cadre(StyleAzur.PANNEAU,StyleAzur.MAGIE if id == _objet_selectionne else StyleAzur.CUIVRE))
+		b.text = "Niv. %d" % ReglagesJoueur.niveau_objet(id)
+		b.tooltip_text = str(CatalogueObjets.OBJETS[id]["nom"])
+		StyleAzur.case_objet(b,id == _objet_selectionne)
 	_details.text = "Sélectionnez un bijou pour consulter ses effets."
+	_portrait_objet.visible = not _objet_selectionne.is_empty()
 	if _objet_selectionne.is_empty(): return
 	var id := _objet_selectionne
+	_portrait_objet.texture = StyleAzur.icone(StyleAzur.icone_objet(id))
 	var niveau := ReglagesJoueur.niveau_objet(id)
 	var bonus := CatalogueObjets.bonus_objet(id,niveau,ReglagesJoueur.monde_equipement_atteint())
 	var parts: Array[String] = []
@@ -187,19 +198,27 @@ func _afficher_armes() -> void:
 		_armes.remove_child(enfant)
 		enfant.queue_free()
 	_armes.add_child(StyleAzur.texte("Votre arme", 35))
-	_armes.add_child(StyleAzur.texte("Choisissez votre rythme de combat. Aucune amélioration d’arme à acheter.", 25, StyleAzur.ATTENUE))
+	var ligne := HBoxContainer.new()
+	ligne.add_theme_constant_override("separation",10)
+	_armes.add_child(ligne)
+	var selection: Dictionary = CatalogueProjectiles.TYPES[ReglagesJoueur.projectile_equipe_effectif()]
 	for id: String in CatalogueProjectiles.TYPES:
 		var arme: Dictionary = CatalogueProjectiles.TYPES[id]
 		var disponible := id in ReglagesJoueur.projectiles_disponibles()
-		var texte := ("✓ " if id == ReglagesJoueur.projectile_equipe_effectif() else "") + str(arme["nom"])
-		texte += " · dégâts ×%.2f · cadence ×%.2f" % [float(arme["degats_mult"]), float(arme.get("cadence_mult", 1.0))]
-		texte += "\n" + str(arme["description"])
-		if not disponible: texte += " · Chapitre %d" % int(arme["niveau"])
-		var bouton := StyleAzur.bouton(texte, func():
+		var bouton := StyleAzur.bouton(str(arme["nom"]), func():
 			ReglagesJoueur.equiper_projectile(id)
 			_afficher_armes())
 		bouton.disabled = not disponible
 		bouton.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		bouton.add_theme_font_size_override("font_size", 24)
-		bouton.custom_minimum_size.y = 125
-		_armes.add_child(bouton)
+		bouton.add_theme_font_size_override("font_size",22)
+		bouton.custom_minimum_size.y = 220
+		bouton.icon = StyleAzur.icone_arme(id)
+		bouton.expand_icon = true
+		bouton.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		bouton.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		bouton.add_theme_constant_override("icon_max_width",116)
+		StyleAzur.case_objet(bouton,id == ReglagesJoueur.projectile_equipe_effectif())
+		bouton.tooltip_text = str(arme["description"])
+		if not disponible: bouton.text += "\nCh. %d" % int(arme["niveau"])
+		ligne.add_child(bouton)
+	_armes.add_child(StyleAzur.texte("%s · dégâts ×%.2f · cadence ×%.2f\n%s" % [selection["nom"],float(selection["degats_mult"]),float(selection.get("cadence_mult",1.0)),selection["description"]],24,StyleAzur.ATTENUE))

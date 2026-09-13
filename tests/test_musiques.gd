@@ -1,8 +1,8 @@
 extends RefCounted
 
 func test_catalogue_et_boucles(v: Verif) -> void:
-	v.egal(Musiques.RUNS.size(), 5, "deux anciennes pistes et trois nouvelles pour les runs")
-	v.egal(Musiques.MENU.size(), 2, "accueil original et nouvelle composition")
+	v.egal(Musiques.RUNS.size(), 10, "dix choix pour les runs")
+	v.egal(Musiques.MENU.size(), 10, "dix choix pour le menu")
 	for menu in [false, true]:
 		for piste in Musiques.MENU if menu else Musiques.RUNS:
 			var id := str(piste["id"])
@@ -25,4 +25,15 @@ func test_choix_independants(v: Verif) -> void:
 	r.definir_piste_musique("atelier_lunaire")
 	v.egal(r.piste_menu, "atelier_lunaire", "une piste run ne remplace pas le menu")
 	v.egal(r.piste_musique, "braise_volatile", "une piste menu ne remplace pas la run")
+	r.free()
+
+func test_tous_les_choix(v: Verif) -> void:
+	var r: Node = load("res://autoload/reglages_joueur.gd").new()
+	r.sauvegarde_active = false
+	for piste in Musiques.RUNS:
+		r.definir_piste_musique(str(piste["id"]))
+		v.egal(r.piste_musique,str(piste["id"]),"choix run conserve")
+	for piste in Musiques.MENU:
+		r.definir_piste_menu(str(piste["id"]))
+		v.egal(r.piste_menu,str(piste["id"]),"choix menu conserve")
 	r.free()

@@ -16,7 +16,7 @@ func exiger(condition: bool, message: String) -> void:
 func attendre() -> void:
 	await process_frame
 	await process_frame
-	await RenderingServer.frame_post_draw
+	if DisplayServer.get_name() != "headless": await RenderingServer.frame_post_draw
 
 func page(nom: String) -> Control:
 	var p: Control = load("res://ui/"+nom+".tscn").instantiate()
@@ -45,7 +45,7 @@ func verifier() -> void:
 	exiger(regles.niveau_objet(id)==niveau+1,"forge ameliore le bijou")
 	exiger(regles.pierres_forge==pierres-cout,"forge debite le cout exact")
 	await attendre()
-	root.get_texture().get_image().save_png("res://tmp/azur-equipement-complet.png")
+	if DisplayServer.get_name() != "headless": root.get_texture().get_image().save_png("res://tmp/azur-equipement-complet.png")
 	equipement.queue_free()
 	await attendre()
 	regles.mode_dev = false
@@ -63,8 +63,10 @@ func verifier() -> void:
 	arbre.queue_free()
 	await attendre()
 	var campagne := page("selection_grimoire")
+	regles.mode_dev = true
 	campagne.call("_choisir_mode","mine")
 	exiger(regles.mode_run_choisi=="mine","mode alternatif memorise")
+	regles.mode_dev = false
 	await create_timer(0.5).timeout
 	campagne.queue_free()
 	await attendre()
@@ -79,7 +81,7 @@ func verifier() -> void:
 	draft.call("_sur_reroll")
 	exiger(jeu.rerolls_restants==0,"aucun tirage negatif")
 	await attendre()
-	root.get_texture().get_image().save_png("res://tmp/azur-ameliorations.png")
+	if DisplayServer.get_name() != "headless": root.get_texture().get_image().save_png("res://tmp/azur-ameliorations.png")
 	var reactif := str(draft.get("_propositions")[0])
 	draft.call("_sur_choix",reactif)
 	draft.call("_sur_choix",reactif)
@@ -93,7 +95,7 @@ func verifier() -> void:
 	exiger(sliders.size()==2,"deux volumes independants")
 	sliders[0].value = 0.37
 	exiger(is_equal_approx(regles.volume_musique,0.37),"volume reel applique")
-	root.get_texture().get_image().save_png("res://tmp/azur-parametres.png")
+	if DisplayServer.get_name() != "headless": root.get_texture().get_image().save_png("res://tmp/azur-parametres.png")
 	reglages.queue_free()
 	await attendre()
 	var menu: Control = load("res://scenes/menu.tscn").instantiate()
@@ -101,29 +103,55 @@ func verifier() -> void:
 	await create_timer(2.0).timeout
 	var accueil: Control = menu.get("_page_actuelle")
 	await attendre()
-	accueil.set_process(false)
-	var mat: ShaderMaterial = accueil.get("_matiere")
-	mat.set_shader_parameter("temps",0.0)
-	await attendre()
-	var debut := root.get_texture().get_image()
-	mat.set_shader_parameter("temps",1.2)
-	await attendre()
-	var fin := root.get_texture().get_image()
-	var surface: Control = accueil.get("_surface")
-	var transform := root.get_screen_transform()*surface.get_global_transform()
-	var changements := 0
-	var commandes := 0
-	for x in range(100,900,8):
-		for y in range(150,1300,8):
-			var point := Vector2i(transform*Vector2(x,y))
-			if debut.get_pixelv(point) != fin.get_pixelv(point): changements += 1
-		for y in range(1740,1890,8):
-			var point := Vector2i(root.get_screen_transform()*Vector2(x,y))
-			if debut.get_pixelv(point) != fin.get_pixelv(point): commandes += 1
-	exiger(changements>50,"accueil vivant dans le rendu Godot")
-	exiger(commandes==0,"navigation illustree immobile")
-	root.get_texture().get_image().save_png("res://tmp/azur-accueil-final.png")
+	var heros: Node3D = accueil.get("_heros")
+	var angle := heros.rotation.y
+	var onglets: Array = menu.get("_onglets")
+	var rectangle: Rect2 = onglets[0].get_global_rect()
+	await create_timer(.7).timeout
+	exiger(not is_equal_approx(angle,heros.rotation.y),"accueil 3D anime")
+	var lecteur := heros.find_child("AnimationPlayer",true,false) as AnimationPlayer
+	exiger(lecteur != null and lecteur.is_playing(),"animation de repos active")
+	exiger(rectangle == onglets[0].get_global_rect(),"navigation immobile pendant l'animation")
+	if DisplayServer.get_name() != "headless": root.get_texture().get_image().save_png("res://tmp/azur-accueil-final.png")
 	menu.queue_free()
 	await attendre()
+	await verifier_reglages_en_pause()
 	print("INTERFACE_AZUR : %d controles, %d echecs" % [controles,echecs])
 	quit(1 if echecs else 0)
+
+func verifier_reglages_en_pause() -> void:
+	var style: Script = load("res://scripts/presentation/style_azur.gd")
+	var pause := page("pause")
+	pause.process_mode = Node.PROCESS_MODE_ALWAYS
+	paused = true
+	pause.call("_ouvrir_reglages")
+	await attendre()
+	var reglages: Control = pause.get("_reglages")
+	exiger(reglages.can_process(),"parametres utilisables pendant la pause")
+	var selecteurs := reglages.find_children("*","OptionButton",true,false)
+	exiger(selecteurs.size()==3,"musiques et raccourci accessibles")
+	for selecteur: OptionButton in selecteurs:
+		var liste := selecteur.get_popup()
+		exiger(liste.get_theme_color("font_color")==style.ENCRE,"listes lisibles sur parchemin")
+		exiger(liste.get_theme_stylebox("panel") is StyleBoxTexture,"cadre Atelier dans les listes")
+		liste.popup()
+		await attendre()
+		exiger(liste.visible,"liste ouvrable en pause")
+		exiger(liste.max_size.y <= root.get_visible_rect().size.y,"hauteur de liste bornee")
+		liste.hide()
+		var index := mini(1,selecteur.item_count-1)
+		selecteur.select(index)
+		selecteur.item_selected.emit(index)
+	exiger(regles.piste_musique==str(selecteurs[0].get_item_metadata(selecteurs[0].selected)),"musique de combat selectionnee")
+	exiger(regles.piste_menu==str(selecteurs[1].get_item_metadata(selecteurs[1].selected)),"musique du menu selectionnee")
+	exiger(regles.raccourci_sort==str(selecteurs[2].get_item_metadata(selecteurs[2].selected)),"raccourci selectionne")
+	var volumes := reglages.find_children("*","HSlider",true,false)
+	volumes[0].value = .31
+	volumes[1].value = .64
+	exiger(is_equal_approx(regles.volume_musique,.31) and is_equal_approx(regles.volume_effets,.64),"volumes independants en pause")
+	reglages.emit_signal("ferme")
+	await attendre()
+	exiger(pause.get("_reglages")==null and paused,"retour aux commandes de pause sans reprise du combat")
+	paused = false
+	pause.queue_free()
+	await attendre()

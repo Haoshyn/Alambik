@@ -29,8 +29,8 @@ func test_glyphes_couvrent_les_catalogues(v: Verif) -> void:
 func test_passages_des_compositions(v: Verif) -> void:
 	for i in Reglages.ARENE_COMPOSITIONS.size():
 		var rectangles: Array[Rect2] = []
-		for point: Vector2 in Reglages.ARENE_COMPOSITIONS[i]:
-			var rect := Rect2(point*Reglages.ARENE_TAILLE-Reglages.ARENE_OBSTACLE_TAILLE/2,Reglages.ARENE_OBSTACLE_TAILLE)
+		for bloc: Rect2 in Reglages.ARENE_COMPOSITIONS[i]:
+			var rect := Rect2(bloc.position*Reglages.ARENE_TAILLE,bloc.size*Reglages.ARENE_TAILLE)
 			for autre in rectangles:
 				v.vrai(not rect.grow(Reglages.ARENE_PASSAGE_MIN).intersects(autre),"passage entre deux obstacles")
 			for retrait: Rect2 in Reglages.ARENE_RETRAITS[i]:
@@ -44,8 +44,8 @@ func test_navigation_portail_autour_des_blocs(v: Verif) -> void:
 	var but := Vector2(limites.get_center().x,180)
 	for motif in Reglages.ARENE_COMPOSITIONS.size():
 		var obstacles: Array[Rect2] = []
-		for point: Vector2 in Reglages.ARENE_COMPOSITIONS[motif]:
-			obstacles.append(Rect2(point*limites.size-Reglages.ARENE_OBSTACLE_TAILLE/2,Reglages.ARENE_OBSTACLE_TAILLE))
+		for bloc: Rect2 in Reglages.ARENE_COMPOSITIONS[motif]:
+			obstacles.append(Rect2(bloc.position*limites.size,bloc.size*limites.size))
 		for rect: Rect2 in Reglages.ARENE_RETRAITS[motif]:
 			obstacles.append(Rect2(rect.position*limites.size,rect.size*limites.size))
 		for obstacle in obstacles.slice(0,3):
