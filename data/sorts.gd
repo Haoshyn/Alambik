@@ -1,40 +1,32 @@
 class_name Sorts
 extends RefCounted
 
-# Les Sorts sont chiffres au rendement : degats rapportes a la recharge. Un sort
-# long doit frapper plus fort qu'un sort court, mais l'alteration qu'il pose
-# fait partie du prix — geler une salle vaut plus que quelques degats de plus.
-# Un Sort frappait pour deux a cinq fois un tir, la ou le heros en place plus de
-# quatre par seconde : il pesait moins qu'une seconde de tir automatique et ne
-# valait donc jamais son emplacement. Les degats sont maintenant cales pour
-# qu'un Sort ajoute environ un quart de la puissance soutenue.
+# Les recharges sont en secondes de jeu et ne dependent ni des impacts ni des morts.
 const ACTIFS := {
-	"onde_alchimique": {"nom": "Onde alchimique", "description": "Repousse la zone ciblée • 24 impacts pour recharger", "recharge": 24.0, "rayon": 180.0, "degats": 9.0, "effet": "repousse"},
-	"nova_de_givre": {"nom": "Nova de givre", "description": "Gèle la zone ciblée • 32 impacts pour recharger", "recharge": 32.0, "rayon": 210.0, "degats": 12.0, "effet": "givre"},
-	"barrage_de_braise": {"nom": "Barrage de braise", "description": "Embrase la zone ciblée • 36 impacts pour recharger", "recharge": 36.0, "rayon": 190.0, "degats": 16.0, "effet": "braise"},
-	"impulsion_foudroyante": {"nom": "Impulsion foudroyante", "description": "Frappe précise ciblée • 38 impacts pour recharger", "recharge": 38.0, "rayon": 130.0, "degats": 20.0, "effet": ""},
-	"explosion_corrosive": {"nom": "Explosion corrosive", "description": "Fragilise la zone ciblée • 42 impacts pour recharger", "recharge": 42.0, "rayon": 170.0, "degats": 26.0, "effet": "acide"},
+	"onde_alchimique": {"nom": "Onde alchimique", "description": "Repousse la zone ciblée • 12 s de récupération", "recharge": 12.0, "rayon": 180.0, "degats": 5.0, "effet": "repousse"},
+	"nova_de_givre": {"nom": "Nova de givre", "description": "Gèle la zone ciblée • 16 s de récupération", "recharge": 16.0, "rayon": 210.0, "degats": 6.0, "effet": "givre"},
+	"barrage_de_braise": {"nom": "Barrage de braise", "description": "Embrase la zone ciblée • 18 s de récupération", "recharge": 18.0, "rayon": 190.0, "degats": 8.0, "effet": "braise"},
+	"impulsion_foudroyante": {"nom": "Impulsion foudroyante", "description": "Frappe précise ciblée • 20 s de récupération", "recharge": 20.0, "rayon": 130.0, "degats": 10.0, "effet": ""},
+	"explosion_corrosive": {"nom": "Explosion corrosive", "description": "Fragilise la zone ciblée • 22 s de récupération", "recharge": 22.0, "rayon": 170.0, "degats": 11.0, "effet": "acide"},
 }
 
-# Les Ultimes frappent toute la salle : leur prix est le nombre d'eliminations.
-# Ils doivent effacer une rencontre, sinon rien ne justifie de les charger.
 const ULTIMES := {
-	"grand_oeuvre": {"nom": "Le Grand Œuvre", "description": "Efface toute la salle • charge rapide", "charge": 24, "degats": 30.0, "effet": ""},
-	"temps_suspendu": {"nom": "Temps suspendu", "description": "Gèle toute la salle • dégâts plus faibles", "charge": 28, "degats": 22.0, "effet": "givre"},
-	"transmutation_totale": {"nom": "Transmutation totale", "description": "Dégâts colossaux et corrosifs • charge lente", "charge": 38, "degats": 55.0, "effet": "acide"},
+	"grand_oeuvre": {"nom": "Le Grand Œuvre", "description": "Frappe toute la salle • récupération 75 s", "recharge": 75.0, "degats": 14.0, "effet": ""},
+	"temps_suspendu": {"nom": "Temps suspendu", "description": "Gèle toute la salle pendant 5 s • récupération 55 s", "recharge": 55.0, "degats": 4.0, "effet": "givre"},
+	"transmutation_totale": {"nom": "Transmutation totale", "description": "Frappe et fragilise toute la salle • récupération 90 s", "recharge": 90.0, "degats": 19.0, "effet": "acide"},
 }
 
 const PASSIFS := {
-	"rempart_initial": {"nom": "Rempart initial", "description": "Bouclier à chaque salle • -18 % de dégâts subis en permanence"},
+	"rempart_initial": {"nom": "Rempart initial", "description": "Bouclier à chaque salle • -12 % de dégâts subis en permanence"},
 	"heritage_reactif": {"nom": "Héritage réactif", "description": "Commence chaque grimoire avec 2 Améliorations aléatoires"},
 	"moisson_vitale": {"nom": "Moisson vitale", "description": "Toutes les 6 éliminations, récupère 2 % des PV • soins limités à 5 % par salle"},
 	"riposte_alchimique": {"nom": "Riposte alchimique", "description": "Être touché déclenche une déflagration massive qui repousse"},
 	"seconde_chance": {"nom": "Seconde chance", "description": "Une fois par aventure, survit à la mort avec 30 % des PV"},
-	"reserve_ultime": {"nom": "Réserve d’ultime", "description": "+1 charge par salle • l’ultime coûte 20 % de charge en moins"},
-	"sang_froid": {"nom": "Sang-froid", "description": "-30 % de recharge du Sort • réinitialisé toutes les 8 éliminations"},
-	"dernier_rempart": {"nom": "Dernier rempart", "description": "Sous 40 % de PV, subit 45 % de dégâts en moins"},
-	"audace": {"nom": "Audace", "description": "Sous 60 % de PV, inflige 45 % de dégâts en plus"},
-	"echo_alchimique": {"nom": "Écho alchimique", "description": "40 % de chance que le Sort frappe une seconde fois à 70 %"},
+	"reserve_ultime": {"nom": "Réserve d’ultime", "description": "Délai de récupération de l’ultime réduit de 20 %"},
+	"sang_froid": {"nom": "Sang-froid", "description": "Délai de récupération du sort actif réduit de 15 %"},
+	"dernier_rempart": {"nom": "Dernier rempart", "description": "Sous 40 % de PV, subit 30 % de dégâts en moins"},
+	"audace": {"nom": "Audace", "description": "Sous 60 % de PV, inflige 30 % de dégâts en plus"},
+	"echo_alchimique": {"nom": "Écho alchimique", "description": "25 % de chance que le Sort frappe une seconde fois à 60 %"},
 }
 
 # La campagne revele l'arsenal par petites touches. Les deux premieres capacites
@@ -126,3 +118,10 @@ static func multiplicateur_degats_conditionnel(passifs: Dictionary, ratio_pv: fl
 static func multiplicateur_degats_recus_conditionnel(passifs: Dictionary, ratio_pv: float) -> float:
 	return (1.0 - Reglages.DERNIER_REMPART_REDUCTION * float(passifs.get("dernier_rempart", 0.0))) \
 		if ratio_pv < Reglages.DERNIER_REMPART_SEUIL_PV else 1.0
+
+static func recharge(id: String, passifs: Dictionary, maitrises: Dictionary, arme: String) -> float:
+	var d := donnees(id)
+	var facteur := multiplicateur_charge_ultime(passifs) if ULTIMES.has(id) else multiplicateur_recharge_active(passifs)
+	facteur *= ArbreCompetences.multiplicateur_recharge(maitrises)
+	facteur *= float(CatalogueProjectiles.TYPES.get(arme, {}).get("recharge_mult", 1.0))
+	return float(d.get("recharge", 0.0)) * maxf(Reglages.RECHARGE_PLANCHER, facteur)

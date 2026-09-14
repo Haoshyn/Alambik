@@ -2,7 +2,11 @@ class_name Visuels3D
 extends RefCounted
 
 # Profil de rendu uniquement : aucune statistique de combat.
-const HEROS_MODELE := "res://assets/3d/characters/apprenti_a.glb"
+const HEROS_MODELE_ORIGINAL := "res://assets/3d/characters/apprenti_a.glb"
+const HEROS_MODELE_ACCUEIL := "res://assets/3d/characters/apprenti_accueil.glb"
+const HEROS_MODELE_ACCUEIL_V2 := "res://assets/3d/characters/apprenti_accueil_v2.glb"
+# Essai reversible : pointer sur HEROS_MODELE_ORIGINAL pour retrouver la v9.
+const HEROS_MODELE := HEROS_MODELE_ACCUEIL_V2
 # Sprint arcade : 0,4 s par cycle, avec une courte phase aerienne.
 const HEROS_CADENCE_COURSE := 1.0
 const HEROS_TRANSITION_MOUVEMENT := 0.18

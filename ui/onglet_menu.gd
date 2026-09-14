@@ -32,15 +32,19 @@ func _process(delta: float) -> void:
 		queue_redraw()
 
 func _draw() -> void:
-	var r := Rect2(Vector2(8, 8), size - Vector2(16, 16))
+	var accents := [StyleAzur.CUIVRE, StyleAzur.CORAIL, StyleAzur.MENTHE, StyleAzur.LILAS]
+	var accent: Color = accents[index_icone]
+	var r := Rect2(Vector2(4, 12), size - Vector2(8, 24))
 	if actif or _pression > 0.0:
-		draw_style_box(StyleAzur.cadre(StyleAzur.VIOLET, StyleAzur.CUIVRE, 22), r)
-	var cote := minf(86.0, size.y * 0.52)
+		draw_style_box(StyleAzur.cadre(StyleAzur.VIOLET, accent, 24), r)
+	var cote := minf(72.0, size.y * 0.44)
 	var identifiants := ["navigation_equipement", "navigation_aventure", "navigation_maitrises", "navigation_sorts"]
-	draw_texture_rect(IconesArcane.texture(identifiants[index_icone]), Rect2(Vector2((size.x-cote)*0.5,16),Vector2.ONE*cote), false)
+	draw_texture_rect(IconesArcane.texture(identifiants[index_icone]), Rect2(Vector2((size.x-cote)*0.5,24),Vector2.ONE*cote), false)
 	var police := Polices.CORPS
 	var taille := 23
+	while taille > 16 and police.get_string_size(libelle,HORIZONTAL_ALIGNMENT_LEFT,-1,taille).x > size.x-20:
+		taille -= 1
 	var largeur := police.get_string_size(libelle,HORIZONTAL_ALIGNMENT_LEFT,-1,taille).x
-	draw_string(police,Vector2((size.x-largeur)*0.5,size.y-30),libelle,HORIZONTAL_ALIGNMENT_LEFT,-1,taille,StyleAzur.TEXTE)
+	draw_string(police,Vector2((size.x-largeur)*0.5,size.y-38),libelle,HORIZONTAL_ALIGNMENT_LEFT,-1,taille,accent if actif else StyleAzur.TEXTE)
 	if actif:
-		draw_line(Vector2(size.x*.3,size.y-13),Vector2(size.x*.7,size.y-13),Color("59d7ca"),4.0,true)
+		draw_line(Vector2(size.x*.4,size.y-24),Vector2(size.x*.6,size.y-24),accent,4.0,true)

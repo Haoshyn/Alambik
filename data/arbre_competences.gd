@@ -5,21 +5,20 @@ extends RefCounted
 # premier rang accompagne la campagne, les suivants sont ce que le farm pousse
 # au maximum. Les valeurs sont donc exprimees PAR RANG, jamais en total.
 #
-# Budget vise a l'arbre complet : environ x2,35 en DPS pour la branche offensive
-# et x2,15 en survie effective pour la defensive. Les Maitrises sont un tiers de
-# la progression permanente, pas une source x11 qui rend stuff et Passifs caducs.
+# Les rangs de degats se multiplient ; les PV ennemis suivent les chapitres,
+# jamais les statistiques equipees, pour conserver le benefice du farm.
 const MAX_RANG := Reglages.MAITRISE_RANG_MAX
 const NOEUDS := {
-	"force": {"nom": "Force", "description": "+1,2 % dégâts par rang", "cout": Reglages.MAITRISE_COUTS[0], "categorie": "Offensif", "degats": 0.012},
+	"force": {"nom": "Force", "description": "+10 % dégâts par rang (multiplicatif)", "cout": Reglages.MAITRISE_COUTS[0], "categorie": "Offensif", "degats": 0.10},
 	"cadence": {"nom": "Cadence", "description": "+0,8 % cadence par rang", "cout": Reglages.MAITRISE_COUTS[1], "categorie": "Offensif", "requis": "force", "cadence": 0.008},
 	"precision": {"nom": "Précision", "description": "+1,2 % vitesse et portée des tirs par rang", "cout": Reglages.MAITRISE_COUTS[2], "categorie": "Offensif", "requis": "cadence", "projectile": 0.012},
-	"puissance": {"nom": "Puissance", "description": "+2 % dégâts par rang", "cout": Reglages.MAITRISE_COUTS[3], "categorie": "Offensif", "requis": "precision", "degats": 0.020, "fort": true},
+	"puissance": {"nom": "Puissance", "description": "+15 % dégâts par rang (multiplicatif)", "cout": Reglages.MAITRISE_COUTS[3], "categorie": "Offensif", "requis": "precision", "degats": 0.15, "fort": true},
 	"rythme": {"nom": "Rythme de guerre", "description": "+1 % cadence par rang", "cout": Reglages.MAITRISE_COUTS[4], "categorie": "Offensif", "requis": "puissance", "cadence": 0.010},
-	"catalyse": {"nom": "Catalyse", "description": "+3,2 % dégâts par rang", "cout": Reglages.MAITRISE_COUTS[5], "categorie": "Offensif", "requis": "rythme", "degats": 0.032},
+	"catalyse": {"nom": "Catalyse", "description": "+20 % dégâts par rang (multiplicatif)", "cout": Reglages.MAITRISE_COUTS[5], "categorie": "Offensif", "requis": "rythme", "degats": 0.20},
 	"trajectoire": {"nom": "Trajectoire absolue", "description": "+1,8 % vitesse et portée des tirs par rang", "cout": Reglages.MAITRISE_COUTS[6], "categorie": "Offensif", "requis": "catalyse", "projectile": 0.018},
 	"tempete": {"nom": "Tempête", "description": "+1,4 % cadence par rang", "cout": Reglages.MAITRISE_COUTS[7], "categorie": "Offensif", "requis": "trajectoire", "cadence": 0.014, "fort": true},
-	"domination": {"nom": "Domination", "description": "+5,2 % dégâts par rang", "cout": Reglages.MAITRISE_COUTS[8], "categorie": "Offensif", "requis": "tempete", "degats": 0.052},
-	"grand_oeuvre": {"nom": "Grand Œuvre", "description": "+9 % dégâts par rang", "cout": Reglages.MAITRISE_COUTS[9], "categorie": "Offensif", "requis": "domination", "degats": 0.090, "fort": true},
+	"domination": {"nom": "Domination", "description": "+25 % dégâts par rang (multiplicatif)", "cout": Reglages.MAITRISE_COUTS[8], "categorie": "Offensif", "requis": "tempete", "degats": 0.25},
+	"grand_oeuvre": {"nom": "Grand Œuvre", "description": "+30 % dégâts par rang (multiplicatif)", "cout": Reglages.MAITRISE_COUTS[9], "categorie": "Offensif", "requis": "domination", "degats": 0.30, "fort": true},
 
 	"constitution": {"nom": "Constitution", "description": "+1,6 % PV maximum par rang", "cout": Reglages.MAITRISE_COUTS[0], "categorie": "Défensif", "pv_mult": 0.016},
 	"armure": {"nom": "Armure", "description": "-0,2 % dégâts reçus par rang", "cout": Reglages.MAITRISE_COUTS[1], "categorie": "Défensif", "requis": "constitution", "reduction": 0.0020},
@@ -41,7 +40,7 @@ const NOEUDS := {
 	"sagesse": {"nom": "Sagesse", "description": "+4 % XP de compte par rang", "cout": Reglages.MAITRISE_COUTS[4], "categorie": "Utilitaire", "requis": "fortune", "experience": 0.04},
 	"abondance": {"nom": "Abondance", "description": "+3 % Gouttes par rang", "cout": Reglages.MAITRISE_COUTS[5], "categorie": "Utilitaire", "requis": "sagesse", "collecte": 0.03},
 	"savoir": {"nom": "Double discipline", "description": "Permet d’équiper un second Passif", "cout": Reglages.MAITRISE_COUTS[6], "categorie": "Utilitaire", "requis": "abondance", "second_passif": true, "rangs": 1, "fort": true},
-	"elan": {"nom": "Élan", "description": "+3 % déplacement par rang", "cout": Reglages.MAITRISE_COUTS[7], "categorie": "Utilitaire", "requis": "savoir", "vitesse": 0.03},
+	"elan": {"nom": "Élan arcanique", "description": "-3 % délai de récupération des sorts par rang", "cout": Reglages.MAITRISE_COUTS[7], "categorie": "Utilitaire", "requis": "savoir", "recharge": 0.03},
 	"prescience": {"nom": "Prescience", "description": "+1 nouveau tirage d’Améliorations par rang", "cout": Reglages.MAITRISE_COUTS[8], "categorie": "Utilitaire", "requis": "elan", "rerolls": 1, "rangs": 2},
 	"philosophe": {"nom": "Pierre philosophale", "description": "+4 % coffres et +6 % Pierres de forge par rang", "cout": Reglages.MAITRISE_COUTS[9], "categorie": "Utilitaire", "requis": "prescience", "coffre": 0.04, "pierres": 0.06, "fort": true},
 }
@@ -80,10 +79,10 @@ static func _somme(rangs_joueur: Dictionary, champ: String) -> float:
 	return total
 
 static func description_effective(id: String) -> String:
-	return str(NOEUDS[id]["description"]) + (". Progression plus douce après le rang 3." if rangs(id) > 3 else "")
+	return str(NOEUDS[id]["description"]) + (". Progression plus douce après le rang 3." if rangs(id) > 3 and not NOEUDS[id].has("degats") else "")
 
 const CHAMPS_LISIBLES := ["degats", "pv_mult", "cadence", "projectile", "reduction",
-	"vitesse", "collecte", "coffre", "experience", "pierres"]
+	"recharge", "vitesse", "collecte", "coffre", "experience", "pierres"]
 
 static func _nombre(valeur: float) -> String:
 	return String.num(valeur, 1).trim_suffix(".0").replace(".", ",")
@@ -94,9 +93,11 @@ static func _nombre(valeur: float) -> String:
 static func valeur_au_rang(id: String, rang: int) -> String:
 	var noeud: Dictionary = NOEUDS.get(id, {})
 	var acquis := clampi(rang, 0, rangs(id))
+	if noeud.has("degats"):
+		return "+%s %%" % _nombre((pow(1.0 + float(noeud["degats"]), acquis) - 1.0) * 100.0)
 	for champ in CHAMPS_LISIBLES:
 		if noeud.has(champ):
-			return "%s%s %%" % ["-" if champ == "reduction" else "+",
+			return "%s%s %%" % ["-" if champ in ["reduction", "recharge"] else "+",
 				_nombre(poids_rang(acquis) * float(noeud[champ]) * 100.0)]
 	if noeud.has("rerolls"):
 		var tirages := acquis * int(noeud["rerolls"])
@@ -128,7 +129,11 @@ static func donne_bouclier(rangs_joueur: Dictionary) -> bool:
 	return _somme(rangs_joueur, "bouclier") > 0.0
 
 static func multiplicateur_degats(rangs_joueur: Dictionary) -> float:
-	return 1.0 + _somme(rangs_joueur, "degats")
+	var facteur := 1.0
+	for id in rangs_joueur:
+		if NOEUDS.has(id) and NOEUDS[id].has("degats"):
+			facteur *= pow(1.0 + float(NOEUDS[id]["degats"]), clampi(int(rangs_joueur[id]), 0, rangs(id)))
+	return facteur
 
 static func multiplicateur_cadence(rangs_joueur: Dictionary) -> float:
 	return 1.0 + _somme(rangs_joueur, "cadence")
@@ -159,3 +164,6 @@ static func donne_second_passif(rangs_joueur: Dictionary) -> bool:
 
 static func poids_rang(rang: int) -> float:
 	return float(mini(rang, Reglages.MAITRISE_RANGS_PLEINS)) + float(maxi(0, rang - Reglages.MAITRISE_RANGS_PLEINS)) * Reglages.MAITRISE_POIDS_TARDIF
+
+static func multiplicateur_recharge(rangs_joueur: Dictionary) -> float:
+	return maxf(Reglages.RECHARGE_PLANCHER, 1.0 - _somme(rangs_joueur, "recharge"))

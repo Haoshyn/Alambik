@@ -61,6 +61,7 @@ var _apparition := 0.0
 var _eclat_phase := 0.0
 var _telegraphe_signature := 0.0
 var _alternance := 0
+var _recharge_invocation := 0.0
 
 func configurer(donnees_: Dictionary) -> void:
 	donnees = donnees_
@@ -83,6 +84,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_anim += delta
+	_recharge_invocation = maxf(0.0, _recharge_invocation - delta)
 	_apparition = minf(1.0, _apparition + delta / Reglages.BOSS_APPARITION_DUREE)
 	_eclat_phase = maxf(0.0, _eclat_phase - delta)
 	_flash = maxf(0.0, _flash - delta * 6.0)
@@ -144,10 +146,13 @@ func _duree_du_motif(motif: String) -> float:
 
 func _commencer_motif(motif: String) -> void:
 	if motif == "invocation":
-		var places := Reglages.PLAFOND_ENNEMIS - get_tree().get_nodes_in_group("ennemis").size()
+		if _recharge_invocation > 0.0: return
+		var places := mini(Reglages.INVOCATION_BOSS_PLAFOND - get_tree().get_nodes_in_group("invocations_boss").size(),
+			Reglages.PLAFOND_ENNEMIS - get_tree().get_nodes_in_group("ennemis").size())
 		if places <= 0:
 			return
-		for i in mini(places, int(donnees.get("nb_invocations_boss", 3))):
+		_recharge_invocation = Reglages.INVOCATION_BOSS_INTERVALLE
+		for i in mini(places, Reglages.INVOCATION_BOSS_SALVE):
 			var ecart := Vector2(randf_range(-200.0, 200.0), randf_range(-60.0, 160.0))
 			invocation_demandee.emit("encrier_rampant", global_position + ecart)
 	elif motif == "charge":

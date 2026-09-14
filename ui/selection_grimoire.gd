@@ -13,6 +13,8 @@ var _bouton_mine: Button
 var _bouton_epreuve: Button
 var _titre: Label
 var _details: Label
+var _liste_epreuves: VBoxContainer
+var _apercu: Control
 
 func _ready() -> void:
 	_monde = clampi(ReglagesJoueur.chapitre_choisi / 3,0,Chapitres.MONDES.size()-1)
@@ -30,7 +32,14 @@ func _ready() -> void:
 		var b := StyleAzur.bouton("",func(): _choisir_chapitre(i))
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		b.custom_minimum_size.y = 145
-		contenu.add_child(b)
+		var ligne := HBoxContainer.new()
+		contenu.add_child(ligne)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		ligne.add_child(b)
+		var info := StyleAzur.bouton("!", func(): _voir_loots("grimoire", _monde * 3 + i))
+		info.custom_minimum_size = Vector2(72, 72)
+		info.tooltip_text = "Récompenses possibles"
+		ligne.add_child(info)
 		_zones_chapitres.append(b)
 	_details = StyleAzur.texte("",28,StyleAzur.ATTENUE)
 	contenu.add_child(_details)
@@ -38,9 +47,35 @@ func _ready() -> void:
 	contenu.add_child(_bouton_selectionner)
 	contenu.add_child(StyleAzur.texte("Autres aventures",35))
 	_bouton_mine = StyleAzur.bouton("La Mine",func(): _choisir_mode("mine"))
-	contenu.add_child(_bouton_mine)
+	var ligne_mine := HBoxContainer.new()
+	contenu.add_child(ligne_mine)
+	_bouton_mine.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ligne_mine.add_child(_bouton_mine)
+	var info_mine := StyleAzur.bouton("!", func(): _voir_loots("mine"))
+	info_mine.custom_minimum_size.x = 72
+	ligne_mine.add_child(info_mine)
 	_bouton_epreuve = StyleAzur.bouton("Épreuves de magie",func(): _choisir_mode("epreuve_sorts"))
 	contenu.add_child(_bouton_epreuve)
+	_liste_epreuves = VBoxContainer.new()
+	contenu.add_child(_liste_epreuves)
+	_liste_epreuves.visible = ReglagesJoueur.mode_run_choisi == "epreuve_sorts"
+	_liste_epreuves.add_child(StyleAzur.texte("Cinq boss · un choix d’augmentation entre chaque boss.
+Terminez un niveau pour ouvrir le suivant. Rejouez-le pour monter ses sorts en rang.", 27, StyleAzur.ATTENUE))
+	for i in Epreuves.nombre():
+		var niveau := i + 1
+		var ligne := HBoxContainer.new()
+		_liste_epreuves.add_child(ligne)
+		var noms: Array[String] = []
+		for id in Epreuves.sorts(niveau): noms.append(str(Sorts.donnees(str(id))["nom"]))
+		var b := StyleAzur.bouton("Niveau %d · %s" % [niveau, " / ".join(noms)], func(): _choisir_epreuve(niveau))
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.custom_minimum_size.y = 120
+		b.disabled = not ReglagesJoueur.mode_dev and niveau > ReglagesJoueur.niveau_epreuve_debloque
+		ligne.add_child(b)
+		var info := StyleAzur.bouton("!", func(): _voir_loots("epreuve_sorts", 0, niveau))
+		info.custom_minimum_size.x = 72
+		ligne.add_child(info)
 	_rafraichir()
 	Capture.programmer(self)
 
@@ -50,6 +85,9 @@ func _choisir_mode(mode: String) -> void:
 	if not ReglagesJoueur.mode_debloque(mode):
 		_message = "Terminez davantage de chapitres pour ouvrir ce mode."
 		_rafraichir()
+		return
+	if mode == "epreuve_sorts":
+		_liste_epreuves.visible = not _liste_epreuves.visible
 		return
 	ReglagesJoueur.choisir_mode_run(mode)
 	selection_changee.emit()
@@ -123,3 +161,19 @@ func _fermer() -> void:
 		return
 	Sons.jouer("choix", -14.0)
 	StyleInterface.sortir_puis(self, func() -> void: ferme.emit())
+
+func _choisir_epreuve(niveau: int) -> void:
+	if not ReglagesJoueur.choisir_epreuve(niveau): return
+	selection_changee.emit()
+	_fermer()
+
+func _voir_loots(mode: String, chapitre := 0, niveau := 1) -> void:
+	if is_instance_valid(_apercu): return
+	_apercu = preload("res://ui/apercu_butin.gd").new()
+	_apercu.mode = mode
+	_apercu.chapitre = chapitre
+	_apercu.niveau_epreuve = niveau
+	add_child(_apercu)
+	_apercu.ferme.connect(func():
+		_apercu.queue_free()
+		_apercu = null)

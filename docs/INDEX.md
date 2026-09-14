@@ -4,10 +4,11 @@ But : arriver au bon fichier avec le moins de contexte possible.
 
 | Tâche | Commencer par | Puis, si nécessaire |
 |---|---|---|
-| Boucle d'une run, salles, récompenses | `scripts/run/run.gd` | `autoload/jeu.gd`, `data/chapitres.gd`, `data/recompenses.gd` |
+| Boucle d'une run, salles, récompenses | `scripts/run.gd` | `autoload/jeu.gd`, `scripts/bilan_run.gd`, `data/butins_run.gd`, `data/recompenses.gd` |
+| Niveaux d'épreuve et loots de sorts | `data/epreuves.gd` | `ui/selection_grimoire.gd`, `ui/apercu_butin.gd`, `data/sorts.gd` |
 | Héros, déplacement, dégâts reçus | `scripts/acteurs/heros.gd` | `scripts/combat/stats.gd`, `data/reglages.gd` |
 | Ennemi commun / IA | `scripts/acteurs/ennemi.gd` | `scripts/acteurs/cerveaux.gd`, `data/catalogue_ennemis.gd` |
-| Boss / gardien | `scripts/acteurs/boss.gd` | `scripts/acteurs/gardien.gd`, `data/catalogue_ennemis.gd` |
+| Boss / gardien | `scripts/boss.gd` | `scripts/salle.gd`, `scripts/gardien.gd`, `data/catalogue_ennemis.gd` |
 | Tirs / ciblage / impacts | `scripts/combat/` | `data/reglages.gd` |
 | Améliorations / effets de run | `scripts/ameliorations/` | `data/catalogue_reactifs.gd`, `data/catalogue_elements.gd` |
 | Salle, obstacles, géométrie | `scripts/monde/` | `data/vagues.gd` |

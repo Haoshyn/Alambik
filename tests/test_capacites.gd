@@ -55,13 +55,12 @@ func test_un_sort_pese_face_au_tir_soutenu(v: Verif) -> void:
 		v.vrai(part >= 0.15, "%s doit ajouter au moins 15 pour cent de la puissance soutenue" % id)
 		v.vrai(part <= 0.80, "%s ne doit pas remplacer le tir automatique" % id)
 
-func test_un_ultime_efface_une_rencontre(v: Verif) -> void:
+func test_les_ultimes_separent_controle_et_degats(v: Verif) -> void:
+	v.vrai(float(Sorts.ULTIMES["grand_oeuvre"]["degats"]) > float(Sorts.ULTIMES["temps_suspendu"]["degats"]), "les degats ont un cout de recuperation")
 	for id in Sorts.ULTIMES:
 		var ultime: Dictionary = Sorts.ULTIMES[id]
-		v.vrai(float(ultime["degats"]) >= 20.0,
-			"%s doit valoir ses eliminations accumulees" % id)
-		v.vrai(int(ultime["charge"]) >= 20,
-			"%s garde un prix en eliminations" % id)
+		v.vrai(float(ultime["recharge"]) >= 55.0, "%s ne peut pas nettoyer deux salles successives immediatement" % id)
+		v.vrai(not ultime.has("charge"), "aucune charge par elimination")
 
 func test_les_capacites_montent_avec_leur_rang(v: Verif) -> void:
 	var r: Node = load("res://autoload/reglages_joueur.gd").new()

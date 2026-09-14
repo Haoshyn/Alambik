@@ -77,10 +77,10 @@ func test_l_arsenal_depend_de_la_campagne_pas_du_niveau_de_compte(v: Verif) -> v
 	r.niveau_compte = 1
 	r.experience_compte = 0
 	r.rangs_sorts = {}
-	v.vrai(not r.sort_decouvert("onde_alchimique"), "le niveau un de campagne garde le premier sort cache")
+	v.vrai(r.sort_decouvert("onde_alchimique"), "le premier sort est annonce sans etre deja possede")
 	r.ajouter_experience_compte(r.experience_compte_requise())
 	v.egal(r.niveau_compte, 2, "le compte atteint le niveau deux")
-	v.vrai(not r.sort_decouvert("onde_alchimique"), "le niveau de compte n'ouvre pas l'arsenal")
+	v.vrai(r.sort_decouvert("onde_alchimique"), "le niveau de compte ne cache pas les loots de la premiere epreuve")
 	r.meilleures_par_chapitre = {"0": Reglages.SALLES_PAR_RUN}
 	v.vrai(r.sort_decouvert("onde_alchimique"), "terminer le premier chapitre ouvre sa pool")
 	v.egal(r.rang_sort("onde_alchimique"), 0, "une pool ouverte n'equipe pas artificiellement un rang")

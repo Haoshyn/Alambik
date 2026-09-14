@@ -12,7 +12,7 @@ func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_recompense = Recompenses.tirer_epreuve(Jeu.rng, ReglagesJoueur.rangs_sorts,
-		ReglagesJoueur.niveau_campagne_atteint())
+		Jeu.niveau_epreuve)
 	if _recompense["type"] == "gouttes":
 		ReglagesJoueur.ajouter_gouttes(int(_recompense["quantite"]))
 	else:

@@ -2,7 +2,54 @@
 
 Ce fichier sert à s'orienter, pas à remplacer les données du jeu. Pour une valeur exacte, lire le catalogue ou `data/reglages.gd` concerné.
 
+## Coffres, sorts et épreuves — 14 septembre
+
+Invocations de boss : 2 par salve, 18 s minimum, plafond 3, 28 % des PV normaux.
+Sorts et ultimes à récupération temporelle ; dégâts et passifs tempérés. Aiguille
+vive −10 % récupération, maîtrise Élan arcanique ajoutée par conversion d’Élan.
+Onze niveaux d’épreuve avec loots locaux, zéro augment initial et quatre choix
+entre les cinq boss. Coffre interactif à toute fin de run, abandon compris,
+vide sans salle terminée ; objets et sorts aléatoires seulement à la victoire.
+Aperçu « ! » dans la sélection. Gros scaling offensif multiplicatif, courbe fixe
+de PV par chapitre. Zone alchimique et familier désormais visibles en 3D ; icône
+de la baguette de base rendue depuis le modèle porté. Validation : 17 700 assertions,
+41 d’intégration dédiée et vingt runs sans blocage. Voir
+`docs/ops/COFFRES_EPREUVES_RECHARGES.md`. APK : `build/alambic-coffres-epreuves.apk`.
+
 ## Direction visuelle intégrée
+
+Apprenti accueil v2, essai après rejet du rendu précédent : buste et jambes
+moins tassés, manches volumétriques avec poignets, mains remodelées dont une
+main libre entrouverte, tunique reprise et iris bruns. Shader spécifique à
+cette variante : ombres de peau chaudes, occlusion atténuée, reflets des yeux
+dessinés. Icône Aventure remplacée par des épées croisées. Autres menus et
+icônes conservés. Les modèles v9 et accueil v1 restent intacts.
+Validation artistique en jeu encore nécessaire ; détails et mesures dans
+`docs/ops/APPRENTI_ACCUEIL_V2.md`.
+15 120 assertions générales, 22 de matériaux, 643 de fluidité, 30 de
+synchronisation, 194 contrôles d'interface et 1 781 de formats réussis.
+Vingt runs sans blocage ; APK : `build/alambic-apprenti-accueil-v2.apk`.
+
+Essai Apprenti de l'accueil : le propriétaire conserve les icônes manga.
+Bouton Jouer rouge remplacé par une commande violette plus compacte. Projectiles
+alliés en perles 3D opaques, avec deux petites perles de traîne ; tirs ennemis
+conservés. Variante `apprenti_accueil.glb` active, avec yeux bruns, sourire,
+frange remodelée, chapeau incliné et écharpe latérale. Ancien modèle v9 et
+ses sources conservés à l'identique ; sélection réversible dans `Visuels3D`.
+Rendus Blender dans `tmp/apprenti-accueil/`, ressemblance à apprécier par le
+propriétaire. 15 120 assertions générales, 643 de fluidité, 30 de synchronisation,
+55 de projectiles, 194 contrôles d'interface et 1 781 de formats réussis.
+Vingt runs sans blocage ; APK signée : `build/alambic-apprenti-accueil.apk`.
+Détails : `docs/ops/APPRENTI_ACCUEIL.md`.
+
+Essai manga demandé le 14 septembre : accueil et personnage illustrés conservés,
+Jouer en sceau corail, modes en ruban prune, navigation espacée avec accents
+ambre/corail/menthe/lilas. Maîtrises, sorts et augmentations utilisent 90 icônes
+chibi détourées ; cadres métalliques remplacés par des aplats et contours nets,
+titres DM Sans. Rouage explicite et livre commun aux deux transitions.
+15 120 assertions, 194 contrôles d'interface, 928 de disposition et 1 781 de
+formats réussis ; vingt runs sans blocage. Rendu final sur téléphone à apprécier.
+Détails : `docs/ops/ESSAI_MANGA.md`.
 
 Menus Éclats d'arcane : fonds bleu/prune, cadres de verre illustrés, titres
 Cinzel, 90 icônes, médaillons de maîtrise et cartes d'augmentation teintées.

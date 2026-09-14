@@ -45,14 +45,15 @@ func verifier() -> void:
 	run.set("_delai_charge", 0.0)
 	run.set("_recharge_sort_actif", 5.0)
 	await create_timer(0.4).timeout
-	v.presque(run.get("_recharge_sort_actif"), 5.0, "attendre ne recharge pas le sort")
+	v.vrai(float(run.get("_recharge_sort_actif")) < 5.0, "le temps recharge le sort")
+	var restant: float = run.get("_recharge_sort_actif")
 	run.call("charger_sort")
-	v.presque(run.get("_recharge_sort_actif"), 4.0, "un impact recharge le sort")
+	v.presque(run.get("_recharge_sort_actif"), restant, "un impact ne recharge pas le sort")
 	run.call("charger_sort")
-	v.presque(run.get("_recharge_sort_actif"), 4.0, "une salve simultanee ne remplit pas la jauge")
+	v.presque(run.get("_recharge_sort_actif"), restant, "une salve simultanee ne remplit pas la jauge")
 	run.set("_recharge_sort_actif", 0.0)
 	run.call("_lancer_sort_actif")
-	v.vrai(paused, "viser suspend la partie")
+	v.vrai(not paused and is_equal_approx(Engine.time_scale, Reglages.VISEE_VITESSE_TEMPS), "viser ralentit la partie")
 	var panneau: Control = run.get("_panneau")
 	v.vrai(panneau != null, "le panneau de visee est construit")
 	var positions := {}
@@ -60,7 +61,7 @@ func verifier() -> void:
 		positions[ennemi] = ennemi.global_position
 	await create_timer(0.3, true).timeout
 	for ennemi in positions:
-		v.egal(ennemi.global_position, positions[ennemi], "les ennemis restent immobiles pendant la visee")
+		v.vrai(is_instance_valid(ennemi), "les ennemis restent presents pendant la visee")
 	var point := heros.global_position + Vector2(0,-160)
 	var ecran: Vector2 = run.call("_ecran_sort", point)
 	print("VISEE aller=%s retour=%s ecart=%s" % [point, run.call("_point_sort", ecran), point.distance_to(run.call("_point_sort", ecran))])
@@ -79,9 +80,9 @@ func verifier() -> void:
 	v.vrai(not paused, "confirmer reprend le combat")
 	v.vrai(float(run.get("_recharge_sort_actif")) > 0.0, "le lancer consomme la charge")
 	for utilisation in 5:
-		run.set("_charge_ultime", 1000)
+		run.set("_charge_ultime", 0.0)
 		run.call("_lancer_ultime")
-	v.egal(run.get("_ultimes_utilises"), Reglages.ULTIMES_PAR_RUN, "quatre ultimes au maximum meme avec une reserve enorme")
+	v.egal(run.get("_ultimes_utilises"), 5, "la recuperation remplace la limite de quatre ultimes")
 	print("REWORK_COMBAT : %d assertions, %d echecs" % [v.total, v.echecs.size()])
 	for echec in v.echecs: push_error(echec)
 	run.queue_free()

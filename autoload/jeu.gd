@@ -1,12 +1,16 @@
 extends Node
 
-# Etat de la run en cours. La mort renvoie au menu sans rien conserver de la
-# descente ; seul le chapitre atteint reste debloque.
+# Etat de la run : les salles terminees remplissent le coffre, y compris
+# lorsque la tentative se termine par une mort ou un abandon.
 
 signal run_terminee(victoire: bool)
 signal inventaire_change
 signal experience_run_change
 
+var niveau_epreuve := 1
+var salles_terminees: Array[int] = []
+var boss_vaincus: Array[int] = []
+var bilan_run: Dictionary = {}
 var salle_courante := 0
 var chapitre := 0
 var inventaire: Array[String] = []
@@ -48,7 +52,7 @@ func nom_run() -> String:
 	if mode_run == "retro":
 		return "Vision enchantée"
 	if mode_run == "epreuve_sorts":
-		return "Épreuves rituelles"
+		return "Épreuve de magie · niveau %d" % niveau_epreuve
 	if mode_run == "mine":
 		return "Mine"
 	return str(chapitre_courant()["nom"])
@@ -72,6 +76,10 @@ func demarrer_run(graine_demandee: int = 0, salle_de_depart: int = 1, chapitre_d
 	mode_run = mode_demande if mode_demande in ["grimoire", "epreuve_sorts", "mine", "retro"] else "grimoire"
 	# Le defi a sa propre courbe : il ne depend jamais du dernier livre consulte.
 	chapitre = 0 if mode_run != "grimoire" else clampi(chapitre_demande, 0, Chapitres.nombre() - 1)
+	niveau_epreuve = clampi(ReglagesJoueur.niveau_epreuve_choisi, 1, Epreuves.nombre())
+	salles_terminees.clear()
+	boss_vaincus.clear()
+	bilan_run.clear()
 	salle_courante = salle_de_depart
 	inventaire = []
 	experience_run = 0
@@ -209,3 +217,9 @@ func duree_run() -> float:
 
 func terminer_run(victoire: bool) -> void:
 	run_terminee.emit(victoire)
+
+func marquer_salle_terminee(numero: int) -> void:
+	if not salles_terminees.has(numero): salles_terminees.append(numero)
+
+func marquer_boss_vaincu(numero: int) -> void:
+	if not boss_vaincus.has(numero): boss_vaincus.append(numero)

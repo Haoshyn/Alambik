@@ -18,11 +18,14 @@ func _ready() -> void:
 	var branches := HBoxContainer.new()
 	branches.add_theme_constant_override("separation",18)
 	contenu.add_child(branches)
+	var index_branche := 0
 	for branche in ArbreCompetences.BRANCHES:
+		var accent: Color = [StyleAzur.CORAIL, StyleAzur.MENTHE, StyleAzur.CUIVRE][index_branche]
+		index_branche += 1
 		var ligne := VBoxContainer.new()
 		ligne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		branches.add_child(ligne)
-		var titre := StyleAzur.texte(branche,29)
+		var titre := StyleAzur.texte(branche,29,accent)
 		titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		ligne.add_child(titre)
 		for identifiant in ArbreCompetences.BRANCHES[branche]:
@@ -40,6 +43,7 @@ func _ready() -> void:
 			icone.position = Vector2(31, 18)
 			b.add_child(icone)
 			b.set_meta("embleme", icone.texture)
+			b.set_meta("accent", accent)
 			var rang := StyleAzur.texte("", 22)
 			rang.position = Vector2(8, 128)
 			rang.size = Vector2(158, 30)
@@ -51,7 +55,7 @@ func _ready() -> void:
 			b.add_theme_stylebox_override("focus", StyleAzur.cadre(Color.TRANSPARENT, StyleAzur.MAGIE, 64))
 			ligne.add_child(b)
 			_noeuds[id] = b
-			var lien := StyleAzur.texte("│",26,StyleAzur.MAGIE)
+			var lien := StyleAzur.texte("│",26,accent)
 			lien.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			ligne.add_child(lien)
 	var fiche := StyleAzur.plaque(col,true)
@@ -82,7 +86,8 @@ func _rafraichir() -> void:
 		b.tooltip_text = str(ArbreCompetences.NOEUDS[id]["nom"])
 		b.add_theme_font_size_override("font_size",22)
 		b.add_theme_color_override("font_color",StyleAzur.IVOIRE)
-		b.add_theme_stylebox_override("normal",StyleAzur.cadre(Color("793e92") if id == _selection else Color("285c85") if ReglagesJoueur.rang_competence(id) > 0 else Color("303564") if ouvert else Color("252943"),StyleAzur.MAGIE if id == _selection else StyleAzur.CUIVRE,64))
+		var accent: Color = b.get_meta("accent")
+		b.add_theme_stylebox_override("normal",StyleAzur.cadre(StyleAzur.PANNEAU.lerp(accent,0.3 if id == _selection else 0.12) if ouvert else Color("292431"),accent if ouvert else Color("776b85"),32))
 	var n: Dictionary = ArbreCompetences.NOEUDS[_selection]
 	_embleme.texture = _noeuds[_selection].get_meta("embleme")
 	_details.text = "%s\n%s\n%s" % [n["nom"],ArbreCompetences.description_effective(_selection),_message]

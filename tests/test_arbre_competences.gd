@@ -23,11 +23,11 @@ func test_le_cout_d_un_rang_monte_avec_le_rang(v: Verif) -> void:
 		"maitriser entierement un noeud coute plus que cinq fois son premier rang")
 
 func test_un_rang_supplementaire_ajoute_sa_part(v: Verif) -> void:
-	v.presque(ArbreCompetences.multiplicateur_degats({"force": 1}), 1.012,
+	v.presque(ArbreCompetences.multiplicateur_degats({"force": 1}), 1.10,
 		"un rang de Force vaut sa valeur unitaire")
-	v.presque(ArbreCompetences.multiplicateur_degats({"force": 3}), 1.036,
-		"trois rangs valent trois fois la valeur unitaire")
-	v.presque(ArbreCompetences.multiplicateur_degats({"force": 99}), 1.060,
+	v.presque(ArbreCompetences.multiplicateur_degats({"force": 3}), 1.331,
+		"trois rangs composent leur gain de degats")
+	v.presque(ArbreCompetences.multiplicateur_degats({"force": 99}), pow(1.10, 10),
 		"un rang sauvegarde au-dela du plafond ne donne rien de plus")
 
 func test_les_trois_branches_restent_independantes(v: Verif) -> void:
@@ -55,22 +55,22 @@ func _branche_au_rang(branche: String, rang: int) -> Dictionary:
 func test_la_puissance_va_du_petit_bonus_au_gros_scaling(v: Verif) -> void:
 	v.presque(ArbreCompetences.multiplicateur_pv({"constitution": 1}), 1.016,
 		"Constitution applique son premier bonus")
-	v.presque(ArbreCompetences.multiplicateur_degats({"force": 1}), 1.012,
+	v.presque(ArbreCompetences.multiplicateur_degats({"force": 1}), 1.10,
 		"Force applique son premier bonus")
 	v.presque(ArbreCompetences.reduction_degats({"armure": 1}), 0.002,
 		"Armure applique sa reduction")
 	var offensive_premier := _branche_au_rang("Offensif", 1)
 	var dps_premier := ArbreCompetences.multiplicateur_degats(offensive_premier) \
 		* ArbreCompetences.multiplicateur_cadence(offensive_premier)
-	v.vrai(dps_premier >= 1.20 and dps_premier <= 1.30,
+	v.vrai(dps_premier >= 2.5 and dps_premier <= 2.6,
 		"les dix premiers rangs donnent un vrai gain sans devenir la campagne a eux seuls")
 
 func test_l_arbre_entierement_pousse_reste_dans_son_budget(v: Verif) -> void:
 	var offensive := _branche_au_rang("Offensif", ArbreCompetences.MAX_RANG)
 	var dps := ArbreCompetences.multiplicateur_degats(offensive) \
 		* ArbreCompetences.multiplicateur_cadence(offensive)
-	v.vrai(dps >= 2.25 and dps <= 2.45,
-		"la branche offensive maxee reste autour de x2,35")
+	v.vrai(dps >= 9500.0 and dps <= 10000.0,
+		"la branche offensive maxee approche dix mille fois le DPS initial")
 	var defensive := _branche_au_rang("Défensif", ArbreCompetences.MAX_RANG)
 	var survie := ArbreCompetences.multiplicateur_pv(defensive) \
 		/ (1.0 - ArbreCompetences.reduction_degats(defensive))
@@ -104,7 +104,7 @@ func test_le_maximum_permanent_est_overkill_sur_la_campagne(v: Verif) -> void:
 		"un compte maxe n'a pas besoin d'un build parfait pour ecraser la campagne")
 
 func test_une_progression_incomplete_peut_finir_avec_un_bon_build(v: Verif) -> void:
-	var offensive := _branche_au_rang("Offensif", 1)
+	var offensive := _branche_au_rang("Offensif", 8)
 	var anciens := CatalogueObjets.IDS_PAR_MONDE[0]
 	var equipements := {"anneau_gauche": str(anciens[0]), "anneau_droit": str(anciens[1]),
 		"collier": str(anciens[2])}
@@ -123,7 +123,7 @@ func test_une_progression_incomplete_peut_finir_avec_un_bon_build(v: Verif) -> v
 		facteur_run *= float(Reglages.RAFALE_NOMBRE)
 	var dernier := Chapitres.nombre() - 1
 	v.vrai(permanent * facteur_run > Chapitres.facteur_pv(dernier, Reglages.SALLES_PAR_RUN),
-		"deux branches rang 1 et une Forge 20 peuvent finir la campagne avec un bon build")
+		"la branche offensive rang 8 et une Forge 20 peuvent finir la campagne avec un bon build")
 
 func test_maitrises_et_capacites_sont_separees(v: Verif) -> void:
 	for catalogue in [Sorts.ACTIFS, Sorts.PASSIFS, Sorts.ULTIMES]:
@@ -142,7 +142,7 @@ func test_l_epreuve_active_un_sort(v: Verif) -> void:
 	var r: Node = load("res://autoload/reglages_joueur.gd").new()
 	r.sauvegarde_active = false
 	r.rangs_sorts = {"onde_alchimique": 0}
-	v.vrai(not r.sort_decouvert("onde_alchimique"), "le premier sort reste cache au niveau un")
+	v.vrai(r.sort_decouvert("onde_alchimique"), "le premier sort est annonce dans le niveau un des epreuves")
 	r.meilleures_par_chapitre = {"0": Reglages.SALLES_PAR_RUN}
 	v.vrai(r.sort_decouvert("onde_alchimique"), "le sort entre dans la pool au niveau deux")
 	v.vrai(not r.sort_debloque("onde_alchimique"), "au rang zero il reste inutilisable")

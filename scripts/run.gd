@@ -12,7 +12,6 @@ const FIN := preload("res://ui/fin_de_run.tscn")
 const HUD := preload("res://ui/hud.tscn")
 const JOYSTICK := preload("res://ui/joystick.tscn")
 const PAUSE := preload("res://ui/pause.tscn")
-const RECOMPENSE_SORTS := preload("res://ui/recompense_sorts.tscn")
 const VOILE_TRANSITION := preload("res://scripts/voile_transition.gd")
 
 var _fond: Node2D
@@ -31,11 +30,10 @@ var _terminee := false
 var _temps_dans_la_salle := 0.0
 var _musique_minuterie := 0.0
 var _recharge_sort_actif := 0.0
-var _charge_ultime := 0
+var _charge_ultime := 0.0
 var _ultimes_utilises := 0
 var _delai_charge := 0.0
 var _compteur_moisson := 0
-var _compteur_sang_froid := 0
 var _niveaux_en_attente := 0
 var _familier_minuterie := 0.0
 var _meteore_minuterie := 0.0
@@ -52,7 +50,6 @@ var _voile_salle: Control
 var _titre_voile: Label
 var _sous_titre_voile: Label
 var _transition_salle := false
-var _dernier_rituel_prepare := 0
 
 func _ready() -> void:
 	add_to_group("charge_combat")
@@ -101,7 +98,7 @@ func _ready() -> void:
 			var index := Jeu.rng.randi_range(0, candidats.size() - 1)
 			Jeu.ajouter_reactif(candidats[index])
 			candidats.remove_at(index)
-	if ReglagesJoueur.passifs_equipes_effectifs().has("heritage_reactif"):
+	if Jeu.mode_run != "epreuve_sorts" and ReglagesJoueur.passifs_equipes_effectifs().has("heritage_reactif"):
 		var heritage := CatalogueReactifs.ids()
 		for tirage in Reglages.HERITAGE_AMELIORATIONS:
 			if heritage.is_empty():
@@ -206,17 +203,16 @@ func _remettre_progression_a_zero() -> void:
 	ReglagesJoueur.equipements = {"anneau_gauche": "", "anneau_droit": "", "collier": ""}
 
 func _doter_progression_intermediaire() -> void:
-	# Profil de premiere fin de campagne : deux branches de Maitrises au rang 2,
-	# un ancien set rattrape, Forge 30 et trois capacites rang 5. Cela represente
-	# une progression solide apres ~15 h, mais reste tres loin des rangs 5, Forge
-	# 60, arsenal rang 10 et second Passif d'un compte complet.
+	# Profil de fin de campagne : offense rang 8 et defense rang 2, ancien set
+	# Forge 30 et capacites rang 5. Il teste la nouvelle courbe sans le plafond
+	# des Maitrises, de la Forge ou du second Passif.
 	ReglagesJoueur.sauvegarde_active = false
 	ReglagesJoueur.mode_dev = false
 	ReglagesJoueur.niveau_compte = 22
 	ReglagesJoueur.rangs_competences.clear()
 	for branche in ["Offensif", "Défensif"]:
 		for id in ArbreCompetences.BRANCHES[branche]:
-			ReglagesJoueur.rangs_competences[str(id)] = 2
+			ReglagesJoueur.rangs_competences[str(id)] = 8 if branche == "Offensif" else 2
 	ReglagesJoueur.rangs_sorts.clear()
 	for id in ["onde_alchimique", "seconde_chance", "grand_oeuvre"]:
 		ReglagesJoueur.rangs_sorts[id] = 5
@@ -286,7 +282,9 @@ func _physics_process(_delta: float) -> void:
 
 func _process(delta: float) -> void:
 	_suivre_heros()
-	_delai_charge = maxf(0.0, _delai_charge - delta)
+	if not _terminee and not _transition_salle and _panneau == null:
+		_recharge_sort_actif = maxf(0.0, _recharge_sort_actif - delta)
+		_charge_ultime = maxf(0.0, _charge_ultime - delta)
 	if _hud != null:
 		_hud.rafraichir_sorts(_recharge_sort_actif, _charge_ultime, _ultimes_utilises)
 	_avancer_phenomenes(delta)
@@ -378,18 +376,13 @@ func _entrer_dans_la_salle() -> void:
 	if not _salle.terminee.is_connected(_sur_salle_terminee):
 		_salle.terminee.connect(_sur_salle_terminee)
 	_heros.global_position = Vector2((_limites.position.x + _limites.end.x) / 2.0, _limites.end.y - 120.0)
-	if Jeu.mode_run == "epreuve_sorts" and _dernier_rituel_prepare < Jeu.salle_courante:
-		var choix := DraftLogique.proposer(Jeu.inventaire, Jeu.rng, 1)
-		if not choix.is_empty(): Jeu.ajouter_reactif(choix[0])
-		_dernier_rituel_prepare = Jeu.salle_courante
-		_heros.recalculer()
-		_sous_titre_voile.text = "Une nouvelle augmentation pour cette épreuve"
+
+
 	_heros.preparer_nouvelle_salle()
 	_soigner_avant_boss()
 	_suivre_heros()
-	if ReglagesJoueur.passifs_equipes_effectifs().has("reserve_ultime"):
-		_charge_ultime += maxi(1, roundi(float(Reglages.RESERVE_ULTIME_CHARGES) \
-			* float(ReglagesJoueur.passifs_equipes_effectifs()["reserve_ultime"])))
+
+
 	_hud.rafraichir()
 	_temps_dans_la_salle = 0.0
 	if Jeu.mode_auto:
@@ -399,6 +392,9 @@ func _entrer_dans_la_salle() -> void:
 
 func _sur_salle_terminee() -> void:
 	if _terminee:
+		return
+	if Jeu.salle_courante >= Jeu.salles_du_chapitre():
+		Jeu.terminer_run(true)
 		return
 	_heros.definir_intention(Vector2.ZERO, 0.0)
 	_joystick.annuler()
@@ -478,7 +474,7 @@ func _animer_entree_salle() -> void:
 	_sous_titre_voile.text = Jeu.nom_run().to_upper() if Jeu.mode_run == "grimoire" else (
 			"SURVIVEZ 5 MINUTES" if Jeu.mode_run == "mine" else "UNE SALLE D'ESSAI" if Jeu.mode_run == "retro" else "CINQ RITUELS")
 	if Jeu.mode_run == "epreuve_sorts":
-		_sous_titre_voile.text = "Une nouvelle augmentation pour cette épreuve"
+		_sous_titre_voile.text = "Choisissez une augmentation après chaque boss"
 	_voile_salle.visible = true
 	_voile_salle.modulate.a = 1.0
 	await get_tree().create_timer(0.10 if ReglagesJoueur.effets_reduits else 0.38).timeout
@@ -526,25 +522,21 @@ func _ouvrir_recompense_etage() -> void:
 			_traiter_fin_salle())
 
 func _sur_palier_defi_termine() -> void:
-	var dernier := Jeu.salle_courante >= Jeu.salles_du_chapitre()
-	_ouvrir_recompense_sorts(dernier)
-
-func _ouvrir_recompense_sorts(derniere: bool) -> void:
+	if Jeu.salle_courante >= Jeu.salles_du_chapitre():
+		Jeu.terminer_run(true)
+		return
 	_neutraliser_deplacement()
 	get_tree().paused = true
-	Sons.musique_calme()
-	_panneau = RECOMPENSE_SORTS.instantiate()
+	_panneau = DRAFT.instantiate()
 	_panneau.etage_recompense = Jeu.salle_courante
 	_panneau.process_mode = Node.PROCESS_MODE_ALWAYS
 	_couche.add_child(_panneau)
 	_panneau.termine.connect(func() -> void:
 		_panneau.queue_free()
 		_panneau = null
+		_heros.recalculer()
 		get_tree().paused = false
-		if derniere:
-			Jeu.terminer_run(true)
-		else:
-			_avancer_salle())
+		_avancer_salle())
 
 func _ouvrir_alambic_apres_salle() -> void:
 	if _panneau != null:
@@ -633,8 +625,7 @@ func _avancer_phenomenes(delta: float) -> void:
 				var origine := _heros.global_position + Reglages.FAMILIER_DECALAGE
 				var vise := Geometrie.point_anticipe(cible.global_position,
 					_vitesse_de(cible), origine, _heros.stats.vitesse_projectile)
-				# Le familier n'a pas de sprite : sans cette lueur, les traits
-				# semblent naitre d'un point vide a cote du heros.
+				# La lueur souligne le tir du compagnon visible dans le monde 3D.
 				_effets.onde(origine, 44.0, Palette.ESSENCE, 0.22)
 				_tirer_phenomene("familier_tireur", Reglages.FAMILIER_TIR_PART_DEGATS,
 					origine, origine.direction_to(vise))
@@ -843,7 +834,6 @@ func _sur_bouclier_brise(position: Vector2) -> void:
 	_effets.onde(position, 200.0, Color(0.85, 0.92, 1.0), 0.5)
 
 func _sur_ennemi_abattu(experience: int) -> void:
-	if _ultimes_utilises < Reglages.ULTIMES_PAR_RUN: _charge_ultime += 1
 	if Jeu.mode_run in ["grimoire", "mine"]:
 		_niveaux_en_attente += Jeu.gagner_experience_run(experience)
 		if _niveaux_en_attente > 0 and _panneau == null and not _terminee:
@@ -858,12 +848,7 @@ func _sur_ennemi_abattu(experience: int) -> void:
 			_heros.stats.soigner(_heros.stats.pv_max * Reglages.MOISSON_PART \
 				* float(passifs["moisson_vitale"]))
 			_effets.onde(_heros.global_position, 150.0, Color(0.35, 1.0, 0.58), 0.5)
-	if passifs.has("sang_froid"):
-		_compteur_sang_froid += 1
-		if _compteur_sang_froid >= ceili(float(Reglages.SANG_FROID_SEUIL) \
-				/ maxf(0.25, float(passifs["sang_froid"]))):
-			_compteur_sang_froid = 0
-			_recharge_sort_actif = 0.0
+
 
 func _sur_tape_rapide(nombre: int) -> void:
 	var requises := RaccourciTactile.tapes_requises(ReglagesJoueur.raccourci_sort)
@@ -875,9 +860,8 @@ func _sur_tape_rapide(nombre: int) -> void:
 	_lancer_sort_actif()
 
 func charger_sort() -> void:
-	if _delai_charge > 0.0 or _terminee or get_tree().paused: return
-	_delai_charge = Reglages.SORT_INTERVALLE_CHARGE
-	_recharge_sort_actif = maxf(0.0, _recharge_sort_actif - 1.0)
+	# Compatibilite des appels d'impact : le temps de jeu seul recharge les sorts.
+	pass
 
 func _point_sort(position_ecran: Vector2) -> Vector2:
 	var camera3d := get_viewport().get_camera_3d()
@@ -943,7 +927,7 @@ func _confirmer_sort(point: Vector2) -> void:
 		return
 	var sort: Dictionary = Sorts.ACTIFS[id]
 	var efficacite := ReglagesJoueur.efficacite_sort(id)
-	_recharge_sort_actif = float(sort["recharge"]) * Sorts.multiplicateur_recharge_active(ReglagesJoueur.passifs_equipes_effectifs())
+	_recharge_sort_actif = ReglagesJoueur.recharge_sort(id)
 	_appliquer_sort(float(sort["rayon"]), float(sort["degats"]) * efficacite, str(sort["effet"]), false, point)
 	var passifs := ReglagesJoueur.passifs_equipes_effectifs()
 	if passifs.has("echo_alchimique") \
@@ -952,17 +936,15 @@ func _confirmer_sort(point: Vector2) -> void:
 			float(sort["degats"]) * efficacite * Reglages.ECHO_PART_DEGATS, str(sort["effet"]), false, point)
 
 func _lancer_ultime() -> void:
-	if _terminee or _panneau != null or get_tree().paused or _ultimes_utilises >= Reglages.ULTIMES_PAR_RUN: return
+	if _terminee or _panneau != null or get_tree().paused: return
 	var id := ReglagesJoueur.ultime_effectif()
 	if not Sorts.ULTIMES.has(id):
 		return
 	var sort: Dictionary = Sorts.ULTIMES[id]
-	var charge_requise := ceili(float(sort["charge"]) * Sorts.multiplicateur_charge_ultime(ReglagesJoueur.passifs_equipes_effectifs()))
-	if _charge_ultime < charge_requise:
-		return
-	_charge_ultime -= charge_requise
+	if _charge_ultime > 0.0: return
+	_charge_ultime = ReglagesJoueur.recharge_sort(id)
 	_ultimes_utilises += 1
-	if _ultimes_utilises >= Reglages.ULTIMES_PAR_RUN: _charge_ultime = 0
+
 	_appliquer_sort(INF, float(sort["degats"]) * ReglagesJoueur.efficacite_sort(id), str(sort["effet"]), true)
 
 func _appliquer_sort(rayon: float, multiplicateur: float, effet: String, ultime: bool, cible := Vector2.INF) -> void:
@@ -977,7 +959,7 @@ func _appliquer_sort(rayon: float, multiplicateur: float, effet: String, ultime:
 			effets_sort.append(effet)
 		ennemi.recevoir_degats(_heros.tir_courant.degats * multiplicateur * _heros.multiplicateur_degats_passif(), effets_sort)
 		if effet == "givre" and ennemi.has_method("geler"):
-			ennemi.geler(2.2 if ultime else 1.2)
+			ennemi.geler(Reglages.GEL_ULTIME_DUREE if ultime else Reglages.GEL_SORT_DUREE)
 		elif effet == "repousse":
 			_repousser(ennemi, centre, 120.0)
 	Sons.jouer("fusion" if ultime else "choix", -9.0)
@@ -996,6 +978,9 @@ func _sur_run_terminee(victoire: bool) -> void:
 		return
 	if _visee_active: _fermer_visee()
 	_terminee = true
+	if is_instance_valid(_panneau):
+		_panneau.queue_free()
+		_panneau = null
 	Sons.musique_calme()
 	get_tree().paused = true
 	var fin := FIN.instantiate()

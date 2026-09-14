@@ -1,6 +1,7 @@
 extends RefCounted
 
 static func appliquer(modele: Node3D) -> void:
+	var accueil_v2 := modele.scene_file_path == Visuels3D.HEROS_MODELE_ACCUEIL_V2
 	if modele.get_node_or_null("Ombre_apprenti") == null:
 		var ombre := MeshInstance3D.new()
 		ombre.name = "Ombre_apprenti"
@@ -24,8 +25,11 @@ static func appliquer(modele: Node3D) -> void:
 			if source == null:
 				continue
 			var matiere := ShaderMaterial.new()
-			matiere.shader = preload("res://shaders/apprenti_surface.gdshader")
+			matiere.shader = preload("res://shaders/apprenti_accueil_surface.gdshader") if accueil_v2 else preload("res://shaders/apprenti_surface.gdshader")
 			matiere.set_shader_parameter("teinte",source.albedo_color)
 			matiere.set_shader_parameter("metal",source.metallic)
 			matiere.set_shader_parameter("rugosite",source.roughness)
+			if accueil_v2:
+				matiere.set_shader_parameter("peau", maillage.name == &"Apprenti_peau")
+				matiere.set_shader_parameter("oeil", maillage.name in [&"Apprenti_yeux", &"Apprenti_iris", &"Apprenti_iris_miel", &"Apprenti_blanc_oeil", &"Apprenti_reflet"])
 			maillage.set_surface_override_material(surface, matiere)

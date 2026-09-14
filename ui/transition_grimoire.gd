@@ -25,9 +25,7 @@ func _process(delta: float) -> void:
 		terminee.emit()
 
 func _draw() -> void:
-	draw_rect(Rect2(Vector2.ZERO,size),StyleAzur.FOND)
+	PassageManga.dessiner(self,size,0.0 if ReglagesJoueur.effets_reduits else _temps)
 	var centre := size*0.5
-	var pulsation := 1.0+sin(_temps*2.0)*0.025
-	draw_texture_rect(StyleAzur.icone(10),Rect2(centre-Vector2.ONE*150*pulsation,Vector2.ONE*300*pulsation),false)
-	draw_string(Polices.CORPS,Vector2(40,centre.y+245),str(_livre.get("nom","Grimoire")),HORIZONTAL_ALIGNMENT_CENTER,size.x-80,38,StyleAzur.TEXTE)
-	draw_string(Polices.CORPS,Vector2(40,centre.y+305),"Votre aventure commence…",HORIZONTAL_ALIGNMENT_CENTER,size.x-80,28,StyleAzur.ATTENUE)
+	draw_string(Polices.CORPS,Vector2(40,centre.y-10),str(_livre.get("nom","Grimoire")),HORIZONTAL_ALIGNMENT_CENTER,size.x-80,38,StyleAzur.TEXTE)
+	draw_string(Polices.CORPS,Vector2(40,centre.y+48),"Votre aventure commence…",HORIZONTAL_ALIGNMENT_CENTER,size.x-80,28,StyleAzur.ATTENUE)

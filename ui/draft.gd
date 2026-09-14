@@ -27,8 +27,10 @@ func _nouveau_tirage() -> void:
 	for id in _propositions:
 		var reactif := CatalogueReactifs.par_id(id)
 		var b := StyleAzur.bouton("",func(): _sur_choix(id))
-		var teinte: Color = [Color("305c8b"), Color("793e92"), Color("286b77")][_cartes.get_child_count() % 3]
-		b.add_theme_stylebox_override("normal", StyleAzur.cadre(teinte, StyleAzur.MAGIE))
+		var index := _cartes.get_child_count() % 3
+		var teinte: Color = [Color("583248"), Color("354f49"), Color("53425f")][index]
+		var accent: Color = [StyleAzur.CORAIL, StyleAzur.MENTHE, StyleAzur.CUIVRE][index]
+		b.add_theme_stylebox_override("normal", StyleAzur.cadre(teinte, accent))
 		b.custom_minimum_size.y = 310
 		_cartes.add_child(b)
 		var marge := MarginContainer.new()

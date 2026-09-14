@@ -63,8 +63,8 @@ func test_difficulte_croissante(v: Verif) -> void:
 		v.vrai(float(Chapitres.par_index(index)["pv_mult"]) > float(Chapitres.par_index(index - 1)["pv_mult"]),
 			"le chapitre %d est plus dur que le precedent" % index)
 	var dernier := Chapitres.nombre() - 1
-	v.vrai(Chapitres.facteur_pv(dernier, Reglages.SALLES_PAR_RUN) >= 4.3 \
-			and Chapitres.facteur_pv(dernier, Reglages.SALLES_PAR_RUN) <= 5.2,
+	v.vrai(Chapitres.facteur_pv(dernier, Reglages.SALLES_PAR_RUN) >= 2000.0 \
+			and Chapitres.facteur_pv(dernier, Reglages.SALLES_PAR_RUN) <= 3000.0,
 		"la fin de campagne reste exigeante sans devenir un test de compte maxe")
 	v.vrai(Chapitres.facteur_degats(dernier, Reglages.SALLES_PAR_RUN) < 2.4,
 		"la densite augmente sans rendre chaque impact tardif lethal")
@@ -80,8 +80,8 @@ func test_la_montee_est_lissee_sur_chaque_chapitre(v: Verif) -> void:
 		v.presque(ratio, Reglages.COURBE_PV_PAR_PALIER,
 			"aucun passage de chapitre n'est une marche plus haute que les autres")
 	var par_monde := pow(Reglages.COURBE_PV_PAR_PALIER, Chapitres.CHAPITRES_PAR_MONDE)
-	v.vrai(par_monde >= 1.10 and par_monde <= 1.12,
-		"les PV bruts montent doucement ; la densite et les motifs portent le reste")
+	v.vrai(par_monde >= 2.09 and par_monde <= 2.10,
+		"les PV suivent la croissance multiplicative des maitrises")
 
 # Un compte neuf n'a ni Maitrise ni objet. Mesure faite, sans cet adoucissement
 # il mourait salle 3 du premier chapitre, donc avant le coffre de la salle 5 :

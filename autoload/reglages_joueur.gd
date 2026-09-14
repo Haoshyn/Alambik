@@ -40,6 +40,8 @@ var projectile_equipe := "standard"
 var forge_niveaux := {}
 var pierres_forge := 0
 var mode_run_choisi := "grimoire"
+var niveau_epreuve_choisi := 1
+var niveau_epreuve_debloque := 1
 var sauvegarde_active := true
 
 signal maitrise_changee
@@ -106,6 +108,8 @@ func charger() -> void:
 	pierres_forge = maxi(0, int(config.get_value("stuff", "pierres_forge", 0)))
 	_migrer_equipements()
 	_migrer_forge_par_objet()
+	niveau_epreuve_debloque = clampi(int(config.get_value("epreuves", "debloque", 1)), 1, Epreuves.nombre())
+	niveau_epreuve_choisi = clampi(int(config.get_value("epreuves", "choisi", 1)), 1, niveau_epreuve_debloque)
 	mode_run_choisi = str(config.get_value("options", "mode_run", "grimoire"))
 	# Le prototype graphique n'est plus un mode : toutes les descentes utilisent
 	# maintenant le rendu 16-bit, donc les anciennes sauvegardes reviennent en campagne.
@@ -121,6 +125,8 @@ func sauvegarder() -> void:
 	if not sauvegarde_active:
 		return
 	var config := ConfigFile.new()
+	config.set_value("epreuves", "choisi", niveau_epreuve_choisi)
+	config.set_value("epreuves", "debloque", niveau_epreuve_debloque)
 	config.set_value("resultats", "victoires", victoires)
 	config.set_value("resultats", "runs", runs)
 	config.set_value("resultats", "par_chapitre", meilleures_par_chapitre)
@@ -310,8 +316,7 @@ func ajouter_gouttes(nombre: int) -> void:
 		return
 	if nombre <= 0:
 		return
-	gouttes += maxi(1, roundi(float(nombre) * ArbreCompetences.multiplicateur_collecte(rangs_competences_effectifs()) \
-		* (1.0 + float(bonus_objets_effectifs()["collecte"]))))
+	gouttes += gain_gouttes(nombre)
 	sauvegarder()
 	maitrise_changee.emit()
 
@@ -324,7 +329,7 @@ func experience_compte_requise() -> int:
 func ajouter_experience_compte(nombre: int) -> void:
 	if nombre <= 0:
 		return
-	var gain := roundi(float(nombre) * ArbreCompetences.multiplicateur_experience(rangs_competences_effectifs()))
+	var gain := gain_experience_compte(nombre)
 	experience_compte += maxi(1, gain)
 	while experience_compte >= experience_compte_requise():
 		var requis := experience_compte_requise()
@@ -444,7 +449,7 @@ func sort_debloque(id: String) -> bool:
 
 func sort_decouvert(id: String) -> bool:
 	return Sorts.contient(id) and (mode_dev or rang_sort(id) > 0 \
-		or Sorts.disponible_au_niveau(id, niveau_campagne_atteint()))
+		or Epreuves.niveau_pour(id) <= niveau_epreuve_debloque)
 
 func rang_sort(id: String) -> int:
 	return Reglages.CAPACITE_RANG_MAX if mode_dev and Sorts.contient(id) \
@@ -485,6 +490,8 @@ func definir_mode_dev(actif: bool) -> void:
 	reglages_changes.emit()
 
 func reinitialiser_progression() -> void:
+	niveau_epreuve_choisi = 1
+	niveau_epreuve_debloque = 1
 	victoires = 0
 	runs = 0
 	meilleures_par_chapitre.clear()
@@ -607,3 +614,19 @@ func choisir_mode_run(mode: String) -> void:
 		return
 	mode_run_choisi = mode
 	sauvegarder()
+
+func recharge_sort(id: String) -> float:
+	return Sorts.recharge(id, passifs_equipes_effectifs(), rangs_competences_effectifs(), projectile_equipe_effectif())
+
+func choisir_epreuve(niveau: int) -> bool:
+	if not mode_debloque("epreuve_sorts") or niveau < 1 or niveau > (Epreuves.nombre() if mode_dev else niveau_epreuve_debloque): return false
+	niveau_epreuve_choisi = niveau
+	choisir_mode_run("epreuve_sorts")
+	return true
+
+func gain_gouttes(nombre: int) -> int:
+	if nombre <= 0: return 0
+	return maxi(1, roundi(float(nombre) * ArbreCompetences.multiplicateur_collecte(rangs_competences_effectifs()) * (1.0 + float(bonus_objets_effectifs()["collecte"]))))
+
+func gain_experience_compte(nombre: int) -> int:
+	return maxi(1, roundi(float(nombre) * ArbreCompetences.multiplicateur_experience(rangs_competences_effectifs()))) if nombre > 0 else 0

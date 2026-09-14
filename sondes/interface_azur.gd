@@ -137,7 +137,7 @@ func verifier_reglages_en_pause() -> void:
 	for selecteur: OptionButton in selecteurs:
 		var liste := selecteur.get_popup()
 		exiger(liste.get_theme_color("font_color")==style.ENCRE,"listes lisibles sur fond arcane")
-		exiger(liste.get_theme_stylebox("panel") is StyleBoxTexture,"cadre illustre dans les listes")
+		exiger(liste.get_theme_stylebox("panel") is StyleBoxFlat,"cadre manga sans texture realiste dans les listes")
 		liste.popup()
 		await attendre()
 		exiger(liste.visible,"liste ouvrable en pause")

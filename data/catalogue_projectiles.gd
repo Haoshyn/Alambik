@@ -5,7 +5,7 @@ extends RefCounted
 const TYPES := {
 	"standard": {
 		"nom": "Baguette d’atelier",
-		"description": "Projectile standard sans compromis.",
+		"description": "La baguette portée par l’apprenti. Projectile standard sans compromis.",
 		"niveau": 1,
 		"degats_mult": 1.0,
 		"vitesse_mult": 1.0,
@@ -13,10 +13,11 @@ const TYPES := {
 	},
 	"veloce": {
 		"nom": "Aiguille vive",
-		"description": "Tirs rapides à longue portée. Davantage d’impacts pour recharger vos sorts.",
+		"description": "Tirs rapides à longue portée. Délai de récupération des sorts et ultimes réduit de 10 %.",
 		"niveau": 2,
 		"degats_mult": 0.70,
 		"cadence_mult": 1.40,
+		"recharge_mult": 0.90,
 		"vitesse_mult": 1.55,
 		"portee_mult": 1.25,
 	},

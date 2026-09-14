@@ -88,7 +88,10 @@ func _rendre() -> void:
 		ligne.add_child(texte)
 		texte.add_child(StyleAzur.texte(str(d["nom"]),34))
 		texte.add_child(StyleAzur.texte(str(d["description"]),27,StyleAzur.ATTENUE))
-		texte.add_child(StyleAzur.texte("Équipé · toucher pour retirer" if id in equipes else "Toucher pour équiper" if ReglagesJoueur.sort_debloque(id) else "À obtenir dans les Épreuves",24,StyleAzur.MAGIE))
+		if d.has("recharge"):
+			texte.add_child(StyleAzur.texte("Récupération avec vos bonus : %.1f s" % ReglagesJoueur.recharge_sort(id), 24, StyleAzur.MAGIE))
+		texte.add_child(StyleAzur.texte("%s · rang %d / %d" % [Epreuves.provenance(id), ReglagesJoueur.rang_sort(id), Reglages.CAPACITE_RANG_MAX],24,StyleAzur.ATTENUE))
+		texte.add_child(StyleAzur.texte("Équipé · toucher pour retirer" if id in equipes else "Toucher pour équiper" if ReglagesJoueur.sort_debloque(id) else Epreuves.provenance(id),24,StyleAzur.MAGIE))
 		marge.minimum_size_changed.connect(func(): b.custom_minimum_size.y = maxf(230.0,marge.get_combined_minimum_size().y))
 		if id in equipes:
 			b.add_theme_stylebox_override("normal",StyleAzur.cadre(Color("285c85"),StyleAzur.MAGIE))
@@ -138,7 +141,7 @@ func _choisir_index(index: int) -> void:
 		return
 	var id := ids[index]
 	if not ReglagesJoueur.sort_debloque(id):
-		_message = "%s s’obtient dans les Épreuves." % str(_catalogue()[id]["nom"])
+		_message = "%s : %s." % [str(_catalogue()[id]["nom"]), Epreuves.provenance(id)]
 		_rendre()
 		return
 	if _categorie == "Actifs":

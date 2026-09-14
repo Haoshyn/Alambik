@@ -44,8 +44,7 @@ func _ouvrir_ameliorations() -> void:
 
 func _quitter_run() -> void:
 	Sons.jouer("choix", -10.0)
-	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/menu.tscn")
+	Jeu.terminer_run(false)
 
 
 class _VueAmeliorations:

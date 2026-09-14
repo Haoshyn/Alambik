@@ -52,14 +52,18 @@ func _construire_navigation() -> void:
 	var socle := Panel.new()
 	socle.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	socle.offset_top = -StyleAzur.HAUTEUR_NAVIGATION - Ecran.marge_basse()
-	socle.add_theme_stylebox_override("panel",StyleAzur.cadre(StyleAzur.VIOLET))
+	socle.offset_left = 16
+	socle.offset_right = -16
+	socle.add_theme_stylebox_override("panel",StyleAzur.cadre(StyleAzur.PANNEAU,StyleAzur.LILAS,32))
 	socle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_navigation.add_child(socle)
 	var barre := HBoxContainer.new()
 	barre.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	barre.offset_top = -StyleAzur.HAUTEUR_NAVIGATION - Ecran.marge_basse()
 	barre.offset_bottom = -Ecran.marge_basse()
-	barre.add_theme_constant_override("separation", 0)
+	barre.offset_left = 30
+	barre.offset_right = -30
+	barre.add_theme_constant_override("separation", 8)
 	_navigation.add_child(barre)
 	var donnees := [
 		["stuff", "ÉQUIPEMENT", 2],

@@ -3,10 +3,10 @@ extends RefCounted
 const FinDeRun = preload("res://ui/fin_de_run.gd")
 
 func test_qualite_evolue_aux_quatre_paliers(v: Verif) -> void:
-	v.egal(Recompenses.coffre_pour(4)["palier"], 0, "aucun coffre avant cinq salles")
-	v.egal(Recompenses.coffre_pour(5)["nom"], "Mini coffre", "palier cinq")
-	v.egal(Recompenses.coffre_pour(10)["nom"], "Petit coffre", "palier dix")
-	v.egal(Recompenses.coffre_pour(18)["nom"], "Coffre moyen", "mourir salle 19 garde le palier quinze")
+	v.egal(Recompenses.coffre_pour(4)["palier"], 0, "coffre sans rang de boss avant cinq salles")
+	v.egal(Recompenses.coffre_pour(5)["nom"], "Coffre de bronze", "palier cinq")
+	v.egal(Recompenses.coffre_pour(10)["nom"], "Coffre d’argent", "palier dix")
+	v.egal(Recompenses.coffre_pour(18)["nom"], "Coffre d’or", "mourir salle 19 garde le palier quinze")
 	v.egal(Recompenses.coffre_pour(20)["nom"], "Grand coffre", "clear complet")
 
 func test_garantie_du_grand_coffre(v: Verif) -> void:

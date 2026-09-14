@@ -14,6 +14,7 @@ var _limites := Rect2()
 var _portail: Node3D
 var _obstacles: Node3D
 var _lumiere: DirectionalLight3D
+var _phenomenes: Node3D
 
 func _ready() -> void:
 	process_priority = 100
@@ -49,6 +50,9 @@ func charger(chemin: String) -> PackedScene:
 func relier(salle_: Node2D, heros_: Node2D, fond: Node2D) -> void:
 	salle = salle_
 	heros = heros_
+	_phenomenes = preload("res://scripts/presentation/phenomenes_3d.gd").new()
+	_phenomenes.heros = heros
+	add_child(_phenomenes)
 	fond.set_meta("visuel_3d", true)
 	fond.queue_redraw()
 	salle.set_meta("visuel_3d", true)
@@ -105,6 +109,7 @@ func _inscrire(noeud: Node) -> void:
 func _process(delta: float) -> void:
 	if not is_instance_valid(salle):
 		return
+	if is_instance_valid(_phenomenes): _phenomenes.mettre_a_jour(delta)
 	Pont3D.cadrer(camera,get_viewport().get_visible_rect().size,get_viewport().canvas_transform)
 	_lumiere.shadow_enabled = not ReglagesJoueur.effets_reduits and (OS.get_name() != "Android" or Visuels3D.OMBRES_ANDROID)
 	var limites: Rect2 = salle.get("limites")

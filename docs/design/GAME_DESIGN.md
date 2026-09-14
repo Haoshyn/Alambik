@@ -2,6 +2,8 @@
 
 ## 0. CONTEXTE CRITIQUE POUR L'IMPLÉMENTATION
 
+**Décision du propriétaire du 14 septembre 2026, prioritaire sur les règles ci-dessous :** les sorts actifs et ultimes récupèrent avec le temps de jeu, jamais avec les impacts ou éliminations. Les invocations de boss sont fragiles, espacées et plafonnées. Les Épreuves de magie ont des niveaux et des tables de sorts locales ; aucun augment initial, un choix entre les boss. Toute fin d’aventure, abandon compris, ouvre un coffre interactif, vide sans salle terminée. Chaque salle le remplit et les boss augmentent son rang ; objets et sorts aléatoires exigent une victoire finale. Les loots sont consultables avec « ! » dans la sélection du mode/niveau. Les maîtrises offensives ont une progression multiplicative forte et les PV ennemis suivent une courbe fixe par chapitre. Voir `docs/ops/COFFRES_EPREUVES_RECHARGES.md` pour les valeurs intégrées et les validations. Les deux cadeaux de campagne existants sont conservés et annoncés dans les loots.
+
 **Décision du propriétaire du 13 septembre 2026 :** abandonner les fusions élémentaires expérimentales. La version actuelle utilise des augmentations classiques, des haltes de soin à 50 %, des armes à ratios sans statistiques permanentes, des sorts ciblés en pause rechargés par impacts et quatre ultimes maximum par run. Héros compact, menaces annoncées et progression initiale accélérée. Cette décision remplace les règles élémentaires et de fusion ci-dessous, y compris pour les Épreuves. Voir `docs/ops/REWORK_ARCADE.md` pour les règles intégrées, les mesures et les limites.
 
 Le jeu existe déjà et possède une base jouable de type Archero-like.

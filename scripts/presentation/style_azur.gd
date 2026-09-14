@@ -2,8 +2,11 @@ class_name StyleAzur
 extends RefCounted
 
 const FOND := Color("201b40")
-const PANNEAU := Color("303564")
-const CUIVRE := Color("ba7c60")
+const PANNEAU := Color("30243f")
+const CUIVRE := Color("ffc77c")
+const CORAIL := Color("f47787")
+const MENTHE := Color("8fe5bd")
+const LILAS := Color("bea0ff")
 const TEXTE := Color("eff2ff")
 const ATTENUE := Color("c6cbea")
 const MAGIE := Color("68e5eb")
@@ -11,9 +14,9 @@ const IVOIRE := Color("e6ecff")
 const ENCRE := Color("eff2ff")
 const ATLAS := preload("res://assets/visual/azur/icones.png")
 const HAUTEUR_NAVIGATION := 176.0
-const VIOLET := Color("54317a")
+const VIOLET := Color("493459")
 const FOND_ATELIER := preload("res://assets/visual/arcane/fond.png")
-const TITRE_ATELIER := preload("res://assets/fonts/Cinzel-Variable.ttf")
+const TITRE_ATELIER := preload("res://assets/fonts/DMSans-Variable.ttf")
 const ARMES_ATELIER := preload("res://assets/visual/atelier/armes.png")
 static var _icones := {}
 static var _cadres := {}
@@ -39,6 +42,12 @@ static func icone_objet(id: String) -> int:
 static func icone_arme(id: String) -> AtlasTexture:
 	var cle := "arme/"+id
 	if not _icones.has(cle):
+		if id == "standard":
+			var baguette := AtlasTexture.new()
+			baguette.atlas = preload("res://assets/visual/manga/baguette_atelier.png")
+			baguette.region = Rect2(Vector2.ZERO, baguette.atlas.get_size())
+			_icones[cle] = baguette
+			return baguette
 		var index := ["standard","veloce","lourd","chercheur","explosif"].find(id)
 		index = maxi(index,0)
 		var texture := AtlasTexture.new()
@@ -52,17 +61,13 @@ static func icone_arme(id: String) -> AtlasTexture:
 static func cadre(couleur := PANNEAU, bord := CUIVRE, rayon := 28) -> StyleBox:
 	var cle := couleur.to_html()+bord.to_html()+str(rayon)
 	if _cadres.has(cle): return _cadres[cle]
-	if couleur.a > 0.0 and rayon > 8:
-		var grave := CadresAtelier.creer(couleur,bord,rayon >= 64)
-		_cadres[cle] = grave
-		return grave
-	var style := StyleInterface.panneau(couleur, Color(bord,0.66), rayon, 5)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(rayon)
+	var style := StyleInterface.panneau(couleur, Color(bord,0.8), rayon, 5)
+	style.set_border_width_all(3)
+	style.set_corner_radius_all(mini(rayon, 32))
 	style.corner_detail = 12
-	style.shadow_color = Color("14173666")
-	style.shadow_size = 8
-	style.shadow_offset = Vector2(0,5)
+	style.shadow_color = Color("21172eee")
+	style.shadow_size = 3
+	style.shadow_offset = Vector2(0,6)
 	style.content_margin_left = 22
 	style.content_margin_right = 22
 	style.content_margin_top = 14
@@ -80,9 +85,9 @@ static func bouton(texte: String, action := Callable(), principal := false) -> B
 	if principal: b.add_theme_font_override("font",TITRE_ATELIER)
 	b.add_theme_font_size_override("font_size", 29)
 	StyleInterface.styliser_bouton(b, MAGIE if principal else CUIVRE, not principal)
-	b.add_theme_stylebox_override("normal",cadre(Color("6347b5") if principal else PANNEAU,Color("55efea") if principal else CUIVRE))
-	b.add_theme_stylebox_override("hover",cadre(Color("436a9f"),MAGIE))
-	b.add_theme_stylebox_override("pressed",cadre(Color("263a70"),MAGIE))
+	b.add_theme_stylebox_override("normal",cadre(Color("773f61") if principal else PANNEAU,CORAIL if principal else LILAS))
+	b.add_theme_stylebox_override("hover",cadre(Color("654d79"),CUIVRE))
+	b.add_theme_stylebox_override("pressed",cadre(Color("453052"),MENTHE))
 	b.add_theme_stylebox_override("disabled",cadre(Color("252943"),Color("707c9d")))
 	for etat in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 		b.add_theme_color_override(etat, ENCRE)
@@ -93,6 +98,34 @@ static func bouton(texte: String, action := Callable(), principal := false) -> B
 	b.add_theme_constant_override("outline_size",0)
 	if action.is_valid(): b.pressed.connect(action)
 	return b
+
+static func sceau(principal := false, teinte := Color.WHITE) -> StyleBoxTexture:
+	var style := StyleBoxTexture.new()
+	style.texture = preload("res://assets/visual/manga/jouer.svg") if principal else preload("res://assets/visual/manga/ruban.svg")
+	for cote in [SIDE_LEFT, SIDE_RIGHT]:
+		style.set_texture_margin(cote, 64)
+		style.set_content_margin(cote, 64)
+	for cote in [SIDE_TOP, SIDE_BOTTOM]:
+		style.set_texture_margin(cote, 24)
+		style.set_content_margin(cote, 18)
+	style.modulate_color = teinte
+	return style
+
+static func habiller_accueil(b: Button, principal := false) -> void:
+	if principal:
+		# Le depart reprend la magie du heros avec un contour discret.
+		b.add_theme_stylebox_override("normal", cadre(Color("654899"), Color("d7bafc"), 22))
+		b.add_theme_stylebox_override("hover", cadre(Color("795aae"), Color("ffe5af"), 22))
+		b.add_theme_stylebox_override("pressed", cadre(Color("4f3777"), Color("bfeeda"), 22))
+		b.add_theme_font_size_override("font_size", 40)
+		return
+	b.add_theme_stylebox_override("normal", sceau(principal))
+	b.add_theme_stylebox_override("hover", sceau(principal, Color("fff2cf")))
+	b.add_theme_stylebox_override("pressed", sceau(principal, Color("cfb9db")))
+	b.add_theme_font_size_override("font_size", 44 if principal else 30)
+	if principal:
+		for etat in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+			b.add_theme_color_override(etat, Color("30243f"))
 
 static func texte(contenu: String, taille := 30, couleur := TEXTE) -> Label:
 	var l := Label.new()
@@ -198,13 +231,8 @@ static func glyphe(id: String) -> Texture2D:
 static func vignette(id: String, cote := 128.0, ronde := false) -> TextureRect:
 	var t := image(0,cote)
 	t.texture = glyphe(id)
-	if ronde and t.texture is AtlasTexture:
-		var atlas := t.texture as AtlasTexture
-		var matiere := ShaderMaterial.new()
-		matiere.shader = preload("res://shaders/icone_arcane.gdshader")
-		var taille := atlas.atlas.get_size()
-		matiere.set_shader_parameter("region", Vector4(atlas.region.position.x / taille.x, atlas.region.position.y / taille.y, atlas.region.size.x / taille.x, atlas.region.size.y / taille.y))
-		t.material = matiere
+	# Les stickers detoures gardent leurs pointes, meme dans les maitrises.
+	if ronde: t.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	return t
 
 static func fond_atelier(parent: Control, calme := false) -> void:

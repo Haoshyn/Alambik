@@ -34,6 +34,14 @@ const DEGATS_COUP_REFERENCE := 15.0
 const SOIN_COMBAT_PAR_SALLE := 0.05
 const ULTIMES_PAR_RUN := 4
 const SORT_INTERVALLE_CHARGE := 0.18
+const INVOCATION_BOSS_INTERVALLE := 18.0
+const INVOCATION_BOSS_SALVE := 2
+const INVOCATION_BOSS_PLAFOND := 3
+const INVOCATION_PV_MULT := 0.28
+const INVOCATION_DEGATS_MULT := 0.55
+const RECHARGE_PLANCHER := 0.45
+const GEL_SORT_DUREE := 1.5
+const GEL_ULTIME_DUREE := 5.0
 const GOUTTES_PAR_SALLE := 3
 const ENNEMI_VITESSE_MULT := 1.10
 # La densite ne suffit pas si chaque creature laisse trop de temps au joueur.
@@ -154,21 +162,21 @@ const CHAINE_PORTEE := 340.0          # distance maximale entre deux maillons
 const MOISSON_SEUIL := 6
 const MOISSON_PART := 0.02
 const SANG_FROID_SEUIL := 8
-const SANG_FROID_RECHARGE := 0.30      # recharge du Sort en moins, en permanence
-const REMPART_REDUCTION := 0.18        # degats recus en moins, en permanence
+const SANG_FROID_RECHARGE := 0.15      # recharge du Sort en moins, en permanence
+const REMPART_REDUCTION := 0.12        # degats recus en moins, en permanence
 const RIPOSTE_RAYON := 320.0
-const RIPOSTE_PART_DEGATS := 2.80
+const RIPOSTE_PART_DEGATS := 2.0
 const RIPOSTE_REPOUSSEE := 420.0
 const SECONDE_CHANCE_PART := 0.30      # une seule resurrection par run
 const RESERVE_ULTIME_CHARGES := 1
 const RESERVE_ULTIME_REMISE := 0.20    # charge requise en moins
 const HERITAGE_AMELIORATIONS := 2
-const ECHO_CHANCE := 0.40
-const ECHO_PART_DEGATS := 0.70
+const ECHO_CHANCE := 0.25
+const ECHO_PART_DEGATS := 0.60
 const AUDACE_SEUIL_PV := 0.60
-const AUDACE_BONUS := 0.45
+const AUDACE_BONUS := 0.30
 const DERNIER_REMPART_SEUIL_PV := 0.40
-const DERNIER_REMPART_REDUCTION := 0.45
+const DERNIER_REMPART_REDUCTION := 0.30
 
 # Equipement. Le palier du compte fait monter tous les objets possedes ensemble :
 # une trouvaille ancienne reste donc viable au Monde X au lieu d'etre remplacee
@@ -243,10 +251,9 @@ const ECHELLE_VISUELLE_COMBAT := 1.08
 # chapitre n'est charge.
 const SALLES_PAR_RUN := 20
 
-# La campagne n'est pas le contenu d'optimisation ultime. Avec les vagues denses,
-# +3,5 % PV par chapitre suffit : le chapitre 30 commence vers x2,7 et demande
-# surtout un bon build et de bonnes esquives, pas toutes les Maitrises du jeu.
-const COURBE_PV_PAR_PALIER := 1.035
+# Les PV suivent la puissance permanente composee, avec une difficulte fixe
+# par chapitre : equiper une Maitrise ne renforce jamais les ennemis presents.
+const COURBE_PV_PAR_PALIER := 1.28
 # La densite multiplie aussi les occasions d'etre touche. Les degats individuels
 # montent donc plus doucement afin qu'un joueur habile puisse compenser le farm.
 const COURBE_DEGATS_PAR_PALIER := 1.018
@@ -260,7 +267,7 @@ const COURBE_PALIERS_DOUCEUR := 9
 # seconde fois la difficulte apportee par la densite.
 const MONTEE_PV := 0.75          # x1,75 entre la premiere et la derniere salle
 const MONTEE_DEGATS := 0.30      # x1,30 sur les degats
-const DEFI_MONTEE_PV := 3.0       # x4 entre la premiere et la derniere rencontre
+const DEFI_MONTEE_PV := 1.0       # x2 entre la premiere et la derniere rencontre
 const DEFI_MONTEE_DEGATS := 1.0   # x2 sur les degats, en plus de la densite
 const DEFI_PV_BASE := 1.25
 const DEFI_DEGATS_BASE := 1.15
@@ -292,9 +299,9 @@ const GOUTTES_MULT_PAR_CHAPITRE := 1.20
 # doublons apportent ensuite +54 % au maximum, pas un second exemplaire complet.
 const CAPACITE_RANG_MAX := 10
 const CAPACITE_BONUS_PAR_RANG := 0.06
-# Cinq miniboss donnent cinq jets : a 20 %, une Epreuve complete rapporte en
-# moyenne une capacite, contre cinq auparavant. Le repli monetaire reste faible.
-const EPREUVE_CHANCE_CAPACITE := 0.20
+# Un seul jet de capacite dans le coffre final. Les boss intermediaires
+# donnent des choix de run, jamais de sorts permanents.
+const EPREUVE_CHANCE_CAPACITE := 0.80
 const EPREUVE_NIVEAU_DEBLOCAGE := 2
 const MINE_NIVEAU_DEBLOCAGE := 4
 

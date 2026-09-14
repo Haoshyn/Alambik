@@ -222,6 +222,11 @@ func _vague_suivante() -> void:
 func _ouvrir_portail() -> void:
 	if _finie or _portail_ouvert:
 		return
+	Jeu.marquer_salle_terminee(numero)
+	if numero >= Jeu.salles_du_chapitre() or Jeu.mode_run == "epreuve_sorts":
+		_finie = true
+		terminee.emit()
+		return
 	_portail_ouvert = true
 	if Jeu.mode_auto:
 		print("salle %d nettoyee : portail ouvert" % numero)
@@ -248,7 +253,7 @@ func _sur_corps_dans_portail(corps: Node) -> void:
 	_finie = true
 	terminee.emit()
 
-func faire_apparaitre(id: String, position: Vector2) -> void:
+func faire_apparaitre(id: String, position: Vector2, invocateur: Node = null) -> void:
 	var donnees: Dictionary = CatalogueEnnemis.par_id(id)
 	if donnees.is_empty():
 		push_error("Ennemi inconnu : " + id)
@@ -259,12 +264,18 @@ func faire_apparaitre(id: String, position: Vector2) -> void:
 		noeud = BOSS.instantiate()
 	else:
 		noeud = ENNEMI.instantiate()
+	if is_instance_valid(invocateur):
+		donnees["pv"] = float(donnees["pv"]) * Reglages.INVOCATION_PV_MULT
+		donnees["degats"] = float(donnees["degats"]) * Reglages.INVOCATION_DEGATS_MULT
+		donnees["experience"] = 0
+		noeud.set_meta("invocateur", invocateur.get_instance_id())
+		if invocateur.is_in_group("boss"): noeud.add_to_group("invocations_boss")
 	noeud.configurer(donnees)
 	noeud.limites = limites
 	noeud.global_position = position
 	noeud.mort.connect(_sur_mort_ennemi)
 	noeud.tir_demande.connect(_sur_tir_ennemi)
-	noeud.invocation_demandee.connect(_sur_invocation)
+	noeud.invocation_demandee.connect(_sur_invocation.bind(noeud))
 	noeud.touche.connect(_sur_ennemi_touche)
 	add_child(noeud)
 	if effets != null:
@@ -279,7 +290,7 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 	copie["id"] = id
 	if Jeu.mode_run == "epreuve_sorts":
 		var progression_defi := clampf(float(numero - 1) / 4.0, 0.0, 1.0)
-		var palier_defi := ReglagesJoueur.palier_atteint()
+		var palier_defi := Epreuves.palier(Jeu.niveau_epreuve)
 		copie["pv"] = float(donnees["pv"]) * Reglages.facteur_annexe_pv(palier_defi) \
 			* Reglages.DEFI_PV_BASE * pow(1.0 + Reglages.DEFI_MONTEE_PV, progression_defi)
 		copie["degats"] = float(donnees["degats"]) * Reglages.facteur_annexe_degats(palier_defi) \
@@ -316,7 +327,7 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 	if Jeu.mode_run == "grimoire":
 		copie["degats"] = maxf(float(copie["degats"]), Reglages.DEGATS_COUP_REFERENCE)
 	if not Jeu.est_retro():
-		var chapitre_patterns := Jeu.chapitre if Jeu.mode_run == "grimoire" else ReglagesJoueur.palier_atteint()
+		var chapitre_patterns := Jeu.chapitre if Jeu.mode_run == "grimoire" else (Epreuves.palier(Jeu.niveau_epreuve) if Jeu.mode_run == "epreuve_sorts" else ReglagesJoueur.palier_atteint())
 		copie = EvolutionEnnemis.appliquer(copie,chapitre_patterns)
 		if donnees["cerveau"] == "boss" and Jeu.mode_run != "grimoire":
 			copie["pv"] = float(copie["pv"])*EvolutionEnnemis.ANNEXE_PV_BOSS
@@ -327,8 +338,20 @@ func _sur_ennemi_touche(position: Vector2, couleur: Color) -> void:
 		effets.eclats(position, couleur.lightened(0.3), 3, 140.0, 0.5)
 
 func _sur_mort_ennemi(qui: Node, position: Vector2, couleur: Color) -> void:
-	Jeu.ennemis_abattus += 1
-	ennemi_abattu.emit(int(qui.donnees.get("experience", 1)))
+	if qui.is_in_group("boss"):
+		Jeu.marquer_boss_vaincu(numero)
+		# Les renforts ne prolongent pas artificiellement la rencontre terminee.
+		for renfort in get_tree().get_nodes_in_group("ennemis"):
+			if int(renfort.get_meta("invocateur", 0)) == qui.get_instance_id():
+				renfort.remove_from_group("ennemis")
+				renfort.queue_free()
+		if numero >= Jeu.salles_du_chapitre():
+			Jeu.ennemis_abattus += 1
+			_ouvrir_portail.call_deferred()
+			return
+	if not qui.has_meta("invocateur"):
+		Jeu.ennemis_abattus += 1
+		ennemi_abattu.emit(int(qui.donnees.get("experience", 1)))
 	if effets != null:
 		effets.mort(position, couleur)
 	# Le noeud mort est encore dans l'arbre a cet instant : on attend une frame
@@ -354,7 +377,7 @@ func _sur_mort_ennemi(qui: Node, position: Vector2, couleur: Color) -> void:
 		else:
 			_ouvrir_portail()
 
-func _sur_invocation(id: String, position: Vector2) -> void:
+func _sur_invocation(id: String, position: Vector2, invocateur: Node = null) -> void:
 	if Jeu.mode_run == "mine" and _mine_temps >= Reglages.MINE_DUREE:
 		return
 	if Jeu.mode_run == "mine" and get_tree().get_nodes_in_group("ennemis").size() >= _plafond_mine():
@@ -364,7 +387,7 @@ func _sur_invocation(id: String, position: Vector2) -> void:
 	p.y = clampf(p.y, limites.position.y, limites.end.y)
 	if not _place_libre(p):
 		p = _position_d_apparition()
-	faire_apparaitre(id, p)
+	faire_apparaitre(id, p, invocateur)
 
 func _plafond_mine() -> int:
 	var progression := clampf(_mine_temps / Reglages.MINE_DUREE, 0.0, 1.0)
