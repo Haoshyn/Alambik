@@ -34,13 +34,13 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	var r := Rect2(Vector2(8, 8), size - Vector2(16, 16))
 	if actif or _pression > 0.0:
-		draw_style_box(StyleAzur.cadre(Color("614675"), StyleAzur.CUIVRE, 22), r)
+		draw_style_box(StyleAzur.cadre(StyleAzur.VIOLET, StyleAzur.CUIVRE, 22), r)
 	var cote := minf(86.0, size.y * 0.52)
-	var icones := [preload("res://assets/visual/atelier/sac.svg"),preload("res://assets/visual/atelier/boussole.svg"),preload("res://assets/visual/atelier/livre.svg"),preload("res://assets/visual/atelier/fiole.svg")]
-	draw_texture_rect(icones[index_icone], Rect2(Vector2((size.x-cote)*0.5,16),Vector2.ONE*cote), false)
+	var identifiants := ["navigation_equipement", "navigation_aventure", "navigation_maitrises", "navigation_sorts"]
+	draw_texture_rect(IconesArcane.texture(identifiants[index_icone]), Rect2(Vector2((size.x-cote)*0.5,16),Vector2.ONE*cote), false)
 	var police := Polices.CORPS
 	var taille := 23
 	var largeur := police.get_string_size(libelle,HORIZONTAL_ALIGNMENT_LEFT,-1,taille).x
-	draw_string(police,Vector2((size.x-largeur)*0.5,size.y-30),libelle,HORIZONTAL_ALIGNMENT_LEFT,-1,taille,Color("fff2dc"))
+	draw_string(police,Vector2((size.x-largeur)*0.5,size.y-30),libelle,HORIZONTAL_ALIGNMENT_LEFT,-1,taille,StyleAzur.TEXTE)
 	if actif:
 		draw_line(Vector2(size.x*.3,size.y-13),Vector2(size.x*.7,size.y-13),Color("59d7ca"),4.0,true)

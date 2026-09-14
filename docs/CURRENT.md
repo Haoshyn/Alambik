@@ -4,6 +4,15 @@ Ce fichier sert à s'orienter, pas à remplacer les données du jeu. Pour une va
 
 ## Direction visuelle intégrée
 
+Menus Éclats d'arcane : fonds bleu/prune, cadres de verre illustrés, titres
+Cinzel, 90 icônes, médaillons de maîtrise et cartes d'augmentation teintées.
+Accueil avec illustration originale proche de l'Apprenti A ; modèle 3D retiré
+de cet écran à la demande du propriétaire. Combat et bestiaire conservés.
+15 120 assertions, 194 contrôles d'interface, 924 de disposition et 1 774 de
+formats réussis ; vingt runs terminées sans blocage. APK signée :
+`build/alambic-eclats-arcane.apk`. Rendu sur téléphone à apprécier ; aucune
+fenêtre de jeu ouverte. Détails : `docs/ops/ECLATS_ARCANE.md`.
+
 Confort combat : Tir multiple + Spirale conserve deux tirs droits et deux
 latéraux ; huit compositions d'obstacles de tailles et nombres variés. Soin
 garanti de 30 % à l'entrée des boss 5/10/15/20, une fois par rencontre ; les

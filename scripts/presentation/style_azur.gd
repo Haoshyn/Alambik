@@ -1,19 +1,19 @@
 class_name StyleAzur
 extends RefCounted
 
-const FOND := Color("e5ddec")
-const PANNEAU := Color("f1edf7")
-const CUIVRE := Color("b88751")
-const TEXTE := Color("352747")
-const ATTENUE := Color("726176")
-const MAGIE := Color("087e85")
-const IVOIRE := Color("f7ead4")
-const ENCRE := Color("352747")
+const FOND := Color("201b40")
+const PANNEAU := Color("303564")
+const CUIVRE := Color("ba7c60")
+const TEXTE := Color("eff2ff")
+const ATTENUE := Color("c6cbea")
+const MAGIE := Color("68e5eb")
+const IVOIRE := Color("e6ecff")
+const ENCRE := Color("eff2ff")
 const ATLAS := preload("res://assets/visual/azur/icones.png")
 const HAUTEUR_NAVIGATION := 176.0
-const VIOLET := Color("3f2b57")
-const FOND_ATELIER := preload("res://assets/visual/atelier/fond.png")
-const TITRE_ATELIER := preload("res://assets/fonts/DMSans-Variable.ttf")
+const VIOLET := Color("54317a")
+const FOND_ATELIER := preload("res://assets/visual/arcane/fond.png")
+const TITRE_ATELIER := preload("res://assets/fonts/Cinzel-Variable.ttf")
 const ARMES_ATELIER := preload("res://assets/visual/atelier/armes.png")
 static var _icones := {}
 static var _cadres := {}
@@ -60,7 +60,7 @@ static func cadre(couleur := PANNEAU, bord := CUIVRE, rayon := 28) -> StyleBox:
 	style.set_border_width_all(2)
 	style.set_corner_radius_all(rayon)
 	style.corner_detail = 12
-	style.shadow_color = Color("35274722")
+	style.shadow_color = Color("14173666")
 	style.shadow_size = 8
 	style.shadow_offset = Vector2(0,5)
 	style.content_margin_left = 22
@@ -80,27 +80,16 @@ static func bouton(texte: String, action := Callable(), principal := false) -> B
 	if principal: b.add_theme_font_override("font",TITRE_ATELIER)
 	b.add_theme_font_size_override("font_size", 29)
 	StyleInterface.styliser_bouton(b, MAGIE if principal else CUIVRE, not principal)
-	b.add_theme_stylebox_override("normal",cadre(Color("19caca") if principal else PANNEAU,Color("55efea") if principal else CUIVRE))
-	b.add_theme_stylebox_override("hover",cadre(Color("d3f5e9"),MAGIE))
-	b.add_theme_stylebox_override("pressed",cadre(Color("9fdad0"),MAGIE))
-	b.add_theme_stylebox_override("disabled",cadre(Color("e0d6ce"),Color("a49a9c")))
+	b.add_theme_stylebox_override("normal",cadre(Color("6347b5") if principal else PANNEAU,Color("55efea") if principal else CUIVRE))
+	b.add_theme_stylebox_override("hover",cadre(Color("436a9f"),MAGIE))
+	b.add_theme_stylebox_override("pressed",cadre(Color("263a70"),MAGIE))
+	b.add_theme_stylebox_override("disabled",cadre(Color("252943"),Color("707c9d")))
 	for etat in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 		b.add_theme_color_override(etat, ENCRE)
-	b.add_theme_color_override("font_disabled_color", Color("807482"))
+	b.add_theme_color_override("font_disabled_color", Color("98a3c6"))
 	b.add_theme_stylebox_override("focus",cadre(Color.TRANSPARENT,MAGIE))
 	if principal:
 		b.add_theme_font_size_override("font_size",34)
-		for etat in ["normal","hover","pressed"]:
-			var style := StyleBoxFlat.new()
-			style.bg_color = Color("32d8d0") if etat == "normal" else Color("65e9dc") if etat == "hover" else Color("1fb6b6")
-			style.border_color = Color("b5fff0")
-			style.set_border_width_all(2)
-			style.set_corner_radius_all(26)
-			style.shadow_color = Color(0.12,0.06,0.20,0.24)
-			style.shadow_size = 5
-			style.shadow_offset = Vector2(0,3)
-			for cote in [SIDE_LEFT,SIDE_RIGHT,SIDE_TOP,SIDE_BOTTOM]: style.set_content_margin(cote,28)
-			b.add_theme_stylebox_override(etat,style)
 	b.add_theme_constant_override("outline_size",0)
 	if action.is_valid(): b.pressed.connect(action)
 	return b
@@ -150,7 +139,8 @@ static func page(parent: Control, titre: String, integre := false) -> VBoxContai
 	var entete := HBoxContainer.new()
 	entete.add_theme_constant_override("separation",16)
 	cartouche.add_child(entete)
-	var embl := image(10,64)
+	var id_entete: String = {"Maîtrises":"navigation_maitrises", "Sorts":"navigation_sorts", "Équipement":"navigation_equipement", "Paramètres":"parametres"}.get(titre, "grand_oeuvre")
+	var embl := vignette(id_entete,64)
 	entete.add_child(embl)
 	var label := texte(titre,42)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -184,7 +174,7 @@ static func defilement(col: VBoxContainer) -> VBoxContainer:
 
 static func plaque(parent: Node, claire := false) -> VBoxContainer:
 	var panneau := PanelContainer.new()
-	panneau.add_theme_stylebox_override("panel",cadre(IVOIRE if claire else PANNEAU))
+	panneau.add_theme_stylebox_override("panel",cadre(VIOLET if claire else PANNEAU))
 	parent.add_child(panneau)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation",12)
@@ -195,6 +185,7 @@ static func glyphe(id: String) -> Texture2D:
 	if CatalogueRecettes.est_fusion(id): id = CatalogueRecettes.augment_de(id)
 	if CatalogueElements.est_fusion(id):
 		id = CatalogueElements.augment_de_fusion(id)
+	if IconesArcane.contient(id): return IconesArcane.texture(id)
 	var cle := "glyphe/"+id
 	if not _icones.has(cle):
 		var chemin := "res://assets/visual/azur/glyphes/"+id+".svg"
@@ -204,9 +195,16 @@ static func glyphe(id: String) -> Texture2D:
 		_icones[cle] = load(chemin)
 	return _icones[cle]
 
-static func vignette(id: String, cote := 128.0) -> TextureRect:
+static func vignette(id: String, cote := 128.0, ronde := false) -> TextureRect:
 	var t := image(0,cote)
 	t.texture = glyphe(id)
+	if ronde and t.texture is AtlasTexture:
+		var atlas := t.texture as AtlasTexture
+		var matiere := ShaderMaterial.new()
+		matiere.shader = preload("res://shaders/icone_arcane.gdshader")
+		var taille := atlas.atlas.get_size()
+		matiere.set_shader_parameter("region", Vector4(atlas.region.position.x / taille.x, atlas.region.position.y / taille.y, atlas.region.size.x / taille.x, atlas.region.size.y / taille.y))
+		t.material = matiere
 	return t
 
 static func fond_atelier(parent: Control, calme := false) -> void:
@@ -220,7 +218,7 @@ static func fond_atelier(parent: Control, calme := false) -> void:
 	parent.add_child(fond)
 	if calme:
 		var voile := ColorRect.new()
-		voile.color = Color("28193655")
+		voile.color = Color("161b3844")
 		voile.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		voile.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		parent.add_child(voile)

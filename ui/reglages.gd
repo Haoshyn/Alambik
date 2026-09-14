@@ -68,7 +68,7 @@ func _selecteur(parent: Node) -> OptionButton:
 	liste.add_theme_font_override("font",Polices.CORPS)
 	liste.add_theme_font_size_override("font_size",29)
 	liste.add_theme_stylebox_override("panel",StyleAzur.cadre())
-	liste.add_theme_stylebox_override("hover",StyleAzur.cadre(Color("d3f5e9"),StyleAzur.MAGIE))
+	liste.add_theme_stylebox_override("hover",StyleAzur.cadre(Color("436a9f"),StyleAzur.MAGIE))
 	for etat in ["font_color","font_hover_color","font_accelerator_color"]:
 		liste.add_theme_color_override(etat,StyleAzur.ENCRE)
 	liste.add_theme_color_override("font_disabled_color",StyleAzur.ATTENUE)
@@ -91,7 +91,7 @@ func _volume(parent: Node, titre: String, valeur: float, action: Callable) -> vo
 	slider.value = valeur
 	slider.custom_minimum_size.y = Ecran.CIBLE_TACTILE
 	var rail := StyleBoxFlat.new()
-	rail.bg_color = Color("deccb6")
+	rail.bg_color = Color("303564")
 	rail.set_corner_radius_all(6)
 	rail.content_margin_top = 6
 	rail.content_margin_bottom = 6

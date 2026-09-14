@@ -7,7 +7,7 @@ var _bouton_reroll: Button
 var etage_recompense := 1
 
 func _ready() -> void:
-	var col := StyleAzur.page(self,"Choisissez une amélioration")
+	var col := StyleAzur.page(self,"Choisissez une augmentation")
 	col.add_child(StyleAzur.texte("Une nouvelle magie pour cette aventure",30,StyleAzur.IVOIRE))
 	_cartes = StyleAzur.defilement(col)
 	_bouton_reroll = StyleAzur.bouton("",_sur_reroll)
@@ -27,6 +27,8 @@ func _nouveau_tirage() -> void:
 	for id in _propositions:
 		var reactif := CatalogueReactifs.par_id(id)
 		var b := StyleAzur.bouton("",func(): _sur_choix(id))
+		var teinte: Color = [Color("305c8b"), Color("793e92"), Color("286b77")][_cartes.get_child_count() % 3]
+		b.add_theme_stylebox_override("normal", StyleAzur.cadre(teinte, StyleAzur.MAGIE))
 		b.custom_minimum_size.y = 310
 		_cartes.add_child(b)
 		var marge := MarginContainer.new()

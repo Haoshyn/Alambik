@@ -91,7 +91,7 @@ func _rendre() -> void:
 		texte.add_child(StyleAzur.texte("Équipé · toucher pour retirer" if id in equipes else "Toucher pour équiper" if ReglagesJoueur.sort_debloque(id) else "À obtenir dans les Épreuves",24,StyleAzur.MAGIE))
 		marge.minimum_size_changed.connect(func(): b.custom_minimum_size.y = maxf(230.0,marge.get_combined_minimum_size().y))
 		if id in equipes:
-			b.add_theme_stylebox_override("normal",StyleAzur.cadre(Color("e0f2e7"),StyleAzur.MAGIE))
+			b.add_theme_stylebox_override("normal",StyleAzur.cadre(Color("285c85"),StyleAzur.MAGIE))
 		_cartes.add_child(b)
 
 func _catalogue() -> Dictionary:

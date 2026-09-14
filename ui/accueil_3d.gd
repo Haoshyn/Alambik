@@ -7,15 +7,12 @@ signal jouer
 signal page_demandee(index: int)
 
 var _surface: Control
-var _vue: SubViewport
-var _heros: Node3D
 var _gouttes: Label
 var _pierres: Label
 var _chapitre: Label
 var _haut: Control
 var _bas: Control
-var _illustration: SubViewportContainer
-var _temps := 0.0
+var _illustration: TextureRect
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -23,11 +20,15 @@ func _ready() -> void:
 	_surface = Control.new()
 	_surface.size = Vector2(1024,1536)
 	add_child(_surface)
-	_illustration = SubViewportContainer.new()
-	_illustration.stretch = true
+	_illustration = TextureRect.new()
+	_illustration.texture = preload("res://assets/visual/arcane/accueil.png")
+	_illustration.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_illustration.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_illustration.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	_illustration.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_surface.add_child(_illustration)
-	_creer_scene()
+	add_child(_illustration)
+	move_child(_illustration, 1)
+	_illustration.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_haut = Control.new()
 	_surface.add_child(_haut)
 	var entete := Panel.new()
@@ -36,14 +37,14 @@ func _ready() -> void:
 	entete.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	entete.add_theme_stylebox_override("panel",StyleAzur.cadre(Color(StyleAzur.PANNEAU,0.94)))
 	_haut.add_child(entete)
-	var titre := StyleAzur.texte("ALAMBIC",48)
+	var titre := StyleAzur.texte("ALAMBIK",48)
 	titre.position = Vector2(42,23)
 	titre.size = Vector2(390,66)
 	_haut.add_child(titre)
 	_gouttes = _valeur(Rect2(454,30,228,52),28,_haut)
 	_pierres = _valeur(Rect2(696,30,170,52),28,_haut)
 	var parametres := StyleAzur.bouton("",func(): reglages.emit())
-	parametres.icon = preload("res://assets/visual/atelier/parametres.svg")
+	parametres.icon = IconesArcane.texture("parametres")
 	parametres.expand_icon = true
 	parametres.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	parametres.add_theme_constant_override("icon_max_width",48)
@@ -106,10 +107,6 @@ func _cadrer() -> void:
 	_surface.position = Vector2((size.x-1024.0*facteur)*0.5,0)
 	_haut.position.y = Ecran.marge_haute()/facteur
 	_bas.position.y = hauteur-450
-	var debut := _haut.position.y + 150.0
-	var disponible := maxf(200.0,_bas.position.y-debut-16.0)
-	_illustration.position = Vector2(160,debut)
-	_illustration.size = Vector2(704,disponible)
 
 func rafraichir() -> void:
 	if _gouttes == null: return
@@ -120,57 +117,3 @@ func rafraichir() -> void:
 	var mode := ReglagesJoueur.mode_run_choisi
 	var chapitre: Dictionary = Chapitres.par_index(ReglagesJoueur.chapitre_choisi)
 	_chapitre.text = "%s · Chapitre %d" % [Chapitres.MONDES[int(chapitre["monde"])]["nom"],int(chapitre["chapitre_monde"])] if mode == "grimoire" else ("LA MINE" if mode == "mine" else "ÉPREUVES")
-
-func _process(delta: float) -> void:
-	_vue.render_target_update_mode = SubViewport.UPDATE_ALWAYS if is_visible_in_tree() else SubViewport.UPDATE_DISABLED
-	if not is_visible_in_tree(): return
-	_temps += delta
-	_heros.rotation.y = 0.25 + sin(_temps * 0.35) * 0.12
-
-func _creer_scene() -> void:
-	_vue = SubViewport.new()
-	_vue.size = Vector2i(768, 1024)
-	_vue.own_world_3d = true
-	_vue.transparent_bg = true
-	_vue.msaa_3d = Viewport.MSAA_2X
-	_illustration.add_child(_vue)
-	var monde := Node3D.new()
-	_vue.add_child(monde)
-	var ambiance := WorldEnvironment.new()
-	ambiance.environment = Environment.new()
-	ambiance.environment.background_mode = Environment.BG_CLEAR_COLOR
-	ambiance.environment.background_color = Color.TRANSPARENT
-	ambiance.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	ambiance.environment.ambient_light_color = Color("b9dfe9")
-	ambiance.environment.ambient_light_energy = 0.8
-	monde.add_child(ambiance)
-	var lumiere := DirectionalLight3D.new()
-	lumiere.rotation_degrees = Vector3(-45, -35, 0)
-	lumiere.light_color = Color("ffe6cf")
-	lumiere.light_energy = 1.1
-	monde.add_child(lumiere)
-	_heros = load(Visuels3D.HEROS_MODELE).instantiate()
-	monde.add_child(_heros)
-	preload("res://scripts/presentation/materiaux_apprenti.gd").appliquer(_heros)
-	var lecteur := _heros.find_child("AnimationPlayer", true, false) as AnimationPlayer
-	if lecteur != null:
-		lecteur.get_animation("repos").loop_mode = Animation.LOOP_LINEAR
-		lecteur.play("repos")
-	var socle := MeshInstance3D.new()
-	var cylindre := CylinderMesh.new()
-	cylindre.top_radius = 0.65
-	cylindre.bottom_radius = 0.7
-	cylindre.height = 0.055
-	socle.mesh = cylindre
-	socle.position.y = -0.035
-	var matiere := StandardMaterial3D.new()
-	matiere.albedo_color = Color("b3a191")
-	matiere.metallic = 0.25
-	socle.material_override = matiere
-	monde.add_child(socle)
-	var camera := Camera3D.new()
-	monde.add_child(camera)
-	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	camera.size = 2.7
-	camera.position = Vector3(0, 2.1, 4.0)
-	camera.look_at(Vector3(0, 0.7, 0))

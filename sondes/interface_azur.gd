@@ -103,15 +103,19 @@ func verifier() -> void:
 	await create_timer(2.0).timeout
 	var accueil: Control = menu.get("_page_actuelle")
 	await attendre()
-	var heros: Node3D = accueil.get("_heros")
-	var angle := heros.rotation.y
+	var illustration: TextureRect = accueil.get("_illustration")
+	exiger(illustration.texture != null and illustration.texture.resource_path == "res://assets/visual/arcane/accueil.png","illustration originale de l'accueil chargee")
+	exiger(accueil.find_children("*","SubViewport",true,false).is_empty(),"aucun rendu 3D dans l'accueil")
 	var onglets: Array = menu.get("_onglets")
 	var rectangle: Rect2 = onglets[0].get_global_rect()
 	await create_timer(.7).timeout
-	exiger(not is_equal_approx(angle,heros.rotation.y),"accueil 3D anime")
-	var lecteur := heros.find_child("AnimationPlayer",true,false) as AnimationPlayer
-	exiger(lecteur != null and lecteur.is_playing(),"animation de repos active")
-	exiger(rectangle == onglets[0].get_global_rect(),"navigation immobile pendant l'animation")
+	exiger(rectangle == onglets[0].get_global_rect(),"navigation immobile")
+	var style_arcane: Script = load("res://scripts/presentation/style_azur.gd")
+	for catalogue in [CatalogueReactifs.TOUS, ArbreCompetences.NOEUDS, Sorts.ACTIFS, Sorts.PASSIFS, Sorts.ULTIMES]:
+		for identifiant in catalogue:
+			exiger(IconesArcane.contient(str(identifiant)),"illustration du catalogue : "+str(identifiant))
+			var icone := style_arcane.glyphe(str(identifiant)) as AtlasTexture
+			exiger(icone != null and Rect2(Vector2.ZERO,icone.atlas.get_size()).encloses(icone.region),"region d'icone valide : "+str(identifiant))
 	if DisplayServer.get_name() != "headless": root.get_texture().get_image().save_png("res://tmp/azur-accueil-final.png")
 	menu.queue_free()
 	await attendre()
@@ -132,8 +136,8 @@ func verifier_reglages_en_pause() -> void:
 	exiger(selecteurs.size()==3,"musiques et raccourci accessibles")
 	for selecteur: OptionButton in selecteurs:
 		var liste := selecteur.get_popup()
-		exiger(liste.get_theme_color("font_color")==style.ENCRE,"listes lisibles sur parchemin")
-		exiger(liste.get_theme_stylebox("panel") is StyleBoxTexture,"cadre Atelier dans les listes")
+		exiger(liste.get_theme_color("font_color")==style.ENCRE,"listes lisibles sur fond arcane")
+		exiger(liste.get_theme_stylebox("panel") is StyleBoxTexture,"cadre illustre dans les listes")
 		liste.popup()
 		await attendre()
 		exiger(liste.visible,"liste ouvrable en pause")

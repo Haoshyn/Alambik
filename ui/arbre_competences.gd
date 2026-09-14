@@ -18,7 +18,6 @@ func _ready() -> void:
 	var branches := HBoxContainer.new()
 	branches.add_theme_constant_override("separation",18)
 	contenu.add_child(branches)
-	var index := 0
 	for branche in ArbreCompetences.BRANCHES:
 		var ligne := VBoxContainer.new()
 		ligne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -37,18 +36,24 @@ func _ready() -> void:
 			b.custom_minimum_size = Vector2(174,174)
 			b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 			b.add_theme_font_size_override("font_size",25)
-			b.icon = StyleAzur.icone([8,9,13][index])
-			b.set_meta("embleme",b.icon)
-			b.expand_icon = true
-			b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
-			b.add_theme_constant_override("icon_max_width",92)
+			var icone := StyleAzur.vignette(id, 112, true)
+			icone.position = Vector2(31, 18)
+			b.add_child(icone)
+			b.set_meta("embleme", icone.texture)
+			var rang := StyleAzur.texte("", 22)
+			rang.position = Vector2(8, 128)
+			rang.size = Vector2(158, 30)
+			rang.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			b.add_child(rang)
+			b.set_meta("rang", rang)
+			b.add_theme_stylebox_override("hover", StyleAzur.cadre(Color("476ba3"), StyleAzur.MAGIE, 64))
+			b.add_theme_stylebox_override("pressed", StyleAzur.cadre(Color("793e92"), StyleAzur.MAGIE, 64))
+			b.add_theme_stylebox_override("focus", StyleAzur.cadre(Color.TRANSPARENT, StyleAzur.MAGIE, 64))
 			ligne.add_child(b)
 			_noeuds[id] = b
-			var lien := StyleAzur.texte("│",26,StyleAzur.CUIVRE)
+			var lien := StyleAzur.texte("│",26,StyleAzur.MAGIE)
 			lien.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			ligne.add_child(lien)
-		index += 1
 	var fiche := StyleAzur.plaque(col,true)
 	var ligne_details := HBoxContainer.new()
 	ligne_details.add_theme_constant_override("separation",24)
@@ -69,21 +74,23 @@ func _rafraichir() -> void:
 	for id in _noeuds:
 		var b: Button = _noeuds[id]
 		var ouvert := ReglagesJoueur.mode_dev or ArbreCompetences.prerequis_atteint(id,ReglagesJoueur.rangs_competences)
-		b.icon = b.get_meta("embleme") if ouvert else preload("res://assets/visual/atelier/verrou.svg")
-		b.modulate = Color.WHITE if ouvert else Color("b6a9be")
-		b.text = "%d / %d" % [ReglagesJoueur.rang_competence(id),ArbreCompetences.rangs(id)] if ouvert else "Verrouillé"
+		b.modulate = Color.WHITE if ouvert else Color("687ba9")
+		var rang: Label = b.get_meta("rang")
+		rang.text = "%d / %d" % [ReglagesJoueur.rang_competence(id),ArbreCompetences.rangs(id)] if ouvert else "Verrouillé"
+		if ouvert and id == _selection: rang.text = "◆ " + rang.text
+		elif ouvert and ReglagesJoueur.rang_competence(id) > 0: rang.text = "✓ " + rang.text
 		b.tooltip_text = str(ArbreCompetences.NOEUDS[id]["nom"])
 		b.add_theme_font_size_override("font_size",22)
 		b.add_theme_color_override("font_color",StyleAzur.IVOIRE)
-		b.add_theme_stylebox_override("normal",StyleAzur.cadre(Color("17626c") if id == _selection else Color("655079") if ouvert else Color("574961"),StyleAzur.MAGIE if id == _selection else StyleAzur.CUIVRE,28))
+		b.add_theme_stylebox_override("normal",StyleAzur.cadre(Color("793e92") if id == _selection else Color("285c85") if ReglagesJoueur.rang_competence(id) > 0 else Color("303564") if ouvert else Color("252943"),StyleAzur.MAGIE if id == _selection else StyleAzur.CUIVRE,64))
 	var n: Dictionary = ArbreCompetences.NOEUDS[_selection]
-	_embleme.texture = _noeuds[_selection].icon
+	_embleme.texture = _noeuds[_selection].get_meta("embleme")
 	_details.text = "%s\n%s\n%s" % [n["nom"],ArbreCompetences.description_effective(_selection),_message]
 	_achat.text = "Améliorer · %d gouttes" % ReglagesJoueur.cout_competence(_selection)
 	_achat.disabled = ReglagesJoueur.rang_competence(_selection) >= ArbreCompetences.rangs(_selection) or (not ReglagesJoueur.mode_dev and (not ArbreCompetences.prerequis_atteint(_selection,ReglagesJoueur.rangs_competences) or ReglagesJoueur.gouttes < ReglagesJoueur.cout_competence(_selection)))
 	var requis := str(n.get("requis",""))
 	if not requis.is_empty() and not ArbreCompetences.prerequis_atteint(_selection,ReglagesJoueur.rangs_competences):
-		_details.text += "\nPrérequis : %s au maximum" % ArbreCompetences.NOEUDS[requis]["nom"]
+		_details.text += "\nPrérequis : %s au rang 1" % ArbreCompetences.NOEUDS[requis]["nom"]
 
 func _ameliorer() -> void:
 	if _selection.is_empty():

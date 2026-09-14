@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<defs>
+<radialGradient id="coeur"><stop stop-color="#344b88"/><stop offset="1" stop-color="#1b2047"/></radialGradient>
+<linearGradient id="verre" x2=".7" y2="1"><stop stop-color="#c9ebff"/><stop offset=".28" stop-color="#549bd0"/><stop offset=".55" stop-color="#41408e"/><stop offset=".82" stop-color="#60d8eb"/><stop offset="1" stop-color="#334879"/></linearGradient>
+<linearGradient id="cuivre" x2="1" y2="1"><stop stop-color="#edbb9c"/><stop offset="1" stop-color="#97577a"/></linearGradient>
+</defs>
+<circle cx="128" cy="133" r="118" fill="#0c1232" opacity=".55"/>
+<circle cx="128" cy="128" r="114" fill="url(#coeur)" stroke="#1b3061" stroke-width="8"/>
+<circle cx="128" cy="128" r="110" fill="none" stroke="url(#verre)" stroke-width="9"/>
+<circle cx="128" cy="128" r="99" fill="none" stroke="#6d7cbc" stroke-width="2"/>
+<path d="M37 94A96 96 0 0 1 101 35M157 220A96 96 0 0 0 220 158" fill="none" stroke="#a8e4ff" stroke-width="3"/>
+<path d="M128 5L144 26 128 47 112 26Z" fill="url(#cuivre)" stroke="#edc5e4" stroke-width="2"/>
+<path d="M128 12L136 26 128 38 120 26Z" fill="#78ccff"/>
+<path d="M13 129L30 118 35 126 20 139Z M243 129L226 118 221 126 236 139Z" fill="url(#cuivre)"/>
+</svg>
