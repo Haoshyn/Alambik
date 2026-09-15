@@ -162,19 +162,10 @@ func _ligne_libre(depuis: Vector2, vers: Vector2) -> bool:
 
 # Choisir un point atteignable et plus proche evite de longer indefiniment un mur.
 func _point_de_tir(cible: Vector2) -> Vector2:
-	var limites: Rect2 = _heros.limites.grow(-Reglages.HEROS_RAYON)
-	var meilleur := Vector2.ZERO
-	var cout := INF
-	for rayon in [200.0, 380.0]:
-		for i in 12:
-			var p: Vector2 = _heros.global_position + Vector2.from_angle(TAU * float(i) / 12.0) * rayon
-			if not limites.has_point(p): continue
-			if not _ligne_libre(p,cible) or not _trajet_libre(p,p): continue
-			var distance := p.distance_to(cible)+float(rayon)*0.15
-			if distance < cout:
-				cout = distance
-				meilleur = p
-	return meilleur
+	var salle := get_tree().get_first_node_in_group("salle")
+	if salle == null: return Vector2.ZERO
+	return NAVIGATION.point_de_tir(_heros.global_position,cible,_heros.limites,
+		salle.obstacles(),Reglages.HEROS_RAYON,MARGE_TIR,salle.contour_sol())
 
 func _trajet_libre(depuis: Vector2, vers: Vector2) -> bool:
 	var salle := get_tree().get_first_node_in_group("salle")
@@ -191,7 +182,7 @@ func _direction_vers(destination: Vector2) -> Vector2:
 	if _salle_chemin != Jeu.salle_courante or _chemin.is_empty() or _destination.distance_to(destination)>60.0:
 		_destination = destination
 		_salle_chemin = Jeu.salle_courante
-		_chemin = NAVIGATION.chemin(_heros.global_position,destination,_heros.limites,salle.obstacles(),Reglages.HEROS_RAYON)
+		_chemin = NAVIGATION.chemin(_heros.global_position,destination,_heros.limites,salle.obstacles(),Reglages.HEROS_RAYON,salle.contour_sol())
 		if not _chemin.is_empty(): _chemin.remove_at(0)
 	while _chemin.size()>1 and _heros.global_position.distance_to(_chemin[0])<12.0:
 		_chemin.remove_at(0)

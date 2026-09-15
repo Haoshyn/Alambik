@@ -14,7 +14,7 @@ func test_garantie_du_grand_coffre(v: Verif) -> void:
 	rng.seed = 1
 	var grand := Recompenses.coffre_pour(20)
 	v.vrai(Recompenses.donne_objet(grand, Recompenses.GARANTIE_APRES_GRANDS_COFFRES - 1, rng),
-		"le cinquieme grand coffre sans objet est garanti")
+		"le troisieme grand coffre sans objet est garanti")
 
 func test_les_gouttes_accelerent_sur_les_trente_chapitres(v: Verif) -> void:
 	var grand := Recompenses.coffre_pour(20)

@@ -108,7 +108,7 @@ func _sur_contact(corps: Node) -> void:
 	Sons.jouer("impact", -18.0, randf_range(0.9, 1.2))
 
 	if "perfore_tout" in tir.drapeaux:
-		_facteur_degats *= 1.0 - Reglages.PERFORATION_PERTE
+		_facteur_degats *= 1.0 if "perforation_sans_perte" in tir.drapeaux else 1.0 - Reglages.PERFORATION_PERTE
 		return
 	match PrioriteProjectile.apres_impact(_rebonds_restants, _perforations_restantes):
 		"rebond":
@@ -117,7 +117,7 @@ func _sur_contact(corps: Node) -> void:
 			_rebondir_vers_une_autre_cible()
 		"perforation":
 			_perforations_restantes -= 1
-			_facteur_degats *= 1.0 - Reglages.PERFORATION_PERTE
+			_facteur_degats *= 1.0 if "perforation_sans_perte" in tir.drapeaux else 1.0 - Reglages.PERFORATION_PERTE
 		"fin":
 			_finir()
 

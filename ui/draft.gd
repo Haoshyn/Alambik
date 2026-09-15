@@ -17,7 +17,7 @@ func _ready() -> void:
 	if Jeu.mode_auto: _choisir_automatiquement()
 
 func _nouveau_tirage() -> void:
-	_propositions = DraftLogique.proposer(Jeu.inventaire,Jeu.rng)
+	_propositions = DraftLogique.proposer(Jeu.ameliorations_effectives(),Jeu.rng)
 	for enfant in _cartes.get_children():
 		_cartes.remove_child(enfant)
 		enfant.queue_free()

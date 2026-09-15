@@ -209,8 +209,11 @@ func elements_de_augment(augment: String) -> Array[String]:
 			resultat.append(CatalogueElements.element_de_fusion(id))
 	return resultat
 
+func ameliorations_effectives() -> Array:
+	return CatalogueObjets.avec_effets(inventaire, ReglagesJoueur.equipements, ReglagesJoueur.forge_niveaux)
+
 func mods() -> Array:
-	return Mods.depuis_l_inventaire(inventaire)
+	return Mods.depuis_l_inventaire(ameliorations_effectives())
 
 func duree_run() -> float:
 	return float(images_de_jeu) / float(Engine.physics_ticks_per_second)

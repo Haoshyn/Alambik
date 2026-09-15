@@ -99,7 +99,7 @@ func _ready() -> void:
 			Jeu.ajouter_reactif(candidats[index])
 			candidats.remove_at(index)
 	if Jeu.mode_run != "epreuve_sorts" and ReglagesJoueur.passifs_equipes_effectifs().has("heritage_reactif"):
-		var heritage := CatalogueReactifs.ids()
+		var heritage := DraftLogique.candidats(Jeu.ameliorations_effectives())
 		for tirage in Reglages.HERITAGE_AMELIORATIONS:
 			if heritage.is_empty():
 				break
@@ -173,6 +173,10 @@ func _ready() -> void:
 		add_child(monde)
 		monde.relier(_salle, _heros, _fond)
 	_animer_entree_salle()
+	if not Jeu.mode_auto and not ReglagesJoueur.tutoriel_vu and Jeu.chapitre == 0:
+		var conseils := Control.new()
+		conseils.set_script(load("res://ui/conseils_debut.gd"))
+		_couche.add_child(conseils)
 	# Arguments de capture reserves au controle visuel automatise des panneaux.
 	if "--ouvrir-pause" in arguments:
 		call_deferred("_ouvrir_pause")
@@ -219,8 +223,7 @@ func _doter_progression_intermediaire() -> void:
 	ReglagesJoueur.sort_actif_equipe = "onde_alchimique"
 	ReglagesJoueur.ultime_equipe = "grand_oeuvre"
 	ReglagesJoueur.passifs_equipes = ["seconde_chance"]
-	# Simule l'acces au dernier chapitre pour que le rattrapage des anciens objets
-	# soit celui d'une vraie progression de campagne.
+	# Simule les deblocages accessibles a la fin de la campagne.
 	ReglagesJoueur.meilleures_par_chapitre.clear()
 	for chapitre in range(Chapitres.nombre() - 1):
 		ReglagesJoueur.meilleures_par_chapitre[str(chapitre)] = Reglages.SALLES_PAR_RUN
@@ -342,7 +345,7 @@ func _calculer_limites() -> void:
 		if _heros != null:
 			_heros.limites = _limites
 		return
-	_limites = Rect2(Vector2(Reglages.ARENE_MARGE_LATERALE,Reglages.ARENE_HAUT),Reglages.ARENE_TAILLE)
+	_limites = Rect2(Vector2(Reglages.ARENE_MARGE_LATERALE,Reglages.ARENE_HAUT),FormesSalles.taille(Jeu.salle_courante, Jeu.chapitre, Jeu.graine, Jeu.mode_run))
 	if _camera != null:
 		_camera.zoom = Vector2.ONE*Reglages.ARENE_CAMERA_ZOOM
 	if _heros != null:

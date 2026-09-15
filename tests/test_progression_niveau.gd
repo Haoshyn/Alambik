@@ -85,9 +85,9 @@ func test_l_epreuve_a_un_drop_rare_et_respecte_la_pool(v: Verif) -> void:
 			capacites += 1
 			v.vrai(str(recompense["id"]) in ["nova_de_givre", "heritage_reactif"],
 				"au niveau deux, aucun sort futur ne fuit dans la pool")
-	v.vrai(capacites >= 750 and capacites <= 850,
-		"sur mille jets, le taux reste proche des 80 pour cent vises pour le coffre final")
-	v.vrai(gouttes < capacites, "le coffre final donne le plus souvent une capacite")
+	v.vrai(capacites >= 150 and capacites <= 250,
+		"sur mille jets, le taux reste proche des 20 pour cent hors garantie pour le coffre final")
+	v.vrai(gouttes > capacites, "hors garantie, le sort reste rare")
 
 func test_un_arsenal_complet_recoit_un_repli(v: Verif) -> void:
 	var rangs := {}

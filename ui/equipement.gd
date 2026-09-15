@@ -13,6 +13,7 @@ var _precedent: Button
 var _suivant: Button
 var _resume: Label
 var _details: Label
+var _effets_objet: Label
 var _armes: VBoxContainer
 var _vide: VBoxContainer
 var _portrait_objet: TextureRect
@@ -62,7 +63,7 @@ func _ready() -> void:
 	_suivant = StyleAzur.bouton("Suivant ›",func(): _changer_page(1))
 	pages.add_child(_precedent)
 	pages.add_child(_suivant)
-	var fiche := StyleAzur.plaque(col,true)
+	var fiche := StyleAzur.plaque(contenu,true)
 	var apercu := HBoxContainer.new()
 	apercu.add_theme_constant_override("separation",20)
 	fiche.add_child(apercu)
@@ -71,6 +72,8 @@ func _ready() -> void:
 	_details = StyleAzur.texte("",26,StyleAzur.ENCRE)
 	_details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	apercu.add_child(_details)
+	_effets_objet = StyleAzur.texte("",24,StyleAzur.ENCRE)
+	fiche.add_child(_effets_objet)
 	var actions := HBoxContainer.new()
 	actions.add_theme_constant_override("separation",12)
 	col.add_child(actions)
@@ -100,6 +103,7 @@ func _afficher_inventaire() -> void:
 		b.text = "Niv. %d" % ReglagesJoueur.niveau_objet(id)
 		b.tooltip_text = str(CatalogueObjets.OBJETS[id]["nom"])
 		StyleAzur.case_objet(b,id == _objet_selectionne)
+	_effets_objet.text = ""
 	_details.text = "Sélectionnez un bijou pour consulter ses effets."
 	_portrait_objet.visible = not _objet_selectionne.is_empty()
 	if _objet_selectionne.is_empty(): return
@@ -111,7 +115,11 @@ func _afficher_inventaire() -> void:
 	var noms := {"degats":"Dégâts","pv":"PV","cadence":"Cadence","vitesse":"Vitesse","critique":"Critique","reduction":"Protection","collecte":"Collecte"}
 	for cle in bonus:
 		if float(bonus[cle]) != 0.0: parts.append("%s +%.1f %%" % [noms.get(cle,cle),float(bonus[cle])*100])
-	_details.text = "%s · Niveau %d\n%s\n%s" % [CatalogueObjets.OBJETS[id]["nom"],niveau," · ".join(parts),"Niveau maximum" if niveau >= Reglages.FORGE_NIVEAU_MAX else "Forge : %d pierres" % ReglagesJoueur.cout_forge(id)]
+	_details.text = "%s · Niveau %d\n%s\n%s" % [CatalogueObjets.OBJETS[id]["nom"],niveau," · ".join(parts),"Limite de forge atteinte" if niveau >= Reglages.FORGE_NIVEAU_MAX else "Forge : %d pierres" % ReglagesJoueur.cout_forge(id)]
+	if niveau < Reglages.FORGE_NIVEAU_MAX:
+		var suivant := CatalogueObjets.bonus_objet(id,niveau+1)
+		_details.text += "\nProchain niveau : dégâts +%.1f %% · PV +%.1f %%" % [float(suivant["degats"])*100.0,float(suivant["pv"])*100.0]
+	_effets_objet.text = CatalogueObjets.description_effets(id,niveau)+"\n\nUn pouvoir au niveau 10. Ensuite : dégâts et PV uniquement.\nActif quand ce bijou est équipé. Effets identiques non cumulables."
 
 func _selectionner_slot(slot: String) -> void:
 	_slot_selectionne = slot
@@ -198,8 +206,10 @@ func _afficher_armes() -> void:
 		_armes.remove_child(enfant)
 		enfant.queue_free()
 	_armes.add_child(StyleAzur.texte("Votre arme", 35))
-	var ligne := HBoxContainer.new()
-	ligne.add_theme_constant_override("separation",10)
+	var ligne := GridContainer.new()
+	ligne.columns = 2
+	ligne.add_theme_constant_override("h_separation",10)
+	ligne.add_theme_constant_override("v_separation",10)
 	_armes.add_child(ligne)
 	var selection: Dictionary = CatalogueProjectiles.TYPES[ReglagesJoueur.projectile_equipe_effectif()]
 	for id: String in CatalogueProjectiles.TYPES:
@@ -219,6 +229,6 @@ func _afficher_armes() -> void:
 		bouton.add_theme_constant_override("icon_max_width",116)
 		StyleAzur.case_objet(bouton,id == ReglagesJoueur.projectile_equipe_effectif())
 		bouton.tooltip_text = str(arme["description"])
-		if not disponible: bouton.text += "\nCh. %d" % int(arme["niveau"])
+		if not disponible: bouton.text += "\nMonde %d" % int(arme["monde"])
 		ligne.add_child(bouton)
 	_armes.add_child(StyleAzur.texte("%s · dégâts ×%.2f · cadence ×%.2f\n%s" % [selection["nom"],float(selection["degats_mult"]),float(selection.get("cadence_mult",1.0)),selection["description"]],24,StyleAzur.ATTENUE))

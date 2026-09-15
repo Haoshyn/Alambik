@@ -22,7 +22,7 @@ func bloc(centre: Vector3, taille: Vector3, couleur: Color) -> MeshInstance3D:
 	add_child(objet)
 	return objet
 
-func construire(limites: Rect2, _charger: Callable, monde := 0, contour := PackedVector2Array()) -> void:
+func construire(limites: Rect2, _charger: Callable, monde := 0, contour := PackedVector2Array(), variante := 0) -> void:
 	for enfant in get_children():
 		enfant.queue_free()
 	var centre := Pont3D.vers_monde(limites.get_center())
@@ -73,10 +73,14 @@ func construire(limites: Rect2, _charger: Callable, monde := 0, contour := Packe
 	# Les ornements restent hors de la surface de collision, meme dans les retraits.
 	var ornements := preload("res://scripts/presentation/ornements_monde.gd")
 	for cote in [-1.0,1.0]:
-		for i in 4:
-			var p := centre+Vector3(cote*(taille.x/2+.65),0,-taille.z*.40+i*taille.z*.26)
-			ornements.pilier(self,p,monde)
-			if monde in [0,4,7]:
-				ornements.jardin(self,p+Vector3(cote*.20,0,1.0),monde)
+		for i in range(3 + variante % 3):
+			var nombre := 3 + variante % 3
+			var p := centre+Vector3(cote*(taille.x/2+.85),0,lerpf(-taille.z*.40,taille.z*.40,float(i)/maxi(1,nombre-1)))
+			if variante == 1 or (variante == 3 and i % 2 == 0):
+				ornements.jardin(self,p,monde)
+			else:
+				ornements.pilier(self,p,monde)
+			if variante == 2:
+				ornements.jardin(self,p+Vector3(cote*.35,0,1.15),monde)
 	ornements.entree(self,centre+Vector3(0,0,-taille.z*.5-1.2),monde)
 	preload("res://scripts/presentation/decor_statique.gd").regrouper(self)

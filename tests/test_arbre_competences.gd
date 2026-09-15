@@ -8,9 +8,9 @@ func test_une_maitrise_se_pousse_sur_plusieurs_rangs(v: Verif) -> void:
 		"une Maitrise chiffree se rachete jusqu'au plafond")
 	# Un deblocage ne s'empile pas : un second Passif obtenu cinq fois ne veut
 	# rien dire, et cinq nouveaux tirages rendraient le draft entierement choisi.
-	v.egal(ArbreCompetences.rangs("savoir"), 1, "un deblocage unique reste unique")
-	v.egal(ArbreCompetences.rangs("distillation"), 2, "les nouveaux tirages restent bornes")
-	v.egal(ArbreCompetences.nombre_rerolls({"distillation": 2, "prescience": 2}), 4,
+	v.egal(ArbreCompetences.rangs("abondance"), 1, "un deblocage unique reste unique")
+	v.egal(ArbreCompetences.rangs("distillation"), 1, "les nouveaux tirages restent bornes")
+	v.egal(ArbreCompetences.nombre_rerolls({"distillation": 2, "prescience": 2}), 2,
 		"les rangs de tirage s'additionnent")
 
 func test_le_cout_d_un_rang_monte_avec_le_rang(v: Verif) -> void:
@@ -25,9 +25,9 @@ func test_le_cout_d_un_rang_monte_avec_le_rang(v: Verif) -> void:
 func test_un_rang_supplementaire_ajoute_sa_part(v: Verif) -> void:
 	v.presque(ArbreCompetences.multiplicateur_degats({"force": 1}), 1.10,
 		"un rang de Force vaut sa valeur unitaire")
-	v.presque(ArbreCompetences.multiplicateur_degats({"force": 3}), 1.331,
-		"trois rangs composent leur gain de degats")
-	v.presque(ArbreCompetences.multiplicateur_degats({"force": 99}), pow(1.10, 10),
+	v.presque(ArbreCompetences.multiplicateur_degats({"force": 3}), 1.30,
+		"trois rangs additionnent leur gain de degats")
+	v.presque(ArbreCompetences.multiplicateur_degats({"force": 99}), 2.0,
 		"un rang sauvegarde au-dela du plafond ne donne rien de plus")
 
 func test_les_trois_branches_restent_independantes(v: Verif) -> void:
@@ -53,30 +53,30 @@ func _branche_au_rang(branche: String, rang: int) -> Dictionary:
 	return rangs
 
 func test_la_puissance_va_du_petit_bonus_au_gros_scaling(v: Verif) -> void:
-	v.presque(ArbreCompetences.multiplicateur_pv({"constitution": 1}), 1.016,
+	v.presque(ArbreCompetences.multiplicateur_pv({"constitution": 1}), 1.10,
 		"Constitution applique son premier bonus")
 	v.presque(ArbreCompetences.multiplicateur_degats({"force": 1}), 1.10,
 		"Force applique son premier bonus")
-	v.presque(ArbreCompetences.reduction_degats({"armure": 1}), 0.002,
+	v.presque(ArbreCompetences.reduction_degats({"armure": 1}), 1.0-1.0/1.05,
 		"Armure applique sa reduction")
 	var offensive_premier := _branche_au_rang("Offensif", 1)
 	var dps_premier := ArbreCompetences.multiplicateur_degats(offensive_premier) \
 		* ArbreCompetences.multiplicateur_cadence(offensive_premier)
-	v.vrai(dps_premier >= 2.5 and dps_premier <= 2.6,
-		"les dix premiers rangs donnent un vrai gain sans devenir la campagne a eux seuls")
+	v.vrai(dps_premier >= 15.8 and dps_premier <= 15.9,
+		"les noeuds tardifs apportent des gains importants")
 
 func test_l_arbre_entierement_pousse_reste_dans_son_budget(v: Verif) -> void:
 	var offensive := _branche_au_rang("Offensif", ArbreCompetences.MAX_RANG)
 	var dps := ArbreCompetences.multiplicateur_degats(offensive) \
 		* ArbreCompetences.multiplicateur_cadence(offensive)
-	v.vrai(dps >= 9500.0 and dps <= 10000.0,
-		"la branche offensive maxee approche dix mille fois le DPS initial")
+	v.vrai(dps >= 608.0 and dps <= 610.0,
+		"la branche offensive maxee approche six cents fois le DPS initial")
 	var defensive := _branche_au_rang("Défensif", ArbreCompetences.MAX_RANG)
 	var survie := ArbreCompetences.multiplicateur_pv(defensive) \
 		/ (1.0 - ArbreCompetences.reduction_degats(defensive))
-	v.vrai(survie >= 2.05 and survie <= 2.30,
-		"la branche defensive maxee garde un budget comparable")
-	v.vrai(ArbreCompetences.reduction_degats(defensive) < 0.15,
+	v.vrai(survie >= 1343.0 and survie <= 1345.0,
+		"la branche defensive maxee accompagne les grands nombres ennemis")
+	v.vrai(ArbreCompetences.reduction_degats(defensive) < 0.85,
 		"la Maitrise defensive seule ne s'approche jamais de l'invulnerabilite")
 
 # Le dernier chapitre appartient encore a la campagne : un compte totalement
@@ -110,7 +110,7 @@ func test_une_progression_incomplete_peut_finir_avec_un_bon_build(v: Verif) -> v
 		"collier": str(anciens[2])}
 	var forge := {}
 	for id in anciens:
-		forge[str(id)] = 20
+		forge[str(id)] = 30
 	var bonus := CatalogueObjets.bonus_effectifs(equipements, forge, Chapitres.MONDES.size() - 1)
 	var permanent := ArbreCompetences.multiplicateur_degats(offensive) \
 		* ArbreCompetences.multiplicateur_cadence(offensive) \
@@ -123,7 +123,7 @@ func test_une_progression_incomplete_peut_finir_avec_un_bon_build(v: Verif) -> v
 		facteur_run *= float(Reglages.RAFALE_NOMBRE)
 	var dernier := Chapitres.nombre() - 1
 	v.vrai(permanent * facteur_run > Chapitres.facteur_pv(dernier, Reglages.SALLES_PAR_RUN),
-		"la branche offensive rang 8 et une Forge 20 peuvent finir la campagne avec un bon build")
+		"la branche offensive rang 8 et une Forge 30 peuvent finir la campagne avec un bon build")
 
 func test_maitrises_et_capacites_sont_separees(v: Verif) -> void:
 	for catalogue in [Sorts.ACTIFS, Sorts.PASSIFS, Sorts.ULTIMES]:
@@ -160,7 +160,7 @@ func test_l_epreuve_active_un_sort(v: Verif) -> void:
 func test_les_deblocages_utilitaires_changent_les_regles(v: Verif) -> void:
 	v.egal(ArbreCompetences.nombre_rerolls({"distillation": 1}), 1,
 		"la Maitrise donne un nouveau tirage")
-	v.vrai(ArbreCompetences.donne_second_passif({"savoir": 1}),
+	v.vrai(ArbreCompetences.donne_second_passif({"abondance": 1}),
 		"la Maitrise ouvre le second slot Passif")
 
 func test_un_sort_actif_et_un_ultime_peuvent_etre_retires(v: Verif) -> void:

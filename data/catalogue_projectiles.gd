@@ -3,53 +3,16 @@ extends RefCounted
 
 # Les armes transforment le rythme et la trajectoire, sans niveau ni bonus permanent.
 const TYPES := {
-	"standard": {
-		"nom": "Baguette d’atelier",
-		"description": "La baguette portée par l’apprenti. Projectile standard sans compromis.",
-		"niveau": 1,
-		"degats_mult": 1.0,
-		"vitesse_mult": 1.0,
-		"portee_mult": 1.0,
-	},
-	"veloce": {
-		"nom": "Aiguille vive",
-		"description": "Tirs rapides à longue portée. Délai de récupération des sorts et ultimes réduit de 10 %.",
-		"niveau": 2,
-		"degats_mult": 0.70,
-		"cadence_mult": 1.40,
-		"recharge_mult": 0.90,
-		"vitesse_mult": 1.55,
-		"portee_mult": 1.25,
-	},
-	"lourd": {
-		"nom": "Sceptre de cuivre",
-		"description": "Tirs lents qui traversent jusqu’à trois ennemis alignés, avec perte de puissance.",
-		"niveau": 3,
-		"degats_mult": 1.20,
-		"perforations": 2,
-		"cadence_mult": 0.70,
-		"vitesse_mult": 0.68,
-		"portee_mult": 0.90,
-	},
-	"chercheur": {
-		"nom": "Branche astrale",
-		"description": "Corrige sa trajectoire vers les ennemis au prix de dégâts.",
-		"niveau": 4,
-		"degats_mult": 0.88,
-		"vitesse_mult": 0.95,
-		"portee_mult": 1.10,
-		"drapeaux": ["homing"],
-	},
-	"explosif": {
-		"nom": "Bâton à étincelles",
-		"description": "Faible sur une cible, mais son impact frappe la zone proche.",
-		"niveau": 5,
-		"degats_mult": 0.85,
-		"vitesse_mult": 0.82,
-		"portee_mult": 0.95,
-		"rayon_explosion": 150.0,
-		"degats_zone_mult": 0.65,
-	},
+	"standard": {"nom": "Baguette d’acier", "description": "Un trait régulier, précis et de bonne portée.", "monde": 1, "niveau": 1, "degats_mult": 1.0, "portee_mult": 1.1},
+	"veloce": {"nom": "Aiguille vive", "description": "Traits rapides et longs. Moins de dégâts par seconde, mais une trajectoire facile à placer.", "monde": 2, "niveau": 4, "degats_mult": 0.78, "cadence_mult": 1.2, "vitesse_mult": 1.55, "portee_mult": 1.25},
+	"lourd": {"nom": "Sceptre de cuivre", "description": "Traverse trois ennemis à pleine puissance. Impacts lourds, cadence lente.", "monde": 3, "niveau": 7, "degats_mult": 1.65, "cadence_mult": 0.7, "perforations": 2, "vitesse_mult": 0.9, "portee_mult": 1.1, "drapeaux": ["perforation_sans_perte"]},
+	"chercheur": {"nom": "Branche astrale", "description": "Des traits puissants corrigent leur trajectoire vers la cible.", "monde": 4, "niveau": 10, "degats_mult": 1.35, "cadence_mult": 0.9, "drapeaux": ["homing"]},
+	"explosif": {"nom": "Bâton à étincelles", "description": "Chaque impact frappe aussi les ennemis autour de la cible.", "monde": 5, "niveau": 13, "degats_mult": 1.4, "cadence_mult": 0.9, "rayon_explosion": 150.0, "degats_zone_mult": 0.45},
+	"prisme": {"nom": "Prisme jumeau", "description": "Deux traits parallèles à chaque attaque.", "monde": 6, "niveau": 16, "degats_mult": 0.9, "cadence_mult": 0.95, "nb_projectiles": 1, "ecart_lateral": 30.0},
+	"resonant": {"nom": "Diapason de verre", "description": "Un trait lourd rebondit sur deux ennemis supplémentaires.", "monde": 7, "niveau": 19, "degats_mult": 1.85, "cadence_mult": 0.9, "rebonds": 2},
+	"draconique": {"nom": "Cornue draconique", "description": "Un impact massif éclate en trois fragments.", "monde": 8, "niveau": 22, "degats_mult": 2.1, "cadence_mult": 0.85, "fragments": 3},
+	"neant": {"nom": "Aiguille du néant", "description": "Un trait guidé traverse tous les ennemis sans perdre de puissance.", "monde": 9, "niveau": 25, "degats_mult": 2.3, "cadence_mult": 0.9, "drapeaux": ["homing", "perfore_tout", "perforation_sans_perte"]},
+	"royal": {"nom": "Alambic souverain", "description": "Un projectile dévastateur explose puis rebondit vers une seconde cible.", "monde": 10, "niveau": 28, "degats_mult": 3.0, "cadence_mult": 0.85, "rebonds": 1, "rayon_explosion": 180.0, "degats_zone_mult": 0.7},
 }
 
 static func contient(id: String) -> bool:
@@ -73,6 +36,9 @@ static func appliquer(id: String, source: Tir) -> Tir:
 	var donnees: Dictionary = TYPES[type_id]
 	var tir := source.copie()
 	tir.arme = type_id
+	for champ in ["nb_projectiles","rebonds","fragments"]:
+		tir.set(champ,int(tir.get(champ))+int(donnees.get(champ,0)))
+	tir.ecart_lateral += float(donnees.get("ecart_lateral",0.0))
 	tir.perforations += int(donnees.get("perforations",0))
 	tir.cadence *= float(donnees.get("cadence_mult", 1.0))
 	tir.degats *= float(donnees.get("degats_mult", 1.0))

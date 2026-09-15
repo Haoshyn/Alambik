@@ -118,7 +118,7 @@ func _process(delta: float) -> void:
 		_limites = limites
 		_numero = numero
 		var chapitre := Jeu.chapitre_courant()
-		_arene.construire(limites,charger,int(chapitre["monde"]),salle.contour_sol())
+		_arene.construire(limites,charger,int(chapitre["monde"]),salle.contour_sol(), posmod(Jeu.graine+numero+Jeu.chapitre, 4))
 		_reconstruire_obstacles()
 	for proxy in _proxies.values():
 		if is_instance_valid(proxy):

@@ -14,6 +14,9 @@ var meilleures_par_chapitre := {}
 var chapitre_choisi := 0
 var gouttes := 0
 var rangs_competences := {}
+var version_maitrises := Reglages.MAITRISE_VERSION
+var remboursement_maitrises := 0
+var tutoriel_vu := false
 var niveau_compte := 1
 var experience_compte := 0
 var mode_dev := false
@@ -33,11 +36,13 @@ var rangs_sorts := {}
 var objets: Array[String] = []
 var dernier_objet_obtenu := ""
 var grands_coffres_sans_objet := {}
+var epreuves_sans_sort := {}
 var equipements := {"anneau_gauche": "", "anneau_droit": "", "collier": ""}
 var projectile_equipe := "standard"
 # La Forge appartient desormais a l'objet, pas a l'emplacement. Changer
 # d'anneau ne transfere donc plus artificiellement tous les niveaux investis.
 var forge_niveaux := {}
+var version_forge := Reglages.FORGE_VERSION
 var pierres_forge := 0
 var mode_run_choisi := "grimoire"
 var niveau_epreuve_choisi := 1
@@ -64,6 +69,9 @@ func charger() -> void:
 	# Migration transparente : les anciens points deviennent des gouttes.
 	gouttes = int(config.get_value("monnaie", "gouttes", config.get_value("maitrise", "points", 0)))
 	rangs_competences = config.get_value("maitrise", "rangs", {})
+	version_maitrises = int(config.get_value("maitrise", "version", 1))
+	_migrer_maitrises()
+	tutoriel_vu = bool(config.get_value("aide", "premiers_pas", false))
 	# Les anciennes sauvegardes utilisaient la section "heros" pour ce qui est
 	# en realite une progression de compte.
 	niveau_compte = maxi(1, int(config.get_value("compte", "niveau",
@@ -102,12 +110,15 @@ func charger() -> void:
 			objets.append(objet)
 	dernier_objet_obtenu = str(config.get_value("stuff", "dernier", ""))
 	grands_coffres_sans_objet = config.get_value("stuff", "pities", {})
+	epreuves_sans_sort = config.get_value("epreuves", "pities", {})
 	equipements = config.get_value("stuff", "equipements", equipements)
 	projectile_equipe = str(config.get_value("stuff", "projectile", "standard"))
 	forge_niveaux = config.get_value("stuff", "forge", forge_niveaux)
+	version_forge = int(config.get_value("stuff", "version_forge", 1))
 	pierres_forge = maxi(0, int(config.get_value("stuff", "pierres_forge", 0)))
 	_migrer_equipements()
 	_migrer_forge_par_objet()
+	_migrer_niveaux_forge()
 	niveau_epreuve_debloque = clampi(int(config.get_value("epreuves", "debloque", 1)), 1, Epreuves.nombre())
 	niveau_epreuve_choisi = clampi(int(config.get_value("epreuves", "choisi", 1)), 1, niveau_epreuve_debloque)
 	mode_run_choisi = str(config.get_value("options", "mode_run", "grimoire"))
@@ -133,6 +144,8 @@ func sauvegarder() -> void:
 	config.set_value("options", "chapitre_choisi", chapitre_choisi)
 	config.set_value("monnaie", "gouttes", gouttes)
 	config.set_value("maitrise", "rangs", rangs_competences)
+	config.set_value("maitrise", "version", version_maitrises)
+	config.set_value("aide", "premiers_pas", tutoriel_vu)
 	config.set_value("compte", "niveau", niveau_compte)
 	config.set_value("compte", "experience", experience_compte)
 	config.set_value("options", "mode_dev", mode_dev)
@@ -150,13 +163,28 @@ func sauvegarder() -> void:
 	config.set_value("stuff", "objets", objets)
 	config.set_value("stuff", "dernier", dernier_objet_obtenu)
 	config.set_value("stuff", "pities", grands_coffres_sans_objet)
+	config.set_value("epreuves", "pities", epreuves_sans_sort)
 	config.set_value("stuff", "equipements", equipements)
 	config.set_value("stuff", "projectile", projectile_equipe)
 	config.set_value("stuff", "forge", forge_niveaux)
+	config.set_value("stuff", "version_forge", version_forge)
 	config.set_value("stuff", "pierres_forge", pierres_forge)
 	config.set_value("options", "mode_run", mode_run_choisi)
 	config.set_value("campagne", "version", VERSION_CAMPAGNE)
 	config.save(FICHIER)
+
+func _migrer_maitrises() -> void:
+	if version_maitrises >= Reglages.MAITRISE_VERSION: return
+	remboursement_maitrises = 0
+	for branche in ArbreCompetences.BRANCHES.values():
+		for i in branche.size():
+			var id: String = branche[i]
+			var plafond := 2 if id in ["distillation","prescience"] else 1 if id == "savoir" else 10
+			for rang in clampi(int(rangs_competences.get(id,0)),0,plafond):
+				remboursement_maitrises += Reglages.cout_maitrise(Reglages.MAITRISE_COUTS[i],rang)
+	gouttes += remboursement_maitrises
+	rangs_competences.clear()
+	version_maitrises = Reglages.MAITRISE_VERSION
 
 func _migrer_ancienne_campagne() -> void:
 	var anciennes: Dictionary = meilleures_par_chapitre.duplicate()
@@ -197,6 +225,14 @@ func _migrer_forge_par_objet() -> void:
 		if not id.is_empty():
 			forge_niveaux[id] = maxi(int(forge_niveaux.get(id, 0)), int(forge_niveaux[slot]))
 		forge_niveaux.erase(slot)
+
+func _migrer_niveaux_forge() -> void:
+	if version_forge >= Reglages.FORGE_VERSION: return
+	for id in forge_niveaux.keys():
+		var ancien := clampi(int(forge_niveaux[id]),0,Reglages.FORGE_ANCIEN_NIVEAU_MAX)
+		# Arrondir en faveur du joueur preserve aussi un ancien niveau impair.
+		forge_niveaux[id] = ceili(float(ancien)/Reglages.FORGE_REGROUPEMENT)
+	version_forge = Reglages.FORGE_VERSION
 
 func _equipement_automatique(id: String) -> void:
 	for slot in ["anneau_gauche", "anneau_droit", "collier"]:
@@ -267,11 +303,18 @@ func ajouter_pierres_forge(nombre: int) -> int:
 	return gain
 
 func grands_coffres_rates(chapitre: int) -> int:
-	return int(grands_coffres_sans_objet.get(str(chapitre), 0))
+	return maxi(0,int(grands_coffres_sans_objet.get(str(chapitre), 0)))
 
 func enregistrer_grand_coffre(chapitre: int, objet_obtenu: bool) -> void:
 	var cle := str(chapitre)
-	grands_coffres_sans_objet[cle] = 0 if objet_obtenu else grands_coffres_rates(chapitre) + 1
+	grands_coffres_sans_objet[cle] = 0 if objet_obtenu else mini(Recompenses.GARANTIE_APRES_GRANDS_COFFRES-1,grands_coffres_rates(chapitre) + 1)
+	sauvegarder()
+
+func epreuves_ratees(niveau: int) -> int:
+	return maxi(0,int(epreuves_sans_sort.get(str(niveau),0)))
+
+func enregistrer_coffre_epreuve(niveau: int, sort_obtenu: bool) -> void:
+	epreuves_sans_sort[str(niveau)] = 0 if sort_obtenu else mini(Reglages.EPREUVE_GARANTIE_CAPACITE-1,epreuves_ratees(niveau)+1)
 	sauvegarder()
 
 func definir_reglages_audio(musique: float, effets: float) -> void:
@@ -507,6 +550,7 @@ func reinitialiser_progression() -> void:
 	objets.clear()
 	dernier_objet_obtenu = ""
 	grands_coffres_sans_objet.clear()
+	epreuves_sans_sort.clear()
 	equipements = {"anneau_gauche": "", "anneau_droit": "", "collier": ""}
 	projectile_equipe = "standard"
 	forge_niveaux = {}

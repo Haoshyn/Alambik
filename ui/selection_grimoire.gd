@@ -43,7 +43,7 @@ func _ready() -> void:
 		_zones_chapitres.append(b)
 	_details = StyleAzur.texte("",28,StyleAzur.ATTENUE)
 	contenu.add_child(_details)
-	_bouton_selectionner = StyleAzur.bouton("Choisir cette campagne",_selectionner,true)
+	_bouton_selectionner = StyleAzur.bouton("Jouer ce chapitre",_selectionner,true)
 	contenu.add_child(_bouton_selectionner)
 	contenu.add_child(StyleAzur.texte("Autres aventures",35))
 	_bouton_mine = StyleAzur.bouton("La Mine",func(): _choisir_mode("mine"))
@@ -124,13 +124,17 @@ func _changer_monde(direction: int) -> void:
 	_rafraichir()
 
 func _choisir_chapitre(index: int) -> void:
+	if _lancement: return
 	_chapitre_monde = clampi(index, 0, 2)
 	var chapitre := _index_selectionne()
 	_message = "" if ReglagesJoueur.chapitre_debloque(chapitre) else "Ce chapitre est encore verrouillé."
 	Sons.jouer("choix", -16.0)
 	_rafraichir()
+	if ReglagesJoueur.chapitre_debloque(chapitre):
+		_selectionner()
 
 func _selectionner() -> void:
+	if _lancement: return
 	var index := _index_selectionne()
 	if not ReglagesJoueur.chapitre_debloque(index):
 		_message = "Terminez le chapitre précédent pour ouvrir celui-ci."
@@ -139,10 +143,6 @@ func _selectionner() -> void:
 	ReglagesJoueur.choisir_mode_run("grimoire")
 	ReglagesJoueur.choisir_chapitre(index)
 	Sons.jouer("choix", -10.0)
-	if selection_seulement:
-		selection_changee.emit()
-		StyleInterface.sortir_puis(self, func() -> void: ferme.emit())
-		return
 	_lancer_chapitre(index)
 
 func _lancer_chapitre(index: int) -> void:

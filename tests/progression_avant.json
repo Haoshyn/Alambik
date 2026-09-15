@@ -1,0 +1,860 @@
+[
+  {
+    "cadence": 2.4,
+    "degats": 10.0,
+    "dps": 24.0,
+    "forge": {},
+    "pv": 100,
+    "rangs": {},
+    "resistance": 100.0,
+    "ennemi_pv": 0.42,
+    "ennemi_degats": 0.42
+  },
+  {
+    "cadence": 2.424,
+    "degats": 12.21,
+    "dps": 29.59704,
+    "forge": {
+      "plume_encres": 0
+    },
+    "pv": 101.6,
+    "rangs": {
+      "constitution": 1,
+      "force": 1
+    },
+    "resistance": 101.6,
+    "ennemi_pv": 0.6200888888888889,
+    "ennemi_degats": 0.49316444444444446
+  },
+  {
+    "cadence": 2.4805872,
+    "degats": 12.563100000000002,
+    "dps": 31.163865052320006,
+    "forge": {
+      "plume_encres": 1,
+      "robe_enluminee": 1
+    },
+    "pv": 101.6,
+    "rangs": {
+      "armure": 1,
+      "cadence": 1,
+      "constitution": 1,
+      "force": 1
+    },
+    "resistance": 101.80360721442885,
+    "ennemi_pv": 0.8992995555555555,
+    "ennemi_degats": 0.5688267288888889
+  },
+  {
+    "cadence": 2.487100896,
+    "degats": 13.099449000000002,
+    "dps": 32.579651345006305,
+    "forge": {
+      "plume_encres": 2,
+      "robe_enluminee": 2,
+      "sceau_scribe": 2
+    },
+    "pv": 127.35216,
+    "rangs": {
+      "armure": 1,
+      "cadence": 1,
+      "constitution": 1,
+      "force": 1,
+      "precision": 1,
+      "vitalite": 1
+    },
+    "resistance": 127.607374749499,
+    "ennemi_pv": 1.2862532266666669,
+    "ennemi_degats": 0.6470530702933334
+  },
+  {
+    "cadence": 2.487100896,
+    "degats": 13.099449000000002,
+    "dps": 32.579651345006305,
+    "forge": {
+      "plume_encres": 2,
+      "robe_enluminee": 2,
+      "sceau_scribe": 2
+    },
+    "pv": 127.35216,
+    "rangs": {
+      "armure": 1,
+      "cadence": 1,
+      "constitution": 1,
+      "force": 1,
+      "precision": 1,
+      "vitalite": 1
+    },
+    "resistance": 127.607374749499,
+    "ennemi_pv": 1.8193958684444447,
+    "ennemi_degats": 0.7279112601281779
+  },
+  {
+    "cadence": 2.488089744,
+    "degats": 15.099527024999999,
+    "dps": 37.56897833015333,
+    "forge": {
+      "plume_encres": 3,
+      "robe_enluminee": 3,
+      "sceau_scribe": 3
+    },
+    "pv": 127.69224000000001,
+    "rangs": {
+      "armure": 1,
+      "cadence": 1,
+      "constitution": 1,
+      "force": 1,
+      "precision": 1,
+      "puissance": 1,
+      "rempart": 1,
+      "vitalite": 1
+    },
+    "resistance": 128.3081189710611,
+    "ennemi_pv": 2.550256136647111,
+    "ennemi_degats": 0.8114706996023016
+  },
+  {
+    "cadence": 2.4953676652800003,
+    "degats": 16.894140552300005,
+    "dps": 42.15709206690504,
+    "forge": {
+      "plume_encres": 4,
+      "robe_enluminee": 4,
+      "sceau_scribe": 4
+    },
+    "pv": 132.19823232000002,
+    "rangs": {
+      "armure": 1,
+      "cadence": 1,
+      "constitution": 2,
+      "force": 2,
+      "precision": 1,
+      "puissance": 1,
+      "rempart": 1,
+      "vitalite": 1
+    },
+    "resistance": 132.83584437299038,
+    "ennemi_pv": 3.5477575189572272,
+    "ennemi_degats": 0.8978024356492124
+  },
+  {
+    "cadence": 2.5399278021600002,
+    "degats": 16.894140552300005,
+    "dps": 42.90989728238549,
+    "forge": {
+      "plume_encres": 4,
+      "robe_enluminee": 4,
+      "sceau_scribe": 4
+    },
+    "pv": 136.20423936000003,
+    "rangs": {
+      "armure": 2,
+      "cadence": 2,
+      "constitution": 2,
+      "force": 2,
+      "precision": 1,
+      "puissance": 1,
+      "rempart": 1,
+      "robustesse": 1,
+      "rythme": 1,
+      "vitalite": 1
+    },
+    "resistance": 137.1367693918647,
+    "ennemi_pv": 4.903919594247874,
+    "ennemi_degats": 0.9869791976871408
+  },
+  {
+    "cadence": 2.5410248937,
+    "degats": 16.936298201625,
+    "dps": 43.03555533745567,
+    "forge": {
+      "plume_encres": 5,
+      "robe_enluminee": 5,
+      "sceau_scribe": 5
+    },
+    "pv": 139.60509480000005,
+    "rangs": {
+      "armure": 2,
+      "cadence": 2,
+      "constitution": 2,
+      "force": 2,
+      "precision": 2,
+      "puissance": 1,
+      "rempart": 1,
+      "robustesse": 1,
+      "rythme": 1,
+      "vitalite": 2
+    },
+    "resistance": 140.56090898107132,
+    "ennemi_pv": 6.741388242215037,
+    "ennemi_degats": 1.0790754351692842
+  },
+  {
+    "cadence": 2.5492969639116,
+    "degats": 17.254166877535503,
+    "dps": 43.98599523572535,
+    "forge": {
+      "plume_encres": 6,
+      "robe_enluminee": 6,
+      "sceau_scribe": 6
+    },
+    "pv": 142.59357500640002,
+    "rangs": {
+      "armure": 2,
+      "cadence": 2,
+      "constitution": 2,
+      "force": 2,
+      "precision": 2,
+      "puissance": 1,
+      "rempart": 1,
+      "robustesse": 1,
+      "rythme": 1,
+      "vitalite": 2
+    },
+    "resistance": 143.5698499863069,
+    "ennemi_pv": 9.223372036854778,
+    "ennemi_degats": 1.1741673559407342
+  },
+  {
+    "cadence": 2.5492969639116,
+    "degats": 26.191825320098893,
+    "dps": 66.77074076783107,
+    "forge": {
+      "plume_encres": 6,
+      "robe_enluminee": 6,
+      "sceau_scribe": 6
+    },
+    "pv": 144.64528112160002,
+    "rangs": {
+      "armure": 2,
+      "cadence": 2,
+      "carapace": 1,
+      "catalyse": 1,
+      "constitution": 3,
+      "force": 3,
+      "precision": 2,
+      "puissance": 2,
+      "rempart": 2,
+      "robustesse": 1,
+      "rythme": 1,
+      "vitalite": 2
+    },
+    "resistance": 146.5801389558168,
+    "ennemi_pv": 11.805916207174116,
+    "ennemi_degats": 1.1953023683476676
+  },
+  {
+    "cadence": 2.5703796770718,
+    "degats": 26.261580209825024,
+    "dps": 67.50223205912522,
+    "forge": {
+      "plume_encres": 7,
+      "robe_enluminee": 7,
+      "sceau_scribe": 7
+    },
+    "pv": 145.0835189352,
+    "rangs": {
+      "armure": 3,
+      "cadence": 3,
+      "carapace": 1,
+      "catalyse": 1,
+      "constitution": 3,
+      "force": 3,
+      "precision": 2,
+      "puissance": 2,
+      "rempart": 2,
+      "robustesse": 1,
+      "rythme": 1,
+      "vitalite": 2
+    },
+    "resistance": 147.32282588870837,
+    "ennemi_pv": 15.111572745182869,
+    "ennemi_degats": 1.2168178109779255
+  },
+  {
+    "cadence": 2.604632048696448,
+    "degats": 26.80008795851076,
+    "dps": 69.80436800462088,
+    "forge": {
+      "plume_encres": 8,
+      "robe_enluminee": 8,
+      "sceau_scribe": 8
+    },
+    "pv": 155.837402827776,
+    "rangs": {
+      "armure": 3,
+      "cadence": 3,
+      "carapace": 1,
+      "catalyse": 1,
+      "constitution": 3,
+      "force": 3,
+      "precision": 3,
+      "puissance": 2,
+      "rempart": 2,
+      "robustesse": 2,
+      "rythme": 2,
+      "vitalite": 3
+    },
+    "resistance": 158.24269174225833,
+    "ennemi_pv": 19.342813113834072,
+    "ennemi_degats": 1.2387205315755283
+  },
+  {
+    "cadence": 2.604632048696448,
+    "degats": 26.80008795851076,
+    "dps": 69.80436800462088,
+    "forge": {
+      "plume_encres": 8,
+      "robe_enluminee": 8,
+      "sceau_scribe": 8
+    },
+    "pv": 162.15513537484804,
+    "rangs": {
+      "armure": 3,
+      "cadence": 3,
+      "carapace": 1,
+      "catalyse": 1,
+      "constitution": 3,
+      "endurance": 1,
+      "force": 3,
+      "precision": 3,
+      "puissance": 2,
+      "rempart": 2,
+      "robustesse": 2,
+      "rythme": 2,
+      "trajectoire": 1,
+      "vitalite": 3
+    },
+    "resistance": 164.65793600207965,
+    "ennemi_pv": 24.758800785707614,
+    "ennemi_degats": 1.2610175011438878
+  },
+  {
+    "cadence": 2.605958370777204,
+    "degats": 33.99829279721499,
+    "dps": 88.5981357070367,
+    "forge": {
+      "plume_encres": 9,
+      "robe_enluminee": 9,
+      "sceau_scribe": 9
+    },
+    "pv": 163.28048063526177,
+    "rangs": {
+      "armure": 3,
+      "cadence": 3,
+      "carapace": 1,
+      "catalyse": 1,
+      "constitution": 4,
+      "endurance": 1,
+      "force": 4,
+      "precision": 3,
+      "puissance": 3,
+      "rempart": 3,
+      "robustesse": 2,
+      "rythme": 2,
+      "trajectoire": 1,
+      "vitalite": 3
+    },
+    "resistance": 166.273401868902,
+    "ennemi_pv": 31.691265005705745,
+    "ennemi_degats": 1.2837158161644777
+  },
+  {
+    "cadence": 2.6221646924789206,
+    "degats": 41.70975225820333,
+    "dps": 109.3698397035037,
+    "forge": {
+      "plume_encres": 10,
+      "robe_enluminee": 10,
+      "sceau_scribe": 10
+    },
+    "pv": 167.41736656187592,
+    "rangs": {
+      "armure": 4,
+      "cadence": 4,
+      "carapace": 2,
+      "catalyse": 2,
+      "constitution": 4,
+      "endurance": 1,
+      "force": 4,
+      "precision": 3,
+      "puissance": 3,
+      "rempart": 3,
+      "robustesse": 2,
+      "rythme": 2,
+      "trajectoire": 1,
+      "vitalite": 3
+    },
+    "resistance": 171.2134125077623,
+    "ennemi_pv": 40.56481920730335,
+    "ennemi_degats": 1.3068227008554383
+  },
+  {
+    "cadence": 2.6486890468606985,
+    "degats": 41.83555769904946,
+    "dps": 110.80938344678107,
+    "forge": {
+      "plume_encres": 11,
+      "robe_enluminee": 11,
+      "sceau_scribe": 11
+    },
+    "pv": 173.26689254225568,
+    "rangs": {
+      "armure": 4,
+      "cadence": 4,
+      "carapace": 2,
+      "catalyse": 2,
+      "constitution": 4,
+      "endurance": 1,
+      "force": 4,
+      "precision": 4,
+      "puissance": 3,
+      "rempart": 3,
+      "robustesse": 3,
+      "rythme": 3,
+      "trajectoire": 1,
+      "vitalite": 4
+    },
+    "resistance": 177.1955714989174,
+    "ennemi_pv": 51.92296858534829,
+    "ennemi_degats": 1.3303455094708363
+  },
+  {
+    "cadence": 2.6837947442629635,
+    "degats": 41.83555769904946,
+    "dps": 112.2780498760189,
+    "forge": {
+      "plume_encres": 11,
+      "robe_enluminee": 11,
+      "sceau_scribe": 11
+    },
+    "pv": 173.26689254225568,
+    "rangs": {
+      "armure": 4,
+      "bastion": 1,
+      "cadence": 4,
+      "carapace": 2,
+      "catalyse": 2,
+      "constitution": 4,
+      "endurance": 1,
+      "force": 4,
+      "precision": 4,
+      "puissance": 3,
+      "rempart": 3,
+      "robustesse": 3,
+      "rythme": 3,
+      "tempete": 1,
+      "trajectoire": 1,
+      "vitalite": 4
+    },
+    "resistance": 177.9965142054285,
+    "ennemi_pv": 66.46139978924582,
+    "ennemi_degats": 1.3542917286413114
+  },
+  {
+    "cadence": 2.69577003562197,
+    "degats": 54.20786306127403,
+    "dps": 146.13193293568156,
+    "forge": {
+      "plume_encres": 12,
+      "robe_enluminee": 12,
+      "sceau_scribe": 12
+    },
+    "pv": 185.36165915384564,
+    "rangs": {
+      "armure": 4,
+      "bastion": 1,
+      "cadence": 4,
+      "carapace": 2,
+      "catalyse": 2,
+      "constitution": 5,
+      "endurance": 2,
+      "force": 5,
+      "precision": 4,
+      "puissance": 4,
+      "rempart": 4,
+      "robustesse": 3,
+      "rythme": 3,
+      "tempete": 1,
+      "trajectoire": 2,
+      "vitalite": 4
+    },
+    "resistance": 190.5780527109041,
+    "ennemi_pv": 85.07059173023465,
+    "ennemi_degats": 1.378668979756855
+  },
+  {
+    "cadence": 2.7031460813183323,
+    "degats": 65.25759587206167,
+    "dps": 176.40081455781888,
+    "forge": {
+      "plume_encres": 13,
+      "robe_enluminee": 13,
+      "sceau_scribe": 13
+    },
+    "pv": 186.0298158380047,
+    "rangs": {
+      "armure": 5,
+      "bastion": 1,
+      "cadence": 5,
+      "carapace": 3,
+      "catalyse": 3,
+      "constitution": 5,
+      "endurance": 2,
+      "force": 5,
+      "precision": 4,
+      "puissance": 4,
+      "rempart": 4,
+      "robustesse": 3,
+      "rythme": 3,
+      "tempete": 1,
+      "trajectoire": 2,
+      "vitalite": 4
+    },
+    "resistance": 192.08884689432867,
+    "ennemi_pv": 108.89035741470035,
+    "ennemi_degats": 1.4034850213924783
+  },
+  {
+    "cadence": 2.710346790112468,
+    "degats": 65.25759587206167,
+    "dps": 176.870715502299,
+    "forge": {
+      "plume_encres": 13,
+      "robe_enluminee": 13,
+      "sceau_scribe": 13
+    },
+    "pv": 188.27113892039026,
+    "rangs": {
+      "armure": 5,
+      "bastion": 1,
+      "cadence": 5,
+      "carapace": 3,
+      "catalyse": 3,
+      "constitution": 5,
+      "endurance": 2,
+      "force": 5,
+      "precision": 5,
+      "puissance": 4,
+      "rempart": 4,
+      "robustesse": 4,
+      "rythme": 4,
+      "tempete": 1,
+      "trajectoire": 2,
+      "vitalite": 5
+    },
+    "resistance": 194.4031703508868,
+    "ennemi_pv": 139.37965749081644,
+    "ennemi_degats": 1.428747751777543
+  },
+  {
+    "cadence": 2.723754762744212,
+    "degats": 66.97699911194279,
+    "dps": 182.42892032546902,
+    "forge": {
+      "plume_encres": 14,
+      "robe_enluminee": 14,
+      "sceau_scribe": 14
+    },
+    "pv": 193.85660679673865,
+    "rangs": {
+      "armure": 5,
+      "bastion": 1,
+      "cadence": 5,
+      "carapace": 3,
+      "catalyse": 3,
+      "constitution": 5,
+      "endurance": 2,
+      "force": 5,
+      "precision": 5,
+      "puissance": 4,
+      "rempart": 4,
+      "robustesse": 4,
+      "rythme": 4,
+      "tempete": 1,
+      "trajectoire": 2,
+      "vitalite": 5
+    },
+    "resistance": 200.1705581155845,
+    "ennemi_pv": 178.40596158824508,
+    "ennemi_degats": 1.4544652113095389
+  },
+  {
+    "cadence": 2.7610051479497266,
+    "degats": 106.26615695794327,
+    "dps": 293.401406413715,
+    "forge": {
+      "plume_encres": 15,
+      "robe_enluminee": 15,
+      "sceau_scribe": 15
+    },
+    "pv": 212.6299904241274,
+    "rangs": {
+      "armure": 5,
+      "bastion": 2,
+      "cadence": 5,
+      "carapace": 3,
+      "catalyse": 3,
+      "colosse": 1,
+      "constitution": 6,
+      "domination": 1,
+      "endurance": 3,
+      "force": 6,
+      "precision": 5,
+      "puissance": 5,
+      "rempart": 5,
+      "robustesse": 4,
+      "rythme": 4,
+      "tempete": 2,
+      "trajectoire": 3,
+      "vitalite": 5
+    },
+    "resistance": 220.74063192870796,
+    "ennemi_pv": 228.35963083295368,
+    "ennemi_degats": 1.4806455851131106
+  },
+  {
+    "cadence": 2.766797972807738,
+    "degats": 127.51938834953195,
+    "dps": 352.82038517916766,
+    "forge": {
+      "plume_encres": 15,
+      "robe_enluminee": 15,
+      "sceau_scribe": 15
+    },
+    "pv": 212.6299904241274,
+    "rangs": {
+      "armure": 6,
+      "bastion": 2,
+      "cadence": 6,
+      "carapace": 4,
+      "catalyse": 4,
+      "colosse": 1,
+      "constitution": 6,
+      "domination": 1,
+      "endurance": 3,
+      "force": 6,
+      "precision": 5,
+      "puissance": 5,
+      "rempart": 5,
+      "robustesse": 4,
+      "rythme": 4,
+      "tempete": 2,
+      "trajectoire": 3,
+      "vitalite": 5
+    },
+    "resistance": 221.10789900898627,
+    "ennemi_pv": 292.3003274661807,
+    "ennemi_degats": 1.5072972056451466
+  },
+  {
+    "cadence": 2.7892379875815556,
+    "degats": 131.15308294172877,
+    "dps": 365.8171611295044,
+    "forge": {
+      "plume_encres": 16,
+      "robe_enluminee": 16,
+      "sceau_scribe": 16
+    },
+    "pv": 221.8180617309462,
+    "rangs": {
+      "armure": 6,
+      "bastion": 2,
+      "cadence": 6,
+      "carapace": 4,
+      "catalyse": 4,
+      "colosse": 1,
+      "constitution": 6,
+      "domination": 1,
+      "endurance": 3,
+      "force": 6,
+      "precision": 6,
+      "puissance": 5,
+      "rempart": 5,
+      "robustesse": 5,
+      "rythme": 5,
+      "tempete": 2,
+      "trajectoire": 3,
+      "vitalite": 6
+    },
+    "resistance": 230.6623138802994,
+    "ennemi_pv": 374.1444191567113,
+    "ennemi_degats": 1.5344285553467591
+  },
+  {
+    "cadence": 2.7912008895050655,
+    "degats": 131.6223634044651,
+    "dps": 367.38445781330194,
+    "forge": {
+      "plume_encres": 17,
+      "robe_enluminee": 17,
+      "sceau_scribe": 17
+    },
+    "pv": 222.7054922011938,
+    "rangs": {
+      "armure": 6,
+      "bastion": 2,
+      "cadence": 6,
+      "carapace": 4,
+      "catalyse": 4,
+      "colosse": 1,
+      "constitution": 6,
+      "domination": 1,
+      "endurance": 3,
+      "force": 6,
+      "precision": 6,
+      "puissance": 5,
+      "rempart": 5,
+      "robustesse": 5,
+      "rythme": 5,
+      "tempete": 2,
+      "trajectoire": 3,
+      "vitalite": 6
+    },
+    "resistance": 231.58512766776943,
+    "ennemi_pv": 478.9048565205905,
+    "ennemi_degats": 1.562048269343001
+  },
+  {
+    "cadence": 2.8269014490419355,
+    "degats": 166.50228970664836,
+    "dps": 470.68556404052435,
+    "forge": {
+      "plume_encres": 17,
+      "robe_enluminee": 17,
+      "sceau_scribe": 17
+    },
+    "pv": 225.44859295193984,
+    "rangs": {
+      "armure": 6,
+      "bastion": 3,
+      "cadence": 6,
+      "carapace": 4,
+      "catalyse": 4,
+      "colosse": 1,
+      "constitution": 7,
+      "domination": 1,
+      "endurance": 4,
+      "force": 7,
+      "precision": 6,
+      "puissance": 6,
+      "rempart": 6,
+      "robustesse": 5,
+      "rythme": 5,
+      "tempete": 3,
+      "trajectoire": 4,
+      "vitalite": 6
+    },
+    "resistance": 235.71217449270804,
+    "ennemi_pv": 612.9982163463559,
+    "ennemi_degats": 1.590165138191175
+  },
+  {
+    "cadence": 2.8499020758771265,
+    "degats": 334.6579560801047,
+    "dps": 953.7424037414867,
+    "forge": {
+      "plume_encres": 18,
+      "robe_enluminee": 18,
+      "sceau_scribe": 18
+    },
+    "pv": 244.3644240599042,
+    "rangs": {
+      "armure": 7,
+      "bastion": 3,
+      "cadence": 7,
+      "carapace": 5,
+      "catalyse": 5,
+      "colosse": 2,
+      "constitution": 7,
+      "domination": 2,
+      "endurance": 4,
+      "force": 7,
+      "grand_oeuvre": 1,
+      "immortel": 1,
+      "precision": 6,
+      "puissance": 6,
+      "rempart": 6,
+      "robustesse": 5,
+      "rythme": 5,
+      "tempete": 3,
+      "trajectoire": 4,
+      "vitalite": 6
+    },
+    "resistance": 257.5355267117328,
+    "ennemi_pv": 784.6377169233356,
+    "ennemi_degats": 1.6187881106786162
+  },
+  {
+    "cadence": 2.8594090526433766,
+    "degats": 335.91973744389054,
+    "dps": 960.5319382086468,
+    "forge": {
+      "plume_encres": 19,
+      "robe_enluminee": 19,
+      "sceau_scribe": 19
+    },
+    "pv": 247.88363306980688,
+    "rangs": {
+      "armure": 7,
+      "bastion": 3,
+      "cadence": 7,
+      "carapace": 5,
+      "catalyse": 5,
+      "colosse": 2,
+      "constitution": 7,
+      "domination": 2,
+      "endurance": 4,
+      "force": 7,
+      "grand_oeuvre": 1,
+      "immortel": 1,
+      "precision": 7,
+      "puissance": 6,
+      "rempart": 6,
+      "robustesse": 6,
+      "rythme": 6,
+      "tempete": 3,
+      "trajectoire": 4,
+      "vitalite": 7
+    },
+    "resistance": 261.2444190738705,
+    "ennemi_pv": 1004.3362776618695,
+    "ennemi_degats": 1.6479262966708312
+  },
+  {
+    "cadence": 2.861586034358502,
+    "degats": 337.1815188076763,
+    "dps": 964.873925263835,
+    "forge": {
+      "plume_encres": 20,
+      "robe_enluminee": 20,
+      "sceau_scribe": 20
+    },
+    "pv": 248.92018465094415,
+    "rangs": {
+      "armure": 7,
+      "bastion": 3,
+      "cadence": 7,
+      "carapace": 5,
+      "catalyse": 5,
+      "colosse": 2,
+      "constitution": 7,
+      "domination": 2,
+      "endurance": 4,
+      "force": 7,
+      "grand_oeuvre": 1,
+      "immortel": 1,
+      "precision": 7,
+      "puissance": 6,
+      "rempart": 6,
+      "robustesse": 6,
+      "rythme": 6,
+      "tempete": 3,
+      "trajectoire": 4,
+      "vitalite": 7
+    },
+    "resistance": 262.3368401922025,
+    "ennemi_pv": 1285.550435407193,
+    "ennemi_degats": 1.6775889700109063
+  }
+]

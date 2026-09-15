@@ -2,11 +2,55 @@
 
 Ce fichier sert à s'orienter, pas à remplacer les données du jeu. Pour une valeur exacte, lire le catalogue ou `data/reglages.gd` concerné.
 
+## Garantie de drop et calcul économique — 16 septembre
+
+Objet 1/3, garanti à la troisième victoire éligible du chapitre ; sort 1/5,
+garanti à la cinquième de son Épreuve. Compteurs persistants, réinitialisés au
+drop et inactifs sur défaite ou pool complète ; premier bijou toujours offert.
+Aperçus synchronisés avec la vraie probabilité et le compteur restant.
+Deux/trois victoires sur chacun des six premiers chapitres : environ 1 638/2 456
+gouttes, 664/832 PV et 956/1 240 dégâts bruts encaissables pour un achat équilibré.
+Aucune forge inventée sans Mine. Courbe monde 3 recalée à 120 dégâts de référence
+et ×3 PV ennemis, en conservant les extrémités de campagne.
+Détails, hypothèses et reproduction : `docs/ops/ECONOMIE_MONDE3_ET_GARANTIES.md`.
+37 502 assertions et 17 contrôles dédiés réussis ; vingt runs sans blocage.
+Les six sondes économiques monde 3 perdent salles 5–6 : confort humain à apprécier.
+
+## Progression, bijoux et prise en main — 16 septembre
+
+Premier chapitre adouci et premier bijou garanti à la victoire. Courbe fixe
+exponentielle : 120 dégâts de référence à l’entrée du monde 3, sans
+ajustement selon le build réel. Cadence de base réduite de 20 %.
+Un pouvoir par bijou au niveau 10 ; forge statistique au-delà, coût exponentiel,
+plafond 100. Objets de même budget entre mondes. Dix baguettes, une par monde ;
+aiguille moins dominante et cuivre perforant sans perte.
+Maîtrises majeures à rang unique aux positions 3/6/9, autres nœuds à dix rangs ;
+utilitaire orienté ressources. Anciens achats de maîtrises remboursés une fois.
+Sorts +3 % par rang, Réserve d’ultime −45 % de recharge au rang 1.
+Conseil initial non bloquant, lancement direct du chapitre touché, fiches de
+butin illustrées et cliquables. Détails et limites :
+`docs/ops/PROGRESSION_STATISTIQUES.md`, `docs/ops/EFFETS_BIJOUX.md`.
+
+Validation : 31 252 assertions et 47 contrôles d’intégration réussis. Chapitre 1 :
+17 victoires sur vingt runs, aucun blocage. Le profil de fin sous-investi en défense
+reste insuffisant (mort salle 1 du chapitre 30) ; rythme humain à apprécier en jeu.
+Diagnostics de ressources à la fermeture headless persistants.
+
+## Variété des salles — 15 septembre
+
+Six profils de campagne : alcôves, rotonde, galerie allongée, cour large,
+ovale et cour décalée. Dimensions partagées par les acteurs et la caméra ;
+contour commun au sol 3D et aux collisions. Huit compositions d'obstacles et
+quatre arrangements de piliers/jardins. Apparitions vérifiées dans le contour.
+18 485 assertions réussies ; vingt runs sans blocage, morts entre les salles
+3 et 10. Diagnostics de ressources à la fermeture du selftest inchangés.
+Rendu sur téléphone à apprécier. Voir `docs/ops/FORMES_SALLES.md`.
+
 ## Coffres, sorts et épreuves — 14 septembre
 
 Invocations de boss : 2 par salve, 18 s minimum, plafond 3, 28 % des PV normaux.
 Sorts et ultimes à récupération temporelle ; dégâts et passifs tempérés. Aiguille
-vive −10 % récupération, maîtrise Élan arcanique ajoutée par conversion d’Élan.
+vive et Élan avaient des bonus de récupération, retirés lors de la passe du 16 septembre.
 Onze niveaux d’épreuve avec loots locaux, zéro augment initial et quatre choix
 entre les cinq boss. Coffre interactif à toute fin de run, abandon compris,
 vide sans salle terminée ; objets et sorts aléatoires seulement à la victoire.
@@ -134,7 +178,7 @@ Atelier vivant intégré : accueil illustré avec héros 3D, menus ivoire/cuivre
 - Combat 3D : modèles GLB existants du héros, gardien, bestiaire, boss, projectiles et décor ; palettes lumineuses des dix mondes.
 - Accueil Atelier vivant : fond original d’atelier, Apprenti A 3D animé, éclairage et commandes natives.
 - Menus natifs Atelier vivant : équipements Anneau/Collier/Bague, maîtrises, sorts, trois cartes d’amélioration superposées, paramètres, pause, infusion et bilan. Aucun portrait du héros sur ces écrans.
-- Salles de campagne 1260 × 1900, trois obstacles centraux décalés et retraits latéraux raccordés aux collisions. Boss et Épreuves dégagés ; Mine sans retraits sur les bords d’apparition. Caméra de suivi avec vue 3D à 48°.
+- Salles de campagne aux dimensions variables à partir de 1260 × 1900, six silhouettes et huit compositions d'obstacles. Boss et Épreuves dégagés ; Mine sans retraits sur les bords d'apparition. Caméra de suivi avec vue 3D à 48°.
 - 83 glyphes SVG : silhouettes distinctes par amélioration, maîtrise et sort. Bijoux absents dans les emplacements vides. Captures et validation des retouches : `docs/ops/RETOUCHES_GRAPHIQUES.md`.
 - Base portrait 1080 × 1920 avec extension adaptative du viewport, sans déformation ni bandes sur les formats testés. Vérifications : `docs/ops/ATELIER_VIVANT.md`.
 - Sondes headless et suites de tests maison.

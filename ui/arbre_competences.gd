@@ -10,6 +10,8 @@ var _noeuds := {}
 var _embleme: TextureRect
 
 func _ready() -> void:
+	if ReglagesJoueur.remboursement_maitrises > 0:
+		_message = "Arbre réorganisé : %d gouttes remboursées." % ReglagesJoueur.remboursement_maitrises
 	var col := StyleAzur.page(self,"Maîtrises",integre_menu)
 	_solde = StyleAzur.texte("",28,StyleAzur.IVOIRE)
 	_solde.visible = not integre_menu
@@ -53,6 +55,10 @@ func _ready() -> void:
 			b.add_theme_stylebox_override("hover", StyleAzur.cadre(Color("476ba3"), StyleAzur.MAGIE, 64))
 			b.add_theme_stylebox_override("pressed", StyleAzur.cadre(Color("793e92"), StyleAzur.MAGIE, 64))
 			b.add_theme_stylebox_override("focus", StyleAzur.cadre(Color.TRANSPARENT, StyleAzur.MAGIE, 64))
+			if ArbreCompetences.rangs(id) == 1:
+				var majeur := StyleAzur.texte("POUVOIR MAJEUR", 18, accent)
+				majeur.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				ligne.add_child(majeur)
 			ligne.add_child(b)
 			_noeuds[id] = b
 			var lien := StyleAzur.texte("│",26,accent)
@@ -83,7 +89,7 @@ func _rafraichir() -> void:
 		rang.text = "%d / %d" % [ReglagesJoueur.rang_competence(id),ArbreCompetences.rangs(id)] if ouvert else "Verrouillé"
 		if ouvert and id == _selection: rang.text = "◆ " + rang.text
 		elif ouvert and ReglagesJoueur.rang_competence(id) > 0: rang.text = "✓ " + rang.text
-		b.tooltip_text = str(ArbreCompetences.NOEUDS[id]["nom"])
+		b.tooltip_text = str(ArbreCompetences.NOEUDS[id]["nom"]) + (" · Pouvoir majeur" if ArbreCompetences.rangs(id)==1 else "")
 		b.add_theme_font_size_override("font_size",22)
 		b.add_theme_color_override("font_color",StyleAzur.IVOIRE)
 		var accent: Color = b.get_meta("accent")
@@ -91,7 +97,7 @@ func _rafraichir() -> void:
 	var n: Dictionary = ArbreCompetences.NOEUDS[_selection]
 	_embleme.texture = _noeuds[_selection].get_meta("embleme")
 	_details.text = "%s\n%s\n%s" % [n["nom"],ArbreCompetences.description_effective(_selection),_message]
-	_achat.text = "Améliorer · %d gouttes" % ReglagesJoueur.cout_competence(_selection)
+	_achat.text = "%s · %d gouttes" % ["Débloquer" if ArbreCompetences.rangs(_selection)==1 else "Améliorer",ReglagesJoueur.cout_competence(_selection)]
 	_achat.disabled = ReglagesJoueur.rang_competence(_selection) >= ArbreCompetences.rangs(_selection) or (not ReglagesJoueur.mode_dev and (not ArbreCompetences.prerequis_atteint(_selection,ReglagesJoueur.rangs_competences) or ReglagesJoueur.gouttes < ReglagesJoueur.cout_competence(_selection)))
 	var requis := str(n.get("requis",""))
 	if not requis.is_empty() and not ArbreCompetences.prerequis_atteint(_selection,ReglagesJoueur.rangs_competences):

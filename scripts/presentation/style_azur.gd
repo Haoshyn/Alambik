@@ -48,7 +48,8 @@ static func icone_arme(id: String) -> AtlasTexture:
 			baguette.region = Rect2(Vector2.ZERO, baguette.atlas.get_size())
 			_icones[cle] = baguette
 			return baguette
-		var index := ["standard","veloce","lourd","chercheur","explosif"].find(id)
+		var variantes := {"prisme":"veloce","resonant":"lourd","draconique":"explosif","neant":"chercheur","royal":"lourd"}
+		var index := ["standard","veloce","lourd","chercheur","explosif"].find(str(variantes.get(id,id)))
 		index = maxi(index,0)
 		var texture := AtlasTexture.new()
 		texture.atlas = ARMES_ATELIER

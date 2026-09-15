@@ -22,11 +22,12 @@ const XP_COMPTE_BASE := 10.0
 const XP_COMPTE_PENTE := 4.0
 const XP_COMPTE_QUADRATIQUE := 1.2
 
-const HEROS_PV := 100.0
+# Bases recalees sur le profil du chapitre 5 ; voir PROGRESSION_STATISTIQUES.md.
+const HEROS_PV := 60.6489414683
 const HEROS_VITESSE := 560.0
 const HEROS_ACCELERATION := 3100.0
 const HEROS_FREINAGE := 4200.0
-const HEROS_CADENCE := 2.4          # tirs par seconde
+const HEROS_CADENCE := 1.5862736918          # tirs par seconde
 const HEROS_INVULNERABILITE := 0.6  # secondes apres un coup recu
 const HEROS_RAYON := 20.0
 const HEROS_ECHELLE := 0.78
@@ -54,7 +55,7 @@ const ENNEMI_RECHARGE_MULT := 0.97
 const ENNEMI_HITBOX_MULT := 0.72
 const BOSS_HITBOX_MULT := 0.74
 
-const TIR_DEGATS := 10.0
+const TIR_DEGATS := 5.4925677820
 const MODS_PLANCHER := 0.05
 # Mesure : la creature la plus rapide file a 704 px/s. A 900, le projectile
 # n'allait qu'a 1,28 fois sa vitesse et se faisait esquiver systematiquement ;
@@ -169,7 +170,7 @@ const RIPOSTE_PART_DEGATS := 2.0
 const RIPOSTE_REPOUSSEE := 420.0
 const SECONDE_CHANCE_PART := 0.30      # une seule resurrection par run
 const RESERVE_ULTIME_CHARGES := 1
-const RESERVE_ULTIME_REMISE := 0.20    # charge requise en moins
+const RESERVE_ULTIME_REMISE := 0.45    # charge requise en moins
 const HERITAGE_AMELIORATIONS := 2
 const ECHO_CHANCE := 0.25
 const ECHO_PART_DEGATS := 0.60
@@ -181,9 +182,8 @@ const DERNIER_REMPART_REDUCTION := 0.30
 # Equipement. Le palier du compte fait monter tous les objets possedes ensemble :
 # une trouvaille ancienne reste donc viable au Monde X au lieu d'etre remplacee
 # automatiquement par la meme silhouette avec dix fois plus de statistiques.
-# +9 % par Monde laisse une progression sensible sans faire du stuff une source
-# de puissance exponentielle a lui seul.
-const OBJET_CROISSANCE_PAR_MONDE := 1.09
+# Le rattrapage de Monde se compose avec la Forge pour les degats et les PV.
+const OBJET_CROISSANCE_PAR_MONDE := 1.08
 
 # Sceaux. L'aura ne fait aucun degat : elle marque, ce qui la rend lisible face
 # aux Phenomenes qui, eux, frappent.
@@ -251,16 +251,7 @@ const ECHELLE_VISUELLE_COMBAT := 1.08
 # chapitre n'est charge.
 const SALLES_PAR_RUN := 20
 
-# Les PV suivent la puissance permanente composee, avec une difficulte fixe
-# par chapitre : equiper une Maitrise ne renforce jamais les ennemis presents.
-const COURBE_PV_PAR_PALIER := 1.28
-# La densite multiplie aussi les occasions d'etre touche. Les degats individuels
-# montent donc plus doucement afin qu'un joueur habile puisse compenser le farm.
-const COURBE_DEGATS_PAR_PALIER := 1.018
-# Le debut est volontairement genereux puis rejoint la courbe sur trois Mondes :
-# apprendre a gerer trois ou quatre vagues ne doit pas exiger de farmer Monde I.
-const COURBE_DOUCEUR_DEBUT := 0.42
-const COURBE_PALIERS_DOUCEUR := 9
+# La courbe entre chapitres vit dans data/progression_statistiques.gd.
 
 # Le crescendo interne est lui aussi modere : les salles tardives ont deja plus
 # de vagues. Les statistiques servent a maintenir la tension, pas a doubler une
@@ -289,30 +280,35 @@ const XP_RUN_SEUILS := [10, 26, 55, 80, 145, 220]
 # 47-50 % vers 70 % du jeu et 80 % a la premiere fin. Les rangs 2-5 restent le
 # vrai puits de farm apres cette premiere progression.
 const MAITRISE_COUTS := [8, 12, 20, 35, 60, 100, 170, 280, 460, 760]
+const MAITRISE_VERSION := 2
+const MAITRISE_COUT_MAJEUR := 4
 const MAITRISE_RANG_MAX := 10
-const MAITRISE_RANGS_PLEINS := 3
-const MAITRISE_POIDS_TARDIF := 2.0 / 7.0
 const MAITRISE_COUT_PAR_RANG := 1.35
 const GOUTTES_MULT_PAR_CHAPITRE := 1.20
 
 # Capacites d'Epreuve : le premier exemplaire debloque la regle de jeu ; neuf
-# doublons apportent ensuite +54 % au maximum, pas un second exemplaire complet.
+# doublons apportent ensuite +27 % au maximum, pas un second exemplaire complet.
 const CAPACITE_RANG_MAX := 10
-const CAPACITE_BONUS_PAR_RANG := 0.06
+const CAPACITE_BONUS_PAR_RANG := 0.03
 # Un seul jet de capacite dans le coffre final. Les boss intermediaires
 # donnent des choix de run, jamais de sorts permanents.
-const EPREUVE_CHANCE_CAPACITE := 0.80
+const EPREUVE_GARANTIE_CAPACITE := 5
+const EPREUVE_CHANCE_CAPACITE := 1.0 / EPREUVE_GARANTIE_CAPACITE
 const EPREUVE_NIVEAU_DEBLOCAGE := 2
 const MINE_NIVEAU_DEBLOCAGE := 4
 
 # La Forge appartient a l'objet. Son cout croit geometriquement pour que les
 # derniers niveaux restent un objectif de farm et non une formalite.
-# La Forge multiplie le profil de l'objet : un seul facteur, quel que soit le
-# champ, sinon deux constantes devraient rester egales sans que rien ne le dise.
-const FORGE_BONUS_PAR_NIVEAU := 0.015
-const FORGE_NIVEAU_MAX := 60
+# Chaque nouveau niveau regroupe deux anciens niveaux de Forge.
+# Un pouvoir au niveau 10 ; au-dela, les statistiques seules progressent.
+const FORGE_VERSION := 2
+const FORGE_ANCIEN_NIVEAU_MAX := 60
+const FORGE_REGROUPEMENT := 2
+const FORGE_BONUS_PAR_NIVEAU := 0.0816
+const FORGE_NIVEAU_MAX := 100
 const FORGE_COUT_BASE := 8
-const FORGE_COUT_CROISSANCE := 1.055
+const FORGE_COUT_CROISSANCE := 1.12
+const FORGE_COUT_APRES_EFFET := 1.18
 const MINE_PIERRES_RECOMPENSE := 25
 # +12 % par chapitre produit environ x1,40 par Monde et x27 sur les trente
 # paliers. Cela donne une vraie acceleration sans le x512 qu'impliquerait un
@@ -323,7 +319,8 @@ static func cout_maitrise(cout_base: int, rang_acquis: int) -> int:
 	return maxi(1, roundi(float(cout_base) * pow(MAITRISE_COUT_PAR_RANG, float(rang_acquis))))
 
 static func cout_forge(niveau_acquis: int) -> int:
-	return maxi(1, roundi(float(FORGE_COUT_BASE) * pow(FORGE_COUT_CROISSANCE, float(niveau_acquis))))
+	var niveau := clampi(niveau_acquis,0,FORGE_NIVEAU_MAX)
+	return maxi(1,roundi(FORGE_COUT_BASE * pow(FORGE_COUT_CROISSANCE,mini(niveau,10)) * pow(FORGE_COUT_APRES_EFFET,maxi(0,niveau-10))))
 
 static func pierres_mine(palier: int) -> int:
 	return maxi(1, roundi(float(MINE_PIERRES_RECOMPENSE) \
@@ -332,10 +329,10 @@ static func pierres_mine(palier: int) -> int:
 # Les annexes suivent la puissance brute du chapitre atteint sans reprendre la
 # douceur pedagogique des premiers chapitres de campagne.
 static func facteur_annexe_pv(palier: int) -> float:
-	return pow(COURBE_PV_PAR_PALIER, float(maxi(0, palier)))
+	return ProgressionStatistiques.facteur_pv(palier)
 
 static func facteur_annexe_degats(palier: int) -> float:
-	return pow(COURBE_DEGATS_PAR_PALIER, float(maxi(0, palier)))
+	return ProgressionStatistiques.facteur_degats(palier)
 
 # La Mine est une survie complete : peu de pression au depart, une horde qui
 # monte pendant cinq minutes, puis un boss. Les multiplicateurs s'appliquent

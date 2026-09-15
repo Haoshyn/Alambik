@@ -6,7 +6,7 @@ func _ready() -> void:
 	var col := StyleAzur.page(self, "La halte")
 	col.add_child(StyleAzur.texte("Choisissez une nouvelle augmentation\n30 % de soin à l’entrée du prochain boss", 30, StyleAzur.ATTENUE))
 	var liste := StyleAzur.defilement(col)
-	var propositions := DraftLogique.proposer_halte(Jeu.inventaire, Jeu.rng)
+	var propositions := DraftLogique.proposer_halte(Jeu.ameliorations_effectives(), Jeu.rng)
 	for id in propositions:
 		var reactif := CatalogueReactifs.par_id(id)
 		var bouton := StyleAzur.bouton(reactif.nom + "\n\n" + reactif.description, func(): _choisir(id))

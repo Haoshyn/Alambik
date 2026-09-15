@@ -22,7 +22,7 @@ const PASSIFS := {
 	"moisson_vitale": {"nom": "Moisson vitale", "description": "Toutes les 6 éliminations, récupère 2 % des PV • soins limités à 5 % par salle"},
 	"riposte_alchimique": {"nom": "Riposte alchimique", "description": "Être touché déclenche une déflagration massive qui repousse"},
 	"seconde_chance": {"nom": "Seconde chance", "description": "Une fois par aventure, survit à la mort avec 30 % des PV"},
-	"reserve_ultime": {"nom": "Réserve d’ultime", "description": "Délai de récupération de l’ultime réduit de 20 %"},
+	"reserve_ultime": {"nom": "Réserve d’ultime", "description": "Délai de récupération de l’ultime réduit de 45 %"},
 	"sang_froid": {"nom": "Sang-froid", "description": "Délai de récupération du sort actif réduit de 15 %"},
 	"dernier_rempart": {"nom": "Dernier rempart", "description": "Sous 40 % de PV, subit 30 % de dégâts en moins"},
 	"audace": {"nom": "Audace", "description": "Sous 60 % de PV, inflige 30 % de dégâts en plus"},

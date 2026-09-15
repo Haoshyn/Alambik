@@ -61,17 +61,13 @@ static func _construire_chapitres() -> Array[Dictionary]:
 
 # Definies pour tout palier positif, y compris au-dela du trentieme : ajouter
 # un onzieme Monde ne demande qu'une entree dans MONDES.
-static func douceur_du_palier(palier: int) -> float:
-	return lerpf(Reglages.COURBE_DOUCEUR_DEBUT, 1.0,
-		clampf(float(maxi(0, palier)) / float(Reglages.COURBE_PALIERS_DOUCEUR), 0.0, 1.0))
-
 static func pv_du_palier(palier: int) -> float:
 	var p := maxi(0, palier)
-	return pow(Reglages.COURBE_PV_PAR_PALIER, float(p)) * douceur_du_palier(p)
+	return ProgressionStatistiques.facteur_pv(p)
 
 static func degats_du_palier(palier: int) -> float:
 	var p := maxi(0, palier)
-	return pow(Reglages.COURBE_DEGATS_PAR_PALIER, float(p)) * douceur_du_palier(p)
+	return ProgressionStatistiques.facteur_degats(p)
 
 static func palier(index: int) -> int:
 	return int(par_index(index)["palier"])

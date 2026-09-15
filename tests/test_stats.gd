@@ -45,7 +45,7 @@ func test_un_objet_apporte_son_profil_multiplie_par_la_forge(v: Verif) -> void:
 	# lisible est exactement son profil multiplie par la Forge.
 	var id := CatalogueObjets.objet_du_chapitre(0)
 	var profil: Dictionary = CatalogueObjets.OBJETS[id]["profil"]
-	var forge := 1.0 + 2.0 * Reglages.FORGE_BONUS_PAR_NIVEAU
+	var forge := pow(1.0 + Reglages.FORGE_BONUS_PAR_NIVEAU, 2.0)
 	var bonus := CatalogueObjets.bonus_effectifs({"anneau_gauche": id}, {id: 2})
 	v.presque(float(bonus["degats"]), float(profil["degats"]) * forge,
 		"l'objet apporte son profil, la Forge le multiplie")
@@ -66,7 +66,7 @@ func test_le_collier_defend_et_l_anneau_attaque(v: Verif) -> void:
 		"le Collier est d'abord un objet defensif")
 	var anneau := CatalogueObjets.objet_du_chapitre(0)
 	var offensif := CatalogueObjets.bonus_effectifs({"anneau_gauche": anneau}, {})
-	v.presque(float(offensif["pv"]), 0.0, "l'Anneau I ne donne pas de PV")
+	v.vrai(float(offensif["pv"]) > 0.0, "l'Anneau apporte aussi de la resistance")
 
 # Le palier du compte rattrape les vieux objets : le choix final pourra donc se
 # faire sur leur effet propre sans qu'un drop tardif invalide automatiquement le
@@ -77,5 +77,5 @@ func test_un_objet_ancien_rattrape_le_palier_du_compte(v: Verif) -> void:
 	var monde_final := Chapitres.MONDES.size() - 1
 	var ancien := CatalogueObjets.bonus_objet(premier, 0, monde_final)
 	var tardif := CatalogueObjets.bonus_objet(dernier, 0, monde_final)
-	v.presque(float(ancien["degats"]), float(tardif["degats"]),
-		"deux Anneaux du meme profil ont la meme base une fois le Monde rattrape")
+	v.presque(float(ancien["degats"])+float(ancien["pv"]), float(tardif["degats"])+float(tardif["pv"]),
+		"deux Anneaux du meme profil ont le meme budget total")

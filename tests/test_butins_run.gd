@@ -11,6 +11,7 @@ func test_chaque_salle_remplit_le_coffre_et_boss_augmente_le_rang(v: Verif) -> v
 		precedent = int(offre["gouttes_min"])
 		if salle < 20: v.vrai((offre["objets"] as Array).is_empty(), "pas d'objet sans victoire finale")
 	var final := ButinsRun.offre("grimoire", 0, 20, 4, true, 1, {}, [], 0)
+	v.presque(float(final["chance_objet"]), 1.0, "premier equipement garanti sans compteur de malchance")
 	v.egal(final["gouttes_min"], 72, "economie finale preservee")
 	v.egal(final["gouttes_max"], 76, "economie finale preservee")
 
@@ -42,7 +43,7 @@ func test_tirage_conforme_a_l_apercu_et_sans_loot_anticipe(v: Verif) -> void:
 	var rangs := {"nova_de_givre": Reglages.CAPACITE_RANG_MAX}
 	var offre := ButinsRun.offre("epreuve_sorts", 0, 5, 5, true, 2, rangs, [], 0)
 	v.egal(offre["sorts"], ["heritage_reactif"], "le sort maxe sort de la pool")
-	v.presque(float(offre["chance_sort"]), 0.8, "la chance restante est annoncee correctement")
+	v.presque(float(offre["chance_sort"]), 0.2, "la chance restante est annoncee correctement")
 	var garanti := ButinsRun.offre("grimoire", 0, 20, 4, true, 1, {}, [], 4)
 	v.presque(float(garanti["chance_objet"]), 1.0, "la garantie est dans l'offre affichee")
 
@@ -51,8 +52,8 @@ func test_recharges_sans_avantage_cache_de_cadence(v: Verif) -> void:
 		for id in catalogue:
 			var base := Sorts.recharge(id, {}, {}, "standard")
 			v.vrai(base > 0.0, "recharge temporelle positive")
-			v.presque(Sorts.recharge(id, {}, {}, "veloce"), base * 0.9, "seul le passif explicite de l'aiguille reduit le delai")
+			v.presque(Sorts.recharge(id, {}, {}, "veloce"), base * 1.0, "l'aiguille ne reduit plus la recharge")
 			v.presque(Sorts.recharge(id, {}, {}, "lourd"), base, "la cadence lente ne penalise pas les sorts")
 			var maximal := Sorts.recharge(id, {"sang_froid": 100.0, "reserve_ultime": 100.0}, {"elan": 10}, "veloce")
 			v.vrai(maximal >= base * Reglages.RECHARGE_PLANCHER, "la combinaison des reductions reste bornee")
-	v.vrai(ArbreCompetences.multiplicateur_recharge({"elan": 1}) < 1.0, "la maitrise utilitaire reduit le delai")
+	v.vrai(ArbreCompetences.multiplicateur_recharge({"elan": 1}) == 1.0, "la maitrise utilitaire ne donne plus de recharge")

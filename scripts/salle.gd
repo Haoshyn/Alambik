@@ -29,6 +29,7 @@ var _portail_ouvert := false
 var _portail: Area2D
 var _obstacles: Array[Rect2] = []
 var _retraits: Array[Rect2] = []
+var _contour := PackedVector2Array()
 var _anim := 0.0
 var _attente_vague := 0.0
 var _mine_active := false
@@ -77,19 +78,23 @@ func _construire_obstacles() -> void:
 		if enfant is StaticBody2D:
 			enfant.queue_free()
 	_obstacles.clear()
-	_construire_murs_perimetre()
 	_retraits.clear()
+	_contour = FormesSalles.contour(limites, FormesSalles.indice(numero, Jeu.chapitre, Jeu.graine, Jeu.mode_run))
 	var combat_de_boss := Jeu.mode_run == "grimoire" and Chapitres.est_boss(Jeu.chapitre, numero) \
 		or Jeu.mode_run in ["epreuve_sorts", "retro"]
 	if combat_de_boss or _vagues.is_empty() and Jeu.mode_run != "mine":
+		_construire_murs_perimetre()
 		return
-	var motif := posmod(Jeu.graine+numero,Reglages.ARENE_COMPOSITIONS.size())
+	var motif := posmod(Jeu.graine+numero+Jeu.chapitre,Reglages.ARENE_COMPOSITIONS.size())
 	for retrait: Rect2 in Reglages.ARENE_RETRAITS[motif]:
 		# La Mine fait apparaitre ses ennemis le long des quatre bords.
-		if Jeu.mode_run == "mine": break
+		if Jeu.mode_run == "mine" or FormesSalles.indice(numero, Jeu.chapitre, Jeu.graine, Jeu.mode_run) != 0: break
 		var rect := Rect2(limites.position+retrait.position*limites.size,retrait.size*limites.size)
 		_retraits.append(rect)
 		_ajouter_obstacle(rect)
+	if not _retraits.is_empty():
+		_contour = _contour_avec_retraits()
+	_construire_murs_perimetre()
 	for bloc: Rect2 in Reglages.ARENE_COMPOSITIONS[motif]:
 		_ajouter_obstacle(Rect2(limites.position+bloc.position*limites.size,bloc.size*limites.size))
 
@@ -97,6 +102,9 @@ func retraits() -> Array[Rect2]:
 	return _retraits
 
 func contour_sol() -> PackedVector2Array:
+	return _contour
+
+func _contour_avec_retraits() -> PackedVector2Array:
 	var points := PackedVector2Array([limites.position])
 	var gauche: Array[Rect2] = []
 	var droite: Array[Rect2] = []
@@ -135,22 +143,21 @@ func _ajouter_obstacle(rect: Rect2) -> void:
 
 func _construire_murs_perimetre() -> void:
 	var e := Reglages.ARENE_MUR_EPAISSEUR
-	var bandes := [
-		Rect2(limites.position.x - e, limites.position.y - e, e, limites.size.y + e * 2.0),
-		Rect2(limites.end.x, limites.position.y - e, e, limites.size.y + e * 2.0),
-		Rect2(limites.position.x, limites.position.y - e, limites.size.x, e),
-		Rect2(limites.position.x, limites.end.y, limites.size.x, e),
-	]
-	for rect in bandes:
+	var aire := 0.0
+	for i in _contour.size():
+		aire += _contour[i].cross(_contour[(i+1)%_contour.size()])
+	for i in _contour.size():
+		var a := _contour[i]
+		var b := _contour[(i+1)%_contour.size()]
+		var direction := b-a
+		if direction.length_squared() < 0.01: continue
+		var dehors := Vector2(direction.y, -direction.x).normalized() * signf(aire)
 		var corps := StaticBody2D.new()
 		corps.name = "MurPerimetre"
 		corps.collision_layer = 4
 		corps.collision_mask = 0
-		corps.global_position = (rect as Rect2).get_center()
-		var forme := CollisionShape2D.new()
-		var rectangle := RectangleShape2D.new()
-		rectangle.size = (rect as Rect2).size
-		forme.shape = rectangle
+		var forme := CollisionPolygon2D.new()
+		forme.polygon = PackedVector2Array([a, b, b+dehors*e, a+dehors*e])
 		corps.add_child(forme)
 		add_child(corps)
 
@@ -306,8 +313,8 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 			copie["pv"] *= Reglages.MINE_BOSS_PV_MULT
 			copie["degats"] *= Reglages.MINE_BOSS_DEGATS_MULT
 	elif Jeu.est_retro():
-		copie["pv"] = float(donnees["pv"]) * Reglages.RETRO_PV_MULT
-		copie["degats"] = float(donnees["degats"]) * Reglages.RETRO_DEGATS_MULT
+		copie["pv"] = float(donnees["pv"]) * Reglages.RETRO_PV_MULT * ProgressionStatistiques.facteur_pv(0)
+		copie["degats"] = float(donnees["degats"]) * Reglages.RETRO_DEGATS_MULT * ProgressionStatistiques.facteur_degats(0)
 	else:
 		copie["pv"] = float(donnees["pv"]) * Chapitres.facteur_pv(Jeu.chapitre, numero)
 		copie["degats"] = float(donnees["degats"]) * Chapitres.facteur_degats(Jeu.chapitre, numero)
@@ -325,7 +332,7 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 		if copie.has("recharge"):
 			copie["recharge"] = float(copie["recharge"]) * Reglages.ENNEMI_RECHARGE_MULT
 	if Jeu.mode_run == "grimoire":
-		copie["degats"] = maxf(float(copie["degats"]), Reglages.DEGATS_COUP_REFERENCE)
+		copie["degats"] = maxf(float(copie["degats"]), Reglages.DEGATS_COUP_REFERENCE * ProgressionStatistiques.facteur_degats(Jeu.chapitre))
 	if not Jeu.est_retro():
 		var chapitre_patterns := Jeu.chapitre if Jeu.mode_run == "grimoire" else (Epreuves.palier(Jeu.niveau_epreuve) if Jeu.mode_run == "epreuve_sorts" else ReglagesJoueur.palier_atteint())
 		copie = EvolutionEnnemis.appliquer(copie,chapitre_patterns)
@@ -412,9 +419,12 @@ func _position_d_apparition() -> Vector2:
 			Jeu.rng.randf_range(limites.position.y + marge, limites.position.y + limites.size.y * 0.45))
 		if _place_libre(candidate):
 			return candidate
-	return candidate
+	# Le pied du portail reste degage dans toutes les compositions.
+	return position_portail()
 
 func _place_libre(position: Vector2) -> bool:
+	if not FormesSalles.contient_disque(position, _contour, FormesSalles.MARGE_APPARITION):
+		return false
 	for rect in _obstacles:
 		if rect.grow(70.0).has_point(position):
 			return false
@@ -468,7 +478,7 @@ func tirer(tir_source: Tir, origine: Vector2, direction: Vector2, hostile := fal
 func _sur_tir_ennemi(tir_ennemi: Tir, origine: Vector2, direction: Vector2) -> void:
 	var projectile := tir_ennemi.copie()
 	if Jeu.mode_run == "grimoire":
-		projectile.degats = maxf(projectile.degats, Reglages.DEGATS_COUP_REFERENCE)
+		projectile.degats = maxf(projectile.degats, Reglages.DEGATS_COUP_REFERENCE * ProgressionStatistiques.facteur_degats(Jeu.chapitre))
 	tirer(projectile, origine, direction, true)
 
 func _sur_impact(position: Vector2, couleur: Color, ampleur: float) -> void:
