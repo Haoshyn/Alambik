@@ -5,8 +5,14 @@ extends RefCounted
 const HEROS_MODELE_ORIGINAL := "res://assets/3d/characters/apprenti_a.glb"
 const HEROS_MODELE_ACCUEIL := "res://assets/3d/characters/apprenti_accueil.glb"
 const HEROS_MODELE_ACCUEIL_V2 := "res://assets/3d/characters/apprenti_accueil_v2.glb"
-# Le modele accueil v2 reste le heros actif.
+# Basic conserve le modele actuel ; les variantes restent des essais visuels.
 const HEROS_MODELE := HEROS_MODELE_ACCUEIL_V2
+const MODELES_HEROS := {
+	"basic": {"nom": "Basic (l’actuel)", "chemin": HEROS_MODELE},
+	"v2": {"nom": "v2 — Little Purple Wizard", "chemin": "res://assets/3d/characters/mage_meshy_v2.glb"},
+	"kaykit": {"nom": "KayKit — Mage", "chemin": "res://assets/3d/characters/mage_kaykit.glb"},
+}
+
 # Sprint arcade : 0,4 s par cycle, avec une courte phase aerienne.
 const HEROS_CADENCE_COURSE := 1.0
 const HEROS_TRANSITION_MOUVEMENT := 0.18
@@ -22,7 +28,12 @@ const HEROS_CADENCE_MAX := 2.0
 const HEROS_SEUIL_TELEPORTATION := 160.0
 const HEROS_LISSAGE_ORIENTATION := 14.0
 const HEROS_INCLINAISON_VIRAGE := 0.075
-const HEROS_OS_HAUT := ["torse", "tete", "chapeau", "bras_droite", "avant_bras_droite", "main_droite", "bras_gauche", "avant_bras_gauche", "main_gauche"]
+const HEROS_OS_HAUT := [
+	"torse", "tete", "chapeau", "bras_droite", "avant_bras_droite", "main_droite",
+	"bras_gauche", "avant_bras_gauche", "main_gauche", "spine", "chest", "head",
+	"upperarm.l", "lowerarm.l", "wrist.l", "hand.l", "handslot.l",
+	"upperarm.r", "lowerarm.r", "wrist.r", "hand.r", "handslot.r",
+]
 const OMBRES_ANDROID := false
 const PARTICULES_MAX := 160
 const PARTICULES_REDUITES := 48
@@ -52,3 +63,9 @@ static func chemin_ennemi(donnees: Dictionary) -> String:
 			"miniboss" if donnees.get("rang_boss", "") == "miniboss" else "boss",
 			int(donnees.get("ornement", 0))]
 	return "res://assets/3d/enemies/%s.glb" % str(COMMUNS.get(donnees.get("forme", ""), "encrier_rampant"))
+
+static func modele_heros_valide(id: String) -> String:
+	return id if MODELES_HEROS.has(id) else "basic"
+
+static func chemin_heros(id: String) -> String:
+	return str(MODELES_HEROS[modele_heros_valide(id)]["chemin"])

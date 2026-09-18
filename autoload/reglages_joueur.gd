@@ -26,6 +26,7 @@ var piste_musique := "first_arcade"
 var piste_menu := "accueil"
 var secousses_ecran := true
 var effets_reduits := false
+var modele_heros := "basic"
 # Comment le Sort actif part : par son icone seule, par une tape rapide dans la
 # zone de deplacement, ou par une double tape rapide.
 var raccourci_sort := RaccourciTactile.MODE_DEFAUT
@@ -85,6 +86,7 @@ func charger() -> void:
 	piste_menu = Musiques.valider(str(config.get_value("audio", "piste_menu", "accueil")), true)
 	secousses_ecran = bool(config.get_value("accessibilite", "secousses", true))
 	effets_reduits = bool(config.get_value("accessibilite", "effets_reduits", false))
+	modele_heros = Visuels3D.modele_heros_valide(str(config.get_value("affichage", "modele_heros", "basic")))
 	raccourci_sort = RaccourciTactile.mode_valide(str(config.get_value("commandes", "raccourci_sort",
 		RaccourciTactile.MODE_DEFAUT)))
 	sort_actif_equipe = str(config.get_value("sorts", "actif", ""))
@@ -155,6 +157,7 @@ func sauvegarder() -> void:
 	config.set_value("audio", "piste_menu", piste_menu)
 	config.set_value("accessibilite", "secousses", secousses_ecran)
 	config.set_value("accessibilite", "effets_reduits", effets_reduits)
+	config.set_value("affichage", "modele_heros", modele_heros)
 	config.set_value("commandes", "raccourci_sort", raccourci_sort)
 	config.set_value("sorts", "actif", sort_actif_equipe)
 	config.set_value("sorts", "ultime", ultime_equipe)
@@ -674,3 +677,11 @@ func gain_gouttes(nombre: int) -> int:
 
 func gain_experience_compte(nombre: int) -> int:
 	return maxi(1, roundi(float(nombre) * ArbreCompetences.multiplicateur_experience(rangs_competences_effectifs()))) if nombre > 0 else 0
+
+func definir_modele_heros(id: String) -> void:
+	var choix := Visuels3D.modele_heros_valide(id)
+	if choix == modele_heros:
+		return
+	modele_heros = choix
+	sauvegarder()
+	reglages_changes.emit()

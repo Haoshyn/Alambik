@@ -34,7 +34,7 @@ func preparer(lecteur: AnimationPlayer) -> void:
 		for piste in clip.get_track_count():
 			var chemin := clip.track_get_path(piste)
 			var os := str(chemin.get_subname(0)) if chemin.get_subname_count() > 0 else ""
-			if os in Visuels3D.HEROS_OS_HAUT:
+			if os in Visuels3D.HEROS_OS_HAUT or os.replace("_", ".") in Visuels3D.HEROS_OS_HAUT:
 				geste.set_filter_path(chemin, true)
 		graphe.add_node(nom, geste)
 	graphe.connect_node("tir", 0, "locomotion")

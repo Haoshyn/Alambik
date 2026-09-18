@@ -5,8 +5,11 @@ anciens essais et résultats de tests ne valent pas validation de l'état prése
 
 ## Présentation
 
-- Le héros en jeu utilise `assets/3d/characters/apprenti_accueil_v2.glb`, choisi
-  dans `data/visuels_3d.gd`. Ses matières passent par
+- Les Paramètres proposent temporairement Basic (modèle actuel, par défaut),
+  v2 (Little Purple Wizard Meshy texturé depuis `magealam.png` et articulé) et KayKit (Mage et animations
+  du pack fourni, avec palette, chapeau et accessoires adaptés à cette référence). Le choix est sauvegardé et appliqué en combat.
+- v2 : chapeau et écharpe avec matières dédiées, ruban/boucle en volume ; course et lancer plus amples, fiole liée à la ceinture.
+- Basic utilise `assets/3d/characters/apprenti_accueil_v2.glb`. Ses matières passent par
   `scripts/presentation/materiaux_apprenti.gd` et
   `shaders/apprenti_accueil_surface.gdshader`.
 - Les essais Feutre & cuir et les variantes chibi de l'atelier du 18 septembre
@@ -32,7 +35,7 @@ anciens essais et résultats de tests ne valent pas validation de l'état prése
 
 ## Reprise du travail
 
-Aucune refonte du héros n'est en cours. Les prochaines tâches doivent partir du
+Les variantes du héros restent des exemples à comparer. Les prochaines tâches doivent partir du
 besoin demandé et des catalogues actifs, pas des anciennes listes de chantier.
 
 Le processus par défaut est celui d'`AGENTS.md` : modification ciblée et relecture ;

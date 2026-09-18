@@ -17,35 +17,16 @@ var _visee_mesh: MeshInstance3D
 func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 	logique = cible
 	genre = type
-	modele = scene.instantiate()
-	add_child(modele)
-	lecteur = modele.find_child("AnimationPlayer", true, false) as AnimationPlayer
-	if lecteur != null:
-		for nom in lecteur.get_animation_list():
-			if str(nom) in ["repos", "course"]:
-				lecteur.get_animation(nom).loop_mode = Animation.LOOP_LINEAR
+	_installer_modele(scene)
 	if genre == "ennemi":
 		var donnees: Dictionary = logique.get("donnees")
 		facteur = float(donnees["rayon"]) / (65.0 if donnees.get("cerveau", "") == "boss" else 30.0)
 	if genre == "heros":
 		facteur = Reglages.HEROS_ECHELLE
-		preload("res://scripts/presentation/materiaux_apprenti.gd").appliquer(modele)
-		var peau := modele.find_child("Heros_B_peau", true, false) as MeshInstance3D
-		if peau != null:
-			var source := peau.get_active_material(0) as StandardMaterial3D
-			if source != null and source.albedo_texture != null and source.normal_texture != null:
-				var matiere := ShaderMaterial.new()
-				matiere.shader = preload("res://shaders/heros_matiere.gdshader")
-				matiere.set_shader_parameter("couleur", source.albedo_texture)
-				matiere.set_shader_parameter("normales", source.normal_texture)
-				peau.set_surface_override_material(0, matiere)
 		suivi = load("res://scripts/presentation/suivi_visuel_2d.gd").new()
 		suivi.name = "SuiviVisuel3D"
 		logique.add_child(suivi)
-		if lecteur != null:
-			animation_heros = load("res://scripts/presentation/animation_heros_3d.gd").new()
-			add_child(animation_heros)
-			animation_heros.preparer(lecteur)
+		ReglagesJoueur.reglages_changes.connect(_actualiser_modele)
 		logique.connect("tir_demande", _jouer_tir)
 		logique.connect("attaque_preparee", _armer_tir)
 		logique.connect("touchee", func(_position):
@@ -64,6 +45,46 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 		logique.connect("touche", func(_position, _couleur): _temps_touche = 0.22)
 	logique.set_meta("visuel_3d", true)
 	logique.queue_redraw()
+	mettre_a_jour(0.0)
+
+func _installer_modele(scene: PackedScene) -> void:
+	modele = scene.instantiate()
+	add_child(modele)
+	lecteur = modele.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if lecteur != null:
+		for nom in lecteur.get_animation_list():
+			if str(nom) in ["repos", "course"]:
+				lecteur.get_animation(nom).loop_mode = Animation.LOOP_LINEAR
+	if genre == "heros":
+		preload("res://scripts/presentation/materiaux_apprenti.gd").appliquer(modele)
+		var peau := modele.find_child("Heros_B_peau", true, false) as MeshInstance3D
+		if peau != null:
+			var source := peau.get_active_material(0) as StandardMaterial3D
+			if source != null and source.albedo_texture != null and source.normal_texture != null:
+				var matiere := ShaderMaterial.new()
+				matiere.shader = preload("res://shaders/heros_matiere.gdshader")
+				matiere.set_shader_parameter("couleur", source.albedo_texture)
+				matiere.set_shader_parameter("normales", source.normal_texture)
+				peau.set_surface_override_material(0, matiere)
+		if lecteur != null:
+			animation_heros = load("res://scripts/presentation/animation_heros_3d.gd").new()
+			add_child(animation_heros)
+			animation_heros.preparer(lecteur)
+
+func _actualiser_modele() -> void:
+	var chemin := Visuels3D.chemin_heros(ReglagesJoueur.modele_heros)
+	if modele.scene_file_path == chemin:
+		return
+	var scene := load(chemin) as PackedScene
+	if scene == null:
+		return
+	if animation_heros != null:
+		animation_heros.active = false
+		animation_heros.free()
+		animation_heros = null
+	modele.free()
+	_installer_modele(scene)
+	_derniere_animation = ""
 	mettre_a_jour(0.0)
 
 func mettre_a_jour(delta: float) -> void:
