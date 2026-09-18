@@ -1,3 +1,8 @@
+> Archive au 18 septembre 2026 : ce document décrit une proposition ou un plan
+> ancien. Il ne constitue plus une instruction de réalisation, de test ou de
+> build. L'état actif est dans `docs/CURRENT.md` ; le processus applicable est
+> celui d'`AGENTS.md`. Les chemins cités dans le texte reflètent l'époque.
+
 # Alambik — migration 3D visuelle avec gameplay 2D
 
 Date : 2026-09-08
@@ -402,3 +407,4 @@ Ne pas inclure dans cette migration initiale :
 - photoréalisme ;
 - refonte complète de toute l'UI ;
 - ajout de contenu gameplay sans rapport avec la migration visuelle.
+

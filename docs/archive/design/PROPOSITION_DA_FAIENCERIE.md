@@ -1,3 +1,8 @@
+> Archive au 18 septembre 2026 : ce document décrit une proposition ou un plan
+> ancien. Il ne constitue plus une instruction de réalisation, de test ou de
+> build. L'état actif est dans `docs/CURRENT.md` ; le processus applicable est
+> celui d'`AGENTS.md`. Les chemins cités dans le texte reflètent l'époque.
+
 # Proposition — La Faïencerie des sorts
 
 14 septembre 2026. Proposition artistique à discuter, non intégrée au jeu.
@@ -96,3 +101,4 @@ Livrables de production :
 5. Exécuter `./verifier.sh` et `./sondes/vingt_runs.sh` après les modifications de code ou données, et lire le détail des résultats. Toute vérification automatisée reste sans fenêtre visible.
 
 Critère décisif : à petite taille et sans lire son nom, on reconnaît un objet, un ennemi ou un menu comme appartenant à Alambik. L'illustration donne une personnalité au jeu tout en laissant les décisions et le combat immédiatement lisibles.
+

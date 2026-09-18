@@ -32,18 +32,38 @@ Ne pas lire par défaut : `docs/archive/`, `human/`, les `.uid`, les `.import`, 
 - Ne pas modifier un tableau pendant son itération.
 - Pour les blocs de salle, utiliser `Geometrie.ligne_libre` plutôt qu'un rayon lancé depuis `_process`.
 
-## Vérification
+## Processus léger par défaut
 
-Exécuter les vérifications sans fenêtre visible ni prise de focus : Godot en
-`--headless`, Blender en `--background`, processus Windows lancés avec
-`-WindowStyle Hidden`. Ne pas ouvrir l'atelier interactif ou une fenêtre de jeu
-sauf demande explicite du propriétaire ; il peut jouer à LoL pendant le travail.
+Lire seulement les fichiers utiles, effectuer la modification, relire les
+changements et faire un retour court. Le propriétaire teste lui-même le jeu.
 
-Après modification de code ou de données :
+- Ne pas lancer automatiquement de tests, sondes, simulations de runs,
+  vérification générale ou import global Godot après une modification,
+  y compris un retour à une ancienne version.
+- Ne pas reconstruire l'APK, exporter pour Android, incrémenter la version
+  ou installer sur téléphone sans demande explicite du propriétaire.
+- Les tests et les builds sont sur demande. Ne pas proposer une confirmation
+  systématique après chaque retouche : par défaut, ne pas les lancer.
+- Si des tests sont demandés, cibler le changement et respecter le périmètre
+  demandé. Ne pas élargir spontanément à toute la suite ou aux vingt runs.
+  Ne pas ajouter de nouveaux tests sans demande.
+- Une demande d'APK autorise son export et les contrôles associés de version,
+  paquet et signature ; elle ne demande pas une batterie de tests ou de runs.
+- Ne pas créer systématiquement de guide, rapport, captures ou documentation
+  pour une petite modification. Une correction d'information devenue fausse
+  dans l'état courant peut rester brève.
 
-```sh
-./verifier.sh
-./sondes/vingt_runs.sh
-```
+Les scripts `verifier.sh` et `sondes/vingt_runs.sh` restent disponibles pour
+une demande explicite ; leur présence n'est pas une obligation de les lancer.
+Ces règles s'appliquent aussi aux sous-agents et aux consignes locales.
 
-Lire les erreurs et le détail des runs, pas seulement le code de sortie. Une tâche documentaire seule n'exige pas les vingt runs.
+## Exécutions demandées
+
+Lorsqu'une exécution est nécessaire au travail demandé, la garder sans fenêtre
+visible ni prise de focus : Godot en `--headless`, Blender en `--background`,
+processus Windows lancés avec `-WindowStyle Hidden`. Ne pas ouvrir l'atelier
+interactif ou une fenêtre de jeu sauf demande explicite du propriétaire ;
+il peut jouer à LoL pendant le travail.
+
+Si des tests ou runs sont demandés, lire leurs erreurs et résultats détaillés,
+pas seulement le code de sortie. Utiliser un profil isolé de la sauvegarde réelle.

@@ -41,7 +41,8 @@ Les deux ports sont différents et peuvent changer.
 ./publier.sh 0.2
 ```
 
-`publier.sh` lance `./verifier.sh` avant l'export.
+Ces exports ne lancent pas de suite de tests. Les vérifications de jeu et les
+simulations restent sur demande explicite, selon `AGENTS.md`.
 
 ## Signature
 
@@ -49,7 +50,7 @@ La clé de release et ses identifiants restent hors du dépôt. Sauvegarder la c
 
 ## Contrôles sur appareil
 
-- Pouce : la moitié basse doit suffire pour piloter. Logique : `scripts/entrees/joystick_logique.gd`.
+- Pouce : la moitié basse doit suffire pour piloter. Logique : `scripts/joystick_logique.gd`.
 - Lisibilité : silhouettes et télégraphes doivent rester visibles en mouvement.
 - Safe area : `autoload/ecran.gd`.
 - Performances : mesurer sur téléphone avant d'annoncer un chiffre.

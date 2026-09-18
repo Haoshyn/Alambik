@@ -24,7 +24,6 @@ if [ "$CIBLE" != test ]; then
     : "${GODOT_ANDROID_KEYSTORE_RELEASE_USER:?Alias de publication absent.}"
     : "${GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD:?Mot de passe de publication absent.}"
 fi
-./verifier.sh
 if [ -n "${1:-}" ]; then
     set -- --nom "$1"
 else

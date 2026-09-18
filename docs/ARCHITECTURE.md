@@ -13,22 +13,32 @@ project.godot
 ├── autoload/          état global et services persistants
 ├── data/              données et équilibrage
 ├── scripts/
-│   ├── run/           orchestration d'une tentative
-│   ├── acteurs/       héros, ennemis, boss, IA
-│   ├── combat/        tirs, ciblage, statistiques
-│   ├── monde/         salle et géométrie
-│   ├── ameliorations/ logique des Améliorations
-│   ├── presentation/  dessin, palette, styles
-│   ├── entrees/       tactile, balayage, joystick
-│   ├── menu/          contrôleur de l'accueil
-│   └── dev/           outils de développement
+│   ├── *.gd           run, acteurs, combat, salles, entrées et menu
+│   ├── presentation/  rendu 3D, matériaux, animation et styles
+│   └── ameliorations/ ancien atelier de fusions, hors boucle active
 ├── scenes/            assemblage Godot minimal
 ├── ui/                écrans et contrôles
+├── assets/            ressources du jeu ; sources 3D dans assets/3d/sources/
+├── shaders/           matériaux et effets
+├── tools/             générateurs d'assets et outils Android
 ├── tests/             vérification déterministe
-└── sondes/            simulation intégrée
+├── sondes/            simulations et diagnostics sur demande
+├── tmp/               essais, rendus et sorties temporaires hors runtime
+└── build/             exports hors runtime
 ```
 
-Quelques petits scripts restent temporairement à la racine de `scripts/` car `run.gd` les charge directement par chemin (`fond.gd`, `effets.gd`, `cadre_retro.gd`, `voile_transition.gd`). Les déplacer n'apporterait presque aucun gain et imposerait une modification du gros orchestrateur ; ils pourront être absorbés lors du futur découpage de celui-ci.
+La logique de gameplay est réellement à la racine de `scripts/` ; la carte
+`scripts/INDEX.md` la classe par rôle sans inventer de sous-dossiers. Les chemins
+sont utilisés par les scènes, préchargements et outils : un simple ménage ne
+justifie pas de déplacer le code ni de rebâtir son architecture.
+
+Les GLB employés par le jeu restent dans `assets/3d/characters/`, `enemies/`,
+`environment/` et les autres dossiers de ressources. Les fichiers de création
+conservés vont dans `assets/3d/sources/`. Les rendus, prototypes et fichiers de
+travail vont dans `tmp/`, les exports dans `build/` ; ils ne sont pas des sources
+du jeu. Les packs tiers et leurs licences sont conservés dans
+`assets/3d/sources/vendor/`, hors import Godot, à part des assets effectivement
+intégrés.
 
 ## Dépendances
 
@@ -51,4 +61,9 @@ Les fichiers générés (`*.uid`, `*.import`) et les binaires ne doivent pas êt
 
 ## Gros fichiers
 
-Un gros fichier n'est pas automatiquement mauvais. Il devient coûteux lorsqu'il faut tout lire pour une petite modification. La priorité est donc d'abord le routage et la recherche par symbole. Si `scripts/run/run.gd`, `scripts/acteurs/ennemi.gd`, `scripts/acteurs/boss.gd`, `scripts/menu/menu.gd` ou `autoload/reglages_joueur.gd` continuent de recevoir plusieurs responsabilités, ils devront être découpés par comportement lors d'une refonte dédiée, avec tests avant/après.
+Un gros fichier n'est pas automatiquement mauvais. Il devient coûteux lorsqu'il
+faut tout lire pour une petite modification. Chercher d'abord les symboles dans
+`scripts/run.gd`, `scripts/ennemi.gd`, `scripts/boss.gd`, `scripts/menu.gd` ou
+`autoload/reglages_joueur.gd`. Un découpage éventuel relève d'une tâche dédiée,
+pas du ménage documentaire. Les vérifications restent soumises au processus
+léger d'`AGENTS.md` et au périmètre demandé par le propriétaire.

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://chgmdcwu1a475"
-path="res://.godot/imported/faiencerie_des_sorts.png-bf794f9d27b3ff0cf5a51443ed7e5ebf.ctex"
+uid="uid://b82ihmv0yvxca"
+path="res://.godot/imported/faiencerie_des_sorts.png-05d4b7565c0c601365ddaa830f0ec912.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/design/concepts/faiencerie_des_sorts.png"
-dest_files=["res://.godot/imported/faiencerie_des_sorts.png-bf794f9d27b3ff0cf5a51443ed7e5ebf.ctex"]
+source_file="res://docs/archive/design/concepts/faiencerie_des_sorts.png"
+dest_files=["res://.godot/imported/faiencerie_des_sorts.png-05d4b7565c0c601365ddaa830f0ec912.ctex"]
 
 [params]
 

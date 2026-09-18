@@ -1,3 +1,8 @@
+> Archive au 18 septembre 2026 : ce document décrit une proposition ou un plan
+> ancien. Il ne constitue plus une instruction de réalisation, de test ou de
+> build. L'état actif est dans `docs/CURRENT.md` ; le processus applicable est
+> celui d'`AGENTS.md`. Les chemins cités dans le texte reflètent l'époque.
+
 # Migration visuelle 3D — plan d'exécution
 
 Exécution directe Codex autorisée. Conception : `2026-09-08-3d-visual-design.md`.
@@ -38,3 +43,4 @@ catalogue, le nettoyage des proxies et capturer le rendu sous GL Compatibility.
 Les sources Blender sont déterministes et leur rapport liste triangles, matériaux,
 animations, dimensions et fichiers exportés. Une absence de mesure sur appareil
 Android reste explicitement non validée.
+

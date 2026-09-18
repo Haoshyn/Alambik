@@ -1,14 +1,18 @@
 .godot/
 android/
-build/
-tmp/
+/build/*
+!/build/.gdignore
+/tmp/*
+!/tmp/.gdignore
 *.apk
 *.aab
 *.keystore
 
-# Une seule APK courante est suivie, directement a la racine du depot.
-!/alambic.apk
+# Les APK locales et leurs signatures restent hors du depot.
 *.idsig
+
+# Etat local de coordination, sans consignes durables pour le projet.
+.multiagents/
 
 # Cache Python des generateurs Blender.
 __pycache__/
