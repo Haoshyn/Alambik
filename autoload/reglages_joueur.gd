@@ -26,7 +26,7 @@ var piste_musique := "first_arcade"
 var piste_menu := "accueil"
 var secousses_ecran := true
 var effets_reduits := false
-var modele_heros := "basic"
+var modele_heros := Visuels3D.HEROS_MODELE_DEFAUT
 # Comment le Sort actif part : par son icone seule, par une tape rapide dans la
 # zone de deplacement, ou par une double tape rapide.
 var raccourci_sort := RaccourciTactile.MODE_DEFAUT
@@ -86,7 +86,7 @@ func charger() -> void:
 	piste_menu = Musiques.valider(str(config.get_value("audio", "piste_menu", "accueil")), true)
 	secousses_ecran = bool(config.get_value("accessibilite", "secousses", true))
 	effets_reduits = bool(config.get_value("accessibilite", "effets_reduits", false))
-	modele_heros = Visuels3D.modele_heros_valide(str(config.get_value("affichage", "modele_heros", "basic")))
+	modele_heros = Visuels3D.modele_heros_valide(str(config.get_value("affichage", "modele_heros", Visuels3D.HEROS_MODELE_DEFAUT)))
 	raccourci_sort = RaccourciTactile.mode_valide(str(config.get_value("commandes", "raccourci_sort",
 		RaccourciTactile.MODE_DEFAUT)))
 	sort_actif_equipe = str(config.get_value("sorts", "actif", ""))

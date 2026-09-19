@@ -187,7 +187,7 @@ const OBJET_CROISSANCE_PAR_MONDE := 1.08
 
 # Sceaux. L'aura ne fait aucun degat : elle marque, ce qui la rend lisible face
 # aux Phenomenes qui, eux, frappent.
-const SCEAU_GARDE_REDUCTION := 0.22
+const SCEAU_GARDE_REDUCTION := 0.16
 const SCEAU_AURA_CIBLES_SOIN_MAX := 3
 const SCEAU_RUINE_VULNERABILITE := 1.30
 const SCEAU_AURA_INTERVALLE := 0.55

@@ -26,15 +26,6 @@ func _ready() -> void:
 		if str(d["id"]) == ReglagesJoueur.piste_menu: pistes_menu.selected = index
 	pistes_menu.item_selected.connect(func(i): ReglagesJoueur.definir_piste_menu(str(pistes_menu.get_item_metadata(i))))
 	contenu.add_child(StyleAzur.texte("Affichage & confort",36))
-	contenu.add_child(StyleAzur.texte("Modèle 3D du héros",29))
-	var modeles := _selecteur(contenu)
-	for id in Visuels3D.MODELES_HEROS:
-		modeles.add_item(str(Visuels3D.MODELES_HEROS[id]["nom"]))
-		var index := modeles.item_count - 1
-		modeles.set_item_metadata(index, id)
-		if id == ReglagesJoueur.modele_heros: modeles.selected = index
-	modeles.item_selected.connect(func(i): ReglagesJoueur.definir_modele_heros(str(modeles.get_item_metadata(i))))
-	contenu.add_child(StyleAzur.texte("Choix temporaire pour comparer les modèles en combat.",24))
 	_option(contenu,"Animations et flashes réduits",ReglagesJoueur.effets_reduits,func(v): ReglagesJoueur.definir_accessibilite(ReglagesJoueur.secousses_ecran,v))
 	contenu.add_child(StyleAzur.texte("Raccourci du sort actif",29))
 	var raccourci := _selecteur(contenu)

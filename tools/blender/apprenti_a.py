@@ -442,7 +442,7 @@ def animer():
     for o in RIG.pose.bones:o.rotation_euler=(0,0,0);o.location=(0,0,0);o.scale=(1,1,1)
 
 
-def exporter():
+def exporter(sections_circulaires=True):
     sections={}
     for o in [o for o in bpy.context.scene.objects if o.type=='MESH']:
         pivot=None
@@ -464,7 +464,8 @@ def exporter():
             largeur=max(v.co.x for v in o.data.vertices)-min(v.co.x for v in o.data.vertices)
             profondeur=max(v.co.y for v in o.data.vertices)-min(v.co.y for v in o.data.vertices)
             sections[o.name]={'largeur':round(largeur,5),'profondeur':round(profondeur,5)}
-            assert abs(largeur/profondeur-1)<.01, 'Section non circulaire : '+o.name
+            if sections_circulaires:
+                assert abs(largeur/profondeur-1)<.01, 'Section non circulaire : '+o.name
     import importlib.util
     chemin=Path(__file__).with_name('occlusion_apprenti.py')
     spec=importlib.util.spec_from_file_location('occlusion_apprenti',chemin)

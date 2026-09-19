@@ -1,31 +1,59 @@
 class_name DraftLogique
 extends RefCounted
 
-# Un niveau propose trois Améliorations distincts parmi ceux que la run ne possede
-# pas encore. Les six decisions restent ainsi comportementales et lisibles.
-
-static func candidats(inventaire: Array) -> Array[String]:
+# Une offre partage sa rarete : une legende ne concurrence jamais un petit bonus.
+# Sans rarete explicite, conserver le catalogue historique des modes annexes.
+static func candidats(inventaire: Array, rarete := "", niveau := 0) -> Array[String]:
 	var liste: Array[String] = []
 	for id in CatalogueReactifs.ids():
-		if id not in inventaire:
+		var reactif := CatalogueReactifs.par_id(id)
+		if rarete.is_empty() and reactif.rarete == Reactif.COMMUN:
+			continue
+		if not rarete.is_empty() and reactif.rarete != rarete:
+			continue
+		if copies(inventaire, id) >= reactif.copies_permises():
+			continue
+		if niveau > ProgressionAugments.DERNIER_NIVEAU_AVIDITE and id == "avidite":
+			continue
+		var compatible := true
+		for autre: String in ProgressionAugments.INCOMPATIBLES.get(id, []):
+			if autre in inventaire:
+				compatible = false
+		if compatible:
 			liste.append(id)
 	return liste
 
-static func proposer(inventaire: Array, rng: RandomNumberGenerator, nb := 3) -> Array[String]:
-	var restants := candidats(inventaire)
+static func proposer(inventaire: Array, rng: RandomNumberGenerator, nb := ProgressionAugments.NOMBRE_CHOIX,
+		rarete := "", niveau := 0, eviter: Array = []) -> Array[String]:
+	var restants := candidats(inventaire, rarete, niveau)
 	var tirage: Array[String] = []
 	var familles: Array[String] = []
 	while tirage.size() < nb and not restants.is_empty():
-		# Trois familles donnent des choix de jeu distincts sans imposer un build.
-		var varies: Array[String] = []
+		var nouveaux: Array[String] = []
 		for id in restants:
-			if CatalogueReactifs.par_id(id).famille not in familles: varies.append(id)
-		if varies.is_empty(): varies = restants.duplicate()
-		var choix: String = varies[rng.randi_range(0,varies.size()-1)]
+			if id not in eviter:
+				nouveaux.append(id)
+		var source: Array[String] = nouveaux if not nouveaux.is_empty() else restants
+		var varies: Array[String] = []
+		for id in source:
+			if CatalogueReactifs.par_id(id).famille not in familles:
+				varies.append(id)
+		if varies.is_empty():
+			varies = source.duplicate()
+		var choix: String = varies[rng.randi_range(0, varies.size() - 1)]
 		tirage.append(choix)
 		familles.append(CatalogueReactifs.par_id(choix).famille)
 		restants.erase(choix)
 	return tirage
+
+static func rarete_disponible(inventaire: Array, rarete: String, niveau: int) -> String:
+	if candidats(inventaire, rarete, niveau).size() >= ProgressionAugments.NOMBRE_CHOIX:
+		return rarete
+	# Un pool rare presque epuise doit encore proposer trois choix utiles,
+	# sans offrir une sixieme legende.
+	if rarete == Reactif.RARE:
+		return Reactif.COMMUN
+	return rarete
 
 static func copies(inventaire: Array, id: String) -> int:
 	return inventaire.count(id)

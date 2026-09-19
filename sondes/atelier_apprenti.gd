@@ -5,7 +5,7 @@ var lecteur: AnimationPlayer
 var camera: Camera3D
 var angle := 0.35
 var elevation := 0.22
-var distance_vue := 2.35
+var distance_vue := 3.1
 var tourner := false
 var temps := 0.0
 var legende: Label
@@ -13,38 +13,54 @@ var controleur: AnimationTree
 var vitesse := 0.0
 var parcours := false
 var capture_active := false
+var pause := false
+var ralenti := 1.0
 
 func _initialize() -> void:
 	call_deferred("preparer")
 
 func preparer() -> void:
 	root.get_node("ReglagesJoueur").sauvegarde_active = false
+	var sculpte := "--mage-sculpte" in OS.get_cmdline_user_args()
 	root.size = Vector2i(1000, 1000)
 	root.content_scale_size = root.size
-	root.title = "Alambik — Apprenti A · finition v8"
+	root.title = "Alambic — Mage sculpté · étude" if sculpte else "Alambic — Nouveau mage de référence"
 	root.msaa_3d = Viewport.MSAA_4X
 	var scene := Node3D.new()
 	root.add_child(scene)
-	modele = load("res://assets/3d/characters/apprenti_a.glb").instantiate()
+	# Lire le GLB courant permet de voir une retouche sans import global du projet.
+	var document := GLTFDocument.new()
+	var etat := GLTFState.new()
+	var chemin := "res://assets/3d/characters/mage_sculpte.glb" if sculpte else Visuels3D.HEROS_MODELE
+	var erreur := document.append_from_file(chemin, etat)
+	if erreur != OK:
+		push_error("Impossible de charger le mage original : %s" % erreur)
+		quit(1)
+		return
+	modele = document.generate_scene(etat)
+	modele.scene_file_path = chemin
 	scene.add_child(modele)
 	preload("res://scripts/presentation/materiaux_apprenti.gd").appliquer(modele)
+	if sculpte:
+		preload("res://scripts/presentation/materiaux_mage_sculpte.gd").appliquer(modele)
 	lecteur = modele.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	for nom: String in ["repos", "course", "victoire"]:
 		lecteur.get_animation(nom).loop_mode = Animation.LOOP_LINEAR
 	controleur = load("res://scripts/presentation/animation_heros_3d.gd").new()
 	modele.add_child(controleur)
 	controleur.preparer(lecteur)
+	vitesse = Reglages.HEROS_VITESSE
 	var environnement := WorldEnvironment.new()
 	environnement.environment = Environment.new()
 	environnement.environment.background_mode = Environment.BG_COLOR
 	environnement.environment.background_color = Color("e6ded0")
 	environnement.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environnement.environment.ambient_light_color = Color("dce8f3")
+	environnement.environment.ambient_light_color = Color.WHITE if sculpte else Color("dce8f3")
 	environnement.environment.ambient_light_energy = .3
 	scene.add_child(environnement)
 	var lumiere := DirectionalLight3D.new()
 	lumiere.rotation_degrees = Vector3(-45, -35, 0)
-	lumiere.light_color = Color("ffe6cf")
+	lumiere.light_color = Color.WHITE if sculpte else Color("ffe6cf")
 	lumiere.light_energy = .45
 	lumiere.shadow_enabled = true
 	lumiere.directional_shadow_max_distance = 12.0
@@ -52,7 +68,7 @@ func preparer() -> void:
 	var appoint := DirectionalLight3D.new()
 	appoint.rotation_degrees = Vector3(-25, 140, 0)
 	appoint.light_energy = .12
-	appoint.light_color = Color("b9dfe9")
+	appoint.light_color = Color.WHITE if sculpte else Color("b9dfe9")
 	scene.add_child(appoint)
 	var sol := MeshInstance3D.new()
 	var plan := PlaneMesh.new()
@@ -65,18 +81,30 @@ func preparer() -> void:
 	sol.material_override = mat
 	scene.add_child(sol)
 	camera = Camera3D.new()
+	camera.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	scene.add_child(camera)
+	var souris := Control.new()
+	root.add_child(souris)
+	souris.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	souris.gui_input.connect(func(evenement: InputEvent):
+		if evenement is InputEventMouseMotion and evenement.button_mask & MOUSE_BUTTON_MASK_LEFT:
+			tourner = false
+			angle -= evenement.relative.x * .008
+			elevation = clampf(elevation + evenement.relative.y * .006, -.15, 1.5)
+		elif evenement is InputEventMouseButton and evenement.pressed:
+			if evenement.button_index == MOUSE_BUTTON_WHEEL_UP: distance_vue = maxf(.8, distance_vue * .9)
+			elif evenement.button_index == MOUSE_BUTTON_WHEEL_DOWN: distance_vue = minf(6.0, distance_vue / .9))
 	var interface := VBoxContainer.new()
 	interface.position = Vector2(28, 22)
 	root.add_child(interface)
 	var titre := Label.new()
-	titre.text = "ALAMBIK / L’APPRENTI A"
+	titre.text = "ALAMBIC / MAGE SCULPTÉ · ÉTUDE" if sculpte else "ALAMBIC / MAGE DE RÉFÉRENCE"
 	titre.add_theme_color_override("font_color", Color("432948"))
 	titre.add_theme_font_size_override("font_size", 26)
 	interface.add_child(titre)
 	legende = Label.new()
-	legende.text = "Finition v8 · chapeau et écharpe resculptés · matières douces"
+	legende.text = "Glisser pour tourner · Molette pour zoomer · Course en boucle"
 	legende.add_theme_color_override("font_color", Color("594d56"))
 	interface.add_child(legende)
 	var boutons := HBoxContainer.new()
@@ -101,7 +129,7 @@ func preparer() -> void:
 			if nom == "Parcours":
 				parcours = not parcours
 				vitesse = Reglages.HEROS_VITESSE if parcours else 0.0
-				distance_vue = 3.6 if parcours else 2.35
+				distance_vue = 3.6 if parcours else 3.1
 				if not parcours:
 					modele.position = Vector3.ZERO
 					modele.rotation.y = 0.0
@@ -111,7 +139,34 @@ func preparer() -> void:
 				angle = PI * .5 if nom == "Profil" else (PI + .35 if nom == "Dos" else .35)
 				elevation = PI / 2.0 if nom == "Dessus" else (deg_to_rad(48.0) if nom == "Caméra jeu" else .22))
 		vues.add_child(bouton)
+	var lecture := HBoxContainer.new()
+	interface.add_child(lecture)
+	var bouton_pause := Button.new()
+	bouton_pause.text = "Pause"
+	bouton_pause.toggle_mode = true
+	bouton_pause.toggled.connect(func(actif: bool):
+		pause = actif
+		lecteur.speed_scale = 0.0 if pause else ralenti
+		bouton_pause.text = "Reprendre" if pause else "Pause")
+	lecture.add_child(bouton_pause)
+	for facteur: float in [.25, .5, 1.0]:
+		var bouton := Button.new()
+		bouton.text = "× %s" % facteur
+		bouton.pressed.connect(func():
+			ralenti = facteur
+			lecteur.speed_scale = 0.0 if pause else ralenti)
+		lecture.add_child(bouton)
 	actualiser_camera()
+	if "--apercu-reference" in OS.get_cmdline_user_args():
+		angle = 0.0
+		elevation = 0.0
+		actualiser_camera()
+		vitesse = 0.0
+		controleur.mettre_a_jour(0.0, 0.0, false)
+		await process_frame
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("res://tmp/mage-reference/apercu.png")
+		vitesse = Reglages.HEROS_VITESSE
 	if "--capturer" in OS.get_cmdline_user_args():
 		await capturer()
 
@@ -119,9 +174,10 @@ func _process(delta: float) -> bool:
 	if capture_active:
 		return false
 	if is_instance_valid(camera):
-		temps += delta
+		var pas := 0.0 if pause else delta * ralenti
+		temps += pas
 		if not capture_active and is_instance_valid(controleur) and controleur.active:
-			controleur.mettre_a_jour(delta, vitesse, false)
+			controleur.mettre_a_jour(pas, vitesse, false)
 			if parcours:
 				modele.position = Vector3(.65 * sin(temps * 1.7), 0, .35 * sin(temps * 3.4))
 				var direction := Vector3(1.105 * cos(temps * 1.7), 0, 1.19 * cos(temps * 3.4))
@@ -132,8 +188,8 @@ func _process(delta: float) -> bool:
 
 func actualiser_camera() -> void:
 	camera.size = distance_vue
-	camera.position = Vector3(sin(angle) * cos(elevation), sin(elevation), cos(angle) * cos(elevation)) * 5.0 + Vector3(0, .93, 0)
-	camera.look_at(Vector3(0, .93, 0), Vector3.FORWARD if elevation > 1.56 else Vector3.UP)
+	camera.position = Vector3(sin(angle) * cos(elevation), sin(elevation), cos(angle) * cos(elevation)) * 5.0 + Vector3(0, 1.25, 0)
+	camera.look_at(Vector3(0, 1.25, 0), Vector3.FORWARD if elevation > 1.56 else Vector3.UP)
 
 func capturer() -> void:
 	capture_active = true

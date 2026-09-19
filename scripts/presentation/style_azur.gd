@@ -219,6 +219,7 @@ static func glyphe(id: String) -> Texture2D:
 	if CatalogueRecettes.est_fusion(id): id = CatalogueRecettes.augment_de(id)
 	if CatalogueElements.est_fusion(id):
 		id = CatalogueElements.augment_de_fusion(id)
+	id = str(CatalogueReactifs.ICONES_COMMUNES.get(id, id))
 	if IconesArcane.contient(id): return IconesArcane.texture(id)
 	var cle := "glyphe/"+id
 	if not _icones.has(cle):

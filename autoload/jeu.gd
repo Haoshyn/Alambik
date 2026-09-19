@@ -103,25 +103,47 @@ func ajouter_reactif(id: String) -> void:
 	inventaire.append(id)
 	inventaire_change.emit()
 
+func seuils_experience_run() -> Array:
+	return ProgressionAugments.XP_SEUILS if mode_run == "grimoire" else Reglages.XP_RUN_SEUILS
+
 func gagner_experience_run(nombre: int) -> int:
-	if niveau_run >= Reglages.XP_RUN_SEUILS.size() or nombre <= 0:
+	var seuils := seuils_experience_run()
+	if niveau_run >= seuils.size() or nombre <= 0:
 		return 0
 	var multiplicateur := Reglages.AVIDITE_XP_MULT if "avidite" in inventaire else 1.0
 	experience_run += maxi(1, roundi(float(nombre) * multiplicateur))
+	var plafond := ProgressionAugments.plafond_salle(salle_courante, salles_du_chapitre()) \
+		if mode_run == "grimoire" else seuils.size()
+	return _monter_niveaux_run(plafond)
+
+func garantir_niveaux_fin_salle() -> int:
+	if mode_run != "grimoire":
+		return 0
+	var cible := ProgressionAugments.plafond_salle(salle_courante, salles_du_chapitre())
+	if cible <= niveau_run:
+		return 0
+	var seuils := seuils_experience_run()
+	experience_run = maxi(experience_run, int(seuils[cible - 1]))
+	return _monter_niveaux_run(cible)
+
+func _monter_niveaux_run(plafond: int) -> int:
+	var seuils := seuils_experience_run()
 	var niveaux_gagnes := 0
-	while niveau_run < Reglages.XP_RUN_SEUILS.size() \
-			and experience_run >= int(Reglages.XP_RUN_SEUILS[niveau_run]):
+	while niveau_run < mini(plafond, seuils.size()) \
+			and experience_run >= int(seuils[niveau_run]):
 		niveau_run += 1
 		niveaux_gagnes += 1
 	experience_run_change.emit()
 	return niveaux_gagnes
 
 func experience_vers_prochain_niveau() -> Dictionary:
-	if niveau_run >= Reglages.XP_RUN_SEUILS.size():
+	var seuils := seuils_experience_run()
+	if niveau_run >= seuils.size():
 		return {"actuelle": 1, "requise": 1}
-	var precedente := 0 if niveau_run == 0 else int(Reglages.XP_RUN_SEUILS[niveau_run - 1])
-	return {"actuelle": maxi(0, experience_run - precedente),
-		"requise": int(Reglages.XP_RUN_SEUILS[niveau_run]) - precedente}
+	var precedente := 0 if niveau_run == 0 else int(seuils[niveau_run - 1])
+	var requise := int(seuils[niveau_run]) - precedente
+	return {"actuelle": clampi(experience_run - precedente, 0, requise),
+		"requise": requise}
 
 func copies(id: String) -> int:
 	return DraftLogique.copies(inventaire, id)

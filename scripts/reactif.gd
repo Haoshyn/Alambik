@@ -1,21 +1,25 @@
 class_name Reactif
 extends RefCounted
 
+const COMMUN := "commun"
+const RARE := "rare"
+const LEGENDAIRE := "legendaire"
+
+var rarete := LEGENDAIRE
 var id: String
 var nom: String
 var description: String
 var mods: Dictionary
 var est_transformation := false
 var famille := ""
-var teinte := Color(0.9, 0.8, 0.5)   # sert au cadre et a l'icone dessinee
-var glyphe := "goutte"               # forme dessinee dans l'icone
-# Combien de fois on peut le reprendre. Un reactif qui ne fait qu'ajouter un
-# effet n'apporte rien la seconde fois : les effets ne s'empilent pas.
-var copies_max := 0                  # 0 : valeur par defaut des reglages
+var teinte := Color(0.9, 0.8, 0.5)
+var glyphe := "goutte"
+# Les drapeaux sont uniques ; seuls les petits bonus peuvent se reprendre.
+var copies_max := 0
 
 static func creer(id_: String, nom_: String, description_: String, mods_: Dictionary,
 		transformation := false, teinte_ := Color(0.9, 0.8, 0.5), glyphe_ := "goutte",
-		copies := 0, famille_ := "") -> Reactif:
+		copies := 0, famille_ := "", rarete_ := LEGENDAIRE) -> Reactif:
 	var r := Reactif.new()
 	r.id = id_
 	r.nom = nom_
@@ -26,7 +30,20 @@ static func creer(id_: String, nom_: String, description_: String, mods_: Dictio
 	r.glyphe = glyphe_
 	r.copies_max = copies
 	r.famille = famille_
+	r.rarete = rarete_
 	return r
 
 func copies_permises() -> int:
 	return copies_max if copies_max > 0 else Reglages.COPIES_MAX
+
+func nom_rarete() -> String:
+	match rarete:
+		COMMUN: return "Commun"
+		RARE: return "Rare"
+	return "Légendaire"
+
+func couleur_rarete() -> Color:
+	match rarete:
+		COMMUN: return Color("a7c0b5")
+		RARE: return Color("8dc8eb")
+	return Color("e9bd69")

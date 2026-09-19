@@ -44,7 +44,7 @@ static func pondere(mod: Dictionary, facteur: float) -> Dictionary:
 		return mod
 	var resultat := {}
 	for cle in mod:
-		if CHAMPS_MULT.has(cle):
+		if CHAMPS_MULT.has(cle) or cle in ["pv_max_mult", "deplacement_mult"]:
 			resultat[cle] = 1.0 + (float(mod[cle]) - 1.0) * facteur
 		elif cle in ["angle_eventail_add", "ecart_lateral_add"]:
 			resultat[cle] = float(mod[cle]) * facteur
@@ -67,6 +67,17 @@ static func depuis_l_inventaire(inventaire: Array) -> Array:
 		vus[id] = deja + 1
 		liste.append(pondere(reactif.mods, rendement(deja)))
 	return liste
+
+static func facteur_heros(mods_liste: Array, cle: String) -> float:
+	var bonus := 0.0
+	var penalite := 1.0
+	for mod: Dictionary in mods_liste:
+		var facteur := float(mod.get(cle, 1.0))
+		if facteur < 1.0:
+			penalite *= facteur
+		else:
+			bonus += facteur - 1.0
+	return maxf(Reglages.MODS_PLANCHER, (1.0 + bonus) * penalite)
 
 static func appliquer(base: Tir, mods_liste: Array) -> Tir:
 	var t := base.copie()

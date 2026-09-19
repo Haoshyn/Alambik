@@ -11,12 +11,14 @@ from pathlib import Path
 from mathutils import Vector
 
 RACINE = Path(__file__).resolve().parents[2]
-ENTREE = Path(sys.argv[sys.argv.index('--') + 1])
+ENTREE = None
 SORTIE = RACINE / 'assets/3d/characters'
 HAUTEUR = 2.14284
+ALLEGEMENT = .24
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from texturer_mage_reference import texturer, ajuster_proportions, accessoires_chapeau, surface_pan
 from kaykit_reference import styliser
+from animer_mage_v2 import animer
 
 
 def lire_glb(path):
@@ -108,7 +110,7 @@ def meshy():
     bpy.ops.object.mode_set(mode='OBJECT')
     # Le fichier brut depasse 100 000 sommets ; garder les volumes lisibles en jeu.
     mod = objet.modifiers.new('Allegement_mobile', 'DECIMATE')
-    mod.ratio = .24
+    mod.ratio = ALLEGEMENT
     bpy.ops.object.modifier_apply(modifier=mod.name)
     for face in objet.data.polygons:
         face.use_smooth = True
@@ -236,11 +238,14 @@ def meshy():
     bpy.ops.export_scene.gltf(filepath=str(SORTIE/'mage_meshy_v2.glb'),export_format='GLB',
         use_selection=True,export_animations=True,export_animation_mode='NLA_TRACKS',
         export_force_sampling=True,export_skins=True,export_def_bones=True)
+    animer(SORTIE/'mage_meshy_v2.glb')
 
 
-SORTIE.mkdir(parents=True,exist_ok=True)
-if '--kaykit-seul' not in sys.argv:
-    meshy()
-if '--meshy-seul' not in sys.argv:
-    kaykit()
-print('Export des variantes termine')
+if __name__=='__main__':
+    ENTREE = Path(sys.argv[sys.argv.index('--') + 1])
+    SORTIE.mkdir(parents=True,exist_ok=True)
+    if '--kaykit-seul' not in sys.argv:
+        meshy()
+    if '--meshy-seul' not in sys.argv:
+        kaykit()
+    print('Export des variantes termine')

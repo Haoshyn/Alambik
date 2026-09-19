@@ -30,7 +30,7 @@ def position_corrigee(point):
     return Vector((x,y,(1497-ligne_reference(z))*HAUTEUR/1336))
 
 
-def surface_chapeau(x,y,z):
+def surface_chapeau(x,y,z,normale=None):
     return (z>1.385-.20*y-.075*abs(x) or
             (y>.35 and z>1.12) or (abs(x)>.46 and z>1.16) or
             (y<-.50 and z>1.18) or (y<-.40 and abs(x)>.34 and z>1.30))
@@ -40,7 +40,7 @@ def surface_pan(x,y,z):
     return .43<z<.94 and ((x<-.12 and y>.20) or (x<-.28 and y>.065))
 
 
-def texturer(objet,reference,sortie):
+def texturer(objet,reference,sortie,marge_uv=.0008,marge_cuisson=12,corriger_cheveux=False):
     bpy.context.view_layer.objects.active=objet
     bpy.ops.object.select_all(action='DESELECT');objet.select_set(True)
     image=bpy.data.images.load(str(reference),check_existing=True)
@@ -48,6 +48,7 @@ def texturer(objet,reference,sortie):
     uv=objet.data.uv_layers.new(name='Projection_reference')
     fond=objet.data.color_attributes.new(name='Fond_reference',type='FLOAT_COLOR',domain='CORNER')
     masque=objet.data.color_attributes.new(name='Masque_reference',type='FLOAT_COLOR',domain='CORNER')
+    cheveux_seuls=objet.data.color_attributes.new(name='Zone_cheveux',type='FLOAT_COLOR',domain='CORNER') if corriger_cheveux else None
     positions=[v.co.copy() for v in objet.data.vertices]
     normales=[v.normal.copy() for v in objet.data.vertices]
     print('Projection de la reference',flush=True)
@@ -79,7 +80,7 @@ def texturer(objet,reference,sortie):
             c=c.lerp(cuir,max(poignet,ceinture))
             c=c.lerp(cuir,1-rampe(.285,.31,z))
         # Exclure les tissus de la projection photographique, sur toute leur surface.
-        est_chapeau=surface_chapeau(x,y,z)
+        est_chapeau=surface_chapeau(x,y,z,normales[boucle.vertex_index])
         col=(.87+.12*abs(x)<z<1.035 and abs(x)<.265)
         pan=surface_pan(x,y,z)
         face=(1-rampe(-.03,.17,y))*rampe(-.25,.30,-normales[boucle.vertex_index].y)
@@ -93,6 +94,9 @@ def texturer(objet,reference,sortie):
             c=cyan.copy();face=0
         fond.data[boucle.index].color=(*c,1)
         masque.data[boucle.index].color=(face,face,face,1)
+        if cheveux_seuls:
+            poids=rampe(1.23,1.29,z) if not est_chapeau else 0
+            cheveux_seuls.data[boucle.index].color=(poids,poids,poids,1)
     print('Projection terminee',flush=True)
     mat=bpy.data.materials.new('Projection_reference_v2');mat.use_nodes=True
     n=mat.node_tree.nodes;l=mat.node_tree.links;n.clear()
@@ -102,6 +106,17 @@ def texturer(objet,reference,sortie):
     couleur=n.new('ShaderNodeVertexColor');couleur.layer_name=fond.name
     force=n.new('ShaderNodeVertexColor');force.layer_name=masque.name
     alpha=n.new('ShaderNodeMath');alpha.operation='MULTIPLY';l.new(force.outputs['Color'],alpha.inputs[0]);l.new(tex.outputs['Alpha'],alpha.inputs[1])
+    if cheveux_seuls:
+        # Le bord violet de l'illustration ne doit pas etre projete sur les meches.
+        rgb=n.new('ShaderNodeSeparateColor');rgb.mode='RGB';l.new(tex.outputs['Color'],rgb.inputs[0])
+        ecart=n.new('ShaderNodeMath');ecart.operation='SUBTRACT';l.new(rgb.outputs['Blue'],ecart.inputs[0]);l.new(rgb.outputs['Red'],ecart.inputs[1])
+        violet=n.new('ShaderNodeMapRange');l.new(ecart.outputs[0],violet.inputs['Value'])
+        violet.inputs['From Min'].default_value=.02;violet.inputs['From Max'].default_value=.12
+        zone=n.new('ShaderNodeVertexColor');zone.layer_name=cheveux_seuls.name
+        rejet=n.new('ShaderNodeMath');rejet.operation='MULTIPLY';l.new(violet.outputs[0],rejet.inputs[0]);l.new(zone.outputs['Color'],rejet.inputs[1])
+        maintien=n.new('ShaderNodeMath');maintien.operation='SUBTRACT';maintien.inputs[0].default_value=1.;l.new(rejet.outputs[0],maintien.inputs[1])
+        filtre=n.new('ShaderNodeMath');filtre.operation='MULTIPLY';l.new(alpha.outputs[0],filtre.inputs[0]);l.new(maintien.outputs[0],filtre.inputs[1])
+        alpha=filtre
     mix=n.new('ShaderNodeMixRGB');l.new(alpha.outputs[0],mix.inputs[0]);l.new(couleur.outputs['Color'],mix.inputs[1]);l.new(tex.outputs['Color'],mix.inputs[2])
     l.new(mix.outputs[0],em.inputs['Color']);l.new(em.outputs[0],out.inputs['Surface'])
     objet.data.materials.clear();objet.data.materials.append(mat)
@@ -110,12 +125,12 @@ def texturer(objet,reference,sortie):
     atlas=objet.data.uv_layers.new(name='Atlas_v2')
     objet.data.uv_layers.active=atlas;atlas.active_render=True
     bpy.ops.object.mode_set(mode='EDIT');bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.uv.smart_project(angle_limit=math.radians(80),island_margin=.0008)
+    bpy.ops.uv.smart_project(angle_limit=math.radians(80),island_margin=marge_uv)
     bpy.ops.object.mode_set(mode='OBJECT')
     cuisson=bpy.data.images.new('Mage_v2_couleur',width=4096,height=4096,alpha=False)
     cible=n.new('ShaderNodeTexImage');cible.image=cuisson;n.active=cible
     scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.samples=1
-    scene.render.bake.margin=12
+    scene.render.bake.margin=marge_cuisson
     print('Cuisson couleur',flush=True)
     bpy.ops.object.bake(type='EMIT')
     cuisson.filepath_raw=str(sortie);cuisson.file_format='PNG';cuisson.save();cuisson.pack()
@@ -136,7 +151,7 @@ def texturer(objet,reference,sortie):
         objet.data.materials.append(tissu)
     for polygone in objet.data.polygons:
         x,y,z=polygone.center
-        if surface_chapeau(x,y,z):
+        if surface_chapeau(x,y,z,polygone.normal):
             polygone.material_index=1
         elif (.87+.12*abs(x)<z<1.035 and abs(x)<.265) or surface_pan(x,y,z):
             polygone.material_index=2

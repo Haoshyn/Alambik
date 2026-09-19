@@ -1,8 +1,8 @@
 extends Node
 
-# Orchestrateur : enchaine vingt salles, six niveaux et trois alambics,
-# et pose le boss a la derniere. Le heros lui appartient, pas a la salle : ses
-# PV et son inventaire traversent la run.
+# Orchestrateur des salles et des choix de run. La campagne construit son
+# melange en 25 niveaux ; les modes annexes conservent leur propre cadence.
+# Le heros lui appartient, pas a la salle : ses PV et son inventaire persistent.
 
 const SALLE := preload("res://scenes/salle.tscn")
 const HEROS := preload("res://scenes/heros.tscn")
@@ -99,7 +99,8 @@ func _ready() -> void:
 			Jeu.ajouter_reactif(candidats[index])
 			candidats.remove_at(index)
 	if Jeu.mode_run != "epreuve_sorts" and ReglagesJoueur.passifs_equipes_effectifs().has("heritage_reactif"):
-		var heritage := DraftLogique.candidats(Jeu.ameliorations_effectives())
+		var heritage := DraftLogique.candidats(Jeu.ameliorations_effectives(),
+			Reactif.RARE if Jeu.mode_run == "grimoire" else "")
 		for tirage in Reglages.HERITAGE_AMELIORATIONS:
 			if heritage.is_empty():
 				break
@@ -183,6 +184,8 @@ func _ready() -> void:
 	elif "--ouvrir-pause-ameliorations" in arguments:
 		call_deferred("_ouvrir_pause_ameliorations_capture")
 	elif "--ouvrir-amelioration" in arguments:
+		Jeu.niveau_run = maxi(1, Jeu.niveau_run)
+		_niveaux_en_attente = 1
 		call_deferred("_ouvrir_recompense_etage")
 	elif "--ouvrir-alambic" in arguments:
 		call_deferred("_ouvrir_alambic_apres_salle")
@@ -394,18 +397,22 @@ func _entrer_dans_la_salle() -> void:
 	_salle.demarrer(Jeu.salle_courante, _limites)
 
 func _sur_salle_terminee() -> void:
-	if _terminee:
+	if _terminee or _fin_salle_en_attente:
 		return
 	if Jeu.salle_courante >= Jeu.salles_du_chapitre():
 		Jeu.terminer_run(true)
 		return
-	_heros.definir_intention(Vector2.ZERO, 0.0)
-	_joystick.annuler()
-	# Le dernier ennemi peut donner un niveau. Le choix immediat a priorite sur
-	# l'Alambic ou la salle suivante, sinon deux panneaux se volent leur etat.
-	if _panneau != null or _niveaux_en_attente > 0:
-		_fin_salle_en_attente = true
+	_neutraliser_deplacement()
+	# Le dernier ennemi et le rattrapage partagent la meme file de choix.
+	# La transition attend que tous les niveaux soient effectivement choisis.
+	_fin_salle_en_attente = true
+	_niveaux_en_attente += Jeu.garantir_niveaux_fin_salle()
+	if _panneau != null:
 		return
+	if _niveaux_en_attente > 0:
+		_ouvrir_recompense_etage()
+		return
+	_fin_salle_en_attente = false
 	_traiter_fin_salle()
 
 func _traiter_fin_salle() -> void:
@@ -415,10 +422,9 @@ func _traiter_fin_salle() -> void:
 	if Jeu.salle_courante >= Jeu.salles_du_chapitre():
 		Jeu.terminer_run(true)
 		return
-	if Chapitres.est_alambic(Jeu.chapitre, Jeu.salle_courante):
-		_ouvrir_alambic_apres_salle()
-	else:
-		_avancer_salle()
+	# Les anciens choix de halte sont integres aux 25 niveaux de campagne.
+	# Les conserver ici ajouterait des legendaires hors des cinq paliers.
+	_avancer_salle()
 
 func _avancer_salle() -> void:
 	if _transition_salle:
@@ -499,20 +505,25 @@ func _texte_fusion_epreuve() -> String:
 	return "%s + %s" % [augment.nom.to_upper(), str(element.get("nom", "ÉLÉMENT")).to_upper()]
 
 func _ouvrir_recompense_etage() -> void:
-	if _terminee or _panneau != null:
+	if _terminee or _panneau != null or _niveaux_en_attente <= 0:
 		return
 	_neutraliser_deplacement()
 	get_tree().paused = true
 	Sons.musique_calme()
 	_panneau = DRAFT.instantiate()
-	_panneau.etage_recompense = Jeu.niveau_run
+	_panneau.campagne = Jeu.mode_run == "grimoire"
+	_panneau.etage_recompense = Jeu.niveau_run - _niveaux_en_attente + 1
 	_panneau.process_mode = Node.PROCESS_MODE_ALWAYS
 	_couche.add_child(_panneau)
 	_panneau.termine.connect(func() -> void:
+		var soin_choisi: float = _panneau.soin_choisi
 		_panneau.queue_free()
 		_panneau = null
 		_heros.recalculer()
-		if Jeu.mode_run == "mine":
+		if Jeu.mode_run == "grimoire":
+			_heros.stats.soigner_garanti(_heros.stats.pv_max * (ProgressionAugments.SOIN_NIVEAU + soin_choisi))
+			_effets.onde(_heros.global_position, 130.0, Color("71d9b4"), 0.4)
+		elif Jeu.mode_run == "mine":
 			_heros.stats.soigner(_heros.stats.pv_max * Reglages.MINE_SOIN_NIVEAU)
 			_effets.onde(_heros.global_position, 150.0, Color(0.42, 1.0, 0.66), 0.45)
 		_hud.rafraichir()
@@ -520,9 +531,11 @@ func _ouvrir_recompense_etage() -> void:
 		_niveaux_en_attente = maxi(0, _niveaux_en_attente - 1)
 		if _niveaux_en_attente > 0:
 			_ouvrir_recompense_etage()
-		elif _fin_salle_en_attente:
-			_fin_salle_en_attente = false
-			_traiter_fin_salle())
+		else:
+			Sons.musique_combat(0.35)
+			if _fin_salle_en_attente:
+				_fin_salle_en_attente = false
+				_traiter_fin_salle())
 
 func _sur_palier_defi_termine() -> void:
 	if Jeu.salle_courante >= Jeu.salles_du_chapitre():
@@ -560,7 +573,7 @@ func _ouvrir_alambic_apres_salle() -> void:
 func _soigner_avant_boss() -> void:
 	if Jeu.mode_run != "grimoire" or not Chapitres.est_boss(Jeu.chapitre, Jeu.salle_courante) or _boss_soignes.has(Jeu.salle_courante): return
 	_boss_soignes.append(Jeu.salle_courante)
-	_heros.stats.soigner_garanti(_heros.stats.pv_max * Reglages.SOIN_AVANT_BOSS)
+	_heros.stats.soigner_garanti(_heros.stats.pv_max * ProgressionAugments.SOIN_AVANT_BOSS)
 	_effets.onde(_heros.global_position,130.0,Color("71d9b4"),0.5)
 
 func _ouvrir_pause() -> void:

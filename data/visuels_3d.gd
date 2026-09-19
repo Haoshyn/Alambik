@@ -5,12 +5,13 @@ extends RefCounted
 const HEROS_MODELE_ORIGINAL := "res://assets/3d/characters/apprenti_a.glb"
 const HEROS_MODELE_ACCUEIL := "res://assets/3d/characters/apprenti_accueil.glb"
 const HEROS_MODELE_ACCUEIL_V2 := "res://assets/3d/characters/apprenti_accueil_v2.glb"
-# Basic conserve le modele actuel ; les variantes restent des essais visuels.
-const HEROS_MODELE := HEROS_MODELE_ACCUEIL_V2
+const HEROS_MODELE_SECOURS := "res://assets/3d/characters/apprenti_secours.glb"
+const HEROS_MODELE_REFERENCE := "res://assets/3d/characters/mage_reference.glb"
+const HEROS_MODELE_DEFAUT := "reference"
+# Revenir au secours ne demande que de changer cette constante.
+const HEROS_MODELE := HEROS_MODELE_REFERENCE
 const MODELES_HEROS := {
-	"basic": {"nom": "Basic (l’actuel)", "chemin": HEROS_MODELE},
-	"v2": {"nom": "v2 — Little Purple Wizard", "chemin": "res://assets/3d/characters/mage_meshy_v2.glb"},
-	"kaykit": {"nom": "KayKit — Mage", "chemin": "res://assets/3d/characters/mage_kaykit.glb"},
+	"reference": {"nom": "Mage", "chemin": HEROS_MODELE},
 }
 
 # Sprint arcade : 0,4 s par cycle, avec une courte phase aerienne.
@@ -29,7 +30,7 @@ const HEROS_SEUIL_TELEPORTATION := 160.0
 const HEROS_LISSAGE_ORIENTATION := 14.0
 const HEROS_INCLINAISON_VIRAGE := 0.075
 const HEROS_OS_HAUT := [
-	"torse", "tete", "chapeau", "bras_droite", "avant_bras_droite", "main_droite",
+	"torse", "tete", "chapeau", "echarpe", "echarpe_milieu", "echarpe_bout", "bras_droite", "avant_bras_droite", "main_droite",
 	"bras_gauche", "avant_bras_gauche", "main_gauche", "spine", "chest", "head",
 	"upperarm.l", "lowerarm.l", "wrist.l", "hand.l", "handslot.l",
 	"upperarm.r", "lowerarm.r", "wrist.r", "hand.r", "handslot.r",
@@ -65,7 +66,7 @@ static func chemin_ennemi(donnees: Dictionary) -> String:
 	return "res://assets/3d/enemies/%s.glb" % str(COMMUNS.get(donnees.get("forme", ""), "encrier_rampant"))
 
 static func modele_heros_valide(id: String) -> String:
-	return id if MODELES_HEROS.has(id) else "basic"
+	return id if MODELES_HEROS.has(id) else HEROS_MODELE_DEFAUT
 
 static func chemin_heros(id: String) -> String:
 	return str(MODELES_HEROS[modele_heros_valide(id)]["chemin"])

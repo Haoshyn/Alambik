@@ -15,6 +15,8 @@ static func lignes(reactif: Reactif, copies := 1) -> Array[String]:
 	_ajouter_multiplicateur(resultat, mods, "cadence_mult", "Cadence de tir", copies)
 	_ajouter_multiplicateur(resultat, mods, "vitesse_mult", "Vitesse des projectiles", copies)
 	_ajouter_multiplicateur(resultat, mods, "portee_mult", "Portée", copies)
+	_ajouter_multiplicateur(resultat, mods, "pv_max_mult", "PV maximum", copies)
+	_ajouter_multiplicateur(resultat, mods, "deplacement_mult", "Déplacement", copies)
 	_ajouter_entier(resultat, mods, "nb_projectiles_add", "projectile", copies)
 	_ajouter_entier(resultat, mods, "rebonds_add", "rebond", copies)
 	_ajouter_entier(resultat, mods, "perforations_add", "ennemi traversé", copies)
@@ -31,6 +33,11 @@ static func lignes(reactif: Reactif, copies := 1) -> Array[String]:
 
 static func texte(reactif: Reactif, copies := 1) -> String:
 	return "\n".join(lignes(reactif, copies))
+
+static func texte_gain(reactif: Reactif, copies_acquises: int) -> String:
+	var gain := Reactif.creer(reactif.id, reactif.nom, reactif.description,
+		Mods.pondere(reactif.mods, Mods.rendement(copies_acquises)))
+	return texte(gain)
 
 static func _poids_copies(copies: int) -> float:
 	var total := 0.0

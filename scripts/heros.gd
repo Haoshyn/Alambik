@@ -57,15 +57,22 @@ func definir_intention(direction: Vector2, intensite := 1.0) -> void:
 	_intention = direction
 	_intensite = intensite
 
-# Appelee a chaque entree de salle : c'est aussi ce qui reforme le bouclier de
-# sel, comme le veut sa description.
+var _pv_max_sans_augments := 0.0
+
 func recalculer() -> void:
-	var tir_de_run := Mods.appliquer(Tir.de_base(stats), Jeu.mods())
+	var mods_run := Jeu.mods()
+	# Repartir de la base evite de regagner des PV maximum a chaque recalcul.
+	if _pv_max_sans_augments <= 0.0:
+		_pv_max_sans_augments = stats.pv_max
+	stats.pv_max = _pv_max_sans_augments * Mods.facteur_heros(mods_run, "pv_max_mult")
+	stats.pv = minf(stats.pv, stats.pv_max)
+	var tir_de_run := Mods.appliquer(Tir.de_base(stats), mods_run)
 	tir_courant = CatalogueProjectiles.appliquer(ReglagesJoueur.projectile_equipe_effectif(), tir_de_run)
 	var drapeaux := tir_courant.drapeaux
 	stats.vitesse = Reglages.HEROS_VITESSE * ArbreCompetences.multiplicateur_vitesse(ReglagesJoueur.rangs_competences_effectifs()) \
 		* Sorts.multiplicateur_vitesse(ReglagesJoueur.passifs_equipes_effectifs()) \
-		* (1.0 + float(ReglagesJoueur.bonus_objets_effectifs()["vitesse"]))
+		* (1.0 + float(ReglagesJoueur.bonus_objets_effectifs()["vitesse"])) \
+		* Mods.facteur_heros(mods_run, "deplacement_mult")
 	if not _bouclier_accorde and ("egide" in drapeaux or ArbreCompetences.donne_bouclier(ReglagesJoueur.rangs_competences_effectifs()) or Sorts.donne_bouclier(ReglagesJoueur.passifs_equipes_effectifs())):
 		bouclier = 1
 		_bouclier_accorde = true
