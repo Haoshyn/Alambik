@@ -12,30 +12,40 @@ import texturer_mage_reference as projection
 from texturer_mage_reference import texturer, ajuster_proportions, position_corrigee
 from animer_heros_meshy import rampe
 from animer_mage_v2 import animer
+import chapeau_sculpte
+import tete_sculptee
 
 RACINE=Path(__file__).resolve().parents[2]
 SOURCE=RACINE/'assets/3d/sources/characters/mage_sculpte'
 TRAVAIL=RACINE/'tmp/mage-sculpte'
 
 
+def surface_echarpe(x,y,z):
+    # Inclure l'epaisseur et l'attache dorsale dans le tissu et dans son articulation.
+    return .43<z<1.025 and ((x<-.12 and y>.105 and z>.72) or
+                          (x<-.12 and y>.20) or (x<-.28 and y>.035))
+
+
 def texturer_copie(objet,reference,sortie):
+    tete_sculptee.preparer_oreilles(objet)
+    chapeau_sculpte.retirer_ancien(objet)
     ancien_masque=projection.surface_chapeau
-    # Le bord est incline : un seuil symetrique peignait les meches de droite en violet.
-    def chapeau(x,y,z,normale=None):
-        if z>1.52+.30*x-.12*y:
-            return True
-        exterieur=(x/.46)**2+(y/.49)**2>1.
-        bord=exterieur and z>1.18+.24*x-.23*y
-        arriere=y>.28 and z>1.32+.20*x-.36*y
-        return bord or arriere
-    projection.surface_chapeau=chapeau
+    # Le chapeau neuf sera ajoute apres la projection ; ne plus teinter les cheveux.
+    projection.surface_chapeau=lambda x,y,z,normale=None: False
     try:
         texturer(objet,reference,TRAVAIL/'projection.png',marge_uv=.0015,marge_cuisson=8,corriger_cheveux=True)
     finally:
         projection.surface_chapeau=ancien_masque
 
 
+def ajouter_accessoires(objet):
+    tete_sculptee.ajouter(objet)
+    chapeau_sculpte.ajouter(objet)
+
+
 def proportions(objet,rig):
+    debut=int(objet['debut_chapeau'])
+    chapeau=[v.co.copy() for v in list(objet.data.vertices)[debut:]]
     # Les mains doivent rester lisibles une fois les bras abaisses.
     for v in objet.data.vertices:
         x,y,z=v.co
@@ -45,12 +55,25 @@ def proportions(objet,rig):
         tete=rampe(1.025,1.09,z)*(1-rampe(1.32,1.39,z))
         v.co.x*=1+.09*tete
     ajuster_proportions(objet,rig)
+    # Le bord est deja construit aux proportions finales pour garder son epaisseur.
+    for v,point in zip(list(objet.data.vertices)[debut:],chapeau):v.co=point
+    indices=list(range(debut,len(objet.data.vertices)))
+    for groupe in objet.vertex_groups:groupe.remove(indices)
+    objet.vertex_groups['chapeau'].add(indices,1.,'REPLACE')
+    indices_tete=set()
+    for face in objet.data.polygons:
+        if objet.data.materials[face.material_index].name.startswith(('Tete_','Oreille_')):
+            indices_tete.update(face.vertices)
+    for groupe in objet.vertex_groups:groupe.remove(list(indices_tete))
+    objet.vertex_groups['tete'].add(list(indices_tete),1.,'REPLACE')
 
 
 def matieres(objet):
     for mat in objet.data.materials:
         nodes=mat.node_tree.nodes;liens=mat.node_tree.links
         p=nodes.get('Principled BSDF')
+        if mat.name.startswith('Chapeau_reconstruit'):
+            continue
         if mat.name.startswith('Boucle_or'):
             p.inputs['Roughness'].default_value=.30
             p.inputs['Specular IOR Level'].default_value=.5
@@ -85,6 +108,8 @@ def cuire(objet):
     anciennes_matieres=list(objet.data.materials)
     anciens_indices=[face.material_index for face in objet.data.polygons]
     bpy.ops.object.select_all(action='DESELECT');objet.select_set(True);bpy.context.view_layer.objects.active=objet
+    objet.data.uv_layers.active_index=objet.data.uv_layers.find('Atlas_v2')
+    objet.data.uv_layers['Atlas_v2'].active_render=True
     scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.samples=8;scene.render.bake.margin=8
     scene.render.bake.use_pass_direct=False;scene.render.bake.use_pass_indirect=False;scene.render.bake.use_pass_color=True
     images={}
@@ -111,7 +136,8 @@ def cuire(objet):
     # Les accessoires ajoutes n'utilisent pas l'atlas de la peau sculptee.
     for ancienne in anciennes_matieres[3:]:objet.data.materials.append(ancienne)
     for face,indice in zip(objet.data.polygons,anciens_indices):
-        face.material_index=0 if indice<3 else indice-2
+        cheveux=anciennes_matieres[indice].name.startswith('Tete_cheveux_')
+        face.material_index=0 if indice<3 or cheveux else indice-2
 
 
 def articuler_echarpe(objet,rig):
@@ -132,13 +158,15 @@ if __name__=='__main__':
     SOURCE.mkdir(parents=True,exist_ok=True);TRAVAIL.mkdir(parents=True,exist_ok=True)
     bpy.ops.wm.read_factory_settings(use_empty=True);bpy.context.preferences.filepaths.save_version=0
     base.SORTIE=TRAVAIL;base.ALLEGEMENT=.42;base.texturer=texturer_copie;base.ajuster_proportions=proportions
+    projection.surface_pan=surface_echarpe;base.surface_pan=surface_echarpe
+    base.accessoires_chapeau=ajouter_accessoires
     base.meshy()
     objet=bpy.data.objects['Mage_v2'];objet.name='Mage_sculpte'
     rig=bpy.data.objects['Squelette']
     matieres(objet);cuire(objet);articuler_echarpe(objet,rig)
     bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE/'mage_sculpte.blend'))
     bpy.ops.object.select_all(action='SELECT')
-    chemin=RACINE/'assets/3d/characters/mage_sculpte.glb'
+    chemin=TRAVAIL/'mage_sculpte.glb'
     bpy.ops.export_scene.gltf(filepath=str(chemin),export_format='GLB',use_selection=True,
         export_animations=True,export_animation_mode='NLA_TRACKS',export_force_sampling=True,export_skins=True)
     animer(chemin)
@@ -146,5 +174,10 @@ if __name__=='__main__':
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=str(chemin))
     bpy.ops.file.pack_all()
-    bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE/'mage_sculpte.blend'))
-    print('MAGE_SCULPTE exporte independamment',chemin,flush=True)
+    bpy.context.preferences.filepaths.save_version=0
+    source_finale=TRAVAIL/'mage_sculpte.blend'
+    bpy.ops.wm.save_as_mainfile(filepath=str(source_finale))
+    source_finale.replace(SOURCE/'mage_sculpte.blend')
+    destination=RACINE/'assets/3d/characters/mage_sculpte.glb'
+    chemin.replace(destination)
+    print('MAGE_SCULPTE exporte independamment',destination,flush=True)

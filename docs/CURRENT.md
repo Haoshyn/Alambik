@@ -14,9 +14,11 @@ anciens essais et résultats de tests ne valent pas validation de l'état prése
   et ses matières. Il n'est pas activé dans le jeu. La copie de travail
   `mage_sculpte`, issue du maillage sculpté et exportée séparément, reste hors jeu
   tant que sa direction visuelle n'est pas retenue.
-- Atelier sculpté : éclairage neutre et shader dédié
-  `shaders/mage_sculpte_surface.gdshader`, diffusion adoucie, relief réduit et
-  matières cuir/or séparées. Marges UV et découpage du chapeau repris ; filtre
+- Atelier sculpté : éclairage neutre et matériaux standard importés du GLB.
+  Le shader dédié `shaders/mage_sculpte_surface.gdshader` est désactivé à la
+  demande du propriétaire. Correction de l'écharpe conservée.
+  Chapeau reconstruit en pièces distinctes dans `tools/blender/chapeau_sculpte.py` :
+  bord violet à épaisseur constante, calotte et ruban séparés. Marges UV et filtre
   de projection contre les débordements violets dans les cheveux. Des raccords
   de texture restent visibles ; la fidélité artistique reste à valider.
 - Le modèle précédent `apprenti_accueil_v2.glb` reste intact depuis cette séparation.

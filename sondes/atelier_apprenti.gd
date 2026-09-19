@@ -56,18 +56,18 @@ func preparer() -> void:
 	environnement.environment.background_color = Color("e6ded0")
 	environnement.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environnement.environment.ambient_light_color = Color.WHITE if sculpte else Color("dce8f3")
-	environnement.environment.ambient_light_energy = .3
+	environnement.environment.ambient_light_energy = .48 if sculpte else .3
 	scene.add_child(environnement)
 	var lumiere := DirectionalLight3D.new()
 	lumiere.rotation_degrees = Vector3(-45, -35, 0)
 	lumiere.light_color = Color.WHITE if sculpte else Color("ffe6cf")
-	lumiere.light_energy = .45
+	lumiere.light_energy = .22 if sculpte else .45
 	lumiere.shadow_enabled = true
 	lumiere.directional_shadow_max_distance = 12.0
 	scene.add_child(lumiere)
 	var appoint := DirectionalLight3D.new()
 	appoint.rotation_degrees = Vector3(-25, 140, 0)
-	appoint.light_energy = .12
+	appoint.light_energy = .10 if sculpte else .12
 	appoint.light_color = Color.WHITE if sculpte else Color("b9dfe9")
 	scene.add_child(appoint)
 	var sol := MeshInstance3D.new()
@@ -166,6 +166,19 @@ func preparer() -> void:
 		await process_frame
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://tmp/mage-reference/apercu.png")
+		if sculpte:
+			angle = PI / 2.0
+			actualiser_camera()
+			await process_frame
+			await RenderingServer.frame_post_draw
+			root.get_texture().get_image().save_png("res://tmp/mage-sculpte/apercu-profil.png")
+			angle = PI
+			actualiser_camera()
+			await process_frame
+			await RenderingServer.frame_post_draw
+			root.get_texture().get_image().save_png("res://tmp/mage-sculpte/apercu-dos.png")
+			angle = 0.0
+			actualiser_camera()
 		vitesse = Reglages.HEROS_VITESSE
 	if "--capturer" in OS.get_cmdline_user_args():
 		await capturer()
