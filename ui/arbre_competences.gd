@@ -97,6 +97,10 @@ func _rafraichir() -> void:
 	var n: Dictionary = ArbreCompetences.NOEUDS[_selection]
 	_embleme.texture = _noeuds[_selection].get_meta("embleme")
 	_details.text = "%s\n%s\n%s" % [n["nom"],ArbreCompetences.description_effective(_selection),_message]
+	var rang_actuel := ReglagesJoueur.rang_competence(_selection)
+	_details.text += "\nBonus du nœud : %s" % ArbreCompetences.valeur_au_rang(_selection, rang_actuel)
+	if rang_actuel < ArbreCompetences.rangs(_selection):
+		_details.text += " → %s" % ArbreCompetences.valeur_au_rang(_selection, rang_actuel + 1)
 	_achat.text = "%s · %d gouttes" % ["Débloquer" if ArbreCompetences.rangs(_selection)==1 else "Améliorer",ReglagesJoueur.cout_competence(_selection)]
 	_achat.disabled = ReglagesJoueur.rang_competence(_selection) >= ArbreCompetences.rangs(_selection) or (not ReglagesJoueur.mode_dev and (not ArbreCompetences.prerequis_atteint(_selection,ReglagesJoueur.rangs_competences) or ReglagesJoueur.gouttes < ReglagesJoueur.cout_competence(_selection)))
 	var requis := str(n.get("requis",""))

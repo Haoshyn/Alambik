@@ -57,7 +57,9 @@ static func pour_salle(numero: int, chapitre := 0, graine := 0, mode := "grimoir
 	var resultat: Array = RENCONTRES[index].slice(0, 2).duplicate(true)
 	var alea := RandomNumberGenerator.new()
 	alea.seed = graine * 7919 + chapitre * 104729 + numero * 31
-	for vague in resultat:
+	for i in resultat.size():
+		resultat[i] = RangsEnnemis.limiter_costauds(resultat[i])
+		var vague: Array = resultat[i]
 		if alea.randf() < 0.5:
 			vague.reverse()
 	return resultat

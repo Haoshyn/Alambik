@@ -4,7 +4,7 @@ extends RefCounted
 # Les armes transforment le rythme et la trajectoire, sans niveau ni bonus permanent.
 const TYPES := {
 	"standard": {"nom": "Baguette d’acier", "description": "Un trait régulier, précis et de bonne portée.", "monde": 1, "niveau": 1, "degats_mult": 1.0, "portee_mult": 1.1},
-	"veloce": {"nom": "Aiguille vive", "description": "Traits rapides et longs. Moins de dégâts par seconde, mais une trajectoire facile à placer.", "monde": 2, "niveau": 4, "degats_mult": 0.78, "cadence_mult": 1.2, "vitesse_mult": 1.55, "portee_mult": 1.25},
+	"veloce": {"nom": "Aiguille vive", "description": "Traits rapides et longs. Moins de dégâts par seconde, mais une trajectoire facile à placer.", "monde": 2, "niveau": 4, "degats_mult": 0.80, "cadence_mult": 1.2, "vitesse_mult": 1.55, "portee_mult": 1.25},
 	"lourd": {"nom": "Sceptre de cuivre", "description": "Traverse trois ennemis à pleine puissance. Impacts lourds, cadence lente.", "monde": 3, "niveau": 7, "degats_mult": 1.65, "cadence_mult": 0.7, "perforations": 2, "vitesse_mult": 0.9, "portee_mult": 1.1, "drapeaux": ["perforation_sans_perte"]},
 	"chercheur": {"nom": "Branche astrale", "description": "Des traits puissants corrigent leur trajectoire vers la cible.", "monde": 4, "niveau": 10, "degats_mult": 1.35, "cadence_mult": 0.9, "drapeaux": ["homing"]},
 	"explosif": {"nom": "Bâton à étincelles", "description": "Chaque impact frappe aussi les ennemis autour de la cible.", "monde": 5, "niveau": 13, "degats_mult": 1.4, "cadence_mult": 0.9, "rayon_explosion": 150.0, "degats_zone_mult": 0.45},

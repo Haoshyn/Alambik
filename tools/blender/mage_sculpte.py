@@ -14,6 +14,7 @@ from animer_heros_meshy import rampe
 from animer_mage_v2 import animer
 import chapeau_sculpte
 import tete_sculptee
+import sans_echarpe
 
 RACINE=Path(__file__).resolve().parents[2]
 SOURCE=RACINE/'assets/3d/sources/characters/mage_sculpte'
@@ -27,15 +28,17 @@ def surface_echarpe(x,y,z):
 
 
 def texturer_copie(objet,reference,sortie):
+    sans_echarpe.preparer(objet,surface_echarpe)
     tete_sculptee.preparer_oreilles(objet)
     chapeau_sculpte.retirer_ancien(objet)
     ancien_masque=projection.surface_chapeau
     # Le chapeau neuf sera ajoute apres la projection ; ne plus teinter les cheveux.
     projection.surface_chapeau=lambda x,y,z,normale=None: False
     try:
-        texturer(objet,reference,TRAVAIL/'projection.png',marge_uv=.0015,marge_cuisson=8,corriger_cheveux=True)
+        texturer(objet,reference,TRAVAIL/'projection.png',marge_uv=.0015,marge_cuisson=8,corriger_cheveux=True,yeux_stylises=True,sans_echarpe=True)
     finally:
         projection.surface_chapeau=ancien_masque
+    sans_echarpe.habiller(objet)
 
 
 def ajouter_accessoires(objet):
@@ -54,12 +57,30 @@ def proportions(objet,rig):
         v.co=pivot+(v.co-pivot)*(1+.28*poids)
         tete=rampe(1.025,1.09,z)*(1-rampe(1.32,1.39,z))
         v.co.x*=1+.09*tete
+        # Arrondir la machoire apres la projection conserve le dessin du visage.
+        visage=(1-rampe(-.14,-.035,y))*rampe(.995,1.025,z)
+        menton=visage*(1-rampe(1.055,1.14,z))
+        cote=rampe(.075,.26,abs(x))
+        v.co.x*=1-.10*menton*cote
+        v.co.z+=.022*menton*cote
+        joue=visage*rampe(1.04,1.10,z)*(1-rampe(1.14,1.22,z))*rampe(.06,.15,abs(x))
+        v.co.y-=.013*joue
     ajuster_proportions(objet,rig)
+    # Le plafond se calcule apres l'elargissement de la tete, sous le bord reel.
+    for v in list(objet.data.vertices)[:debut]:
+        plafond=chapeau_sculpte.plafond_cheveux(v.co.x,v.co.y)
+        v.co.z=min(v.co.z,plafond)
     # Le bord est deja construit aux proportions finales pour garder son epaisseur.
     for v,point in zip(list(objet.data.vertices)[debut:],chapeau):v.co=point
     indices=list(range(debut,len(objet.data.vertices)))
     for groupe in objet.vertex_groups:groupe.remove(indices)
-    objet.vertex_groups['chapeau'].add(indices,1.,'REPLACE')
+    # Le bord suit la tete ; seule la pointe conserve le mouvement secondaire.
+    for indice in indices:
+        point=objet.data.vertices[indice].co
+        bord=position_corrigee(Vector((point.x,point.y,chapeau_sculpte.altitude(point.x,point.y)))).z
+        souplesse=rampe(.28,.55,point.z-bord)
+        objet.vertex_groups['tete'].add([indice],1-souplesse,'REPLACE')
+        objet.vertex_groups['chapeau'].add([indice],souplesse,'REPLACE')
     indices_tete=set()
     for face in objet.data.polygons:
         if objet.data.materials[face.material_index].name.startswith(('Tete_','Oreille_')):
@@ -72,7 +93,7 @@ def matieres(objet):
     for mat in objet.data.materials:
         nodes=mat.node_tree.nodes;liens=mat.node_tree.links
         p=nodes.get('Principled BSDF')
-        if mat.name.startswith('Chapeau_reconstruit'):
+        if mat.name.startswith(('Chapeau_reconstruit','Tunique_raccord_col')):
             continue
         if mat.name.startswith('Boucle_or'):
             p.inputs['Roughness'].default_value=.30
@@ -136,34 +157,26 @@ def cuire(objet):
     # Les accessoires ajoutes n'utilisent pas l'atlas de la peau sculptee.
     for ancienne in anciennes_matieres[3:]:objet.data.materials.append(ancienne)
     for face,indice in zip(objet.data.polygons,anciens_indices):
-        cheveux=anciennes_matieres[indice].name.startswith('Tete_cheveux_')
+        cheveux=anciennes_matieres[indice].name.startswith(('Tete_cheveux_','Tunique_raccord_col'))
         face.material_index=0 if indice<3 or cheveux else indice-2
 
-
-def articuler_echarpe(objet,rig):
-    bpy.context.view_layer.objects.active=rig;bpy.ops.object.mode_set(mode='EDIT')
-    for nom,p,parent in [('echarpe_milieu',(-.36,.19,.75),'echarpe'),('echarpe_bout',(-.52,.21,.60),'echarpe_milieu')]:
-        os=rig.data.edit_bones.new(nom);os.head=position_corrigee(Vector(p))
-        os.tail=os.head+Vector((0,0,.08));os.parent=rig.data.edit_bones[parent]
-    bpy.ops.object.mode_set(mode='OBJECT')
-    original=objet.vertex_groups['echarpe']
-    groupes=[original,objet.vertex_groups.new(name='echarpe_milieu'),objet.vertex_groups.new(name='echarpe_bout')]
-    for v in objet.data.vertices:
-        if not any(g.group==original.index and g.weight>.5 for g in v.groups):continue
-        t=max(0,min(2,(-v.co.x-.22)/.30*2));indice=min(1,int(t));fraction=t-indice
-        original.remove([v.index]);groupes[indice].add([v.index],1-fraction,'REPLACE');groupes[indice+1].add([v.index],fraction,'REPLACE')
 
 
 if __name__=='__main__':
     SOURCE.mkdir(parents=True,exist_ok=True);TRAVAIL.mkdir(parents=True,exist_ok=True)
     bpy.ops.wm.read_factory_settings(use_empty=True);bpy.context.preferences.filepaths.save_version=0
     base.SORTIE=TRAVAIL;base.ALLEGEMENT=.42;base.texturer=texturer_copie;base.ajuster_proportions=proportions
-    projection.surface_pan=surface_echarpe;base.surface_pan=surface_echarpe
+    projection.surface_pan=lambda x,y,z: False
+    base.surface_pan=projection.surface_pan
     base.accessoires_chapeau=ajouter_accessoires
     base.meshy()
     objet=bpy.data.objects['Mage_v2'];objet.name='Mage_sculpte'
     rig=bpy.data.objects['Squelette']
-    matieres(objet);cuire(objet);articuler_echarpe(objet,rig)
+    matieres(objet);cuire(objet)
+    bpy.context.view_layer.objects.active=rig;bpy.ops.object.mode_set(mode='EDIT')
+    rig.data.edit_bones.remove(rig.data.edit_bones['echarpe'])
+    bpy.ops.object.mode_set(mode='OBJECT')
+    objet.vertex_groups.remove(objet.vertex_groups['echarpe'])
     bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE/'mage_sculpte.blend'))
     bpy.ops.object.select_all(action='SELECT')
     chemin=TRAVAIL/'mage_sculpte.glb'

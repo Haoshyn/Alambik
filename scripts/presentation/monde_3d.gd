@@ -15,6 +15,7 @@ var _portail: Node3D
 var _obstacles: Node3D
 var _lumiere: DirectionalLight3D
 var _phenomenes: Node3D
+var _terrain: Node3D
 
 func _ready() -> void:
 	process_priority = 100
@@ -50,6 +51,9 @@ func charger(chemin: String) -> PackedScene:
 func relier(salle_: Node2D, heros_: Node2D, fond: Node2D) -> void:
 	salle = salle_
 	heros = heros_
+	_terrain = preload("res://scripts/presentation/terrain_elementaire_3d.gd").new()
+	_terrain.salle = salle
+	add_child(_terrain)
 	_phenomenes = preload("res://scripts/presentation/phenomenes_3d.gd").new()
 	_phenomenes.heros = heros
 	add_child(_phenomenes)
@@ -110,6 +114,7 @@ func _process(delta: float) -> void:
 	if not is_instance_valid(salle):
 		return
 	if is_instance_valid(_phenomenes): _phenomenes.mettre_a_jour(delta)
+	if is_instance_valid(_terrain): _terrain.mettre_a_jour(delta)
 	Pont3D.cadrer(camera,get_viewport().get_visible_rect().size,get_viewport().canvas_transform)
 	_lumiere.shadow_enabled = not ReglagesJoueur.effets_reduits and (OS.get_name() != "Android" or Visuels3D.OMBRES_ANDROID)
 	var limites: Rect2 = salle.get("limites")
@@ -118,7 +123,7 @@ func _process(delta: float) -> void:
 		_limites = limites
 		_numero = numero
 		var chapitre := Jeu.chapitre_courant()
-		_arene.construire(limites,charger,int(chapitre["monde"]),salle.contour_sol(), posmod(Jeu.graine+numero+Jeu.chapitre, 4))
+		_arene.construire(limites,charger,int(chapitre["monde"]),salle.contour_sol(), TerrainsMondes.variante(numero, Jeu.chapitre, Jeu.graine))
 		_reconstruire_obstacles()
 	for proxy in _proxies.values():
 		if is_instance_valid(proxy):
@@ -140,7 +145,7 @@ func _reconstruire_obstacles() -> void:
 	for rect in salle.obstacles():
 		if rect in salle.retraits(): continue
 		var taille := Pont3D.vers_monde(rect.size)
-		var obstacle := preload("res://scripts/presentation/decor_alchimique.gd").obstacle(taille, (_numero+index)%3, int(Jeu.chapitre_courant()["monde"]))
+		var obstacle := preload("res://scripts/presentation/decor_alchimique.gd").obstacle(taille, (_numero+index)%3, int(Jeu.chapitre_courant()["monde"]), salle.type_obstacle(rect))
 		_obstacles.add_child(obstacle)
 		obstacle.position = Pont3D.vers_monde(rect.get_center())
 		# La base couvre exactement le rectangle physique de l'obstacle.

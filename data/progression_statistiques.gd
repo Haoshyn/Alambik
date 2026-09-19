@@ -1,26 +1,29 @@
 class_name ProgressionStatistiques
 extends RefCounted
 
-# Reperes fixes calcules hors combat sur deux a trois victoires par chapitre.
-# Aucun coefficient ne lit l'equipement reel du joueur.
-const PV_DEPART := 0.14
-const DEGATS_DEPART := 0.15
-const ENTREE_MONDE_TROIS := 6
-const FIN_CAMPAGNE := 29
-const PV_MONDE_TROIS := 3.0
-const DEGATS_MONDE_TROIS := 8.0
-# Conserve le dernier palier existant pour ne pas multiplier toute la fin de jeu.
-const PV_FIN := 4475.831861
-const DEGATS_FIN := 1259.356719
+# Courbe fixe des 35 chapitres, pour une premiere campagne autour de douze heures
+# avec reprises et annexes. Aucun coefficient ne lit le build reel du joueur.
+# La puissance permanente attendue en fin de campagne vaut environ x12 a x18 ;
+# les motifs et les terrains apportent le reste de la difficulte.
+const PV_DEPART := .75
+const DEGATS_DEPART := .50
+const FIN_CAMPAGNE := Chapitres.MONDES.size() * Chapitres.CHAPITRES_PAR_MONDE - 1
+const PV_FIN := 15.0
+const DEGATS_FIN := 15.0
+const EXPOSANT_PROGRESSION := 1.15
 
-static func _courbe(palier: int, depart: float, monde_trois: float, fin: float) -> float:
-	var p := maxi(0,palier)
-	if p <= ENTREE_MONDE_TROIS:
-		return depart * pow(monde_trois/depart,float(p)/ENTREE_MONDE_TROIS)
-	return monde_trois * pow(fin/monde_trois,float(p-ENTREE_MONDE_TROIS)/float(FIN_CAMPAGNE-ENTREE_MONDE_TROIS))
+static func _courbe(palier: int, depart: float, fin: float) -> float:
+	var progression := float(maxi(0, palier)) / maxf(1.0, float(FIN_CAMPAGNE))
+	return depart * pow(fin / depart, pow(progression, EXPOSANT_PROGRESSION))
 
 static func facteur_pv(palier: int) -> float:
-	return _courbe(palier,PV_DEPART,PV_MONDE_TROIS,PV_FIN)
+	return _courbe(palier, PV_DEPART, PV_FIN)
 
 static func facteur_degats(palier: int) -> float:
-	return _courbe(palier,DEGATS_DEPART,DEGATS_MONDE_TROIS,DEGATS_FIN)
+	return _courbe(palier, DEGATS_DEPART, DEGATS_FIN)
+
+# Les premieres victoires doivent etre possibles sans Sort ni Ultime ; le
+# budget de vie des miniboss accompagne ensuite l'acquisition de cet arsenal.
+static func facteur_miniboss(palier: int) -> float:
+	var progression := clampf(float(palier) / maxf(1.0, float(FIN_CAMPAGNE)), 0.0, 1.0)
+	return lerpf(Reglages.MINIBOSS_PV_MULT_DEPART, Reglages.MINIBOSS_PV_MULT, pow(progression, EXPOSANT_PROGRESSION))

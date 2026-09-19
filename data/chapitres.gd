@@ -1,23 +1,27 @@
 class_name Chapitres
 extends RefCounted
 
-# Les dix identites de monde existantes sont declinees en trois chapitres. Les
-# contenus sont reutilises entre les trois, tandis que densite et statistiques
-# montent. Le troisieme porte le boss signature du monde.
+# Les cinq mondes actifs sont declines en sept chapitres. Les
+# contenus sont reutilises entre les sept, tandis que densite et statistiques
+# montent. Le septieme porte le boss signature du monde.
 #
 # Les Mondes ne portent plus leurs multiplicateurs : la difficulte est une
 # fonction du palier, c'est-a-dire du rang du chapitre dans la campagne. Une
 # table figee obligeait a recalculer dix lignes a chaque retouche et rendait
 # l'entree d'un Monde deux fois plus dure que ses propres chapitres.
 
-const CHAPITRES_PAR_MONDE := 3
+const CHAPITRES_PAR_MONDE := 7
 
 const MONDES := [
-	{"id": "encres", "numero": "I", "nom": "Encres", "sous_titre": "Les créatures quittent leurs lignes.", "boss_signature": "archiscribe_encres", "teinte": Color(0.60, 0.50, 0.92)},
-	{"id": "braises", "numero": "II", "nom": "Braises", "sous_titre": "Chaque salle conserve une étincelle.", "boss_signature": "roi_braises", "teinte": Color(1.00, 0.55, 0.28)},
-	{"id": "givre", "numero": "III", "nom": "Givre", "sous_titre": "Le papier craque sous le froid.", "boss_signature": "reine_givre", "teinte": Color(0.52, 0.86, 1.00)},
-	{"id": "orages", "numero": "IV", "nom": "Orages", "sous_titre": "Les phrases grondent avant de frapper.", "boss_signature": "maitre_orages", "teinte": Color(0.98, 0.90, 0.35)},
-	{"id": "venins", "numero": "V", "nom": "Venins", "sous_titre": "L’encre ronge ceux qui la lisent.", "boss_signature": "hydre_venins", "teinte": Color(0.52, 0.94, 0.38)},
+	{"id":"encre", "numero":"I", "nom":"Encre", "sous_titre":"Les pages débordent de magie.", "boss_signature":"archiscribe_encres", "teinte":Color("aa8dc7")},
+	{"id":"terre", "numero":"II", "nom":"Terre", "sous_titre":"Les sables mouvants gagnent les vieux jardins.", "boss_signature":"gardien_runes", "teinte":Color("b4bd78")},
+	{"id":"eau", "numero":"III", "nom":"Eau", "sous_titre":"Les marées ont gagné le sanctuaire.", "boss_signature":"reine_givre", "teinte":Color("4dbac4")},
+	{"id":"air", "numero":"IV", "nom":"Air", "sous_titre":"Les souffles traversent les terrasses.", "boss_signature":"maitre_orages", "teinte":Color("79c9b7")},
+	{"id":"feu", "numero":"V", "nom":"Feu", "sous_titre":"La lave affleure au bord des forges.", "boss_signature":"roi_braises", "teinte":Color("ed9857")},
+]
+
+# Garder les identites retirees pour les bijoux des anciennes sauvegardes.
+const MONDES_RETIRES := [
 	{"id": "echos", "numero": "VI", "nom": "Échos", "sous_titre": "Chaque attaque revient une seconde fois.", "boss_signature": "choeur_infini", "teinte": Color(0.70, 0.56, 0.98)},
 	{"id": "ombres", "numero": "VII", "nom": "Ombres", "sous_titre": "Les mots se déplacent quand on détourne les yeux.", "boss_signature": "souverain_ombres", "teinte": Color(0.46, 0.42, 0.68)},
 	{"id": "runes", "numero": "VIII", "nom": "Runes", "sous_titre": "Des signes anciens défendent leurs secrets.", "boss_signature": "gardien_runes", "teinte": Color(0.35, 0.92, 0.76)},
@@ -40,7 +44,7 @@ static func _construire_chapitres() -> Array[Dictionary]:
 			var est_signature := chapitre_monde == CHAPITRES_PAR_MONDE
 			var palier := index_monde * CHAPITRES_PAR_MONDE + index_chapitre
 			var boss_final: String = str(monde["boss_signature"]) if est_signature \
-				else MINIBOSS_FINAUX[(index_monde * 2 + index_chapitre) % MINIBOSS_FINAUX.size()]
+				else MINIBOSS_FINAUX[(index_monde * (CHAPITRES_PAR_MONDE - 1) + index_chapitre) % MINIBOSS_FINAUX.size()]
 			resultat.append({
 				"id": "%s_%d" % [monde["id"], chapitre_monde],
 				"nom": "Monde %s — %s · Chapitre %d" % [monde["numero"], monde["nom"], chapitre_monde],
@@ -59,8 +63,8 @@ static func _construire_chapitres() -> Array[Dictionary]:
 			})
 	return resultat
 
-# Definies pour tout palier positif, y compris au-dela du trentieme : ajouter
-# un onzieme Monde ne demande qu'une entree dans MONDES.
+# Definies pour tout palier positif, y compris au-dela de la campagne : ajouter
+# un nouveau Monde ne demande qu'une entree dans MONDES.
 static func pv_du_palier(palier: int) -> float:
 	var p := maxi(0, palier)
 	return ProgressionStatistiques.facteur_pv(p)

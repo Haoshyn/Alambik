@@ -16,12 +16,14 @@ var chapitre := 0
 var inventaire: Array[String] = []
 var experience_run := 0
 var niveau_run := 0
+var niveaux_rares: Array[int] = []
 var rerolls_restants := 0
 var mode_run := "grimoire"
 var rng := RandomNumberGenerator.new()
 var graine := 0
 var mode_auto := false          # le bot headless pilote la run
 var ennemis_abattus := 0
+var elites_par_salle := {}
 var temps_mine_restant := 0.0
 var elements_alambic_tires: Array[String] = []
 var derniere_fusion_epreuve := {}
@@ -84,8 +86,10 @@ func demarrer_run(graine_demandee: int = 0, salle_de_depart: int = 1, chapitre_d
 	inventaire = []
 	experience_run = 0
 	niveau_run = 0
+	niveaux_rares = ProgressionAugments.tirer_niveaux_rares(rng) if mode_run == "grimoire" else []
 	rerolls_restants = ArbreCompetences.nombre_rerolls(ReglagesJoueur.rangs_competences_effectifs())
 	ennemis_abattus = 0
+	elites_par_salle.clear()
 	temps_mine_restant = Reglages.MINE_DUREE if mode_run == "mine" else 0.0
 	elements_alambic_tires = []
 	derniere_fusion_epreuve = {}

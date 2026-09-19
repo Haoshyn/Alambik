@@ -3,16 +3,11 @@ extends RefCounted
 
 # Profils artistiques : aucune incidence sur les collisions ou la progression.
 const PROFILS := [
-	{"nom":"Cour des alchimistes", "sol":"dfd2ba", "joint":"b9aa8d", "mur":"eddbb8", "accent":"319f9d", "dehors":"7da89b", "detail":"6e9561", "motif":0, "forme":0},
-	{"nom":"Fonderies de braise", "sol":"c58c66", "joint":"9a705a", "mur":"645663", "accent":"da995b", "dehors":"a77c76", "detail":"c77e44", "motif":1, "forme":1},
-	{"nom":"Palais de givre", "sol":"c8e0e3", "joint":"9cbfc9", "mur":"a2c6db", "accent":"719ecd", "dehors":"88aaba", "detail":"b2dcdf", "motif":2, "forme":2},
-	{"nom":"Terrasses des orages", "sol":"b7c3ce", "joint":"8b9cac", "mur":"8493ac", "accent":"cdb363", "dehors":"8398ae", "detail":"acbccb", "motif":3, "forme":3},
-	{"nom":"Serres des venins", "sol":"bec8a4", "joint":"96a07f", "mur":"8d9f85", "accent":"8985b2", "dehors":"789485", "detail":"65975e", "motif":2, "forme":0},
-	{"nom":"Galeries des echos", "sol":"d3c3d8", "joint":"ac9eb5", "mur":"b8a6cc", "accent":"d3af83", "dehors":"a79bb8", "detail":"9b91b3", "motif":3, "forme":3},
-	{"nom":"Cloitre des ombres", "sol":"a5a3b9", "joint":"858297", "mur":"77758f", "accent":"8bb6c7", "dehors":"85869d", "detail":"77838f", "motif":0, "forme":1},
-	{"nom":"Jardins des runes", "sol":"b8ccb3", "joint":"92ab91", "mur":"8db2a0", "accent":"56a99c", "dehors":"799d91", "detail":"688d64", "motif":4, "forme":4},
-	{"nom":"Rives du neant", "sol":"c4adc7", "joint":"9d89a6", "mur":"9682a4", "accent":"b88dc2", "dehors":"93829f", "detail":"af99be", "motif":2, "forme":2},
-	{"nom":"Le Grand Atelier", "sol":"ead3a0", "joint":"bca77d", "mur":"d7bb84", "accent":"369f9d", "dehors":"9ab6a5", "detail":"bc905c", "motif":3, "forme":0},
+	{"nom":"Scriptorium vivant", "sol":"ddd0e6", "joint":"b8a8c9", "mur":"9990b7", "accent":"c7a86a", "dehors":"6b6897", "detail":"aca0c8", "motif":0, "forme":5},
+	{"nom":"Jardins de pierre", "sol":"dcc399", "joint":"b49b76", "mur":"bfa477", "accent":"b4bd78", "dehors":"819576", "detail":"649157", "motif":0, "forme":4},
+	{"nom":"Sanctuaire des marées", "sol":"c3dce4", "joint":"9dbfcf", "mur":"91b8c7", "accent":"4dbac4", "dehors":"377e98", "detail":"70a798", "motif":0, "forme":0},
+	{"nom":"Terrasses des souffles", "sol":"e7dcc4", "joint":"c9bd9e", "mur":"ede1c4", "accent":"79c9b7", "dehors":"93bad2", "detail":"8ca98a", "motif":0, "forme":3},
+	{"nom":"Forge des braises", "sol":"80717c", "joint":"635664", "mur":"665366", "accent":"cb9259", "dehors":"ad643e", "detail":"c88b48", "motif":1, "forme":1},
 ]
 
 static func profil(monde: int) -> Dictionary:

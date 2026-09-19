@@ -24,10 +24,12 @@ var numero := 1
 
 var _vagues: Array = []
 var _vague_courante := -1
+var _alea_elites := RandomNumberGenerator.new()
 var _finie := false
 var _portail_ouvert := false
 var _portail: Area2D
 var _obstacles: Array[Rect2] = []
+var _types_obstacles := {}
 var _retraits: Array[Rect2] = []
 var _contour := PackedVector2Array()
 var _anim := 0.0
@@ -36,6 +38,7 @@ var _mine_active := false
 var _mine_temps := 0.0
 var _mine_prochain_spawn := 0.0
 var _mine_boss_apparu := false
+var _terrain: Node2D
 
 func _ready() -> void:
 	add_to_group("salle")
@@ -54,6 +57,7 @@ func demarrer(numero_: int, limites_: Rect2) -> void:
 	limites = limites_
 	_vagues = Vagues.pour_salle(numero, Jeu.chapitre, Jeu.graine, Jeu.mode_run)
 	_vague_courante = -1
+	_alea_elites.seed = Jeu.graine + Jeu.chapitre * 104729 + numero * 7919
 	_finie = false
 	_portail_ouvert = false
 	_portail = null
@@ -62,6 +66,12 @@ func demarrer(numero_: int, limites_: Rect2) -> void:
 	_mine_prochain_spawn = 0.0
 	_mine_boss_apparu = false
 	_construire_obstacles()
+	if is_instance_valid(_terrain):
+		_terrain.set_physics_process(false)
+		_terrain.queue_free()
+	_terrain = preload("res://scripts/terrain_elementaire.gd").new()
+	add_child(_terrain)
+	_terrain.configurer(self)
 	if Jeu.mode_run == "mine":
 		_demarrer_mine()
 		return
@@ -78,12 +88,19 @@ func _construire_obstacles() -> void:
 		if enfant is StaticBody2D:
 			enfant.queue_free()
 	_obstacles.clear()
+	_types_obstacles.clear()
 	_retraits.clear()
 	_contour = FormesSalles.contour(limites, FormesSalles.indice(numero, Jeu.chapitre, Jeu.graine, Jeu.mode_run))
 	var combat_de_boss := Jeu.mode_run == "grimoire" and Chapitres.est_boss(Jeu.chapitre, numero) \
 		or Jeu.mode_run in ["epreuve_sorts", "retro"]
 	if combat_de_boss or _vagues.is_empty() and Jeu.mode_run != "mine":
 		_construire_murs_perimetre()
+		return
+	if Jeu.mode_run == "grimoire":
+		_construire_murs_perimetre()
+		for definition: Dictionary in TerrainsMondes.obstacles(numero, Jeu.chapitre):
+			var bloc: Rect2 = definition["rect"]
+			_ajouter_obstacle(Rect2(limites.position + bloc.position * limites.size, bloc.size * limites.size), str(definition["type"]))
 		return
 	var motif := posmod(Jeu.graine+numero+Jeu.chapitre,Reglages.ARENE_COMPOSITIONS.size())
 	for retrait: Rect2 in Reglages.ARENE_RETRAITS[motif]:
@@ -97,6 +114,17 @@ func _construire_obstacles() -> void:
 	_construire_murs_perimetre()
 	for bloc: Rect2 in Reglages.ARENE_COMPOSITIONS[motif]:
 		_ajouter_obstacle(Rect2(limites.position+bloc.position*limites.size,bloc.size*limites.size))
+
+func terrain_elementaire() -> Node2D:
+	return _terrain if is_instance_valid(_terrain) and not _terrain.is_queued_for_deletion() else null
+
+func mouvement_terrain(position_heros: Vector2, direction_voulue := Vector2.ZERO) -> Vector3:
+	var terrain := terrain_elementaire()
+	return terrain.mouvement(position_heros, direction_voulue) if terrain != null else Vector3(0, 0, 1)
+
+func tir_bloque_par_terrain(position_heros: Vector2) -> bool:
+	var terrain := terrain_elementaire()
+	return terrain != null and terrain.tir_bloque(position_heros)
 
 func retraits() -> Array[Rect2]:
 	return _retraits
@@ -128,8 +156,12 @@ func _contour_avec_retraits() -> PackedVector2Array:
 	points.append(Vector2(limites.end.x,limites.position.y))
 	return points
 
-func _ajouter_obstacle(rect: Rect2) -> void:
+func type_obstacle(rect: Rect2) -> String:
+	return str(_types_obstacles.get(rect, "muret"))
+
+func _ajouter_obstacle(rect: Rect2, type := "muret") -> void:
 	_obstacles.append(rect)
+	_types_obstacles[rect] = type
 	var corps := StaticBody2D.new()
 	corps.collision_layer = 4
 	corps.collision_mask = 0
@@ -221,8 +253,14 @@ func _vague_suivante() -> void:
 		if get_tree().get_nodes_in_group("ennemis").is_empty():
 			_ouvrir_portail()
 		return
-	for id in _vagues[_vague_courante]:
-		faire_apparaitre(id, _position_d_apparition())
+	var vague: Array = _vagues[_vague_courante]
+	var index_elite := -1
+	if Jeu.mode_run == "grimoire" and Jeu.chapitre >= RangsEnnemis.PREMIER_CHAPITRE_ELITES \
+			and not Chapitres.est_boss(Jeu.chapitre, numero) and get_tree().get_nodes_in_group("elites").is_empty():
+		if not vague.is_empty() and _alea_elites.randf() < RangsEnnemis.CHANCE_ELITE_PAR_VAGUE:
+			index_elite = _alea_elites.randi_range(0, vague.size() - 1)
+	for i in vague.size():
+		faire_apparaitre(str(vague[i]), _position_d_apparition(), null, i == index_elite)
 	_attente_vague = -1.0 if Jeu.est_retro() else (
 		Reglages.DELAI_VAGUE_FORCE if _vague_courante < _vagues.size() - 1 else -1.0)
 
@@ -260,12 +298,14 @@ func _sur_corps_dans_portail(corps: Node) -> void:
 	_finie = true
 	terminee.emit()
 
-func faire_apparaitre(id: String, position: Vector2, invocateur: Node = null) -> void:
+func faire_apparaitre(id: String, position: Vector2, invocateur: Node = null, elite := false) -> void:
 	var donnees: Dictionary = CatalogueEnnemis.par_id(id)
 	if donnees.is_empty():
 		push_error("Ennemi inconnu : " + id)
 		return
 	donnees = _mis_a_l_echelle(donnees, id)
+	if elite and invocateur == null and str(donnees["cerveau"]) != "boss":
+		donnees = RangsEnnemis.renforcer(donnees)
 	var noeud: Node2D
 	if donnees["cerveau"] == "boss":
 		noeud = BOSS.instantiate()
@@ -320,7 +360,8 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 		copie["degats"] = float(donnees["degats"]) * Chapitres.facteur_degats(Jeu.chapitre, numero)
 		if donnees["cerveau"] == "boss":
 			var signature := str(donnees.get("rang_boss", "miniboss")) == "signature"
-			copie["pv"] *= Reglages.BOSS_SIGNATURE_PV_MULT if signature else Reglages.MINIBOSS_PV_MULT
+			copie["pv"] *= Reglages.BOSS_SIGNATURE_PV_MULT if signature \
+				else ProgressionStatistiques.facteur_miniboss(Chapitres.palier(Jeu.chapitre))
 			copie["degats"] *= Reglages.BOSS_SIGNATURE_DEGATS_MULT if signature else Reglages.MINIBOSS_DEGATS_MULT
 	# Les monstres communs gagnent de la menace par leur rythme, pas par des PV.
 	# Le Retro reste volontairement un prototype de demonstration et n'est pas
@@ -331,8 +372,6 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 			copie["vitesse_projectile"] = float(copie["vitesse_projectile"]) * Reglages.ENNEMI_PROJECTILE_VITESSE_MULT
 		if copie.has("recharge"):
 			copie["recharge"] = float(copie["recharge"]) * Reglages.ENNEMI_RECHARGE_MULT
-	if Jeu.mode_run == "grimoire":
-		copie["degats"] = maxf(float(copie["degats"]), Reglages.DEGATS_COUP_REFERENCE * ProgressionStatistiques.facteur_degats(Jeu.chapitre))
 	if not Jeu.est_retro():
 		var chapitre_patterns := Jeu.chapitre if Jeu.mode_run == "grimoire" else (Epreuves.palier(Jeu.niveau_epreuve) if Jeu.mode_run == "epreuve_sorts" else ReglagesJoueur.palier_atteint())
 		copie = EvolutionEnnemis.appliquer(copie,chapitre_patterns)
@@ -357,6 +396,8 @@ func _sur_mort_ennemi(qui: Node, position: Vector2, couleur: Color) -> void:
 			_ouvrir_portail.call_deferred()
 			return
 	if not qui.has_meta("invocateur"):
+		if bool(qui.donnees.get("elite", false)):
+			Jeu.elites_par_salle[numero] = int(Jeu.elites_par_salle.get(numero, 0)) + 1
 		Jeu.ennemis_abattus += 1
 		ennemi_abattu.emit(int(qui.donnees.get("experience", 1)))
 	if effets != null:
@@ -477,8 +518,6 @@ func tirer(tir_source: Tir, origine: Vector2, direction: Vector2, hostile := fal
 
 func _sur_tir_ennemi(tir_ennemi: Tir, origine: Vector2, direction: Vector2) -> void:
 	var projectile := tir_ennemi.copie()
-	if Jeu.mode_run == "grimoire":
-		projectile.degats = maxf(projectile.degats, Reglages.DEGATS_COUP_REFERENCE * ProgressionStatistiques.facteur_degats(Jeu.chapitre))
 	tirer(projectile, origine, direction, true)
 
 func _sur_impact(position: Vector2, couleur: Color, ampleur: float) -> void:

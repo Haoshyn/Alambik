@@ -22,7 +22,7 @@ static func _construire() -> Dictionary:
 			"cerveau": "sentinelle", "couleur": Color(0.84, 0.78, 1.00), "rayon": 28.0,
 			"forme": "plume", "experience": 2, "recharge": 1.70, "vitesse_projectile": 620.0,
 			"portee_projectile": 2200.0, "telegraphe": 0.65,
-			"projectiles": 3, "angle_eventail": 0.30, "part_degats_projectile": 0.72,
+			"projectiles": 3, "angle_eventail": 0.30, "part_degats_projectile": 0.75,
 		},
 		"tache_veloce": {
 			"nom": "Tache véloce",
@@ -46,7 +46,7 @@ static func _construire() -> Dictionary:
 			"cerveau": "orbiteur", "couleur": Color(0.32, 0.84, 1.00), "rayon": 27.0,
 			"forme": "orbite", "experience": 2, "recharge": 1.65,
 			"vitesse_projectile": 500.0, "portee_projectile": 1300.0,
-			"part_degats_projectile": 0.62, "sens_orbite": 1.0,
+			"part_degats_projectile": 0.625, "sens_orbite": 1.0,
 		},
 		"sceau_belier": {
 			"nom": "Sceau-bélier",
@@ -62,7 +62,7 @@ static func _construire() -> Dictionary:
 			"cerveau": "harceleur", "couleur": Color(1.00, 0.42, 0.72), "rayon": 29.0,
 			"forme": "ruban", "experience": 3, "recharge": 1.45, "telegraphe": 0.48,
 			"vitesse_projectile": 560.0, "portee_projectile": 1700.0,
-			"projectiles": 2, "angle_eventail": 0.18, "part_degats_projectile": 0.58,
+			"projectiles": 2, "angle_eventail": 0.18, "part_degats_projectile": 0.60,
 		},
 		"miroir_encre": {
 			"nom": "Miroir d’encre",
@@ -70,7 +70,7 @@ static func _construire() -> Dictionary:
 			"cerveau": "miroir", "couleur": Color(0.54, 0.92, 0.78), "rayon": 36.0,
 			"forme": "miroir", "experience": 4, "recharge": 2.35, "telegraphe": 0.65,
 			"projectiles_cercle": 8, "vitesse_projectile": 390.0,
-			"portee_projectile": 1200.0, "part_degats_projectile": 0.52,
+			"portee_projectile": 1200.0, "part_degats_projectile": 0.50,
 		},
 		"cachet_phaseur": {
 			"nom": "Cachet phaseur",
@@ -79,7 +79,7 @@ static func _construire() -> Dictionary:
 			"forme": "phaseur", "dessin_procedural": true, "experience": 3,
 			"recharge": 2.55, "telegraphe": 0.62, "projectiles_cercle": 6,
 			"vitesse_projectile": 520.0, "portee_projectile": 1450.0,
-			"part_degats_projectile": 0.56,
+			"part_degats_projectile": 0.55,
 		},
 		"fuseau_tisseur": {
 			"nom": "Fuseau tisseur",
@@ -88,7 +88,7 @@ static func _construire() -> Dictionary:
 			"forme": "fuseau", "dessin_procedural": true, "experience": 3,
 			"recharge": 1.85, "telegraphe": 0.52, "projectiles": 3,
 			"angle_eventail": 0.0, "ecart_lateral": 82.0, "vitesse_projectile": 470.0,
-			"portee_projectile": 1500.0, "part_degats_projectile": 0.62,
+			"portee_projectile": 1500.0, "part_degats_projectile": 0.625,
 		},
 		"fiole_volatile": {
 			"nom": "Fiole volatile",
@@ -100,6 +100,9 @@ static func _construire() -> Dictionary:
 			"part_degats_projectile": 0.45,
 		},
 	}
+
+	for id in tous:
+		tous[id]["categorie"] = RangsEnnemis.categorie(str(id))
 
 	var miniboss := [
 		["la_rature", "La Rature", 270.0, 260.0, 18.0, Color(0.95, 0.55, 0.30), 0,

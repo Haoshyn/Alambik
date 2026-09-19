@@ -1,11 +1,15 @@
 class_name DraftLogique
 extends RefCounted
 
-# Une offre partage sa rarete : une legende ne concurrence jamais un petit bonus.
+# Une offre partage sa rarete : un pouvoir ne concurrence jamais un petit bonus.
 # Sans rarete explicite, conserver le catalogue historique des modes annexes.
-static func candidats(inventaire: Array, rarete := "", niveau := 0) -> Array[String]:
+static func candidats(inventaire: Array, rarete := "", niveau := 0, contexte: Dictionary = {}) -> Array[String]:
 	var liste: Array[String] = []
 	for id in CatalogueReactifs.ids():
+		if not bool(contexte.get("avec_sorts", true)) and id in CatalogueReactifs.AUGMENTS_SORTS:
+			continue
+		if id == "egide" and bool(contexte.get("bouclier_initial", false)):
+			continue
 		var reactif := CatalogueReactifs.par_id(id)
 		if rarete.is_empty() and reactif.rarete == Reactif.COMMUN:
 			continue
@@ -16,6 +20,9 @@ static func candidats(inventaire: Array, rarete := "", niveau := 0) -> Array[Str
 		if niveau > ProgressionAugments.DERNIER_NIVEAU_AVIDITE and id == "avidite":
 			continue
 		var compatible := true
+		for drapeau: String in contexte.get("drapeaux_arme", []):
+			if id in ProgressionAugments.INCOMPATIBLES_ARMES.get(drapeau, []):
+				compatible = false
 		for autre: String in ProgressionAugments.INCOMPATIBLES.get(id, []):
 			if autre in inventaire:
 				compatible = false
@@ -24,8 +31,13 @@ static func candidats(inventaire: Array, rarete := "", niveau := 0) -> Array[Str
 	return liste
 
 static func proposer(inventaire: Array, rng: RandomNumberGenerator, nb := ProgressionAugments.NOMBRE_CHOIX,
-		rarete := "", niveau := 0, eviter: Array = []) -> Array[String]:
-	var restants := candidats(inventaire, rarete, niveau)
+		rarete := "", niveau := 0, eviter: Array = [], contexte: Dictionary = {}) -> Array[String]:
+	if rarete == Reactif.COMMUN:
+		# Le soin est une vraie carte : trois choix fixes, aucune quatrieme option.
+		var communs: Array[String] = []
+		communs.assign(ProgressionAugments.COMMUNS)
+		return communs
+	var restants := candidats(inventaire, rarete, niveau, contexte)
 	var tirage: Array[String] = []
 	var familles: Array[String] = []
 	while tirage.size() < nb and not restants.is_empty():
@@ -45,15 +57,6 @@ static func proposer(inventaire: Array, rng: RandomNumberGenerator, nb := Progre
 		familles.append(CatalogueReactifs.par_id(choix).famille)
 		restants.erase(choix)
 	return tirage
-
-static func rarete_disponible(inventaire: Array, rarete: String, niveau: int) -> String:
-	if candidats(inventaire, rarete, niveau).size() >= ProgressionAugments.NOMBRE_CHOIX:
-		return rarete
-	# Un pool rare presque epuise doit encore proposer trois choix utiles,
-	# sans offrir une sixieme legende.
-	if rarete == Reactif.RARE:
-		return Reactif.COMMUN
-	return rarete
 
 static func copies(inventaire: Array, id: String) -> int:
 	return inventaire.count(id)

@@ -26,16 +26,10 @@ const CHAMPS_MULT := {
 	"portee_mult": "portee",
 }
 
-# Rendement decroissant : la deuxieme copie d'un reactif vaut moins que la
-# premiere, la troisieme encore moins. Sans cela, empiler trois fois le meme
-# reactif rendait le heros seize fois plus fort que ce que la page pouvait
-# opposer — mesure a la page 50 du premier chapitre.
-const RENDEMENT_COPIES := [1.0, 0.60, 0.40]
-
-static func rendement(copie: int) -> float:
-	if copie < RENDEMENT_COPIES.size():
-		return RENDEMENT_COPIES[copie]
-	return RENDEMENT_COPIES[RENDEMENT_COPIES.size() - 1] * 0.7
+# Un bonus annonce reste identique a chaque choix ; les bonus se cumulent
+# sur la base de depart. Les pouvoirs de projectile, eux, restent uniques.
+static func rendement(_copie: int) -> float:
+	return 1.0
 
 # Les champs entiers ne se ponderent pas : un demi-projectile n'existe pas.
 # Les reactifs qui en donnent sont plafonnes plus bas, dans leur catalogue.

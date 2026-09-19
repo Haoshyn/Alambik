@@ -2,6 +2,8 @@
 
 ## 0. CONTEXTE CRITIQUE POUR L'IMPLÉMENTATION
 
+**Décision du propriétaire du 19 septembre 2026, prioritaire sur les passes précédentes :** équilibrage global pour environ 12 h jusqu'à la première fin des 5 mondes, avec des gains lisibles. Maîtrises ATK/PV additives à 5/7,5/10/12,5 % par rang ; forge +2,5 points par niveau. Dix niveaux de run : quatre rares garantis à des niveaux aléatoires, six communs avec seulement soin 30 %, ATK +10 % ou PV max +10 %. Épiques avant les étages 5/10/15, avec soin de 30 %. Sorts proportionnels à l'ATK, deux augments de sorts rares (+25 % dégâts, −15 % récupération) et un épique (+75 % dégâts, +25 % rayon actif), disponible aux trois paliers épiques. Précision du propriétaire : aucune rareté légendaire ; les 12 h incluent plusieurs reprises pour farmer, améliorer le personnage et progresser. Les valeurs actives sont dans `data/` ; résumé et limites dans `docs/CURRENT.md`. Relecture uniquement, sans lancement de jeu.
+
 **Précision suivante du 16 septembre :** « 60–70 dégâts » était indicatif. Calibrer l’entrée du monde 3 sur les ressources et objets accessibles après deux à trois passages par chapitre. Butin à chance 1/X avec garantie au Xe coffre éligible : objets 1/3 (garantie à 3), sorts 1/5 (garantie à 5), remise à zéro au drop. Détails : `docs/ops/ECONOMIE_MONDE3_ET_GARANTIES.md`.
 
 **Décision du propriétaire du 16 septembre 2026, prioritaire sur les passes précédentes :** premier chapitre accessible sans équipement, premier bijou garanti à la victoire, puis croissance exponentielle plus exigeante. Bijoux sans cadence, un seul pouvoir au niveau 10, forge possible au-delà pour les statistiques seules et à coût exponentiel ; les nouveaux objets proposent des alternatives de même budget. Dix baguettes, une par monde, les dernières pouvant être plus fortes. Maîtrises en trois branches : deux nœuds de statistiques à dix rangs puis un majeur à rang unique (positions 3/6/9), utilitaire centré sur les ressources. Cadence de base réduite de 20 % à titre d’interprétation et gains de cadence limités. Rangs des sorts conservés avec faibles gains ; Réserve d’ultime renforcée. Petit tutoriel non bloquant, lancement direct du chapitre touché et aperçus de butin illustrés/interactifs. Détails : `docs/ops/PROGRESSION_STATISTIQUES.md` et `docs/ops/EFFETS_BIJOUX.md`.
@@ -83,6 +85,18 @@ Un joueur moins performant doit pouvoir :
 * revenir progressivement plus puissant ;
 * finir par franchir l'obstacle sans devoir devenir un expert mécanique.
 
+La progression doit être rapide au début : une tentative ratée en salle 20 doit
+financer environ deux petits rangs de maîtrise, voire davantage sur les tout
+premiers achats. Au chapitre 1, 19 salles terminées et trois boss vaincus donnent
+56–59 Gouttes hors bonus. Cela permet par exemple de passer Force et Constitution
+du rang 0 au rang 2 pour 50 Gouttes au total, ou du rang 5 au rang 6 pour le même
+prix. Le rythme ralentit avec les maîtrises avancées : quelques tentatives utiles
+mais ratées doivent alors généralement financer un petit gain permanent. Les
+pouvoirs majeurs demandent davantage d'épargne. Une mort avant toute salle
+terminée ne rapporte rien.
+Le bilan rappelle une maîtrise ou un bijou équipé améliorable avec les ressources
+déjà disponibles, sans effectuer l'achat à la place du joueur.
+
 Cependant :
 
 **le farm ne doit jamais supprimer totalement l'esquive.**
@@ -145,11 +159,20 @@ S'il existe un jour, il devra récompenser le retour sans créer d'obligation de
 
 La campagne cible :
 
-**10 mondes × 3 chapitres = 30 chapitres.**
+**5 mondes × 7 chapitres = 35 chapitres.**
+
+Mondes actifs, dans l’ordre : Encre, Terre, Eau, Air et Feu.
 
 Chaque monde représente une vraie identité visuelle et mécanique.
 
-Les 3 chapitres d'un même monde mutualisent volontairement beaucoup de contenu afin de garder un scope de développement raisonnable.
+Les 7 chapitres d'un même monde mutualisent volontairement beaucoup de contenu afin de garder un scope de développement raisonnable.
+
+La puissance ennemie augmente progressivement sur les 35 chapitres, sans saut
+spécifique au changement de monde et sans adaptation à l’équipement porté.
+Les différences de dégâts entre espèces et entre contact et projectiles sont
+conservées. Les nouveaux motifs arrivent à l’intérieur des mondes, après leur
+prise en main. Maîtrises et forge gardent leurs bonus acquis ; leurs coûts
+successifs sont adoucis pour rendre la progression permanente plus régulière.
 
 ---
 
@@ -165,6 +188,23 @@ Chaque monde possède :
 
 La mécanique environnementale apparaît **régulièrement mais pas systématiquement**.
 
+Direction retenue : grandes arènes rectangulaires, contours légèrement variés,
+centre dégagé, obstacles latéraux et murs discontinus ou absents visuellement.
+Les bords sans muret restent signalés par le rebord du sol. Un parcours fixe de
+20 étages combine neuf contours, dont des coins plus arrondis, avec zéro à quatre
+petits obstacles : murets droits ou en L, piliers, rochers, caisses ou livres.
+Nombre, taille, forme, type, emplacement et effets de terrain sont identiques
+lorsqu’on rejoue le même étage du même chapitre. Aucune graine de run ne change
+la carte ; les chapitres emploient des déclinaisons fixes de ces compositions.
+Encre ouvre la campagne sans effet de terrain pour apprendre les bases.
+Terre : sables mouvants qui ralentissent d’abord très peu puis progressivement
+plus tant qu’on reste dedans, avec récupération à la sortie. Eau : flaques
+légèrement ralentissantes où les tirs sont interdits. Air : vent qui accélère
+la marche dans son sens et la freine à contre-vent, sans pousser à l’arrêt ;
+un petit effet directionnel montre son sens, sans tornades. Feu : flaques de
+lave infligeant des dégâts. Les flaques restent contournables ; les salles de
+boss restent sans effets de terrain dans cette passe.
+
 Exemple :
 
 Monde volcanique → coulées de lave dans certaines rencontres.
@@ -176,7 +216,7 @@ La mécanique d'un monde :
 * peut produire des variantes de miniboss ;
 * disparaît au monde suivant.
 
-Le but est de renouveler le gameplay sans empiler définitivement dix couches de mécaniques.
+Le but est de renouveler le gameplay sans empiler définitivement cinq couches de mécaniques.
 
 ---
 
@@ -192,11 +232,11 @@ Environ **4 types de monstres**.
 
 Environ **5 types**.
 
-### Chapitre 3
+### Chapitre 7
 
 Environ **6 types**.
 
-Un nouveau type de monstre est donc introduit à chaque chapitre du monde.
+L’introduction des types de monstres est étalée sur les sept chapitres, en réutilisant le bestiaire du monde.
 
 La difficulté augmente aussi via :
 
@@ -242,16 +282,20 @@ Un chapitre contient :
 
 Objectifs de durée lorsque le joueur possède une puissance appropriée :
 
-### Chapitres 1 et 2
+### Chapitres 1 à 6
 
 Environ **12 minutes**.
 
-### Chapitre 3
+### Chapitre 7
 
 Environ **16 minutes**.
 
-La première complétion des 30 chapitres vise environ **12 à 16 heures de jeu**
-au total, avec les défaites, nouveaux essais, choix de build et un peu de farm.
+La cible de première complétion des 35 chapitres est d'environ **12 heures** :
+7 h 20 de victoires théoriques et 4 h 40 de reprises et de farm. Les tentatives
+répétées financent les maîtrises, la forge et les sorts nécessaires à la suite :
+la cible inclut cette progression entre les essais. Les Gouttes augmentent de
+7,5 % par chapitre ; les tentatives ratées rémunèrent leurs salles terminées.
+Ce budget reste théorique.
 Le temps de clean théorique est volontairement plus court : le joueur habile
 avance plus vite et le farm compense une partie du manque de skill.
 
@@ -335,7 +379,9 @@ sont des paliers majeurs.
 
 Le joueur entre d'abord dans une **pré-salle**.
 
-Cette pré-salle contient l'Alambic.
+Cette pré-salle propose trois pouvoirs épiques, puis rend 30 % des PV max.
+Apothéose est un épique de sorts admissible aux trois paliers.
+Le soin est identique quelle que soit l'augmentation retenue.
 
 Puis :
 
@@ -345,17 +391,17 @@ Puis :
 
 Pas d'Alambic.
 
-### Chapitres 1 et 2
+### Chapitres 1 à 6
 
 Miniboss final / rencontre finale renforcée.
 
-### Chapitre 3
+### Chapitre 7
 
 **Boss signature du monde.**
 
 Il existe donc :
 
-**10 boss signature principaux au total.**
+**5 boss signature principaux au total.**
 
 Un boss signature doit constituer un vrai pic de difficulté. Sa puissance ne doit pas venir uniquement d'une barre de PV : la cible actuelle combine une endurance nettement supérieure, des projectiles plus rapides, davantage de pression entre les salves et moins de temps mort. En budget de rencontre, il doit être de l'ordre de **quatre à cinq fois plus exigeant** que l'ancien prototype, sans multiplier chaque statistique par cinq.
 
@@ -369,60 +415,34 @@ Les miniboss peuvent être réutilisés mais recevoir de petites modifications c
 
 # 12. NIVEAU DE RUN
 
-ATTENTION :
+Le niveau de run est distinct du niveau de compte et recommence à chaque chapitre.
+La campagne donne dix montées de niveau avant le boss final. Quatre niveaux sont
+choisis aléatoirement sans remise au début de la run pour proposer des rares ;
+les six autres sont communs. Les rares incluent Homing et les spécialisations.
+Une relance conserve la rareté du niveau.
 
-le **niveau de run** est distinct du niveau permanent du compte.
-
-Chaque chapitre recommence au niveau de run initial.
-
-Le niveau de run possède seulement :
-
-**6 niveaux / 6 montées de niveau utiles.**
-
-Chaque montée de niveau donne :
-
-**un choix entre 3 Améliorations aléatoires.**
-
-L'XP nécessaire doit être calibrée pour obtenir approximativement :
-
-* 2 Améliorations avant la salle 5 ;
-* 4 Améliorations avant la salle 10 ;
-* 5 Améliorations avant la salle 15 ;
-* 6 Améliorations avant la salle 20.
-
-Donc une run complète contient au maximum :
-
-**6 Améliorations standards.**
-
-Les niveaux de run sont entièrement reset au chapitre suivant.
+L'XP permet de gagner le choix pendant une salle ; sa fin garantit les paliers
+aux salles 1/3/4/6/8/9/11/13/16/19. Les trois offres épiques des étages 5/10/15
+s'ajoutent aux dix niveaux, sans consommer l'un des quatre rares.
 
 ---
 
 # 13. LEVEL-UP
 
-Lorsqu'un niveau de run est gagné :
+Le combat se met en pause et le joueur retient une augmentation.
+Un niveau commun propose toujours les trois choix suivants :
 
-**le combat se met en pause immédiatement** et le choix d'Amélioration apparaît.
+* rendre 30 % des PV maximum ;
+* ajouter 10 % d'attaque de base à la run ;
+* ajouter 10 % de PV maximum de base, sans soin immédiat.
 
-Principe similaire à Archero.
+Les gains ATK/PV se cumulent sans rendement décroissant. Un niveau rare propose
+des spécialisations uniques disponibles ; jamais de soin comme quatrième option.
+Aucun niveau ne donne de soin automatique. Les offres épiques
+rendent 30 % des PV max avec le pouvoir choisi.
 
-Le joueur choisit 1 Amélioration parmi 3.
-
-Des rerolls pourront être obtenus via les Maîtrises permanentes.
-
-Les Améliorations ne doivent PAS être uniquement :
-
-* +10 % ATK ;
-* +5 % critique ;
-* +15 % PV.
-
-Les Améliorations servent principalement à modifier le comportement du build.
-
-Les petits bonus statistiques appartiennent davantage :
-
-* aux Maîtrises ;
-* à l'équipement ;
-* aux systèmes permanents.
+Les Maîtrises et Héritage réactif donnent des relances. Les choix communs étant
+fixes, ils ne consomment pas de relance.
 
 ---
 
@@ -1065,17 +1085,13 @@ Chaque monde possède son propre ensemble d'équipements.
 
 Structure actuelle :
 
-### Chapitre 1
+Les trois bijoux du monde sont reproposés en cycle :
 
-Drop d'un équipement destiné à un slot Anneau.
+* chapitres 1, 4 et 7 : premier Anneau ;
+* chapitres 2 et 5 : second Anneau ;
+* chapitres 3 et 6 : Collier.
 
-### Chapitre 2
-
-Drop d'un autre équipement destiné à un slot Anneau.
-
-### Chapitre 3
-
-Drop d'un Collier.
+Les bijoux déjà possédés des mondes retirés restent utilisables.
 
 Les détails exacts de la compatibilité entre les deux slots Anneau restent à confirmer.
 
@@ -1148,7 +1164,7 @@ Ainsi :
 **la progression détermine les stats brutes ; le choix d'objet détermine l'effet spécial.**
 
 La puissance permanente maximale n'est **pas** la puissance requise pour finir
-la campagne. Un joueur habile doit pouvoir vaincre le Monde X avec des Maîtrises,
+la campagne. Un joueur habile doit pouvoir vaincre le Monde V avec des Maîtrises,
 une Forge, des objets et des capacités encore très incomplets s'il construit une
 bonne run. Le farm sert à compenser le manque de skill et à préparer les modes
 annexes / post-game.
@@ -1218,9 +1234,9 @@ Structure retenue : une arène de survie de **5 minutes**, alimentée en continu
 puis un boss final. Elle favorise AoE, gestion de foule, déplacement et survie
 sous saturation.
 
-Sa difficulté possède un palier pour chacun des 30 niveaux de campagne et suit
+Sa difficulté possède un palier pour chacun des 35 niveaux de campagne et suit
 le dernier chapitre réellement débloqué. Ses Pierres progressent de x1,12 par
-niveau de campagne, soit environ x1,40 par Monde : croissance volontairement
+niveau de campagne, soit environ x2,21 par Monde : croissance volontairement
 non linéaire sans rendre les premiers paliers insignifiants.
 
 ---
@@ -1249,9 +1265,14 @@ elle aussi le dernier niveau de campagne débloqué.
 Loadout : **1 Sort + 1 Passif + 1 Ultime**. Une Maîtrise Utilitaire avancée
 ouvre un deuxième slot Passif.
 
-Les capacités ont **10 rangs**. Le rang 1 rend la capacité utilisable ; chaque
-nouvel exemplaire améliore ensuite son efficacité de 6 %, jusqu'à +54 % au rang
-10. Le farm d'Épreuves sert donc à approfondir les capacités déjà accessibles,
+Les capacités ont **10 rangs**. Les actifs et ultimes gagnent +5 % de puissance
+par exemplaire après le premier, jusqu'à +45 % au rang 10. Les passifs gagnent
+2,5 points de pourcentage par rang, ou un effet entier aux rangs 1/4/7/10.
+Les dégâts des actifs et ultimes dépendent de l'attaque du héros, sans le ratio
+de projectile de la baguette ni la pénalité de Salve/Tir multiple. Deux augments
+rares renforcent leurs dégâts (+25 %) ou réduisent leur récupération (−15 %).
+Apothéose, épique possible aux étages 5/10/15, donne +75 % dégâts de sorts et
++25 % de rayon au sort actif. Le farm d'Épreuves sert donc à approfondir les capacités déjà accessibles,
 pas à court-circuiter la progression de campagne.
 
 La première boucle de build doit apparaître immédiatement : terminer le niveau
@@ -1357,7 +1378,8 @@ Courbe cible sans farm volontaire, en ne comptant que les victoires de campagne 
 
 Un peu de farm permet de rapprocher la Maîtrise du pourcentage de campagne,
 mais dépasser nettement cette courbe doit coûter de plus en plus cher grâce aux
-rangs supplémentaires et à leur coût géométrique.
+rangs supplémentaires. Le coût augmente de 25 % du prix initial par rang,
+arrondi à 5 Gouttes ; les nœuds avancés ont un prix initial supérieur.
 
 Trois branches prévues :
 
@@ -1387,7 +1409,8 @@ Exemples validés comme direction :
 * potentiellement deuxième reroll plus tard ;
 * deuxième slot Passif.
 
-L'arbre complet n'est PAS encore conçu.
+L'arbre actif est défini dans `data/arbre_competences.gd` ; ses bonus ATK/PV
+s'additionnent entre rangs et nœuds. La première fin ne demande pas de le maximiser.
 
 ---
 
@@ -1428,7 +1451,7 @@ Le theorycraft consiste en partie à construire quelque chose de puissant avec c
 
 Première vraie fin :
 
-**terminer la campagne des 10 mondes.**
+**terminer la campagne des 5 mondes.**
 
 Le joueur doit pouvoir se dire :
 
@@ -1446,7 +1469,7 @@ Ne pas consacrer du temps important à cette partie tant que la campagne n'est p
 
 ## Panthéon
 
-Contenu de maîtrise autour des boss des 10 mondes.
+Contenu de maîtrise autour des boss des 5 mondes.
 
 Possiblement boss rush.
 
@@ -1569,22 +1592,22 @@ Le changement éventuel doit être prototypé séparément.
 À considérer comme la direction actuelle de référence :
 
 * jeu existant à modifier, pas à recréer ;
-* 10 mondes ;
-* 3 chapitres par monde ;
-* 30 chapitres ;
+* 5 mondes ;
+* 7 chapitres par monde ;
+* 35 chapitres ;
 * 20 salles par chapitre ;
 * rencontres principalement fixes avec quelques variantes ;
 * combats à vagues ;
 * vague suivante immédiate si clean rapide ;
 * miniboss aux paliers 5/10/15 ;
 * salle 20 = final du chapitre ;
-* boss signature uniquement au chapitre 3 ;
-* 10 boss signature ;
+* boss signature uniquement au chapitre 7 ;
+* 5 boss signature ;
 * mécanique environnementale par monde ;
-* environ 4/5/6 types de monstres sur les chapitres 1/2/3 ;
+* environ 4/5/6 types de monstres sur les chapitres 1/2/7 ;
 * 6 Améliorations maximum par run ;
 * choix entre 3 Améliorations ;
-* progression approximative 2/4/5/6 Améliorations avant 5/10/15/20 ;
+* dix niveaux, quatre rares garantis et trois offres épiques aux étages 5/10/15 ;
 * 3 Alambics ;
 * Alambics avant 5/10/15 ;
 * Alambic soigne 20 % PV max ;
@@ -1652,7 +1675,7 @@ Codex ne doit pas prendre de décisions de game design définitives à leur suje
 * compositions finales des salles ;
 * miniboss ;
 * boss ;
-* mécaniques des 10 mondes ;
+* mécaniques des 5 mondes ;
 * contrôle Joystick vs Tap-to-walk ;
 * Panthéon ;
 * Chaos.
@@ -1752,7 +1775,7 @@ Pour chaque ennemi :
 
 ## Étape 8 — Boss
 
-Créer/adapter les 10 boss signature lorsque le combat normal et le bestiaire sont suffisamment solides.
+Créer/adapter les 5 boss signature lorsque le combat normal et le bestiaire sont suffisamment solides.
 
 ---
 

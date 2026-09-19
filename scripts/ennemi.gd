@@ -46,6 +46,7 @@ func configurer(donnees_: Dictionary) -> void:
 
 func _ready() -> void:
 	add_to_group("ennemis")
+	if bool(donnees.get("elite", false)): add_to_group("elites")
 	collision_layer = 2
 	collision_mask = 4
 	_graine = randi() % 1000
@@ -403,7 +404,7 @@ func recevoir_degats(montant: float, effets: Array = []) -> void:
 		match effet:
 			"braise":
 				_braise = Reglages.BRAISE_DUREE
-				_braise_dps = maxf(_braise_dps, Reglages.BRAISE_DEGATS_PAR_SECONDE)
+				_braise_dps = maxf(_braise_dps, montant * Reglages.BRAISE_PART_DEGATS_PAR_SECONDE)
 			"feu":
 				_feu = Reglages.BRAISE_DUREE
 				if _feu_cumuls < Reglages.FEU_DOT_CUMUL_MAX:
@@ -450,11 +451,16 @@ func _mourir() -> void:
 	if not is_inside_tree():
 		return
 	remove_from_group("ennemis")
+	remove_from_group("elites")
 	mort.emit(self, global_position, donnees["couleur"])
 	Sons.jouer("mort", -14.0, randf_range(0.85, 1.15))
 	queue_free()
 
 func _draw() -> void:
+	if bool(donnees.get("elite", false)):
+		var rayon := float(donnees["rayon"])
+		draw_arc(Vector2.ZERO, rayon + 7.0, 0, TAU, 32, Color(RangsEnnemis.COULEUR_ELITE, .7), 2.0)
+		draw_string(ThemeDB.fallback_font, Vector2(-23,-rayon-31), "ÉLITE", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, RangsEnnemis.COULEUR_ELITE)
 	if has_meta("visuel_3d"):
 		_dessiner_telegraphe(float(donnees["rayon"]))
 		_dessiner_barre_de_vie(float(donnees["rayon"]))

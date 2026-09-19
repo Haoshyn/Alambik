@@ -60,27 +60,39 @@ func construire(limites: Rect2, _charger: Callable, monde := 0, contour := Packe
 	# Le sol recoit les ombres des acteurs sans produire de bandes d'auto-ombre.
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(instance)
+	var numero_segment := 0
 	for i in contour.size():
 		var a := Pont3D.vers_monde(contour[i])
 		var b := Pont3D.vers_monde(contour[(i+1)%contour.size()])
 		var longueur := a.distance_to(b)
-		var bord := bloc((a+b)*0.5+Vector3(0,0.05,0),Vector3(longueur+0.12,0.50,0.24),ambiance[2])
-		bord.rotation.y = -atan2(b.z-a.z,b.x-a.x)
-		var tranche := bloc((a+b)*0.5+Vector3(0,-0.42,0),Vector3(longueur+0.10,0.4,0.22),ambiance[2].darkened(.18))
-		tranche.rotation.y = bord.rotation.y
-		var ceramique := bloc((a+b)*0.5+Vector3(0,.32,0),Vector3(longueur+.12,.10,.30),DecorsMondes.couleur(monde,"accent"))
-		ceramique.rotation.y = bord.rotation.y
+		var angle := -atan2(b.z-a.z,b.x-a.x)
+		# Meme sans muret, une tranche et un rebord rendent la limite lisible.
+		var tranche := bloc((a+b)*.5+Vector3(0,-.24,0),Vector3(longueur+.10,.48,.22),ambiance[2].darkened(.18))
+		tranche.rotation.y = angle
+		var rebord := bloc((a+b)*.5+Vector3(0,.015,0),Vector3(longueur+.10,.04,.16),ambiance[2])
+		rebord.rotation.y = angle
+		var morceaux := maxi(1, ceili(longueur / 2.1))
+		for j in morceaux:
+			var visible_ := TerrainsMondes.muret_visible(variante, numero_segment)
+			numero_segment += 1
+			if not visible_: continue
+			var position_bord := a.lerp(b, (float(j)+.5)/morceaux)
+			var bord := bloc(position_bord+Vector3(0,.18,0),Vector3(longueur/morceaux-.08,.36,.24),ambiance[2])
+			bord.rotation.y = angle
+			var ceramique := bloc(position_bord+Vector3(0,.39,0),Vector3(longueur/morceaux-.06,.06,.28),DecorsMondes.couleur(monde,"accent"))
+			ceramique.rotation.y = angle
 	# Les ornements restent hors de la surface de collision, meme dans les retraits.
 	var ornements := preload("res://scripts/presentation/ornements_monde.gd")
 	for cote in [-1.0,1.0]:
 		for i in range(3 + variante % 3):
 			var nombre := 3 + variante % 3
 			var p := centre+Vector3(cote*(taille.x/2+.85),0,lerpf(-taille.z*.40,taille.z*.40,float(i)/maxi(1,nombre-1)))
-			if variante == 1 or (variante == 3 and i % 2 == 0):
+			if monde == 1 or (monde in [3,2] and (i + variante) % 3 == 0):
 				ornements.jardin(self,p,monde)
 			else:
 				ornements.pilier(self,p,monde)
-			if variante == 2:
+			if monde == 1 and i % 2 == 0:
 				ornements.jardin(self,p+Vector3(cote*.35,0,1.15),monde)
+	ornements.abords(self, centre, taille, monde, variante)
 	ornements.entree(self,centre+Vector3(0,0,-taille.z*.5-1.2),monde)
 	preload("res://scripts/presentation/decor_statique.gd").regrouper(self)

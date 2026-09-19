@@ -1,5 +1,12 @@
 # Progression des statistiques — 16 septembre 2026
 
+> Mise à jour du 19 septembre : les chiffres de cette note décrivent une passe
+> historique. La campagne de 35 chapitres utilise désormais la courbe lissée de
+> `data/progression_statistiques.gd`, sans plancher uniforme de dégâts. Bases héros,
+> coûts et évolution des ennemis ont été revus ; voir `docs/CURRENT.md`.
+> Les résultats de tests ci-dessous ne valident pas cette nouvelle passe.
+
+
 Cette passe remplace le recalage du 15 septembre : conserver les anciens rapports
 rendait la progression équipée trop facile. La difficulté dépend uniquement du
 chapitre, jamais du build réel du joueur.

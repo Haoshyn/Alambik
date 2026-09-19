@@ -10,6 +10,11 @@ def altitude(x,y):
     return 1.32+.22*x-.24*y
 
 
+def plafond_cheveux(x,y):
+    # L'epaisseur du bord est appliquee apres la correction des proportions.
+    return position_corrigee(Vector((x,y,altitude(x,y)))).z-.016
+
+
 def retirer_ancien(objet):
     maillage=bmesh.new();maillage.from_mesh(objet.data)
     faces=[]
@@ -69,7 +74,8 @@ def ajouter(objet):
     for j in range(lignes):
         t=j/(lignes-1)
         for i in range(n):
-            a=i*math.tau/n;x=math.cos(a)*(.355+.37*t);y=math.sin(a)*(.35+.31*t)
+            # L'ouverture interieure rejoint les racines, sans changer le contour externe.
+            a=i*math.tau/n;x=math.cos(a)*(.295+.43*t);y=math.sin(a)*(.285+.375*t)
             z=altitude(x,y)+.024*t*t*math.cos(a*2+.3)
             points.append((x,y,z))
     bord=volume('Bord_violet',points,relier(lignes),violet)
@@ -85,32 +91,47 @@ def ajouter(objet):
         p=t*(len(reperes)-1);k=min(len(reperes)-2,int(p));u=p-k
         a=Vector(reperes[max(0,k-1)]);b=Vector(reperes[k]);c=Vector(reperes[k+1]);d=Vector(reperes[min(len(reperes)-1,k+2)])
         return .5*((2*b)+(-a+c)*u+(2*a-5*b+4*c-d)*u*u+(-a+3*b-3*c+d)*u*u*u)
-    points=[];lignes=65
-    for j in range(lignes):
-        t=j/(lignes-1);p=courbe(t)
+    def surface_calotte(t,a):
+        p=courbe(t)
         avant=courbe(max(0,t-.002));apres=courbe(min(1,t+.002))
         tangent=Vector(apres[:3])-Vector(avant[:3]);tangent.normalize()
         cote=Vector((0,1,0)).cross(tangent).normalized();profondeur=tangent.cross(cote).normalized()
+        # Une base plane entre dans le bord ; la courbure commence au-dessus du ruban.
+        raccord=max(0.,min(1.,(p.z-.16)/.16));raccord=raccord*raccord*(3-2*raccord)
+        cote=Vector((1,0,0)).lerp(cote,raccord)
+        profondeur=Vector((0,1,0)).lerp(profondeur,raccord)
+        q=Vector(p[:3])+max(.002,p.w)*(math.cos(a)*cote+math.sin(a)*profondeur)
+        return Vector((q.x,q.y,altitude(q.x,q.y)+q.z-.012))
+    def parametre_hauteur(h):
+        bas=0.;haut=.20
+        for _ in range(24):
+            milieu=(bas+haut)*.5
+            if courbe(milieu).z<h:bas=milieu
+            else:haut=milieu
+        return (bas+haut)*.5
+    points=[];lignes=65
+    for j in range(lignes):
+        t=j/(lignes-1)
         for i in range(n):
-            a=i*math.tau/n;q=Vector(p[:3])+max(.002,p.w)*(math.cos(a)*cote+math.sin(a)*profondeur)
-            points.append((q.x,q.y,altitude(q.x,q.y)+q.z+.008))
+            points.append(surface_calotte(t,i*math.tau/n))
     faces=relier(lignes);faces.append(tuple(range((lignes-1)*n,lignes*n)))
     volume('Calotte_violette',points,faces,violet)
-    # Ruban strictement au-dessus du bord : aucune partie ne suit la lamelle.
+    # Le ruban epouse la meme surface que la calotte, avec une epaisseur de cuir.
     points=[];lignes=7
     for j in range(lignes):
-        h=.034+j*.105/(lignes-1);r=.405-.31*h+.009
+        h=.014+j*.125/(lignes-1);t=parametre_hauteur(h)
         for i in range(n):
-            a=i*math.tau/n;x=math.cos(a)*r-.075*h;y=math.sin(a)*r+.075*h
-            points.append((x,y,altitude(x,y)+h))
+            a=i*math.tau/n;p=surface_calotte(t,a)
+            p+=Vector((math.cos(a),math.sin(a),0))*.007
+            points.append(p)
     ruban=volume('Ruban_autour_calotte',points,relier(lignes),cuir)
     bpy.context.view_layer.objects.active=ruban
     solid=ruban.modifiers.new('Epaisseur_cuir','SOLIDIFY');solid.thickness=.008;solid.offset=1
     bpy.ops.object.modifier_apply(modifier=solid.name)
     # Boucle rigide posee sur le ruban, sans deformer son cercle par projection.
-    h=.09;a=-math.pi/2+.20;r=.405-.31*h+.028
-    centre=Vector((math.cos(a)*r-.075*h,math.sin(a)*r+.075*h,0))
-    centre.z=altitude(centre.x,centre.y)+h
+    h=.09;a=-math.pi/2+.20
+    centre=surface_calotte(parametre_hauteur(h),a)
+    centre+=Vector((math.cos(a),math.sin(a),0))*.028
     centre=position_corrigee(centre)
     normale=Vector((math.cos(a),math.sin(a),.24)).normalized()
     rotation=Vector((0,0,1)).rotation_difference(normale)

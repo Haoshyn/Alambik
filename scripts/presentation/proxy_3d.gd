@@ -21,6 +21,18 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 	if genre == "ennemi":
 		var donnees: Dictionary = logique.get("donnees")
 		facteur = float(donnees["rayon"]) / (65.0 if donnees.get("cerveau", "") == "boss" else 30.0)
+		if bool(donnees.get("elite", false)):
+			var insigne := MeshInstance3D.new()
+			var forme := PrismMesh.new()
+			forme.size = Vector3(.22,.30,.12)
+			insigne.mesh = forme
+			insigne.position.y = 1.5
+			var mat := StandardMaterial3D.new()
+			mat.albedo_color = RangsEnnemis.COULEUR_ELITE
+			mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			insigne.material_override = mat
+			insigne.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			add_child(insigne)
 	if genre == "heros":
 		facteur = Reglages.HEROS_ECHELLE
 		suivi = load("res://scripts/presentation/suivi_visuel_2d.gd").new()

@@ -1,29 +1,30 @@
 class_name EvolutionEnnemis
 extends RefCounted
 
-# Trois evolutions apprises au fil de la campagne, sans gonfler les PV communs.
-const SEUILS := [3,12,21]
-const RECHARGE := [1.0,.94,.86,.78]
-const PROJECTILE := [1.0,1.06,1.14,1.22]
-const MOUVEMENT := [1.0,1.04,1.08,1.12]
-const TELEGRAPHE := [1.0,.98,.92,.86]
+# Evolutions au milieu des mondes Terre, Eau et Air : ne pas cumuler
+# nouvelle mecanique de terrain et durcissement des motifs a leur entree.
+const SEUILS := [9,17,25]
+const RECHARGE := [1.0,.975,.95,.90]
+const PROJECTILE := [1.0,1.025,1.05,1.10]
+const MOUVEMENT := [1.0,1.025,1.05,1.075]
+const TELEGRAPHE := [1.0,1.0,.975,.95]
 const TELEGRAPHE_MIN := .40
-const SALVES := [1,1,2,3]
+const SALVES := [1,1,1,2]
 const INTERVALLE_SALVES := .32
 const DECALAGE_ANNEAU := .13
-const ANTICIPATION := [0.0,.10,.20,.28]
-const PROJECTILES_AJOUT := [0,0,2,2]
-const ANNEAU_AJOUT := [0,2,4,6]
-const EVENTAIL_AJOUT := [0.0,.10,.18,.24]
-const REPOS_BOSS := [1.0,.95,.85,.75]
+const ANTICIPATION := [0.0,.05,.10,.15]
+const PROJECTILES_AJOUT := [0,0,1,1]
+const ANNEAU_AJOUT := [0,0,1,2]
+const EVENTAIL_AJOUT := [0.0,.05,.10,.15]
+const REPOS_BOSS := [1.0,.975,.95,.90]
 const ANNEXE_PV_BOSS := .65
-const ELAN_DISTANCE := [0.0,0.0,250.0,310.0]
+const ELAN_DISTANCE := [0.0,0.0,0.0,250.0]
 const ELAN_DUREE := .24
 const ELAN_VITESSE := 2.0
 const ELAN_PREPARATION := .50
 const CONTACT_RECHARGE := 1.0
-const CHARGES := [1,1,2,2]
-const BOSS_ANNEAU_AJOUT := [0,2,4,6]
+const CHARGES := [1,1,1,2]
+const BOSS_ANNEAU_AJOUT := [0,0,1,2]
 const BOSS_EVENTAIL := [-.65,-.5,-.25,0.0,.25,.5,.65]
 const BOSS_DENTS := [-2.0,-1.0,0.0,1.0,2.0]
 

@@ -17,6 +17,11 @@ static func lignes(reactif: Reactif, copies := 1) -> Array[String]:
 	_ajouter_multiplicateur(resultat, mods, "portee_mult", "Portée", copies)
 	_ajouter_multiplicateur(resultat, mods, "pv_max_mult", "PV maximum", copies)
 	_ajouter_multiplicateur(resultat, mods, "deplacement_mult", "Déplacement", copies)
+	_ajouter_multiplicateur(resultat, mods, "degats_sorts_mult", "Dégâts des sorts", copies)
+	_ajouter_multiplicateur(resultat, mods, "recharge_sorts_mult", "Récupération des sorts", copies)
+	_ajouter_multiplicateur(resultat, mods, "rayon_sorts_mult", "Rayon du sort actif", copies)
+	if mods.has("soin_part"):
+		resultat.append("Soin immédiat : %s %% des PV max" % _nombre(float(mods["soin_part"]) * 100.0))
 	_ajouter_entier(resultat, mods, "nb_projectiles_add", "projectile", copies)
 	_ajouter_entier(resultat, mods, "rebonds_add", "rebond", copies)
 	_ajouter_entier(resultat, mods, "perforations_add", "ennemi traversé", copies)
@@ -90,4 +95,4 @@ static func _detail_drapeau(drapeau: String) -> String:
 static func _nombre(valeur: float) -> String:
 	if is_equal_approx(valeur, roundf(valeur)):
 		return str(roundi(valeur))
-	return ("%.2f" % valeur).trim_suffix("0").trim_suffix("0").trim_suffix(".")
+	return ("%.2f" % valeur).trim_suffix("0").trim_suffix("0").trim_suffix(".").replace(".", ",")

@@ -142,7 +142,7 @@ func _dessiner_bouton_sort(police: Font, bouton: Button, ultime: bool) -> void:
 	var ratio := 0.0
 	var texte := "PRÊT"
 	var restant := _charge_ultime if ultime else _recharge_active
-	var recharge_max := ReglagesJoueur.recharge_sort(id)
+	var recharge_max := BonusSorts.recharge(ReglagesJoueur.recharge_sort(id), Jeu.mods())
 	ratio = 1.0 - clampf(restant / maxf(0.01, recharge_max), 0.0, 1.0)
 	texte = "%d s" % ceili(restant) if restant > 0.0 else "PRÊT"
 

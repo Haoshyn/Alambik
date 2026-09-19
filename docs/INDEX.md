@@ -7,11 +7,12 @@ But : arriver au bon fichier avec le moins de contexte possible.
 | Garantie de drop et économie monde 3 | `data/butins_run.gd`, `scripts/bilan_run.gd` | `docs/ops/ECONOMIE_MONDE3_ET_GARANTIES.md`, `sondes/economie_monde_trois.gd` |
 | Boucle d'une run, salles, récompenses | `scripts/run.gd` | `autoload/jeu.gd`, `scripts/bilan_run.gd`, `data/butins_run.gd`, `data/recompenses.gd` |
 | Niveaux d'épreuve et loots de sorts | `data/epreuves.gd` | `ui/selection_grimoire.gd`, `ui/apercu_butin.gd`, `data/sorts.gd` |
+| Sorts et augments de sorts | `data/sorts.gd`, `scripts/bonus_sorts.gd` | `data/catalogue_reactifs.gd`, `scripts/run.gd` |
 | Héros, déplacement, dégâts reçus | `scripts/heros.gd` | `scripts/stats.gd`, `data/reglages.gd` |
 | Ennemi commun / IA | `scripts/ennemi.gd` | `scripts/cerveaux.gd`, `data/catalogue_ennemis.gd` |
 | Boss / gardien | `scripts/boss.gd` | `scripts/salle.gd`, `scripts/gardien.gd`, `data/catalogue_ennemis.gd` |
 | Tirs / ciblage / impacts | `scripts/tir.gd`, `scripts/projectile.gd`, `scripts/ciblage.gd` | `scripts/priorite_projectile.gd`, `data/reglages.gd` |
-| Améliorations / effets de run | `scripts/mods.gd`, `scripts/draft_logique.gd`, `scripts/reactif.gd` | `data/catalogue_reactifs.gd`, `scripts/details_reactif.gd` |
+| Améliorations / effets de run | `scripts/mods.gd`, `scripts/draft_logique.gd`, `scripts/reactif.gd` | `data/progression_augments.gd`, `data/catalogue_reactifs.gd`, `scripts/details_reactif.gd` |
 | Salle, obstacles, géométrie | `scripts/salle.gd`, `data/formes_salles.gd` | `data/reglages.gd`, `data/vagues.gd`, `scripts/geometrie.gd` |
 | Menu principal | `scripts/menu.gd` | `ui/accueil_3d.gd`, `ui/onglet_menu.gd` |
 | Rendu 3D / modèles Blender | `scripts/presentation/monde_3d.gd`, `data/visuels_3d.gd` | `tools/blender/`, `assets/3d/sources/` |

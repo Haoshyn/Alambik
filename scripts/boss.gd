@@ -378,7 +378,7 @@ func recevoir_degats(montant: float, effets: Array = []) -> void:
 		match effet:
 			"braise":
 				_braise = Reglages.BRAISE_DUREE
-				_braise_dps = maxf(_braise_dps, Reglages.BRAISE_DEGATS_PAR_SECONDE)
+				_braise_dps = maxf(_braise_dps, montant * Reglages.BRAISE_PART_DEGATS_PAR_SECONDE)
 			"feu":
 				_feu = Reglages.BRAISE_DUREE
 				if _feu_cumuls < Reglages.FEU_DOT_CUMUL_MAX:

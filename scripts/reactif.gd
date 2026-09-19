@@ -3,9 +3,9 @@ extends RefCounted
 
 const COMMUN := "commun"
 const RARE := "rare"
-const LEGENDAIRE := "legendaire"
+const EPIQUE := "epique"
 
-var rarete := LEGENDAIRE
+var rarete := EPIQUE
 var id: String
 var nom: String
 var description: String
@@ -19,7 +19,7 @@ var copies_max := 0
 
 static func creer(id_: String, nom_: String, description_: String, mods_: Dictionary,
 		transformation := false, teinte_ := Color(0.9, 0.8, 0.5), glyphe_ := "goutte",
-		copies := 0, famille_ := "", rarete_ := LEGENDAIRE) -> Reactif:
+		copies := 0, famille_ := "", rarete_ := EPIQUE) -> Reactif:
 	var r := Reactif.new()
 	r.id = id_
 	r.nom = nom_
@@ -40,10 +40,10 @@ func nom_rarete() -> String:
 	match rarete:
 		COMMUN: return "Commun"
 		RARE: return "Rare"
-	return "Légendaire"
+	return "Épique"
 
 func couleur_rarete() -> Color:
 	match rarete:
 		COMMUN: return Color("a7c0b5")
 		RARE: return Color("8dc8eb")
-	return Color("e9bd69")
+	return Color("cc9df0")

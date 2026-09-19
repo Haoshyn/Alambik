@@ -94,13 +94,23 @@ func preparer_nouvelle_salle() -> void:
 		stats.soigner(stats.pv_max * soin * ArbreCompetences.multiplicateur_soin(ReglagesJoueur.rangs_competences_effectifs()))
 
 func _physics_process(delta: float) -> void:
-	var vise := _intention * stats.vitesse * _intensite
+	var terrain := Vector3(0, 0, 1)
+	var salle := get_tree().get_first_node_in_group("salle")
+	if is_instance_valid(salle): terrain = salle.mouvement_terrain(global_position, _intention)
+	var vise := _intention * stats.vitesse * _intensite * terrain.z + Vector2(terrain.x, terrain.y)
 	var reponse := Reglages.HEROS_ACCELERATION if vise != Vector2.ZERO else Reglages.HEROS_FREINAGE
 	velocity = velocity.move_toward(vise, reponse * delta)
 	move_and_slide()
 	global_position = Geometrie.contraindre_dans_rect(global_position, limites, Reglages.HEROS_RAYON)
 
+func peut_tirer() -> bool:
+	var salle := get_tree().get_first_node_in_group("salle")
+	return not is_instance_valid(salle) or not salle.tir_bloque_par_terrain(global_position)
+
 func _process(delta: float) -> void:
+	if not peut_tirer():
+		_tirs_prepares.clear()
+		_rafale_restante = 0
 	_avancer_tirs_prepares(delta)
 	_flottement += delta
 	_attaque = maxf(0.0, _attaque - delta)
@@ -119,7 +129,7 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 	# Le tir automatique est la grammaire du genre : on s'arrete, on tire.
-	if not immobile:
+	if not immobile or not peut_tirer():
 		return
 	if immobile and _temps_immobile < Reglages.TIR_DELAI_ARRET:
 		return
@@ -142,6 +152,9 @@ func _process(delta: float) -> void:
 		_preparer_tir(direction)
 
 func _avancer_rafale(delta: float) -> void:
+	if not peut_tirer():
+		_rafale_restante = 0
+		return
 	if _rafale_restante <= 0:
 		return
 	_rafale_minuterie -= delta
@@ -159,12 +172,12 @@ func _avancer_rafale(delta: float) -> void:
 	_preparer_tir(_rafale_direction)
 
 func _preparer_tir(direction: Vector2) -> void:
-	if stats.pv <= 0: return
+	if stats.pv <= 0 or not peut_tirer(): return
 	_tirs_prepares.append({"reste": Reglages.TIR_PREPARATION, "direction": direction, "tir": tir_courant})
 	attaque_preparee.emit(direction)
 
 func _avancer_tirs_prepares(delta: float) -> void:
-	if stats.pv <= 0:
+	if stats.pv <= 0 or not peut_tirer():
 		_tirs_prepares.clear()
 		return
 	var attentes: Array[Dictionary] = []
@@ -231,8 +244,7 @@ func recevoir_degats(montant: float, _effets: Array = []) -> void:
 			return
 		if _seconde_chance_disponible and ReglagesJoueur.passifs_equipes_effectifs().has("seconde_chance"):
 			_seconde_chance_disponible = false
-			stats.pv = stats.pv_max * Reglages.SECONDE_CHANCE_PART \
-				* float(ReglagesJoueur.passifs_equipes_effectifs()["seconde_chance"])
+			stats.pv = stats.pv_max * Sorts.soin_seconde_chance(ReglagesJoueur.passifs_equipes_effectifs())
 			bouclier = 1
 			Sons.jouer("fusion", -7.0)
 			return

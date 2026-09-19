@@ -2,7 +2,7 @@ class_name ButinsRun
 extends RefCounted
 
 const GOUTTES_SALLE := 2.0
-const BONUS_PAR_BOSS := 0.125
+const BONUS_PAR_BOSS := 0.10
 const XP_SALLE := 2
 const XP_VICTOIRE := 20
 const XP_BOSS_EPREUVE := 2

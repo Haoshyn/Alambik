@@ -2,9 +2,18 @@ class_name BilanRun
 extends RefCounted
 
 static func offre(victoire: bool) -> Dictionary:
-	return ButinsRun.offre(Jeu.mode_run, Jeu.chapitre, Jeu.salles_terminees.size(), Jeu.boss_vaincus.size(),
+	var resultat := ButinsRun.offre(Jeu.mode_run, Jeu.chapitre, Jeu.salles_terminees.size(), Jeu.boss_vaincus.size(),
 		victoire, Jeu.niveau_epreuve, ReglagesJoueur.rangs_sorts, ReglagesJoueur.objets,
 		ReglagesJoueur.grands_coffres_rates(Jeu.chapitre), ReglagesJoueur.epreuves_ratees(Jeu.niveau_epreuve))
+
+	if Jeu.mode_run == "grimoire":
+		var nombre := 0
+		for salle in Jeu.salles_terminees:
+			nombre += int(Jeu.elites_par_salle.get(salle, 0))
+		var bonus := RangsEnnemis.bonus_gouttes(Jeu.chapitre, nombre)
+		resultat["gouttes_min"] = int(resultat["gouttes_min"]) + bonus
+		resultat["gouttes_max"] = int(resultat["gouttes_max"]) + bonus
+	return resultat
 
 static func multiplicateur_coffre() -> float:
 	return ArbreCompetences.multiplicateur_coffre(ReglagesJoueur.rangs_competences_effectifs())
@@ -12,6 +21,39 @@ static func multiplicateur_coffre() -> float:
 static func gouttes_finales(brut: int, avidite := false) -> int:
 	return ReglagesJoueur.gain_gouttes(roundi(float(brut) * multiplicateur_coffre()
 		* (Reglages.AVIDITE_GOUTTES_MULT if avidite else 1.0)))
+
+# Lire le solde apres attribution du coffre : un achat devenu possible doit
+# rester visible meme si le joueur oublie de consulter les autres onglets.
+static func ameliorations_accessibles() -> Dictionary:
+	var resultat := {}
+	var maitrise: Dictionary = {}
+	for id: String in ArbreCompetences.NOEUDS:
+		if not ReglagesJoueur.peut_acheter_competence(id):
+			continue
+		var noeud: Dictionary = ArbreCompetences.NOEUDS[id]
+		var combat := str(noeud["categorie"]) != "Utilitaire"
+		var cout := ReglagesJoueur.cout_competence(id)
+		if maitrise.is_empty() or (combat and not bool(maitrise["combat"])) \
+				or (combat == bool(maitrise["combat"]) and cout < int(maitrise["cout"])):
+			maitrise = {"id": id, "cout": cout, "combat": combat,
+				"rang": ReglagesJoueur.rang_competence(id) + 1}
+	if not maitrise.is_empty():
+		resultat["maitrise"] = maitrise
+	var forge: Dictionary = {}
+	var possedes := ReglagesJoueur.objets_disponibles()
+	for valeur in ReglagesJoueur.equipements.values():
+		var id := str(valeur)
+		if not CatalogueObjets.OBJETS.has(id) or id not in possedes:
+			continue
+		var niveau := ReglagesJoueur.niveau_objet(id)
+		var cout := ReglagesJoueur.cout_forge(id)
+		if niveau >= Reglages.FORGE_NIVEAU_MAX or cout > ReglagesJoueur.pierres_forge:
+			continue
+		if forge.is_empty() or cout < int(forge["cout"]):
+			forge = {"id": id, "cout": cout, "rang": niveau + 1}
+	if not forge.is_empty():
+		resultat["forge"] = forge
+	return resultat
 
 # Calculer et attribuer une seule fois, meme si le bilan est reaffiche ou touche deux fois.
 static func finaliser(victoire: bool, _salle_atteinte: int) -> Dictionary:

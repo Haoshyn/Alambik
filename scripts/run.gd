@@ -1,13 +1,12 @@
 extends Node
 
 # Orchestrateur des salles et des choix de run. La campagne construit son
-# melange en 25 niveaux ; les modes annexes conservent leur propre cadence.
+# melange en dix niveaux et trois paliers epiques ; les modes annexes conservent leur propre cadence.
 # Le heros lui appartient, pas a la salle : ses PV et son inventaire persistent.
 
 const SALLE := preload("res://scenes/salle.tscn")
 const HEROS := preload("res://scenes/heros.tscn")
 const DRAFT := preload("res://ui/draft.tscn")
-const ALAMBIC := preload("res://ui/alambic.tscn")
 const FIN := preload("res://ui/fin_de_run.tscn")
 const HUD := preload("res://ui/hud.tscn")
 const JOYSTICK := preload("res://ui/joystick.tscn")
@@ -24,7 +23,6 @@ var _couche: CanvasLayer
 var _panneau: Control
 var _visee_active := false
 var _vitesse_avant_visee := 1.0
-var _boss_soignes: Array[int] = []
 var _limites := Rect2()
 var _terminee := false
 var _temps_dans_la_salle := 0.0
@@ -98,15 +96,7 @@ func _ready() -> void:
 			var index := Jeu.rng.randi_range(0, candidats.size() - 1)
 			Jeu.ajouter_reactif(candidats[index])
 			candidats.remove_at(index)
-	if Jeu.mode_run != "epreuve_sorts" and ReglagesJoueur.passifs_equipes_effectifs().has("heritage_reactif"):
-		var heritage := DraftLogique.candidats(Jeu.ameliorations_effectives(),
-			Reactif.RARE if Jeu.mode_run == "grimoire" else "")
-		for tirage in Reglages.HERITAGE_AMELIORATIONS:
-			if heritage.is_empty():
-				break
-			var index := Jeu.rng.randi_range(0, heritage.size() - 1)
-			Jeu.ajouter_reactif(heritage[index])
-			heritage.remove_at(index)
+	Jeu.rerolls_restants += Sorts.relances_heritage(ReglagesJoueur.passifs_equipes_effectifs())
 	Jeu.run_terminee.connect(_sur_run_terminee)
 
 	_camera = Camera2D.new()
@@ -385,7 +375,6 @@ func _entrer_dans_la_salle() -> void:
 
 
 	_heros.preparer_nouvelle_salle()
-	_soigner_avant_boss()
 	_suivre_heros()
 
 
@@ -422,8 +411,9 @@ func _traiter_fin_salle() -> void:
 	if Jeu.salle_courante >= Jeu.salles_du_chapitre():
 		Jeu.terminer_run(true)
 		return
-	# Les anciens choix de halte sont integres aux 25 niveaux de campagne.
-	# Les conserver ici ajouterait des legendaires hors des cinq paliers.
+	if Jeu.mode_run == "grimoire" and Jeu.salle_courante + 1 in ProgressionAugments.ETAGES_EPIQUES:
+		_ouvrir_alambic_apres_salle()
+		return
 	_avancer_salle()
 
 func _avancer_salle() -> void:
@@ -520,10 +510,10 @@ func _ouvrir_recompense_etage() -> void:
 		_panneau.queue_free()
 		_panneau = null
 		_heros.recalculer()
-		if Jeu.mode_run == "grimoire":
-			_heros.stats.soigner_garanti(_heros.stats.pv_max * (ProgressionAugments.SOIN_NIVEAU + soin_choisi))
+		if soin_choisi > 0.0:
+			_heros.stats.soigner_garanti(_heros.stats.pv_max * soin_choisi)
 			_effets.onde(_heros.global_position, 130.0, Color("71d9b4"), 0.4)
-		elif Jeu.mode_run == "mine":
+		if Jeu.mode_run == "mine":
 			_heros.stats.soigner(_heros.stats.pv_max * Reglages.MINE_SOIN_NIVEAU)
 			_effets.onde(_heros.global_position, 150.0, Color(0.42, 1.0, 0.66), 0.45)
 		_hud.rafraichir()
@@ -548,33 +538,37 @@ func _sur_palier_defi_termine() -> void:
 	_panneau.process_mode = Node.PROCESS_MODE_ALWAYS
 	_couche.add_child(_panneau)
 	_panneau.termine.connect(func() -> void:
+		var soin: float = _panneau.soin_choisi
 		_panneau.queue_free()
 		_panneau = null
 		_heros.recalculer()
+		_heros.stats.soigner_garanti(_heros.stats.pv_max * soin)
 		get_tree().paused = false
 		_avancer_salle())
 
 func _ouvrir_alambic_apres_salle() -> void:
-	if _panneau != null:
+	if _terminee or _panneau != null:
 		return
 	_neutraliser_deplacement()
 	get_tree().paused = true
 	Sons.musique_calme()
-	_panneau = ALAMBIC.instantiate()
+	_panneau = DRAFT.instantiate()
+	_panneau.campagne = true
+	_panneau.rarete_imposee = Reactif.EPIQUE
+	_panneau.palier_epique = Jeu.salle_courante + 1
 	_panneau.process_mode = Node.PROCESS_MODE_ALWAYS
 	_couche.add_child(_panneau)
 	_panneau.termine.connect(func() -> void:
+		var soin: float = _panneau.soin_choisi
 		_panneau.queue_free()
 		_panneau = null
+		_heros.recalculer()
+		_heros.stats.soigner_garanti(_heros.stats.pv_max * soin)
+		_effets.onde(_heros.global_position, 130.0, Color("71d9b4"), 0.4)
+		_hud.rafraichir()
 		get_tree().paused = false
 		Sons.musique_combat(0.35)
 		_avancer_salle())
-
-func _soigner_avant_boss() -> void:
-	if Jeu.mode_run != "grimoire" or not Chapitres.est_boss(Jeu.chapitre, Jeu.salle_courante) or _boss_soignes.has(Jeu.salle_courante): return
-	_boss_soignes.append(Jeu.salle_courante)
-	_heros.stats.soigner_garanti(_heros.stats.pv_max * ProgressionAugments.SOIN_AVANT_BOSS)
-	_effets.onde(_heros.global_position,130.0,Color("71d9b4"),0.5)
 
 func _ouvrir_pause() -> void:
 	if _visee_active: _fermer_visee()
@@ -618,6 +612,7 @@ func _neutraliser_deplacement() -> void:
 	_heros.velocity = Vector2.ZERO
 
 func _sur_tir_heros(tir_courant: Tir, origine: Vector2, direction: Vector2) -> void:
+	if not _heros.peut_tirer(): return
 	var tir_effectif := tir_courant.copie()
 	tir_effectif.degats *= _heros.multiplicateur_degats_passif()
 	_salle.tirer(tir_effectif, origine, direction, false)
@@ -682,6 +677,7 @@ func _avancer_phenomenes(delta: float) -> void:
 		add_child(_gardien)
 
 func _tirer_phenomene(id: String, part_degats: float, origine: Vector2, direction: Vector2) -> void:
+	if not _heros.peut_tirer(): return
 	var tir := Tir.de_base(_heros.stats)
 	tir.degats *= part_degats
 	if id == "familier_tireur":
@@ -840,7 +836,7 @@ func _sur_heros_touche(position: Vector2) -> void:
 			if not is_instance_valid(ennemi) \
 					or ennemi.global_position.distance_to(position) > Reglages.RIPOSTE_RAYON:
 				continue
-			ennemi.recevoir_degats(_heros.tir_courant.degats * Reglages.RIPOSTE_PART_DEGATS \
+			ennemi.recevoir_degats(BonusSorts.attaque(_heros.stats, Jeu.mods()) * Reglages.RIPOSTE_PART_DEGATS \
 				* float(ReglagesJoueur.passifs_equipes_effectifs()["riposte_alchimique"]), [])
 			# La riposte doit rendre l'espace repris : encaisser un coup sans
 			# desengager ne changeait rien a la situation.
@@ -859,10 +855,9 @@ func _sur_ennemi_abattu(experience: int) -> void:
 	var passifs := ReglagesJoueur.passifs_equipes_effectifs()
 	if passifs.has("moisson_vitale"):
 		_compteur_moisson += 1
-		if _compteur_moisson >= Reglages.MOISSON_SEUIL:
+		if _compteur_moisson >= Sorts.seuil_moisson(passifs):
 			_compteur_moisson = 0
-			_heros.stats.soigner(_heros.stats.pv_max * Reglages.MOISSON_PART \
-				* float(passifs["moisson_vitale"]))
+			_heros.stats.soigner(_heros.stats.pv_max * Reglages.MOISSON_PART)
 			_effets.onde(_heros.global_position, 150.0, Color(0.35, 1.0, 0.58), 0.5)
 
 
@@ -903,7 +898,7 @@ func _lancer_sort_actif() -> void:
 	_neutraliser_deplacement()
 	_panneau = load("res://ui/visee_sort.gd").new()
 	_panneau.point = _heros.global_position
-	_panneau.rayon = float(Sorts.ACTIFS[id]["rayon"])
+	_panneau.rayon = BonusSorts.rayon(float(Sorts.ACTIFS[id]["rayon"]), Jeu.mods())
 	_panneau.vers_logique = _point_sort
 	_panneau.vers_ecran = _ecran_sort
 	_panneau.confirme.connect(func(point: Vector2):
@@ -943,11 +938,11 @@ func _confirmer_sort(point: Vector2) -> void:
 		return
 	var sort: Dictionary = Sorts.ACTIFS[id]
 	var efficacite := ReglagesJoueur.efficacite_sort(id)
-	_recharge_sort_actif = ReglagesJoueur.recharge_sort(id)
+	_recharge_sort_actif = BonusSorts.recharge(ReglagesJoueur.recharge_sort(id), Jeu.mods())
 	_appliquer_sort(float(sort["rayon"]), float(sort["degats"]) * efficacite, str(sort["effet"]), false, point)
 	var passifs := ReglagesJoueur.passifs_equipes_effectifs()
 	if passifs.has("echo_alchimique") \
-			and Jeu.rng.randf() < Reglages.ECHO_CHANCE * float(passifs["echo_alchimique"]):
+			and Jeu.rng.randf() < Sorts.chance_echo(passifs):
 		_appliquer_sort(float(sort["rayon"]),
 			float(sort["degats"]) * efficacite * Reglages.ECHO_PART_DEGATS, str(sort["effet"]), false, point)
 
@@ -958,12 +953,15 @@ func _lancer_ultime() -> void:
 		return
 	var sort: Dictionary = Sorts.ULTIMES[id]
 	if _charge_ultime > 0.0: return
-	_charge_ultime = ReglagesJoueur.recharge_sort(id)
+	_charge_ultime = BonusSorts.recharge(ReglagesJoueur.recharge_sort(id), Jeu.mods())
 	_ultimes_utilises += 1
 
 	_appliquer_sort(INF, float(sort["degats"]) * ReglagesJoueur.efficacite_sort(id), str(sort["effet"]), true)
 
 func _appliquer_sort(rayon: float, multiplicateur: float, effet: String, ultime: bool, cible := Vector2.INF) -> void:
+	var mods_sorts := Jeu.mods()
+	rayon = BonusSorts.rayon(rayon, mods_sorts)
+	var attaque := BonusSorts.degats(_heros.stats, mods_sorts)
 	var centre := _heros.global_position if cible == Vector2.INF else cible
 	var couleur := Palette.ESSENCE if ultime else (Palette.GIVRE if effet == "givre" else Palette.ACIDE if effet == "acide" else Palette.OR)
 	_effets.onde(centre, 620.0 if is_inf(rayon) else rayon, couleur, 0.85)
@@ -973,7 +971,7 @@ func _appliquer_sort(rayon: float, multiplicateur: float, effet: String, ultime:
 		var effets_sort: Array[String] = []
 		if effet in ["braise", "givre", "acide"]:
 			effets_sort.append(effet)
-		ennemi.recevoir_degats(_heros.tir_courant.degats * multiplicateur * _heros.multiplicateur_degats_passif(), effets_sort)
+		ennemi.recevoir_degats(attaque * multiplicateur * _heros.multiplicateur_degats_passif(), effets_sort)
 		if effet == "givre" and ennemi.has_method("geler"):
 			ennemi.geler(Reglages.GEL_ULTIME_DUREE if ultime else Reglages.GEL_SORT_DUREE)
 		elif effet == "repousse":

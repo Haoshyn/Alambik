@@ -53,7 +53,10 @@ func _ajouter_carte(col: VBoxContainer, id: String, type: String, chance: float)
 
 func _resume_objet(id: String, niveau: int) -> String:
 	var bonus := CatalogueObjets.bonus_objet(id, niveau)
-	return "Dégâts +%.0f %% · PV +%.0f %%" % [float(bonus["degats"]) * 100.0, float(bonus["pv"]) * 100.0]
+	return "Dégâts +%s %% · PV +%s %%" % [_pourcentage(float(bonus["degats"])), _pourcentage(float(bonus["pv"]))]
+
+func _pourcentage(valeur: float) -> String:
+	return String.num(valeur * 100.0, 1).trim_suffix(".0").replace(".", ",")
 
 func _ouvrir_detail(id: String, type: String) -> void:
 	if is_instance_valid(_detail): _detail.queue_free()
@@ -71,4 +74,5 @@ func _ouvrir_detail(id: String, type: String) -> void:
 		col.add_child(StyleAzur.texte("Un seul pouvoir au niveau 10. Ensuite, la forge augmente uniquement les dégâts et les PV, avec un coût croissant.", 26, StyleAzur.ATTENUE))
 	else:
 		col.add_child(StyleAzur.texte(str(d["description"]), 30))
-		col.add_child(StyleAzur.texte("Les doublons améliorent le sort : +%.0f %% d’efficacité par rang supplémentaire, jusqu’au rang %d." % [Reglages.CAPACITE_BONUS_PAR_RANG * 100.0, Reglages.CAPACITE_RANG_MAX], 26, StyleAzur.ATTENUE))
+		col.add_child(StyleAzur.texte("Rang 1 : %s\nRang %d : %s" % [Sorts.resume_rang(id, 1), Reglages.CAPACITE_RANG_MAX, Sorts.resume_rang(id, Reglages.CAPACITE_RANG_MAX)], 28))
+		col.add_child(StyleAzur.texte("Les doublons améliorent cette capacité, jusqu’au rang %d. %s" % [Reglages.CAPACITE_RANG_MAX, Sorts.progression_rang(id)], 26, StyleAzur.ATTENUE))

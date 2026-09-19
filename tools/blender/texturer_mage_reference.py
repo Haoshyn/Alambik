@@ -40,7 +40,7 @@ def surface_pan(x,y,z):
     return .43<z<.94 and ((x<-.12 and y>.20) or (x<-.28 and y>.065))
 
 
-def texturer(objet,reference,sortie,marge_uv=.0008,marge_cuisson=12,corriger_cheveux=False):
+def texturer(objet,reference,sortie,marge_uv=.0008,marge_cuisson=12,corriger_cheveux=False,yeux_stylises=False,sans_echarpe=False):
     bpy.context.view_layer.objects.active=objet
     bpy.ops.object.select_all(action='DESELECT');objet.select_set(True)
     image=bpy.data.images.load(str(reference),check_existing=True)
@@ -73,7 +73,7 @@ def texturer(objet,reference,sortie,marge_uv=.0008,marge_cuisson=12,corriger_che
             echarpe=rampe(.90,.93,z)*(1-rampe(.25,.30,abs(x)))
             # Le pan flottant est du tissu turquoise, pas une cape violette.
             pan=(1-rampe(-.24,-.18,x))*rampe(.45,.52,z)*(1-rampe(.80,.86,z))*rampe(.01,.09,y)
-            c=c.lerp(cyan,max(echarpe,pan))
+            if not sans_echarpe:c=c.lerp(cyan,max(echarpe,pan))
             c=c.lerp(peau,rampe(.55,.59,abs(x))*rampe(.78,.82,z))
             poignet=rampe(.48,.50,abs(x))*(1-rampe(.55,.57,abs(x)))*rampe(.78,.82,z)
             ceinture=rampe(.60,.615,z)*(1-rampe(.66,.68,z))*(1-rampe(.26,.30,abs(x)))
@@ -81,7 +81,7 @@ def texturer(objet,reference,sortie,marge_uv=.0008,marge_cuisson=12,corriger_che
             c=c.lerp(cuir,1-rampe(.285,.31,z))
         # Exclure les tissus de la projection photographique, sur toute leur surface.
         est_chapeau=surface_chapeau(x,y,z,normales[boucle.vertex_index])
-        col=(.87+.12*abs(x)<z<1.035 and abs(x)<.265)
+        col=not sans_echarpe and (.87+.12*abs(x)<z<1.035 and abs(x)<.265)
         pan=surface_pan(x,y,z)
         face=(1-rampe(-.03,.17,y))*rampe(-.25,.30,-normales[boucle.vertex_index].y)
         if z>1.23:
@@ -95,7 +95,8 @@ def texturer(objet,reference,sortie,marge_uv=.0008,marge_cuisson=12,corriger_che
         fond.data[boucle.index].color=(*c,1)
         masque.data[boucle.index].color=(face,face,face,1)
         if cheveux_seuls:
-            poids=rampe(1.23,1.29,z) if not est_chapeau else 0
+            # Un rejet partiel laissait encore du violet sur les racines aux tempes.
+            poids=1.0 if z>1.23 and not est_chapeau else 0.0
             cheveux_seuls.data[boucle.index].color=(poids,poids,poids,1)
     print('Projection terminee',flush=True)
     mat=bpy.data.materials.new('Projection_reference_v2');mat.use_nodes=True
@@ -117,7 +118,11 @@ def texturer(objet,reference,sortie,marge_uv=.0008,marge_cuisson=12,corriger_che
         maintien=n.new('ShaderNodeMath');maintien.operation='SUBTRACT';maintien.inputs[0].default_value=1.;l.new(rejet.outputs[0],maintien.inputs[1])
         filtre=n.new('ShaderNodeMath');filtre.operation='MULTIPLY';l.new(alpha.outputs[0],filtre.inputs[0]);l.new(maintien.outputs[0],filtre.inputs[1])
         alpha=filtre
-    mix=n.new('ShaderNodeMixRGB');l.new(alpha.outputs[0],mix.inputs[0]);l.new(couleur.outputs['Color'],mix.inputs[1]);l.new(tex.outputs['Color'],mix.inputs[2])
+    teinte=tex.outputs['Color']
+    if yeux_stylises:
+        from yeux_sculptes import styliser
+        teinte=styliser(n,l,coord.outputs['UV'],teinte,largeur,hauteur)
+    mix=n.new('ShaderNodeMixRGB');l.new(alpha.outputs[0],mix.inputs[0]);l.new(couleur.outputs['Color'],mix.inputs[1]);l.new(teinte,mix.inputs[2])
     l.new(mix.outputs[0],em.inputs['Color']);l.new(em.outputs[0],out.inputs['Surface'])
     objet.data.materials.clear();objet.data.materials.append(mat)
     for face in objet.data.polygons:face.material_index=0
@@ -153,7 +158,7 @@ def texturer(objet,reference,sortie,marge_uv=.0008,marge_cuisson=12,corriger_che
         x,y,z=polygone.center
         if surface_chapeau(x,y,z,polygone.normal):
             polygone.material_index=1
-        elif (.87+.12*abs(x)<z<1.035 and abs(x)<.265) or surface_pan(x,y,z):
+        elif not sans_echarpe and ((.87+.12*abs(x)<z<1.035 and abs(x)<.265) or surface_pan(x,y,z)):
             polygone.material_index=2
     # Eviter que l'ancien attribut de couleur soit multiplie par l'albedo glTF.
     for attr in list(objet.data.color_attributes):objet.data.color_attributes.remove(attr)

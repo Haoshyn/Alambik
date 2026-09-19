@@ -4,19 +4,22 @@ extends RefCounted
 # Ordre des coins : haut gauche, haut droit, bas droit, bas gauche.
 # Les proportions ne reduisent pas les passages des compositions existantes.
 const PROFILS := [
-	{"nom": "Alcoves", "taille": Vector2.ONE, "coins": [Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO], "segments": 1},
-	{"nom": "Rotonde", "taille": Vector2(1.12, 1.0), "coins": [Vector2(.28,.20), Vector2(.28,.20), Vector2(.28,.20), Vector2(.28,.20)], "segments": 6},
-	{"nom": "Galerie", "taille": Vector2(1.0, 1.24), "coins": [Vector2(.12,.07), Vector2(.12,.07), Vector2(.12,.07), Vector2(.12,.07)], "segments": 4},
-	{"nom": "Cour large", "taille": Vector2(1.30, 1.0), "coins": [Vector2(.14,.10), Vector2(.14,.10), Vector2(.14,.10), Vector2(.14,.10)], "segments": 1},
-	{"nom": "Ovale", "taille": Vector2(1.16, 1.12), "coins": [Vector2(.36,.27), Vector2(.36,.27), Vector2(.36,.27), Vector2(.36,.27)], "segments": 8},
-	{"nom": "Cour decalee", "taille": Vector2(1.12, 1.08), "coins": [Vector2(.30,.20), Vector2(.10,.08), Vector2(.28,.18), Vector2(.10,.08)], "segments": 4},
+	{"nom":"Cour ouverte", "taille":Vector2.ONE, "coins":[Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO], "segments":1},
+	{"nom":"Angles biseautés", "taille":Vector2(1.03,1.0), "coins":[Vector2(.06,.04),Vector2(.06,.04),Vector2(.06,.04),Vector2(.06,.04)], "segments":1},
+	{"nom":"Bord adouci", "taille":Vector2(1.0,1.04), "coins":[Vector2(.08,.05),Vector2.ZERO,Vector2.ZERO,Vector2(.08,.05)], "segments":3},
+	{"nom":"Cour large", "taille":Vector2(1.07,1.0), "coins":[Vector2(.04,.03),Vector2(.04,.03),Vector2.ZERO,Vector2.ZERO], "segments":1},
+	{"nom":"Angles décalés", "taille":Vector2(1.02,1.03), "coins":[Vector2(.08,.04),Vector2(.03,.02),Vector2(.07,.05),Vector2.ZERO], "segments":1},
+	{"nom":"Bord arrondi", "taille":Vector2(1.04,1.01), "coins":[Vector2.ZERO,Vector2(.07,.04),Vector2(.07,.04),Vector2.ZERO], "segments":3},
+	{"nom":"Cour longue", "taille":Vector2(1.0,1.06), "coins":[Vector2(.04,.03),Vector2.ZERO,Vector2(.06,.04),Vector2(.03,.02)], "segments":1},
+	{"nom":"Cour arrondie", "taille":Vector2(1.04,1.03), "coins":[Vector2(.15,.10),Vector2(.15,.10),Vector2(.15,.10),Vector2(.15,.10)], "segments":6},
+	{"nom":"Angles souples", "taille":Vector2(1.03,1.02), "coins":[Vector2(.16,.10),Vector2(.06,.04),Vector2(.14,.09),Vector2(.06,.04)], "segments":5},
 ]
 const MARGE_APPARITION := 70.0
 
-static func indice(numero: int, chapitre: int, graine: int, mode: String) -> int:
-	if mode != "grimoire" or Chapitres.est_boss(chapitre, numero):
+static func indice(numero: int, chapitre: int, _graine: int, mode: String) -> int:
+	if mode != "grimoire":
 		return 0
-	return posmod(numero - 1 + chapitre + graine, PROFILS.size())
+	return TerrainsMondes.forme(numero, chapitre)
 
 static func taille(numero: int, chapitre: int, graine: int, mode: String) -> Vector2:
 	var facteur: Vector2 = PROFILS[indice(numero, chapitre, graine, mode)]["taille"]

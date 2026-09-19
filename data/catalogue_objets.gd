@@ -1,18 +1,18 @@
 class_name CatalogueObjets
 extends RefCounted
 
-# Un objet precis par chapitre : deux Anneaux puis un Collier dans chaque
-# monde. Les anciens ids sont conserves uniquement pour migrer les sauvegardes.
+# Trois bijoux par monde, reproposes en cycle sur ses sept chapitres.
+# Les bijoux des mondes retires restent utilisables dans les anciennes sauvegardes.
 #
 # Budget constant par emplacement ; les mondes proposent des allocations differentes.
 # Seule la forge augmente la puissance propre de chaque bijou.
 const PROFILS := [
-	{"degats": 0.50, "pv": 0.25},
-	{"degats": 0.30, "pv": 0.35},
-	{"pv": 0.50, "degats": 0.20},
+	{"degats": 0.20, "pv": 0.10},
+	{"degats": 0.15, "pv": 0.15},
+	{"pv": 0.20, "degats": 0.10},
 ]
 
-const VARIATIONS_PROFILS := [0.0,0.10,-0.10,0.05,-0.05,0.08,-0.08,0.03,-0.03,0.06]
+const VARIATIONS_PROFILS := [0.0, 0.025, -0.025, 0.05, -0.05, 0.025, -0.025, 0.05, -0.05, 0.0]
 
 const IDS_PAR_MONDE := [
 	["plume_encres", "robe_enluminee", "sceau_scribe"],
@@ -31,8 +31,9 @@ static var OBJETS := _construire()
 
 static func _construire() -> Dictionary:
 	var resultat := {}
+	var identites := Chapitres.MONDES + Chapitres.MONDES_RETIRES
 	for monde in IDS_PAR_MONDE.size():
-		var donnees_monde: Dictionary = Chapitres.MONDES[monde]
+		var donnees_monde: Dictionary = identites[monde]
 		for index in 3:
 			var slot := "anneau" if index < 2 else "collier"
 			var nom_slot := ("Anneau" if index == 0 else "Bague") if slot == "anneau" else "Collier"
@@ -44,7 +45,7 @@ static func _construire() -> Dictionary:
 				"slot": slot,
 				"monde": monde,
 				"chapitre_monde": index + 1,
-				"chapitre": monde * 3 + index,
+				"chapitre": monde * Chapitres.CHAPITRES_PAR_MONDE + index,
 				"profil": profil,
 				"effets": EffetsBijoux.parcours(monde,index),
 				"teinte": donnees_monde["teinte"],
@@ -52,10 +53,13 @@ static func _construire() -> Dictionary:
 	return resultat
 
 static func du_chapitre(chapitre: int) -> Array[String]:
-	var resultat: Array[String] = []
-	for id in OBJETS:
-		if int(OBJETS[id]["chapitre"]) == chapitre:
-			resultat.append(id)
+	if chapitre < 0 or chapitre >= Chapitres.nombre():
+		return []
+	var donnees := Chapitres.par_index(chapitre)
+	var monde := int(donnees["monde"])
+	var bijoux: Array = IDS_PAR_MONDE[monde]
+	var index := (int(donnees["chapitre_monde"]) - 1) % bijoux.size()
+	var resultat: Array[String] = [str(bijoux[index])]
 	return resultat
 
 static func objet_du_chapitre(chapitre: int) -> String:
@@ -82,10 +86,11 @@ static func bonus_objet(id: String, niveau: int, _monde_reference := -1) -> Dict
 		return resultat
 	var donnees: Dictionary = OBJETS[id]
 	var forge := clampi(niveau, 0, Reglages.FORGE_NIVEAU_MAX)
-	var facteur := pow(1.0 + Reglages.FORGE_BONUS_PAR_NIVEAU, float(forge))
+	# La forge ajoute des points fixes : +20 % devient +22,5 %, puis +25 %.
+	var bonus_forge := Reglages.FORGE_BONUS_PAR_NIVEAU * float(forge)
 	var profil: Dictionary = donnees["profil"]
 	for champ in profil:
-		resultat[champ] = float(profil[champ]) * facteur
+		resultat[champ] = float(profil[champ]) + bonus_forge
 	return resultat
 
 static func bonus_effectifs(equipements: Dictionary, forge_niveaux: Dictionary, monde_reference := -1) -> Dictionary:

@@ -4,6 +4,8 @@ extends Node
 # c'est explicitement hors perimetre de la V1.
 
 const FICHIER := "user://alambic.cfg"
+# La structure 5 x 7 conserve les indices lineaires de la version 2 : les
+# victoires, le chapitre choisi et les garanties restent au meme rang.
 const VERSION_CAMPAGNE := 2
 
 var victoires := 0
@@ -184,7 +186,7 @@ func _migrer_maitrises() -> void:
 			var id: String = branche[i]
 			var plafond := 2 if id in ["distillation","prescience"] else 1 if id == "savoir" else 10
 			for rang in clampi(int(rangs_competences.get(id,0)),0,plafond):
-				remboursement_maitrises += Reglages.cout_maitrise(Reglages.MAITRISE_COUTS[i],rang)
+				remboursement_maitrises += ArbreCompetences.ancien_cout(i, rang)
 	gouttes += remboursement_maitrises
 	rangs_competences.clear()
 	version_maitrises = Reglages.MAITRISE_VERSION
@@ -601,7 +603,7 @@ func enregistrer_resultat_annexe(victoire: bool) -> void:
 func meilleure_du_chapitre(chapitre: int) -> int:
 	return int(meilleures_par_chapitre.get(str(chapitre), 0))
 
-# Le niveau de campagne est le chapitre actuellement ouvert, de 1 a 30. Une
+# Le niveau de campagne est le chapitre actuellement ouvert, de 1 a 35. Une
 # simple tentative ne monte donc plus artificiellement les annexes : il faut
 # terminer le chapitre precedent pour faire avancer leur palier.
 func niveau_campagne_atteint() -> int:
@@ -627,7 +629,7 @@ func mode_debloque(mode: String) -> bool:
 	return false
 
 # Les objets deja trouves rattrapent le Monde le plus avance actuellement
-# accessible. Terminer le chapitre 3 d'un Monde suffit donc a faire monter son
+# accessible. Terminer le dernier chapitre d'un Monde suffit donc a faire monter son
 # ancien equipement avant meme la premiere tentative du Monde suivant.
 func monde_equipement_atteint() -> int:
 	if mode_dev:

@@ -1,48 +1,54 @@
 class_name ProgressionAugments
 extends RefCounted
 
-# La campagne distribue 25 choix avant le boss final. L'XP peut les avancer
-# pendant une salle ; sa fin garantit le palier pour ne pas penaliser un tirage
-# de vagues peu genereux. Le plafond empeche de farmer les invocations d'un boss.
-const XP_SEUILS := [4, 8, 14, 20, 26, 34, 42, 52, 65, 80, 88, 96, 105,
-	115, 125, 135, 145, 155, 165, 175, 184, 193, 202, 211, 220]
-const NIVEAUX_LEGENDAIRES := [5, 10, 15, 20, 25]
+# Le rattrapage garantit dix niveaux avant le boss, meme avec peu d'XP.
+# Les trois choix de boss sont independants de ces niveaux.
+const XP_SEUILS := [4, 20, 32, 50, 70, 90, 112, 140, 180, 220]
+const SALLES_NIVEAUX := [1, 3, 4, 6, 8, 9, 11, 13, 16, 19]
+const ETAGES_EPIQUES := [5, 10, 15]
+const NOMBRE_RARES := 4
 const NOMBRE_CHOIX := 3
-const CHANCE_RARE_DEBUT := 0.15
-const CHANCE_RARE_FIN := 0.35
-const SOIN_NIVEAU := 0.01
-const SOIN_CHOIX := 0.16
-const SOIN_AVANT_BOSS := 0.20
-const DERNIER_NIVEAU_AVIDITE := 15
+const COMMUNS := ["soin", "poudre_vive", "reserve_vitale"]
+const SOIN_CHOIX := 0.30
+const SOIN_EPIQUE := 0.30
+const BONUS_COMMUN := 0.10
+const DERNIER_NIVEAU_AVIDITE := 6
 
 # Ces trajectoires se remplacent, elles ne se cumulent pas dans Projectile.
-# Ne jamais vendre au joueur une amelioration neutralisee par son build.
 const INCOMPATIBLES := {
 	"trait_transpercant": ["perforation", "ricochet"],
 	"perforation": ["trait_transpercant"],
 	"ricochet": ["trait_transpercant"],
 }
 
+const INCOMPATIBLES_ARMES := {
+	"perfore_tout": ["ricochet", "perforation", "trait_transpercant"],
+	"homing": ["homing"],
+}
+
 static func niveau_max() -> int:
 	return XP_SEUILS.size()
 
-static func est_legendaire(niveau: int) -> bool:
-	return niveau in NIVEAUX_LEGENDAIRES
-
 static func plafond_salle(salle: int, total_salles: int) -> int:
-	var salles_utiles := maxi(1, total_salles - 1)
-	return clampi(floori(float(maxi(0, salle) * niveau_max()) / float(salles_utiles)),
-		0, niveau_max())
+	var avancement := float(maxi(0, salle)) / float(maxi(1, total_salles - 1))
+	var cible := 0
+	for palier: int in SALLES_NIVEAUX:
+		if avancement >= float(palier) / float(SALLES_NIVEAUX.back()):
+			cible += 1
+	return cible
 
-static func tirer_rarete(niveau: int, rng: RandomNumberGenerator) -> String:
-	if est_legendaire(niveau):
-		return Reactif.LEGENDAIRE
-	var avancement := clampf(float(niveau - 1) / float(niveau_max() - 1), 0.0, 1.0)
-	var chance := lerpf(CHANCE_RARE_DEBUT, CHANCE_RARE_FIN, avancement)
-	return Reactif.RARE if rng.randf() < chance else Reactif.COMMUN
+static func tirer_niveaux_rares(rng: RandomNumberGenerator) -> Array[int]:
+	var disponibles: Array[int] = []
+	var rares: Array[int] = []
+	for niveau in range(1, niveau_max() + 1):
+		disponibles.append(niveau)
+	# Tirage sans remise : quatre rares exactement, sans dependance aux relances.
+	for choix in NOMBRE_RARES:
+		var index := rng.randi_range(0, disponibles.size() - 1)
+		rares.append(disponibles[index])
+		disponibles.remove_at(index)
+	rares.sort()
+	return rares
 
-static func prochain_legendaire(niveau: int) -> int:
-	for palier: int in NIVEAUX_LEGENDAIRES:
-		if palier > niveau:
-			return palier
-	return 0
+static func rarete_niveau(niveau: int, rares: Array[int]) -> String:
+	return Reactif.RARE if niveau in rares else Reactif.COMMUN

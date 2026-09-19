@@ -17,8 +17,8 @@ var _liste_epreuves: VBoxContainer
 var _apercu: Control
 
 func _ready() -> void:
-	_monde = clampi(ReglagesJoueur.chapitre_choisi / 3,0,Chapitres.MONDES.size()-1)
-	_chapitre_monde = posmod(ReglagesJoueur.chapitre_choisi,3)
+	_monde = clampi(ReglagesJoueur.chapitre_choisi / Chapitres.CHAPITRES_PAR_MONDE,0,Chapitres.MONDES.size()-1)
+	_chapitre_monde = posmod(ReglagesJoueur.chapitre_choisi,Chapitres.CHAPITRES_PAR_MONDE)
 	var col := StyleAzur.page(self,"Campagne & modes")
 	var contenu := StyleAzur.defilement(col)
 	contenu.add_child(StyleAzur.image(10,220))
@@ -28,7 +28,7 @@ func _ready() -> void:
 	navigation.add_child(StyleAzur.bouton("Monde ›",func(): _changer_monde(1)))
 	_titre = StyleAzur.texte("",38)
 	contenu.add_child(_titre)
-	for i in 3:
+	for i in Chapitres.CHAPITRES_PAR_MONDE:
 		var b := StyleAzur.bouton("",func(): _choisir_chapitre(i))
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		b.custom_minimum_size.y = 145
@@ -36,7 +36,7 @@ func _ready() -> void:
 		contenu.add_child(ligne)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		ligne.add_child(b)
-		var info := StyleAzur.bouton("!", func(): _voir_loots("grimoire", _monde * 3 + i))
+		var info := StyleAzur.bouton("!", func(): _voir_loots("grimoire", _monde * Chapitres.CHAPITRES_PAR_MONDE + i))
 		info.custom_minimum_size = Vector2(72, 72)
 		info.tooltip_text = "Récompenses possibles"
 		ligne.add_child(info)
@@ -95,8 +95,8 @@ func _choisir_mode(mode: String) -> void:
 
 func _rafraichir() -> void:
 	_titre.text = "%s · %s" % [Chapitres.MONDES[_monde]["nom"],DecorsMondes.profil(_monde)["nom"]]
-	for i in 3:
-		var index := _monde*3+i
+	for i in Chapitres.CHAPITRES_PAR_MONDE:
+		var index := _monde * Chapitres.CHAPITRES_PAR_MONDE + i
 		var d := Chapitres.par_index(index)
 		_zones_chapitres[i].text = "%s   ·   %s" % [d["nom"],"Accessible" if ReglagesJoueur.chapitre_debloque(index) else "Verrouillé"]
 		_zones_chapitres[i].add_theme_stylebox_override("normal",StyleAzur.cadre(StyleAzur.PANNEAU,StyleAzur.MAGIE if i == _chapitre_monde else StyleAzur.CUIVRE))
@@ -110,7 +110,7 @@ func _rafraichir() -> void:
 	_details.text = "Meilleur étage : %d / %d\n%s" % [ReglagesJoueur.meilleure_du_chapitre(_index_selectionne()),Chapitres.par_index(_index_selectionne())["salles"],_message]
 
 func _index_selectionne() -> int:
-	return _monde * 3 + _chapitre_monde
+	return _monde * Chapitres.CHAPITRES_PAR_MONDE + _chapitre_monde
 
 func _changer_monde(direction: int) -> void:
 	var nouveau := clampi(_monde + direction, 0, Chapitres.MONDES.size() - 1)
@@ -125,7 +125,7 @@ func _changer_monde(direction: int) -> void:
 
 func _choisir_chapitre(index: int) -> void:
 	if _lancement: return
-	_chapitre_monde = clampi(index, 0, 2)
+	_chapitre_monde = clampi(index, 0, Chapitres.CHAPITRES_PAR_MONDE - 1)
 	var chapitre := _index_selectionne()
 	_message = "" if ReglagesJoueur.chapitre_debloque(chapitre) else "Ce chapitre est encore verrouillé."
 	Sons.jouer("choix", -16.0)

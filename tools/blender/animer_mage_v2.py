@@ -36,7 +36,8 @@ def pose(nom, t, noeuds):
     rotations['torse'][0] = .012*math.sin(phase)
     rotations['tete'][0] = -.009*math.sin(phase-.35)
     rotations['chapeau'][2] = .016*math.sin(phase-.6)
-    rotations['echarpe'][0] = .035*math.sin(phase-.8)
+    if 'echarpe' in rotations:
+        rotations['echarpe'][0] = .035*math.sin(phase-.8)
 
     if nom == 'repos':
         positions['torse'][1] += .004*math.sin(phase)

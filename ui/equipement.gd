@@ -114,12 +114,16 @@ func _afficher_inventaire() -> void:
 	var parts: Array[String] = []
 	var noms := {"degats":"Dégâts","pv":"PV","cadence":"Cadence","vitesse":"Vitesse","critique":"Critique","reduction":"Protection","collecte":"Collecte"}
 	for cle in bonus:
-		if float(bonus[cle]) != 0.0: parts.append("%s +%.1f %%" % [noms.get(cle,cle),float(bonus[cle])*100])
+		if float(bonus[cle]) != 0.0: parts.append("%s +%s %%" % [noms.get(cle,cle),_pourcentage(float(bonus[cle]))])
 	_details.text = "%s · Niveau %d\n%s\n%s" % [CatalogueObjets.OBJETS[id]["nom"],niveau," · ".join(parts),"Limite de forge atteinte" if niveau >= Reglages.FORGE_NIVEAU_MAX else "Forge : %d pierres" % ReglagesJoueur.cout_forge(id)]
 	if niveau < Reglages.FORGE_NIVEAU_MAX:
 		var suivant := CatalogueObjets.bonus_objet(id,niveau+1)
-		_details.text += "\nProchain niveau : dégâts +%.1f %% · PV +%.1f %%" % [float(suivant["degats"])*100.0,float(suivant["pv"])*100.0]
+		_details.text += "\nProchain niveau : dégâts +%s %% · PV +%s %%" % [_pourcentage(float(suivant["degats"])),_pourcentage(float(suivant["pv"]))]
+		_details.text += "\nForge : +%s points de bonus dégâts et PV par niveau." % _pourcentage(Reglages.FORGE_BONUS_PAR_NIVEAU)
 	_effets_objet.text = CatalogueObjets.description_effets(id,niveau)+"\n\nUn pouvoir au niveau 10. Ensuite : dégâts et PV uniquement.\nActif quand ce bijou est équipé. Effets identiques non cumulables."
+
+func _pourcentage(valeur: float) -> String:
+	return String.num(valeur * 100.0, 1).trim_suffix(".0").replace(".", ",")
 
 func _selectionner_slot(slot: String) -> void:
 	_slot_selectionne = slot
@@ -229,6 +233,6 @@ func _afficher_armes() -> void:
 		bouton.add_theme_constant_override("icon_max_width",116)
 		StyleAzur.case_objet(bouton,id == ReglagesJoueur.projectile_equipe_effectif())
 		bouton.tooltip_text = str(arme["description"])
-		if not disponible: bouton.text += "\nMonde %d" % int(arme["monde"])
+		if not disponible: bouton.text += "\nChapitre %d" % CatalogueProjectiles.niveau_deblocage(id)
 		ligne.add_child(bouton)
 	_armes.add_child(StyleAzur.texte("%s · dégâts ×%.2f · cadence ×%.2f\n%s" % [selection["nom"],float(selection["degats_mult"]),float(selection.get("cadence_mult",1.0)),selection["description"]],24,StyleAzur.ATTENUE))

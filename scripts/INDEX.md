@@ -5,6 +5,7 @@
 | Run | `run.gd`, `bilan_run.gd` | orchestration d'une tentative, transitions, récompenses |
 | Acteurs | `heros.gd`, `ennemi.gd`, `boss.gd`, `gardien.gd`, `cerveaux.gd` | héros, ennemis, boss, IA spécialisée |
 | Combat | `projectile.gd`, `tir.gd`, `ciblage.gd`, `stats.gd`, `priorite_projectile.gd` | projectile, tir, ciblage, stats et priorités |
+| Sorts | `bonus_sorts.gd` | attaque, dégâts, récupération et rayon avec les bonus de run |
 | Monde | `salle.gd`, `geometrie.gd`, `fond_adaptatif.gd` | salle, géométrie, adaptation du terrain |
 | Améliorations | `mods.gd`, `reactif.gd`, `draft_logique.gd`, `details_reactif.gd` | effets et logique des choix de run |
 | Animation du héros 3D | `presentation/animation_heros_3d.gd`, `presentation/suivi_visuel_2d.gd` | mélange des gestes, cadence et interpolation visuelle |

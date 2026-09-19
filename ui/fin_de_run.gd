@@ -50,10 +50,27 @@ func afficher(victoire: bool, salle_atteinte: int) -> void:
 		_recompenses.add_child(StyleAzur.texte("%s · rang %d" % [Sorts.donnees(sort_)["nom"], ReglagesJoueur.rang_sort(sort_)], 32, StyleAzur.ENCRE))
 	if _recompenses.get_child_count() == 0:
 		_recompenses.add_child(StyleAzur.texte("Le coffre est vide.\nTerminez une salle pour commencer à le remplir.", 30, StyleAzur.ENCRE))
+	_afficher_ameliorations_disponibles()
 	_retour = StyleAzur.bouton("Retour à l’accueil", _retourner, true)
 	_retour.visible = false
 	_bilan.add_child(_retour)
 	if Jeu.mode_auto: _ouvrir()
+
+func _afficher_ameliorations_disponibles() -> void:
+	var disponibles := BilanRun.ameliorations_accessibles()
+	if disponibles.is_empty():
+		return
+	_recompenses.add_child(StyleAzur.texte("Vous pouvez déjà vous renforcer", 30, StyleAzur.ENCRE))
+	if disponibles.has("maitrise"):
+		var achat: Dictionary = disponibles["maitrise"]
+		var noeud: Dictionary = ArbreCompetences.NOEUDS[str(achat["id"])]
+		_recompenses.add_child(StyleAzur.texte("Maîtrises : %s, rang %d · %d Gouttes\n%s" % [
+			noeud["nom"], int(achat["rang"]), int(achat["cout"]), noeud["description"]], 26, StyleAzur.ENCRE))
+	if disponibles.has("forge"):
+		var achat: Dictionary = disponibles["forge"]
+		var objet: Dictionary = CatalogueObjets.OBJETS[str(achat["id"])]
+		_recompenses.add_child(StyleAzur.texte("Équipement : %s équipé, forge niveau %d · %d Pierres" % [
+			objet["nom"], int(achat["rang"]), int(achat["cout"])], 26, StyleAzur.ENCRE))
 
 func _ouvrir() -> void:
 	if _ouvert: return

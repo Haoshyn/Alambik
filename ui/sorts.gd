@@ -88,8 +88,12 @@ func _rendre() -> void:
 		ligne.add_child(texte)
 		texte.add_child(StyleAzur.texte(str(d["nom"]),34))
 		texte.add_child(StyleAzur.texte(str(d["description"]),27,StyleAzur.ATTENUE))
+		var rang := ReglagesJoueur.rang_sort(id)
+		texte.add_child(StyleAzur.texte("Rang %d : %s" % [maxi(1, rang), Sorts.resume_rang(id, rang)], 24, StyleAzur.MAGIE))
+		texte.add_child(StyleAzur.texte(Sorts.progression_rang(id), 24, StyleAzur.ATTENUE))
 		if d.has("recharge"):
-			texte.add_child(StyleAzur.texte("Récupération avec vos bonus : %.1f s" % ReglagesJoueur.recharge_sort(id), 24, StyleAzur.MAGIE))
+			var recharge := String.num(ReglagesJoueur.recharge_sort(id), 1).trim_suffix(".0").replace(".", ",")
+			texte.add_child(StyleAzur.texte("Récupération avec vos bonus : %s s" % recharge, 24, StyleAzur.MAGIE))
 		texte.add_child(StyleAzur.texte("%s · rang %d / %d" % [Epreuves.provenance(id), ReglagesJoueur.rang_sort(id), Reglages.CAPACITE_RANG_MAX],24,StyleAzur.ATTENUE))
 		texte.add_child(StyleAzur.texte("Équipé · toucher pour retirer" if id in equipes else "Toucher pour équiper" if ReglagesJoueur.sort_debloque(id) else Epreuves.provenance(id),24,StyleAzur.MAGIE))
 		marge.minimum_size_changed.connect(func(): b.custom_minimum_size.y = maxf(230.0,marge.get_combined_minimum_size().y))
