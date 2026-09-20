@@ -7,13 +7,17 @@ extends RefCounted
 # les motifs et les terrains apportent le reste de la difficulte.
 const PV_DEPART := .75
 const DEGATS_DEPART := .50
-const FIN_CAMPAGNE := Chapitres.MONDES.size() * Chapitres.CHAPITRES_PAR_MONDE - 1
 const PV_FIN := 15.0
 const DEGATS_FIN := 15.0
 const EXPOSANT_PROGRESSION := 1.15
 
+static func _fin_campagne() -> int:
+	# La taille du catalogue est evaluee a l'appel : size() n'est pas une
+	# expression constante acceptee par Godot 4.7.1 dans cette dependance.
+	return Chapitres.MONDES.size() * Chapitres.CHAPITRES_PAR_MONDE - 1
+
 static func _courbe(palier: int, depart: float, fin: float) -> float:
-	var progression := float(maxi(0, palier)) / maxf(1.0, float(FIN_CAMPAGNE))
+	var progression := float(maxi(0, palier)) / maxf(1.0, float(_fin_campagne()))
 	return depart * pow(fin / depart, pow(progression, EXPOSANT_PROGRESSION))
 
 static func facteur_pv(palier: int) -> float:
@@ -25,5 +29,5 @@ static func facteur_degats(palier: int) -> float:
 # Les premieres victoires doivent etre possibles sans Sort ni Ultime ; le
 # budget de vie des miniboss accompagne ensuite l'acquisition de cet arsenal.
 static func facteur_miniboss(palier: int) -> float:
-	var progression := clampf(float(palier) / maxf(1.0, float(FIN_CAMPAGNE)), 0.0, 1.0)
+	var progression := clampf(float(palier) / maxf(1.0, float(_fin_campagne())), 0.0, 1.0)
 	return lerpf(Reglages.MINIBOSS_PV_MULT_DEPART, Reglages.MINIBOSS_PV_MULT, pow(progression, EXPOSANT_PROGRESSION))

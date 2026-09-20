@@ -15,6 +15,7 @@ var parcours := false
 var capture_active := false
 var pause := false
 var ralenti := 1.0
+var arme_tenue: Node3D
 
 func _initialize() -> void:
 	call_deferred("preparer")
@@ -40,6 +41,7 @@ func preparer() -> void:
 	modele = document.generate_scene(etat)
 	modele.scene_file_path = chemin
 	scene.add_child(modele)
+	arme_tenue = preload("res://scripts/presentation/arme_tenue_3d.gd").installer(modele, "standard", true)
 	preload("res://scripts/presentation/materiaux_apprenti.gd").appliquer(modele)
 	if sculpte:
 		preload("res://scripts/presentation/materiaux_mage_sculpte.gd").appliquer(modele)
@@ -156,6 +158,13 @@ func preparer() -> void:
 			ralenti = facteur
 			lecteur.speed_scale = 0.0 if pause else ralenti)
 		lecture.add_child(bouton)
+	var choix_arme := OptionButton.new()
+	for id: String in CatalogueProjectiles.TYPES:
+		choix_arme.add_item(str(CatalogueProjectiles.TYPES[id]["nom"]))
+		choix_arme.set_item_metadata(choix_arme.item_count - 1, id)
+	choix_arme.item_selected.connect(func(index: int):
+		arme_tenue.changer(str(choix_arme.get_item_metadata(index))))
+	interface.add_child(choix_arme)
 	actualiser_camera()
 	if "--apercu-reference" in OS.get_cmdline_user_args():
 		angle = 0.0

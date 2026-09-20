@@ -13,6 +13,7 @@ var _mort := false
 var _derniere_animation := ""
 var _orientation := Vector2.DOWN
 var _visee_mesh: MeshInstance3D
+var _arme_tenue: Node3D
 
 func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 	logique = cible
@@ -39,6 +40,7 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 		suivi.name = "SuiviVisuel3D"
 		logique.add_child(suivi)
 		ReglagesJoueur.reglages_changes.connect(_actualiser_modele)
+		ReglagesJoueur.maitrise_changee.connect(_actualiser_arme)
 		logique.connect("tir_demande", _jouer_tir)
 		logique.connect("attaque_preparee", _armer_tir)
 		logique.connect("touchee", func(_position):
@@ -69,6 +71,7 @@ func _installer_modele(scene: PackedScene) -> void:
 				lecteur.get_animation(nom).loop_mode = Animation.LOOP_LINEAR
 	if genre == "heros":
 		preload("res://scripts/presentation/materiaux_apprenti.gd").appliquer(modele)
+		_arme_tenue = preload("res://scripts/presentation/arme_tenue_3d.gd").installer(modele, ReglagesJoueur.projectile_equipe_effectif())
 		var peau := modele.find_child("Heros_B_peau", true, false) as MeshInstance3D
 		if peau != null:
 			var source := peau.get_active_material(0) as StandardMaterial3D
@@ -82,6 +85,10 @@ func _installer_modele(scene: PackedScene) -> void:
 			animation_heros = load("res://scripts/presentation/animation_heros_3d.gd").new()
 			add_child(animation_heros)
 			animation_heros.preparer(lecteur)
+
+func _actualiser_arme() -> void:
+	if is_instance_valid(_arme_tenue):
+		_arme_tenue.changer(ReglagesJoueur.projectile_equipe_effectif())
 
 func _actualiser_modele() -> void:
 	var chemin := Visuels3D.chemin_heros(ReglagesJoueur.modele_heros)

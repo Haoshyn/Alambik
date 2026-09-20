@@ -73,13 +73,13 @@ func _construire_vent(ensemble: Node3D, zone: Dictionary) -> void:
 	var direction: Vector2 = zone["direction"]
 	var teinte: Color = zone["couleur"]
 	for i in 9:
-		var trait := Node3D.new()
+		var trace_vent := Node3D.new()
 		var origine := Vector3((.18 + (i % 3) * .32 - .5) * salle.limites.size.x * Pont3D.ECHELLE, .16,
 			(.22 + (i / 3) * .27 - .5) * salle.limites.size.y * Pont3D.ECHELLE)
-		trait.position = origine
-		trait.rotation.y = -direction.angle()
-		trait.set_meta("origine", origine)
-		ensemble.add_child(trait)
+		trace_vent.position = origine
+		trace_vent.rotation.y = -direction.angle()
+		trace_vent.set_meta("origine", origine)
+		ensemble.add_child(trace_vent)
 		for morceau in 3:
 			var barre := MeshInstance3D.new()
 			var forme := BoxMesh.new()
@@ -91,7 +91,7 @@ func _construire_vent(ensemble: Node3D, zone: Dictionary) -> void:
 				var cote := -1.0 if morceau == 1 else 1.0
 				barre.position = Vector3(.18, 0, cote * .05)
 				barre.rotation.y = cote * .6
-			trait.add_child(barre)
+			trace_vent.add_child(barre)
 
 func mettre_a_jour(_delta: float) -> void:
 	if not is_instance_valid(salle): return
@@ -108,8 +108,8 @@ func mettre_a_jour(_delta: float) -> void:
 		if str(zone["type"]) == "vent":
 			var direction: Vector2 = zone["direction"]
 			var index := 0
-			for trait in visuel.get_children():
-				var origine: Vector3 = trait.get_meta("origine")
+			for trace_vent in visuel.get_children():
+				var origine: Vector3 = trace_vent.get_meta("origine")
 				var avance := 0.0 if ReglagesJoueur.effets_reduits else fposmod(float(_source.temps) * .38 + index * .17, .60) - .30
-				trait.position = origine + Vector3(direction.x, 0, direction.y) * avance
+				trace_vent.position = origine + Vector3(direction.x, 0, direction.y) * avance
 				index += 1

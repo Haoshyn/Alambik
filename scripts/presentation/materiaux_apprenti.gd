@@ -15,6 +15,9 @@ static func appliquer(modele: Node3D) -> void:
 		mat.shader = preload("res://shaders/ombre_apprenti.gdshader")
 		ombre.material_override = mat
 		modele.add_child(ombre)
+	if modele.scene_file_path == Visuels3D.HEROS_MODELE_SCULPTE:
+		preload("res://scripts/presentation/materiaux_mage_sculpte.gd").appliquer(modele)
+		return
 	# Le nouveau mage porte ses textures et ses reliefs dans le GLB.
 	if modele.scene_file_path == Visuels3D.HEROS_MODELE_REFERENCE:
 		for objet: Node in modele.find_children("*", "MeshInstance3D", true, false):

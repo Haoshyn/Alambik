@@ -7,11 +7,12 @@ const HEROS_MODELE_ACCUEIL := "res://assets/3d/characters/apprenti_accueil.glb"
 const HEROS_MODELE_ACCUEIL_V2 := "res://assets/3d/characters/apprenti_accueil_v2.glb"
 const HEROS_MODELE_SECOURS := "res://assets/3d/characters/apprenti_secours.glb"
 const HEROS_MODELE_REFERENCE := "res://assets/3d/characters/mage_reference.glb"
-const HEROS_MODELE_DEFAUT := "reference"
+const HEROS_MODELE_SCULPTE := "res://assets/3d/characters/mage_sculpte.glb"
+const HEROS_MODELE_DEFAUT := "sculpte"
 # Revenir au secours ne demande que de changer cette constante.
-const HEROS_MODELE := HEROS_MODELE_REFERENCE
+const HEROS_MODELE := HEROS_MODELE_SCULPTE
 const MODELES_HEROS := {
-	"reference": {"nom": "Mage", "chemin": HEROS_MODELE},
+	"sculpte": {"nom": "Mage", "chemin": HEROS_MODELE},
 }
 
 # Sprint arcade : 0,4 s par cycle, avec une courte phase aerienne.

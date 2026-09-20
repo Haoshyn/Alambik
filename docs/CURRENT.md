@@ -5,20 +5,53 @@ anciens essais et résultats de tests ne valent pas validation de l'état prése
 
 ## Présentation
 
-- Le nouveau modèle de travail et par défaut est `assets/3d/characters/mage_reference.glb`,
+- Le modèle actif en jeu et par défaut est `assets/3d/characters/mage_sculpte.glb`,
+  avec ses retouches récentes et ses matériaux standard. Les anciens choix
+  sauvegardés sont redirigés vers ce modèle au chargement.
+  Le précédent modèle `assets/3d/characters/mage_reference.glb` reste conservé,
   généré par `tools/blender/mage_reference.py`. Référence fournie conservée dans
   `assets/3d/sources/characters/mage_reference/direction.png`, avec sa source Blender.
   Textures couleur et normales intégrées, matières éclairées, écharpe sur trois os,
   six animations. Rendu encore à apprécier avec le propriétaire dans l'atelier.
 - L'essai procédural `mage_fidele` a été rejeté pour ses proportions, ses facettes
   et ses matières. Il n'est pas activé dans le jeu. La copie de travail
-  `mage_sculpte`, issue du maillage sculpté et exportée séparément, reste hors jeu
-  tant que sa direction visuelle n'est pas retenue.
+  `mage_sculpte`, issue du maillage sculpté et exportée séparément, est désormais
+  utilisée en jeu à la demande du propriétaire.
 - Atelier sculpté : éclairage neutre et matériaux standard importés du GLB.
   Le shader dédié `shaders/mage_sculpte_surface.gdshader` est désactivé à la
   demande du propriétaire. Retrait local de l'écharpe du mage sculpté par
-  `tools/blender/sans_echarpe.py` ; tunique et manches sculptées conservées,
-  sans boutons ni liseré ajoutés. Os de l'écharpe supprimés.
+  `tools/blender/sans_echarpe.py`. Os de l'écharpe supprimés.
+  Reprise du vêtement par `tools/blender/vetement_sculpte.py` : haut de tunique
+  et manches continus, violet uniforme aux épaules, reste de pan isolé retiré.
+  Coudes fléchis vers l'avant et doigts recourbés vers la paume.
+  `tools/blender/poignets_sculptes.py` réduit les mains d'environ un quart,
+  les recentre sur les avant-bras et remplace les bracelets par du cuir uni.
+  Potion de ceinture retirée ; tissu sous son attache repris depuis le côté opposé.
+  `tools/blender/bottes_sculptees.py` raccourcit et affine les bottes,
+  anime une course sur un cycle de 0,54 s, avec des appuis courts et une
+  phase aérienne entre les pas. Foulée élargie et flexion des genoux réduite.
+  Buste penché vers l'avant, épaules en torsion alternée et bras fléchis
+  balancés à l'opposé des jambes ; tête compensée pour garder le regard devant.
+  `tools/blender/raccord_tunique.py` prolonge le tissu sous la ceinture et
+  harmonise leur attache au bassin pour fermer le ventre pendant la course.
+  Armes tenues séparées dans `assets/3d/weapons/`, générées par
+  `tools/blender/armes_tenues.py` d'après les silhouettes du catalogue.
+  `arme_tenue_3d.gd` les attache à la main droite et le proxy suit l'arme équipée.
+  L'atelier propose les dix armes sans modifier la sauvegarde.
+  `gestes_baguette.py` maintient la prise droite, légèrement vers l'avant en
+  course ; au lancer, le bras avance sans balayage latéral. Prise rapprochée
+  de la monture de la baguette.
+  Genoux légèrement relevés et recentrés dans le pantalon.
+  Pointes redressées vers l'avant ; bottines entièrement rigides sur les pieds.
+  La foulée distingue poussée arrière, remontée du talon, passage du pied
+  sous le bassin et extension avant. Les bottines restent rigides et basculent
+  avec les pieds ; leur levée tient compte de la pointe pour éviter le sol.
+  Bas du pantalon reconstruit en surfaces continues autour des genoux pour
+  supprimer les pans du scan qui se pinçaient sur les bottes.
+  Version avant les bottes conservée dans `tmp/retouche-bottes/avant.glb` et `avant.blend`.
+  Version avant cette passe conservée dans `tmp/retouche-poignets/avant.glb`
+  et `avant.blend`.
+  Copie antérieure dans `tmp/retouche-vetement/avant.glb` et `avant.blend`.
   Chapeau reconstruit en pièces distinctes dans `tools/blender/chapeau_sculpte.py` :
   bord violet à épaisseur constante, calotte et ruban séparés. Marges UV et filtre
   de projection contre les débordements violets dans les cheveux. Des raccords

@@ -15,6 +15,10 @@ from animer_mage_v2 import animer
 import chapeau_sculpte
 import tete_sculptee
 import sans_echarpe
+import vetement_sculpte
+import bottes_sculptees
+import raccord_tunique
+import gestes_baguette
 
 RACINE=Path(__file__).resolve().parents[2]
 SOURCE=RACINE/'assets/3d/sources/characters/mage_sculpte'
@@ -183,6 +187,10 @@ if __name__=='__main__':
     bpy.ops.export_scene.gltf(filepath=str(chemin),export_format='GLB',use_selection=True,
         export_animations=True,export_animation_mode='NLA_TRACKS',export_force_sampling=True,export_skins=True)
     animer(chemin)
+    vetement_sculpte.finaliser(chemin)
+    bottes_sculptees.finaliser(chemin)
+    raccord_tunique.finaliser(chemin)
+    gestes_baguette.finaliser(chemin)
     # La source de consultation doit montrer les memes clips que le modele livre.
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=str(chemin))

@@ -84,7 +84,7 @@ static func entree(parent: Node3D, position: Vector3, monde: int) -> void:
 
 static func abords(parent: Node3D, centre: Vector3, taille: Vector3, monde: int, variante: int) -> void:
 	# Ces motifs se trouvent au-dela du rebord physique, jamais sur un passage.
-	for cote in [-1.0, 1.0]:
+	for cote: float in [-1.0, 1.0]:
 		var x := cote * (taille.x * .5 + 1.55)
 		match monde:
 			3:

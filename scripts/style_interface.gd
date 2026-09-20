@@ -118,7 +118,7 @@ static func styliser_bouton(bouton: Button, accent := Palette.OR, secondaire := 
 static func _animer_bouton(bouton: Button, echelle: Vector2, enfonce: bool) -> void:
 	if not is_instance_valid(bouton):
 		return
-	var precedente: Variant = bouton.get_meta("micro_animation", null)
+	var precedente: Variant = bouton.get_meta("micro_animation") if bouton.has_meta("micro_animation") else null
 	if precedente is Tween and (precedente as Tween).is_valid():
 		(precedente as Tween).kill()
 	var animation := bouton.create_tween()
