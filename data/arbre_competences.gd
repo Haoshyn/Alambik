@@ -10,16 +10,16 @@ const MAX_RANG := Reglages.MAITRISE_RANG_MAX
 const ANCIENS_COUTS := [8, 12, 20, 35, 60, 100, 170, 280, 460, 760]
 const ANCIEN_COUT_PAR_RANG := 1.35
 const NOEUDS := {
-	"force": {"nom": "Force", "description": "+5 % dégâts par rang", "categorie": "Offensif", "degats": 0.05, "cout": Reglages.MAITRISE_COUTS[0]},
+	"force": {"nom": "Force", "description": "+5 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.05, "cout": Reglages.MAITRISE_COUTS[0]},
 	"cadence": {"nom": "Cadence", "description": "+1 % cadence par rang", "categorie": "Offensif", "cadence": 0.01, "requis": "force", "cout": Reglages.MAITRISE_COUTS[1]},
-	"precision": {"nom": "Frappe souveraine", "description": "+25 % dégâts.", "categorie": "Offensif", "degats": 0.25, "requis": "cadence", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[2] * Reglages.MAITRISE_COUT_MAJEUR},
-	"puissance": {"nom": "Puissance", "description": "+7,5 % dégâts par rang", "categorie": "Offensif", "degats": 0.075, "requis": "precision", "cout": Reglages.MAITRISE_COUTS[3]},
+	"precision": {"nom": "Frappe souveraine", "description": "+25 % d’attaque.", "categorie": "Offensif", "attaque": 0.25, "requis": "cadence", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[2] * Reglages.MAITRISE_COUT_MAJEUR},
+	"puissance": {"nom": "Puissance", "description": "+7,5 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.075, "requis": "precision", "cout": Reglages.MAITRISE_COUTS[3]},
 	"rythme": {"nom": "Rythme maîtrisé", "description": "+1,5 % cadence par rang", "categorie": "Offensif", "cadence": 0.015, "requis": "puissance", "cout": Reglages.MAITRISE_COUTS[4]},
-	"catalyse": {"nom": "Catalyse absolue", "description": "+50 % dégâts.", "categorie": "Offensif", "degats": 0.5, "requis": "rythme", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[5] * Reglages.MAITRISE_COUT_MAJEUR},
-	"trajectoire": {"nom": "Maîtrise du trait", "description": "+10 % dégâts par rang", "categorie": "Offensif", "degats": 0.1, "requis": "catalyse", "cout": Reglages.MAITRISE_COUTS[6]},
+	"catalyse": {"nom": "Catalyse absolue", "description": "+50 % d’attaque.", "categorie": "Offensif", "attaque": 0.5, "requis": "rythme", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[5] * Reglages.MAITRISE_COUT_MAJEUR},
+	"trajectoire": {"nom": "Maîtrise du trait", "description": "+10 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.1, "requis": "catalyse", "cout": Reglages.MAITRISE_COUTS[6]},
 	"tempete": {"nom": "Tempête mesurée", "description": "+2 % cadence par rang", "categorie": "Offensif", "cadence": 0.02, "requis": "trajectoire", "cout": Reglages.MAITRISE_COUTS[7]},
-	"domination": {"nom": "Domination", "description": "+75 % dégâts.", "categorie": "Offensif", "degats": 0.75, "requis": "tempete", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[8] * Reglages.MAITRISE_COUT_MAJEUR},
-	"grand_oeuvre": {"nom": "Grand Œuvre", "description": "+12,5 % dégâts par rang", "categorie": "Offensif", "degats": 0.125, "requis": "domination", "cout": Reglages.MAITRISE_COUTS[9]},
+	"domination": {"nom": "Domination", "description": "+75 % d’attaque.", "categorie": "Offensif", "attaque": 0.75, "requis": "tempete", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[8] * Reglages.MAITRISE_COUT_MAJEUR},
+	"grand_oeuvre": {"nom": "Grand Œuvre", "description": "+12,5 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.125, "requis": "domination", "cout": Reglages.MAITRISE_COUTS[9]},
 	"constitution": {"nom": "Constitution", "description": "+5 % PV maximum par rang", "categorie": "Défensif", "pv_mult": 0.05, "cout": Reglages.MAITRISE_COUTS[0]},
 	"armure": {"nom": "Armure", "description": "+2,5 % armure par rang", "categorie": "Défensif", "armure": 0.025, "requis": "constitution", "cout": Reglages.MAITRISE_COUTS[1]},
 	"vitalite": {"nom": "Vitalité souveraine", "description": "+25 % PV maximum.", "categorie": "Défensif", "pv_mult": 0.25, "requis": "armure", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[2] * Reglages.MAITRISE_COUT_MAJEUR},
@@ -32,13 +32,13 @@ const NOEUDS := {
 	"immortel": {"nom": "Immortel", "description": "+12,5 % PV maximum par rang", "categorie": "Défensif", "pv_mult": 0.125, "requis": "colosse", "cout": Reglages.MAITRISE_COUTS[9]},
 	"celerite": {"nom": "Récolte", "description": "+5 % Gouttes gagnées par rang", "categorie": "Utilitaire", "collecte": 0.05, "cout": Reglages.MAITRISE_COUTS[0]},
 	"collecte": {"nom": "Prospection", "description": "+5 % Pierres de forge par rang", "categorie": "Utilitaire", "pierres": 0.05, "requis": "celerite", "cout": Reglages.MAITRISE_COUTS[1]},
-	"distillation": {"nom": "Distillation", "description": "+1 nouveau tirage d’augmentations par aventure.", "categorie": "Utilitaire", "rerolls": 1, "requis": "collecte", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[2] * Reglages.MAITRISE_COUT_MAJEUR},
+	"distillation": {"nom": "Distillation", "description": "+1 relance d’augmentations par aventure, dans la limite de %d au total, toutes sources confondues." % Reglages.RELANCES_MAX_PAR_RUN, "categorie": "Utilitaire", "rerolls": 1, "requis": "collecte", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[2] * Reglages.MAITRISE_COUT_MAJEUR},
 	"fortune": {"nom": "Fortune", "description": "+5 % Gouttes des coffres par rang", "categorie": "Utilitaire", "coffre": 0.05, "requis": "distillation", "cout": Reglages.MAITRISE_COUTS[3]},
 	"sagesse": {"nom": "Sagesse", "description": "+5 % XP de compte par rang", "categorie": "Utilitaire", "experience": 0.05, "requis": "fortune", "cout": Reglages.MAITRISE_COUTS[4]},
 	"abondance": {"nom": "Double discipline", "description": "Permet d’équiper un second Passif.", "categorie": "Utilitaire", "second_passif": true, "requis": "sagesse", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[5] * Reglages.MAITRISE_COUT_MAJEUR},
 	"savoir": {"nom": "Artisanat", "description": "+7,5 % Pierres de forge par rang", "categorie": "Utilitaire", "pierres": 0.075, "requis": "abondance", "cout": Reglages.MAITRISE_COUTS[6]},
 	"elan": {"nom": "Abondance", "description": "+7,5 % Gouttes gagnées par rang", "categorie": "Utilitaire", "collecte": 0.075, "requis": "savoir", "cout": Reglages.MAITRISE_COUTS[7]},
-	"prescience": {"nom": "Prescience", "description": "+1 nouveau tirage d’augmentations par aventure.", "categorie": "Utilitaire", "rerolls": 1, "requis": "elan", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[8] * Reglages.MAITRISE_COUT_MAJEUR},
+	"prescience": {"nom": "Prescience", "description": "+1 relance d’augmentations par aventure, dans la limite de %d au total, toutes sources confondues." % Reglages.RELANCES_MAX_PAR_RUN, "categorie": "Utilitaire", "rerolls": 1, "requis": "elan", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[8] * Reglages.MAITRISE_COUT_MAJEUR},
 	"philosophe": {"nom": "Pierre philosophale", "description": "+7,5 % Gouttes des coffres par rang", "categorie": "Utilitaire", "coffre": 0.075, "requis": "prescience", "cout": Reglages.MAITRISE_COUTS[9]},
 }
 
@@ -80,11 +80,13 @@ static func _somme(rangs_joueur: Dictionary, champ: String) -> float:
 
 static func description_effective(id: String) -> String:
 	var description := str(NOEUDS[id]["description"]) + (" Pouvoir majeur · achat unique." if rangs(id)==1 else " Dix rangs à plein effet.")
-	if NOEUDS[id].has("degats") or NOEUDS[id].has("pv_mult"):
+	if NOEUDS[id].has("attaque"):
+		description += " S’ajoute aux bonus d’attaque sur votre attaque de base, avant les dégâts finaux."
+	elif NOEUDS[id].has("pv_mult"):
 		description += " S’ajoute aux autres maîtrises de cette statistique."
 	return description
 
-const CHAMPS_LISIBLES := ["degats", "pv_mult", "cadence", "projectile", "armure", "reduction",
+const CHAMPS_LISIBLES := ["attaque", "pv_mult", "cadence", "projectile", "armure", "reduction",
 	"recharge", "vitesse", "collecte", "coffre", "experience", "pierres"]
 
 static func _nombre(valeur: float) -> String:
@@ -96,16 +98,16 @@ static func _nombre(valeur: float) -> String:
 static func valeur_au_rang(id: String, rang: int) -> String:
 	var noeud: Dictionary = NOEUDS.get(id, {})
 	var acquis := clampi(rang, 0, rangs(id))
-	for champ in ["degats", "pv_mult", "cadence", "armure"]:
+	for champ in ["attaque", "pv_mult", "cadence", "armure"]:
 		if noeud.has(champ):
-			return "+%s %%" % _nombre(float(noeud[champ]) * acquis * 100.0)
+			return "+%s %%%s" % [_nombre(float(noeud[champ]) * acquis * 100.0), " d’attaque" if champ == "attaque" else ""]
 	for champ in CHAMPS_LISIBLES:
 		if noeud.has(champ):
 			return "%s%s %%" % ["-" if champ in ["reduction", "recharge"] else "+",
 				_nombre(poids_rang(acquis) * float(noeud[champ]) * 100.0)]
 	if noeud.has("rerolls"):
 		var tirages := acquis * int(noeud["rerolls"])
-		return "+%d tirage%s" % [tirages, "s" if tirages > 1 else ""]
+		return "+%d relance%s (maximum %d au total)" % [tirages, "s" if tirages > 1 else "", Reglages.RELANCES_MAX_PAR_RUN]
 	return "acquis" if acquis > 0 else "aucun"
 
 static func resume_rang(id: String, rang: int) -> String:
@@ -132,8 +134,11 @@ static func soin_par_salle(rangs_joueur: Dictionary) -> float:
 static func donne_bouclier(rangs_joueur: Dictionary) -> bool:
 	return _somme(rangs_joueur, "bouclier") > 0.0
 
-static func multiplicateur_degats(rangs_joueur: Dictionary) -> float:
-	return 1.0 + _somme(rangs_joueur, "degats")
+static func bonus_attaque(rangs_joueur: Dictionary) -> float:
+	return _somme(rangs_joueur, "attaque")
+
+static func multiplicateur_attaque(rangs_joueur: Dictionary) -> float:
+	return 1.0 + bonus_attaque(rangs_joueur)
 
 static func multiplicateur_cadence(rangs_joueur: Dictionary) -> float:
 	return 1.0 + _somme(rangs_joueur, "cadence")
@@ -157,7 +162,7 @@ static func multiplicateur_pierres(rangs_joueur: Dictionary) -> float:
 	return 1.0 + _somme(rangs_joueur, "pierres")
 
 static func nombre_rerolls(rangs_joueur: Dictionary) -> int:
-	return roundi(_somme(rangs_joueur, "rerolls"))
+	return mini(Reglages.RELANCES_MAX_PAR_RUN, roundi(_somme(rangs_joueur, "rerolls")))
 
 static func donne_second_passif(rangs_joueur: Dictionary) -> bool:
 	return _somme(rangs_joueur, "second_passif") > 0.0

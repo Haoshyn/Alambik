@@ -8,7 +8,6 @@ var heros: Node2D
 var _arene: Node3D
 var _proxies := {}
 var _scenes := {}
-var _materiaux := {}
 var _numero := -1
 var _limites := Rect2()
 var _portail: Node3D
@@ -86,18 +85,17 @@ func _inscrire(noeud: Node) -> void:
 	var chemin := ""
 	var genre := ""
 	if noeud == heros:
-		chemin = Visuels3D.chemin_heros(ReglagesJoueur.modele_heros)
+		chemin = Visuels3D.HEROS_MODELE
 		genre = "heros"
 	elif noeud.is_in_group("ennemis"):
 		chemin = Visuels3D.chemin_ennemi(noeud.get("donnees"))
 		genre = "ennemi"
 	elif noeud is Area2D and noeud.get_script() != null and noeud.get_script().resource_path == "res://scripts/projectile.gd":
-		chemin = "res://assets/3d/projectiles/orbe.glb"
 		genre = "projectile"
 	elif noeud is Gardien:
 		chemin = "res://assets/3d/characters/gardien.glb"
 		genre = "gardien"
-	if chemin.is_empty():
+	if genre.is_empty():
 		return
 	var proxy := Node3D.new()
 	proxy.set_script(preload("res://scripts/presentation/projectile_3d.gd") if genre == "projectile" else PROXY)

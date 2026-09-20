@@ -6,25 +6,11 @@ extends RefCounted
 # des rectangles : les silhouettes viennent des assets de production.
 
 const PAS := 4.0
-const ENCRE := Color("17234a")
-const OMBRE := Color("303d72")
 const PAPIER := Color("fff0bd")
 const OR := Color("ffb52e")
 const ROSE := Color("ef476f")
 const CYAN := Color("42d9c8")
-const VIOLET := Color("aa86ff")
-const VERT := Color("65d47b")
-const BLEU_NUIT := Color("28526b")
 
-const FOND_MENU := preload("res://assets/visual/menu_vallee_alambics.png")
-# menu_premium_v3_classique.png et menu_premium_v3_adaptatif.png restent dans le
-# depot : repointer cette constante suffit a revenir a une ancienne peinture
-# d'accueil. Elles ne sont plus prechargees, une seule composition servant
-# desormais toutes les proportions d'ecran.
-const MENU_PREMIUM_CLASSIQUE := preload("res://assets/visual/menu_futur.png")
-const HEROS_MENU_PREMIUM := preload("res://assets/visual/heros_menu_premium.png")
-const FOND_INTERFACE := preload("res://assets/visual/fond_interface_scriptorium.png")
-const ICONES_INTERFACE := preload("res://assets/visual/icones_interface_normalisees.png")
 const PLANCHE_HEROS := preload("res://assets/visual/hero_alchimiste.png")
 const PLANCHE_ENNEMIS := preload("res://assets/visual/ennemis.png")
 const PLANCHE_MINIBOSS := preload("res://assets/visual/miniboss.png")
@@ -87,92 +73,6 @@ static func contour_rectangle(canvas: CanvasItem, rect: Rect2, fond: Color,
 		bord: Color, epaisseur := 4.0) -> void:
 	rectangle(canvas, rect, bord)
 	rectangle(canvas, rect.grow(-epaisseur), fond)
-
-static func polygone(canvas: CanvasItem, points: Array[Vector2], couleur: Color) -> void:
-	var ajustes := PackedVector2Array()
-	for point in points:
-		ajustes.append(pixel(point))
-	canvas.draw_colored_polygon(ajustes, couleur)
-
-static func dessiner_fond_interface(canvas: CanvasItem, taille: Vector2,
-		accent: Color, temps := 0.0, opacite := 1.0) -> void:
-	FondAdaptatif.dessiner_premium(canvas, FOND_INTERFACE, taille, 500.0, 420.0, opacite)
-	# Deux voiles continus reservent du contraste au bandeau et a la navigation,
-	# sans casser la peinture en bandes visibles.
-	canvas.draw_rect(Rect2(0.0, 0.0, taille.x, taille.y * 0.16),
-		Color(0.018, 0.035, 0.090, 0.24 * opacite))
-	canvas.draw_rect(Rect2(0.0, taille.y * 0.78, taille.x, taille.y * 0.22),
-		Color(0.012, 0.025, 0.070, 0.20 * opacite))
-	for etoile in 18:
-		var p := Vector2(fmod(float(etoile * 173), taille.x),
-			fmod(float(etoile * 101), taille.y * 0.72))
-		var pulse := 0.22 + 0.16 * sin(temps * 1.7 + etoile)
-		canvas.draw_circle(p, 2.0 + float(etoile % 3), Color(accent, pulse * opacite))
-	dessiner_coins(canvas, taille, Color(accent, 0.44 * opacite), 18.0)
-
-static func dessiner_fond_accueil(canvas: CanvasItem, taille: Vector2,
-		temps := 0.0, opacite := 1.0) -> void:
-	FondAdaptatif.dessiner(canvas, FOND_MENU, taille, 620.0, 430.0,
-		Color(1.0, 1.0, 1.0, opacite))
-	canvas.draw_rect(Rect2(0.0, 0.0, taille.x, taille.y * 0.15),
-		Color(0.012, 0.025, 0.070, 0.35 * opacite))
-	canvas.draw_rect(Rect2(0.0, taille.y * 0.76, taille.x, taille.y * 0.24),
-		Color(0.008, 0.018, 0.050, 0.38 * opacite))
-	for index in 12:
-		var p := Vector2(fmod(float(index * 197 + 63), taille.x),
-			fmod(float(index * 137 + 210), taille.y * 0.72))
-		canvas.draw_circle(p, 2.0 + float(index % 2) * 2.0,
-			Color(CYAN.lerp(VIOLET, float(index % 3) * 0.34),
-			(0.20 + 0.14 * sin(temps * 1.8 + index)) * opacite))
-
-# Chassis et bandes fixes de la peinture d'accueil. Une seule source pour le
-# dessin ET pour le placement des zones : sans cela, les libelles flottaient
-# au-dessus de leur plaque des que l'ecran changeait de proportions.
-const MENU_HAUT_FIXE := 1040.0
-const MENU_BAS_FIXE := 650.0
-
-# Repere de la peinture (reference 1080 de large) vers l'ecran reel.
-static func rect_menu(taille: Vector2, reference: Rect2) -> Rect2:
-	return FondAdaptatif.rect(taille, texture_menu(taille), reference,
-		MENU_HAUT_FIXE, MENU_BAS_FIXE)
-
-static func dessiner_menu_premium(canvas: CanvasItem, taille: Vector2,
-		temps := 0.0, opacite := 1.0) -> void:
-	var texture := texture_menu(taille)
-	var haut_fixe := MENU_HAUT_FIXE
-	var bas_fixe := MENU_BAS_FIXE
-	FondAdaptatif.dessiner(canvas, texture, taille, haut_fixe, bas_fixe,
-		Color(1.0, 1.0, 1.0, opacite))
-	# Le personnage est un calque distinct : une respiration tres legere suffit
-	# a donner vie a l'accueil sans transformer le menu en animation agitee.
-	var souffle := sin(temps * 1.75)
-	var centre_plateforme := FondAdaptatif.point(taille, texture,
-		Vector2(540.0, 1025.0), haut_fixe, bas_fixe)
-	var centre := centre_plateforme + Vector2(0.0, souffle * 1.8)
-	var dimensions := Vector2(taille.x * 0.47, taille.x * 0.59)
-	var echelle := Vector2(1.0 + souffle * 0.003, 1.0 + souffle * 0.007)
-	canvas.draw_set_transform(centre, 0.0, echelle)
-	canvas.draw_texture_rect(HEROS_MENU_PREMIUM,
-		Rect2(-dimensions * 0.5, dimensions), false,
-		Color(1.0, 1.0, 1.0, opacite))
-	canvas.draw_set_transform(Vector2.ZERO)
-
-# Une seule peinture d'accueil, quelle que soit la proportion de l'ecran : sa
-# bande centrale absorbe la hauteur supplementaire. Deux compositions
-# demandaient deux jeux de reperes, donc deux occasions de les desaccorder.
-static func texture_menu(_taille: Vector2) -> Texture2D:
-	return MENU_PREMIUM_CLASSIQUE
-
-static func icone_interface(index: int) -> AtlasTexture:
-	var atlas := AtlasTexture.new()
-	atlas.atlas = ICONES_INTERFACE
-	atlas.region = Rect2(float(posmod(index, 5) * 256), float(posmod(index / 5, 3) * 256), 256.0, 256.0)
-	return atlas
-
-static func dessiner_icone_interface(canvas: CanvasItem, index: int, rect: Rect2,
-		modulation := Color.WHITE) -> void:
-	var source := Rect2(float(posmod(index, 5) * 256), float(posmod(index / 5, 3) * 256), 256.0, 256.0)
-	canvas.draw_texture_rect_region(ICONES_INTERFACE, rect, source, modulation, false, true)
 
 static func dessiner_coins(canvas: CanvasItem, taille: Vector2, couleur: Color,
 		marge := 10.0) -> void:

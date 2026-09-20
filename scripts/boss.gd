@@ -48,12 +48,8 @@ var _anim := 0.0
 var _flash := 0.0
 var _braise := 0.0
 var _braise_dps := 0.0
-var _feu := 0.0
-var _feu_dps := 0.0
-var _feu_cumuls := 0
 var _givre := 0.0
 var _acide := 0.0
-var _terre_declenchee := false
 var _gel := 0.0
 var _ancre := Vector2.ZERO
 var _direction_charge := Vector2.ZERO
@@ -97,12 +93,6 @@ func _physics_process(delta: float) -> void:
 		dot_dps += _braise_dps
 	else:
 		_braise_dps = 0.0
-	if _feu > 0.0:
-		_feu = maxf(0.0, _feu - delta)
-		dot_dps += _feu_dps
-	else:
-		_feu_dps = 0.0
-		_feu_cumuls = 0
 	if dot_dps > 0.0:
 		pv -= dot_dps * delta
 		if pv <= 0.0:
@@ -379,20 +369,8 @@ func recevoir_degats(montant: float, effets: Array = []) -> void:
 			"braise":
 				_braise = Reglages.BRAISE_DUREE
 				_braise_dps = maxf(_braise_dps, montant * Reglages.BRAISE_PART_DEGATS_PAR_SECONDE)
-			"feu":
-				_feu = Reglages.BRAISE_DUREE
-				if _feu_cumuls < Reglages.FEU_DOT_CUMUL_MAX:
-					_feu_cumuls += 1
-					_feu_dps += montant * Reglages.FEU_DOT_PART_PAR_SECONDE
 			"givre": _givre = Reglages.GIVRE_DUREE
 			"acide": _acide = Reglages.ACIDE_DUREE
-			"eau":
-				_givre = Reglages.GIVRE_DUREE
-				_acide = Reglages.ACIDE_DUREE
-			"terre":
-				if not _terre_declenchee:
-					_terre_declenchee = true
-					_minuterie = maxf(_minuterie, Reglages.TERRE_RETARD_ATTAQUE)
 	if pv <= 0.0:
 		_mourir()
 
@@ -491,98 +469,3 @@ func _draw() -> void:
 	draw_circle(centre_sigil, r * 0.25, Color(0.035, 0.018, 0.065, 0.78))
 	Dessin.glyphe(self, GLYPHES_ORNEMENTS[ornement], centre_sigil, r * 0.15,
 		couleur.lightened(0.42))
-
-func _dessiner_corps_miniboss(r: float, couleur: Color) -> void:
-	var clair := couleur.lightened(0.38)
-	var sombre := couleur.darkened(0.48)
-	match str(donnees.get("silhouette", "correcteur")):
-		"rature":
-			var corps := PackedVector2Array([
-				Vector2(-r * 1.28, -r * 0.58), Vector2(-r * 0.18, -r * 0.34),
-				Vector2(r * 1.22, -r * 0.78), Vector2(r * 0.34, r * 0.08),
-				Vector2(r * 1.02, r * 0.58), Vector2(-r * 0.20, r * 0.32),
-				Vector2(-r * 1.18, r * 0.74), Vector2(-r * 0.56, 0.0)])
-			draw_colored_polygon(corps, couleur)
-			Dessin.contour(self, corps, clair, 5.0)
-			for barre in [-0.34, 0.0, 0.34]:
-				draw_line(Vector2(-r * 0.72, r * float(barre)),
-					Vector2(r * 0.74, r * (float(barre) - 0.28)), sombre, 6.0, true)
-		"errata":
-			for index in 3:
-				var centre := Vector2.RIGHT.rotated(_anim * (0.38 + index * 0.08) + index * TAU / 3.0) * r * 0.48
-				var tache := Dessin.blob(centre, r * (0.66 - index * 0.06), index * 97 + 11, 0.18, _anim * 1.5)
-				draw_colored_polygon(tache, couleur.lightened(index * 0.07))
-				Dessin.contour(self, tache, clair, 3.0)
-				draw_circle(centre, r * 0.13, sombre)
-		"correcteur":
-			var masque := Dessin.polygone_regulier(Vector2.ZERO, r * 1.15, 6, PI / 6.0)
-			draw_colored_polygon(masque, couleur)
-			Dessin.contour(self, masque, clair, 6.0)
-			draw_rect(Rect2(-r * 0.74, -r * 0.23, r * 1.48, r * 0.46), Color(clair, 0.86))
-			for x in [-0.46, 0.0, 0.46]:
-				draw_rect(Rect2(r * float(x) - r * 0.07, -r * 0.23, r * 0.14, r * 0.46), sombre)
-		"reliure":
-			for cote in [-1.0, 1.0]:
-				draw_set_transform(Vector2(0.0, float(cote) * r * 0.12), float(cote) * -0.22, Vector2.ONE)
-				var page := Rect2(-r * 1.05, -r * 0.58, r * 2.1, r * 0.52)
-				draw_rect(page, couleur)
-				draw_rect(page, clair, false, 5.0)
-				for dent in 5:
-					var x := -r * 0.82 + float(dent) * r * 0.41
-					draw_colored_polygon(PackedVector2Array([Vector2(x, -r * 0.06),
-						Vector2(x + r * 0.18, r * 0.24), Vector2(x + r * 0.34, -r * 0.06)]), clair)
-			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-			draw_circle(Vector2.ZERO, r * 0.32, sombre)
-		"virgule":
-			var tete := Dessin.goutte(Vector2(-r * 0.12, -r * 0.18), r * 0.92, PI * 0.84, 1.34)
-			draw_colored_polygon(tete, couleur)
-			Dessin.contour(self, tete, clair, 5.0)
-			for index in 4:
-				var p := Vector2(r * (0.36 + index * 0.19), r * (0.35 + index * 0.17))
-				draw_circle(p, r * (0.27 - index * 0.045), couleur.lerp(clair, index * 0.16))
-			draw_circle(Vector2(-r * 0.28, -r * 0.28), r * 0.19, sombre)
-		"index":
-			draw_circle(Vector2(0.0, r * 0.20), r * 0.66, couleur)
-			for doigt in 5:
-				var x := (float(doigt) - 2.0) * r * 0.30
-				var longueur := r * (0.86 + (2 - absi(doigt - 2)) * 0.13)
-				draw_line(Vector2(x, r * 0.08), Vector2(x * 1.10, -longueur), clair, r * 0.20, true)
-			draw_arc(Vector2(0.0, r * 0.20), r * 0.66, 0.0, TAU, 30, clair, 5.0, true)
-			draw_circle(Vector2.ZERO, r * 0.18, sombre)
-		"marge":
-			var coeur := Rect2(-r * 0.28, -r * 1.02, r * 0.56, r * 2.04)
-			draw_rect(coeur, couleur)
-			draw_rect(coeur, clair, false, 5.0)
-			for cote in [-1.0, 1.0]:
-				var x := float(cote) * r * 0.92
-				draw_line(Vector2(x, -r), Vector2(x, r), clair, 8.0, true)
-				draw_line(Vector2(x, -r), Vector2(float(cote) * r * 0.54, -r), clair, 8.0, true)
-				draw_line(Vector2(x, r), Vector2(float(cote) * r * 0.54, r), clair, 8.0, true)
-			draw_circle(Vector2.ZERO, r * 0.17, sombre)
-		"enlumineur":
-			var rayons := Dessin.etoile(Vector2.ZERO, r * 1.25, r * 0.72, 12, _anim * 0.16)
-			draw_colored_polygon(rayons, couleur)
-			Dessin.contour(self, rayons, clair, 5.0)
-			draw_circle(Vector2.ZERO, r * 0.60, clair)
-			draw_colored_polygon(Dessin.etoile(Vector2.ZERO, r * 0.42, r * 0.20, 8,
-				-_anim * 0.38), sombre)
-		"signet":
-			draw_set_transform(Vector2.ZERO, PI * 0.25 + sin(_anim * 0.8) * 0.04, Vector2.ONE)
-			var sceau := Rect2(-r * 0.78, -r * 0.78, r * 1.56, r * 1.56)
-			draw_rect(sceau, couleur)
-			draw_rect(sceau, clair, false, 7.0)
-			draw_rect(sceau.grow(-r * 0.22), sombre, false, 5.0)
-			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-			for index in 3:
-				draw_circle(Vector2(0.0, r * (0.70 + index * 0.18)), r * (0.22 - index * 0.04), couleur)
-		"copiste":
-			for cote in [-1.0, 1.0]:
-				var centre := Vector2(float(cote) * r * 0.48, sin(_anim * 1.6 + float(cote)) * r * 0.12)
-				var visage := Dessin.polygone_regulier(centre, r * 0.70, 5,
-					-PI / 2.0 + float(cote) * 0.12)
-				draw_colored_polygon(visage, couleur.lightened(0.08 if cote > 0.0 else 0.0))
-				Dessin.contour(self, visage, clair, 4.0)
-				draw_circle(centre + Vector2(float(cote) * r * 0.14, -r * 0.08), r * 0.13, sombre)
-		_:
-			draw_circle(Vector2.ZERO, r * 1.12, couleur)
-			draw_arc(Vector2.ZERO, r * 1.12, 0.0, TAU, 36, clair, 5.0, true)

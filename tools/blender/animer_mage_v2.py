@@ -1,15 +1,9 @@
-"""Recompose les gestes du V2 sans reconstruire sa geometrie ni ses textures.
-
-Execution Python standard, ou appel apres l'export Blender des variantes.
-Les poses sont creees pour ses proportions ; KayKit sert de reference de rythme.
-"""
+"""Gestes du squelette utilise par le generateur du mage sculpte."""
 import json
 import math
-from pathlib import Path
 import struct
 
 
-MODELE = Path(__file__).resolve().parents[2] / 'assets/3d/characters/mage_meshy_v2.glb'
 FPS = 60
 DUREES = {'repos': 2.4, 'course': .72, 'attaque': .4}
 
@@ -106,7 +100,7 @@ def pose(nom, t, noeuds):
     return rotations, positions
 
 
-def animer(chemin=MODELE):
+def animer(chemin):
     brut = chemin.read_bytes()
     taille = struct.unpack_from('<I', brut, 12)[0]
     doc = json.loads(brut[20:20+taille])
@@ -164,8 +158,4 @@ def animer(chemin=MODELE):
               + struct.pack('<II', len(texte), 0x4e4f534a)+texte
               + struct.pack('<II', len(binaire), 0x004e4942)+binaire)
     chemin.write_bytes(sortie)
-    print('V2 : repos, course et attaque recomposes ; geometrie et textures conservees.')
-
-
-if __name__ == '__main__':
-    animer()
+    print('Repos, course et attaque recomposes ; geometrie et textures conservees.')

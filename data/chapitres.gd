@@ -22,11 +22,11 @@ const MONDES := [
 
 # Garder les identites retirees pour les bijoux des anciennes sauvegardes.
 const MONDES_RETIRES := [
-	{"id": "echos", "numero": "VI", "nom": "Échos", "sous_titre": "Chaque attaque revient une seconde fois.", "boss_signature": "choeur_infini", "teinte": Color(0.70, 0.56, 0.98)},
-	{"id": "ombres", "numero": "VII", "nom": "Ombres", "sous_titre": "Les mots se déplacent quand on détourne les yeux.", "boss_signature": "souverain_ombres", "teinte": Color(0.46, 0.42, 0.68)},
-	{"id": "runes", "numero": "VIII", "nom": "Runes", "sous_titre": "Des signes anciens défendent leurs secrets.", "boss_signature": "gardien_runes", "teinte": Color(0.35, 0.92, 0.76)},
-	{"id": "neant", "numero": "IX", "nom": "Néant", "sous_titre": "Certaines salles auraient dû rester scellées.", "boss_signature": "devoreur_neant", "teinte": Color(0.82, 0.38, 0.82)},
-	{"id": "alambic", "numero": "X", "nom": "Alambic", "sous_titre": "Toutes les formules convergent ici.", "boss_signature": "grand_alambic", "teinte": Color(1.00, 0.74, 0.24)},
+	{"nom": "Échos", "teinte": Color(0.70, 0.56, 0.98)},
+	{"nom": "Ombres", "teinte": Color(0.46, 0.42, 0.68)},
+	{"nom": "Runes", "teinte": Color(0.35, 0.92, 0.76)},
+	{"nom": "Néant", "teinte": Color(0.82, 0.38, 0.82)},
+	{"nom": "Alambic", "teinte": Color(1.00, 0.74, 0.24)},
 ]
 
 const MINIBOSS_FINAUX := ["la_rature", "l_errata", "le_correcteur", "reliure_affamee",
@@ -90,9 +90,6 @@ static func par_id(id: String) -> Dictionary:
 
 static func salles(index: int) -> int:
 	return par_index(index)["salles"]
-
-static func est_alambic(index: int, salle: int) -> bool:
-	return salle in par_index(index)["alambics"]
 
 static func est_boss(index: int, salle: int) -> bool:
 	return salle in par_index(index)["bosses"]

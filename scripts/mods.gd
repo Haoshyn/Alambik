@@ -3,11 +3,8 @@ extends RefCounted
 
 # Un reactif ne contient pas de logique : il decrit ce qu'il change.
 #
-# Les bonus positifs s'additionnent au lieu de se composer : deux fois +45 %
-# donnent +90 %, pas +110 %. En produit, quatre reactifs de degats faisaient
-# une main six fois plus forte que la moyenne — c'est la definition d'une
-# combinaison cassee. La somme reste commutative, donc l'ordre d'acquisition
-# ne change toujours rien au resultat.
+# Les pourcentages d'attaque rejoignent ceux des maitrises dans une meme somme.
+# Les coefficients de tir et les deblocages magiques interviennent ensuite.
 
 const CHAMPS_ADD := {
 	"nb_projectiles_add": "nb_projectiles",
@@ -20,46 +17,18 @@ const CHAMPS_ADD := {
 }
 
 const CHAMPS_MULT := {
-	"degats_mult": "degats",
 	"cadence_mult": "cadence",
 	"vitesse_mult": "vitesse",
 	"portee_mult": "portee",
 }
 
-# Un bonus annonce reste identique a chaque choix ; les bonus se cumulent
-# sur la base de depart. Les pouvoirs de projectile, eux, restent uniques.
-static func rendement(_copie: int) -> float:
-	return 1.0
-
-# Les champs entiers ne se ponderent pas : un demi-projectile n'existe pas.
-# Les reactifs qui en donnent sont plafonnes plus bas, dans leur catalogue.
-static func pondere(mod: Dictionary, facteur: float) -> Dictionary:
-	if facteur >= 0.999:
-		return mod
-	var resultat := {}
-	for cle in mod:
-		if CHAMPS_MULT.has(cle) or cle in ["pv_max_mult", "deplacement_mult"]:
-			resultat[cle] = 1.0 + (float(mod[cle]) - 1.0) * facteur
-		elif cle in ["angle_eventail_add", "ecart_lateral_add"]:
-			resultat[cle] = float(mod[cle]) * facteur
-		else:
-			resultat[cle] = mod[cle]
-	return resultat
-
-# La liste de mods d'un inventaire, doublons compris et ponderes.
+# Chaque copie applique son bonus complet ; les doublons restent dans la liste.
 static func depuis_l_inventaire(inventaire: Array) -> Array:
-	var vus := {}
 	var liste: Array = []
 	for id in inventaire:
 		var reactif := CatalogueReactifs.par_id(id)
-		if reactif == null:
-			reactif = CatalogueElements.creer_fusion(CatalogueElements.element_de_fusion(id),
-				CatalogueElements.augment_de_fusion(id))
-		if reactif == null:
-			continue
-		var deja: int = vus.get(id, 0)
-		vus[id] = deja + 1
-		liste.append(pondere(reactif.mods, rendement(deja)))
+		if reactif != null:
+			liste.append(reactif.mods)
 	return liste
 
 static func facteur_heros(mods_liste: Array, cle: String) -> float:
@@ -73,8 +42,21 @@ static func facteur_heros(mods_liste: Array, cle: String) -> float:
 			bonus += facteur - 1.0
 	return maxf(Reglages.MODS_PLANCHER, (1.0 + bonus) * penalite)
 
+static func bonus_attaque(mods_liste: Array, pour_sort := false) -> float:
+	var bonus := 0.0
+	for mod: Dictionary in mods_liste:
+		bonus += float(mod.get("attaque_mult", 1.0)) - 1.0
+		if pour_sort:
+			bonus += float(mod.get("attaque_sorts_mult", 1.0)) - 1.0
+	return bonus
+
 static func appliquer(base: Tir, mods_liste: Array) -> Tir:
 	var t := base.copie()
+	t.bonus_attaque += bonus_attaque(mods_liste)
+	if t.attaque_base > 0.0:
+		t.degats = t.attaque_base * maxf(Reglages.MODS_PLANCHER, 1.0 + t.bonus_attaque)
+	else:
+		t.degats *= maxf(Reglages.MODS_PLANCHER, 1.0 + bonus_attaque(mods_liste))
 	var cumuls := {}
 	var penalites := {}
 	for mod in mods_liste:

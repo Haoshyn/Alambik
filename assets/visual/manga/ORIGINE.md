@@ -16,9 +16,9 @@ six colonnes et cinq lignes. Les deux autres planches utilisent la surface
 entière en 6 × 5. Les PNG originaux restent dans le répertoire de génération
 Codex ; les copies du projet sont consommées directement par AtlasTexture.
 
-`jouer.svg` et `ruban.svg` : formes vectorielles originales de commandes,
-sans texte incorporé. Styles à neuf tranches avec extrémités protégées.
-Libellés, états tactiles et signaux restent des contrôles Godot natifs.
+Les anciennes commandes vectorielles originales `jouer.svg` et `ruban.svg`,
+remplacées par le kit partagé, sont dans
+`../OldAlambik/2026-09-20/organisation/retires/` depuis la racine du projet.
 
 `navigation_aventure.png` : icône originale ImageGen ajoutée après demande
 du propriétaire de remplacer la carte par des épées croisées. Silhouette

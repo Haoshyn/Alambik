@@ -4,7 +4,8 @@ extends RefCounted
 static func offre(victoire: bool) -> Dictionary:
 	var resultat := ButinsRun.offre(Jeu.mode_run, Jeu.chapitre, Jeu.salles_terminees.size(), Jeu.boss_vaincus.size(),
 		victoire, Jeu.niveau_epreuve, ReglagesJoueur.rangs_sorts, ReglagesJoueur.objets,
-		ReglagesJoueur.grands_coffres_rates(Jeu.chapitre), ReglagesJoueur.epreuves_ratees(Jeu.niveau_epreuve))
+		ReglagesJoueur.grands_coffres_rates(Jeu.chapitre), ReglagesJoueur.epreuves_ratees(Jeu.niveau_epreuve),
+		ReglagesJoueur.palier_atteint(), maxf(0.0, Reglages.MINE_DUREE - Jeu.temps_mine_restant))
 
 	if Jeu.mode_run == "grimoire":
 		var nombre := 0
@@ -68,9 +69,7 @@ static func finaliser(victoire: bool, _salle_atteinte: int) -> Dictionary:
 	var xp := int(bilan["xp"])
 	bilan["xp"] = ReglagesJoueur.gain_experience_compte(xp)
 	ReglagesJoueur.ajouter_experience_compte(xp)
-	bilan["pierres"] = 0
-	if Jeu.mode_run == "mine" and victoire:
-		bilan["pierres"] = ReglagesJoueur.ajouter_pierres_forge(ReglagesJoueur.pierres_mine())
+	bilan["pierres"] = ReglagesJoueur.ajouter_pierres_forge(int(bilan["pierres"]))
 	if not str(bilan["objet"]).is_empty(): ReglagesJoueur.ajouter_objet(str(bilan["objet"]))
 	if not str(bilan["sort"]).is_empty(): ReglagesJoueur.debloquer_sort(str(bilan["sort"]))
 	if Jeu.mode_run == "epreuve_sorts" and victoire:
@@ -82,7 +81,7 @@ static func finaliser(victoire: bool, _salle_atteinte: int) -> Dictionary:
 		var dernier_etage := 0
 		for numero in Jeu.salles_terminees: dernier_etage = maxi(dernier_etage, numero)
 		ReglagesJoueur.enregistrer_resultat(dernier_etage, victoire, Jeu.chapitre)
-	elif not Jeu.est_retro():
+	else:
 		ReglagesJoueur.enregistrer_resultat_annexe(victoire)
 	ReglagesJoueur.sauvegarder()
 	return bilan

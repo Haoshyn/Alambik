@@ -2,32 +2,38 @@ extends Button
 
 var ouverture := 0.0:
 	set(valeur):
-		ouverture = valeur
+		ouverture = clampf(valeur, 0.0, 1.0)
 		queue_redraw()
 var rang := 0
 
+var _corps: Texture2D
+var _couvercle: Texture2D
+var _halo: Texture2D
+
 func _ready() -> void:
-	custom_minimum_size = Vector2(0, 350)
-	for etat in ["normal", "hover", "pressed", "disabled"]:
+	HabillagePeint.appliquer(self)
+	custom_minimum_size = Vector2(0, 360)
+	focus_mode = Control.FOCUS_NONE
+	action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
+	for etat in ["normal", "hover", "pressed", "disabled", "focus"]:
 		add_theme_stylebox_override(etat, StyleBoxEmpty.new())
-	tooltip_text = "Ouvrir le coffre"
+	_corps = StyleAzur.texture_interface("coffre_corps")
+	_couvercle = StyleAzur.texture_interface("coffre_couvercle")
+	_halo = StyleAzur.texture_interface("halo_recompense")
+	tooltip_text = "Ouvrir le coffre de l’aventure"
 
 func _draw() -> void:
-	var centre := size * Vector2(0.5, 0.55)
-	var or_ := Color("f1c36d")
-	var fond: Color = [Color("877496"), Color("bc8064"), Color("96aacd"), Color("d1a64f"), Color("af8add")][clampi(rang, 0, 4)]
-	if ouverture > 0.0:
-		draw_circle(centre, 118 + ouverture * 34, Color(1.0, 0.8, 0.35, ouverture * 0.12))
-		for i in 10:
-			var direction := Vector2.from_angle(float(i) * TAU / 10.0)
-			draw_line(centre + direction * 120, centre + direction * (120 + ouverture * 55), Color(or_, ouverture * 0.65), 4, true)
-	var corps := Rect2(centre + Vector2(-120, -25), Vector2(240, 118))
-	draw_style_box(StyleAzur.cadre(fond.darkened(0.2), Color("382743")), corps)
-	for x in [-80.0, 60.0]: draw_rect(Rect2(centre + Vector2(x, -25), Vector2(20, 115)), or_)
-	draw_line(centre + Vector2(-109, 64), centre + Vector2(109, 64), fond.lightened(0.2), 3, true)
-	var hauteur := 62.0 * (1.0 - ouverture * 0.35)
-	var couvercle := Rect2(centre + Vector2(-125, -82 - ouverture * 68), Vector2(250, hauteur))
-	draw_style_box(StyleAzur.cadre(fond.lightened(0.12), Color("382743")), couvercle)
-	draw_line(couvercle.position + Vector2(18, 14), couvercle.position + Vector2(225, 14), or_, 6, true)
-	draw_style_box(StyleAzur.cadre(or_, Color("382743")), Rect2(centre + Vector2(-19, -38 - ouverture * 95), Vector2(38, 42)))
-	draw_circle(centre + Vector2(0, -22 - ouverture * 95), 6, Color("382743"))
+	if _corps == null or _couvercle == null:
+		return
+	var centre := size * Vector2(0.5, 0.51)
+	var couleurs: Array[Color] = [Color("c5cde1"), Color("e2ae85"), Color("9fd5ee"), Color("ffe0a0"), Color("d3adff")]
+	var teinte := couleurs[clampi(rang, 0, couleurs.size() - 1)]
+	var cote_halo := 300.0 + ouverture * 100.0
+	if _halo != null:
+		draw_texture_rect(_halo, Rect2(centre - Vector2.ONE * cote_halo * 0.5, Vector2.ONE * cote_halo), false, Color(teinte, 0.32 + ouverture * 0.68))
+	var decalage := Vector2(0, 4) if is_pressed() else Vector2.ZERO
+	var teinte_coffre := Color.WHITE.lerp(teinte, 0.25)
+	draw_texture_rect(_corps, Rect2(centre + Vector2(-160, -18) + decalage, Vector2(320, 160)), false, teinte_coffre)
+	var hauteur := 160.0 * (1.0 - ouverture * 0.22)
+	var levee := ouverture * (34.0 if ReglagesJoueur.effets_reduits else 76.0)
+	draw_texture_rect(_couvercle, Rect2(centre + Vector2(-160, -114 - levee) + decalage, Vector2(320, hauteur)), false, teinte_coffre)

@@ -28,7 +28,7 @@ var piste_musique := "first_arcade"
 var piste_menu := "accueil"
 var secousses_ecran := true
 var effets_reduits := false
-var modele_heros := Visuels3D.HEROS_MODELE_DEFAUT
+var vibrations := true
 # Comment le Sort actif part : par son icone seule, par une tape rapide dans la
 # zone de deplacement, ou par une double tape rapide.
 var raccourci_sort := RaccourciTactile.MODE_DEFAUT
@@ -42,8 +42,7 @@ var grands_coffres_sans_objet := {}
 var epreuves_sans_sort := {}
 var equipements := {"anneau_gauche": "", "anneau_droit": "", "collier": ""}
 var projectile_equipe := "standard"
-# La Forge appartient desormais a l'objet, pas a l'emplacement. Changer
-# d'anneau ne transfere donc plus artificiellement tous les niveaux investis.
+# Chaque bijou et chaque arme garde ses niveaux de forge sous son propre ID.
 var forge_niveaux := {}
 var version_forge := Reglages.FORGE_VERSION
 var pierres_forge := 0
@@ -81,14 +80,14 @@ func charger() -> void:
 		config.get_value("heros", "niveau", 1))))
 	experience_compte = int(config.get_value("compte", "experience",
 		config.get_value("heros", "experience", 0)))
-	mode_dev = bool(config.get_value("options", "mode_dev", false))
+	mode_dev = outils_developpement_disponibles() and bool(config.get_value("options", "mode_dev", false))
 	volume_musique = clampf(float(config.get_value("audio", "musique", 1.0)), 0.0, 1.0)
 	volume_effets = clampf(float(config.get_value("audio", "effets", 1.0)), 0.0, 1.0)
 	piste_musique = Musiques.valider(str(config.get_value("audio", "piste", "first_arcade")))
 	piste_menu = Musiques.valider(str(config.get_value("audio", "piste_menu", "accueil")), true)
 	secousses_ecran = bool(config.get_value("accessibilite", "secousses", true))
 	effets_reduits = bool(config.get_value("accessibilite", "effets_reduits", false))
-	modele_heros = Visuels3D.modele_heros_valide(str(config.get_value("affichage", "modele_heros", Visuels3D.HEROS_MODELE_DEFAUT)))
+	vibrations = bool(config.get_value("accessibilite", "vibrations", true))
 	raccourci_sort = RaccourciTactile.mode_valide(str(config.get_value("commandes", "raccourci_sort",
 		RaccourciTactile.MODE_DEFAUT)))
 	sort_actif_equipe = str(config.get_value("sorts", "actif", ""))
@@ -126,11 +125,11 @@ func charger() -> void:
 	niveau_epreuve_debloque = clampi(int(config.get_value("epreuves", "debloque", 1)), 1, Epreuves.nombre())
 	niveau_epreuve_choisi = clampi(int(config.get_value("epreuves", "choisi", 1)), 1, niveau_epreuve_debloque)
 	mode_run_choisi = str(config.get_value("options", "mode_run", "grimoire"))
-	# Le prototype graphique n'est plus un mode : toutes les descentes utilisent
-	# maintenant le rendu 16-bit, donc les anciennes sauvegardes reviennent en campagne.
+	# Les anciens modes retires reviennent en campagne.
 	if mode_run_choisi not in ["grimoire", "epreuve_sorts", "mine"] \
 			or not mode_debloque(mode_run_choisi):
 		mode_run_choisi = "grimoire"
+	_valider_chapitre_choisi()
 	# Les anciennes sauvegardes qui avaient deja passe les premiers chapitres
 	# recoivent les deux cadeaux de campagne sans devoir les rejouer.
 	if _synchroniser_recompenses_campagne():
@@ -159,7 +158,7 @@ func sauvegarder() -> void:
 	config.set_value("audio", "piste_menu", piste_menu)
 	config.set_value("accessibilite", "secousses", secousses_ecran)
 	config.set_value("accessibilite", "effets_reduits", effets_reduits)
-	config.set_value("affichage", "modele_heros", modele_heros)
+	config.set_value("accessibilite", "vibrations", vibrations)
 	config.set_value("commandes", "raccourci_sort", raccourci_sort)
 	config.set_value("sorts", "actif", sort_actif_equipe)
 	config.set_value("sorts", "ultime", ultime_equipe)
@@ -280,6 +279,23 @@ func equiper_projectile(id: String) -> bool:
 	maitrise_changee.emit()
 	return true
 
+func niveau_arme(id: String) -> int:
+	return clampi(int(forge_niveaux.get(id, 0)), 0, Reglages.FORGE_NIVEAU_MAX) \
+		if CatalogueProjectiles.contient(id) else 0
+
+func cout_forge_arme(id: String) -> int:
+	return Reglages.cout_forge(niveau_arme(id))
+
+func ameliorer_arme(id: String) -> bool:
+	if id not in projectiles_disponibles() or niveau_arme(id) >= Reglages.FORGE_NIVEAU_MAX \
+			or pierres_forge < cout_forge_arme(id):
+		return false
+	pierres_forge -= cout_forge_arme(id)
+	forge_niveaux[id] = niveau_arme(id) + 1
+	sauvegarder()
+	maitrise_changee.emit()
+	return true
+
 func niveau_objet(id: String) -> int:
 	return clampi(int(forge_niveaux.get(id, 0)), 0, Reglages.FORGE_NIVEAU_MAX) \
 		if CatalogueObjets.OBJETS.has(id) else 0
@@ -359,6 +375,13 @@ func definir_accessibilite(secousses: bool, reduire_effets: bool) -> void:
 	sauvegarder()
 	reglages_changes.emit()
 
+func definir_vibrations(actives: bool) -> void:
+	if vibrations == actives:
+		return
+	vibrations = actives
+	sauvegarder()
+	reglages_changes.emit()
+
 func ajouter_gouttes(nombre: int) -> void:
 	if mode_dev:
 		return
@@ -418,7 +441,11 @@ func objets_disponibles() -> Array[String]:
 	return tous
 
 func bonus_objets_effectifs() -> Dictionary:
-	return CatalogueObjets.bonus_effectifs(equipements, forge_niveaux, monde_equipement_atteint())
+	var bonus := CatalogueObjets.bonus_effectifs(equipements, forge_niveaux, monde_equipement_atteint())
+	var arme := projectile_equipe_effectif()
+	bonus["attaque_base"] = float(bonus.get("attaque_base", 0.0)) \
+		+ CatalogueProjectiles.attaque_base(arme, niveau_arme(arme))
+	return bonus
 
 func passifs_equipes_effectifs() -> Dictionary:
 	var resultat := {}
@@ -495,6 +522,12 @@ func ultime_effectif() -> String:
 func sort_debloque(id: String) -> bool:
 	return Sorts.contient(id) and (mode_dev or rang_sort(id) > 0)
 
+func nombre_capacites_debloquees() -> int:
+	return Sorts.nombre_capacites_debloquees(rangs_sorts, mode_dev)
+
+func multiplicateur_degats_deblocages() -> float:
+	return Sorts.multiplicateur_degats_deblocages(rangs_sorts, mode_dev)
+
 func sort_decouvert(id: String) -> bool:
 	return Sorts.contient(id) and (mode_dev or rang_sort(id) > 0 \
 		or Epreuves.niveau_pour(id) <= niveau_epreuve_debloque)
@@ -528,16 +561,31 @@ func reinitialiser_arbre() -> int:
 	maitrise_changee.emit()
 	return rembourses
 
+func outils_developpement_disponibles() -> bool:
+	return OS.is_debug_build()
+
+func _valider_chapitre_choisi() -> void:
+	chapitre_choisi = clampi(chapitre_choisi, 0, Chapitres.nombre() - 1)
+	if not chapitre_debloque(chapitre_choisi):
+		chapitre_choisi = niveau_campagne_atteint() - 1
+
 func definir_mode_dev(actif: bool) -> void:
-	mode_dev = actif
+	# Une sauvegarde de travail ne doit pas activer les avantages de debug
+	# quand elle est ouverte par une version destinee aux joueurs.
+	mode_dev = actif and outils_developpement_disponibles()
 	if not mode_dev:
 		# Un objet seulement equipe pour un test ne doit pas devenir un vrai drop.
 		_migrer_equipements()
+		_valider_chapitre_choisi()
+		if not mode_debloque(mode_run_choisi):
+			mode_run_choisi = "grimoire"
+		niveau_epreuve_choisi = clampi(niveau_epreuve_choisi, 1, niveau_epreuve_debloque)
 	sauvegarder()
 	maitrise_changee.emit()
 	reglages_changes.emit()
 
 func reinitialiser_progression() -> void:
+	tutoriel_vu = false
 	niveau_epreuve_choisi = 1
 	niveau_epreuve_debloque = 1
 	victoires = 0
@@ -664,8 +712,9 @@ func choisir_mode_run(mode: String) -> void:
 	mode_run_choisi = mode
 	sauvegarder()
 
-func recharge_sort(id: String) -> float:
-	return Sorts.recharge(id, passifs_equipes_effectifs(), rangs_competences_effectifs(), projectile_equipe_effectif())
+func recharge_sort(id: String, mods_liste: Array = []) -> float:
+	return Sorts.recharge(id, passifs_equipes_effectifs(), rangs_competences_effectifs(),
+		projectile_equipe_effectif(), Mods.facteur_heros(mods_liste, "recharge_sorts_mult"))
 
 func choisir_epreuve(niveau: int) -> bool:
 	if not mode_debloque("epreuve_sorts") or niveau < 1 or niveau > (Epreuves.nombre() if mode_dev else niveau_epreuve_debloque): return false
@@ -675,15 +724,7 @@ func choisir_epreuve(niveau: int) -> bool:
 
 func gain_gouttes(nombre: int) -> int:
 	if nombre <= 0: return 0
-	return maxi(1, roundi(float(nombre) * ArbreCompetences.multiplicateur_collecte(rangs_competences_effectifs()) * (1.0 + float(bonus_objets_effectifs()["collecte"]))))
+	return maxi(1, roundi(float(nombre) * ArbreCompetences.multiplicateur_collecte(rangs_competences_effectifs())))
 
 func gain_experience_compte(nombre: int) -> int:
 	return maxi(1, roundi(float(nombre) * ArbreCompetences.multiplicateur_experience(rangs_competences_effectifs()))) if nombre > 0 else 0
-
-func definir_modele_heros(id: String) -> void:
-	var choix := Visuels3D.modele_heros_valide(id)
-	if choix == modele_heros:
-		return
-	modele_heros = choix
-	sauvegarder()
-	reglages_changes.emit()

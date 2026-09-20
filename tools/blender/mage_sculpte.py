@@ -9,8 +9,7 @@ from mathutils import Vector
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 import variantes_mage as base
 import texturer_mage_reference as projection
-from texturer_mage_reference import texturer, ajuster_proportions, position_corrigee
-from animer_heros_meshy import rampe
+from texturer_mage_reference import texturer, ajuster_proportions, position_corrigee, rampe
 from animer_mage_v2 import animer
 import chapeau_sculpte
 import tete_sculptee

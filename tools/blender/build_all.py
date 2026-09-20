@@ -1,7 +1,7 @@
 """Volumes Alambik reproductibles : blender --background --python tools/blender/build_all.py.
 
-Sources modifiables. Le mage utilise des maillages articules avec des textures
-peintes ; les autres objets conservent leurs materiaux proceduraux.
+Bestiaire, gardien et portail du jeu. Le mage dispose de son generateur
+dedie dans mage_sculpte.py.
 """
 import bpy
 import math
@@ -14,7 +14,6 @@ SORTIE = RACINE / 'assets/3d'
 MAT = {}
 RAPPORT = []
 ACTEUR = None
-RIG = None
 
 
 def materiaux():
@@ -50,20 +49,6 @@ def finir(obj, nom, mat):
     obj.data.materials.append(MAT[mat])
     if ACTEUR:
         obj.parent = ACTEUR
-    if RIG:
-        obj.parent = RIG
-        groupe = 'racine'
-        if nom in ('Botte','Jambe'):
-            groupe = 'jambe_gauche' if obj.location.x < 0 else 'jambe_droite'
-        elif nom in ('Manche','Gant'):
-            groupe = 'bras_gauche' if obj.location.x < 0 else 'bras_droit'
-        elif nom in ('Baguette','Fiole','Fiole_col','Fiole_monture') and obj.location.x > .30:
-            groupe = 'bras_droit'
-        elif nom=='Pan_echarpe': groupe='echarpe'
-        poids=obj.vertex_groups.new(name=groupe)
-        poids.add(list(range(len(obj.data.vertices))),1.0,'REPLACE')
-        mod=obj.modifiers.new('Squelette','ARMATURE')
-        mod.object=RIG
     return obj
 
 
@@ -147,13 +132,6 @@ def fiole(pos, r=.12, mat='magie', nom='Fiole'):
 def yeux(y=-.23,z=.48,ecart=.13,mat='magie'):
     for cote in [-1,1]:
         boule('Oeil', (ecart*cote,y,z),(.055,.035,.075),mat,12)
-
-
-def heros():
-    import sys
-    sys.path.insert(0,str(Path(__file__).resolve().parent))
-    from heros_azur import construire
-    construire(sys.modules[__name__])
 
 
 def encrier():
@@ -314,28 +292,10 @@ def majeur(index, miniature=False):
         yeux(-.18,.90,.07,magie)
 
 
-def obstacle(index):
-    if index==0:
-        for z in range(2):
-            for x in range(3): boite('Pierre',((x-1)*.32,0,.10+z*.19),(.315,.38,.185),'pierre_claire')
-        boite('Mousse',(-.30,.025,.40),(.26,.24,.035),'mousse')
-    elif index==1:
-        boite('Jardiniere',(0,0,.12),(.95,.45,.24),'pierre')
-        for i in range(5): boule('Feuillage',((i-2)*.17,0,.33),(.19,.19,.19+(.08 if i==2 else 0)),'mousse',12)
-    else:
-        for i in range(3):
-            boule('Rocher',((i-1)*.25,0,.15),(.24,.21,.20),'pierre',8)
-        cone('Cristal',(.05,.05,.43),.12,0,.59,'cristal',5)
-
-
 def portail():
     import portail_azur
     import sys
     portail_azur.construire(sys.modules[__name__])
-
-
-def decor():
-    boite('Dalle',(0,0,-.095),(1,1,.18),'pierre_claire')
 
 
 def animations():
@@ -355,28 +315,6 @@ def animations():
         piste.name=nom
         piste.strips.new(nom,1,action)
         piste.mute=True
-        if RIG:
-            action_rig=bpy.data.actions.new(nom+'_articule')
-            RIG.animation_data_create()
-            RIG.animation_data.action=action_rig
-            for f in [1,duree//4,duree//2,duree*3//4,duree]:
-                phase=(f-1)/max(1,duree-1)*math.tau
-                for os in RIG.pose.bones:
-                    os.rotation_mode='XYZ'
-                    os.rotation_euler=(0,0,0)
-                    if nom=='course':
-                        if os.name.startswith('jambe'): os.rotation_euler.x=math.sin(phase)*(.42 if os.name.endswith('gauche') else -.42)
-                        if os.name.startswith('bras'): os.rotation_euler.x=math.sin(phase)*(-.22 if os.name.endswith('gauche') else .22)
-                    if os.name=='echarpe': os.rotation_euler.x=math.sin(phase)*(.13 if nom=='course' else .045)
-                    if nom=='attaque' and os.name=='bras_droit': os.rotation_euler.x=math.sin(phase*.5)**.6*.85
-                    if nom=='victoire' and os.name.startswith('bras'): os.rotation_euler.x=-math.sin(phase*.5)*1.3
-                    os.keyframe_insert(data_path='rotation_euler',frame=f)
-            piste_rig=RIG.animation_data.nla_tracks.new()
-            piste_rig.name=nom
-            piste_rig.strips.new(nom,1,action_rig)
-            piste_rig.mute=True
-            RIG.animation_data.action=None
-            for os in RIG.pose.bones: os.rotation_euler=(0,0,0)
     ACTEUR.animation_data.action=None
     ACTEUR.location=(0,0,0)
     ACTEUR.rotation_euler=(0,0,0)
@@ -384,23 +322,11 @@ def animations():
 
 
 def exporter(nom, dossier, construire, anime=False):
-    global ACTEUR, RIG, MAT
-    materiaux_avant=MAT
-    if nom=='heros':
-        MAT={cle:mat.copy() for cle,mat in MAT.items()}
-        for cle,mat in MAT.items():mat['alambik_matiere']=cle
-    RIG=None
+    global ACTEUR
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.object.delete(use_global=False)
     ACTEUR=bpy.data.objects.new('Volume',None)
     bpy.context.collection.objects.link(ACTEUR)
-    if nom=='heros':
-        armature=bpy.data.armatures.new('Squelette_heros')
-        RIG=bpy.data.objects.new('Squelette',armature)
-        bpy.context.collection.objects.link(RIG)
-        RIG.parent=ACTEUR
-        from heros_azur import creer_squelette
-        creer_squelette(RIG)
     construire()
     # Un mesh par materiau au maximum, au lieu d'un draw call par petite piece.
     for mat in MAT.values():
@@ -414,17 +340,13 @@ def exporter(nom, dossier, construire, anime=False):
     meshes=[o for o in bpy.context.scene.objects if o.type=='MESH']
     triangles=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in meshes)
     if anime:
-        if nom=='heros':
-            from heros_azur import animer
-            animer()
-        else: animations()
+        animations()
     source=SORTIE/'sources'/dossier/(nom+'.blend')
     export=SORTIE/dossier/(nom+'.glb')
     source.parent.mkdir(parents=True,exist_ok=True)
     export.parent.mkdir(parents=True,exist_ok=True)
     bpy.context.scene.render.fps=24
     bpy.context.scene.frame_set(1)
-    if nom=='heros': bpy.ops.file.pack_all()
     bpy.ops.wm.save_as_mainfile(filepath=str(source))
     bpy.ops.export_scene.gltf(filepath=str(export),export_format='GLB',export_yup=True,
         export_animations=anime,export_animation_mode='NLA_TRACKS',export_nla_strips=True,
@@ -432,7 +354,6 @@ def exporter(nom, dossier, construire, anime=False):
     RAPPORT.append({'nom':nom,'glb':str(export.relative_to(RACINE)).replace('\\','/'),
                     'triangles':triangles,'surfaces':len(meshes),'octets':export.stat().st_size,
                     'animations': ['repos','course','attaque','touche','mort','victoire'] if anime else []})
-    if nom=='heros':MAT=materiaux_avant
 
 
 def main():
@@ -440,17 +361,12 @@ def main():
     bpy.context.preferences.filepaths.save_version=0
     bpy.context.preferences.filepaths.file_preview_type='NONE'
     materiaux()
-    exporter('heros','characters',heros,True)
     communs=['encrier_rampant','plume_sentinelle','tache_veloce','scribe_essaimeur','folio_orbiteur','sceau_belier','marge_harceleuse','miroir_encre','cachet_phaseur','fuseau_tisseur','fiole_volatile']
     for nom in communs: exporter(nom,'enemies',lambda n=nom:commun(n),True)
     for i in range(10): exporter('miniboss_'+str(i),'bosses',lambda n=i:majeur(n,True),True)
     for i in range(10): exporter('boss_'+str(i),'bosses',lambda n=i:majeur(n),True)
     exporter('gardien','characters',livre,True)
-    exporter('orbe','projectiles',lambda:boule('Coeur',(0,0,0),(.09,.09,.09),'magie',12))
-    for i in range(3): exporter('obstacle_'+str(i),'props',lambda n=i:obstacle(n))
     exporter('portail','environment',portail)
-    exporter('dalle','environment',decor)
-    exporter('colonne','environment',lambda:(cone('Fut',(0,0,.6),.18,.16,1.2,'pierre',12),boite('Chapiteau',(0,0,1.2),(.44,.44,.12),'pierre_claire')))
     (SORTIE/'rapport.json').write_text(json.dumps({'blender':bpy.app.version_string,'assets':RAPPORT},indent=2),encoding='utf-8')
     print('ALAMBIK_EXPORT_OK',len(RAPPORT),sum(x['triangles'] for x in RAPPORT))
 

@@ -1,8 +1,5 @@
-"""Prepare v2 depuis Meshy et assemble le mage KayKit avec ses clips natifs.
-Blender --background --python tools/blender/variantes_mage.py -- /dossier/Telechargements
-"""
+"""Base de construction du mage sculpte depuis sa geometrie source."""
 import bpy
-import copy
 import json
 import math
 import struct
@@ -11,13 +8,11 @@ from pathlib import Path
 from mathutils import Vector
 
 RACINE = Path(__file__).resolve().parents[2]
-ENTREE = None
 SORTIE = RACINE / 'assets/3d/characters'
 HAUTEUR = 2.14284
 ALLEGEMENT = .24
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from texturer_mage_reference import texturer, ajuster_proportions, accessoires_chapeau, surface_pan
-from kaykit_reference import styliser
 from animer_mage_v2 import animer
 
 
@@ -35,59 +30,6 @@ def ecrire_glb(path, doc, binaire):
     path.write_bytes(struct.pack('<III', 0x46546c67, 2, 28+len(texte)+len(binaire))
                     + struct.pack('<II', len(texte), 0x4e4f534a) + texte
                     + struct.pack('<II', len(binaire), 0x004e4942) + binaire)
-
-
-def kaykit():
-    doc, binaire = lire_glb(ENTREE/'KayKit_Adventurers_2.0_FREE/Characters/gltf/Mage.glb')
-    noeuds = {n['name']: i for i, n in enumerate(doc['nodes'])}
-    doc['animations'] = []
-    clips = {'General': {'Idle_A': 'repos', 'Hit_A': 'touche', 'Death_A': 'mort'},
-             'MovementBasic': {'Running_A': 'course'},
-             'CombatRanged': {'Ranged_Magic_Shoot': 'attaque'},
-             'Simulation': {'Cheering': 'victoire'}}
-    for pack, noms in clips.items():
-        source, donnees = lire_glb(ENTREE/f'KayKit_Character_Animations_1.1/Animations/gltf/Rig_Medium/Rig_Medium_{pack}.glb')
-        # Copier seulement les accesseurs des clips retenus, jamais le mannequin.
-        copies = {}
-        def copier(index):
-            nonlocal binaire
-            if index in copies:
-                return copies[index]
-            acc = copy.deepcopy(source['accessors'][index])
-            vue = source['bufferViews'][acc['bufferView']]
-            depart = vue.get('byteOffset', 0)
-            bloc = donnees[depart:depart+vue['byteLength']]
-            binaire += b'\0' * (-len(binaire) % 4)
-            acc['bufferView'] = len(doc['bufferViews'])
-            doc['bufferViews'].append({'buffer': 0, 'byteOffset': len(binaire), 'byteLength': len(bloc)})
-            binaire += bloc
-            copies[index] = len(doc['accessors'])
-            doc['accessors'].append(acc)
-            return copies[index]
-        for animation in source['animations']:
-            if animation['name'] not in noms:
-                continue
-            clip = copy.deepcopy(animation)
-            clip['name'] = noms[animation['name']]
-            for canal in clip['channels']:
-                nom = source['nodes'][canal['target']['node']]['name']
-                canal['target']['node'] = noeuds[nom]
-            for sampler in clip['samplers']:
-                sampler['input'] = copier(sampler['input'])
-                sampler['output'] = copier(sampler['output'])
-            doc['animations'].append(clip)
-    # Une enveloppe commune normalise aussi les translations des os animes.
-    positions = [doc['accessors'][p['attributes']['POSITION']] for m in doc['meshes'] for p in m['primitives']]
-    sol = min(a['min'][1] for a in positions)
-    haut = max(a['max'][1] for a in positions)
-    facteur = HAUTEUR/(haut-sol)
-    scene = doc['scenes'][doc.get('scene', 0)]
-    index = len(doc['nodes'])
-    doc['nodes'].append({'name': 'Mage_KayKit', 'children': scene['nodes'],
-                         'scale': [facteur]*3, 'translation': [0, -sol*facteur, 0]})
-    scene['nodes'] = [index]
-    ecrire_glb(SORTIE/'mage_kaykit.glb', doc, binaire)
-    styliser(SORTIE/'mage_kaykit.glb',SORTIE/'mage_kaykit.glb')
 
 
 def meshy():
@@ -239,13 +181,3 @@ def meshy():
         use_selection=True,export_animations=True,export_animation_mode='NLA_TRACKS',
         export_force_sampling=True,export_skins=True,export_def_bones=True)
     animer(SORTIE/'mage_meshy_v2.glb')
-
-
-if __name__=='__main__':
-    ENTREE = Path(sys.argv[sys.argv.index('--') + 1])
-    SORTIE.mkdir(parents=True,exist_ok=True)
-    if '--kaykit-seul' not in sys.argv:
-        meshy()
-    if '--meshy-seul' not in sys.argv:
-        kaykit()
-    print('Export des variantes termine')

@@ -5,13 +5,25 @@ extends Node2D
 # par seconde sur un telephone.
 
 const GRAVITE := 220.0
+const AnimationSorts = preload("res://scripts/presentation/animation_sorts.gd")
+const CatalogueAnimations = preload("res://data/animations_sorts.gd")
 
 var _particules: Array[Dictionary] = []
 var _ondes: Array[Dictionary] = []
 var _arcs: Array[Dictionary] = []
 var _textes: Array[Dictionary] = []
+var _sorts: Array[Dictionary] = []
+var _segments_sorts: Array[Dictionary] = []
 
 func _process(delta: float) -> void:
+	_segments_sorts.clear()
+	var sorts_vivants: Array[Dictionary] = []
+	for sort in _sorts:
+		sort["age"] = float(sort["age"]) + delta
+		if float(sort["age"]) < float(sort["duree"]):
+			sorts_vivants.append(sort)
+			_segments_sorts.append_array(AnimationSorts.segments(sort, ReglagesJoueur.effets_reduits))
+	_sorts = sorts_vivants
 	# On itere a rebours : la liste se vide pendant qu'on la parcourt.
 	for i in range(_particules.size() - 1, -1, -1):
 		var p := _particules[i]
@@ -86,6 +98,17 @@ func apparition(position: Vector2, couleur: Color, rayon: float, majeure := fals
 func onde(position: Vector2, rayon: float, couleur: Color, duree := 0.45) -> void:
 	_ondes.append({"position": position, "vie": duree, "vie_max": duree, "rayon": rayon, "couleur": couleur})
 
+func animer_sort(id: String, centre: Vector2, rayon: float) -> void:
+	var animation := AnimationSorts.creer(id, centre,
+		CatalogueAnimations.RAYON_ULTIME if is_inf(rayon) else rayon)
+	if animation.is_empty():
+		return
+	if _sorts.size() >= CatalogueAnimations.MAX_SIMULTANES:
+		_sorts.pop_front()
+	_sorts.append(animation)
+	var couleur: Color = animation["couleur"]
+	eclats(centre, couleur, 16, 220.0, 0.0)
+
 # Un arc bref entre deux points. La Chaîne alchimique doit se lire comme un
 # maillon, pas comme deux impacts sans lien.
 func arc(depart: Vector2, arrivee: Vector2, couleur: Color, duree := 0.22) -> void:
@@ -99,6 +122,8 @@ func _draw() -> void:
 	if has_meta("visuel_3d"):
 		_dessiner_textes()
 		return
+	for segment in _segments_sorts:
+		draw_line(segment["depart"], segment["arrivee"], segment["couleur"], 3.0, true)
 	for o in _ondes:
 		var t: float = 1.0 - o["vie"] / o["vie_max"]
 		var c: Color = o["couleur"]

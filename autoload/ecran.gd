@@ -39,6 +39,3 @@ func marge_basse() -> float:
 func hauteur_visible() -> float:
 	var taille := get_viewport().get_visible_rect().size
 	return taille.y
-
-func largeur_visible() -> float:
-	return get_viewport().get_visible_rect().size.x

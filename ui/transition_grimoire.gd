@@ -14,6 +14,9 @@ func configurer(livre: Dictionary) -> void:
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	HabillagePeint.appliquer(self)
+	PassageManga.preparer(self)
+	StyleInterface.animer_entree(self, 0.0)
 	queue_redraw()
 	Capture.programmer(self)
 
@@ -25,7 +28,4 @@ func _process(delta: float) -> void:
 		terminee.emit()
 
 func _draw() -> void:
-	PassageManga.dessiner(self,size,0.0 if ReglagesJoueur.effets_reduits else _temps)
-	var centre := size*0.5
-	draw_string(Polices.CORPS,Vector2(40,centre.y-10),str(_livre.get("nom","Grimoire")),HORIZONTAL_ALIGNMENT_CENTER,size.x-80,38,StyleAzur.TEXTE)
-	draw_string(Polices.CORPS,Vector2(40,centre.y+48),"Votre aventure commence…",HORIZONTAL_ALIGNMENT_CENTER,size.x-80,28,StyleAzur.ATTENUE)
+	PassageManga.dessiner(self, size, _temps, str(_livre.get("nom", "Grimoire")), "Votre aventure commence…")

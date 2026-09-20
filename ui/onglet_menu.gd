@@ -6,21 +6,40 @@ var libelle := ""
 var index_icone := 0
 var _selection := 0.0
 var _pression := 0.0
+var _embleme := ""
+var _illustration: TextureRect
 var actif := false:
 	set(valeur):
 		actif = valeur
 		queue_redraw()
 
 func configurer(symbole_: String, libelle_ := "", index_icone_ := 0) -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	HabillagePeint.appliquer(self)
 	symbole = symbole_
 	libelle = libelle_
 	index_icone = index_icone_
+	var emblemes := ["forge", "portail", "astrolabe", "grimoire"]
+	_embleme = emblemes[index_icone]
+	_illustration = StyleAzur.illustration(_embleme, 0)
+	add_child(_illustration)
+	resized.connect(_replacer_illustration)
 	flat = true
+	for etat in ["normal", "hover", "pressed", "disabled", "focus"]:
+		add_theme_stylebox_override(etat, StyleBoxEmpty.new())
 	focus_mode = Control.FOCUS_NONE
-	custom_minimum_size = Vector2(0.0, 112.0)
+	custom_minimum_size = Vector2(0, 164)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	button_down.connect(func() -> void: _pression = 1.0)
-	button_up.connect(func() -> void: _pression = 0.0)
+	tooltip_text = libelle
+	button_down.connect(func() -> void:
+		_pression = 1.0
+		_replacer_illustration()
+		queue_redraw())
+	button_up.connect(func() -> void:
+		_pression = 0.0
+		_replacer_illustration()
+		queue_redraw())
+	_replacer_illustration()
 	queue_redraw()
 
 func _process(delta: float) -> void:
@@ -29,22 +48,27 @@ func _process(delta: float) -> void:
 	var avant := _selection
 	_selection = move_toward(_selection, cible, delta * vitesse)
 	if not is_equal_approx(avant, _selection) or _pression > 0.0:
+		_replacer_illustration()
 		queue_redraw()
 
+func _replacer_illustration() -> void:
+	if _illustration == null:
+		return
+	var hauteur_icone := minf(116.0, size.y * 0.66)
+	var centre := Vector2(size.x * 0.5, 69.0 - _selection * 4.0 + _pression * 3.0)
+	_illustration.position = centre - Vector2.ONE * hauteur_icone * 0.5
+	_illustration.size = Vector2.ONE * hauteur_icone
+	_illustration.modulate = Color("cbd2e7").lerp(Color.WHITE, _selection)
+
 func _draw() -> void:
-	var accents := [StyleAzur.CUIVRE, StyleAzur.CORAIL, StyleAzur.MENTHE, StyleAzur.LILAS]
-	var accent: Color = accents[index_icone]
-	var r := Rect2(Vector2(4, 12), size - Vector2(8, 24))
-	if actif or _pression > 0.0:
-		draw_style_box(StyleAzur.cadre(StyleAzur.VIOLET, accent, 24), r)
-	var cote := minf(72.0, size.y * 0.44)
-	var identifiants := ["navigation_equipement", "navigation_aventure", "navigation_maitrises", "navigation_sorts"]
-	draw_texture_rect(IconesArcane.texture(identifiants[index_icone]), Rect2(Vector2((size.x-cote)*0.5,24),Vector2.ONE*cote), false)
+	if _selection > 0.0 or _pression > 0.0:
+		var halo := StyleAzur.texture_interface("selection_onglet")
+		draw_texture_rect(halo, Rect2(Vector2(8, 6), size - Vector2(16, 10)), false, Color(1.0, 1.0, 1.0, maxf(_selection, _pression * 0.5)))
 	var police := Polices.CORPS
-	var taille := 23
-	while taille > 16 and police.get_string_size(libelle,HORIZONTAL_ALIGNMENT_LEFT,-1,taille).x > size.x-20:
+	var taille := 25
+	while taille > 16 and police.get_string_size(libelle, HORIZONTAL_ALIGNMENT_LEFT, -1, taille).x > size.x - 16:
 		taille -= 1
-	var largeur := police.get_string_size(libelle,HORIZONTAL_ALIGNMENT_LEFT,-1,taille).x
-	draw_string(police,Vector2((size.x-largeur)*0.5,size.y-38),libelle,HORIZONTAL_ALIGNMENT_LEFT,-1,taille,accent if actif else StyleAzur.TEXTE)
-	if actif:
-		draw_line(Vector2(size.x*.4,size.y-24),Vector2(size.x*.6,size.y-24),accent,4.0,true)
+	var largeur := police.get_string_size(libelle, HORIZONTAL_ALIGNMENT_LEFT, -1, taille).x
+	var origine := Vector2((size.x - largeur) * 0.5, size.y - 27)
+	draw_string_outline(police, origine, libelle, HORIZONTAL_ALIGNMENT_LEFT, -1, taille, 3, Color("160d30"))
+	draw_string(police, origine, libelle, HORIZONTAL_ALIGNMENT_LEFT, -1, taille, StyleAzur.IVOIRE if actif else StyleAzur.ATTENUE)

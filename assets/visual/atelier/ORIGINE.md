@@ -1,17 +1,17 @@
-# Assets Atelier vivant
+# Ressources d'atelier conservées
 
-Créés pour Alambic le 13 septembre 2026, après validation de la piste A.
+Créations originales pour Alambik du 13 septembre 2026.
 
-- `fond.png` : fond d'atelier sans personnage ni interface, généré avec l'outil image_gen pour cette intégration. Les commandes sont des contrôles Godot et le héros est rendu séparément en 3D.
-- `calcaire.png` : texture originale de matière, générée avec image_gen. Les joints et motifs de dalles sont produits par le shader du sol.
-- SVG : dessins vectoriels originaux de sac, boussole, livre, fiole, baguette et interrupteurs.
-- `armes.png` : cinq illustrations originales générées avec image_gen pour les
-  armes existantes ; atlas de trois colonnes et deux lignes, dernière case vide.
-- `parametres.svg`, `verrou.svg` : pictogrammes originaux, indépendants des glyphes
-  Unicode de la police.
-- Cadres gravés : SVG produits par `scripts/presentation/cadres_atelier.gd`,
-  découpés en neuf tranches par Godot pour préserver les coins.
-- Titres : Cinzel, distribuée sous SIL Open Font License ; source Google Fonts,
-  licence embarquée dans `assets/fonts/OFL-Cinzel.txt`.
+- `calcaire.png` : texture originale produite avec ImageGen ; joints et motifs
+  du sol générés par le shader actif.
+- `armes.png` : cinq illustrations originales ImageGen, disposées dans un atlas
+  de trois colonnes et deux lignes, dernière case vide.
+- `curseur.svg`, `oui.svg`, `non.svg` : dessins vectoriels
+  originaux utilisés par l'interface et ses paramètres.
 
-La source de direction et les mesures sont dans `docs/design/ATELIER_VIVANT.md` et `docs/ops/ATELIER_VIVANT.md`.
+Les premiers fonds, pictogrammes remplacés et la police Cinzel avec sa licence
+sont archivés dans `../OldAlambik/2026-09-20/retires/` depuis la racine du projet.
+Les titres actuels utilisent DM Sans, avec sa licence dans `assets/fonts/`.
+
+Les anciens `livre.svg` et `fiole.svg`, sans consommateur, sont dans
+`../OldAlambik/2026-09-20/organisation/retires/`.

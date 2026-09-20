@@ -2,17 +2,28 @@ extends Node
 
 # Les effets sont synthetises ; les compositions sont lues en boucle depuis Ogg.
 
-const TAUX := 22050
-const TAUX_MUSIQUE := 11025
-const VOIX := 8
+const EFFETS := preload("res://data/effets_sonores.gd")
+const SYNTHESE := preload("res://scripts/audio/synthese_effets.gd")
 const DUREE_FONDU := 2.2
 const DUREE_BLANC_COMBAT := 0.14
 const BUS_MUSIQUE := "Musique"
 const BUS_EFFETS := "Effets"
 
-var _banque := {}
+var _banque: Dictionary = {}
 var _voix: Array[AudioStreamPlayer] = []
-var _prochaine := 0
+var _noms_voix: Array[String] = []
+var _priorites_voix := PackedInt32Array()
+var _debuts_voix := PackedInt64Array()
+var _derniers_sons: Dictionary = {}
+var _dernieres_variantes: Dictionary = {}
+var _alea := RandomNumberGenerator.new()
+var _retrait_restant := 0.0
+var _retrait_mixage := 0.0
+var _index_bus_combat := -1
+var _application_active := true
+var _vibrations_autorisees := false
+var _derniere_vibration := -10000
+var _dernieres_vibrations: Dictionary = {}
 var actif := true
 var _musiques: Array[AudioStreamPlayer] = []
 var _volumes_vises := PackedFloat32Array([-80.0, -80.0])
@@ -29,24 +40,24 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_preparer_bus(BUS_MUSIQUE)
 	_preparer_bus(BUS_EFFETS)
+	_preparer_bus(EFFETS.BUS_COMBAT)
+	_index_bus_combat = AudioServer.get_bus_index(EFFETS.BUS_COMBAT)
+	AudioServer.set_bus_send(_index_bus_combat, BUS_EFFETS)
 	if OS.has_feature("headless") or DisplayServer.get_name() == "headless":
 		actif = false
-	_banque["tir"] = _souffle(0.07, 900.0, 420.0, 0.35, 0.25)
-	_banque["impact"] = _souffle(0.09, 320.0, 140.0, 0.6, 0.4)
-	_banque["mort"] = _souffle(0.22, 240.0, 60.0, 0.8, 0.55)
-	# Un choc court, grave et granuleux : lisible au haut-parleur d'un téléphone
-	# sans couvrir la musique ni ressembler au petit impact des projectiles.
-	_banque["degat"] = _impact_heros()
-	_banque["choix"] = _souffle(0.12, 620.0, 900.0, 0.15, 0.45)
-	_banque["fusion"] = _souffle(0.55, 300.0, 1100.0, 0.2, 0.6)
-	_banque["coffre"] = _souffle(0.72, 180.0, 1320.0, 0.12, 0.42)
-	_banque["portail"] = _souffle(0.48, 260.0, 980.0, 0.18, 0.55)
-	_banque["boss"] = _souffle(0.7, 140.0, 70.0, 0.7, 0.7)
-	for i in VOIX:
+	var arguments := OS.get_cmdline_args() + OS.get_cmdline_user_args()
+	_vibrations_autorisees = actif and OS.has_feature("android") and not arguments.has("--auto")
+	_alea.randomize()
+	if actif:
+		_banque = SYNTHESE.creer_banque()
+	for i in EFFETS.VOIX:
 		var lecteur := AudioStreamPlayer.new()
 		lecteur.bus = BUS_EFFETS
 		add_child(lecteur)
 		_voix.append(lecteur)
+		_noms_voix.append("")
+		_priorites_voix.append(0)
+		_debuts_voix.append(0)
 	if actif:
 		# Une copie locale active la boucle sans modifier la ressource importee.
 		for ambiance in 2:
@@ -66,9 +77,21 @@ func _ready() -> void:
 		musique_menu()
 
 func _process(delta: float) -> void:
+	_retrait_restant = maxf(0.0, _retrait_restant - delta)
+	var duree := EFFETS.ATTAQUE_RETRAIT if _retrait_restant > 0.0 else EFFETS.SORTIE_RETRAIT
+	_retrait_mixage = move_toward(_retrait_mixage, 1.0 if _retrait_restant > 0.0 else 0.0, delta / duree)
+	if _index_bus_combat >= 0:
+		AudioServer.set_bus_volume_db(_index_bus_combat, _retrait_mixage * EFFETS.RETRAIT_COMBAT_DB)
 	for i in _musiques.size():
-		_musiques[i].volume_db = move_toward(_musiques[i].volume_db, _volumes_vises[i],
+		var volume := _volumes_vises[i] + _retrait_mixage * EFFETS.RETRAIT_MUSIQUE_DB
+		_musiques[i].volume_db = move_toward(_musiques[i].volume_db, volume,
 			80.0 * delta / DUREE_FONDU)
+
+func _notification(quoi: int) -> void:
+	if quoi in [NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_APPLICATION_PAUSED]:
+		_application_active = false
+	elif quoi in [NOTIFICATION_APPLICATION_FOCUS_IN, NOTIFICATION_APPLICATION_RESUMED]:
+		_application_active = true
 
 func musique_menu() -> void:
 	_regler_musique(-8.0, -80.0)
@@ -148,117 +171,83 @@ func _appliquer_volume_bus(nom: String, volume: float) -> void:
 	AudioServer.set_bus_volume_db(index, linear_to_db(maxf(volume, 0.001)))
 
 func jouer(nom: String, volume_db := -12.0, hauteur := 1.0) -> void:
+	# Le tactile reste utilisable lorsque le joueur coupe les effets sonores.
+	vibrer(nom)
 	if not actif or not _banque.has(nom):
 		return
-	var lecteur := _voix[_prochaine]
-	_prochaine = (_prochaine + 1) % VOIX
-	lecteur.stream = _banque[nom]
+	if ReglagesJoueur.volume_effets <= 0.001:
+		return
+	var profil: Dictionary = EFFETS.PROFILS[nom]
+	var maintenant := Time.get_ticks_msec()
+	if maintenant - int(_derniers_sons.get(nom, -10000)) < int(profil["intervalle_ms"]):
+		return
+	var index := _choisir_voix(nom, int(profil["priorite"]), int(profil["simultanes"]))
+	if index < 0:
+		return
+	var variantes: Array[AudioStreamWAV] = _banque[nom]
+	var variante := _choisir_variante(nom, variantes.size())
+	var variation := float(profil["variation_hauteur"])
+	var vitesse := clampf(hauteur * _alea.randf_range(1.0 - variation, 1.0 + variation), 0.35, 2.5)
+	var lecteur := _voix[index]
+	lecteur.stop()
+	lecteur.bus = EFFETS.BUS_COMBAT if bool(profil.get("combat", false)) else BUS_EFFETS
+	lecteur.stream = variantes[variante]
 	lecteur.volume_db = volume_db
-	lecteur.pitch_scale = hauteur
+	lecteur.pitch_scale = vitesse
+	_noms_voix[index] = nom
+	_priorites_voix[index] = int(profil["priorite"])
+	_debuts_voix[index] = maintenant
+	_derniers_sons[nom] = maintenant
+	_retrait_restant = maxf(_retrait_restant, float(profil.get("retrait", 0.0)) / vitesse)
 	lecteur.play()
 
-# Un balayage de frequence melange a du bruit, sous une enveloppe qui decroit :
-# assez pour distinguer un tir d'un impact sans sortir la boite a rythmes.
-func _souffle(duree: float, f_debut: float, f_fin: float, part_bruit: float, courbe: float) -> AudioStreamWAV:
-	var echantillons := int(duree * TAUX)
-	var donnees := PackedByteArray()
-	donnees.resize(echantillons * 2)
-	var phase := 0.0
-	var alea := RandomNumberGenerator.new()
-	alea.seed = int(f_debut * 1000.0 + duree * 7919.0)
-	for i in echantillons:
-		var t := float(i) / float(echantillons)
-		var frequence := lerpf(f_debut, f_fin, t)
-		phase += TAU * frequence / float(TAUX)
-		var onde := sin(phase)
-		var bruit := alea.randf_range(-1.0, 1.0)
-		var enveloppe := pow(1.0 - t, 1.0 + courbe * 6.0)
-		var valeur := lerpf(onde, bruit, part_bruit) * enveloppe * 0.7
-		var entier := int(clampf(valeur, -1.0, 1.0) * 32000.0)
-		donnees.encode_s16(i * 2, entier)
-	var flux := AudioStreamWAV.new()
-	flux.format = AudioStreamWAV.FORMAT_16_BITS
-	flux.mix_rate = TAUX
-	flux.stereo = false
-	flux.data = donnees
-	return flux
+func _choisir_voix(nom: String, priorite: int, simultanes: int) -> int:
+	var libre := -1
+	var remplacable := -1
+	var ancienne_identique := -1
+	var nombre_identiques := 0
+	for i in _voix.size():
+		if not _voix[i].playing:
+			if libre < 0:
+				libre = i
+			continue
+		if _noms_voix[i] == nom:
+			nombre_identiques += 1
+			if ancienne_identique < 0 or _debuts_voix[i] < _debuts_voix[ancienne_identique]:
+				ancienne_identique = i
+		# Une rafale peut remplacer un autre tir, jamais une blessure ni un coffre.
+		if _priorites_voix[i] > priorite:
+			continue
+		if remplacable < 0 or _priorites_voix[i] < _priorites_voix[remplacable] \
+				or (_priorites_voix[i] == _priorites_voix[remplacable] and _debuts_voix[i] < _debuts_voix[remplacable]):
+			remplacable = i
+	if nombre_identiques >= simultanes:
+		return ancienne_identique
+	return libre if libre >= 0 else remplacable
 
-func _impact_heros() -> AudioStreamWAV:
-	var duree := 0.14
-	var echantillons := int(duree * TAUX)
-	var donnees := PackedByteArray()
-	donnees.resize(echantillons * 2)
-	var phase_grave := 0.0
-	var phase_clic := 0.0
-	var alea := RandomNumberGenerator.new()
-	alea.seed = 17011996
-	for i in echantillons:
-		var t := float(i) / float(echantillons)
-		phase_grave += TAU * lerpf(210.0, 72.0, t) / float(TAUX)
-		phase_clic += TAU * lerpf(980.0, 360.0, t) / float(TAUX)
-		var choc := sin(phase_grave) * pow(1.0 - t, 3.2)
-		var clic := sin(phase_clic) * pow(1.0 - t, 10.0) * 0.30
-		var grain := alea.randf_range(-1.0, 1.0) * pow(1.0 - t, 8.0) * 0.42
-		var valeur := clampf(choc * 0.72 + clic + grain, -0.95, 0.95)
-		donnees.encode_s16(i * 2, int(valeur * 32767.0))
-	var flux := AudioStreamWAV.new()
-	flux.format = AudioStreamWAV.FORMAT_16_BITS
-	flux.mix_rate = TAUX
-	flux.stereo = false
-	flux.data = donnees
-	return flux
+func _choisir_variante(nom: String, nombre: int) -> int:
+	var precedente := int(_dernieres_variantes.get(nom, -1))
+	var variante := 0
+	if precedente < 0:
+		variante = _alea.randi_range(0, nombre - 1)
+	elif nombre > 1:
+		variante = _alea.randi_range(0, nombre - 2)
+		if variante >= precedente:
+			variante += 1
+	_dernieres_variantes[nom] = variante
+	return variante
 
-# Ancienne esquisse synthetique conservee ; les menus utilisent le catalogue Ogg.
-func _composer_boucle_menu() -> AudioStreamWAV:
-	var tempo := 96.0
-	var battements := 16.0
-	var duree := battements * 60.0 / tempo
-	var echantillons := int(duree * TAUX_MUSIQUE)
-	var donnees := PackedByteArray()
-	donnees.resize(echantillons * 4)
-	var accords := [
-		[50, 53, 57], [46, 50, 53], [53, 57, 60], [48, 52, 55],
-	]
-	for i in echantillons:
-		var temps := float(i) / float(TAUX_MUSIQUE)
-		var battement := temps * tempo / 60.0
-		var index_accord := int(battement / 4.0) % accords.size()
-		var accord: Array = accords[index_accord]
-		var local := fmod(battement, 1.0)
-		var valeur_g := 0.0
-		var valeur_d := 0.0
-		# Un pad doux et legerement desaccorde evite le timbre de bip pur.
-		for n in accord:
-			var frequence := _frequence(float(n))
-			valeur_g += sin(TAU * frequence * temps) * 0.055
-			valeur_d += sin(TAU * frequence * 1.003 * temps + 0.35) * 0.055
-		var pas_arp := int(battement * 2.0)
-		var note_arp: int = accord[pas_arp % 3] + 12
-		var enveloppe_arp := pow(1.0 - fmod(battement * 2.0, 1.0), 3.0)
-		var arp := sin(TAU * _frequence(note_arp) * temps) * enveloppe_arp * 0.10
-		valeur_g += arp * (0.75 if pas_arp % 2 == 0 else 0.35)
-		valeur_d += arp * (0.35 if pas_arp % 2 == 0 else 0.75)
-		var phrase := fmod(battement, 4.0)
-		var enveloppe_air := pow(sin(PI * clampf(phrase / 4.0, 0.0, 1.0)), 2.0)
-		var note_air: int = accord[2] + 24
-		var air := sin(TAU * _frequence(note_air) * temps + 0.6) * enveloppe_air * 0.035
-		valeur_g += air * 0.55
-		valeur_d += air
-		var fondu_bord := minf(1.0, minf(temps * 30.0, (duree - temps) * 30.0))
-		_ecrire_stereo(donnees, i, valeur_g * fondu_bord, valeur_d * fondu_bord)
-	var flux := AudioStreamWAV.new()
-	flux.format = AudioStreamWAV.FORMAT_16_BITS
-	flux.mix_rate = TAUX_MUSIQUE
-	flux.stereo = true
-	flux.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	flux.loop_begin = 0
-	flux.loop_end = echantillons
-	flux.data = donnees
-	return flux
-
-func _frequence(note: float) -> float:
-	return 440.0 * pow(2.0, (note - 69.0) / 12.0)
-
-func _ecrire_stereo(donnees: PackedByteArray, index: int, gauche: float, droite: float) -> void:
-	donnees.encode_s16(index * 4, int(clampf(gauche, -0.95, 0.95) * 32767.0))
-	donnees.encode_s16(index * 4 + 2, int(clampf(droite, -0.95, 0.95) * 32767.0))
+func vibrer(nom: String) -> void:
+	if not _vibrations_autorisees or not ReglagesJoueur.vibrations or Jeu.mode_auto:
+		return
+	if not _application_active or not get_window().has_focus() or not EFFETS.VIBRATIONS.has(nom):
+		return
+	var maintenant := Time.get_ticks_msec()
+	var profil: Dictionary = EFFETS.VIBRATIONS[nom]
+	if maintenant - _derniere_vibration < EFFETS.VIBRATION_INTERVALLE_MS:
+		return
+	if maintenant - int(_dernieres_vibrations.get(nom, -10000)) < int(profil["intervalle_ms"]):
+		return
+	_derniere_vibration = maintenant
+	_dernieres_vibrations[nom] = maintenant
+	Input.vibrate_handheld(int(profil["duree_ms"]), float(profil["amplitude"]))

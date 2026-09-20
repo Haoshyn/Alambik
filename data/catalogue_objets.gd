@@ -4,15 +4,14 @@ extends RefCounted
 # Trois bijoux par monde, reproposes en cycle sur ses sept chapitres.
 # Les bijoux des mondes retires restent utilisables dans les anciennes sauvegardes.
 #
-# Budget constant par emplacement ; les mondes proposent des allocations differentes.
-# Seule la forge augmente la puissance propre de chaque bijou.
+# La forge augmente la base avant les bonus en pourcentage du build.
+# Les mondes se distinguent par leurs pouvoirs, pas par un bonus cache aux statistiques.
 const PROFILS := [
-	{"degats": 0.20, "pv": 0.10},
-	{"degats": 0.15, "pv": 0.15},
-	{"pv": 0.20, "degats": 0.10},
+	{"pv_base": 15.0},
+	{"pv_base": 15.0},
+	{"attaque_base": 3.0},
 ]
-
-const VARIATIONS_PROFILS := [0.0, 0.025, -0.025, 0.05, -0.05, 0.025, -0.025, 0.05, -0.05, 0.0]
+const FORGE_PAR_STAT := {"attaque_base": 0.5, "pv_base": 2.0}
 
 const IDS_PAR_MONDE := [
 	["plume_encres", "robe_enluminee", "sceau_scribe"],
@@ -38,8 +37,6 @@ static func _construire() -> Dictionary:
 			var slot := "anneau" if index < 2 else "collier"
 			var nom_slot := ("Anneau" if index == 0 else "Bague") if slot == "anneau" else "Collier"
 			var profil: Dictionary = PROFILS[index].duplicate()
-			profil["degats"] = float(profil["degats"])+VARIATIONS_PROFILS[monde]
-			profil["pv"] = float(profil["pv"])-VARIATIONS_PROFILS[monde]
 			resultat[IDS_PAR_MONDE[monde][index]] = {
 				"nom": "%s · %s" % [nom_slot, donnees_monde["nom"]],
 				"slot": slot,
@@ -86,15 +83,19 @@ static func bonus_objet(id: String, niveau: int, _monde_reference := -1) -> Dict
 		return resultat
 	var donnees: Dictionary = OBJETS[id]
 	var forge := clampi(niveau, 0, Reglages.FORGE_NIVEAU_MAX)
-	# La forge ajoute des points fixes : +20 % devient +22,5 %, puis +25 %.
-	var bonus_forge := Reglages.FORGE_BONUS_PAR_NIVEAU * float(forge)
 	var profil: Dictionary = donnees["profil"]
 	for champ in profil:
-		resultat[champ] = float(profil[champ]) + bonus_forge
+		resultat[champ] = float(profil[champ]) + float(FORGE_PAR_STAT[champ]) * float(forge)
 	return resultat
 
+static func description_bonus(id: String, niveau: int) -> String:
+	var bonus := bonus_objet(id, niveau)
+	if bonus.has("attaque_base"):
+		return "Attaque de base +%s" % String.num(float(bonus["attaque_base"]), 1).trim_suffix(".0").replace(".", ",")
+	return "PV de base +%d" % roundi(float(bonus.get("pv_base", 0.0)))
+
 static func bonus_effectifs(equipements: Dictionary, forge_niveaux: Dictionary, monde_reference := -1) -> Dictionary:
-	var bonus := {"degats": 0.0, "cadence": 0.0, "pv": 0.0, "vitesse": 0.0, "collecte": 0.0}
+	var bonus := {"attaque_base": 0.0, "pv_base": 0.0}
 	for slot in ["anneau_gauche", "anneau_droit", "collier"]:
 		var id := str(equipements.get(slot, ""))
 		if not compatible(slot, id):

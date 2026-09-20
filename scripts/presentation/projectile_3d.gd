@@ -6,6 +6,7 @@ var _matiere_ruban: StandardMaterial3D
 var _matiere_coeur: ShaderMaterial
 var _couleur := Color.WHITE
 var _hostile := false
+var _aiguille := false
 static var _perle: SphereMesh
 
 func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
@@ -17,6 +18,7 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 	if hostile:
 		_couleur = Color("ff493a")
 	var tir: Tir = logique.get("tir")
+	_aiguille = not hostile and tir.arme == "veloce"
 	if not hostile:
 		_couleur = {"standard": Color("c5a1ff"), "veloce": Color("e6ff9c"), "lourd": Color("ffbf74"), "chercheur": Color("c2a5ff"), "explosif": Color("ff8b60")}.get(tir.arme, _couleur)
 	var cle := _couleur.to_html()+str(hostile)+tir.arme
@@ -57,7 +59,7 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 			_perle.rings = 8
 		coeur.mesh = _perle
 		coeur.rotation = Vector3.ZERO
-		coeur.scale = {"standard":Vector3(.14,.14,.20),"veloce":Vector3(.075,.075,.28),"lourd":Vector3(.19,.17,.26),"chercheur":Vector3(.17,.17,.17),"explosif":Vector3(.22,.22,.22)}.get(tir.arme,Vector3.ONE*.14)
+		coeur.scale = {"standard":Vector3(.14,.14,.20),"veloce":Vector3(.13,.13,.36),"lourd":Vector3(.19,.17,.26),"chercheur":Vector3(.17,.17,.17),"explosif":Vector3(.22,.22,.22)}.get(tir.arme,Vector3.ONE*.14)
 		coeur.position.y = coeur.scale.y + .025
 		for i in 2:
 			var perle := MeshInstance3D.new()
@@ -67,7 +69,7 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 			perle.position = Vector3(0,coeur.position.y,-coeur.scale.z*(1.25+i*.7))
 			perle.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			modele.add_child(perle)
-	if hostile:
+	if hostile or _aiguille:
 		var trainee := MeshInstance3D.new()
 		trainee.mesh = _ruban
 		trainee.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -88,8 +90,11 @@ func mettre_a_jour(_delta: float) -> void:
 	if not _hostile:
 		for index in range(1, modele.get_child_count()):
 			modele.get_child(index).visible = not ReglagesJoueur.effets_reduits
-		return
-	_matiere_coeur.set_shader_parameter("reduit",ReglagesJoueur.effets_reduits)
+		if not _aiguille:
+			return
+	else:
+		_matiere_coeur.set_shader_parameter("reduit",ReglagesJoueur.effets_reduits)
+	# Le ruban continu garde l'aiguille lisible entre deux positions rapides.
 	var points: Array[Vector2] = logique.get("_trainee")
 	var nombre := mini(points.size(),3 if ReglagesJoueur.effets_reduits else 8)
 	if nombre < 2: return

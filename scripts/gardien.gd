@@ -45,22 +45,8 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 	elif _attaque <= 0.0:
 		_attaque = Reglages.GARDIEN_INTERVALLE
-		var degats: float = float(heros.stats.degats) * Reglages.GARDIEN_PART_DEGATS
-		var effets: Array[String] = []
-		for element in Jeu.elements_de_augment("familier_gardien"):
-			if element == "feu":
-				effets.append("feu")
-			elif element == "eau":
-				effets.append("eau")
-			elif element == "terre":
-				effets.append("terre")
-			elif element == "lumiere":
-				effets.append("lumiere")
-			elif element == "tenebres" and Jeu.rng.randf() < Reglages.TENEBRES_CHANCE_SURCHARGE:
-				degats *= Reglages.TENEBRES_SURCHARGE_MULT
-		cible.recevoir_degats(degats, effets)
-		if "lumiere" in effets:
-			heros.stats.soigner(degats * Reglages.LUMIERE_VOL_DE_VIE)
+		var degats: float = heros.degats_finaux(heros.attaque_reelle() * Reglages.GARDIEN_PART_DEGATS)
+		cible.recevoir_degats(degats)
 
 func recevoir_degats(montant: float, _effets: Array = []) -> void:
 	if _reapparition > 0.0:

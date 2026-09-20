@@ -1,68 +1,51 @@
-# Mettre Alambic sur le téléphone
+# Connecter et observer Alambik sur téléphone
 
-Ce guide décrit la configuration Linux de la machine de développement d'origine : Godot 4.7.1, SDK Android, JDK 17 et keystores. Sur un nouveau PC, ces dépendances doivent être configurées avant d'utiliser les scripts `.sh`.
+Pour les exports, versions, clés et installations, suivre [MISES_A_JOUR_ANDROID.md](MISES_A_JOUR_ANDROID.md). Ce guide couvre la connexion ADB et les observations sur appareil ; aucun lancement sur téléphone n'est automatique.
 
-## Préparer le téléphone
+## Connexion
 
-1. Réglages ▸ À propos du téléphone — taper sept fois sur *Numéro de build*.
-2. Réglages ▸ Système ▸ Options pour les développeurs — activer **Débogage USB**. Android 11+ permet aussi le débogage sans fil.
-3. Facultatif : activer **Rester activé** pendant le branchement.
+Activer les options développeur du téléphone (sept appuis sur *Numéro de build*), puis le **Débogage USB**. Brancher un câble de données et accepter l'autorisation sur le téléphone.
 
-## Relier le téléphone
-
-Par câble :
+Commandes Linux ci-dessous : adapter le chemin au SDK Android configuré sur la machine. L'état attendu est `device`.
 
 ```sh
 ~/Android/Sdk/platform-tools/adb devices
 ```
 
-Accepter l'autorisation sur le téléphone ; l'état attendu est `device`.
-
-Sans fil :
+Si le téléphone propose le débogage sans fil :
 
 ```sh
 ~/Android/Sdk/platform-tools/adb pair IP:PORT_ASSOCIATION
 ~/Android/Sdk/platform-tools/adb connect IP:PORT_CONNEXION
 ```
 
-Les deux ports sont différents et peuvent changer.
+Les ports d'association et de connexion sont distincts et peuvent changer. Avec plusieurs appareils, ajouter `-s IDENTIFIANT_ADB` aux commandes ADB qui ciblent le téléphone.
 
-## Installer et lancer
+## Lancement et diagnostic demandés
 
-```sh
-./deploy.sh
-./deploy.sh --sans-logs
-```
-
-`deploy.sh` exporte, installe, lance puis peut afficher les logs. Pour une version de distribution :
+Après installation par l'outil de mise à jour :
 
 ```sh
-./publier.sh
-./publier.sh 0.2
+~/Android/Sdk/platform-tools/adb shell monkey -p com.giovanni.alambic -c android.intent.category.LAUNCHER 1
+~/Android/Sdk/platform-tools/adb logcat godot:V GodotEngine:V "*:S"
 ```
 
-Ces exports ne lancent pas de suite de tests. Les vérifications de jeu et les
-simulations restent sur demande explicite, selon `AGENTS.md`.
+`./deploy.sh` est un raccourci de développement : export debug direct dans `build/alambic.apk`, installation, lancement et logs (`--sans-logs` pour arrêter après lancement). Il ne réserve pas de nouveau numéro et ne contrôle pas le certificat historique ; utiliser l'outil de mise à jour pour les APK à distribuer.
 
-## Signature
-
-La clé de release et ses identifiants restent hors du dépôt. Sauvegarder la clé : sa perte empêche de publier une mise à jour acceptée par les installations existantes. Une APK debug et une APK release signées différemment ne se remplacent pas directement.
-
-## Contrôles sur appareil
-
-- Pouce : la moitié basse doit suffire pour piloter. Logique : `scripts/joystick_logique.gd`.
-- Lisibilité : silhouettes et télégraphes doivent rester visibles en mouvement.
-- Safe area : `autoload/ecran.gd`.
-- Performances : mesurer sur téléphone avant d'annoncer un chiffre.
-
-Noter les observations actuelles dans `docs/CURRENT.md` ou dans un document de mesure dédié ; ne pas gonfler l'index de travail avec un journal chronologique.
-
-## Problèmes fréquents
-
-| Symptôme | Cause probable |
+| Symptôme | Action |
 |---|---|
-| `adb devices` ne liste rien | câble en charge seule ou débogage USB inactif |
-| `unauthorized` | autorisation non acceptée sur le téléphone |
-| `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | signature différente ; désinstaller l'ancienne version |
-| fermeture au lancement | lire `adb logcat godot:V GodotEngine:V "*:S"` |
-| export impossible | vérifier la configuration Android/keystore de Godot |
+| Aucun appareil dans `adb devices` | Vérifier câble de données, connexion et débogage USB. |
+| `unauthorized` | Accepter l'autorisation sur le téléphone. |
+| `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | Réexporter avec la clé correspondant à l'application installée ; ne pas désinstaller ni effacer les données. |
+| Version installée égale ou plus récente | Exporter une nouvelle version avec l'outil ; ne pas forcer une rétrogradation. |
+| Fermeture au lancement | Lire les erreurs de `adb logcat`. |
+| Export impossible | Lire le journal dans `build/android/` et vérifier SDK, Java, Godot 4.7.1 et signature. |
+
+## Observations sur appareil
+
+- Confort du pouce : `scripts/joystick_logique.gd`.
+- Lisibilité des silhouettes et télégraphes en mouvement.
+- Marges pour les encoches : `autoload/ecran.gd`.
+- Performances mesurées sur le téléphone concerné.
+
+Garder seulement les constats encore utiles dans `docs/CURRENT.md` ; réserver les mesures détaillées à une demande explicite.

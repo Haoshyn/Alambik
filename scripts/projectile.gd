@@ -1,12 +1,9 @@
 extends Area2D
 
-# Projectile generique : il n'a aucune logique propre a un reactif, il execute
-# le Tir qu'on lui attache. Une fusion n'est donc jamais du code special
-# disperse dans le combat.
+# Les caracteristiques du projectile viennent du Tir partage entre les salves.
 
 signal fragments_demandes(origine: Vector2, direction: Vector2, tir_source: Tir, hostile: bool, cible_exclue: int)
 signal impact_visuel(position: Vector2, couleur: Color, ampleur: float)
-signal soin_demande(montant: float)
 
 const RAYON := Reglages.TIR_RAYON
 const MEMOIRE_TRAINEE := 9
@@ -28,7 +25,6 @@ var _deja_touches: Array[int] = []
 var _corps_exclus: Array[RID] = []
 var _trainee: Array[Vector2] = []
 var _age := 0.0
-var _facteur_tenebres := 1.0
 var _dernier_touche := 0
 var _termine := false
 
@@ -43,8 +39,6 @@ func _ready() -> void:
 		_deja_touches.append(cible_exclue)
 		var exclusion := instance_from_id(cible_exclue) as CollisionObject2D
 		if exclusion != null: _corps_exclus.append(exclusion.get_rid())
-	if not hostile and "tenebres" in tir.drapeaux and Jeu.rng.randf() < Reglages.TENEBRES_CHANCE_SURCHARGE:
-		_facteur_tenebres = Reglages.TENEBRES_SURCHARGE_MULT
 	couleur = Palette.TIR_ENNEMI_HALO if hostile else Palette.teinte_du_tir(tir.effets)
 	if hostile:
 		add_to_group("tirs_ennemis")
@@ -57,7 +51,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if _termine: return
-	_appliquer_trajectoire_fusion(delta)
+	_appliquer_guidage(delta)
 	var pas := direction * tir.vitesse * delta
 	# Le segment bouche les trous entre deux positions de l'Area2D rapide.
 	# Les contacts lateraux restent geres par sa forme circulaire.
@@ -96,14 +90,12 @@ func _sur_contact(corps: Node) -> void:
 		Jeu.tirs_touches += 1
 	# Le Tir est partage entre tous les projectiles d'une salve : on ne le mute
 	# jamais, la perte de puissance vit dans le projectile.
-	var degats_infliges := tir.degats * _facteur_degats * _facteur_tenebres
+	var degats_infliges := tir.degats * _facteur_degats
 	corps.recevoir_degats(degats_infliges, tir.effets)
 	if not hostile:
 		get_tree().call_group("charge_combat", "charger_sort")
 	if not hostile and tir.rayon_explosion > 0.0 and tir.degats_zone_mult > 0.0:
 		_exploser_autour(corps, degats_infliges)
-	if not hostile and "lumiere" in tir.effets:
-		soin_demande.emit(degats_infliges * Reglages.LUMIERE_VOL_DE_VIE)
 	impact_visuel.emit(global_position, couleur, 1.0)
 	Sons.jouer("impact", -18.0, randf_range(0.9, 1.2))
 
@@ -155,7 +147,7 @@ func _rebondir_vers_une_autre_cible() -> void:
 		direction = global_position.direction_to(positions[index])
 	_distance_parcourue = 0.0
 
-func _appliquer_trajectoire_fusion(delta: float) -> void:
+func _appliquer_guidage(delta: float) -> void:
 	if hostile:
 		return
 	if "homing" in tir.drapeaux:

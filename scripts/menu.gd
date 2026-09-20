@@ -17,9 +17,11 @@ var _transition_page := false
 var _onglets: Array[Button] = []
 var _page := 1
 var _lancement := false
+var _selection_initiale := ""
 
 
 func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	if OS.get_name() == "Android":
 		get_tree().set_auto_accept_quit(false)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -27,7 +29,12 @@ func _ready() -> void:
 	Sons.musique_menu()
 	print("Alambic pret")
 	_construire_structure()
-	_afficher_page(1, false)
+	var destination := Jeu.destination_menu.duplicate()
+	Jeu.destination_menu.clear()
+	_selection_initiale = str(destination.get("selection", ""))
+	var page_initiale := PAGES.find(str(destination.get("page", "aventure")))
+	_afficher_page(page_initiale if page_initiale >= 0 else 1, false)
+	_selection_initiale = ""
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--page-menu="):
 			var page_capture := PAGES.find(argument.trim_prefix("--page-menu="))
@@ -50,19 +57,20 @@ func _construire_navigation() -> void:
 	_navigation.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_navigation)
 	var socle := Panel.new()
+	HabillagePeint.appliquer(socle)
 	socle.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	socle.offset_top = -StyleAzur.HAUTEUR_NAVIGATION - Ecran.marge_basse()
-	socle.offset_left = 16
-	socle.offset_right = -16
-	socle.add_theme_stylebox_override("panel",StyleAzur.cadre(StyleAzur.PANNEAU,StyleAzur.LILAS,32))
+	socle.offset_left = 12
+	socle.offset_right = -12
+	socle.add_theme_stylebox_override("panel", StyleAzur.texture_etirable("navigation", 40, 24, 16))
 	socle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_navigation.add_child(socle)
 	var barre := HBoxContainer.new()
 	barre.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	barre.offset_top = -StyleAzur.HAUTEUR_NAVIGATION - Ecran.marge_basse()
 	barre.offset_bottom = -Ecran.marge_basse()
-	barre.offset_left = 30
-	barre.offset_right = -30
+	barre.offset_left = 24
+	barre.offset_right = -24
 	barre.add_theme_constant_override("separation", 8)
 	_navigation.add_child(barre)
 	var donnees := [
@@ -83,10 +91,12 @@ func _creer_page(index: int) -> Control:
 		"equipement":
 			var equipement := EQUIPEMENT.instantiate()
 			equipement.integre_menu = true
+			equipement.objet_initial = _selection_initiale
 			return equipement
 		"maitrises":
 			var arbre := ARBRE.instantiate()
 			arbre.integre_menu = true
+			arbre.maitrise_initiale = _selection_initiale
 			return arbre
 		"sorts":
 			var sorts := MENU_SORTS.instantiate()
@@ -142,8 +152,8 @@ func _creer_aventure() -> Control:
 	var page := Control.new()
 	page.set_script(preload("res://ui/accueil_3d.gd"))
 	page.campagne.connect(_ouvrir_campagne)
-	page.mine.connect(func(): _lancer_mode("mine", {"nom": "Mine"}))
-	page.epreuve.connect(func(): _lancer_mode("epreuve_sorts", {"nom": "Défi alchimique"}))
+	page.mine.connect(func(): _ouvrir_campagne("mine"))
+	page.epreuve.connect(func(): _ouvrir_campagne("epreuve_sorts"))
 	page.reglages.connect(_ouvrir_reglages)
 	page.jouer.connect(_jouer_immediatement)
 	page.page_demandee.connect(_afficher_page)
@@ -167,9 +177,10 @@ func _lancer_mode(mode: String, destination: Dictionary) -> void:
 	transition.terminee.connect(func() -> void:
 		get_tree().change_scene_to_file("res://scenes/run.tscn"))
 
-func _ouvrir_campagne() -> void:
+func _ouvrir_campagne(mode := "") -> void:
 	var selection := SELECTION_GRIMOIRE.instantiate()
 	selection.selection_seulement = true
+	selection.mode_initial = mode
 	_ouvrir_superposition(selection)
 
 func _ouvrir_reglages() -> void:
@@ -201,7 +212,7 @@ func _fermer_superposition(panneau: Control) -> void:
 	queue_redraw()
 
 func _notification(quoi: int) -> void:
-	if quoi != NOTIFICATION_WM_GO_BACK_REQUEST:
+	if quoi != NOTIFICATION_WM_GO_BACK_REQUEST or _lancement or _transition_page:
 		return
 	if _superposition != null and is_instance_valid(_superposition):
 		var cible := _superposition

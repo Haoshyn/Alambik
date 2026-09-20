@@ -1,93 +1,113 @@
 class_name CarteReactif
 extends Button
 
-# Une carte d'Amélioration entierement dessinee. Une transformation elementaire
-# conserve une double bordure pour rester identifiable dans l'inventaire.
-
 signal choisie(id: String)
 
-const HAUTEUR := 216.0
+const HAUTEUR := 250.0
 
 var reactif: Reactif
-var selectionnee := false
+var pour_choix := false
+var selectionnee := false:
+	set(valeur):
+		selectionnee = valeur
+		if is_node_ready():
+			_appliquer_cadre()
 var desactivee := false:
 	set(valeur):
 		desactivee = valeur
 		disabled = valeur
-		queue_redraw()
+		if is_instance_valid(_contenu):
+			_contenu.modulate.a = 0.45 if valeur else 1.0
 
-var _survol := 0.0
-var _anim := 0.0
-var _pulsation := 0.0
-var _pointeur := false
-var _style_normal: StyleBox
-var _style_actif: StyleBox
+var _contenu: MarginContainer
 
 func configurer(reactif_: Reactif) -> void:
 	reactif = reactif_
-	_style_normal = StyleAzur.cadre()
-	_style_actif = StyleAzur.cadre(StyleAzur.PANNEAU,StyleAzur.MAGIE)
 	custom_minimum_size = Vector2(0, HAUTEUR)
-	queue_redraw()
+	if is_node_ready():
+		_construire()
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(0, HAUTEUR)
+	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	flat = true
-	focus_mode = Control.FOCUS_NONE
-	action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
+	StyleInterface.styliser_bouton(self)
 	pressed.connect(_sur_appui)
-	mouse_entered.connect(func() -> void: _pointeur = true)
-	mouse_exited.connect(func() -> void: _pointeur = false)
+	_construire()
 
-func _process(delta: float) -> void:
-	_anim += delta
-	var vise := 1.0 if selectionnee else (0.42 if _pointeur else 0.0)
-	_survol = lerpf(_survol, vise, minf(1.0, delta * 10.0))
-	_pulsation = maxf(0.0, _pulsation - delta * 3.0)
-	queue_redraw()
-
-func _sur_appui() -> void:
-	if desactivee:
-		return
-	_pulsation = 1.0
-	Sons.jouer("choix", -14.0)
-	choisie.emit(reactif.id)
-
-func _draw() -> void:
+func _construire() -> void:
 	if reactif == null:
 		return
-	var police := Polices.CORPS
-	var r := Rect2(Vector2(8.0, 7.0), size - Vector2(16.0, 14.0))
-	var teinte: Color = reactif.teinte
-	var alpha := 0.35 if desactivee else 1.0
-
-	# Surface surelevee : le fond, l'ombre et les coins sont communs a toute l'UI.
-	draw_style_box(_style_actif if selectionnee or _survol > 0.55 else _style_normal, r)
-	if selectionnee or _pulsation > 0.0:
-		var lueur := maxf(_survol, _pulsation)
-		draw_rect(Rect2(r.position, Vector2(7.0, r.size.y)), Color(teinte, 0.85 * lueur))
-	if reactif.est_transformation:
-		# Une transformation elementaire porte un double cadre.
-		draw_arc(Vector2(r.end.x - 38.0, r.position.y + 38.0), 18.0, 0.0, TAU, 24, Color(Palette.ESSENCE, 0.75 * alpha), 2.0, true)
-		draw_string(police, Vector2(r.size.x - 190.0, 34.0), "ÉLÉMENT",
-			HORIZONTAL_ALIGNMENT_RIGHT, 170, 22, Color(Palette.ESSENCE, 0.9 * alpha))
-
-	# La fusion conserve sa silhouette de base et porte son element en medaillon.
-	var centre := Vector2(84.0, r.position.y + r.size.y / 2.0)
-	draw_texture_rect(StyleAzur.glyphe(reactif.id),Rect2(centre-Vector2.ONE*56,Vector2.ONE*112),false)
-
-	if reactif.est_transformation:
-		draw_texture_rect(StyleAzur.glyphe(CatalogueElements.element_de_fusion(reactif.id)),Rect2(centre+Vector2(20,20),Vector2.ONE*48),false)
-
-	var x := 158.0
-	var titre := reactif.nom
+	if is_instance_valid(_contenu):
+		remove_child(_contenu)
+		_contenu.queue_free()
+	_appliquer_cadre()
+	tooltip_text = "%s — %s" % [reactif.nom, reactif.description]
+	_contenu = MarginContainer.new()
+	_contenu.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_contenu.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_contenu.modulate.a = 0.45 if desactivee else 1.0
+	for cote in ["left", "right"]:
+		_contenu.add_theme_constant_override("margin_" + cote, 30)
+	for cote in ["top", "bottom"]:
+		_contenu.add_theme_constant_override("margin_" + cote, 24)
+	add_child(_contenu)
+	var ligne := HBoxContainer.new()
+	ligne.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ligne.add_theme_constant_override("separation", 26)
+	_contenu.add_child(ligne)
+	var illustration := Control.new()
+	illustration.custom_minimum_size = Vector2(156, 156)
+	illustration.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	illustration.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ligne.add_child(illustration)
+	var medaillon := Panel.new()
+	HabillagePeint.appliquer(medaillon)
+	medaillon.add_theme_stylebox_override("panel", StyleAzur.cadre(StyleAzur.VIOLET, reactif.couleur_rarete(), 64))
+	medaillon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	medaillon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	illustration.add_child(medaillon)
+	var glyphe := StyleAzur.vignette(reactif.id, 116)
+	glyphe.position = Vector2(20, 20)
+	glyphe.size = Vector2(116, 116)
+	illustration.add_child(glyphe)
+	var textes := VBoxContainer.new()
+	textes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	textes.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	textes.add_theme_constant_override("separation", 8)
+	ligne.add_child(textes)
 	var possedees := Jeu.copies(reactif.id)
-	if possedees > 0:
-		# Reprendre un reactif l'empile : on annonce ou on en est, sinon le
-		# joueur ne sait pas ce qu'il renforce.
-		titre += "  (déjà x%d)" % possedees
-	draw_string(police, Vector2(x, r.position.y + 62.0), titre, HORIZONTAL_ALIGNMENT_LEFT,
-		r.size.x - x - 24.0, 32, Color(StyleAzur.TEXTE, alpha))
-	draw_multiline_string(police, Vector2(x, r.position.y + 108.0), reactif.description, HORIZONTAL_ALIGNMENT_LEFT,
-		r.size.x - x - 24.0, 27, 3, Color(StyleAzur.ATTENUE, alpha))
+	var etiquette := reactif.nom_rarete().to_upper()
+	if pour_choix and reactif.copies_permises() > 1 and not reactif.mods.has("soin_part"):
+		etiquette += "  ·  Rang %d / %d" % [possedees + 1, reactif.copies_permises()]
+	elif not pour_choix and possedees > 0:
+		etiquette += "  ·  Acquis ×%d" % possedees
+	textes.add_child(StyleAzur.texte(etiquette, 22, reactif.couleur_rarete()))
+	textes.add_child(StyleAzur.texte(reactif.nom, 35, StyleAzur.IVOIRE))
+	textes.add_child(StyleAzur.texte(reactif.description, 27, StyleAzur.ATTENUE))
+	if pour_choix and reactif.rarete != Reactif.COMMUN:
+		textes.add_child(StyleAzur.texte(DetailsReactif.texte(reactif), 24, reactif.couleur_rarete()))
+	# Les descriptions longues agrandissent la carte au lieu de chevaucher la suivante.
+	_contenu.minimum_size_changed.connect(_adapter_hauteur)
+	_adapter_hauteur.call_deferred()
+
+func _adapter_hauteur() -> void:
+	if is_instance_valid(_contenu):
+		custom_minimum_size.y = maxf(HAUTEUR, _contenu.get_combined_minimum_size().y)
+
+func _appliquer_cadre() -> void:
+	if reactif == null:
+		return
+	var accent := reactif.couleur_rarete()
+	add_theme_stylebox_override("normal", StyleAzur.carte_augment(accent, selectionnee))
+	add_theme_stylebox_override("hover", StyleAzur.carte_augment(accent, true))
+	add_theme_stylebox_override("pressed", StyleAzur.carte_augment(StyleAzur.IVOIRE, true))
+	add_theme_stylebox_override("disabled", StyleAzur.carte_augment(accent if selectionnee else accent.darkened(0.5), selectionnee))
+	add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+
+func _sur_appui() -> void:
+	if desactivee or reactif == null:
+		return
+	if not pour_choix:
+		Sons.jouer("choix", -14.0)
+	choisie.emit(reactif.id)

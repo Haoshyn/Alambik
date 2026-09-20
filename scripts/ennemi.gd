@@ -18,12 +18,8 @@ var _cible: Node2D
 var _recharge := 0.0
 var _braise := 0.0
 var _braise_dps := 0.0
-var _feu := 0.0
-var _feu_dps := 0.0
-var _feu_cumuls := 0
 var _givre := 0.0
 var _acide := 0.0
-var _terre_declenchee := false
 var _gel := 0.0
 var _etat := "repos"
 var _point_vise := Vector2.ZERO
@@ -32,7 +28,6 @@ var _direction_charge := Vector2.ZERO
 var _anim := 0.0
 var _flash := 0.0
 var _apparition := 0.0
-var _graine := 0
 var _invocations := 0
 var _contournement := 0.0
 var _sens_contournement := 1.0
@@ -49,7 +44,6 @@ func _ready() -> void:
 	if bool(donnees.get("elite", false)): add_to_group("elites")
 	collision_layer = 2
 	collision_mask = 4
-	_graine = randi() % 1000
 	_cible = get_tree().get_first_node_in_group("heros")
 	var forme := $CollisionShape2D.shape as CircleShape2D
 	forme.radius = float(donnees["rayon"]) * Reglages.ENNEMI_HITBOX_MULT
@@ -405,20 +399,8 @@ func recevoir_degats(montant: float, effets: Array = []) -> void:
 			"braise":
 				_braise = Reglages.BRAISE_DUREE
 				_braise_dps = maxf(_braise_dps, montant * Reglages.BRAISE_PART_DEGATS_PAR_SECONDE)
-			"feu":
-				_feu = Reglages.BRAISE_DUREE
-				if _feu_cumuls < Reglages.FEU_DOT_CUMUL_MAX:
-					_feu_cumuls += 1
-					_feu_dps += montant * Reglages.FEU_DOT_PART_PAR_SECONDE
 			"givre": _givre = Reglages.GIVRE_DUREE
 			"acide": _acide = Reglages.ACIDE_DUREE
-			"eau":
-				_givre = Reglages.GIVRE_DUREE
-				_acide = Reglages.ACIDE_DUREE
-			"terre":
-				if not _terre_declenchee:
-					_terre_declenchee = true
-					_recharge = maxf(_recharge, Reglages.TERRE_RETARD_ATTAQUE)
 	if pv <= 0.0:
 		_mourir()
 
@@ -436,12 +418,6 @@ func _appliquer_effets(delta: float) -> void:
 		dot_dps += _braise_dps
 	else:
 		_braise_dps = 0.0
-	if _feu > 0.0:
-		_feu = maxf(0.0, _feu - delta)
-		dot_dps += _feu_dps
-	else:
-		_feu_dps = 0.0
-		_feu_cumuls = 0
 	if dot_dps > 0.0:
 		pv -= dot_dps * delta
 		if pv <= 0.0:
@@ -497,16 +473,6 @@ func _draw() -> void:
 		Dessin.contour(self, Dessin.etoile(Vector2.ZERO, r * 1.5, r * 0.7, 6, _anim * 0.4), Palette.GIVRE, 2.5)
 	_dessiner_barre_de_vie(r)
 
-func _dessiner_repli(r: float, couleur: Color) -> void:
-	match donnees.get("forme", "goutte"):
-		"plume", "ruban": _dessiner_sentinelle(r, couleur)
-		"dard", "belier": _dessiner_veloce(r, couleur)
-		"masque", "miroir": _dessiner_essaimeur(r, couleur)
-		"phaseur": _dessiner_phaseur(r, couleur)
-		"fuseau": _dessiner_tisseur(r, couleur)
-		"fiole": _dessiner_volatile(r, couleur)
-		_: _dessiner_rampant(r, couleur)
-
 func _dessiner_telegraphe(r: float) -> void:
 	if _cible == null:
 		return
@@ -554,107 +520,3 @@ func _dessiner_barre_de_vie(r: float) -> void:
 	pleine.size.x *= clampf(pv / pv_max, 0.0, 1.0)
 	draw_rect(pleine, Palette.DANGER)
 	draw_rect(barre, Color(Palette.OR, 0.62), false, 2.0)
-
-func _dessiner_rampant(r: float, couleur: Color) -> void:
-	var vers := Vector2.DOWN if _cible == null else global_position.direction_to(_cible.global_position)
-	var corps := Dessin.blob(Vector2.ZERO, r, _graine, 0.18, _anim * 3.0)
-	draw_colored_polygon(corps, couleur)
-	Dessin.contour(self, corps, couleur.lightened(0.35), 2.0)
-	# Deux yeux d'encre claire : c'est ce qui distingue une creature d'une tache.
-	for cote in [-1.0, 1.0]:
-		draw_circle(vers.rotated(cote * 0.5) * r * 0.45, r * 0.16, Color(0.95, 0.95, 1.0, 0.9))
-	# Gouttes qui perlent derriere lui.
-	draw_circle(-vers * r * (1.1 + 0.2 * sin(_anim * 5.0)), r * 0.22, couleur * Color(1, 1, 1, 0.6))
-
-func _dessiner_sentinelle(r: float, couleur: Color) -> void:
-	var vers := Vector2.DOWN if _cible == null else global_position.direction_to(_cible.global_position)
-	draw_set_transform(Vector2.ZERO, vers.angle(), Vector2.ONE)
-	var forme := Dessin.plume(r * 3.0, r * 0.9)
-	draw_colored_polygon(forme, couleur)
-	Dessin.contour(self, forme, couleur.lightened(0.4), 2.0)
-	draw_line(Vector2(-r * 1.5, 0), Vector2(r * 1.5, 0), couleur.darkened(0.4), 2.5, true)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	draw_circle(Vector2.ZERO, r * 0.42, Color(0.95, 0.95, 1.0, 0.9))
-	draw_circle(vers * r * 0.12, r * 0.20, Color(0.18, 0.14, 0.25))
-	if _etat == "vise":
-		# Trait de visee : la spec veut un tir telegraphie, donc visible avant.
-		var distance_cible := global_position.distance_to(_cible.global_position)
-		draw_line(vers * r, vers * distance_cible, Color(Palette.DANGER, 0.35 + 0.25 * sin(_anim * 30.0)), 3.0, true)
-
-func _dessiner_veloce(r: float, couleur: Color) -> void:
-	var vers := _direction_charge if _direction_charge != Vector2.ZERO else Vector2.DOWN
-	draw_set_transform(Vector2.ZERO, vers.angle(), Vector2.ONE)
-	var etire := 1.0 + (0.8 if _etat == "charger" else 0.0)
-	var forme := Dessin.dard(r * 1.9 * etire, r * 0.95)
-	draw_colored_polygon(forme, couleur)
-	Dessin.contour(self, forme, couleur.lightened(0.4), 2.0)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	draw_circle(vers * r * 0.5, r * 0.22, Color(1, 1, 1, 0.85))
-	if _etat == "preparer":
-		# Preparation visible : le joueur apprend a se decaler perpendiculairement.
-		var intensite := 0.4 + 0.6 * sin(_anim * 24.0)
-		draw_line(vers * r, vers * 620.0, Color(Palette.DANGER, 0.25 * intensite), 8.0, true)
-		Dessin.contour(self, Dessin.polygone_regulier(Vector2.ZERO, r * (1.6 + 0.3 * intensite), 3, vers.angle()), Palette.DANGER, 3.0)
-
-func _dessiner_essaimeur(r: float, couleur: Color) -> void:
-	var corps := Dessin.blob(Vector2.ZERO, r, _graine, 0.10, _anim * 1.4)
-	draw_colored_polygon(corps, couleur.darkened(0.08))
-	Dessin.contour(self, corps, couleur.lightened(0.3), 2.5)
-	# Un masque de scribe : bandeau clair et trois encoches.
-	draw_rect(Rect2(-r * 0.7, -r * 0.25, r * 1.4, r * 0.5), Color(0.94, 0.92, 0.86, 0.92))
-	for i in 3:
-		var x := (float(i) - 1.0) * r * 0.45
-		draw_rect(Rect2(x - r * 0.07, -r * 0.25, r * 0.14, r * 0.5), couleur.darkened(0.5))
-	# Plumes d'invocation qui tournent : on voit qu'il prepare quelque chose.
-	var pret := 1.0 - clampf(_recharge / maxf(0.1, float(donnees.get("recharge", 3.5))), 0.0, 1.0)
-	for i in 3:
-		var a := _anim * 1.8 + float(i) * TAU / 3.0
-		var p := Vector2(cos(a), sin(a)) * r * (1.5 + 0.3 * pret)
-		draw_circle(p, r * 0.16 * (0.5 + pret), Palette.ACIDE.lerp(couleur, 0.3))
-
-func _dessiner_phaseur(r: float, couleur: Color) -> void:
-	var effacement := 1.0
-	if _etat == "phase":
-		effacement = 0.35 + 0.65 * clampf(_minuterie / maxf(0.1,
-			float(donnees.get("telegraphe", 0.62))), 0.0, 1.0)
-	var teinte := Color(couleur, effacement)
-	for index in 4:
-		var debut := _anim * (0.7 if index % 2 == 0 else -0.55) + float(index) * PI * 0.5
-		draw_arc(Vector2.ZERO, r * (0.78 + index * 0.16), debut, debut + PI * 0.68,
-			18, teinte.lightened(float(index) * 0.06), 5.0, true)
-	draw_circle(Vector2.ZERO, r * 0.48, Color(0.06, 0.03, 0.12, effacement))
-	draw_colored_polygon(Dessin.polygone_regulier(Vector2.ZERO, r * 0.32, 6,
-		_anim * 0.45), teinte.lightened(0.35))
-
-func _dessiner_tisseur(r: float, couleur: Color) -> void:
-	var angle := _anim * 0.7
-	draw_set_transform(Vector2.ZERO, angle, Vector2.ONE)
-	var fuseau := PackedVector2Array([
-		Vector2(0.0, -r * 1.25), Vector2(r * 0.58, -r * 0.38),
-		Vector2(r * 0.48, r * 0.52), Vector2(0.0, r * 1.25),
-		Vector2(-r * 0.48, r * 0.52), Vector2(-r * 0.58, -r * 0.38)])
-	draw_colored_polygon(fuseau, couleur.darkened(0.12))
-	Dessin.contour(self, fuseau, couleur.lightened(0.42), 3.0)
-	for cote in [-1.0, 1.0]:
-		draw_line(Vector2(0.0, -r), Vector2(cote * r * 1.1, 0.0),
-			Color(couleur, 0.62), 2.0, true)
-		draw_line(Vector2(cote * r * 1.1, 0.0), Vector2(0.0, r),
-			Color(couleur, 0.62), 2.0, true)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	draw_circle(Vector2.ZERO, r * 0.24, Color(0.95, 1.0, 0.94, 0.92))
-
-func _dessiner_volatile(r: float, couleur: Color) -> void:
-	var gonflement := 1.0
-	if _etat == "gonfler":
-		var avancee := 1.0 - clampf(_minuterie / maxf(0.1,
-			float(donnees.get("preparation", 0.88))), 0.0, 1.0)
-		gonflement = 1.0 + avancee * 0.38 + sin(_anim * 28.0) * 0.05
-	var corps := Dessin.goutte(Vector2(0.0, r * 0.12), r * gonflement, PI, 1.16)
-	draw_colored_polygon(corps, Color(couleur, 0.82))
-	Dessin.contour(self, corps, couleur.lightened(0.35), 3.0)
-	draw_rect(Rect2(-r * 0.34, -r * 1.18, r * 0.68, r * 0.36),
-		Color(0.78, 0.70, 0.52))
-	for index in 3:
-		var bulle := Vector2(sin(_anim * (2.2 + index * 0.3) + index) * r * 0.42,
-			r * 0.62 - fmod(_anim * (18.0 + index * 4.0) + index * 13.0, r * 1.15))
-		draw_circle(bulle, r * (0.08 + index * 0.025), Color.WHITE * Color(1, 1, 1, 0.58))

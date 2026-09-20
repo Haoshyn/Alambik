@@ -9,16 +9,24 @@ func _ready() -> void:
 	var salles := Reglages.SALLES_PAR_RUN if mode == "grimoire" else 5 if mode == "epreuve_sorts" else 1
 	var boss := 4 if mode == "grimoire" else 5 if mode == "epreuve_sorts" else 1
 	var offre := ButinsRun.offre(mode, chapitre, salles, boss, true, niveau_epreuve,
-		ReglagesJoueur.rangs_sorts, ReglagesJoueur.objets, ReglagesJoueur.grands_coffres_rates(chapitre), ReglagesJoueur.epreuves_ratees(niveau_epreuve))
+		ReglagesJoueur.rangs_sorts, ReglagesJoueur.objets, ReglagesJoueur.grands_coffres_rates(chapitre), ReglagesJoueur.epreuves_ratees(niveau_epreuve), ReglagesJoueur.palier_atteint())
 	var titre := str(Chapitres.par_index(chapitre)["nom"]) if mode == "grimoire" else "Épreuve de magie · niveau %d" % niveau_epreuve if mode == "epreuve_sorts" else "La Mine"
-	col.add_child(StyleAzur.texte(titre, 36))
-	col.add_child(StyleAzur.texte("Coffre d’une aventure terminée", 29, StyleAzur.ATTENUE))
+	StyleAzur.banniere(col, titre, "Le trésor d’une aventure menée à son terme.", "couronne")
+	col.add_child(StyleAzur.texte("DANS VOTRE COFFRE", 24, StyleAzur.CUIVRE))
 	for cadeau in offre["cadeaux"]:
 		_ajouter_carte(col, str(cadeau), "sort", 1.0)
-	col.add_child(StyleAzur.texte("%d–%d gouttes\n%d XP de compte" % [BilanRun.gouttes_finales(int(offre["gouttes_min"])), BilanRun.gouttes_finales(int(offre["gouttes_max"])), ReglagesJoueur.gain_experience_compte(int(offre["xp"]))], 32))
-	if mode == "mine":
-		var pierres := roundi(float(ReglagesJoueur.pierres_mine()) * ArbreCompetences.multiplicateur_pierres(ReglagesJoueur.rangs_competences_effectifs()))
-		col.add_child(StyleAzur.texte("%d pierres de forge · 100 %%" % pierres, 30))
+	var ressources := StyleAzur.plaque(col, true)
+	var ligne := HBoxContainer.new()
+	ligne.add_theme_constant_override("separation", 24)
+	ressources.add_child(ligne)
+	ligne.add_child(StyleAzur.illustration("fiole", 120))
+	var gains := StyleAzur.texte("%d–%d gouttes\n%d XP de compte" % [BilanRun.gouttes_finales(int(offre["gouttes_min"])), BilanRun.gouttes_finales(int(offre["gouttes_max"])), ReglagesJoueur.gain_experience_compte(int(offre["xp"]))], 32)
+	gains.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ligne.add_child(gains)
+	var pierres := roundi(float(offre["pierres"]) * ArbreCompetences.multiplicateur_pierres(ReglagesJoueur.rangs_competences_effectifs()))
+	if pierres > 0:
+		ressources.add_child(StyleAzur.texte("%d pierres de forge · garanties" % pierres, 29, StyleAzur.CUIVRE))
+	StyleAzur.separateur(col)
 	for type in ["objet", "sort"]:
 		var candidats: Array = offre[type + "s"]
 		if candidats.is_empty(): continue
@@ -39,24 +47,34 @@ var _detail: Control
 
 func _ajouter_carte(col: VBoxContainer, id: String, type: String, chance: float) -> void:
 	var d: Dictionary = CatalogueObjets.OBJETS[id] if type == "objet" else Sorts.donnees(id)
-	var carte := StyleAzur.bouton("%s · %.1f %%\n%s\nToucher pour voir les détails" % [d["nom"], chance * 100.0,
-		_resume_objet(id, 0) if type == "objet" else d["description"]], func(): _ouvrir_detail(id, type))
+	var carte := StyleAzur.bouton("", func(): _ouvrir_detail(id, type))
 	carte.name = "Carte_" + id
-	carte.icon = StyleAzur.icone(StyleAzur.icone_objet(id)) if type == "objet" else StyleAzur.glyphe(id)
-	carte.expand_icon = true
-	carte.add_theme_constant_override("icon_max_width", 120)
-	carte.add_theme_font_size_override("font_size", 26)
-	carte.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	carte.custom_minimum_size.y = 180
+	carte.custom_minimum_size.y = 204
+	var marge := MarginContainer.new()
+	marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	marge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for cote in ["left", "right", "top", "bottom"]:
+		marge.add_theme_constant_override("margin_" + cote, 24)
+	carte.add_child(marge)
+	var ligne := HBoxContainer.new()
+	ligne.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ligne.add_theme_constant_override("separation", 22)
+	marge.add_child(ligne)
+	ligne.add_child(StyleAzur.image(StyleAzur.icone_objet(id), 128) if type == "objet" else StyleAzur.vignette(id, 128))
+	var textes := VBoxContainer.new()
+	textes.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	textes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ligne.add_child(textes)
+	textes.add_child(StyleAzur.texte("GARANTI" if chance >= 1.0 else "CHANCE D’OBTENTION · %.1f %%" % (chance * 100.0), 22, StyleAzur.CUIVRE))
+	textes.add_child(StyleAzur.texte(str(d["nom"]), 32))
+	textes.add_child(StyleAzur.texte(_resume_objet(id, 0) if type == "objet" else str(d["description"]), 25, StyleAzur.ATTENUE))
+	textes.add_child(StyleAzur.texte("Consulter les pouvoirs ›", 24, StyleAzur.MAGIE))
+	marge.minimum_size_changed.connect(func(): carte.custom_minimum_size.y = maxf(204.0, marge.get_combined_minimum_size().y))
 	StyleAzur.case_objet(carte)
 	col.add_child(carte)
 
 func _resume_objet(id: String, niveau: int) -> String:
-	var bonus := CatalogueObjets.bonus_objet(id, niveau)
-	return "Dégâts +%s %% · PV +%s %%" % [_pourcentage(float(bonus["degats"])), _pourcentage(float(bonus["pv"]))]
-
-func _pourcentage(valeur: float) -> String:
-	return String.num(valeur * 100.0, 1).trim_suffix(".0").replace(".", ",")
+	return CatalogueObjets.description_bonus(id, niveau)
 
 func _ouvrir_detail(id: String, type: String) -> void:
 	if is_instance_valid(_detail): _detail.queue_free()
@@ -66,13 +84,17 @@ func _ouvrir_detail(id: String, type: String) -> void:
 	_detail.connect("ferme", func(): _detail.queue_free())
 	var d: Dictionary = CatalogueObjets.OBJETS[id] if type == "objet" else Sorts.donnees(id)
 	var col := StyleAzur.defilement(StyleAzur.page(_detail, str(d["nom"])))
-	col.add_child(StyleAzur.image(StyleAzur.icone_objet(id), 240) if type == "objet" else StyleAzur.vignette(id, 240))
+	var presentation := StyleAzur.plaque(col, true)
+	presentation.add_child(StyleAzur.image(StyleAzur.icone_objet(id), 240) if type == "objet" else StyleAzur.vignette(id, 240))
+	presentation.add_child(StyleAzur.texte("RELIQUE DE L’ATELIER" if type == "objet" else "PAGE DU GRIMOIRE", 24, StyleAzur.CUIVRE))
+	StyleAzur.separateur(col)
 	if type == "objet":
 		col.add_child(StyleAzur.texte("À l’obtention\n" + _resume_objet(id, 0), 30))
 		col.add_child(StyleAzur.texte("Forge 10\n" + _resume_objet(id, 10), 30))
 		col.add_child(StyleAzur.texte(CatalogueObjets.description_effets(id, 10), 28))
-		col.add_child(StyleAzur.texte("Un seul pouvoir au niveau 10. Ensuite, la forge augmente uniquement les dégâts et les PV, avec un coût croissant.", 26, StyleAzur.ATTENUE))
+		col.add_child(StyleAzur.texte("Un seul pouvoir au niveau 10. Chaque niveau de forge augmente l’attaque de base des colliers ou les PV de base des anneaux, avec un coût croissant.", 26, StyleAzur.ATTENUE))
 	else:
 		col.add_child(StyleAzur.texte(str(d["description"]), 30))
 		col.add_child(StyleAzur.texte("Rang 1 : %s\nRang %d : %s" % [Sorts.resume_rang(id, 1), Reglages.CAPACITE_RANG_MAX, Sorts.resume_rang(id, Reglages.CAPACITE_RANG_MAX)], 28))
 		col.add_child(StyleAzur.texte("Les doublons améliorent cette capacité, jusqu’au rang %d. %s" % [Reglages.CAPACITE_RANG_MAX, Sorts.progression_rang(id)], 26, StyleAzur.ATTENUE))
+		col.add_child(StyleAzur.texte("Premier déblocage : +%d %% de dégâts finaux, même sans équiper cette capacité. Les doublons n’augmentent pas ce bonus." % roundi(Sorts.BONUS_FINAL_PAR_DEBLOCAGE * 100.0), 26, StyleAzur.ATTENUE))

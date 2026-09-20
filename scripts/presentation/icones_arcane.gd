@@ -2,6 +2,16 @@ class_name IconesArcane
 extends RefCounted
 
 const PLANCHES := [preload("res://assets/visual/manga/icones_0.png"), preload("res://assets/visual/manga/icones_1.png"), preload("res://assets/visual/manga/icones_2.png")]
+const ICONES_INTERFACE := {
+	"parametres": "parametres",
+	"gouttes": "gouttes",
+	"pierres": "pierres",
+	"navigation_equipement": "forge",
+	"navigation_maitrises": "astrolabe",
+	"navigation_sorts": "grimoire",
+	"navigation_aventure": "portail",
+}
+const ALIAS_CAPACITES := {"vortex_alchimique": "spirale", "purification_totale": "lumiere"}
 const IDENTIFIANTS := [
 	"abondance", "air", "armure", "audace", "avidite", "barrage_de_braise",
 	"bastion", "cadence", "cadence_febrile", "carapace", "catalyse", "celerite",
@@ -22,11 +32,12 @@ const IDENTIFIANTS := [
 static var _textures := {}
 
 static func contient(id: String) -> bool:
-	return id in IDENTIFIANTS
+	return id in IDENTIFIANTS or ALIAS_CAPACITES.has(id)
 
 static func texture(id: String) -> Texture2D:
-	if id == "navigation_aventure":
-		return preload("res://assets/visual/manga/navigation_aventure.png")
+	id = str(ALIAS_CAPACITES.get(id, id))
+	if ICONES_INTERFACE.has(id):
+		return HabillagePeint.texture(str(ICONES_INTERFACE[id]))
 	if _textures.has(id): return _textures[id]
 	var index := IDENTIFIANTS.find(id)
 	if index < 0: return null

@@ -2,7 +2,7 @@ class_name ProgressionAugments
 extends RefCounted
 
 # Le rattrapage garantit dix niveaux avant le boss, meme avec peu d'XP.
-# Les trois choix de boss sont independants de ces niveaux.
+# Les trois choix de boss, dont un legendaire, sont independants de ces niveaux.
 const XP_SEUILS := [4, 20, 32, 50, 70, 90, 112, 140, 180, 220]
 const SALLES_NIVEAUX := [1, 3, 4, 6, 8, 9, 11, 13, 16, 19]
 const ETAGES_EPIQUES := [5, 10, 15]
@@ -52,3 +52,9 @@ static func tirer_niveaux_rares(rng: RandomNumberGenerator) -> Array[int]:
 
 static func rarete_niveau(niveau: int, rares: Array[int]) -> String:
 	return Reactif.RARE if niveau in rares else Reactif.COMMUN
+
+static func tirer_etage_legendaire(rng: RandomNumberGenerator) -> int:
+	return int(ETAGES_EPIQUES[rng.randi_range(0, ETAGES_EPIQUES.size() - 1)])
+
+static func relance_autorisee(rarete: String) -> bool:
+	return rarete not in [Reactif.COMMUN, Reactif.LEGENDAIRE]

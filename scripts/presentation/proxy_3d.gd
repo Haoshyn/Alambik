@@ -39,7 +39,6 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 		suivi = load("res://scripts/presentation/suivi_visuel_2d.gd").new()
 		suivi.name = "SuiviVisuel3D"
 		logique.add_child(suivi)
-		ReglagesJoueur.reglages_changes.connect(_actualiser_modele)
 		ReglagesJoueur.maitrise_changee.connect(_actualiser_arme)
 		logique.connect("tir_demande", _jouer_tir)
 		logique.connect("attaque_preparee", _armer_tir)
@@ -72,15 +71,6 @@ func _installer_modele(scene: PackedScene) -> void:
 	if genre == "heros":
 		preload("res://scripts/presentation/materiaux_apprenti.gd").appliquer(modele)
 		_arme_tenue = preload("res://scripts/presentation/arme_tenue_3d.gd").installer(modele, ReglagesJoueur.projectile_equipe_effectif())
-		var peau := modele.find_child("Heros_B_peau", true, false) as MeshInstance3D
-		if peau != null:
-			var source := peau.get_active_material(0) as StandardMaterial3D
-			if source != null and source.albedo_texture != null and source.normal_texture != null:
-				var matiere := ShaderMaterial.new()
-				matiere.shader = preload("res://shaders/heros_matiere.gdshader")
-				matiere.set_shader_parameter("couleur", source.albedo_texture)
-				matiere.set_shader_parameter("normales", source.normal_texture)
-				peau.set_surface_override_material(0, matiere)
 		if lecteur != null:
 			animation_heros = load("res://scripts/presentation/animation_heros_3d.gd").new()
 			add_child(animation_heros)
@@ -89,22 +79,6 @@ func _installer_modele(scene: PackedScene) -> void:
 func _actualiser_arme() -> void:
 	if is_instance_valid(_arme_tenue):
 		_arme_tenue.changer(ReglagesJoueur.projectile_equipe_effectif())
-
-func _actualiser_modele() -> void:
-	var chemin := Visuels3D.chemin_heros(ReglagesJoueur.modele_heros)
-	if modele.scene_file_path == chemin:
-		return
-	var scene := load(chemin) as PackedScene
-	if scene == null:
-		return
-	if animation_heros != null:
-		animation_heros.active = false
-		animation_heros.free()
-		animation_heros = null
-	modele.free()
-	_installer_modele(scene)
-	_derniere_animation = ""
-	mettre_a_jour(0.0)
 
 func mettre_a_jour(delta: float) -> void:
 	if not is_instance_valid(logique) or logique.is_queued_for_deletion():

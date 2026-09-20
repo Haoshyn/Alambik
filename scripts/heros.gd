@@ -24,6 +24,8 @@ var _temps_immobile := 0.0
 var _a_bouge_dans_la_salle := false
 var _recharge := 0.0
 var _invulnerable := 0.0
+var _protection_apprentissage := false
+var _tir_suspendu_apprentissage := false
 var _rafale_restante := 0
 var _rafale_minuterie := 0.0
 var _rafale_direction := Vector2.RIGHT
@@ -34,14 +36,7 @@ var _inclinaison := 0.0
 var _attaque := 0.0
 var _tirs_prepares: Array[Dictionary] = []
 var _seconde_chance_disponible := true
-var _transformations_initialisees: Array[String] = []
-var _resurrections_feu := 0
-var _resurrections_eau := 0
-var _resurrections_air := 0
-var _resurrections_terre := 0
-var _resurrections_lumiere := 0
-var _protection_terre := 0.0
-var _aureole_lumiere := 0.0
+
 func _ready() -> void:
 	add_to_group("heros")
 	var collision := get_node_or_null("CollisionShape2D") as CollisionShape2D
@@ -57,6 +52,15 @@ func definir_intention(direction: Vector2, intensite := 1.0) -> void:
 	_intention = direction
 	_intensite = intensite
 
+func configurer_apprentissage(proteger: bool, suspendre_tir: bool) -> void:
+	if _protection_apprentissage and not proteger:
+		_invulnerable = maxf(_invulnerable, Reglages.APPRENTISSAGE_GRACE_FIN)
+	_protection_apprentissage = proteger
+	_tir_suspendu_apprentissage = suspendre_tir
+	if suspendre_tir:
+		_tirs_prepares.clear()
+		_rafale_restante = 0
+
 var _pv_max_sans_augments := 0.0
 
 func recalculer() -> void:
@@ -71,12 +75,10 @@ func recalculer() -> void:
 	var drapeaux := tir_courant.drapeaux
 	stats.vitesse = Reglages.HEROS_VITESSE * ArbreCompetences.multiplicateur_vitesse(ReglagesJoueur.rangs_competences_effectifs()) \
 		* Sorts.multiplicateur_vitesse(ReglagesJoueur.passifs_equipes_effectifs()) \
-		* (1.0 + float(ReglagesJoueur.bonus_objets_effectifs()["vitesse"])) \
 		* Mods.facteur_heros(mods_run, "deplacement_mult")
-	if not _bouclier_accorde and ("egide" in drapeaux or ArbreCompetences.donne_bouclier(ReglagesJoueur.rangs_competences_effectifs()) or Sorts.donne_bouclier(ReglagesJoueur.passifs_equipes_effectifs())):
+	if not _bouclier_accorde and ("egide" in drapeaux or ArbreCompetences.donne_bouclier(ReglagesJoueur.rangs_competences_effectifs())):
 		bouclier = 1
 		_bouclier_accorde = true
-	_initialiser_transformations(drapeaux)
 
 func preparer_nouvelle_salle() -> void:
 	_bouclier_accorde = false
@@ -85,7 +87,6 @@ func preparer_nouvelle_salle() -> void:
 	_tirs_prepares.clear()
 	_rafale_restante = 0
 	recalculer()
-	# La resurrection reste consommee entre les salles.
 	if "regeneration" in tir_courant.drapeaux:
 		stats.soigner(stats.pv_max * Reglages.REGENERATION_PART \
 			* ArbreCompetences.multiplicateur_soin(ReglagesJoueur.rangs_competences_effectifs()))
@@ -104,6 +105,8 @@ func _physics_process(delta: float) -> void:
 	global_position = Geometrie.contraindre_dans_rect(global_position, limites, Reglages.HEROS_RAYON)
 
 func peut_tirer() -> bool:
+	if _tir_suspendu_apprentissage:
+		return false
 	var salle := get_tree().get_first_node_in_group("salle")
 	return not is_instance_valid(salle) or not salle.tir_bloque_par_terrain(global_position)
 
@@ -118,8 +121,6 @@ func _process(delta: float) -> void:
 	_inclinaison = lerpf(_inclinaison, inclinaison_visee, minf(1.0, delta * 10.0))
 	_secousse = maxf(0.0, _secousse - delta * 4.0)
 	_invulnerable = maxf(0.0, _invulnerable - delta)
-	_protection_terre = maxf(0.0, _protection_terre - delta)
-	_aureole_lumiere = maxf(0.0, _aureole_lumiere - delta)
 	_recharge = maxf(0.0, _recharge - delta)
 	_avancer_rafale(delta)
 	var immobile := _intention == Vector2.ZERO
@@ -219,7 +220,7 @@ func _point_vise(index: int) -> Vector2:
 		global_position, tir_courant.vitesse)
 
 func recevoir_degats(montant: float, _effets: Array = []) -> void:
-	if _invulnerable > 0.0 or stats.est_mort():
+	if _protection_apprentissage or _invulnerable > 0.0 or stats.est_mort():
 		return
 	if bouclier > 0:
 		bouclier -= 1
@@ -227,21 +228,17 @@ func recevoir_degats(montant: float, _effets: Array = []) -> void:
 		bouclier_brise.emit(global_position)
 		Sons.jouer("impact", -8.0, 0.7)
 		return
-	_invulnerable = Reglages.HEROS_INVULNERABILITE
 	_secousse = 1.0
-	var ratio_pv := stats.pv / maxf(1.0, stats.pv_max)
-	stats.blesser(montant * (Reglages.TERRE_PROTECTION_MULT if _protection_terre > 0.0 else 1.0) \
-		* ((1.0 - Reglages.PEAU_DE_PIERRE_REDUCTION) if "peau_de_pierre" in tir_courant.drapeaux else 1.0) \
+	var passifs := ReglagesJoueur.passifs_equipes_effectifs()
+	var degats_apres_defenses := montant * ((1.0 - Reglages.PEAU_DE_PIERRE_REDUCTION) if "peau_de_pierre" in tir_courant.drapeaux else 1.0) \
 		* ((1.0 - Reglages.SCEAU_GARDE_REDUCTION) if "sceau_garde" in tir_courant.drapeaux else 1.0) \
 		* (Reglages.SCEAU_RUINE_VULNERABILITE if "sceau_ruine" in tir_courant.drapeaux else 1.0) \
-		* (1.0 - ArbreCompetences.reduction_degats(ReglagesJoueur.rangs_competences_effectifs())) \
-		* Sorts.multiplicateur_degats_recus(ReglagesJoueur.passifs_equipes_effectifs()) \
-		* Sorts.multiplicateur_degats_recus_conditionnel(ReglagesJoueur.passifs_equipes_effectifs(), ratio_pv))
+		* (1.0 - ArbreCompetences.reduction_degats(ReglagesJoueur.rangs_competences_effectifs()))
+	stats.blesser(degats_apres_defenses)
+	_invulnerable = Reglages.HEROS_INVULNERABILITE + Sorts.bonus_invulnerabilite(passifs)
 	touchee.emit(global_position)
 	Sons.jouer("degat", -6.0)
 	if stats.est_mort():
-		if _essayer_resurrection_elementaire():
-			return
 		if _seconde_chance_disponible and ReglagesJoueur.passifs_equipes_effectifs().has("seconde_chance"):
 			_seconde_chance_disponible = false
 			stats.pv = stats.pv_max * Sorts.soin_seconde_chance(ReglagesJoueur.passifs_equipes_effectifs())
@@ -250,62 +247,24 @@ func recevoir_degats(montant: float, _effets: Array = []) -> void:
 			return
 		morte.emit()
 
-func multiplicateur_degats_passif() -> float:
+func bonus_attaque_conditionnel() -> float:
 	var ratio := stats.pv / maxf(1.0, stats.pv_max)
-	var resultat := Sorts.multiplicateur_degats_conditionnel(ReglagesJoueur.passifs_equipes_effectifs(), ratio)
+	var bonus := 0.0
 	if "courageux" in tir_courant.drapeaux:
-		resultat *= 1.0 + (1.0 - ratio) * Reglages.COURAGEUX_BONUS_MAX
+		bonus += (1.0 - ratio) * Reglages.COURAGEUX_BONUS_MAX
 	if "mannequin" in tir_courant.drapeaux and _temps_immobile >= Reglages.MANNEQUIN_DELAI:
-		resultat *= Reglages.MANNEQUIN_DEGATS_MULT
+		bonus += Reglages.MANNEQUIN_DEGATS_MULT - 1.0
 	# Elan vital recompense le deplacement : le bonus persiste un court instant
 	# apres l'arret, sinon il ne servirait jamais — on tire a l'arret.
 	if "elan_vital" in tir_courant.drapeaux and _a_bouge_dans_la_salle and _temps_immobile <= Reglages.ELAN_VITAL_DUREE:
-		resultat *= Reglages.ELAN_VITAL_DEGATS_MULT
-	if "transformation_heros_tenebres" in tir_courant.drapeaux:
-		resultat *= Reglages.TENEBRES_HEROS_DEGATS_MULT
-	if _aureole_lumiere > 0.0:
-		resultat *= Reglages.LUMIERE_AUREOLE_DEGATS_MULT
-	return resultat
+		bonus += Reglages.ELAN_VITAL_DEGATS_MULT - 1.0
+	return bonus
 
-func _initialiser_transformations(drapeaux: Array[String]) -> void:
-	for element in CatalogueElements.ids():
-		var drapeau := "transformation_heros_%s" % element
-		if drapeau not in drapeaux or drapeau in _transformations_initialisees:
-			continue
-		_transformations_initialisees.append(drapeau)
-		match element:
-			"feu": _resurrections_feu = Reglages.PHENIX_RESURRECTIONS
-			"eau": _resurrections_eau = Reglages.EAU_RESURRECTIONS
-			"air": _resurrections_air = Reglages.AIR_RESURRECTIONS
-			"terre": _resurrections_terre = Reglages.TERRE_RESURRECTIONS
-			"lumiere": _resurrections_lumiere = Reglages.LUMIERE_RESURRECTIONS
+func attaque_reelle(pour_sort := false) -> float:
+	return BonusSorts.attaque(stats, Jeu.mods(), bonus_attaque_conditionnel(), pour_sort)
 
-func _essayer_resurrection_elementaire() -> bool:
-	var part := 0.0
-	if _resurrections_eau > 0:
-		_resurrections_eau -= 1
-		part = 1.0
-	elif _resurrections_feu > 0:
-		_resurrections_feu -= 1
-		part = Reglages.PHENIX_PV_PART
-	elif _resurrections_terre > 0:
-		_resurrections_terre -= 1
-		part = Reglages.TERRE_RESURRECTION_PV_PART
-		_protection_terre = Reglages.TERRE_PROTECTION_DUREE
-	elif _resurrections_lumiere > 0:
-		_resurrections_lumiere -= 1
-		part = Reglages.LUMIERE_RESURRECTION_PV_PART
-		_aureole_lumiere = Reglages.LUMIERE_AUREOLE_DUREE
-	elif _resurrections_air > 0:
-		_resurrections_air -= 1
-		part = Reglages.AIR_RESURRECTION_PV_PART
-	if part <= 0.0:
-		return false
-	stats.pv = stats.pv_max * part
-	bouclier = 1
-	_invulnerable = Reglages.HEROS_INVULNERABILITE
-	Sons.jouer("fusion", -6.0)
-	return true
+func degats_finaux(montant: float) -> float:
+	return montant * ReglagesJoueur.multiplicateur_degats_deblocages()
 
 func _draw() -> void:
 	if has_meta("visuel_3d"):
@@ -362,12 +321,3 @@ func _dessiner_vie() -> void:
 	var contenu := barre.grow(-1)
 	contenu.size.x *= part
 	draw_rect(contenu,Palette.DANGER.lerp(Color("71d9b4"),part))
-
-func _dessiner_repli(r: float, teinte: Color) -> void:
-	var capuche := Dessin.goutte(Vector2(0, -r * 0.15), r * 1.35, PI, 1.15)
-	draw_colored_polygon(capuche, Palette.HEROS_ROBE)
-	Dessin.contour(self, capuche, Palette.HEROS_ACCENT, 3.0)
-	draw_circle(Vector2(0, -r * 0.2), r * 0.62, Color(0.13, 0.08, 0.19))
-	for cote in [-1.0, 1.0]:
-		draw_circle(Vector2(cote * r * 0.22, -r * 0.22), r * 0.11, Palette.HEROS_ACCENT)
-	draw_circle(Vector2(r * 0.65, r * 0.2), r * 0.22, teinte)

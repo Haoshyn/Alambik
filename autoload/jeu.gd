@@ -11,13 +11,20 @@ var niveau_epreuve := 1
 var salles_terminees: Array[int] = []
 var boss_vaincus: Array[int] = []
 var bilan_run: Dictionary = {}
+var destination_menu: Dictionary = {}
+var nouvelle_tentative: Dictionary = {}
 var salle_courante := 0
 var chapitre := 0
 var inventaire: Array[String] = []
 var experience_run := 0
 var niveau_run := 0
 var niveaux_rares: Array[int] = []
-var rerolls_restants := 0
+var etage_legendaire := 0
+var _relances_utilisees := 0
+var rerolls_restants := 0:
+	set(valeur):
+		# Une source ajoutee pendant la run ne peut pas restituer les relances depensees.
+		rerolls_restants = clampi(valeur, 0, maxi(0, Reglages.RELANCES_MAX_PAR_RUN - _relances_utilisees))
 var mode_run := "grimoire"
 var rng := RandomNumberGenerator.new()
 var graine := 0
@@ -25,8 +32,6 @@ var mode_auto := false          # le bot headless pilote la run
 var ennemis_abattus := 0
 var elites_par_salle := {}
 var temps_mine_restant := 0.0
-var elements_alambic_tires: Array[String] = []
-var derniere_fusion_epreuve := {}
 # Compteurs de diagnostic : sans eux, un blocage ne dit pas si le heros tirait
 # dans le vide, dans un mur, ou pas du tout.
 var tirs_emis := 0
@@ -42,8 +47,6 @@ func chapitre_courant() -> Dictionary:
 	return Chapitres.par_index(chapitre)
 
 func salles_du_chapitre() -> int:
-	if mode_run == "retro":
-		return 1
 	if mode_run == "epreuve_sorts":
 		return 5
 	if mode_run == "mine":
@@ -51,8 +54,6 @@ func salles_du_chapitre() -> int:
 	return int(chapitre_courant()["salles"])
 
 func nom_run() -> String:
-	if mode_run == "retro":
-		return "Vision enchantée"
 	if mode_run == "epreuve_sorts":
 		return "Épreuve de magie · niveau %d" % niveau_epreuve
 	if mode_run == "mine":
@@ -60,25 +61,35 @@ func nom_run() -> String:
 	return str(chapitre_courant()["nom"])
 
 func est_boss_courant() -> bool:
-	if mode_run == "retro":
-		return get_tree().get_first_node_in_group("boss") != null
 	if mode_run == "epreuve_sorts":
 		return true
 	if mode_run == "mine":
 		return get_tree().get_first_node_in_group("boss") != null
 	return Chapitres.est_boss(chapitre, salle_courante)
 
+func preparer_nouvelle_tentative() -> void:
+	nouvelle_tentative = {"mode": mode_run, "chapitre": chapitre, "epreuve": niveau_epreuve}
+
 func demarrer_run(graine_demandee: int = 0, salle_de_depart: int = 1, chapitre_demande := 0,
 		mode_demande := "grimoire") -> void:
+	var epreuve_demandee := ReglagesJoueur.niveau_epreuve_choisi
+	if not nouvelle_tentative.is_empty():
+		# Rejouer conserve la destination, mais jamais la salle, le tirage ou le bilan.
+		mode_demande = str(nouvelle_tentative["mode"])
+		chapitre_demande = int(nouvelle_tentative["chapitre"])
+		epreuve_demandee = int(nouvelle_tentative["epreuve"])
+		graine_demandee = 0
+		salle_de_depart = 1
+		nouvelle_tentative.clear()
 	# Une graine explicite rend une run rejouable : c'est ce qui permet au bot
 	# headless de reproduire un blocage au lieu de le raconter.
 	graine = graine_demandee if graine_demandee != 0 else randi()
 	rng = RandomNumberGenerator.new()
 	rng.seed = graine
-	mode_run = mode_demande if mode_demande in ["grimoire", "epreuve_sorts", "mine", "retro"] else "grimoire"
+	mode_run = mode_demande if mode_demande in ["grimoire", "epreuve_sorts", "mine"] else "grimoire"
 	# Le defi a sa propre courbe : il ne depend jamais du dernier livre consulte.
 	chapitre = 0 if mode_run != "grimoire" else clampi(chapitre_demande, 0, Chapitres.nombre() - 1)
-	niveau_epreuve = clampi(ReglagesJoueur.niveau_epreuve_choisi, 1, Epreuves.nombre())
+	niveau_epreuve = clampi(epreuve_demandee, 1, Epreuves.nombre())
 	salles_terminees.clear()
 	boss_vaincus.clear()
 	bilan_run.clear()
@@ -87,12 +98,14 @@ func demarrer_run(graine_demandee: int = 0, salle_de_depart: int = 1, chapitre_d
 	experience_run = 0
 	niveau_run = 0
 	niveaux_rares = ProgressionAugments.tirer_niveaux_rares(rng) if mode_run == "grimoire" else []
-	rerolls_restants = ArbreCompetences.nombre_rerolls(ReglagesJoueur.rangs_competences_effectifs())
+	# Fixer le palier avant toute offre empeche une relance de changer sa rarete.
+	etage_legendaire = ProgressionAugments.tirer_etage_legendaire(rng) if mode_run == "grimoire" else 0
+	_relances_utilisees = 0
+	rerolls_restants = ArbreCompetences.nombre_rerolls(ReglagesJoueur.rangs_competences_effectifs()) \
+		+ Sorts.relances_heritage(ReglagesJoueur.passifs_equipes_effectifs())
 	ennemis_abattus = 0
 	elites_par_salle.clear()
 	temps_mine_restant = Reglages.MINE_DUREE if mode_run == "mine" else 0.0
-	elements_alambic_tires = []
-	derniere_fusion_epreuve = {}
 	tirs_emis = 0
 	tirs_touches = 0
 	tirs_dans_un_mur = 0
@@ -100,8 +113,12 @@ func demarrer_run(graine_demandee: int = 0, salle_de_depart: int = 1, chapitre_d
 	debut_run = Time.get_ticks_msec() / 1000.0
 	images_de_jeu = 0
 
-func est_retro() -> bool:
-	return mode_run == "retro"
+func consommer_relance(rarete: String) -> bool:
+	if not ProgressionAugments.relance_autorisee(rarete) or rerolls_restants <= 0:
+		return false
+	rerolls_restants -= 1
+	_relances_utilisees += 1
+	return true
 
 func ajouter_reactif(id: String) -> void:
 	inventaire.append(id)
@@ -168,72 +185,7 @@ func inventaire_groupe() -> Array:
 	return resultat
 
 func reactif(id: String) -> Reactif:
-	if CatalogueRecettes.est_fusion(id): return CatalogueRecettes.creer(id)
-	var r := CatalogueReactifs.par_id(id)
-	if r == null and CatalogueElements.est_fusion(id):
-		r = CatalogueElements.creer_fusion(CatalogueElements.element_de_fusion(id),
-			CatalogueElements.augment_de_fusion(id))
-	return r
-
-func ajouter_fusion_elementaire(element: String, augment: String) -> bool:
-	if augment_deja_fusionne(augment):
-		return false
-	var fusion := CatalogueElements.creer_fusion(element, augment)
-	if fusion == null:
-		return false
-	inventaire.append(fusion.id)
-	inventaire_change.emit()
-	return true
-
-func ajouter_fusion_aleatoire_epreuve() -> Dictionary:
-	var augments := CatalogueReactifs.ids()
-	for id in inventaire:
-		if id in augments or CatalogueElements.est_fusion(id):
-			augments.erase(id if id in augments else CatalogueElements.augment_de_fusion(id))
-	if augments.is_empty():
-		return {}
-	var augment: String = augments[rng.randi_range(0, augments.size() - 1)]
-	var element := tirer_element_alambic()
-	if element.is_empty():
-		var elements := CatalogueElements.ids()
-		element = elements[rng.randi_range(0, elements.size() - 1)]
-	ajouter_reactif(augment)
-	if not ajouter_fusion_elementaire(element, augment):
-		return {}
-	var fusion := CatalogueElements.creer_fusion(element, augment)
-	derniere_fusion_epreuve = {"augment": augment, "element": element, "fusion": fusion.id}
-	return derniere_fusion_epreuve.duplicate()
-
-func augment_deja_fusionne(augment: String) -> bool:
-	for id in inventaire:
-		if CatalogueRecettes.est_fusion(id) and CatalogueRecettes.augment_de(id) == augment: return true
-	return not elements_de_augment(augment).is_empty()
-
-func ajouter_recette(id: String) -> bool:
-	var augment := CatalogueRecettes.augment_de(id)
-	if augment not in inventaire or augment_deja_fusionne(augment) or CatalogueRecettes.creer(id) == null: return false
-	for existante in inventaire:
-		if CatalogueRecettes.recette_de(existante) == CatalogueRecettes.recette_de(id): return false
-	inventaire.append(id)
-	inventaire_change.emit()
-	return true
-
-func tirer_element_alambic() -> String:
-	var disponibles := CatalogueElements.ids()
-	for element in elements_alambic_tires:
-		disponibles.erase(element)
-	if disponibles.is_empty():
-		return ""
-	var element: String = disponibles[rng.randi_range(0, disponibles.size() - 1)]
-	elements_alambic_tires.append(element)
-	return element
-
-func elements_de_augment(augment: String) -> Array[String]:
-	var resultat: Array[String] = []
-	for id in inventaire:
-		if CatalogueElements.est_fusion(id) and CatalogueElements.augment_de_fusion(id) == augment:
-			resultat.append(CatalogueElements.element_de_fusion(id))
-	return resultat
+	return CatalogueReactifs.par_id(id)
 
 func ameliorations_effectives() -> Array:
 	return CatalogueObjets.avec_effets(inventaire, ReglagesJoueur.equipements, ReglagesJoueur.forge_niveaux)

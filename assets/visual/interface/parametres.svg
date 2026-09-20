@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<defs>
+<linearGradient id="or" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#fff3bc"/><stop offset=".38" stop-color="#f6c465"/><stop offset="1" stop-color="#b97836"/></linearGradient>
+<linearGradient id="email" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#b5a1ff"/><stop offset=".5" stop-color="#7753bd"/><stop offset="1" stop-color="#42326e"/></linearGradient>
+<linearGradient id="cristal" x1="0" y1="0" x2=".6" y2="1"><stop stop-color="#e0ffff"/><stop offset=".4" stop-color="#68ecf2"/><stop offset="1" stop-color="#247eae"/></linearGradient>
+</defs>
+<path d="M108 12h40l6 28 16 7 25-15 29 29-15 25 7 16 28 6v40l-28 6-7 16 15 25-29 29-25-15-16 7-6 28h-40l-6-28-16-7-25 15-29-29 15-25-7-16-28-6v-40l28-6 7-16-15-25 29-29 25 15 16-7Z" fill="url(#or)" stroke="#6c4160" stroke-width="6" stroke-linejoin="round"/>
+<path d="M113 20h30l5 26 23 10 22-13 20 20-13 22 10 23 26 5v30l-26 5-10 23 13 22-20 20-22-13-23 10-5 26h-30l-5-26-23-10-22 13-20-20 13-22-10-23-26-5v-30l26-5 10-23-13-22 20-20 22 13 23-10Z" fill="none" stroke="#fff0b4" stroke-width="2.5"/>
+<circle cx="128" cy="128" r="76" fill="url(#email)" stroke="#ffe7a3" stroke-width="5"/>
+<circle cx="128" cy="128" r="65" fill="none" stroke="#d8ad73" stroke-width="2"/>
+<path d="M128 67l36 35v52l-36 35-36-35v-52Z" fill="url(#cristal)" stroke="#ffedb7" stroke-width="4" stroke-linejoin="round"/>
+<path d="M128 67v122l-17-35v-52ZM111 102l53 0-17 23-36 29ZM128 189l19-64 17 29Z" fill="#b8fffa" fill-opacity=".65"/>
+<path d="M128 67l19 58 17-23ZM128 189v-64l-36-23v52Z" fill="#367cbb" fill-opacity=".4"/>
+<path d="M128 67l-17 35-19 0M111 102v52l17 35M111 102l36 23 17-23" fill="none" stroke="#efffff" stroke-width="2" stroke-linejoin="round"/>
+<g fill="#a0fff0" stroke="#fff0ba" stroke-width="3"><path d="M128 26l8 12-8 12-8-12ZM230 128l-12 8-12-8 12-8ZM128 230l-8-12 8-12 8 12ZM26 128l12-8 12 8-12 8Z"/></g>
+</svg>

@@ -1,6 +1,0 @@
-v2 : géométrie issue de Meshy_AI_Little_Purple_Wizard_0918191647_generate.glb, fourni par le propriétaire. Texture reconstruite depuis magealam.png fourni par le propriétaire ; allègement, proportions, squelette et animations adaptés pour Alambik. Sources conservées dans assets/3d/sources/characters/mage_v2/.
-
-KayKit : Mage, KayKit Adventurers 2.0 FREE, et clips Rig_Medium de KayKit Character Animations 1.1, par Kay Lousberg. Adaptation Alambik : palette violette/cuir, yeux noisette, chapeau recourbé, écharpe turquoise, boucles dorées et fiole, selon la référence magealam.png.
-Licence CC0 : voir les License.txt des deux packs dans assets/3d/sources/vendor/.
-
-Générateur : tools/blender/variantes_mage.py (Blender en arrière-plan, dossier des téléchargements en argument).

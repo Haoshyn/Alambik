@@ -18,7 +18,6 @@ func _ready() -> void:
 	_contexte = {
 		"drapeaux_arme": arme.get("drapeaux", []),
 		"avec_sorts": Sorts.ACTIFS.has(ReglagesJoueur.sort_actif_effectif()) or Sorts.ULTIMES.has(ReglagesJoueur.ultime_effectif()),
-		"bouclier_initial": Sorts.donne_bouclier(ReglagesJoueur.passifs_equipes_effectifs()) or ArbreCompetences.donne_bouclier(ReglagesJoueur.rangs_competences_effectifs()),
 	}
 	_rarete = rarete_imposee
 	if campagne and _rarete.is_empty():
@@ -26,23 +25,34 @@ func _ready() -> void:
 	var titre := "Choisissez une augmentation"
 	var sous_titre := "Une nouvelle magie pour cette aventure"
 	if palier_epique > 0:
-		titre = "Étage %d · Augmentation épique" % palier_epique
+		titre = "Étage %d · Augmentation %s" % [palier_epique,
+			"légendaire" if _rarete == Reactif.LEGENDAIRE else "épique"]
 		sous_titre = "Choisissez un pouvoir · Soin garanti : %d %% des PV max" % roundi(ProgressionAugments.SOIN_EPIQUE * 100.0)
+		if _rarete == Reactif.LEGENDAIRE:
+			sous_titre += "\nUnique dans cette aventure · Aucune relance"
 	elif campagne:
 		titre = "Niveau %d / %d · %s" % [etage_recompense, ProgressionAugments.niveau_max(),
 			"Rare" if _rarete == Reactif.RARE else "Commun"]
 		sous_titre = "Quatre rares garantis entre les niveaux 1 et 10" if _rarete == Reactif.RARE else "Soin, attaque ou PV maximum · Bonus cumulables sans diminution"
-	var col := StyleAzur.page(self, titre)
-	col.add_child(StyleAzur.texte(sous_titre, 28, StyleAzur.IVOIRE))
+	var col := StyleAzur.page(self, "Augmentations")
+	StyleAzur.banniere(col, titre, sous_titre, "fiole")
 	_cartes = StyleAzur.defilement(col)
+	_cartes.add_theme_constant_override("separation", 22)
+	var consigne := StyleAzur.texte("Touchez la carte du pouvoir à emporter", 25, StyleAzur.ATTENUE)
+	consigne.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(consigne)
 	_bouton_reroll = StyleAzur.bouton("", _sur_reroll)
 	col.add_child(_bouton_reroll)
 	_nouveau_tirage()
+	if not _choisi:
+		StyleInterface.animer_entree(self)
 	Capture.programmer(self)
 	if Jeu.mode_auto:
 		_choisir_automatiquement()
 
 func _nouveau_tirage() -> void:
+	if _rarete == Reactif.LEGENDAIRE and not _propositions.is_empty():
+		return
 	var anciennes := _propositions.duplicate()
 	_propositions = DraftLogique.proposer(Jeu.ameliorations_effectives(), Jeu.rng,
 		ProgressionAugments.NOMBRE_CHOIX, _rarete, etage_recompense if campagne else 0, anciennes, _contexte)
@@ -54,51 +64,26 @@ func _nouveau_tirage() -> void:
 		return
 	for id in _propositions:
 		var reactif := CatalogueReactifs.par_id(id)
-		var b := StyleAzur.bouton("", func(): _sur_choix(id))
-		var index := _cartes.get_child_count() % 3
-		var teinte: Color = [Color("583248"), Color("354f49"), Color("53425f")][index]
-		var accent := reactif.couleur_rarete()
-		b.add_theme_stylebox_override("normal", StyleAzur.cadre(teinte, accent))
-		b.custom_minimum_size.y = 310
-		_cartes.add_child(b)
-		var marge := MarginContainer.new()
-		marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		for cote in ["left", "right", "top", "bottom"]:
-			marge.add_theme_constant_override("margin_" + cote, 24)
-		marge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		b.add_child(marge)
-		var ligne := HBoxContainer.new()
-		ligne.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		ligne.add_theme_constant_override("separation", 28)
-		marge.add_child(ligne)
-		ligne.add_child(StyleAzur.vignette(id, 160))
-		var texte := VBoxContainer.new()
-		texte.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		texte.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		ligne.add_child(texte)
-		var deja := Jeu.copies(id)
-		var etiquette := reactif.nom_rarete().to_upper()
-		if reactif.copies_permises() > 1 and not reactif.mods.has("soin_part"):
-			etiquette += " · Rang %d/%d" % [deja + 1, reactif.copies_permises()]
-		texte.add_child(StyleAzur.texte(etiquette, 22, accent))
-		texte.add_child(StyleAzur.texte(reactif.nom, 35))
-		texte.add_child(StyleAzur.texte(reactif.description, 27, StyleAzur.ATTENUE))
-		if reactif.rarete != Reactif.COMMUN:
-			texte.add_child(StyleAzur.texte(DetailsReactif.texte_gain(reactif, deja), 25, accent))
-		marge.minimum_size_changed.connect(func(): b.custom_minimum_size.y = maxf(310.0, marge.get_combined_minimum_size().y))
+		var carte := CarteReactif.new()
+		carte.pour_choix = true
+		carte.configurer(reactif)
+		carte.choisie.connect(_sur_choix)
+		_cartes.add_child(carte)
 	var disponibles := DraftLogique.candidats(Jeu.ameliorations_effectives(),
 		_rarete, etage_recompense if campagne else 0, _contexte)
 	var peut_changer := false
 	for id in disponibles:
 		if id not in _propositions:
 			peut_changer = true
-	_bouton_reroll.text = "Nouveau tirage · %d restant(s)" % Jeu.rerolls_restants
-	_bouton_reroll.disabled = _rarete == Reactif.COMMUN or Jeu.rerolls_restants <= 0 or not peut_changer
+	_bouton_reroll.text = "Renouveler les cartes · %d restant(s) · %d max par aventure" % [Jeu.rerolls_restants, Reglages.RELANCES_MAX_PAR_RUN]
+	_bouton_reroll.disabled = not ProgressionAugments.relance_autorisee(_rarete) or Jeu.rerolls_restants <= 0 or not peut_changer
+	_bouton_reroll.visible = ProgressionAugments.relance_autorisee(_rarete)
 
 func _sur_reroll() -> void:
-	if _choisi or _bouton_reroll.disabled or Jeu.rerolls_restants <= 0:
+	if _choisi or _bouton_reroll.disabled:
 		return
-	Jeu.rerolls_restants -= 1
+	if not Jeu.consommer_relance(_rarete):
+		return
 	# La rarete est fixee a l'ouverture du niveau, jamais relancee.
 	_nouveau_tirage()
 
@@ -106,9 +91,13 @@ func _sur_choix(id: String) -> void:
 	if _choisi or id not in _propositions:
 		return
 	_choisi = true
+	for carte in _cartes.get_children():
+		if carte is CarteReactif:
+			carte.selectionnee = carte.reactif.id == id
+			carte.disabled = true
 	var reactif := CatalogueReactifs.par_id(id)
 	soin_choisi = float(reactif.mods.get("soin_part", 0.0))
-	if reactif.rarete == Reactif.EPIQUE:
+	if reactif.rarete in [Reactif.EPIQUE, Reactif.LEGENDAIRE]:
 		soin_choisi += ProgressionAugments.SOIN_EPIQUE
 	if not reactif.mods.has("soin_part"):
 		Jeu.ajouter_reactif(id)

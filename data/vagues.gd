@@ -38,12 +38,6 @@ const POOL_MINE_FIN := ["encrier_rampant", "plume_sentinelle", "tache_veloce", "
 	"cachet_phaseur", "fuseau_tisseur", "fiole_volatile"]
 
 static func pour_salle(numero: int, chapitre := 0, graine := 0, mode := "grimoire") -> Array:
-	if mode == "retro":
-		return [
-			["encrier_rampant", "plume_sentinelle", "tache_veloce"],
-			["folio_orbiteur", "fiole_volatile", "fuseau_tisseur"],
-			["la_rature"],
-		]
 	if mode == "epreuve_sorts":
 		return _miniboss_aleatoire(numero, graine)
 	if mode == "mine":

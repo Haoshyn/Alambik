@@ -12,8 +12,8 @@ const LOOTS := [
 	["impulsion_foudroyante", "reserve_ultime"],
 	["sang_froid", "dernier_rempart"],
 	["transmutation_totale"],
-	["explosion_corrosive"],
-	["audace", "echo_alchimique"],
+	["explosion_corrosive", "vortex_alchimique"],
+	["audace", "echo_alchimique", "purification_totale"],
 ]
 const PALIERS := [0, 2, 5, 8, 11, 14, 17, 20, 23, 26, 29]
 
@@ -33,9 +33,20 @@ static func niveau_pour(id: String) -> int:
 
 static func candidats(niveau: int, rangs: Dictionary) -> Array[String]:
 	var resultat: Array[String] = []
+	var nouveautes: Array[String] = []
 	for id in sorts(niveau):
-		if int(rangs.get(id, 0)) < Reglages.CAPACITE_RANG_MAX: resultat.append(str(id))
-	return resultat
+		var rang := int(rangs.get(id, 0))
+		if rang <= 0:
+			nouveautes.append(str(id))
+		elif rang < Reglages.CAPACITE_RANG_MAX:
+			resultat.append(str(id))
+	return nouveautes if not nouveautes.is_empty() else resultat
+
+static func nouvelle_capacite_disponible(niveau: int, rangs: Dictionary) -> bool:
+	for id in sorts(niveau):
+		if int(rangs.get(id, 0)) <= 0:
+			return true
+	return false
 
 static func provenance(id: String) -> String:
 	return "Épreuve de magie · niveau %d" % niveau_pour(id)

@@ -1,33 +1,29 @@
 class_name ProgressionStatistiques
 extends RefCounted
 
-# Courbe fixe des 35 chapitres, pour une premiere campagne autour de douze heures
-# avec reprises et annexes. Aucun coefficient ne lit le build reel du joueur.
-# La puissance permanente attendue en fin de campagne vaut environ x12 a x18 ;
-# les motifs et les terrains apportent le reste de la difficulte.
-const PV_DEPART := .75
-const DEGATS_DEPART := .50
-const PV_FIN := 15.0
-const DEGATS_FIN := 15.0
-const EXPOSANT_PROGRESSION := 1.15
+# Hypothese non mesuree : 3 a 5 tentatives par chapitre, farm compris.
+# La courbe reste fixe : mieux s'equiper doit aider, sans relever les ennemis.
+const PALIERS := [0, 6, 13, 20, 27, 34]
+const MULTIPLICATEURS_PV := [1.2, 5.0, 12.0, 25.0, 45.0, 80.0]
+const MULTIPLICATEURS_DEGATS := [0.65, 1.3, 2.5, 4.5, 7.0, 10.0]
 
-static func _fin_campagne() -> int:
-	# La taille du catalogue est evaluee a l'appel : size() n'est pas une
-	# expression constante acceptee par Godot 4.7.1 dans cette dependance.
-	return Chapitres.MONDES.size() * Chapitres.CHAPITRES_PAR_MONDE - 1
-
-static func _courbe(palier: int, depart: float, fin: float) -> float:
-	var progression := float(maxi(0, palier)) / maxf(1.0, float(_fin_campagne()))
-	return depart * pow(fin / depart, pow(progression, EXPOSANT_PROGRESSION))
+static func _courbe(palier: int, valeurs: Array) -> float:
+	var p := maxi(0, palier)
+	var droite := PALIERS.size() - 1
+	for index in range(1, PALIERS.size()):
+		if p <= int(PALIERS[index]):
+			droite = index
+			break
+	var gauche := droite - 1
+	var progression := float(p - int(PALIERS[gauche])) / float(int(PALIERS[droite]) - int(PALIERS[gauche]))
+	var depart := float(valeurs[gauche])
+	return depart * pow(float(valeurs[droite]) / depart, progression)
 
 static func facteur_pv(palier: int) -> float:
-	return _courbe(palier, PV_DEPART, PV_FIN)
+	return _courbe(palier, MULTIPLICATEURS_PV)
 
 static func facteur_degats(palier: int) -> float:
-	return _courbe(palier, DEGATS_DEPART, DEGATS_FIN)
+	return _courbe(palier, MULTIPLICATEURS_DEGATS)
 
-# Les premieres victoires doivent etre possibles sans Sort ni Ultime ; le
-# budget de vie des miniboss accompagne ensuite l'acquisition de cet arsenal.
-static func facteur_miniboss(palier: int) -> float:
-	var progression := clampf(float(palier) / maxf(1.0, float(_fin_campagne())), 0.0, 1.0)
-	return lerpf(Reglages.MINIBOSS_PV_MULT_DEPART, Reglages.MINIBOSS_PV_MULT, pow(progression, EXPOSANT_PROGRESSION))
+static func facteur_miniboss(_palier: int) -> float:
+	return Reglages.MINIBOSS_PV_MULT

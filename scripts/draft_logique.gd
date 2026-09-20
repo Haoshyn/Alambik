@@ -2,16 +2,14 @@ class_name DraftLogique
 extends RefCounted
 
 # Une offre partage sa rarete : un pouvoir ne concurrence jamais un petit bonus.
-# Sans rarete explicite, conserver le catalogue historique des modes annexes.
+# Sans rarete explicite, les modes annexes piochent parmi les rares et epiques.
 static func candidats(inventaire: Array, rarete := "", niveau := 0, contexte: Dictionary = {}) -> Array[String]:
 	var liste: Array[String] = []
 	for id in CatalogueReactifs.ids():
 		if not bool(contexte.get("avec_sorts", true)) and id in CatalogueReactifs.AUGMENTS_SORTS:
 			continue
-		if id == "egide" and bool(contexte.get("bouclier_initial", false)):
-			continue
 		var reactif := CatalogueReactifs.par_id(id)
-		if rarete.is_empty() and reactif.rarete == Reactif.COMMUN:
+		if rarete.is_empty() and reactif.rarete in [Reactif.COMMUN, Reactif.LEGENDAIRE]:
 			continue
 		if not rarete.is_empty() and reactif.rarete != rarete:
 			continue
@@ -47,8 +45,9 @@ static func proposer(inventaire: Array, rng: RandomNumberGenerator, nb := Progre
 				nouveaux.append(id)
 		var source: Array[String] = nouveaux if not nouveaux.is_empty() else restants
 		var varies: Array[String] = []
+		# Les legendaires ont toutes la meme chance, sans imposer celle de sorts.
 		for id in source:
-			if CatalogueReactifs.par_id(id).famille not in familles:
+			if rarete != Reactif.LEGENDAIRE and CatalogueReactifs.par_id(id).famille not in familles:
 				varies.append(id)
 		if varies.is_empty():
 			varies = source.duplicate()

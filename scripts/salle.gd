@@ -76,8 +76,6 @@ func demarrer(numero_: int, limites_: Rect2) -> void:
 		_demarrer_mine()
 		return
 	if _vagues.is_empty():
-		# Un alambic n'est pas une arene : la salle se termine aussitot et
-		# l'orchestrateur ouvre le panneau.
 		_finie = true
 		terminee.emit()
 		return
@@ -92,7 +90,7 @@ func _construire_obstacles() -> void:
 	_retraits.clear()
 	_contour = FormesSalles.contour(limites, FormesSalles.indice(numero, Jeu.chapitre, Jeu.graine, Jeu.mode_run))
 	var combat_de_boss := Jeu.mode_run == "grimoire" and Chapitres.est_boss(Jeu.chapitre, numero) \
-		or Jeu.mode_run in ["epreuve_sorts", "retro"]
+		or Jeu.mode_run == "epreuve_sorts"
 	if combat_de_boss or _vagues.is_empty() and Jeu.mode_run != "mine":
 		_construire_murs_perimetre()
 		return
@@ -261,8 +259,7 @@ func _vague_suivante() -> void:
 			index_elite = _alea_elites.randi_range(0, vague.size() - 1)
 	for i in vague.size():
 		faire_apparaitre(str(vague[i]), _position_d_apparition(), null, i == index_elite)
-	_attente_vague = -1.0 if Jeu.est_retro() else (
-		Reglages.DELAI_VAGUE_FORCE if _vague_courante < _vagues.size() - 1 else -1.0)
+	_attente_vague = Reglages.DELAI_VAGUE_FORCE if _vague_courante < _vagues.size() - 1 else -1.0
 
 func _ouvrir_portail() -> void:
 	if _finie or _portail_ouvert:
@@ -352,9 +349,6 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 		if donnees["cerveau"] == "boss":
 			copie["pv"] *= Reglages.MINE_BOSS_PV_MULT
 			copie["degats"] *= Reglages.MINE_BOSS_DEGATS_MULT
-	elif Jeu.est_retro():
-		copie["pv"] = float(donnees["pv"]) * Reglages.RETRO_PV_MULT * ProgressionStatistiques.facteur_pv(0)
-		copie["degats"] = float(donnees["degats"]) * Reglages.RETRO_DEGATS_MULT * ProgressionStatistiques.facteur_degats(0)
 	else:
 		copie["pv"] = float(donnees["pv"]) * Chapitres.facteur_pv(Jeu.chapitre, numero)
 		copie["degats"] = float(donnees["degats"]) * Chapitres.facteur_degats(Jeu.chapitre, numero)
@@ -364,19 +358,16 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 				else ProgressionStatistiques.facteur_miniboss(Chapitres.palier(Jeu.chapitre))
 			copie["degats"] *= Reglages.BOSS_SIGNATURE_DEGATS_MULT if signature else Reglages.MINIBOSS_DEGATS_MULT
 	# Les monstres communs gagnent de la menace par leur rythme, pas par des PV.
-	# Le Retro reste volontairement un prototype de demonstration et n'est pas
-	# concerne par cette passe de difficulte.
-	if donnees["cerveau"] != "boss" and not Jeu.est_retro():
+	if donnees["cerveau"] != "boss":
 		copie["degats"] = float(copie["degats"]) * Reglages.ENNEMI_DEGATS_MULT
 		if copie.has("vitesse_projectile"):
 			copie["vitesse_projectile"] = float(copie["vitesse_projectile"]) * Reglages.ENNEMI_PROJECTILE_VITESSE_MULT
 		if copie.has("recharge"):
 			copie["recharge"] = float(copie["recharge"]) * Reglages.ENNEMI_RECHARGE_MULT
-	if not Jeu.est_retro():
-		var chapitre_patterns := Jeu.chapitre if Jeu.mode_run == "grimoire" else (Epreuves.palier(Jeu.niveau_epreuve) if Jeu.mode_run == "epreuve_sorts" else ReglagesJoueur.palier_atteint())
-		copie = EvolutionEnnemis.appliquer(copie,chapitre_patterns)
-		if donnees["cerveau"] == "boss" and Jeu.mode_run != "grimoire":
-			copie["pv"] = float(copie["pv"])*EvolutionEnnemis.ANNEXE_PV_BOSS
+	var chapitre_patterns := Jeu.chapitre if Jeu.mode_run == "grimoire" else (Epreuves.palier(Jeu.niveau_epreuve) if Jeu.mode_run == "epreuve_sorts" else ReglagesJoueur.palier_atteint())
+	copie = EvolutionEnnemis.appliquer(copie,chapitre_patterns)
+	if donnees["cerveau"] == "boss" and Jeu.mode_run != "grimoire":
+		copie["pv"] = float(copie["pv"])*EvolutionEnnemis.ANNEXE_PV_BOSS
 	return copie
 
 func _sur_ennemi_touche(position: Vector2, couleur: Color) -> void:
@@ -513,7 +504,6 @@ func tirer(tir_source: Tir, origine: Vector2, direction: Vector2, hostile := fal
 		p.global_position = origine_projectile
 		p.fragments_demandes.connect(_sur_fragments)
 		p.impact_visuel.connect(_sur_impact)
-		p.soin_demande.connect(_sur_soin_demande)
 		add_child(p)
 
 func _sur_tir_ennemi(tir_ennemi: Tir, origine: Vector2, direction: Vector2) -> void:
@@ -523,11 +513,6 @@ func _sur_tir_ennemi(tir_ennemi: Tir, origine: Vector2, direction: Vector2) -> v
 func _sur_impact(position: Vector2, couleur: Color, ampleur: float) -> void:
 	if effets != null:
 		effets.impact(position, couleur, ampleur)
-
-func _sur_soin_demande(montant: float) -> void:
-	var heros := get_tree().get_first_node_in_group("heros")
-	if heros != null:
-		heros.stats.soigner(montant)
 
 func _sur_fragments(origine: Vector2, direction: Vector2, tir_source: Tir, hostile: bool,
 		cible_exclue: int) -> void:

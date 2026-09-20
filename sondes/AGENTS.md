@@ -1,5 +1,5 @@
 # sondes/
 
-Simulation intégrée, contrôles de cohérence et runs headless, uniquement sur demande explicite conformément à l'`AGENTS.md` racine. Une sonde ne doit jamais écrire dans la sauvegarde réelle du joueur.
+Seuls `bot.gd` et `navigation_bot.gd` restent actifs pour l'option PC `--auto` de `scripts/run.gd`. Ils sont exclus des exports Android. Ne pas les déplacer sans adapter ce consommateur.
 
-Lire les résultats détaillés : un processus qui termine n'implique pas qu'une run ait progressé correctement.
+Les autres diagnostics sont archivés, voir `docs/INDEX.md`. Pour toute simulation demandée, utiliser un profil isolé et lire les résultats détaillés : une fin de processus ne prouve pas la progression d'une run.

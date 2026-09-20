@@ -1,18 +1,24 @@
 extends Control
 signal ferme
 var integre_menu := false
+var maitrise_initiale := ""
 var _selection := ""
 var _message := ""
+var _titre_details: Label
 var _details: Label
+var _message_details: Label
 var _solde: Label
 var _achat: Button
 var _noeuds := {}
 var _embleme: TextureRect
 
 func _ready() -> void:
+	if ArbreCompetences.NOEUDS.has(maitrise_initiale):
+		_selection = maitrise_initiale
 	if ReglagesJoueur.remboursement_maitrises > 0:
 		_message = "Arbre réorganisé : %d gouttes remboursées." % ReglagesJoueur.remboursement_maitrises
 	var col := StyleAzur.page(self,"Maîtrises",integre_menu)
+	StyleAzur.banniere(col, "La constellation des savoirs", "Les bonus d’attaque renforcent l’attaque de base de votre équipement.", "astrolabe")
 	_solde = StyleAzur.texte("",28,StyleAzur.IVOIRE)
 	_solde.visible = not integre_menu
 	col.add_child(_solde)
@@ -24,10 +30,16 @@ func _ready() -> void:
 	for branche in ArbreCompetences.BRANCHES:
 		var accent: Color = [StyleAzur.CORAIL, StyleAzur.MENTHE, StyleAzur.CUIVRE][index_branche]
 		index_branche += 1
+		var socle := PanelContainer.new()
+		HabillagePeint.appliquer(socle)
+		socle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		socle.add_theme_stylebox_override("panel", StyleAzur.cadre(StyleAzur.PANNEAU, accent))
+		branches.add_child(socle)
 		var ligne := VBoxContainer.new()
-		ligne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		branches.add_child(ligne)
-		var titre := StyleAzur.texte(branche,29,accent)
+		ligne.add_theme_constant_override("separation", 10)
+		socle.add_child(ligne)
+		ligne.add_child(StyleAzur.illustration(["couronne", "fiole", "astrolabe"][index_branche - 1], 76))
+		var titre := StyleAzur.texte(branche,30,StyleAzur.IVOIRE)
 		titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		ligne.add_child(titre)
 		for identifiant in ArbreCompetences.BRANCHES[branche]:
@@ -38,65 +50,97 @@ func _ready() -> void:
 				_message = ""
 				_rafraichir())
 			b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			b.custom_minimum_size = Vector2(174,174)
-			b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-			b.add_theme_font_size_override("font_size",25)
-			var icone := StyleAzur.vignette(id, 112, true)
-			icone.position = Vector2(31, 18)
-			b.add_child(icone)
+			b.custom_minimum_size = Vector2(192,178)
+			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			var marge := MarginContainer.new()
+			marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			marge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			for cote in ["left", "right", "top", "bottom"]:
+				marge.add_theme_constant_override("margin_" + cote, 16)
+			b.add_child(marge)
+			var contenu_noeud := VBoxContainer.new()
+			contenu_noeud.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			contenu_noeud.alignment = BoxContainer.ALIGNMENT_CENTER
+			contenu_noeud.add_theme_constant_override("separation", 8)
+			marge.add_child(contenu_noeud)
+			var icone := StyleAzur.vignette(id, 90, true)
+			icone.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			contenu_noeud.add_child(icone)
 			b.set_meta("embleme", icone.texture)
+			b.set_meta("icone", icone)
 			b.set_meta("accent", accent)
-			var rang := StyleAzur.texte("", 22)
-			rang.position = Vector2(8, 128)
-			rang.size = Vector2(158, 30)
+			var rang := StyleAzur.texte("", 28, StyleAzur.IVOIRE)
 			rang.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			b.add_child(rang)
+			contenu_noeud.add_child(rang)
 			b.set_meta("rang", rang)
-			b.add_theme_stylebox_override("hover", StyleAzur.cadre(Color("476ba3"), StyleAzur.MAGIE, 64))
-			b.add_theme_stylebox_override("pressed", StyleAzur.cadre(Color("793e92"), StyleAzur.MAGIE, 64))
-			b.add_theme_stylebox_override("focus", StyleAzur.cadre(Color.TRANSPARENT, StyleAzur.MAGIE, 64))
+			b.add_theme_stylebox_override("hover", _style_noeud(accent, true))
+			b.add_theme_stylebox_override("pressed", _style_noeud(StyleAzur.MAGIE, true))
+			var focus := _style_noeud(StyleAzur.IVOIRE, true)
+			focus.draw_center = false
+			b.add_theme_stylebox_override("focus", focus)
 			if ArbreCompetences.rangs(id) == 1:
-				var majeur := StyleAzur.texte("POUVOIR MAJEUR", 18, accent)
+				var majeur := StyleAzur.texte("Pouvoir majeur", 24, StyleAzur.IVOIRE)
 				majeur.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 				ligne.add_child(majeur)
 			ligne.add_child(b)
 			_noeuds[id] = b
-			var lien := StyleAzur.texte("│",26,accent)
-			lien.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			ligne.add_child(lien)
 	var fiche := StyleAzur.plaque(col,true)
 	var ligne_details := HBoxContainer.new()
 	ligne_details.add_theme_constant_override("separation",24)
 	fiche.add_child(ligne_details)
 	_embleme = StyleAzur.image(8,120)
+	_embleme.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	ligne_details.add_child(_embleme)
-	_details = StyleAzur.texte("",28,StyleAzur.ENCRE)
-	_details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	ligne_details.add_child(_details)
+	var texte_details := VBoxContainer.new()
+	texte_details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	texte_details.add_theme_constant_override("separation", 12)
+	ligne_details.add_child(texte_details)
+	_titre_details = StyleAzur.texte("",34,StyleAzur.IVOIRE)
+	texte_details.add_child(_titre_details)
+	_details = StyleAzur.texte("",28,StyleAzur.IVOIRE)
+	_details.add_theme_constant_override("line_spacing", 6)
+	texte_details.add_child(_details)
+	_message_details = StyleAzur.texte("",28,StyleAzur.IVOIRE)
+	_message_details.add_theme_constant_override("line_spacing", 6)
+	fiche.add_child(_message_details)
 	_achat = StyleAzur.bouton("Améliorer",_ameliorer,true)
 	col.add_child(_achat)
-	col.add_child(StyleAzur.bouton("Réinitialiser les maîtrises",_reinitialiser))
+	contenu.add_child(StyleAzur.bouton("Réinitialiser les maîtrises",_reinitialiser))
 	_rafraichir()
 	Capture.programmer(self)
+
+func _style_noeud(accent: Color, selection := false, ouvert := true) -> StyleBoxFlat:
+	# Les petites cellules gardent la place pour l'icone et le rang plutot que l'ornement.
+	var style := StyleBoxFlat.new()
+	style.bg_color = StyleAzur.FOND.lerp(accent, 0.18 if selection else 0.04) if ouvert else StyleAzur.FOND.darkened(0.12)
+	style.border_color = accent if ouvert else StyleAzur.ATTENUE.darkened(0.4)
+	style.set_border_width_all(4 if selection else 2)
+	style.set_corner_radius_all(20)
+	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
+		style.set_content_margin(cote, 16)
+	return style
 
 func _rafraichir() -> void:
 	_solde.text = "%s gouttes disponibles" % ReglagesJoueur.gouttes_affichees()
 	for id in _noeuds:
 		var b: Button = _noeuds[id]
 		var ouvert := ReglagesJoueur.mode_dev or ArbreCompetences.prerequis_atteint(id,ReglagesJoueur.rangs_competences)
-		b.modulate = Color.WHITE if ouvert else Color("687ba9")
+		var icone: TextureRect = b.get_meta("icone")
+		icone.modulate = Color.WHITE if ouvert else Color("8691a8")
 		var rang: Label = b.get_meta("rang")
 		rang.text = "%d / %d" % [ReglagesJoueur.rang_competence(id),ArbreCompetences.rangs(id)] if ouvert else "Verrouillé"
 		if ouvert and id == _selection: rang.text = "◆ " + rang.text
 		elif ouvert and ReglagesJoueur.rang_competence(id) > 0: rang.text = "✓ " + rang.text
 		b.tooltip_text = str(ArbreCompetences.NOEUDS[id]["nom"]) + (" · Pouvoir majeur" if ArbreCompetences.rangs(id)==1 else "")
-		b.add_theme_font_size_override("font_size",22)
-		b.add_theme_color_override("font_color",StyleAzur.IVOIRE)
 		var accent: Color = b.get_meta("accent")
-		b.add_theme_stylebox_override("normal",StyleAzur.cadre(StyleAzur.PANNEAU.lerp(accent,0.3 if id == _selection else 0.12) if ouvert else Color("292431"),accent if ouvert else Color("776b85"),32))
+		b.add_theme_stylebox_override("normal",_style_noeud(accent, id == _selection, ouvert))
 	var n: Dictionary = ArbreCompetences.NOEUDS[_selection]
-	_embleme.texture = _noeuds[_selection].get_meta("embleme")
-	_details.text = "%s\n%s\n%s" % [n["nom"],ArbreCompetences.description_effective(_selection),_message]
+	var selection: Button = _noeuds[_selection]
+	_embleme.texture = selection.get_meta("embleme")
+	_titre_details.text = str(n["nom"])
+	_details.text = ArbreCompetences.description_effective(_selection)
+	_message_details.text = _message
+	_message_details.visible = not _message.is_empty()
 	var rang_actuel := ReglagesJoueur.rang_competence(_selection)
 	_details.text += "\nBonus du nœud : %s" % ArbreCompetences.valeur_au_rang(_selection, rang_actuel)
 	if rang_actuel < ArbreCompetences.rangs(_selection):

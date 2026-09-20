@@ -3,6 +3,7 @@ extends Node3D
 var source: Node2D
 var _particules: MultiMesh
 var _lignes := ImmediateMesh.new()
+var _sorts := ImmediateMesh.new()
 var _mat := StandardMaterial3D.new()
 
 func _ready() -> void:
@@ -10,6 +11,7 @@ func _ready() -> void:
 	_mat.vertex_color_use_as_albedo = true
 	_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_mat.no_depth_test = true
+	_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	var mesh := SphereMesh.new()
 	mesh.radius = 1.0
 	mesh.height = 2.0
@@ -30,6 +32,10 @@ func _ready() -> void:
 	lignes.mesh = _lignes
 	lignes.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(lignes)
+	var sorts := MeshInstance3D.new()
+	sorts.mesh = _sorts
+	sorts.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(sorts)
 
 func relier(noeud: Node2D) -> void:
 	source = noeud
@@ -38,6 +44,7 @@ func relier(noeud: Node2D) -> void:
 func _process(_delta: float) -> void:
 	if not is_instance_valid(source):
 		return
+	_dessiner_sorts()
 	var particules: Array = source.get("_particules")
 	var nombre := mini(particules.size(),Visuels3D.PARTICULES_REDUITES if ReglagesJoueur.effets_reduits else Visuels3D.PARTICULES_MAX)
 	_particules.visible_instance_count = nombre
@@ -69,3 +76,18 @@ func _process(_delta: float) -> void:
 		_lignes.surface_add_vertex(Pont3D.vers_monde(arc["depart"]))
 		_lignes.surface_add_vertex(Pont3D.vers_monde(arc["arrivee"]))
 	_lignes.surface_end()
+
+func _dessiner_sorts() -> void:
+	_sorts.clear_surfaces()
+	var segments: Array = source.get("_segments_sorts")
+	if segments.is_empty():
+		return
+	_sorts.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _mat)
+	for segment in segments:
+		var debut := Pont3D.vers_monde(segment["depart"]) + Vector3.UP * 0.035
+		var fin := Pont3D.vers_monde(segment["arrivee"]) + Vector3.UP * 0.035
+		var cote := (fin - debut).cross(Vector3.UP).normalized() * 0.025
+		_sorts.surface_set_color(segment["couleur"])
+		for sommet in [debut - cote, debut + cote, fin + cote, debut - cote, fin + cote, fin - cote]:
+			_sorts.surface_add_vertex(sommet)
+	_sorts.surface_end()

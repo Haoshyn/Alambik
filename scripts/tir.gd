@@ -2,10 +2,12 @@ class_name Tir
 extends RefCounted
 
 # Description d'un tir, pas un comportement : le projectile lit ces champs et
-# les execute. Une fusion n'est donc qu'une composition de valeurs.
+# les execute.
 
 var arme := "standard"
 var degats: float
+var attaque_base := 0.0
+var bonus_attaque := 0.0
 var vitesse: float
 var portee: float
 var cadence: float
@@ -24,6 +26,8 @@ var drapeaux: Array[String] = []
 static func de_base(stats: Stats) -> Tir:
 	var t := Tir.new()
 	t.degats = stats.degats
+	t.attaque_base = stats.attaque_base
+	t.bonus_attaque = stats.bonus_attaque
 	t.vitesse = stats.vitesse_projectile
 	t.portee = stats.portee
 	t.cadence = stats.cadence
@@ -72,6 +76,8 @@ func copie() -> Tir:
 	var t := Tir.new()
 	t.arme = arme
 	t.degats = degats
+	t.attaque_base = attaque_base
+	t.bonus_attaque = bonus_attaque
 	t.vitesse = vitesse
 	t.portee = portee
 	t.cadence = cadence

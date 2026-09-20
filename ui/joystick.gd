@@ -12,16 +12,11 @@ signal tape_rapide(nombre: int)
 var _logique := JoystickLogique.new()
 var _raccourci := RaccourciTactile.new()
 var _doigt := -1
-var _anim := 0.0
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_preset(Control.PRESET_FULL_RECT)
-
-func _process(delta: float) -> void:
-	_anim += delta
-	if _doigt != -1:
-		queue_redraw()
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 
 func _zone_valide(position: Vector2) -> bool:
 	var taille := get_viewport_rect().size
@@ -70,27 +65,11 @@ func _input(evenement: InputEvent) -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	# Repli geometrique : le joystick se dessine, il n'a pas de sprite.
 	if _doigt == -1:
 		return
 	var origine := _logique.origine
 	var pouce := origine + _logique.direction() * _logique.intensite() * JoystickLogique.RAYON
-	var hexagone := Dessin.polygone_regulier(origine, JoystickLogique.RAYON + 8.0, 12, PI / 12.0)
-	Dessin.contour(self, hexagone, Color(0.01, 0.02, 0.05, 0.72), 10.0)
-	Dessin.contour(self, hexagone, Color(Palette.ESSENCE, 0.30), 2.0)
-	draw_circle(origine, JoystickLogique.RAYON, Color(1, 1, 1, 0.06))
-	draw_circle(origine, JoystickLogique.RAYON * 0.72, Color(0.025, 0.018, 0.050, 0.36))
-	draw_arc(origine, JoystickLogique.RAYON, -PI * 0.5, -PI * 0.5 + TAU * maxf(0.04, _logique.intensite()), 48, Color(Palette.OR, 0.72), 5.0, true)
-	draw_arc(origine, JoystickLogique.RAYON, 0.0, TAU, 48, Color(1, 1, 1, 0.14), 2.0, true)
-	for index in 8:
-		var angle := float(index) * TAU / 8.0
-		var debut := origine + Vector2.RIGHT.rotated(angle) * (JoystickLogique.RAYON - 13.0)
-		var fin := origine + Vector2.RIGHT.rotated(angle) * (JoystickLogique.RAYON - 3.0)
-		draw_line(debut, fin, Color(Palette.ESSENCE if index % 2 == 0 else Palette.OR, 0.40), 3.0, true)
-	draw_arc(origine, JoystickLogique.RAYON * 0.28, 0.0, TAU, 24, Color(1, 1, 1, 0.12), 2.0, true)
-	if _logique.intensite() > 0.0:
-		draw_line(origine, pouce, Color(Palette.OR, 0.35), 4.0, true)
-	Dessin.halo(self, pouce, JoystickLogique.RAYON * 0.7, Color(Palette.ESSENCE, 0.42), 3)
-	draw_circle(pouce, JoystickLogique.RAYON * 0.32, Color(0.02, 0.08, 0.12, 0.88))
-	draw_arc(pouce, JoystickLogique.RAYON * 0.32, 0.0, TAU, 24, Color(Palette.OR, 0.82), 3.0, true)
-	draw_circle(pouce, JoystickLogique.RAYON * 0.16, Color(Palette.ESSENCE, 0.72))
+	var base := Vector2.ONE * (JoystickLogique.RAYON + 10.0) * 2.0
+	var curseur := Vector2.ONE * JoystickLogique.RAYON * 0.88
+	draw_texture_rect(StyleAzur.texture_interface("joystick_base"), Rect2(origine - base * 0.5, base), false, Color(1, 1, 1, 0.78))
+	draw_texture_rect(StyleAzur.texture_interface("joystick_curseur"), Rect2(pouce - curseur * 0.5, curseur), false)
