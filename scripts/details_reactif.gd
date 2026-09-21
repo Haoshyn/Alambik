@@ -16,10 +16,14 @@ static func lignes(reactif: Reactif, copies := 1) -> Array[String]:
 	_ajouter_multiplicateur(resultat, mods, "vitesse_mult", "Vitesse des projectiles", copies)
 	_ajouter_multiplicateur(resultat, mods, "portee_mult", "Portée", copies)
 	_ajouter_multiplicateur(resultat, mods, "pv_max_mult", "PV maximum", copies)
+	_ajouter_multiplicateur(resultat, mods, "defense_mult", "Défense", copies)
 	_ajouter_multiplicateur(resultat, mods, "deplacement_mult", "Déplacement", copies)
 	_ajouter_multiplicateur(resultat, mods, "attaque_sorts_mult", "Attaque des sorts", copies)
 	_ajouter_multiplicateur(resultat, mods, "recharge_sorts_mult", "Récupération des sorts", copies)
 	_ajouter_multiplicateur(resultat, mods, "rayon_sorts_mult", "Rayon du sort actif", copies)
+	_ajouter_multiplicateur(resultat, mods, "degats_projectile_mult", "Dégâts par projectile", copies)
+	_ajouter_multiplicateur(resultat, mods, "degats_finaux_projectile_mult", "Dégâts finaux de tous les projectiles", copies)
+	_ajouter_multiplicateur(resultat, mods, "degats_hors_baguette_mult", "Dégâts hors attaque de base", copies)
 	if mods.has("soin_part"):
 		resultat.append("Soin immédiat : %s %% des PV max" % _nombre(float(mods["soin_part"]) * 100.0))
 	_ajouter_entier(resultat, mods, "nb_projectiles_add", "projectile", copies)
@@ -68,22 +72,25 @@ static func _detail_drapeau(drapeau: String) -> String:
 	match drapeau:
 		"rafale": return "Rafale de %d tirs, intervalle %s s" % [Reglages.RAFALE_NOMBRE, _nombre(Reglages.RAFALE_INTERVALLE)]
 		"homing": return "Les projectiles se dirigent vers les ennemis"
-		"perfore_tout": return "Traverse tous les ennemis ; dégâts −%s %% à chaque traversée" % _nombre(Reglages.PERFORATION_PERTE * 100.0)
-		"egide": return "Annule la première attaque de chaque salle"
+		"perfore_tout": return "Traverse tous les ennemis sans perte de dégâts"
+		"egide": return "Dégâts subis −%s %% · rend immédiatement tous les PV" % _nombre((1.0 - Reglages.EGIDE_REDUCTION) * 100.0)
 		"regeneration": return "Entre les salles : soin de %s %% des PV max, dans le budget partagé des soins" % _nombre(Reglages.REGENERATION_PART * 100.0)
 		"avidite": return "XP +%s %% · Gouttes +%s %%" % [_nombre((Reglages.AVIDITE_XP_MULT-1.0)*100.0),_nombre((Reglages.AVIDITE_GOUTTES_MULT-1.0)*100.0)]
-		"courageux": return "Jusqu’à +%s %% d’attaque à très faibles PV" % _nombre(Reglages.COURAGEUX_BONUS_MAX*100.0)
-		"mannequin": return "Après %s s immobile : attaque +%s %% · cadence +%s %%" % [_nombre(Reglages.MANNEQUIN_DELAI),_nombre((Reglages.MANNEQUIN_DEGATS_MULT-1.0)*100.0),_nombre((Reglages.MANNEQUIN_CADENCE_MULT-1.0)*100.0)]
-		"elan_vital": return "Après un déplacement : attaque +%s %% pendant %s s" % [_nombre((Reglages.ELAN_VITAL_DEGATS_MULT-1.0)*100.0),_nombre(Reglages.ELAN_VITAL_DUREE)]
-		"soif_de_sang": return "Par élimination : soin de %s %% des PV max, dans le budget partagé des soins" % _nombre(Reglages.SOIF_DE_SANG_PART*100.0)
+		"courageux": return "Une vie supplémentaire, rendue à 100 %"
+		"mannequin": return "De %s à %s s immobile : dégâts et cadence jusqu’à +%s %%" % [_nombre(Reglages.MANNEQUIN_DEBUT), _nombre(Reglages.MANNEQUIN_FIN), _nombre(Reglages.MANNEQUIN_BONUS_MAX * 100.0)]
+		"elan_vital": return "Après %s s de mouvement : prochaine attaque doublée par une aura traversante" % _nombre(Reglages.ELAN_VITAL_CHARGE)
+		"soif_de_sang": return "Par élimination : soin de %s %% des PV max" % _nombre(Reglages.SOIF_DE_SANG_PART*100.0)
 		"peau_de_pierre": return "Dégâts subis −%s %%" % _nombre(Reglages.PEAU_DE_PIERRE_REDUCTION*100.0)
 		"sceau_garde": return "Dégâts subis −%s %%" % _nombre(Reglages.SCEAU_GARDE_REDUCTION*100.0)
 		"sceau_ruine": return "Dégâts subis +%s %%" % _nombre((Reglages.SCEAU_RUINE_VULNERABILITE - 1.0) * 100.0)
-		"familier_tireur": return "Familier : %s %% des dégâts d’attaque toutes les %s s" % [_nombre(Reglages.FAMILIER_TIR_PART_DEGATS * 100.0), _nombre(Reglages.FAMILIER_TIR_INTERVALLE)]
+		"familier_tireur": return "Attaque du familier +%s %% · cadence +%s %%" % [_nombre((Reglages.FAMILIER_TIREUR_ATTAQUE_MULT - 1.0) * 100.0), _nombre((Reglages.FAMILIER_TIREUR_CADENCE_MULT - 1.0) * 100.0)]
 		"meteores": return "Météore : %s %% des dégâts d’attaque toutes les %s s · rayon %s" % [_nombre(Reglages.METEORE_PART_DEGATS * 100.0), _nombre(Reglages.METEORE_INTERVALLE), _nombre(Reglages.METEORE_RAYON)]
 		"zone_heros": return "Zone : %s %% des dégâts d’attaque toutes les %s s · rayon %s" % [_nombre(Reglages.ZONE_HEROS_PART_DEGATS * 100.0), _nombre(Reglages.ZONE_HEROS_INTERVALLE), _nombre(Reglages.ZONE_HEROS_RAYON)]
 		"familier_gardien": return "Gardien : %s %% des dégâts d’attaque toutes les %s s · revient après %s s" % [_nombre(Reglages.GARDIEN_PART_DEGATS * 100.0), _nombre(Reglages.GARDIEN_INTERVALLE), _nombre(Reglages.GARDIEN_REAPPARITION)]
-		"orbes_chargees": return "Une orbe toutes les %s s, jusqu’à %d · %s %% des dégâts d’attaque par orbe" % [_nombre(Reglages.ORBE_INTERVALLE), Reglages.ORBE_MAX, _nombre(Reglages.ORBE_PART_DEGATS * 100.0)]
+		"orbes_chargees": return "À l’impact : %s %% des dégâts dans un rayon %s, hors cible principale" % [_nombre(Reglages.ORBE_PART_DEGATS * 100.0), _nombre(Reglages.ORBE_RAYON)]
+		"retardement": return "Une marque par ennemi · répète les dégâts après %s s, réduites par la cadence" % _nombre(Reglages.RETARDEMENT_DELAI)
+		"indelebile": return "Poursuit la cible et traverse murs et ennemis interposés"
+		"annule_malus_degats": return "Annule tous les malus de dégâts des autres augments"
 		"chaine_alchimique": return "Arc : %s %% des dégâts d’attaque par cible toutes les %s s · jusqu’à %d ennemis" % [_nombre(Reglages.CHAINE_PART_DEGATS * 100.0), _nombre(Reglages.CHAINE_INTERVALLE), Reglages.CHAINE_CIBLES]
 		"onde_de_choc": return "Onde : %s %% des dégâts d’attaque toutes les %s s · rayon %s et repoussement" % [_nombre(Reglages.ONDE_CHOC_PART_DEGATS * 100.0), _nombre(Reglages.ONDE_CHOC_INTERVALLE), _nombre(Reglages.ONDE_CHOC_RAYON)]
 	return drapeau.replace("_", " ").capitalize()

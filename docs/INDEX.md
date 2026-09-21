@@ -6,7 +6,7 @@ il n'est pas nécessaire de lire tous les fichiers d'une ligne.
 | Besoin | Point d'entrée | Dépendances utiles |
 |---|---|---|
 | Boucle, salles, transitions et récompenses | `scripts/run.gd`, `scripts/bilan_run.gd` | `autoload/jeu.gd`, `data/butins_run.gd`, `data/recompenses.gd` |
-| Campagne, rencontres et difficulté | `data/chapitres.gd`, `data/vagues.gd` | `data/catalogue_ennemis.gd`, `data/evolution_ennemis.gd`, `data/rangs_ennemis.gd` |
+| Campagne, rencontres et difficulté | `data/chapitres.gd`, `data/vagues.gd` | `data/catalogue_ennemis.gd`, `data/progression_statistiques.gd`, `data/profils_progression.gd`, `data/evolution_ennemis.gd` |
 | Épreuves et butins de sorts | `data/epreuves.gd`, `data/sorts.gd` | `ui/selection_grimoire.gd`, `ui/apercu_butin.gd` |
 | Sorts et leurs animations | `scripts/bonus_sorts.gd`, `data/animations_sorts.gd` | `scripts/presentation/animation_sorts.gd`, `scripts/effets.gd`, `scripts/presentation/effets_3d.gd` |
 | Augments et phénomènes de combat | `data/catalogue_reactifs.gd`, `scripts/mods.gd` | `scripts/draft_logique.gd`, `scripts/reactif.gd`, `scripts/details_reactif.gd`, `data/progression_augments.gd` |
@@ -15,7 +15,8 @@ il n'est pas nécessaire de lire tous les fichiers d'une ligne.
 | Ennemis et boss | `scripts/ennemi.gd`, `scripts/boss.gd` | `scripts/cerveaux.gd`, `scripts/gardien.gd`, `scripts/salle.gd` |
 | Tirs, ciblage et impacts | `scripts/tir.gd`, `scripts/projectile.gd`, `scripts/ciblage.gd` | `scripts/priorite_projectile.gd`, `data/catalogue_projectiles.gd` |
 | Formes, obstacles et terrains | `scripts/salle.gd`, `scripts/geometrie.gd` | `data/formes_salles.gd`, `data/terrains_mondes.gd`, `scripts/terrain_elementaire.gd` |
-| Statistiques, équipement et forge | `data/progression_statistiques.gd`, `data/catalogue_objets.gd` | `data/effets_bijoux.gd`, `ui/equipement.gd` |
+| Statistiques, spécialisations, équipement et forge | `data/personnage.gd`, `data/catalogue_objets.gd` | `data/catalogue_familiers.gd`, `data/catalogue_projectiles.gd`, `ui/equipement.gd` |
+| Listes lisibles des capacités, maîtrises, items et augments | `statistiques_jeu/` | `data/sorts.gd`, `data/arbre_competences.gd`, catalogues de `data/` |
 | Maîtrises, sauvegarde et migrations | `autoload/reglages_joueur.gd`, `data/arbre_competences.gd` | `ui/arbre_competences.gd`, `autoload/jeu.gd` |
 | Accueil et navigation | `scripts/menu.gd`, `ui/accueil_3d.gd` | `ui/onglet_menu.gd`, `ui/selection_grimoire.gd` |
 | Écran ou panneau particulier | chercher son nom dans `ui/` avec `rg --files ui` | `ui/hud.gd`, `ui/draft.gd`, `ui/pause.gd`, `ui/sorts.gd`, `ui/fin_de_run.gd` |

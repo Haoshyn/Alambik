@@ -9,7 +9,10 @@ func _ready() -> void:
 	var salles := Reglages.SALLES_PAR_RUN if mode == "grimoire" else 5 if mode == "epreuve_sorts" else 1
 	var boss := 4 if mode == "grimoire" else 5 if mode == "epreuve_sorts" else 1
 	var offre := ButinsRun.offre(mode, chapitre, salles, boss, true, niveau_epreuve,
-		ReglagesJoueur.rangs_sorts, ReglagesJoueur.objets, ReglagesJoueur.grands_coffres_rates(chapitre), ReglagesJoueur.epreuves_ratees(niveau_epreuve), ReglagesJoueur.palier_atteint())
+		ReglagesJoueur.rangs_sorts, ReglagesJoueur.objets, ReglagesJoueur.grands_coffres_rates(chapitre),
+		ReglagesJoueur.epreuves_ratees(niveau_epreuve), ReglagesJoueur.palier_atteint(), 0.0,
+		ReglagesJoueur.coeur_mana_obtenu(niveau_epreuve),
+		ReglagesJoueur.epreuves_sans_coeur_mana(niveau_epreuve))
 	var titre := str(Chapitres.par_index(chapitre)["nom"]) if mode == "grimoire" else "Épreuve de magie · niveau %d" % niveau_epreuve if mode == "epreuve_sorts" else "La Mine"
 	StyleAzur.banniere(col, titre, "Le trésor d’une aventure menée à son terme.", "couronne")
 	col.add_child(StyleAzur.texte("DANS VOTRE COFFRE", 24, StyleAzur.CUIVRE))
@@ -37,6 +40,10 @@ func _ready() -> void:
 		if not (offre["sorts"] as Array).is_empty():
 			col.add_child(StyleAzur.texte("Garantie de ce niveau : un sort sous %d victoire(s) maximum. Le compteur repart après chaque sort obtenu." % maxi(1,Reglages.EPREUVE_GARANTIE_CAPACITE-ReglagesJoueur.epreuves_ratees(niveau_epreuve)),27,StyleAzur.ATTENUE))
 		col.add_child(StyleAzur.texte("Un sort au maximum. Les sorts au rang maximal sortent du tirage.\nSans sort : %.0f %%" % [(1.0 - float(offre["chance_sort"])) * 100.0], 27, StyleAzur.ATTENUE))
+		if ReglagesJoueur.coeur_mana_obtenu(niveau_epreuve):
+			col.add_child(StyleAzur.texte("Cœur de mana déjà obtenu dans ce niveau.", 27, StyleAzur.CUIVRE))
+		else:
+			col.add_child(StyleAzur.texte("Cœur de mana : %.0f %% · garanti sous %d victoire(s) maximum. Un seul pour ce niveau." % [float(offre["chance_coeur"]) * 100.0, maxi(1, Reglages.EPREUVE_GARANTIE_COEUR - ReglagesJoueur.epreuves_sans_coeur_mana(niveau_epreuve))], 27, StyleAzur.CUIVRE))
 	elif mode == "grimoire":
 		if not (offre["objets"] as Array).is_empty():
 			col.add_child(StyleAzur.texte("Garantie de ce chapitre : objet sous %d victoire(s) maximum." % (1 if chapitre == 0 else maxi(1,Recompenses.GARANTIE_APRES_GRANDS_COFFRES-ReglagesJoueur.grands_coffres_rates(chapitre))),27,StyleAzur.ATTENUE))
@@ -92,9 +99,10 @@ func _ouvrir_detail(id: String, type: String) -> void:
 		col.add_child(StyleAzur.texte("À l’obtention\n" + _resume_objet(id, 0), 30))
 		col.add_child(StyleAzur.texte("Forge 10\n" + _resume_objet(id, 10), 30))
 		col.add_child(StyleAzur.texte(CatalogueObjets.description_effets(id, 10), 28))
-		col.add_child(StyleAzur.texte("Un seul pouvoir au niveau 10. Chaque niveau de forge augmente l’attaque de base des colliers ou les PV de base des anneaux, avec un coût croissant.", 26, StyleAzur.ATTENUE))
+		col.add_child(StyleAzur.texte("Un pouvoir fixe au niveau 10. La forge augmente la statistique principale : PV de l’anneau, Défense du bracelet ou dégâts des sorts du collier.", 26, StyleAzur.ATTENUE))
 	else:
 		col.add_child(StyleAzur.texte(str(d["description"]), 30))
-		col.add_child(StyleAzur.texte("Rang 1 : %s\nRang %d : %s" % [Sorts.resume_rang(id, 1), Reglages.CAPACITE_RANG_MAX, Sorts.resume_rang(id, Reglages.CAPACITE_RANG_MAX)], 28))
-		col.add_child(StyleAzur.texte("Les doublons améliorent cette capacité, jusqu’au rang %d. %s" % [Reglages.CAPACITE_RANG_MAX, Sorts.progression_rang(id)], 26, StyleAzur.ATTENUE))
-		col.add_child(StyleAzur.texte("Premier déblocage : +%d %% de dégâts finaux, même sans équiper cette capacité. Les doublons n’augmentent pas ce bonus." % roundi(Sorts.BONUS_FINAL_PAR_DEBLOCAGE * 100.0), 26, StyleAzur.ATTENUE))
+		var rang_max := Sorts.rang_max(id)
+		col.add_child(StyleAzur.texte("Rang 1 : %s\nRang %d : %s" % [Sorts.resume_rang(id, 1), rang_max, Sorts.resume_rang(id, rang_max)], 28))
+		col.add_child(StyleAzur.texte("Les doublons améliorent cette capacité, jusqu’au rang %d. %s" % [rang_max, Sorts.progression_rang(id)], 26, StyleAzur.ATTENUE))
+		col.add_child(StyleAzur.texte("Découvrir un sort ouvre son utilisation. Les dégâts finaux permanents viennent désormais des Cœurs de mana.", 26, StyleAzur.ATTENUE))

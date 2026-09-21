@@ -1,10 +1,10 @@
 extends Control
 signal ferme
-const SLOTS := ["anneau_gauche", "collier", "anneau_droit"]
-const NOMS_SLOTS := {"anneau_gauche":"Anneau", "collier":"Collier", "anneau_droit":"Bague"}
+const SLOTS := ["anneau", "bracelet", "collier"]
+const NOMS_SLOTS := {"anneau":"Anneau", "bracelet":"Bracelet", "collier":"Collier"}
 var integre_menu := false
 var objet_initial := ""
-var _slot_selectionne := "anneau_gauche"
+var _slot_selectionne := "anneau"
 var _objet_selectionne := ""
 var _arme_selectionnee := ""
 var _page := 0
@@ -17,6 +17,8 @@ var _resume: Label
 var _details: Label
 var _effets_objet: Label
 var _armes: VBoxContainer
+var _familiers: VBoxContainer
+var _familier_selectionne := "homoncule_encre"
 var _vide: VBoxContainer
 var _portrait_objet: TextureRect
 var _fiche_objet: PanelContainer
@@ -27,12 +29,12 @@ var _page_collection: Label
 
 func _ready() -> void:
 	var col := StyleAzur.page(self,"Équipement",integre_menu)
-	StyleAzur.banniere(col, "L’atelier des reliques", "Forgez vos armes et colliers pour l’attaque, vos anneaux pour les PV.", "forge")
+	StyleAzur.banniere(col, "L’atelier des reliques", "Arme pour l’Attaque, anneau pour les PV, bracelet pour la Défense et collier pour la magie.", "forge")
 	var onglets := HBoxContainer.new()
 	onglets.add_theme_constant_override("separation", 14)
 	col.add_child(onglets)
-	for index in 2:
-		var onglet := StyleAzur.bouton(["Bijoux & forge", "Armes & forge"][index], func(): _changer_atelier(index))
+	for index in 3:
+		var onglet := StyleAzur.bouton(["Reliques", "Armes", "Familiers"][index], func(): _changer_atelier(index))
 		onglets.add_child(onglet)
 		_onglets_atelier.append(onglet)
 	var contenu := StyleAzur.defilement(col)
@@ -44,6 +46,9 @@ func _ready() -> void:
 	_armes.add_theme_constant_override("separation", 20)
 	contenu.add_child(_armes)
 	_afficher_armes()
+	_familiers = VBoxContainer.new()
+	_familiers.add_theme_constant_override("separation", 20)
+	contenu.add_child(_familiers)
 	_bijoux = VBoxContainer.new()
 	_bijoux.add_theme_constant_override("separation", 20)
 	contenu.add_child(_bijoux)
@@ -51,7 +56,7 @@ func _ready() -> void:
 	slots.add_theme_constant_override("separation",16)
 	_bijoux.add_child(StyleAzur.texte("Votre parure", 34, StyleAzur.IVOIRE))
 	_bijoux.add_child(slots)
-	for i in 3:
+	for i in SLOTS.size():
 		var b := StyleAzur.bouton(NOMS_SLOTS[SLOTS[i]],func(): _selectionner_slot(SLOTS[i]))
 		b.custom_minimum_size.y = 210
 		b.add_theme_font_size_override("font_size", 30)
@@ -140,6 +145,7 @@ func _ready() -> void:
 
 func _changer_atelier(index: int) -> void:
 	_armes.visible = index == 1
+	_familiers.visible = index == 2
 	_bijoux.visible = index == 0
 	_actions_ligne.visible = index == 0
 	for i in _onglets_atelier.size():
@@ -147,7 +153,7 @@ func _changer_atelier(index: int) -> void:
 
 func _afficher_inventaire() -> void:
 	_resume.text = _resume_heros()
-	for i in 3:
+	for i in SLOTS.size():
 		var id := str(ReglagesJoueur.equipements.get(SLOTS[i],""))
 		_boutons_slots[i].icon = null if id.is_empty() else StyleAzur.icone(StyleAzur.icone_objet(id))
 		_boutons_slots[i].text = NOMS_SLOTS[SLOTS[i]]+ ("\nLibre" if id.is_empty() else "\nNiveau %d" % ReglagesJoueur.niveau_objet(id))
@@ -176,7 +182,7 @@ func _afficher_inventaire() -> void:
 	_details.text = "%s · Niveau %d\n%s\n%s" % [CatalogueObjets.OBJETS[id]["nom"],niveau,CatalogueObjets.description_bonus(id,niveau),"Limite de forge atteinte" if niveau >= Reglages.FORGE_NIVEAU_MAX else "Forge : %d pierres" % ReglagesJoueur.cout_forge(id)]
 	if niveau < Reglages.FORGE_NIVEAU_MAX:
 		_details.text += "\nProchain niveau : " + CatalogueObjets.description_bonus(id,niveau+1)
-	_effets_objet.text = CatalogueObjets.description_effets(id,niveau)+"\n\nUn pouvoir au niveau 10. Chaque niveau de forge augmente la base, avant les bonus en pourcentage.\nActif quand ce bijou est équipé. Effets identiques non cumulables."
+	_effets_objet.text = CatalogueObjets.description_effets(id,niveau)+"\n\nUn pouvoir passif au niveau 10. Chaque niveau de forge augmente la base, avant les bonus en pourcentage.\nActif quand ce bijou est équipé."
 
 func _nombre(valeur: float) -> String:
 	return String.num(valeur, 1).trim_suffix(".0").replace(".", ",")
@@ -261,10 +267,17 @@ func _rafraichir() -> void:
 		or ReglagesJoueur.pierres_forge < ReglagesJoueur.cout_forge(_objet_selectionne)
 	_afficher_inventaire()
 	_afficher_armes()
+	_afficher_familiers()
 
 func _resume_heros() -> String:
-	var stats := Stats.depuis_reglages(ReglagesJoueur.rangs_competences_effectifs(),ReglagesJoueur.passifs_equipes_effectifs(),ReglagesJoueur.bonus_objets_effectifs(),ReglagesJoueur.niveau_compte_effectif())
-	return "Attaque de base %s · Bonus d’attaque +%s %%\nAttaque réelle %s · Dégâts finaux +%s %%\nPV %d · Cadence %.2f /s\n%d capacités débloquées · %d pierres de forge" % [_nombre(stats.attaque_base),_pourcentage(stats.bonus_attaque),_nombre(stats.degats),_pourcentage(ReglagesJoueur.multiplicateur_degats_deblocages()-1.0),roundi(stats.pv_max),stats.cadence,ReglagesJoueur.nombre_capacites_debloquees(),ReglagesJoueur.pierres_forge]
+	var stats := Stats.depuis_reglages(ReglagesJoueur.rangs_competences_effectifs(),
+		ReglagesJoueur.passifs_equipes_effectifs(), ReglagesJoueur.bonus_objets_effectifs(),
+		ReglagesJoueur.niveau_compte_effectif(), ReglagesJoueur.attributs)
+	return "Attaque %s · Défense %s · PV %d\nCritique %s %% · dégâts critiques +%s %% · sorts +%s %%\nCadence %.2f /s · Cœurs %d/%d · %d pierres" % [
+		_nombre(stats.degats), _nombre(stats.defense), roundi(stats.pv_max),
+		_pourcentage(stats.critique), _pourcentage(stats.degats_critiques),
+		_pourcentage(stats.degats_sorts), stats.cadence, ReglagesJoueur.nombre_coeurs_mana(),
+		Epreuves.nombre(), ReglagesJoueur.pierres_forge]
 
 func _selectionner_arme(id: String) -> void:
 	_arme_selectionnee = id
@@ -286,7 +299,7 @@ func _afficher_armes() -> void:
 		_armes.remove_child(enfant)
 		enfant.queue_free()
 	_armes.add_child(StyleAzur.texte("L’arsenal alchimique", 35))
-	_armes.add_child(StyleAzur.texte("Chaque arme change la forme de vos tirs. Sa forge augmente l’attaque de base de vos tirs, sorts et ultimes.", 26, StyleAzur.ATTENUE))
+	_armes.add_child(StyleAzur.texte("Chaque arme apporte de l’Attaque brute et change le comportement des tirs de baguette.", 26, StyleAzur.ATTENUE))
 	if not CatalogueProjectiles.contient(_arme_selectionnee):
 		_arme_selectionnee = ReglagesJoueur.projectile_equipe_effectif()
 	var ligne := GridContainer.new()
@@ -333,4 +346,52 @@ func _afficher_armes() -> void:
 	var ameliorer := StyleAzur.bouton("Forge",_ameliorer_arme)
 	ameliorer.disabled = not disponible or niveau >= Reglages.FORGE_NIVEAU_MAX \
 		or ReglagesJoueur.pierres_forge < ReglagesJoueur.cout_forge_arme(_arme_selectionnee)
+	actions.add_child(ameliorer)
+
+func _afficher_familiers() -> void:
+	for enfant in _familiers.get_children():
+		_familiers.remove_child(enfant)
+		enfant.queue_free()
+	_familiers.add_child(StyleAzur.texte("Compagnons autonomes", 35))
+	_familiers.add_child(StyleAzur.texte("Chaque familier possède sa propre Attaque et cadence. Son petit passif renforce aussi le héros.", 26, StyleAzur.ATTENUE))
+	if not CatalogueFamiliers.contient(_familier_selectionne):
+		_familier_selectionne = ReglagesJoueur.familier_equipe_effectif()
+	var grille := GridContainer.new()
+	grille.columns = 2
+	grille.add_theme_constant_override("h_separation", 10)
+	grille.add_theme_constant_override("v_separation", 10)
+	_familiers.add_child(grille)
+	var disponibles := ReglagesJoueur.familiers_disponibles()
+	for valeur in CatalogueFamiliers.TYPES:
+		var id := str(valeur)
+		var donnees: Dictionary = CatalogueFamiliers.TYPES[id]
+		var b := StyleAzur.bouton(str(donnees["nom"]), func():
+			_familier_selectionne = id
+			_afficher_familiers())
+		b.custom_minimum_size.y = 130
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		b.disabled = id not in disponibles
+		if b.disabled: b.text += "\nChapitre %d" % CatalogueFamiliers.niveau_deblocage(id)
+		elif id == ReglagesJoueur.familier_equipe_effectif(): b.text += "\nÉquipé"
+		StyleAzur.case_objet(b, id == _familier_selectionne)
+		grille.add_child(b)
+	var d: Dictionary = CatalogueFamiliers.TYPES[_familier_selectionne]
+	var niveau := ReglagesJoueur.niveau_familier(_familier_selectionne)
+	var fiche := StyleAzur.plaque(_familiers)
+	fiche.add_child(StyleAzur.texte("%s · Niveau %d" % [d["nom"], niveau], 34, StyleAzur.IVOIRE))
+	fiche.add_child(StyleAzur.texte("Attaque %s · une attaque toutes les %s s\n%s" % [
+		_nombre(CatalogueFamiliers.attaque(_familier_selectionne, niveau)),
+		_nombre(float(d["intervalle"])), d["description"]], 28, StyleAzur.ATTENUE))
+	var actions := HBoxContainer.new()
+	actions.add_theme_constant_override("separation", 12)
+	fiche.add_child(actions)
+	var equiper := StyleAzur.bouton("Équiper", func():
+		if ReglagesJoueur.equiper_familier(_familier_selectionne): _rafraichir(), true)
+	equiper.disabled = _familier_selectionne not in disponibles \
+		or _familier_selectionne == ReglagesJoueur.familier_equipe_effectif()
+	actions.add_child(equiper)
+	var ameliorer := StyleAzur.bouton("Forge", func():
+		if ReglagesJoueur.ameliorer_familier(_familier_selectionne): _rafraichir())
+	ameliorer.disabled = _familier_selectionne not in disponibles or niveau >= Reglages.FORGE_NIVEAU_MAX \
+		or ReglagesJoueur.pierres_forge < Reglages.cout_forge(niveau)
 	actions.add_child(ameliorer)

@@ -1,0 +1,66 @@
+RÈGLES DE FORGE
+Tous les modèles | Identité fixe | Statistiques, bonus spécial et pouvoir identiques pour tous les exemplaires ; aucun tirage aléatoire
+Coût | Niveau actuel 0 à 20 | Chaque niveau regroupe le prix des 5 anciens niveaux correspondants ; 10 900 Pierres du niveau 0 au niveau 20, soit le même total qu’avant
+Arme | Statistique principale | Attaque brute +4 au niveau 0, puis +2,5 par niveau ; +29 au niveau 10 ; +54 au niveau 20
+Anneau | Statistique principale | PV bruts +15 au niveau 0, puis +10 par niveau ; +115 au niveau 10 ; +215 au niveau 20
+Bracelet | Statistique principale | Défense brute +3 au niveau 0, puis +1,25 par niveau ; +15,5 au niveau 10 ; +28 au niveau 20
+Collier | Statistique principale | Dégâts des sorts +8 % au niveau 0, puis +2,5 points par niveau ; +33 % au niveau 10 ; +58 % au niveau 20
+Familier | Statistique principale | Attaque propre indiquée ci-dessous, puis +2 par niveau ; +20 au niveau 10 ; +40 au niveau 20
+Bijou | Pouvoir passif fixe | Débloqué au niveau de forge 10
+Élan offensif | Anneau | Chaque attaque donne +1 % de dégâts, cumulable 10 fois ; tous les cumuls disparaissent après 5 s sans attaquer
+Cinquième impact | Anneau | Chaque cinquième attaque inflige le double de dégâts
+Sursis | Bracelet | La première blessure mortelle de l’aventure laisse le héros à 1 PV
+Incantation | Collier | Après un sort actif : dégâts +10 % pendant 5 s
+
+ARMES
+Baguette d’acier | Déblocage 1 | Tir 100 % ; cadence normale
+Aiguille vive | Déblocage 4 | Tir 80 % ; cadence +20 % ; portée −10 %
+Sceptre de cuivre | Déblocage 7 | Tir 150 % ; cadence −30 %
+Branche astrale | Déblocage 10 | Tir 110 % ; cadence normale ; dégâts des sorts +20 % ; récupération des sorts −20 %
+Bâton à étincelles | Déblocage 13 | Tir 100 % ; cadence +10 % ; explosion à 45 % dans un rayon 150
+Prisme jumeau | Déblocage 16 | Deux traits parallèles à 70 % chacun, soit 140 % au total ; cadence normale
+Diapason de verre | Déblocage 19 | Tir 90 % ; cadence +50 %
+Cornue draconique | Déblocage 22 | Tir 100 % ; cadence normale ; dégâts des sorts +30 % ; après un sort, dégâts et cadence +20 % pendant 5 s
+Aiguille du néant | Déblocage 25 | Tir 150 % ; cadence +50 %
+Alambic souverain | Déblocage 28 | Tir 200 % ; cadence +100 % ; dégâts des sorts +50 % ; récupération des sorts −50 %
+
+BIJOUX DES MONDES ACTUELS
+Anneau · Encre | PV +15 ; critique +2 % | Forge 10 : Élan offensif
+Bracelet · Encre | Défense +3 ; vitesse +3 % | Forge 10 : Sursis
+Collier · Encre | Dégâts des sorts +8 % ; Butin +5 % | Forge 10 : Incantation
+Anneau · Terre | PV +15 ; dégâts critiques +5 % | Forge 10 : Cinquième impact
+Bracelet · Terre | Défense +3 ; PV +5 | Forge 10 : Sursis
+Collier · Terre | Dégâts des sorts +8 % ; attaque +3 % | Forge 10 : Incantation
+Anneau · Eau | PV +15 ; vitesse +3 % | Forge 10 : Élan offensif
+Bracelet · Eau | Défense +3 ; dégâts des sorts +4 % | Forge 10 : Sursis
+Collier · Eau | Dégâts des sorts +8 % ; critique +2 % | Forge 10 : Incantation
+Anneau · Air | PV +15 ; vitesse d’attaque +3 % | Forge 10 : Cinquième impact
+Bracelet · Air | Défense +3 ; critique +2 % | Forge 10 : Sursis
+Collier · Air | Dégâts des sorts +8 % ; vitesse +3 % | Forge 10 : Incantation
+Anneau · Feu | PV +15 ; Butin +4 % | Forge 10 : Élan offensif
+Bracelet · Feu | Défense +3 ; attaque +3 % | Forge 10 : Sursis
+Collier · Feu | Dégâts des sorts +8 % ; dégâts critiques +5 % | Forge 10 : Incantation
+
+BIJOUX HISTORIQUES CONSERVÉS POUR LES SAUVEGARDES
+Anneau · Échos | PV +15 ; critique +2 % | Forge 10 : Cinquième impact
+Bracelet · Échos | Défense +3 ; vitesse d’attaque +3 % | Forge 10 : Sursis
+Collier · Échos | Dégâts des sorts +8 % ; Butin +5 % | Forge 10 : Incantation
+Anneau · Ombres | PV +15 ; dégâts critiques +5 % | Forge 10 : Élan offensif
+Bracelet · Ombres | Défense +3 ; vitesse +3 % | Forge 10 : Sursis
+Collier · Ombres | Dégâts des sorts +8 % ; critique +2 % | Forge 10 : Incantation
+Anneau · Runes | PV +20 | Forge 10 : Cinquième impact
+Bracelet · Runes | Défense +3 ; attaque +3 % | Forge 10 : Sursis
+Collier · Runes | Dégâts des sorts +12 % | Forge 10 : Incantation
+Anneau · Néant | PV +15 ; vitesse +3 % | Forge 10 : Élan offensif
+Bracelet · Néant | Défense +3 ; critique +2 % | Forge 10 : Sursis
+Collier · Néant | Dégâts des sorts +8 % ; Butin +5 % | Forge 10 : Incantation
+Anneau · Alambic | PV +15 ; vitesse d’attaque +3 % | Forge 10 : Cinquième impact
+Bracelet · Alambic | Défense +3 ; PV +5 | Forge 10 : Sursis
+Collier · Alambic | Dégâts des sorts +8 % ; attaque +3 % | Forge 10 : Incantation
+
+FAMILIERS
+Homoncule d’encre | Déblocage 1 | Attaque 6 ; attaque toutes les 1 s ; héros : critique +2 %
+Salamandre de braise | Déblocage 8 | Attaque 9 ; attaque toutes les 1,25 s ; héros : attaque +3 %
+Ondine de givre | Déblocage 15 | Attaque 6,5 ; attaque toutes les 0,8 s ; héros : dégâts des sorts +4 %
+Sylphe des orages | Déblocage 22 | Attaque 5 ; attaque toutes les 0,55 s ; héros : vitesse +4 %
+Golem de forge | Déblocage 29 | Attaque 13 ; attaque toutes les 1,5 s ; héros : Défense brute +2

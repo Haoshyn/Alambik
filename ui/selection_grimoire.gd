@@ -129,7 +129,7 @@ func _ready() -> void:
 	_liste_epreuves.add_theme_constant_override("separation", 18)
 	epreuve.add_child(_liste_epreuves)
 	_liste_epreuves.visible = ReglagesJoueur.mode_run_choisi == "epreuve_sorts"
-	_liste_epreuves.add_child(StyleAzur.texte("Une augmentation entre chaque boss. Terminez un niveau pour ouvrir le suivant ; rejouez-le pour améliorer ses sorts.", 25, StyleAzur.ATTENUE))
+	_liste_epreuves.add_child(StyleAzur.texte("Une augmentation entre chaque boss. Chaque niveau cache un Cœur de mana unique : +10 % de dégâts finaux.", 25, StyleAzur.ATTENUE))
 	for i in Epreuves.nombre():
 		var niveau := i + 1
 		var fiche := StyleAzur.plaque(_liste_epreuves)
@@ -139,7 +139,8 @@ func _ready() -> void:
 		for id in Epreuves.sorts(niveau):
 			noms.append(str(Sorts.donnees(str(id))["nom"]))
 			symboles.add_child(StyleAzur.vignette(str(id), 76))
-		fiche.add_child(StyleAzur.texte("Niveau %d · %s" % [niveau, " / ".join(noms)], 27))
+		fiche.add_child(StyleAzur.texte("Niveau %d · %s\nCœur de mana : %s" % [niveau,
+			" / ".join(noms), "obtenu" if ReglagesJoueur.coeur_mana_obtenu(niveau) else "à trouver"], 27))
 		var ligne := HBoxContainer.new()
 		ligne.add_theme_constant_override("separation", 14)
 		fiche.add_child(ligne)

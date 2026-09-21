@@ -44,6 +44,7 @@ func _ready() -> void:
 		raccourci.set_item_metadata(index,mode)
 		if mode == ReglagesJoueur.raccourci_sort: raccourci.selected = index
 	raccourci.item_selected.connect(func(i): ReglagesJoueur.definir_raccourci_sort(str(raccourci.get_item_metadata(i))))
+	confort.add_child(StyleAzur.texte("Visée libre après l’icône, cible la plus proche par l’icône, ou tape courte n’importe où dans l’arène.",24,StyleAzur.ATTENUE))
 	StyleAzur.separateur(contenu)
 	var progression := StyleAzur.plaque(contenu)
 	progression.get_parent().visible = false

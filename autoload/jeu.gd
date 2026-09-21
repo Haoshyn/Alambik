@@ -101,8 +101,8 @@ func demarrer_run(graine_demandee: int = 0, salle_de_depart: int = 1, chapitre_d
 	# Fixer le palier avant toute offre empeche une relance de changer sa rarete.
 	etage_legendaire = ProgressionAugments.tirer_etage_legendaire(rng) if mode_run == "grimoire" else 0
 	_relances_utilisees = 0
-	rerolls_restants = ArbreCompetences.nombre_rerolls(ReglagesJoueur.rangs_competences_effectifs()) \
-		+ Sorts.relances_heritage(ReglagesJoueur.passifs_equipes_effectifs())
+	rerolls_restants = ArbreCompetences.nombre_rerolls(ReglagesJoueur.rangs_competences_effectifs())
+	_ajouter_heritage_reactif()
 	ennemis_abattus = 0
 	elites_par_salle.clear()
 	temps_mine_restant = Reglages.MINE_DUREE if mode_run == "mine" else 0.0
@@ -112,6 +112,20 @@ func demarrer_run(graine_demandee: int = 0, salle_de_depart: int = 1, chapitre_d
 	tirs_perdus = 0
 	debut_run = Time.get_ticks_msec() / 1000.0
 	images_de_jeu = 0
+
+func _ajouter_heritage_reactif() -> void:
+	var nombre := Sorts.augments_heritage(ReglagesJoueur.passifs_equipes_effectifs())
+	if nombre <= 0:
+		return
+	var rares: Array[String] = []
+	for id in CatalogueReactifs.ids():
+		var reactif := CatalogueReactifs.par_id(id)
+		if reactif != null and reactif.rarete == Reactif.RARE:
+			rares.append(id)
+	for i in mini(nombre, rares.size()):
+		var index := rng.randi_range(0, rares.size() - 1)
+		inventaire.append(rares[index])
+		rares.remove_at(index)
 
 func consommer_relance(rarete: String) -> bool:
 	if not ProgressionAugments.relance_autorisee(rarete) or rerolls_restants <= 0:
@@ -188,7 +202,7 @@ func reactif(id: String) -> Reactif:
 	return CatalogueReactifs.par_id(id)
 
 func ameliorations_effectives() -> Array:
-	return CatalogueObjets.avec_effets(inventaire, ReglagesJoueur.equipements, ReglagesJoueur.forge_niveaux)
+	return inventaire.duplicate()
 
 func mods() -> Array:
 	return Mods.depuis_l_inventaire(ameliorations_effectives())

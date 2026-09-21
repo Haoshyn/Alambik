@@ -21,6 +21,8 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 	_aiguille = not hostile and tir.arme == "veloce"
 	if not hostile:
 		_couleur = {"standard": Color("c5a1ff"), "veloce": Color("e6ff9c"), "lourd": Color("ffbf74"), "chercheur": Color("c2a5ff"), "explosif": Color("ff8b60")}.get(tir.arme, _couleur)
+		if "trait_orbe" in tir.drapeaux:
+			_couleur = Color("e6b3ff")
 	var cle := _couleur.to_html()+str(hostile)+tir.arme
 	if not _matieres.has(cle):
 		var mat := ShaderMaterial.new()
@@ -61,6 +63,9 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 		coeur.rotation = Vector3.ZERO
 		coeur.scale = {"standard":Vector3(.14,.14,.20),"veloce":Vector3(.13,.13,.36),"lourd":Vector3(.19,.17,.26),"chercheur":Vector3(.17,.17,.17),"explosif":Vector3(.22,.22,.22)}.get(tir.arme,Vector3.ONE*.14)
 		coeur.position.y = coeur.scale.y + .025
+		if "trait_orbe" in tir.drapeaux:
+			coeur.scale = Vector3.ONE * 0.19
+			coeur.position.y = 0.24
 		for i in 2:
 			var perle := MeshInstance3D.new()
 			perle.mesh = _perle

@@ -14,7 +14,7 @@ const PAUSE := preload("res://ui/pause.tscn")
 const VOILE_TRANSITION := preload("res://scripts/voile_transition.gd")
 const APPRENTISSAGE := preload("res://scripts/apprentissage.gd")
 const PassifsCombat = preload("res://scripts/passifs_combat.gd")
-const ReglagesPassifs = preload("res://data/passifs_combat.gd")
+const FLAQUE_ALCHIMIQUE = preload("res://scripts/presentation/flaque_alchimique.gd")
 
 var _fond: Node2D
 var _salle: Node2D
@@ -31,7 +31,6 @@ var _terminee := false
 var _temps_dans_la_salle := 0.0
 var _musique_minuterie := 0.0
 var _recharge_sort_actif := 0.0
-var _recharge_riposte := 0.0
 var _charge_ultime := 0.0
 var _ultimes_utilises := 0
 var _delai_charge := 0.0
@@ -40,17 +39,17 @@ var _niveaux_en_attente := 0
 var _familier_minuterie := 0.0
 var _meteore_minuterie := 0.0
 var _zone_minuterie := 0.0
-var _orbe_minuterie := 0.0
 var _chaine_minuterie := 0.0
 var _onde_choc_minuterie := 0.0
-var _orbes_chargees := 0
 var _gardien: Gardien
 var _fin_salle_en_attente := false
 var _camera: Camera2D
 var _voile_salle: VOILE_TRANSITION
 var _transition_salle := false
 var _apprentissage: APPRENTISSAGE
-var _passifs_combat := PassifsCombat.new()
+var _flaques_alchimiques: Array[Dictionary] = []
+var _retardements: Array[Dictionary] = []
+var _compteur_attaques_objet := 0
 
 func _ready() -> void:
 	add_to_group("charge_combat")
@@ -136,7 +135,7 @@ func _ready() -> void:
 	_hud.pause_demandee.connect(func() -> void:
 		if not _terminee and _panneau == null:
 			_ouvrir_pause())
-	_hud.sort_actif_demande.connect(_lancer_sort_actif)
+	_hud.sort_actif_demande.connect(_sur_sort_actif_demande)
 	_hud.ultime_demande.connect(_lancer_ultime)
 	_hud.rafraichir_sorts(_recharge_sort_actif, _charge_ultime, _ultimes_utilises)
 	_joystick = JOYSTICK.instantiate()
@@ -203,11 +202,11 @@ func _remettre_progression_a_zero() -> void:
 	ReglagesJoueur.ultime_equipe = ""
 	ReglagesJoueur.objets.clear()
 	ReglagesJoueur.forge_niveaux.clear()
-	ReglagesJoueur.equipements = {"anneau_gauche": "", "anneau_droit": "", "collier": ""}
+	ReglagesJoueur.equipements = {"anneau": "", "bracelet": "", "collier": ""}
 
 func _doter_progression_intermediaire() -> void:
 	# Profil de fin de campagne : offense rang 8 et defense rang 2, ancien set
-	# Forge 30 et capacites rang 5. Il teste la nouvelle courbe sans le plafond
+	# au palier de familier planifie et capacites rang 5. Il teste la courbe sans le plafond
 	# des Maitrises, de la Forge ou du second Passif.
 	ReglagesJoueur.sauvegarde_active = false
 	ReglagesJoueur.mode_dev = false
@@ -217,11 +216,11 @@ func _doter_progression_intermediaire() -> void:
 		for id in ArbreCompetences.BRANCHES[branche]:
 			ReglagesJoueur.rangs_competences[str(id)] = 8 if branche == "Offensif" else 2
 	ReglagesJoueur.rangs_sorts.clear()
-	for id in ["onde_alchimique", "seconde_chance", "grand_oeuvre"]:
+	for id in ["onde_alchimique", "moisson_vitale", "grand_oeuvre"]:
 		ReglagesJoueur.rangs_sorts[id] = 5
 	ReglagesJoueur.sort_actif_equipe = "onde_alchimique"
 	ReglagesJoueur.ultime_equipe = "grand_oeuvre"
-	ReglagesJoueur.passifs_equipes = ["seconde_chance"]
+	ReglagesJoueur.passifs_equipes = ["moisson_vitale"]
 	# Simule les deblocages accessibles a la fin de la campagne.
 	ReglagesJoueur.meilleures_par_chapitre.clear()
 	for chapitre in range(Chapitres.nombre() - 1):
@@ -231,9 +230,10 @@ func _doter_progression_intermediaire() -> void:
 	ReglagesJoueur.forge_niveaux.clear()
 	for id in anciens:
 		ReglagesJoueur.objets.append(str(id))
-		ReglagesJoueur.forge_niveaux[str(id)] = 30
-	ReglagesJoueur.equipements = {"anneau_gauche": str(anciens[0]),
-		"anneau_droit": str(anciens[1]), "collier": str(anciens[2])}
+		ReglagesJoueur.forge_niveaux[str(id)] = ProfilsProgression.FORGE_FAMILIER[
+			ProfilsProgression.FORGE_FAMILIER.size() - 1]
+	ReglagesJoueur.equipements = {"anneau": str(anciens[0]),
+		"bracelet": str(anciens[1]), "collier": str(anciens[2])}
 
 func _doter_progression_maximale() -> void:
 	# Outil de sonde : la vraie sauvegarde du joueur ne doit jamais recevoir ca.
@@ -252,10 +252,10 @@ func _doter_progression_maximale() -> void:
 	# catalogue plutot que le plafond reel de progression.
 	ReglagesJoueur.sort_actif_equipe = "explosion_corrosive"
 	ReglagesJoueur.ultime_equipe = "grand_oeuvre"
-	ReglagesJoueur.passifs_equipes = ["rempart_initial", "seconde_chance"]
+	ReglagesJoueur.passifs_equipes = ["rempart_initial", "moisson_vitale"]
 	var derniers: Array = CatalogueObjets.IDS_PAR_MONDE[CatalogueObjets.IDS_PAR_MONDE.size() - 1]
-	ReglagesJoueur.equipements = {"anneau_gauche": str(derniers[0]),
-		"anneau_droit": str(derniers[1]), "collier": str(derniers[2])}
+	ReglagesJoueur.equipements = {"anneau": str(derniers[0]),
+		"bracelet": str(derniers[1]), "collier": str(derniers[2])}
 	for id in derniers:
 		if not str(id) in ReglagesJoueur.objets:
 			ReglagesJoueur.objets.append(str(id))
@@ -288,14 +288,12 @@ func _process(delta: float) -> void:
 		_apprentissage.suspendre(_panneau != null or _voile_salle.visible or _transition_salle or _terminee)
 	if not _terminee and not _transition_salle and _panneau == null:
 		_recharge_sort_actif = maxf(0.0, _recharge_sort_actif - delta)
-		_recharge_riposte = maxf(0.0, _recharge_riposte - delta)
 		_charge_ultime = maxf(0.0, _charge_ultime - delta)
-		if _passifs_combat.avancer_deplacement(_heros.global_position, ReglagesJoueur.passifs_equipes_effectifs()):
-			_effets.onde(_heros.global_position, ReglagesPassifs.RAYON_SIGNAL,
-				ReglagesPassifs.COULEUR_SANG_FROID, ReglagesPassifs.DUREE_SIGNAL)
 	if _hud != null:
 		_hud.rafraichir_sorts(_recharge_sort_actif, _charge_ultime, _ultimes_utilises)
 	_avancer_phenomenes(delta)
+	_avancer_flaques_alchimiques(delta)
+	_avancer_retardements(delta)
 	_musique_minuterie -= delta
 	if _musique_minuterie <= 0.0 and not _terminee and _panneau == null:
 		_musique_minuterie = 0.35
@@ -376,6 +374,7 @@ func _suivre_heros() -> void:
 	_camera.force_update_scroll()
 
 func _entrer_dans_la_salle() -> void:
+	_effets.effacer_augments()
 	for enfant in _salle.get_children():
 		enfant.queue_free()
 	_calculer_limites()
@@ -387,7 +386,7 @@ func _entrer_dans_la_salle() -> void:
 
 
 	_heros.preparer_nouvelle_salle()
-	_passifs_combat.nouvelle_salle(_heros.global_position)
+	_flaques_alchimiques.clear()
 	_suivre_heros()
 
 
@@ -613,17 +612,33 @@ func _neutraliser_deplacement() -> void:
 func _sur_tir_heros(tir_courant: Tir, origine: Vector2, direction: Vector2) -> void:
 	if not _heros.peut_tirer(): return
 	var tir_effectif := tir_courant.copie()
+	_heros.enregistrer_attaque_objet()
 	var attaque_sans_conditions := BonusSorts.attaque(_heros.stats, Jeu.mods())
 	var facteur_conditionnel: float = _heros.attaque_reelle() / attaque_sans_conditions if attaque_sans_conditions > 0.0 else 1.0
-	tir_effectif.degats = _heros.degats_finaux(tir_effectif.degats * facteur_conditionnel)
-	_passifs_combat.preparer_tir(tir_effectif, ReglagesJoueur.passifs_equipes_effectifs())
+	tir_effectif.degats = _heros.degats_finaux(tir_effectif.degats * facteur_conditionnel, "baguette")
+	if "indelebile" in tir_effectif.drapeaux:
+		var cible_initiale := _ennemi_plus_proche(origine)
+		if cible_initiale != null:
+			tir_effectif.cible_verrouillee = cible_initiale.get_instance_id()
+	var passifs := ReglagesJoueur.passifs_equipes_effectifs()
+	if passifs.has("sang_froid"):
+		tir_effectif.effets.append("sang_froid_%d" % Sorts.rang_passif(passifs, "sang_froid"))
+	if "cinquieme_impact" in ReglagesJoueur.effets_objets_effectifs():
+		_compteur_attaques_objet += 1
+		if _compteur_attaques_objet >= EffetsBijoux.IMPACT_ATTAQUES:
+			_compteur_attaques_objet = 0
+			tir_effectif.degats *= EffetsBijoux.IMPACT_MULTIPLICATEUR
+	tir_effectif.degats *= tir_effectif.degats_finaux_projectile_mult
 	_salle.tirer(tir_effectif, origine, direction, false)
-	if _orbes_chargees > 0 and "orbes_chargees" in tir_courant.drapeaux:
-		for i in _orbes_chargees:
-			var angle := (float(i) - float(_orbes_chargees - 1) * 0.5) * 0.13
-			_tirer_phenomene("orbes_chargees", Reglages.ORBE_PART_DEGATS, origine,
-				direction.rotated(angle))
-		_orbes_chargees = 0
+	if "elan_vital" in tir_courant.drapeaux and _heros.consommer_aura_elan():
+		var aura := Tir.de_base(_heros.stats)
+		aura.degats = _heros.degats_finaux(_heros.attaque_reelle(), "augment")
+		aura.portee = Reglages.ELAN_VITAL_PORTEE
+		aura.portee_limitee = true
+		aura.drapeaux.append_array(["perfore_tout", "perforation_sans_perte",
+			"traverse_murs", "trait_aura"])
+		_salle.tirer(aura, origine, direction, false)
+		_effets.animer_augment("zone_heros", origine, 70.0)
 
 func _avancer_phenomenes(delta: float) -> void:
 	if is_instance_valid(_apprentissage) and _apprentissage.combat_suspendu():
@@ -634,7 +649,11 @@ func _avancer_phenomenes(delta: float) -> void:
 	if "familier_tireur" in drapeaux:
 		_familier_minuterie -= delta
 		if _familier_minuterie <= 0.0:
-			_familier_minuterie = Reglages.FAMILIER_TIR_INTERVALLE
+			var familier_id := ReglagesJoueur.familier_equipe_effectif()
+			var familier: Dictionary = CatalogueFamiliers.TYPES[familier_id]
+			_familier_minuterie = float(familier["intervalle"]) \
+				/ (Reglages.FAMILIER_TIREUR_CADENCE_MULT \
+				if "familier_renforce" in drapeaux else 1.0)
 			var cible := _ennemi_plus_proche(_heros.global_position)
 			if cible != null:
 				var origine := _heros.global_position + Reglages.FAMILIER_DECALAGE
@@ -642,8 +661,7 @@ func _avancer_phenomenes(delta: float) -> void:
 					_vitesse_de(cible), origine, _heros.stats.vitesse_projectile)
 				# La lueur souligne le tir du compagnon visible dans le monde 3D.
 				_effets.onde(origine, 44.0, Palette.ESSENCE, 0.22)
-				_tirer_phenomene("familier_tireur", Reglages.FAMILIER_TIR_PART_DEGATS,
-					origine, origine.direction_to(vise))
+				_tirer_familier(familier_id, origine, origine.direction_to(vise))
 	if "meteores" in drapeaux:
 		_meteore_minuterie -= delta
 		if _meteore_minuterie <= 0.0:
@@ -654,11 +672,6 @@ func _avancer_phenomenes(delta: float) -> void:
 		if _zone_minuterie <= 0.0:
 			_zone_minuterie = Reglages.ZONE_HEROS_INTERVALLE
 			_frapper_zone_heros()
-	if "orbes_chargees" in drapeaux:
-		_orbe_minuterie -= delta
-		if _orbe_minuterie <= 0.0:
-			_orbe_minuterie = Reglages.ORBE_INTERVALLE
-			_orbes_chargees = mini(Reglages.ORBE_MAX, _orbes_chargees + 1)
 	if "chaine_alchimique" in drapeaux:
 		_chaine_minuterie -= delta
 		if _chaine_minuterie <= 0.0:
@@ -672,32 +685,54 @@ func _avancer_phenomenes(delta: float) -> void:
 	if "familier_gardien" in drapeaux and (_gardien == null or not is_instance_valid(_gardien)):
 		_gardien = Gardien.new()
 		_gardien.heros = _heros
+		_gardien.attaque_portee.connect(func(origine: Vector2, cible: Vector2):
+			_effets.animer_augment("frappe_gardien", origine, 0.0, cible))
 		_gardien.global_position = _heros.global_position + Vector2(-70.0, -25.0)
 		add_child(_gardien)
 
 func _tirer_phenomene(id: String, part_degats: float, origine: Vector2, direction: Vector2) -> void:
 	if not _heros.peut_tirer(): return
 	var tir := Tir.de_base(_heros.stats)
-	tir.degats = _heros.degats_finaux(_heros.attaque_reelle() * part_degats)
+	tir.degats = _heros.degats_finaux(_heros.attaque_reelle() * part_degats,
+		"familier" if id == "familier_tireur" else "augment")
 	if id == "familier_tireur":
 		tir.drapeaux.append("trait_familier")
+	_salle.tirer(tir, origine, direction, false)
+
+func _tirer_familier(id: String, origine: Vector2, direction: Vector2) -> void:
+	if not _heros.peut_tirer(): return
+	var tir := Tir.de_base(_heros.stats)
+	var attaque := CatalogueFamiliers.attaque(id, ReglagesJoueur.niveau_familier(id))
+	if "familier_renforce" in _heros.tir_courant.drapeaux:
+		attaque *= Reglages.FAMILIER_TIREUR_ATTAQUE_MULT
+	tir.degats = _heros.degats_finaux(attaque, "familier", false)
+	tir.drapeaux.append("trait_familier")
 	_salle.tirer(tir, origine, direction, false)
 
 func _declencher_meteore() -> void:
 	var cible := _ennemi_plus_proche(_heros.global_position)
 	if cible == null:
 		return
+	var point_impact: Vector2 = cible.global_position
+	var salle_impact: int = Jeu.salle_courante
 	var tir := Tir.de_base(_heros.stats)
-	tir.degats = _heros.degats_finaux(_heros.attaque_reelle() * Reglages.METEORE_PART_DEGATS)
-	_effets.onde(cible.global_position, Reglages.METEORE_RAYON, Palette.BRAISE, 0.65)
+	tir.degats = _heros.degats_finaux(_heros.attaque_reelle() * Reglages.METEORE_PART_DEGATS, "augment")
+	_effets.animer_augment("chute_meteore", point_impact, Reglages.METEORE_RAYON)
+	# Le point au sol reste fixe meme si la cible meurt pendant la chute.
+	# Le delai de contact respecte aussi la pause du choix d'augment.
+	await get_tree().create_timer(preload("res://data/animations_augments.gd").CHUTE_METEORE, false).timeout
+	if _terminee or _transition_salle or Jeu.salle_courante != salle_impact:
+		return
+	_effets.animer_augment("impact_meteore", point_impact, Reglages.METEORE_RAYON)
+	_effets.eclats(point_impact, Palette.BRAISE, 14, 230.0, 0.7)
 	for ennemi in get_tree().get_nodes_in_group("ennemis"):
-		if is_instance_valid(ennemi) and ennemi.global_position.distance_to(cible.global_position) <= Reglages.METEORE_RAYON:
+		if is_instance_valid(ennemi) and ennemi.global_position.distance_to(point_impact) <= Reglages.METEORE_RAYON:
 			_infliger_phenomene(ennemi, tir)
 
 # La chaine ne revient jamais sur un maillon deja frappe.
 func _declencher_chaine() -> void:
 	var tir := Tir.de_base(_heros.stats)
-	tir.degats = _heros.degats_finaux(_heros.attaque_reelle() * Reglages.CHAINE_PART_DEGATS)
+	tir.degats = _heros.degats_finaux(_heros.attaque_reelle() * Reglages.CHAINE_PART_DEGATS, "augment")
 	var depart := _heros.global_position
 	var deja: Array[int] = []
 	for maillon in Reglages.CHAINE_CIBLES:
@@ -705,7 +740,7 @@ func _declencher_chaine() -> void:
 		if cible == null:
 			return
 		deja.append(cible.get_instance_id())
-		_effets.arc(depart, cible.global_position, Palette.ESSENCE)
+		_effets.animer_augment("chaine_alchimique", depart, 0.0, cible.global_position)
 		_infliger_phenomene(cible, tir)
 		depart = cible.global_position
 
@@ -723,8 +758,8 @@ func _maillon_suivant(origine: Vector2, deja: Array[int]) -> Node2D:
 
 func _declencher_onde_de_choc() -> void:
 	var tir := Tir.de_base(_heros.stats)
-	tir.degats = _heros.degats_finaux(_heros.attaque_reelle() * Reglages.ONDE_CHOC_PART_DEGATS)
-	_effets.onde(_heros.global_position, Reglages.ONDE_CHOC_RAYON, Palette.OR, 0.55)
+	tir.degats = _heros.degats_finaux(_heros.attaque_reelle() * Reglages.ONDE_CHOC_PART_DEGATS, "augment")
+	_effets.animer_augment("onde_de_choc", _heros.global_position, Reglages.ONDE_CHOC_RAYON)
 	for ennemi in get_tree().get_nodes_in_group("ennemis"):
 		if not is_instance_valid(ennemi) \
 				or ennemi.global_position.distance_to(_heros.global_position) > Reglages.ONDE_CHOC_RAYON:
@@ -734,8 +769,8 @@ func _declencher_onde_de_choc() -> void:
 
 func _frapper_zone_heros() -> void:
 	var tir := Tir.de_base(_heros.stats)
-	tir.degats = _heros.degats_finaux(_heros.attaque_reelle() * Reglages.ZONE_HEROS_PART_DEGATS)
-	_effets.onde(_heros.global_position, Reglages.ZONE_HEROS_RAYON, Palette.MOUSSE_MAGIQUE, 0.32)
+	tir.degats = _heros.degats_finaux(_heros.attaque_reelle() * Reglages.ZONE_HEROS_PART_DEGATS, "augment")
+	_effets.animer_augment("zone_heros", _heros.global_position, Reglages.ZONE_HEROS_RAYON)
 	for ennemi in get_tree().get_nodes_in_group("ennemis"):
 		if is_instance_valid(ennemi) and ennemi.global_position.distance_to(_heros.global_position) <= Reglages.ZONE_HEROS_RAYON:
 			_infliger_phenomene(ennemi, tir)
@@ -762,28 +797,76 @@ func _ennemi_plus_proche(origine: Vector2) -> Node2D:
 func _sur_heros_touche(position: Vector2) -> void:
 	_effets.impact(position, Palette.DANGER, 1.6)
 	_hud.impact_degats()
+
+func attaque_touche(position: Vector2, degats_tir: float, drapeaux: Array,
+		cible: Node2D = null) -> void:
+	if "trait_familier" in drapeaux or "trait_orbe" in drapeaux \
+			or "trait_supplementaire" in drapeaux or "fragment" in drapeaux \
+			or "trait_aura" in drapeaux:
+		return
+	if "retardement" in drapeaux and is_instance_valid(cible):
+		_marquer_retardement(cible, degats_tir)
 	var passifs := ReglagesJoueur.passifs_equipes_effectifs()
-	var ratio_pv: float = _heros.stats.pv / maxf(1.0, _heros.stats.pv_max)
-	if _passifs_combat.recharge_audace(passifs, ratio_pv, _recharge_sort_actif):
-		_recharge_sort_actif = 0.0
-		_effets.onde(position, ReglagesPassifs.RAYON_SIGNAL,
-			ReglagesPassifs.COULEUR_AUDACE, ReglagesPassifs.DUREE_SIGNAL)
-	if _passifs_combat.declencher_rempart(passifs, ratio_pv, _heros, _salle, _limites):
-		_effets.onde(position, Sorts.rayon_rempart(passifs),
-			ReglagesPassifs.COULEUR_REMPART, ReglagesPassifs.DUREE_SIGNAL)
-	if passifs.has("riposte_alchimique") and _recharge_riposte <= 0.0:
-		_recharge_riposte = Reglages.RIPOSTE_RECHARGE
-		var degats: float = _heros.degats_finaux(_heros.attaque_reelle() \
-			* Reglages.RIPOSTE_PART_DEGATS * float(passifs["riposte_alchimique"]))
-		_effets.onde(position, Reglages.RIPOSTE_RAYON, Palette.OR, 0.45)
-		for ennemi in get_tree().get_nodes_in_group("ennemis"):
-			if not is_instance_valid(ennemi) \
-					or ennemi.global_position.distance_to(position) > Reglages.RIPOSTE_RAYON:
-				continue
-			ennemi.recevoir_degats(degats, [])
-			# La riposte doit rendre l'espace repris : encaisser un coup sans
-			# desengager ne changeait rien a la situation.
-			_repousser(ennemi, position, Reglages.RIPOSTE_REPOUSSEE)
+	if not passifs.has("riposte_alchimique"):
+		return
+	var visuel := FLAQUE_ALCHIMIQUE.new()
+	add_child(visuel)
+	visuel.global_position = position
+	visuel.configurer(Reglages.CONTRAT_DUREE, Reglages.CONTRAT_RAYON)
+	_flaques_alchimiques.append({
+		"position": position,
+		"restant": Reglages.CONTRAT_DUREE,
+		"prochain": Reglages.CONTRAT_INTERVALLE,
+		"degats": degats_tir * Sorts.part_contrat(passifs) \
+			* Mods.facteur_heros(Jeu.mods(), "degats_hors_baguette_mult"),
+	})
+
+func _avancer_flaques_alchimiques(delta: float) -> void:
+	if _flaques_alchimiques.is_empty() or _terminee:
+		return
+	var restantes: Array[Dictionary] = []
+	for flaque: Dictionary in _flaques_alchimiques:
+		var restant := float(flaque["restant"]) - delta
+		var prochain := float(flaque["prochain"]) - delta
+		while prochain <= 0.0:
+			_frapper_flaque(flaque)
+			prochain += Reglages.CONTRAT_INTERVALLE
+		flaque["restant"] = restant
+		flaque["prochain"] = prochain
+		if restant > 0.0:
+			restantes.append(flaque)
+	_flaques_alchimiques = restantes
+
+func _marquer_retardement(cible: Node2D, degats: float) -> void:
+	var id := cible.get_instance_id()
+	for marque: Dictionary in _retardements:
+		if int(marque["id"]) == id:
+			return
+	var cadence := maxf(0.01, _heros.cadence_effective_actuelle())
+	_retardements.append({"id": id, "cible": cible, "degats": degats \
+		* Mods.facteur_heros(Jeu.mods(), "degats_hors_baguette_mult"),
+		"restant": Reglages.RETARDEMENT_DELAI * Reglages.HEROS_CADENCE / cadence})
+	_effets.animer_augment("orbes_chargees", cible.global_position, 32.0)
+
+func _avancer_retardements(delta: float) -> void:
+	var restantes: Array[Dictionary] = []
+	for marque: Dictionary in _retardements:
+		marque["restant"] = float(marque["restant"]) - delta
+		var cible: Node2D = marque["cible"]
+		if float(marque["restant"]) <= 0.0:
+			if is_instance_valid(cible):
+				cible.recevoir_degats(float(marque["degats"]), [])
+				_effets.impact(cible.global_position, Palette.ESSENCE, 1.3)
+		elif is_instance_valid(cible):
+			restantes.append(marque)
+	_retardements = restantes
+
+func _frapper_flaque(flaque: Dictionary) -> void:
+	var centre: Vector2 = flaque["position"]
+	for ennemi in get_tree().get_nodes_in_group("ennemis"):
+		if is_instance_valid(ennemi) and ennemi.global_position.distance_to(centre) <= Reglages.CONTRAT_RAYON:
+			ennemi.recevoir_degats(float(flaque["degats"]), [])
+	_effets.onde(centre, Reglages.CONTRAT_RAYON, Color(0.55, 0.95, 0.62), 0.18)
 
 func _sur_bouclier_brise(position: Vector2) -> void:
 	_effets.onde(position, 200.0, Color(0.85, 0.92, 1.0), 0.5)
@@ -794,7 +877,7 @@ func _sur_ennemi_abattu(experience: int) -> void:
 		if _niveaux_en_attente > 0 and _panneau == null and not _terminee:
 			_ouvrir_recompense_etage()
 	if "soif_de_sang" in _heros.tir_courant.drapeaux:
-		_heros.stats.soigner(_heros.stats.pv_max * Reglages.SOIF_DE_SANG_PART)
+		_heros.stats.soigner_garanti(_heros.stats.pv_max * Reglages.SOIF_DE_SANG_PART)
 	var passifs := ReglagesJoueur.passifs_equipes_effectifs()
 	if passifs.has("moisson_vitale"):
 		_compteur_moisson += 1
@@ -808,14 +891,16 @@ func _sur_tape_rapide(nombre: int) -> void:
 	var requises := RaccourciTactile.tapes_requises(ReglagesJoueur.raccourci_sort)
 	if requises <= 0 or nombre < requises or _terminee or _panneau != null:
 		return
-	# La serie repart de zero apres un tir, sinon la tape suivante completerait
-	# un double appui deja consomme.
+	# Les autres doigts deja poses ne doivent pas produire un second lancement
+	# en se relevant apres celui-ci.
 	_joystick.consommer_raccourci()
-	_lancer_sort_actif()
+	_lancer_sort_actif(false)
+
+func _sur_sort_actif_demande() -> void:
+	_lancer_sort_actif(RaccourciTactile.visee_manuelle(ReglagesJoueur.raccourci_sort))
 
 func charger_sort() -> void:
-	# Les impacts ordinaires ne rendent pas de recharge ; Reserve d'ultime
-	# reagit une seule fois au resultat du sort actif.
+	# Les impacts ordinaires ne rendent pas de recharge.
 	pass
 
 func _point_sort(position_ecran: Vector2) -> Vector2:
@@ -832,14 +917,15 @@ func _ecran_sort(point: Vector2) -> Vector2:
 	var camera3d := get_viewport().get_camera_3d()
 	return camera3d.unproject_position(Pont3D.vers_monde(point)) if camera3d != null else _heros.get_canvas_transform() * point
 
-func _lancer_sort_actif() -> void:
+func _lancer_sort_actif(visee_manuelle := true) -> void:
 	if is_instance_valid(_apprentissage) and _apprentissage.combat_suspendu():
 		return
 	var id := ReglagesJoueur.sort_actif_effectif()
 	if _terminee or _panneau != null or get_tree().paused or _recharge_sort_actif > 0.0 or not Sorts.ACTIFS.has(id): return
-	if Jeu.mode_auto:
-		var ennemis := get_tree().get_nodes_in_group("ennemis")
-		if not ennemis.is_empty(): _confirmer_sort(ennemis[0].global_position)
+	if Jeu.mode_auto or not visee_manuelle:
+		var cible := _ennemi_plus_proche(_heros.global_position)
+		if cible != null:
+			_confirmer_sort(cible.global_position)
 		return
 	_neutraliser_deplacement()
 	_panneau = load("res://ui/visee_sort.gd").new()
@@ -885,17 +971,38 @@ func _confirmer_sort(point: Vector2) -> void:
 	var sort: Dictionary = Sorts.ACTIFS[id]
 	var efficacite := ReglagesJoueur.efficacite_sort(id)
 	var multiplicateur := float(sort["degats"]) * efficacite
-	var degats: float = _heros.degats_finaux(_heros.attaque_reelle(true) * multiplicateur)
+	var degats: float = _heros.degats_finaux(_heros.attaque_reelle(true) * multiplicateur, "sort")
 	_recharge_sort_actif = ReglagesJoueur.recharge_sort(id, Jeu.mods())
-	var touches := _appliquer_sort(float(sort["rayon"]), multiplicateur, str(sort["effet"]), false, point, id, degats)
+	_appliquer_sort(float(sort["rayon"]), multiplicateur, str(sort["effet"]), false, point, id, degats)
 	var passifs := ReglagesJoueur.passifs_equipes_effectifs()
-	if touches > 0:
-		_charge_ultime = maxf(0.0, _charge_ultime - Sorts.temps_reserve(passifs))
-	if passifs.has("echo_alchimique") \
-			and Jeu.rng.randf() < Sorts.chance_echo(passifs):
-		# Les soins des premieres victimes ne changent pas les degats de l'echo.
-		_appliquer_sort(float(sort["rayon"]), multiplicateur, str(sort["effet"]), false, point, id,
-			degats * Reglages.ECHO_PART_DEGATS)
+	if passifs.has("echo_alchimique"):
+		_lancer_echos(point, id, efficacite, Sorts.nombre_echos(passifs))
+	var bonus_apres_sort := Sorts.bonus_sort_imprecateur(passifs)
+	var duree_bonus := Reglages.SORT_IMPRECATEUR_DUREE
+	var cadence_apres_sort := 0.0
+	if "incantation" in ReglagesJoueur.effets_objets_effectifs():
+		bonus_apres_sort += EffetsBijoux.INCANTATION_BONUS
+		duree_bonus = maxf(duree_bonus, EffetsBijoux.INCANTATION_DUREE)
+	var arme: Dictionary = CatalogueProjectiles.TYPES[ReglagesJoueur.projectile_equipe_effectif()]
+	bonus_apres_sort += float(arme.get("apres_sort_degats", 0.0))
+	cadence_apres_sort += float(arme.get("apres_sort_cadence", 0.0))
+	duree_bonus = maxf(duree_bonus, float(arme.get("apres_sort_duree", 0.0)))
+	if bonus_apres_sort > 0.0 or cadence_apres_sort > 0.0:
+		_heros.activer_bonus_apres_sort(bonus_apres_sort, duree_bonus, cadence_apres_sort)
+		_effets.onde(_heros.global_position, 110.0, Color(0.76, 0.42, 0.94), 0.35)
+
+func _lancer_echos(point: Vector2, id_initial: String, efficacite: float, nombre: int) -> void:
+	var candidats: Array[String] = []
+	for candidat_id in Sorts.ACTIFS:
+		if candidat_id != id_initial:
+			candidats.append(candidat_id)
+	for i in mini(nombre, candidats.size()):
+		var index := Jeu.rng.randi_range(0, candidats.size() - 1)
+		var echo_id := candidats[index]
+		candidats.remove_at(index)
+		var echo: Dictionary = Sorts.ACTIFS[echo_id]
+		_appliquer_sort(float(echo["rayon"]), float(echo["degats"]) * efficacite,
+			str(echo["effet"]), false, point, echo_id)
 
 func _lancer_ultime() -> void:
 	if is_instance_valid(_apprentissage) and _apprentissage.combat_suspendu():
@@ -914,10 +1021,10 @@ func _lancer_ultime() -> void:
 func _appliquer_sort(rayon: float, multiplicateur: float, effet: String, ultime: bool,
 		cible := Vector2.INF, id := "", degats_prepares := -1.0) -> int:
 	var mods_sorts := Jeu.mods()
-	rayon = BonusSorts.rayon(rayon, mods_sorts)
+	rayon = BonusSorts.rayon(rayon, mods_sorts, ReglagesJoueur.rangs_competences_effectifs())
 	var degats := degats_prepares
 	if degats < 0.0:
-		degats = _heros.degats_finaux(_heros.attaque_reelle(true) * multiplicateur)
+		degats = _heros.degats_finaux(_heros.attaque_reelle(true) * multiplicateur, "sort")
 	var centre := _heros.global_position if cible == Vector2.INF else cible
 	_effets.animer_sort(id, centre, rayon)
 	if effet == "purifie":

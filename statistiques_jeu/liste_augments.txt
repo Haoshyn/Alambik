@@ -1,0 +1,33 @@
+Tir multiple | Épique | +1 projectile simultané parallèle ; tous les projectiles infligent −20 % de dégâts finaux après tous les autres calculs
+Salve souveraine | Légendaire | +2 projectiles simultanés parallèles ; tous les projectiles infligent −20 % de dégâts finaux après tous les autres calculs
+Ricochet | Épique | +3 rebonds avec redirection directe ; dégâts −20 % à chaque rebond
+Perforation | Épique | Traverse tous les ennemis sans gain ni perte de dégâts ; avec Ricochet, rebonds sans limite et une seule touche par ennemi
+Retardement | Épique | Une attaque pose une seule marque par ennemi ; après 2 s réduites par la cadence, la cible reprend les dégâts du coup initial
+Traque alchimique | Rare | Projectiles guidés, sans autre bonus
+Frappe cataclysmique | Légendaire | Attaque de run +100 % ; annule tous les malus de dégâts des autres augments
+Cadence fébrile | Rare | Cadence +30 %
+Spirale | Épique | +2 projectiles latéraux guidés à 45 % ; angle d’éventail +31,51°
+Tir indélébile | Épique | Poursuit la cible initiale, traverse murs et ennemis interposés, disparaît seulement en la touchant
+Égide souveraine | Légendaire | PV maximum +50 % ; dégâts subis −50 % ; rend immédiatement tous les PV
+Régénération | Rare | PV maximum +20 % ; soin de 5 % des PV max entre les salles dans le budget partagé
+Avidité | Rare | XP de run +30 % ; Gouttes +30 %
+Courage indomptable | Légendaire | Attaque, cadence, Défense et PV maximum +20 % ; une vie supplémentaire rendue à 100 %
+Mannequin | Rare | Entre 0,5 s et 1,5 s immobile : dégâts et cadence progressent jusqu’à +50 %
+Peau de pierre | Épique | PV maximum +20 % ; dégâts subis −20 %
+Élan vital | Épique | Après 1 s de mouvement, la prochaine attaque libère une aura infligeant les dégâts d’une attaque normale et traversant ennemis et murs
+Soif de sang | Rare | Chaque élimination rend 1 % des PV max
+Familier tireur | Rare | Attaque propre du familier +30 % ; cadence du familier +20 %
+Météores | Épique | Impact de zone infligeant 300 % des dégâts d’attaque toutes les 3 s ; rayon 220
+Zone alchimique | Rare | Inflige 45 % des dégâts d’attaque toutes les 0,5 s autour du héros ; rayon 210
+Familier gardien | Rare | Gardien de mêlée : 60 % des dégâts d’attaque toutes les 0,8 s ; 55 PV ; réapparition après 5 s
+Orbes chargées | Rare | Chaque projectile qui touche répète ses dégâts dans un rayon 150, sans refrapper la cible principale
+Chaîne alchimique | Épique | Arc infligeant 200 % des dégâts d’attaque par cible toutes les 1,4 s ; jusqu’à 5 cibles ; portée 460 entre les cibles
+Onde de choc | Rare | Inflige 200 % des dégâts d’attaque toutes les 3 s ; rayon 330 ; repoussement 300
+Sceau de garde | Rare | Dégâts subis −15 %
+Sceau de ruine | Rare | Attaque de run +35 % ; dégâts subis +15 %
+Puissance arcanique | Rare | Toutes les formes de dégâts sauf l’attaque de base +30 %
+Cycle arcanique | Rare | Récupération des sorts actifs et ultimes −25 %
+Apothéose | Légendaire | Dégâts des sorts +100 % ; récupération −50 % ; rayon inchangé
+Soin immédiat | Commun | Soigne immédiatement 30 % des PV maximum
+Poudre vive | Commun | Attaque +10 % par choix pour la run
+Réserve vitale | Commun | PV maximum +10 % par choix pour la run ; aucun soin immédiat

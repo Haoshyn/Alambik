@@ -4,16 +4,20 @@ extends RefCounted
 const GOUTTES_SALLE := 2.0
 const BONUS_PAR_BOSS := 0.10
 const XP_SALLE := 2
-const XP_VICTOIRE := 20
+# La victoire garde un bonus, mais l'essentiel de l'XP vient des salles. Avec
+# ce partage, le panier 8/11/13/15/17/19 salles vaut 86 % de quatre victoires
+# precedentes et une septieme defaite tardive atteint 106 %.
+const XP_VICTOIRE := 8
 const XP_BOSS_EPREUVE := 2
 
 # La meme offre alimente l'aperçu et le tirage ; seules les salles validees paient.
 static func offre(mode: String, chapitre: int, salles: int, boss: int, victoire: bool,
 		niveau_epreuve: int, rangs: Dictionary, objets: Array[String], echecs: int, echecs_sorts := 0,
-		palier_mine := 0, temps_mine := 0.0) -> Dictionary:
+		palier_mine := 0, temps_mine := 0.0, coeur_obtenu := false, echecs_coeur := 0) -> Dictionary:
 	var rang := clampi(boss, 0, Recompenses.COFFRES.size() - 1)
 	var resultat := {"nom": Recompenses.COFFRES[rang]["nom"], "rang": rang, "gouttes_min": 0, "gouttes_max": 0,
-		"xp": 0, "pierres": 0, "objets": [], "chance_objet": 0.0, "sorts": [], "chance_sort": 0.0, "cadeaux": []}
+		"xp": 0, "pierres": 0, "objets": [], "chance_objet": 0.0, "sorts": [],
+		"chance_sort": 0.0, "chance_coeur": 0.0, "cadeaux": []}
 	if mode == "mine":
 		# La survie finance un nouvel essai meme si le boss reste hors de portee.
 		var progression := clampf(temps_mine / Reglages.MINE_DUREE, 0.0, 1.0)
@@ -45,15 +49,20 @@ static func offre(mode: String, chapitre: int, salles: int, boss: int, victoire:
 		if victoire:
 			resultat["sorts"] = Epreuves.candidats(niveau_epreuve, rangs)
 			if not resultat["sorts"].is_empty():
-				resultat["chance_sort"] = 1.0 if Epreuves.nouvelle_capacite_disponible(niveau_epreuve, rangs) \
-					else Recompenses.chance_garantie(Reglages.EPREUVE_GARANTIE_CAPACITE, echecs_sorts)
+				resultat["chance_sort"] = Recompenses.chance_garantie(
+					Reglages.EPREUVE_GARANTIE_CAPACITE, echecs_sorts)
+			if not coeur_obtenu:
+				resultat["chance_coeur"] = Recompenses.chance_garantie(
+					Reglages.EPREUVE_GARANTIE_COEUR, echecs_coeur)
 	elif mode == "mine":
 		resultat["xp"] = salles * XP_SALLE
 	return resultat
 
 static func tirer(offre_: Dictionary, rng: RandomNumberGenerator) -> Dictionary:
 	var resultat := {"gouttes": rng.randi_range(int(offre_["gouttes_min"]), int(offre_["gouttes_max"])),
-		"xp": int(offre_["xp"]), "pierres": int(offre_["pierres"]), "objet": "", "sort": "", "nom": offre_["nom"], "rang": offre_["rang"], "cadeaux": offre_["cadeaux"].duplicate()}
+		"xp": int(offre_["xp"]), "pierres": int(offre_["pierres"]), "objet": "", "sort": "",
+		"coeur_mana": rng.randf() < float(offre_.get("chance_coeur", 0.0)),
+		"nom": offre_["nom"], "rang": offre_["rang"], "cadeaux": offre_["cadeaux"].duplicate()}
 	for type in ["objet", "sort"]:
 		var candidats_: Array = offre_[type + "s"]
 		if not candidats_.is_empty() and rng.randf() < float(offre_["chance_" + type]):

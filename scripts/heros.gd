@@ -12,7 +12,7 @@ signal morte
 
 var stats := Stats.depuis_reglages(ReglagesJoueur.rangs_competences_effectifs(),
 	ReglagesJoueur.passifs_equipes_effectifs(), ReglagesJoueur.bonus_objets_effectifs(),
-	ReglagesJoueur.niveau_compte_effectif())
+	ReglagesJoueur.niveau_compte_effectif(), ReglagesJoueur.attributs)
 var tir_courant: Tir
 var bouclier := 0
 var _bouclier_accorde := false
@@ -35,7 +35,17 @@ var _secousse := 0.0
 var _inclinaison := 0.0
 var _attaque := 0.0
 var _tirs_prepares: Array[Dictionary] = []
-var _seconde_chance_disponible := true
+var _temps_depuis_degats := 0.0
+var _bonus_apres_sort := 0.0
+var _cadence_apres_sort := 0.0
+var _bonus_apres_sort_restant := 0.0
+var _elan_objet_cumuls := 0
+var _elan_objet_restant := 0.0
+var _sursis_disponible := true
+var _courage_vie_disponible := true
+var _egide_active := false
+var _elan_mouvement := 0.0
+var _elan_chargee := false
 
 func _ready() -> void:
 	add_to_group("heros")
@@ -43,7 +53,7 @@ func _ready() -> void:
 	if collision != null:
 		collision.shape = collision.shape.duplicate()
 		(collision.shape as CircleShape2D).radius = Reglages.HEROS_RAYON
-	stats.soin_restant = stats.pv_max * Reglages.SOIN_COMBAT_PAR_SALLE
+	stats.soin_restant = stats.pv_max * Reglages.SOIN_COMBAT_PAR_SALLE * stats.soin_mult
 	add_to_group("cibles_ennemis")
 	tir_courant = Tir.de_base(stats)
 	recalculer()
@@ -72,27 +82,34 @@ func recalculer() -> void:
 	stats.pv = minf(stats.pv, stats.pv_max)
 	var tir_de_run := Mods.appliquer(Tir.de_base(stats), mods_run)
 	tir_courant = CatalogueProjectiles.appliquer(ReglagesJoueur.projectile_equipe_effectif(), tir_de_run)
+	if "familier_tireur" in tir_courant.drapeaux:
+		tir_courant.drapeaux.append("familier_renforce")
+	if "familier_tireur" not in tir_courant.drapeaux:
+		tir_courant.drapeaux.append("familier_tireur")
 	var drapeaux := tir_courant.drapeaux
 	stats.vitesse = Reglages.HEROS_VITESSE * ArbreCompetences.multiplicateur_vitesse(ReglagesJoueur.rangs_competences_effectifs()) \
 		* Sorts.multiplicateur_vitesse(ReglagesJoueur.passifs_equipes_effectifs()) \
+		* (1.0 + float(ReglagesJoueur.bonus_objets_effectifs().get("vitesse", 0.0))) \
 		* Mods.facteur_heros(mods_run, "deplacement_mult")
-	if not _bouclier_accorde and ("egide" in drapeaux or ArbreCompetences.donne_bouclier(ReglagesJoueur.rangs_competences_effectifs())):
+	if "egide" in drapeaux and not _egide_active:
+		stats.pv = stats.pv_max
+	_egide_active = "egide" in drapeaux
+	if not _bouclier_accorde and ArbreCompetences.donne_bouclier(ReglagesJoueur.rangs_competences_effectifs()):
 		bouclier = 1
 		_bouclier_accorde = true
 
 func preparer_nouvelle_salle() -> void:
 	_bouclier_accorde = false
-	stats.soin_restant = stats.pv_max * Reglages.SOIN_COMBAT_PAR_SALLE
+	stats.soin_restant = stats.pv_max * Reglages.SOIN_COMBAT_PAR_SALLE * stats.soin_mult
 	_a_bouge_dans_la_salle = false
 	_tirs_prepares.clear()
 	_rafale_restante = 0
 	recalculer()
 	if "regeneration" in tir_courant.drapeaux:
-		stats.soigner(stats.pv_max * Reglages.REGENERATION_PART \
-			* ArbreCompetences.multiplicateur_soin(ReglagesJoueur.rangs_competences_effectifs()))
+		stats.soigner(stats.pv_max * Reglages.REGENERATION_PART)
 	var soin := ArbreCompetences.soin_par_salle(ReglagesJoueur.rangs_competences_effectifs()) + Sorts.soin_par_salle(ReglagesJoueur.passifs_equipes_effectifs())
 	if soin > 0.0:
-		stats.soigner(stats.pv_max * soin * ArbreCompetences.multiplicateur_soin(ReglagesJoueur.rangs_competences_effectifs()))
+		stats.soigner(stats.pv_max * soin)
 
 func _physics_process(delta: float) -> void:
 	var terrain := Vector3(0, 0, 1)
@@ -122,10 +139,23 @@ func _process(delta: float) -> void:
 	_secousse = maxf(0.0, _secousse - delta * 4.0)
 	_invulnerable = maxf(0.0, _invulnerable - delta)
 	_recharge = maxf(0.0, _recharge - delta)
+	_temps_depuis_degats += delta
+	_bonus_apres_sort_restant = maxf(0.0, _bonus_apres_sort_restant - delta)
+	if _bonus_apres_sort_restant <= 0.0:
+		_bonus_apres_sort = 0.0
+		_cadence_apres_sort = 0.0
+	_elan_objet_restant = maxf(0.0, _elan_objet_restant - delta)
+	if _elan_objet_restant <= 0.0:
+		_elan_objet_cumuls = 0
 	_avancer_rafale(delta)
 	var immobile := _intention == Vector2.ZERO
 	if not immobile and _intensite > 0.0:
 		_a_bouge_dans_la_salle = true
+		if "elan_vital" in tir_courant.drapeaux and not _elan_chargee:
+			_elan_mouvement += delta
+			_elan_chargee = _elan_mouvement >= Reglages.ELAN_VITAL_CHARGE
+	elif not _elan_chargee:
+		_elan_mouvement = 0.0
 	_temps_immobile = _temps_immobile + delta if immobile else 0.0
 	queue_redraw()
 
@@ -142,8 +172,7 @@ func _process(delta: float) -> void:
 		return
 	var direction := global_position.direction_to(_point_vise(index))
 	_visee = direction
-	var cadence_effective := tir_courant.cadence * (Reglages.MANNEQUIN_CADENCE_MULT \
-		if "mannequin" in tir_courant.drapeaux and _temps_immobile >= Reglages.MANNEQUIN_DELAI else 1.0)
+	var cadence_effective := cadence_effective_actuelle()
 	_recharge = 1.0 / maxf(0.2, cadence_effective)
 	if "rafale" in tir_courant.drapeaux:
 		_rafale_restante = Reglages.RAFALE_NOMBRE
@@ -231,40 +260,89 @@ func recevoir_degats(montant: float, _effets: Array = []) -> void:
 	_secousse = 1.0
 	var passifs := ReglagesJoueur.passifs_equipes_effectifs()
 	var degats_apres_defenses := montant * ((1.0 - Reglages.PEAU_DE_PIERRE_REDUCTION) if "peau_de_pierre" in tir_courant.drapeaux else 1.0) \
+		* (Reglages.EGIDE_REDUCTION if "egide" in tir_courant.drapeaux else 1.0) \
 		* ((1.0 - Reglages.SCEAU_GARDE_REDUCTION) if "sceau_garde" in tir_courant.drapeaux else 1.0) \
 		* (Reglages.SCEAU_RUINE_VULNERABILITE if "sceau_ruine" in tir_courant.drapeaux else 1.0) \
-		* (1.0 - ArbreCompetences.reduction_degats(ReglagesJoueur.rangs_competences_effectifs()))
+		* (1.0 + Sorts.bonus_audace(passifs)) \
+		* (1.0 - ArbreCompetences.reduction_degats(ReglagesJoueur.rangs_competences_effectifs())) \
+		* 100.0 / (100.0 + maxf(0.0, stats.defense \
+			* Mods.facteur_heros(Jeu.mods(), "defense_mult")))
 	stats.blesser(degats_apres_defenses)
+	_temps_depuis_degats = 0.0
 	_invulnerable = Reglages.HEROS_INVULNERABILITE + Sorts.bonus_invulnerabilite(passifs)
 	touchee.emit(global_position)
 	Sons.jouer("degat", -6.0)
 	if stats.est_mort():
-		if _seconde_chance_disponible and ReglagesJoueur.passifs_equipes_effectifs().has("seconde_chance"):
-			_seconde_chance_disponible = false
-			stats.pv = stats.pv_max * Sorts.soin_seconde_chance(ReglagesJoueur.passifs_equipes_effectifs())
-			bouclier = 1
+		if _courage_vie_disponible and "courageux" in tir_courant.drapeaux:
+			_courage_vie_disponible = false
+			stats.pv = stats.pv_max * Reglages.COURAGEUX_RETOUR_PV
+			Sons.jouer("fusion", -7.0)
+			return
+		if _sursis_disponible and "sursis" in ReglagesJoueur.effets_objets_effectifs():
+			_sursis_disponible = false
+			stats.pv = EffetsBijoux.SURSIS_PV
 			Sons.jouer("fusion", -7.0)
 			return
 		morte.emit()
 
 func bonus_attaque_conditionnel() -> float:
-	var ratio := stats.pv / maxf(1.0, stats.pv_max)
 	var bonus := 0.0
-	if "courageux" in tir_courant.drapeaux:
-		bonus += (1.0 - ratio) * Reglages.COURAGEUX_BONUS_MAX
-	if "mannequin" in tir_courant.drapeaux and _temps_immobile >= Reglages.MANNEQUIN_DELAI:
-		bonus += Reglages.MANNEQUIN_DEGATS_MULT - 1.0
-	# Elan vital recompense le deplacement : le bonus persiste un court instant
-	# apres l'arret, sinon il ne servirait jamais — on tire a l'arret.
-	if "elan_vital" in tir_courant.drapeaux and _a_bouge_dans_la_salle and _temps_immobile <= Reglages.ELAN_VITAL_DUREE:
-		bonus += Reglages.ELAN_VITAL_DEGATS_MULT - 1.0
+	if "mannequin" in tir_courant.drapeaux:
+		bonus += bonus_mannequin()
 	return bonus
 
-func attaque_reelle(pour_sort := false) -> float:
-	return BonusSorts.attaque(stats, Jeu.mods(), bonus_attaque_conditionnel(), pour_sort)
+func bonus_mannequin() -> float:
+	if tir_courant == null or "mannequin" not in tir_courant.drapeaux:
+		return 0.0
+	return clampf((_temps_immobile - Reglages.MANNEQUIN_DEBUT) \
+		/ (Reglages.MANNEQUIN_FIN - Reglages.MANNEQUIN_DEBUT), 0.0, 1.0) \
+		* Reglages.MANNEQUIN_BONUS_MAX
 
-func degats_finaux(montant: float) -> float:
-	return montant * ReglagesJoueur.multiplicateur_degats_deblocages()
+func cadence_effective_actuelle() -> float:
+	return tir_courant.cadence * (1.0 + bonus_mannequin()) * (1.0 + _cadence_apres_sort)
+
+func consommer_aura_elan() -> bool:
+	if not _elan_chargee:
+		return false
+	_elan_chargee = false
+	_elan_mouvement = 0.0
+	return true
+
+func attaque_reelle(pour_sort := false) -> float:
+	var attaque := BonusSorts.attaque(stats, Jeu.mods(), bonus_attaque_conditionnel(), pour_sort)
+	return attaque * (1.0 + stats.degats_sorts) if pour_sort else attaque
+
+func activer_bonus_apres_sort(bonus: float, duree: float, cadence := 0.0) -> void:
+	_bonus_apres_sort = maxf(0.0, bonus)
+	_cadence_apres_sort = maxf(0.0, cadence)
+	_bonus_apres_sort_restant = maxf(0.0, duree)
+
+func enregistrer_attaque_objet() -> void:
+	if "elan_offensif" not in ReglagesJoueur.effets_objets_effectifs():
+		return
+	_elan_objet_cumuls = mini(EffetsBijoux.ELAN_CUMULS_MAX, _elan_objet_cumuls + 1)
+	_elan_objet_restant = EffetsBijoux.ELAN_DUREE
+
+func bonus_degats_passifs() -> float:
+	var passifs := ReglagesJoueur.passifs_equipes_effectifs()
+	var bonus := Sorts.bonus_audace(passifs)
+	if passifs.has("rempart_initial") and _temps_depuis_degats >= Reglages.REPRISE_DELAI:
+		bonus += Sorts.bonus_reprise(passifs)
+	if _bonus_apres_sort_restant > 0.0:
+		bonus += _bonus_apres_sort
+	bonus += float(_elan_objet_cumuls) * EffetsBijoux.ELAN_BONUS_PAR_ATTAQUE
+	return bonus
+
+func degats_finaux(montant: float, source := "baguette", critique_autorise := true) -> float:
+	var resultat := montant
+	if critique_autorise and Jeu.rng.randf() < stats.critique:
+		resultat *= 1.50 + stats.degats_critiques
+	resultat *= ReglagesJoueur.multiplicateur_coeurs_mana()
+	resultat *= Personnage.multiplicateur_source(ReglagesJoueur.specialisation_effective(), source)
+	if source != "baguette":
+		resultat *= Mods.facteur_heros(Jeu.mods(), "degats_hors_baguette_mult")
+	resultat *= 1.0 + bonus_degats_passifs()
+	return resultat
 
 func _draw() -> void:
 	if has_meta("visuel_3d"):

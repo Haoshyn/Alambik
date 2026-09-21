@@ -15,9 +15,11 @@ const MOTIFS_PHASE_2: Array[String] = ["barrage_croise", "invocation", "charge",
 const MOTIFS_CONNUS: Array[String] = ["barrage_horizontal", "eventail_lent", "barrage_croise",
 	"invocation", "charge", "spirale", "anneau_breche", "pluie", "poursuite", "pause",
 	"griffure", "echo_errata", "quadrillage", "machoire", "calligraphie", "indexation",
-	"onde_marge", "rosace", "estampille", "copie_double"]
+	"onde_marge", "rosace", "estampille", "copie_double", "frontieres_encre",
+	"remparts_terre", "marees_eau", "couloirs_air", "foyers_feu"]
 const MOTIFS_SIGNATURE: Array[String] = ["griffure", "echo_errata", "quadrillage", "machoire",
-	"calligraphie", "indexation", "onde_marge", "rosace", "estampille", "copie_double"]
+	"calligraphie", "indexation", "onde_marge", "rosace", "estampille", "copie_double",
+	"frontieres_encre", "remparts_terre", "marees_eau", "couloirs_air", "foyers_feu"]
 const GLYPHES_ORNEMENTS: Array[String] = ["eclats", "oeil", "hexagone", "eclair", "goutte",
 	"vague", "nuage", "cristal", "zigzag", "fiole"]
 
@@ -49,6 +51,8 @@ var _flash := 0.0
 var _braise := 0.0
 var _braise_dps := 0.0
 var _givre := 0.0
+var _ralentissement_passif := 0.0
+var _ralentissement_passif_part := 0.0
 var _acide := 0.0
 var _gel := 0.0
 var _ancre := Vector2.ZERO
@@ -58,6 +62,7 @@ var _eclat_phase := 0.0
 var _telegraphe_signature := 0.0
 var _alternance := 0
 var _recharge_invocation := 0.0
+var _invocation_motif_effectuee := false
 
 func configurer(donnees_: Dictionary) -> void:
 	donnees = donnees_
@@ -86,6 +91,7 @@ func _physics_process(delta: float) -> void:
 	_flash = maxf(0.0, _flash - delta * 6.0)
 	_gel = maxf(0.0, _gel - delta)
 	_givre = maxf(0.0, _givre - delta)
+	_ralentissement_passif = maxf(0.0, _ralentissement_passif - delta)
 	_acide = maxf(0.0, _acide - delta)
 	var dot_dps := 0.0
 	if _braise > 0.0:
@@ -123,7 +129,9 @@ func _physics_process(delta: float) -> void:
 		_index_motif += 1
 		_minuterie = _duree_du_motif(_motif)
 		_cadence_motif = 0.0
-		_telegraphe_signature = Reglages.BOSS_TELEGRAPHE_SIGNATURE if _motif in MOTIFS_SIGNATURE else 0.0
+		_invocation_motif_effectuee = false
+		_telegraphe_signature = Reglages.BOSS_TELEGRAPHE_SIGNATURE \
+			if _motif in MOTIFS_SIGNATURE or _motif == "invocation" else 0.0
 		_commencer_motif(_motif)
 	_executer_motif(_motif, delta)
 	global_position = Geometrie.contraindre_dans_rect(global_position, limites,
@@ -136,17 +144,23 @@ func _duree_du_motif(motif: String) -> float:
 
 func _commencer_motif(motif: String) -> void:
 	if motif == "invocation":
-		if _recharge_invocation > 0.0: return
-		var places := mini(Reglages.INVOCATION_BOSS_PLAFOND - get_tree().get_nodes_in_group("invocations_boss").size(),
-			Reglages.PLAFOND_ENNEMIS - get_tree().get_nodes_in_group("ennemis").size())
-		if places <= 0:
-			return
-		_recharge_invocation = Reglages.INVOCATION_BOSS_INTERVALLE
-		for i in mini(places, Reglages.INVOCATION_BOSS_SALVE):
-			var ecart := Vector2(randf_range(-200.0, 200.0), randf_range(-60.0, 160.0))
-			invocation_demandee.emit("encrier_rampant", global_position + ecart)
+		# L'arrivee part apres le telegraphe commun, jamais au changement de motif.
+		return
 	elif motif == "charge":
 		_direction_charge = global_position.direction_to(_cible.global_position)
+
+func _invoquer_renforts() -> void:
+	if _recharge_invocation > 0.0:
+		return
+	var places: int = mini(Reglages.INVOCATION_BOSS_PLAFOND \
+		- get_tree().get_nodes_in_group("invocations_boss").size(),
+		Reglages.PLAFOND_ENNEMIS - get_tree().get_nodes_in_group("ennemis").size())
+	if places <= 0:
+		return
+	_recharge_invocation = Reglages.INVOCATION_BOSS_INTERVALLE
+	for i in mini(places, Reglages.INVOCATION_BOSS_SALVE):
+		var ecart := Vector2(randf_range(-200.0, 200.0), randf_range(-60.0, 160.0))
+		invocation_demandee.emit("encrier_rampant", global_position + ecart)
 
 func _executer_motif(motif: String, delta: float) -> void:
 	if _telegraphe_signature > 0.0:
@@ -159,6 +173,11 @@ func _executer_motif(motif: String, delta: float) -> void:
 	var evolution := int(donnees.get("evolution",0))
 	_cadence_motif -= delta / (Reglages.BOSS_CADENCE_MOTIF_MULT*EvolutionEnnemis.RECHARGE[evolution])
 	match motif:
+		"invocation":
+			_flotter(delta)
+			if not _invocation_motif_effectuee:
+				_invocation_motif_effectuee = true
+				_invoquer_renforts()
 		"barrage_horizontal":
 			_flotter(delta)
 			if _cadence_motif <= 0.0:
@@ -218,6 +237,60 @@ func _executer_motif(motif: String, delta: float) -> void:
 				var vers := global_position.direction_to(_cible.global_position)
 				_lancer(global_position, vers, 0.76)
 				_lancer(global_position, vers.rotated(sin(_anim * 3.0) * 0.16), 0.55)
+		"frontieres_encre":
+			_flotter(delta)
+			if _cadence_motif <= 0.0:
+				_cadence_motif = 0.78
+				_alternance += 1
+				var ouverture := posmod(_alternance * 2, 7)
+				for k in 7:
+					if k == ouverture or k == (ouverture + 1) % 7:
+						continue
+					var origine := Vector2(limites.position.x + limites.size.x * (float(k) + 0.5) / 7.0,
+						limites.position.y + 8.0)
+					_lancer(origine, Vector2.DOWN, 0.62)
+		"remparts_terre":
+			_flotter(delta)
+			if _cadence_motif <= 0.0:
+				_cadence_motif = 0.92
+				_alternance += 1
+				var passage := posmod(_alternance, 6)
+				for k in 6:
+					if k == passage:
+						continue
+					var y := limites.position.y + limites.size.y * (float(k) + 0.5) / 6.0
+					_lancer(Vector2(limites.position.x + 8.0, y), Vector2.RIGHT, 0.72)
+					_lancer(Vector2(limites.end.x - 8.0, y + 42.0), Vector2.LEFT, 0.72)
+		"marees_eau":
+			_flotter(delta)
+			if _cadence_motif <= 0.0:
+				_cadence_motif = 0.68
+				_alternance += 1
+				var depuis_gauche := _alternance % 2 == 0
+				var voie_sure := posmod(_alternance * 3, 7)
+				for k in 7:
+					if k == voie_sure or k == (voie_sure + 1) % 7:
+						continue
+					var y := limites.position.y + limites.size.y * (float(k) + 0.5) / 7.0
+					var x_origine := limites.position.x + 8.0 if depuis_gauche else limites.end.x - 8.0
+					var origine := Vector2(x_origine, y)
+					_lancer_regle(origine, Vector2.RIGHT if depuis_gauche else Vector2.LEFT, 0.56, 0.72)
+		"couloirs_air":
+			_flotter(delta)
+			if _cadence_motif <= 0.0:
+				_cadence_motif = 0.50
+				var vers := global_position.direction_to(_cible.global_position)
+				for cote in [-1.0, 0.0, 1.0]:
+					var origine := global_position + vers.orthogonal() * float(cote) * 118.0
+					_lancer_regle(origine, vers, 0.58, 1.32)
+		"foyers_feu":
+			_flotter(delta)
+			if _cadence_motif <= 0.0:
+				_cadence_motif = 1.02
+				_alternance += 1
+				for k in 10:
+					var angle := TAU * float(k) / 10.0 + float(_alternance) * 0.17
+					_lancer_regle(global_position, Vector2.RIGHT.rotated(angle), 0.70, 0.58)
 		"griffure":
 			_flotter(delta)
 			if _signature_prete(motif):
@@ -324,7 +397,8 @@ func _executer_motif(motif: String, delta: float) -> void:
 			if _minuterie > 2.0:
 				velocity = Vector2.ZERO
 			else:
-				velocity = _direction_charge * donnees["vitesse"] * 2.2 * Reglages.ENNEMI_VITESSE_MULT
+				velocity = _direction_charge * donnees["vitesse"] * 2.2 \
+					* Reglages.ENNEMI_VITESSE_MULT * _facteur_ralentissement()
 				move_and_slide()
 				global_position = Geometrie.contraindre_dans_rect(global_position, limites,
 					($CollisionShape2D.shape as CircleShape2D).radius)
@@ -344,15 +418,20 @@ func _flotter(_delta: float) -> void:
 	# Il revient toujours vers le haut de l'arene : le joueur garde de la place.
 	var vise := Vector2(_ancre.x + sin(_anim * 0.7) * 260.0, _ancre.y)
 	velocity = global_position.direction_to(vise) * donnees["vitesse"] * 0.6 \
-		* Reglages.ENNEMI_VITESSE_MULT
+		* Reglages.ENNEMI_VITESSE_MULT * _facteur_ralentissement()
 	if global_position.distance_to(vise) < 20.0:
 		velocity = Vector2.ZERO
 	move_and_slide()
 
 func _lancer(origine: Vector2, direction: Vector2, part_degats: float) -> void:
+	_lancer_regle(origine, direction, part_degats, 1.0)
+
+func _lancer_regle(origine: Vector2, direction: Vector2, part_degats: float,
+		vitesse_mult: float) -> void:
 	var t := Tir.new()
 	t.degats = donnees["degats"] * part_degats
-	t.vitesse = donnees.get("vitesse_projectile", 380.0) * Reglages.BOSS_PROJECTILE_VITESSE_MULT
+	t.vitesse = donnees.get("vitesse_projectile", 380.0) \
+		* Reglages.BOSS_PROJECTILE_VITESSE_MULT * vitesse_mult
 	t.portee = 2200.0
 	t.cadence = 1.0
 	tir_demande.emit(t, origine, direction)
@@ -370,6 +449,10 @@ func recevoir_degats(montant: float, effets: Array = []) -> void:
 				_braise = Reglages.BRAISE_DUREE
 				_braise_dps = maxf(_braise_dps, montant * Reglages.BRAISE_PART_DEGATS_PAR_SECONDE)
 			"givre": _givre = Reglages.GIVRE_DUREE
+			"sang_froid_1", "sang_froid_2":
+				_ralentissement_passif = Reglages.SANG_FROID_DUREE
+				_ralentissement_passif_part = Reglages.SANG_FROID_RALENTISSEMENT \
+					* (2.0 if effet == "sang_froid_2" else 1.0)
 			"acide": _acide = Reglages.ACIDE_DUREE
 	if pv <= 0.0:
 		_mourir()
@@ -377,6 +460,12 @@ func recevoir_degats(montant: float, effets: Array = []) -> void:
 func geler(duree: float) -> void:
 	# Un boss ne se fige pas comme un rampant, sinon il suffit de le geler.
 	_gel = maxf(_gel, duree * 0.4)
+
+func _facteur_ralentissement() -> float:
+	var facteur := Reglages.GIVRE_RALENTISSEMENT if _givre > 0.0 else 1.0
+	if _ralentissement_passif > 0.0:
+		facteur = minf(facteur, 1.0 - _ralentissement_passif_part)
+	return facteur
 
 func _mourir() -> void:
 	if not is_inside_tree():
@@ -393,6 +482,7 @@ func _draw() -> void:
 			var avancee := 1.0 - _telegraphe_signature / Reglages.BOSS_TELEGRAPHE_SIGNATURE
 			draw_arc(Vector2.ZERO, rayon * (2.1 - avancee * 0.72), 0.0, TAU, 42,
 				Color(Palette.DANGER, 0.28 + avancee * 0.52), 4.0 + avancee * 4.0, true)
+			_dessiner_annonce_signature(rayon)
 		if _motif == "charge" and _minuterie > 2.0:
 			draw_line(_direction_charge * rayon, _direction_charge * 1050.0, Palette.DANGER, 5.0, true)
 		if _eclat_phase > 0.0:
@@ -403,7 +493,7 @@ func _draw() -> void:
 	var r: float = donnees["rayon"] * (0.28 + entree * 0.72)
 	var couleur: Color = donnees["couleur"]
 	couleur.a = 0.18 + entree * 0.82
-	if _givre > 0.0:
+	if _givre > 0.0 or _ralentissement_passif > 0.0:
 		couleur = couleur.lerp(Palette.GIVRE, 0.35)
 	if _flash > 0.0:
 		couleur = couleur.lerp(Color.WHITE, _flash * 0.7)
@@ -417,6 +507,7 @@ func _draw() -> void:
 		var avancee := 1.0 - _telegraphe_signature / Reglages.BOSS_TELEGRAPHE_SIGNATURE
 		draw_arc(Vector2.ZERO, r * (2.1 - avancee * 0.72), 0.0, TAU, 42,
 			Color(Palette.DANGER, 0.28 + avancee * 0.52), 4.0 + avancee * 4.0, true)
+		_dessiner_annonce_signature(r)
 	if _eclat_phase > 0.0:
 		var expansion := 1.0 - _eclat_phase
 		draw_arc(Vector2.ZERO, r * (1.35 + expansion * 1.25), 0.0, TAU, 42,
@@ -469,3 +560,39 @@ func _draw() -> void:
 	draw_circle(centre_sigil, r * 0.25, Color(0.035, 0.018, 0.065, 0.78))
 	Dessin.glyphe(self, GLYPHES_ORNEMENTS[ornement], centre_sigil, r * 0.15,
 		couleur.lightened(0.42))
+
+func _dessiner_annonce_signature(r: float) -> void:
+	var danger := Color(Palette.DANGER, 0.42 + 0.18 * sin(_anim * 22.0))
+	match _motif:
+		"frontieres_encre":
+			var ouverture := posmod((_alternance + 1) * 2, 7)
+			for k in 7:
+				if k == ouverture or k == (ouverture + 1) % 7:
+					continue
+				var x := limites.position.x + limites.size.x * (float(k) + 0.5) / 7.0
+				draw_line(Vector2(x, limites.position.y) - global_position,
+					Vector2(x, limites.end.y) - global_position, danger, 4.0, true)
+		"remparts_terre":
+			var passage := posmod(_alternance + 1, 6)
+			for k in 6:
+				if k == passage:
+					continue
+				var y := limites.position.y + limites.size.y * (float(k) + 0.5) / 6.0
+				draw_line(Vector2(limites.position.x, y) - global_position,
+					Vector2(limites.end.x, y) - global_position, danger, 4.0, true)
+		"marees_eau":
+			var voie_sure := posmod((_alternance + 1) * 3, 7)
+			for k in 7:
+				if k == voie_sure or k == (voie_sure + 1) % 7:
+					continue
+				var y := limites.position.y + limites.size.y * (float(k) + 0.5) / 7.0
+				draw_line(Vector2(limites.position.x, y) - global_position,
+					Vector2(limites.end.x, y) - global_position, danger, 4.0, true)
+		"couloirs_air":
+			var vers := Vector2.DOWN if _cible == null else global_position.direction_to(_cible.global_position)
+			for cote in [-1.0, 0.0, 1.0]:
+				var depart := vers.orthogonal() * float(cote) * 118.0
+				draw_line(depart + vers * r, depart + vers * 1250.0, danger, 4.0, true)
+		"foyers_feu":
+			for rayon in [r * 2.0, r * 3.2, r * 4.4]:
+				draw_arc(Vector2.ZERO, rayon, 0.0, TAU, 40, danger, 4.0, true)

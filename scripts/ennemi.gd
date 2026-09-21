@@ -19,6 +19,8 @@ var _recharge := 0.0
 var _braise := 0.0
 var _braise_dps := 0.0
 var _givre := 0.0
+var _ralentissement_passif := 0.0
+var _ralentissement_passif_part := 0.0
 var _acide := 0.0
 var _gel := 0.0
 var _etat := "repos"
@@ -96,7 +98,10 @@ func _cible_la_plus_proche() -> Node2D:
 	return meilleure
 
 func _facteur_vitesse() -> float:
-	return Reglages.ENNEMI_VITESSE_MULT * (Reglages.GIVRE_RALENTISSEMENT if _givre > 0.0 else 1.0)
+	var facteur := Reglages.GIVRE_RALENTISSEMENT if _givre > 0.0 else 1.0
+	if _ralentissement_passif > 0.0:
+		facteur = minf(facteur, 1.0 - _ralentissement_passif_part)
+	return Reglages.ENNEMI_VITESSE_MULT * facteur
 
 func _avancer_vers(cible: Vector2, vitesse: float) -> void:
 	var direction := global_position.direction_to(cible)
@@ -115,6 +120,24 @@ func _avancer_vers(cible: Vector2, vitesse: float) -> void:
 
 func _agir_rampant(_delta: float) -> void:
 	var distance := global_position.distance_to(_cible.global_position)
+	if _etat == "frappe":
+		if _minuterie <= 0.0:
+			if distance <= _distance_contact() + 24.0:
+				_cible.recevoir_degats(donnees["degats"])
+			_etat = "repos_contact"
+			_minuterie = float(donnees.get("repos_contact", 0.72))
+			_recharge = float(donnees.get("recharge", 2.1))
+		return
+	if _etat == "repos_contact":
+		if _minuterie <= 0.0:
+			_etat = "repos"
+		return
+	if _etat == "crache":
+		if _minuterie <= 0.0:
+			_tirer_vers(_point_vise)
+			_etat = "repos"
+			_recharge = float(donnees.get("recharge", 2.1))
+		return
 	if _etat == "preparer":
 		if _minuterie <= 0.0:
 			_etat = "charger"
@@ -135,16 +158,19 @@ func _agir_rampant(_delta: float) -> void:
 		_minuterie = float(donnees["preparation"])
 		_direction_charge = global_position.direction_to(_viser())
 		return
+	if distance <= _distance_contact() and _recharge <= 0.0:
+		_etat = "frappe"
+		_minuterie = float(donnees.get("telegraphe_contact", 0.48))
+		_direction_charge = global_position.direction_to(_cible.global_position)
+		return
+	if distance <= float(donnees.get("portee_tir", 0.0)) \
+			and distance > float(donnees["portee"]) * 2.0 and _recharge <= 0.0:
+		_etat = "crache"
+		_minuterie = float(donnees.get("telegraphe", 0.62))
+		_point_vise = _viser()
+		return
 	if Cerveaux.rampant(distance, _distance_contact()) == "avancer":
 		_avancer_vers(_cible.global_position, donnees["vitesse"])
-	elif _recharge <= 0.0:
-		_recharge = 1.0
-		_cible.recevoir_degats(donnees["degats"])
-	# Il ne sert plus seulement de sac de PV de melee : son crachat lent coupe
-	# regulierement la trajectoire du joueur, sans punir une esquive tardive.
-	if distance <= float(donnees.get("portee_tir", 0.0)) and distance > donnees["portee"] and _recharge <= 0.0:
-		_recharge = donnees.get("recharge", 2.3)
-		_tirer_vers(_cible.global_position)
 
 func _agir_sentinelle() -> void:
 	if _etat == "vise":
@@ -242,6 +268,11 @@ func _agir_veloce(_delta: float) -> void:
 				_minuterie = donnees.get("repos", 0.8)
 
 func _agir_essaimeur(_delta: float) -> void:
+	if _etat == "invoque":
+		if _minuterie <= 0.0:
+			_etat = "repos"
+			_invoquer_essaimeur()
+		return
 	var distance := global_position.distance_to(_cible.global_position)
 	match Cerveaux.essaimeur(distance, donnees["portee"], _recharge):
 		"reculer":
@@ -250,21 +281,31 @@ func _agir_essaimeur(_delta: float) -> void:
 			_avancer_vers(_cible.global_position, donnees["vitesse"])
 		"invoquer":
 			_recharge = donnees.get("recharge", 3.5)
-			# Reserve d'encre finie : sans ce plafond, un scribe qu'on ne prend
-			# jamais pour cible rend la salle litteralement infinie.
-			if _invocations >= int(donnees.get("max_invocations", 6)):
-				if int(donnees.get("evolution",0)) > 0:
-					_tirer_cercle(int(donnees.get("projectiles_cercle",0)))
-				return
-			if get_tree().get_nodes_in_group("ennemis").size() >= Reglages.PLAFOND_ENNEMIS:
-				return
-			_invocations += int(donnees.get("nb_invoques", 2))
-			for i in int(donnees.get("nb_invoques", 2)):
-				var ecart := Vector2(randf_range(-90.0, 90.0), randf_range(-90.0, 90.0))
-				invocation_demandee.emit(donnees.get("invoque", "encrier_rampant"), global_position + ecart)
+			_etat = "invoque"
+			_minuterie = float(donnees.get("telegraphe", 0.78))
+
+func _invoquer_essaimeur() -> void:
+	# Reserve d'encre finie : sans ce plafond, un scribe qu'on ne prend jamais
+	# pour cible rend la salle litteralement infinie.
+	if _invocations >= int(donnees.get("max_invocations", 6)):
+		if int(donnees.get("evolution", 0)) > 0:
 			_tirer_cercle(int(donnees.get("projectiles_cercle", 0)))
+		return
+	if get_tree().get_nodes_in_group("ennemis").size() >= Reglages.PLAFOND_ENNEMIS:
+		return
+	_invocations += int(donnees.get("nb_invoques", 2))
+	for i in int(donnees.get("nb_invoques", 2)):
+		var ecart := Vector2(randf_range(-90.0, 90.0), randf_range(-90.0, 90.0))
+		invocation_demandee.emit(donnees.get("invoque", "encrier_rampant"), global_position + ecart)
+	_tirer_cercle(int(donnees.get("projectiles_cercle", 0)))
 
 func _agir_orbiteur(_delta: float) -> void:
+	if _etat == "vise_orbite":
+		velocity = Vector2.ZERO
+		if _minuterie <= 0.0:
+			_etat = "repos"
+			_tirer_vers(_point_vise)
+		return
 	var distance := global_position.distance_to(_cible.global_position)
 	match Cerveaux.orbiteur(distance, donnees["portee"], _recharge):
 		"reculer": _avancer_vers(global_position * 2.0 - _cible.global_position, donnees["vitesse"])
@@ -276,7 +317,9 @@ func _agir_orbiteur(_delta: float) -> void:
 			move_and_slide()
 		"tirer":
 			_recharge = donnees.get("recharge", 1.65)
-			_tirer_vers(_viser())
+			_etat = "vise_orbite"
+			_minuterie = float(donnees.get("telegraphe", 0.50))
+			_point_vise = _viser()
 
 func _agir_harceleur(_delta: float) -> void:
 	if _etat == "vise":
@@ -400,6 +443,10 @@ func recevoir_degats(montant: float, effets: Array = []) -> void:
 				_braise = Reglages.BRAISE_DUREE
 				_braise_dps = maxf(_braise_dps, montant * Reglages.BRAISE_PART_DEGATS_PAR_SECONDE)
 			"givre": _givre = Reglages.GIVRE_DUREE
+			"sang_froid_1", "sang_froid_2":
+				_ralentissement_passif = Reglages.SANG_FROID_DUREE
+				_ralentissement_passif_part = Reglages.SANG_FROID_RALENTISSEMENT \
+					* (2.0 if effet == "sang_froid_2" else 1.0)
 			"acide": _acide = Reglages.ACIDE_DUREE
 	if pv <= 0.0:
 		_mourir()
@@ -411,6 +458,7 @@ func geler(duree: float) -> void:
 func _appliquer_effets(delta: float) -> void:
 	_gel = maxf(0.0, _gel - delta)
 	_givre = maxf(0.0, _givre - delta)
+	_ralentissement_passif = maxf(0.0, _ralentissement_passif - delta)
 	_acide = maxf(0.0, _acide - delta)
 	var dot_dps := 0.0
 	if _braise > 0.0:
@@ -446,7 +494,7 @@ func _draw() -> void:
 	var r: float = donnees["rayon"] * (0.4 + 0.6 * _apparition)
 	var base: Color = donnees["couleur"]
 	var couleur := base
-	if _givre > 0.0:
+	if _givre > 0.0 or _ralentissement_passif > 0.0:
 		couleur = couleur.lerp(Palette.GIVRE, 0.45)
 	if _acide > 0.0:
 		couleur = couleur.lerp(Palette.ACIDE, 0.30)
@@ -477,10 +525,12 @@ func _dessiner_telegraphe(r: float) -> void:
 	if _cible == null:
 		return
 	var vers := global_position.direction_to(_cible.global_position)
-	if donnees.get("cerveau", "") in ["sentinelle", "harceleur"] and _etat == "vise":
+	if (donnees.get("cerveau", "") in ["sentinelle", "harceleur"] and _etat == "vise") \
+			or (donnees.get("cerveau", "") == "orbiteur" and _etat == "vise_orbite") \
+			or (donnees.get("cerveau", "") == "rampant" and _etat == "crache"):
 		var distance_cible := global_position.distance_to(_cible.global_position)
 		draw_line(vers * r, vers * distance_cible, Color(Palette.DANGER, 0.35 + 0.25 * sin(_anim * 30.0)), 3.0, true)
-	elif donnees.get("cerveau", "") in ["veloce","rampant"] and _etat == "preparer":
+	elif donnees.get("cerveau", "") in ["veloce", "rampant"] and _etat in ["preparer", "frappe"]:
 		vers = _direction_charge
 		var intensite := 0.4 + 0.6 * sin(_anim * 24.0)
 		draw_line(vers * r, vers * 620.0, Color(Palette.DANGER, 0.25 * intensite), 8.0, true)
@@ -489,6 +539,10 @@ func _dessiner_telegraphe(r: float) -> void:
 		var avancee := 1.0 - clampf(_minuterie / maxf(0.1, float(donnees.get("telegraphe", 0.65))), 0.0, 1.0)
 		draw_arc(Vector2.ZERO, r * (1.25 + avancee * 0.55), 0.0, TAU, 32,
 			Color(Palette.DANGER, 0.25 + avancee * 0.55), 3.0 + avancee * 3.0, true)
+	elif donnees.get("cerveau", "") == "essaimeur" and _etat == "invoque":
+		var avancee := 1.0 - clampf(_minuterie / maxf(0.1, float(donnees.get("telegraphe", 0.78))), 0.0, 1.0)
+		draw_arc(Vector2.ZERO, r * (1.35 + avancee * 0.9), 0.0, TAU, 32,
+			Color(Palette.DANGER, 0.25 + avancee * 0.45), 4.0, true)
 	elif donnees.get("cerveau", "") == "orbiteur":
 		draw_arc(Vector2.ZERO, r * 1.35, _anim, _anim + PI * 1.35, 20,
 			Color(donnees["couleur"], 0.65), 2.5, true)

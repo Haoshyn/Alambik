@@ -14,17 +14,20 @@ const SOIN_EPIQUE := 0.30
 const BONUS_COMMUN := 0.10
 const DERNIER_NIVEAU_AVIDITE := 6
 
-# Ces trajectoires se remplacent, elles ne se cumulent pas dans Projectile.
-const INCOMPATIBLES := {
-	"trait_transpercant": ["perforation", "ricochet"],
-	"perforation": ["trait_transpercant"],
-	"ricochet": ["trait_transpercant"],
-}
+# Enveloppes cibles de conception, pas une mesure du catalogue ni des parties.
+# La refonte des augments permet des synergies exactes qui les depassent ; ces
+# tableaux ne pilotent jamais la difficulte fixe des ennemis.
+const GAIN_OFFENSIF_FAIBLE := [1.00, 1.04, 1.08, 1.13, 1.18, 1.24, 1.30, 1.36, 1.42, 1.48]
+const GAIN_OFFENSIF_MEDIAN := [1.00, 1.08, 1.16, 1.26, 1.37, 1.49, 1.62, 1.75, 1.90, 2.05]
+const GAIN_OFFENSIF_FORT := [1.00, 1.12, 1.25, 1.42, 1.62, 1.85, 2.12, 2.43, 2.76, 3.10]
+const GAIN_SURVIE_FAIBLE := [1.00, 1.02, 1.04, 1.07, 1.10, 1.14, 1.18, 1.22, 1.27, 1.32]
+const GAIN_SURVIE_MEDIAN := [1.00, 1.04, 1.08, 1.13, 1.18, 1.24, 1.30, 1.37, 1.44, 1.52]
+const GAIN_SURVIE_FORT := [1.00, 1.07, 1.14, 1.23, 1.33, 1.44, 1.56, 1.69, 1.83, 1.98]
 
-const INCOMPATIBLES_ARMES := {
-	"perfore_tout": ["ricochet", "perforation", "trait_transpercant"],
-	"homing": ["homing"],
-}
+# Les trajectoires peuvent maintenant se combiner ; Ricochet + Perforation
+# possede volontairement sa synergie sans perte et sans cible repetee.
+const INCOMPATIBLES := {}
+const INCOMPATIBLES_ARMES := {}
 
 static func niveau_max() -> int:
 	return XP_SEUILS.size()

@@ -493,7 +493,13 @@ func tirer(tir_source: Tir, origine: Vector2, direction: Vector2, hostile := fal
 	var decalages := tir_source.decalages()
 	for i in angles.size():
 		var p := PROJECTILE.instantiate()
-		p.tir = tir_source
+		p.tir = tir_source.copie()
+		# Le premier trait porte l'attaque complete. Les traits simultanes suivants
+		# gardent la couverture et les effets, sans multiplier gratuitement le
+		# monocible. Les tirs hostiles conservent leur budget propre par projectile.
+		if not hostile and i > 0:
+			p.tir.degats *= tir_source.degats_projectiles_supplementaires
+			p.tir.drapeaux.append("trait_supplementaire")
 		p.hostile = hostile
 		p.cible_exclue = cible_exclue
 		var direction_projectile := direction.rotated(angles[i])
@@ -525,6 +531,7 @@ func _sur_fragments(origine: Vector2, direction: Vector2, tir_source: Tir, hosti
 	eclat.angle_eventail = 0.0
 	eclat.degats = tir_source.degats * Reglages.FRAGMENT_PART_DEGATS
 	eclat.portee = Reglages.FRAGMENT_PORTEE
+	eclat.drapeaux.append("fragment")
 	# Le signal part d'un contact physique : ajouter des Area2D pendant que le
 	# moteur vide ses collisions produit une erreur et une saccade visible.
 	call_deferred("_tirer_fragments", eclat, tir_source.fragments, origine, direction, hostile,

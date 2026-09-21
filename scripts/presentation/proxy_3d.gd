@@ -56,6 +56,10 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 		add_child(_visee_mesh)
 		logique.connect("tir_demande", func(_tir, _origine, _direction): _temps_attaque = 0.25)
 		logique.connect("touche", func(_position, _couleur): _temps_touche = 0.22)
+	elif genre == "gardien":
+		logique.connect("attaque_portee", func(origine: Vector2, cible_attaque: Vector2):
+			_orientation = origine.direction_to(cible_attaque)
+			_temps_attaque = 0.22)
 	logique.set_meta("visuel_3d", true)
 	logique.queue_redraw()
 	mettre_a_jour(0.0)
@@ -108,6 +112,8 @@ func mettre_a_jour(delta: float) -> void:
 		var cerveau := str(logique.get("donnees").get("cerveau", ""))
 		if cerveau in ["sentinelle", "harceleur"] and str(logique.get("_etat")) == "vise":
 			direction = logique.global_position.direction_to(logique.get("_point_vise"))
+	elif genre == "gardien" and _temps_attaque > 0.0:
+		direction = _orientation
 	elif genre == "projectile":
 		direction = logique.get("direction")
 	# Les GLB regardent +Z (Blender -Y). La rotation ne touche que le modele.

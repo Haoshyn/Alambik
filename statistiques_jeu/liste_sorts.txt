@@ -1,0 +1,26 @@
+RÈGLE DES RANGS | Sorts actifs et ultimes | 10 rangs ; dégâts +10 % du coefficient de départ par rang après le premier
+RÈGLE DES RANGS | Passifs | 2 rangs ; un seul doublon passe au rang 2 et double exactement l’effet
+
+SORTS ACTIFS
+Onde alchimique | Déblocage 2 | Rayon 180 ; 400 % de l’ATK au rang 1, 760 % au rang 10 ; repoussement 120 ; récupération 12 s
+Nova de givre | Déblocage 5 | Rayon 210 ; 350 % de l’ATK au rang 1, 665 % au rang 10 ; gel 1,5 s ; récupération 15 s
+Barrage de braise | Déblocage 10 | Rayon 190 ; 500 % de l’ATK au rang 1, 950 % au rang 10 ; brûlure de 10 % des dégâts par seconde pendant 4 s ; récupération 15 s
+Impulsion foudroyante | Déblocage 15 | Rayon 130 ; 800 % de l’ATK au rang 1, 1 520 % au rang 10 ; récupération 20 s
+Explosion corrosive | Déblocage 25 | Rayon 170 ; 550 % de l’ATK au rang 1, 1 045 % au rang 10 ; dégâts subis par les cibles ×1,25 pendant 4 s ; récupération 20 s
+Vortex alchimique | Déblocage 26 | Rayon 260 ; 450 % de l’ATK au rang 1, 855 % au rang 10 ; attraction 180 ; récupération 18 s
+
+PASSIFS — ORDRE DE DÉBLOCAGE
+Moisson vitale | Déblocage 4 | Soigne 2,5 % des PV max toutes les 6 éliminations ; 5 % au rang 2 ; hors budget des soins d’augments
+Sang-froid | Déblocage 6 | Tous les tirs ralentissent les ennemis de 10 % pendant 2 s ; 20 % au rang 2
+Contrat d’alchimie | Déblocage 8 | Chaque tir qui touche laisse une petite flaque pendant 2 s ; 10 % des dégâts du tir par seconde, 20 % au rang 2 ; flaques cumulables ; leurs dégâts ne déclenchent aucun effet de touche
+Sort imprécateur | Déblocage 11 | Après un sort actif : dégâts +15 % pendant 5 s ; +30 % au rang 2
+Reprise de souffle | Déblocage 13 | Après 10 s sans subir de dégâts : dégâts +15 % ; +30 % au rang 2
+Héritage réactif | Déblocage 17 | Commence l’aventure avec 1 augment rare aléatoire ; 2 augments rares distincts au rang 2
+Audace | Déblocage 19 | Dégâts infligés et subis +20 % ; +40 % au rang 2
+Écho alchimique | Déblocage 23 | Lancer un sort actif lance un autre sort actif aléatoire au même endroit ; 2 sorts aléatoires distincts au rang 2
+
+ULTIMES
+Le Grand Œuvre | Déblocage 3 | Toute la salle ; 1 200 % de l’ATK au rang 1, 2 280 % au rang 10 ; récupération 75 s
+Temps suspendu | Déblocage 7 | Toute la salle ; 350 % de l’ATK au rang 1, 665 % au rang 10 ; gel 3 s ; récupération 60 s
+Transmutation totale | Déblocage 21 | Toute la salle ; 1 300 % de l’ATK au rang 1, 2 470 % au rang 10 ; dégâts subis par les cibles ×1,25 pendant 4 s ; récupération 90 s
+Purification totale | Déblocage 28 | Toute la salle ; 800 % de l’ATK au rang 1, 1 520 % au rang 10 ; dissipe tous les projectiles ennemis ; récupération 70 s

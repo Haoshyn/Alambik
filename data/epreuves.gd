@@ -3,17 +3,17 @@ extends RefCounted
 
 # Une table locale par niveau : rejouer un niveau permet d'en monter les sorts.
 const LOOTS := [
-	["onde_alchimique", "rempart_initial"],
-	["nova_de_givre", "heritage_reactif"],
+	["onde_alchimique", "moisson_vitale"],
+	["nova_de_givre", "sang_froid"],
 	["grand_oeuvre"],
-	["barrage_de_braise", "moisson_vitale"],
+	["barrage_de_braise", "riposte_alchimique"],
 	["temps_suspendu"],
-	["riposte_alchimique", "seconde_chance"],
 	["impulsion_foudroyante", "reserve_ultime"],
-	["sang_froid", "dernier_rempart"],
+	["rempart_initial"],
+	["heritage_reactif"],
 	["transmutation_totale"],
-	["explosion_corrosive", "vortex_alchimique"],
-	["audace", "echo_alchimique", "purification_totale"],
+	["explosion_corrosive", "vortex_alchimique", "audace"],
+	["echo_alchimique", "purification_totale"],
 ]
 const PALIERS := [0, 2, 5, 8, 11, 14, 17, 20, 23, 26, 29]
 
@@ -38,7 +38,7 @@ static func candidats(niveau: int, rangs: Dictionary) -> Array[String]:
 		var rang := int(rangs.get(id, 0))
 		if rang <= 0:
 			nouveautes.append(str(id))
-		elif rang < Reglages.CAPACITE_RANG_MAX:
+		elif rang < Sorts.rang_max(str(id)):
 			resultat.append(str(id))
 	return nouveautes if not nouveautes.is_empty() else resultat
 

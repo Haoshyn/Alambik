@@ -210,7 +210,7 @@ func _dessiner_bouton_sort(police: Font, bouton: Button, ultime: bool) -> void:
 	# choisi dans les reglages tant qu'il en existe un.
 	if not ultime and RaccourciTactile.tapes_requises(ReglagesJoueur.raccourci_sort) > 0:
 		_draw_centre(police, Vector2(rect.position.x - 20, rect.end.y + 26), rect.size.x + 40,
-			"TAPE ×%d" % RaccourciTactile.tapes_requises(ReglagesJoueur.raccourci_sort),
+			"TAPE ÉCRAN",
 			14, StyleAzur.ATTENUE)
 
 func _barre_premium(rect: Rect2, ratio: float, couleur: Color) -> void:

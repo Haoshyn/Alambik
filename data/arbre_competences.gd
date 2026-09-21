@@ -10,36 +10,36 @@ const MAX_RANG := Reglages.MAITRISE_RANG_MAX
 const ANCIENS_COUTS := [8, 12, 20, 35, 60, 100, 170, 280, 460, 760]
 const ANCIEN_COUT_PAR_RANG := 1.35
 const NOEUDS := {
-	"force": {"nom": "Force", "description": "+5 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.05, "cout": Reglages.MAITRISE_COUTS[0]},
-	"cadence": {"nom": "Cadence", "description": "+1 % cadence par rang", "categorie": "Offensif", "cadence": 0.01, "requis": "force", "cout": Reglages.MAITRISE_COUTS[1]},
-	"precision": {"nom": "Frappe souveraine", "description": "+25 % d’attaque.", "categorie": "Offensif", "attaque": 0.25, "requis": "cadence", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[2] * Reglages.MAITRISE_COUT_MAJEUR},
-	"puissance": {"nom": "Puissance", "description": "+7,5 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.075, "requis": "precision", "cout": Reglages.MAITRISE_COUTS[3]},
-	"rythme": {"nom": "Rythme maîtrisé", "description": "+1,5 % cadence par rang", "categorie": "Offensif", "cadence": 0.015, "requis": "puissance", "cout": Reglages.MAITRISE_COUTS[4]},
+	"force": {"nom": "Force maîtrisée", "description": "+10 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.10, "cout": Reglages.MAITRISE_COUTS[0]},
+	"cadence": {"nom": "Œil sûr", "description": "+1,5 % de chance critique par rang", "categorie": "Offensif", "critique": 0.015, "requis": "force", "cout": Reglages.MAITRISE_COUTS[1]},
+	"precision": {"nom": "Frappe souveraine", "description": "+10 % de chance critique.", "categorie": "Offensif", "critique": 0.10, "requis": "cadence", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[2] * Reglages.MAITRISE_COUT_MAJEUR},
+	"puissance": {"nom": "Puissance", "description": "+20 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.20, "requis": "precision", "cout": Reglages.MAITRISE_COUTS[3]},
+	"rythme": {"nom": "Impact critique", "description": "+5 % de dégâts critiques par rang", "categorie": "Offensif", "degats_critiques": 0.05, "requis": "puissance", "cout": Reglages.MAITRISE_COUTS[4]},
 	"catalyse": {"nom": "Catalyse absolue", "description": "+50 % d’attaque.", "categorie": "Offensif", "attaque": 0.5, "requis": "rythme", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[5] * Reglages.MAITRISE_COUT_MAJEUR},
-	"trajectoire": {"nom": "Maîtrise du trait", "description": "+10 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.1, "requis": "catalyse", "cout": Reglages.MAITRISE_COUTS[6]},
-	"tempete": {"nom": "Tempête mesurée", "description": "+2 % cadence par rang", "categorie": "Offensif", "cadence": 0.02, "requis": "trajectoire", "cout": Reglages.MAITRISE_COUTS[7]},
+	"trajectoire": {"nom": "Maîtrise du trait", "description": "+30 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.30, "requis": "catalyse", "cout": Reglages.MAITRISE_COUTS[6]},
+	"tempete": {"nom": "Instinct critique", "description": "+2,5 % de chance critique par rang", "categorie": "Offensif", "critique": 0.025, "requis": "trajectoire", "cout": Reglages.MAITRISE_COUTS[7]},
 	"domination": {"nom": "Domination", "description": "+75 % d’attaque.", "categorie": "Offensif", "attaque": 0.75, "requis": "tempete", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[8] * Reglages.MAITRISE_COUT_MAJEUR},
-	"grand_oeuvre": {"nom": "Grand Œuvre", "description": "+12,5 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.125, "requis": "domination", "cout": Reglages.MAITRISE_COUTS[9]},
-	"constitution": {"nom": "Constitution", "description": "+5 % PV maximum par rang", "categorie": "Défensif", "pv_mult": 0.05, "cout": Reglages.MAITRISE_COUTS[0]},
-	"armure": {"nom": "Armure", "description": "+2,5 % armure par rang", "categorie": "Défensif", "armure": 0.025, "requis": "constitution", "cout": Reglages.MAITRISE_COUTS[1]},
-	"vitalite": {"nom": "Vitalité souveraine", "description": "+25 % PV maximum.", "categorie": "Défensif", "pv_mult": 0.25, "requis": "armure", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[2] * Reglages.MAITRISE_COUT_MAJEUR},
-	"rempart": {"nom": "Rempart vivant", "description": "+7,5 % PV maximum par rang", "categorie": "Défensif", "pv_mult": 0.075, "requis": "vitalite", "cout": Reglages.MAITRISE_COUTS[3]},
-	"robustesse": {"nom": "Robustesse", "description": "+5 % armure par rang", "categorie": "Défensif", "armure": 0.05, "requis": "rempart", "cout": Reglages.MAITRISE_COUTS[4]},
-	"carapace": {"nom": "Carapace absolue", "description": "Réduit les dégâts reçus de 25 % après l’armure.", "categorie": "Défensif", "reduction": 0.25, "requis": "robustesse", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[5] * Reglages.MAITRISE_COUT_MAJEUR},
-	"endurance": {"nom": "Endurance", "description": "+10 % PV maximum par rang", "categorie": "Défensif", "pv_mult": 0.1, "requis": "carapace", "cout": Reglages.MAITRISE_COUTS[6]},
-	"bastion": {"nom": "Bastion", "description": "+7,5 % armure par rang", "categorie": "Défensif", "armure": 0.075, "requis": "endurance", "cout": Reglages.MAITRISE_COUTS[7]},
-	"colosse": {"nom": "Colosse", "description": "+75 % PV maximum.", "categorie": "Défensif", "pv_mult": 0.75, "requis": "bastion", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[8] * Reglages.MAITRISE_COUT_MAJEUR},
-	"immortel": {"nom": "Immortel", "description": "+12,5 % PV maximum par rang", "categorie": "Défensif", "pv_mult": 0.125, "requis": "colosse", "cout": Reglages.MAITRISE_COUTS[9]},
-	"celerite": {"nom": "Récolte", "description": "+5 % Gouttes gagnées par rang", "categorie": "Utilitaire", "collecte": 0.05, "cout": Reglages.MAITRISE_COUTS[0]},
-	"collecte": {"nom": "Prospection", "description": "+5 % Pierres de forge par rang", "categorie": "Utilitaire", "pierres": 0.05, "requis": "celerite", "cout": Reglages.MAITRISE_COUTS[1]},
+	"grand_oeuvre": {"nom": "Grand Œuvre", "description": "+32,5 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.325, "requis": "domination", "cout": Reglages.MAITRISE_COUTS[9]},
+	"constitution": {"nom": "Constitution", "description": "+10 % PV maximum par rang", "categorie": "Défensif", "pv_mult": 0.10, "cout": Reglages.MAITRISE_COUTS[0]},
+	"armure": {"nom": "Défense", "description": "+10 % de Défense par rang", "categorie": "Défensif", "defense": 0.10, "requis": "constitution", "cout": Reglages.MAITRISE_COUTS[1]},
+	"vitalite": {"nom": "Vitalité souveraine", "description": "+50 % PV maximum.", "categorie": "Défensif", "pv_mult": 0.50, "requis": "armure", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[2] * Reglages.MAITRISE_COUT_MAJEUR},
+	"rempart": {"nom": "Rempart vivant", "description": "+20 % PV maximum par rang", "categorie": "Défensif", "pv_mult": 0.20, "requis": "vitalite", "cout": Reglages.MAITRISE_COUTS[3]},
+	"robustesse": {"nom": "Robustesse", "description": "+20 % de Défense par rang", "categorie": "Défensif", "defense": 0.20, "requis": "rempart", "cout": Reglages.MAITRISE_COUTS[4]},
+	"carapace": {"nom": "Carapace absolue", "description": "Réduit les dégâts reçus de 25 % avant la Défense.", "categorie": "Défensif", "reduction": 0.25, "requis": "robustesse", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[5] * Reglages.MAITRISE_COUT_MAJEUR},
+	"endurance": {"nom": "Endurance", "description": "+30 % PV maximum par rang", "categorie": "Défensif", "pv_mult": 0.30, "requis": "carapace", "cout": Reglages.MAITRISE_COUTS[6]},
+	"bastion": {"nom": "Bastion", "description": "+30 % de Défense par rang", "categorie": "Défensif", "defense": 0.30, "requis": "endurance", "cout": Reglages.MAITRISE_COUTS[7]},
+	"colosse": {"nom": "Colosse", "description": "+100 % PV maximum.", "categorie": "Défensif", "pv_mult": 1.0, "requis": "bastion", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[8] * Reglages.MAITRISE_COUT_MAJEUR},
+	"immortel": {"nom": "Immortel", "description": "+30 % PV maximum par rang", "categorie": "Défensif", "pv_mult": 0.30, "requis": "colosse", "cout": Reglages.MAITRISE_COUTS[9]},
+	"celerite": {"nom": "Alchimie réparatrice", "description": "+5 % aux soins reçus par rang", "categorie": "Utilitaire", "soin": 0.05, "cout": Reglages.MAITRISE_COUTS[0]},
+	"collecte": {"nom": "Prospection", "description": "+5 % de Butin par rang", "categorie": "Utilitaire", "collecte": 0.05, "requis": "celerite", "cout": Reglages.MAITRISE_COUTS[1]},
 	"distillation": {"nom": "Distillation", "description": "+1 relance d’augmentations par aventure, dans la limite de %d au total, toutes sources confondues." % Reglages.RELANCES_MAX_PAR_RUN, "categorie": "Utilitaire", "rerolls": 1, "requis": "collecte", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[2] * Reglages.MAITRISE_COUT_MAJEUR},
-	"fortune": {"nom": "Fortune", "description": "+5 % Gouttes des coffres par rang", "categorie": "Utilitaire", "coffre": 0.05, "requis": "distillation", "cout": Reglages.MAITRISE_COUTS[3]},
-	"sagesse": {"nom": "Sagesse", "description": "+5 % XP de compte par rang", "categorie": "Utilitaire", "experience": 0.05, "requis": "fortune", "cout": Reglages.MAITRISE_COUTS[4]},
+	"fortune": {"nom": "Puissance magique", "description": "+5 % de dégâts des sorts par rang", "categorie": "Utilitaire", "degats_sorts": 0.05, "requis": "distillation", "cout": Reglages.MAITRISE_COUTS[3]},
+	"sagesse": {"nom": "Étude", "description": "+5 % XP de compte par rang", "categorie": "Utilitaire", "experience": 0.05, "requis": "fortune", "cout": Reglages.MAITRISE_COUTS[4]},
 	"abondance": {"nom": "Double discipline", "description": "Permet d’équiper un second Passif.", "categorie": "Utilitaire", "second_passif": true, "requis": "sagesse", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[5] * Reglages.MAITRISE_COUT_MAJEUR},
-	"savoir": {"nom": "Artisanat", "description": "+7,5 % Pierres de forge par rang", "categorie": "Utilitaire", "pierres": 0.075, "requis": "abondance", "cout": Reglages.MAITRISE_COUTS[6]},
-	"elan": {"nom": "Abondance", "description": "+7,5 % Gouttes gagnées par rang", "categorie": "Utilitaire", "collecte": 0.075, "requis": "savoir", "cout": Reglages.MAITRISE_COUTS[7]},
+	"savoir": {"nom": "Cycle arcanique", "description": "Récupération des sorts −2 % par rang", "categorie": "Utilitaire", "recharge": 0.02, "requis": "abondance", "cout": Reglages.MAITRISE_COUTS[6]},
+	"elan": {"nom": "Expansion rituelle", "description": "+3 % de rayon des sorts par rang", "categorie": "Utilitaire", "rayon_sorts": 0.03, "requis": "savoir", "cout": Reglages.MAITRISE_COUTS[7]},
 	"prescience": {"nom": "Prescience", "description": "+1 relance d’augmentations par aventure, dans la limite de %d au total, toutes sources confondues." % Reglages.RELANCES_MAX_PAR_RUN, "categorie": "Utilitaire", "rerolls": 1, "requis": "elan", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[8] * Reglages.MAITRISE_COUT_MAJEUR},
-	"philosophe": {"nom": "Pierre philosophale", "description": "+7,5 % Gouttes des coffres par rang", "categorie": "Utilitaire", "coffre": 0.075, "requis": "prescience", "cout": Reglages.MAITRISE_COUTS[9]},
+	"philosophe": {"nom": "Abondance", "description": "+5 % de Butin et d’XP de compte par rang", "categorie": "Utilitaire", "collecte": 0.05, "experience": 0.05, "requis": "prescience", "cout": Reglages.MAITRISE_COUTS[9]},
 }
 
 const BRANCHES := {
@@ -86,8 +86,9 @@ static func description_effective(id: String) -> String:
 		description += " S’ajoute aux autres maîtrises de cette statistique."
 	return description
 
-const CHAMPS_LISIBLES := ["attaque", "pv_mult", "cadence", "projectile", "armure", "reduction",
-	"recharge", "vitesse", "collecte", "coffre", "experience", "pierres"]
+const CHAMPS_LISIBLES := ["attaque", "pv_mult", "defense", "cadence", "critique",
+	"degats_critiques", "degats_sorts", "projectile", "reduction", "recharge", "vitesse",
+	"soin", "rayon_sorts", "collecte", "coffre", "experience", "pierres"]
 
 static func _nombre(valeur: float) -> String:
 	return String.num(valeur, 1).trim_suffix(".0").replace(".", ",")
@@ -98,7 +99,11 @@ static func _nombre(valeur: float) -> String:
 static func valeur_au_rang(id: String, rang: int) -> String:
 	var noeud: Dictionary = NOEUDS.get(id, {})
 	var acquis := clampi(rang, 0, rangs(id))
-	for champ in ["attaque", "pv_mult", "cadence", "armure"]:
+	if noeud.has("collecte") and noeud.has("experience"):
+		var butin := poids_rang(acquis) * float(noeud["collecte"]) * 100.0
+		var experience := poids_rang(acquis) * float(noeud["experience"]) * 100.0
+		return "+%s %% Butin · +%s %% XP de compte" % [_nombre(butin), _nombre(experience)]
+	for champ in ["attaque", "pv_mult", "defense", "cadence", "critique", "degats_critiques", "degats_sorts"]:
 		if noeud.has(champ):
 			return "+%s %%%s" % [_nombre(float(noeud[champ]) * acquis * 100.0), " d’attaque" if champ == "attaque" else ""]
 	for champ in CHAMPS_LISIBLES:
@@ -123,10 +128,25 @@ static func multiplicateur_pv(rangs_joueur: Dictionary) -> float:
 	return 1.0 + _somme(rangs_joueur, "pv_mult")
 
 static func reduction_degats(rangs_joueur: Dictionary) -> float:
-	return 1.0 - (1.0 - _somme(rangs_joueur, "reduction")) / (1.0 + _somme(rangs_joueur, "armure"))
+	return clampf(_somme(rangs_joueur, "reduction"), 0.0, 0.90)
+
+static func multiplicateur_defense(rangs_joueur: Dictionary) -> float:
+	return 1.0 + _somme(rangs_joueur, "defense")
+
+static func bonus_critique(rangs_joueur: Dictionary) -> float:
+	return _somme(rangs_joueur, "critique")
+
+static func bonus_degats_critiques(rangs_joueur: Dictionary) -> float:
+	return _somme(rangs_joueur, "degats_critiques")
+
+static func bonus_degats_sorts(rangs_joueur: Dictionary) -> float:
+	return _somme(rangs_joueur, "degats_sorts")
 
 static func multiplicateur_soin(rangs_joueur: Dictionary) -> float:
 	return 1.0 + _somme(rangs_joueur, "soin")
+
+static func multiplicateur_rayon_sorts(rangs_joueur: Dictionary) -> float:
+	return 1.0 + _somme(rangs_joueur, "rayon_sorts")
 
 static func soin_par_salle(rangs_joueur: Dictionary) -> float:
 	return _somme(rangs_joueur, "soin_salle")

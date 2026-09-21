@@ -5,7 +5,9 @@ static func offre(victoire: bool) -> Dictionary:
 	var resultat := ButinsRun.offre(Jeu.mode_run, Jeu.chapitre, Jeu.salles_terminees.size(), Jeu.boss_vaincus.size(),
 		victoire, Jeu.niveau_epreuve, ReglagesJoueur.rangs_sorts, ReglagesJoueur.objets,
 		ReglagesJoueur.grands_coffres_rates(Jeu.chapitre), ReglagesJoueur.epreuves_ratees(Jeu.niveau_epreuve),
-		ReglagesJoueur.palier_atteint(), maxf(0.0, Reglages.MINE_DUREE - Jeu.temps_mine_restant))
+		ReglagesJoueur.palier_atteint(), maxf(0.0, Reglages.MINE_DUREE - Jeu.temps_mine_restant),
+		ReglagesJoueur.coeur_mana_obtenu(Jeu.niveau_epreuve),
+		ReglagesJoueur.epreuves_sans_coeur_mana(Jeu.niveau_epreuve))
 
 	if Jeu.mode_run == "grimoire":
 		var nombre := 0
@@ -75,6 +77,8 @@ static func finaliser(victoire: bool, _salle_atteinte: int) -> Dictionary:
 	if Jeu.mode_run == "epreuve_sorts" and victoire:
 		if not (offre_finale["sorts"] as Array).is_empty():
 			ReglagesJoueur.enregistrer_coffre_epreuve(Jeu.niveau_epreuve, not str(bilan["sort"]).is_empty())
+		if not ReglagesJoueur.coeur_mana_obtenu(Jeu.niveau_epreuve):
+			ReglagesJoueur.enregistrer_coeur_mana(Jeu.niveau_epreuve, bool(bilan["coeur_mana"]))
 		ReglagesJoueur.niveau_epreuve_debloque = maxi(ReglagesJoueur.niveau_epreuve_debloque, mini(Epreuves.nombre(), Jeu.niveau_epreuve + 1))
 	if Jeu.mode_run == "grimoire":
 		if victoire and not (offre_finale["objets"] as Array).is_empty(): ReglagesJoueur.enregistrer_grand_coffre(Jeu.chapitre, not str(bilan["objet"]).is_empty())

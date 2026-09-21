@@ -10,6 +10,7 @@ var attaque_base := 0.0
 var bonus_attaque := 0.0
 var vitesse: float
 var portee: float
+var portee_limitee := false
 var cadence: float
 var nb_projectiles := 1
 var projectiles_lateraux := 0
@@ -20,6 +21,9 @@ var perforations := 0
 var fragments := 0
 var rayon_explosion := 0.0
 var degats_zone_mult := 0.0
+var degats_projectiles_supplementaires := 1.0
+var degats_finaux_projectile_mult := 1.0
+var cible_verrouillee := 0
 var effets: Array[String] = []
 var drapeaux: Array[String] = []
 
@@ -80,6 +84,7 @@ func copie() -> Tir:
 	t.bonus_attaque = bonus_attaque
 	t.vitesse = vitesse
 	t.portee = portee
+	t.portee_limitee = portee_limitee
 	t.cadence = cadence
 	t.nb_projectiles = nb_projectiles
 	t.projectiles_lateraux = projectiles_lateraux
@@ -90,6 +95,9 @@ func copie() -> Tir:
 	t.fragments = fragments
 	t.rayon_explosion = rayon_explosion
 	t.degats_zone_mult = degats_zone_mult
+	t.degats_projectiles_supplementaires = degats_projectiles_supplementaires
+	t.degats_finaux_projectile_mult = degats_finaux_projectile_mult
+	t.cible_verrouillee = cible_verrouillee
 	t.effets = effets.duplicate()
 	t.drapeaux = drapeaux.duplicate()
 	return t

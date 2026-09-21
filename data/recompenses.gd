@@ -40,8 +40,7 @@ static func chance_garantie(essais: int, echecs: int) -> float:
 
 static func tirer_epreuve(rng: RandomNumberGenerator, rangs: Dictionary, niveau_epreuve: int, echecs := 0) -> Dictionary:
 	var candidats := Epreuves.candidats(niveau_epreuve, rangs)
-	var chance := 1.0 if Epreuves.nouvelle_capacite_disponible(niveau_epreuve, rangs) \
-		else chance_garantie(Reglages.EPREUVE_GARANTIE_CAPACITE, echecs)
+	var chance := chance_garantie(Reglages.EPREUVE_GARANTIE_CAPACITE, echecs)
 	if candidats.is_empty() or rng.randf() >= chance:
 		return {"type": "gouttes", "quantite": rng.randi_range(GOUTTES_EPREUVE_MIN, GOUTTES_EPREUVE_MAX)}
 	var id := candidats[rng.randi_range(0, candidats.size() - 1)]

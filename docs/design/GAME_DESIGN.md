@@ -31,7 +31,9 @@ Sources : `data/chapitres.gd`, `data/vagues.gd`, `data/formes_salles.gd`,
 ## Combat et terrains
 
 Les ennemis communs, costauds, élites, miniboss et boss ont des comportements
-et motifs propres. Leur progression suit le chapitre. Les projectiles,
+et motifs propres. Leur progression suit 35 profils fixes, construits depuis
+les achats accessibles sans jamais lire le build réel. Standards, petits,
+gros, miniboss et signatures ont des budgets d’attaques distincts. Les projectiles,
 collisions, protections et états restent gérés par la simulation 2D ; la
 présentation de combat utilise des modèles et effets 3D.
 
@@ -54,16 +56,21 @@ au début du run, propose des légendaires ; les deux autres proposent des
 sont exclus des tirages ordinaires des modes annexes.
 
 Le catalogue propose 15 rares, 10 épiques majeures et 5 légendaires, en plus
-des trois communs. Les maîtrises et passifs réunis accordent au maximum
-3 relances par run, partagées entre les choix qui autorisent une relance.
+des trois communs. Les maîtrises accordent au maximum 3 relances par run,
+partagées entre les choix qui autorisent une relance. Héritage réactif ajoute
+séparément un ou deux augments rares au début de l’aventure.
 
 Les augments couvrent tirs, protections, récupération et phénomènes comme les
-familiers, météores ou orbes. Leurs effets se cumulent selon leur catalogue.
-Les sorts actifs, passifs et ultimes sont équipés depuis le menu. Les dégâts
-partent de l'attaque cumulée du héros. Les passifs interviennent ensuite sur les
-valeurs finales : dégâts de toutes les sources, récupération après les autres
-bonus, protection après les défenses, soins sur les PV max finaux. Ils
-n'ajoutent pas d'attaque ; Moisson soigne hors du budget des soins d'augments.
+familiers, météores ou orbes. Leur Attaque de run multiplie la progression
+permanente séparément. Le premier trait simultané reste entier et chaque trait
+supplémentaire suit désormais la règle de son augment : Tir multiple et Salve
+réduisent de 20 % les dégâts finaux de tous leurs traits, après les autres calculs.
+Les sorts actifs, passifs et ultimes sont équipés depuis le menu. Un passif se
+découvre au rang 1 et un seul doublon double son effet au rang 2. Les dégâts
+partent de l'attaque cumulée du héros. Les onze Épreuves donnent chacune un
+Cœur de mana unique à 1 chance sur 10, garanti au dixième succès du niveau ;
+chaque Cœur ajoute 10 % de dégâts finaux. Les sorts tombent à 1 chance sur 5,
+garantis au cinquième succès. Découvrir un sort ne donne plus de dégâts finaux.
 
 Sources : `data/catalogue_reactifs.gd`, `data/progression_augments.gd`,
 `data/sorts.gd`, `scripts/mods.gd`, `scripts/draft_logique.gd`,
@@ -71,15 +78,24 @@ Sources : `data/catalogue_reactifs.gd`, `data/progression_augments.gd`,
 
 ## Progression persistante
 
-Les récompenses financent l'équipement, la forge et les maîtrises. Les dix armes
-et les bijoux possèdent leurs propres caractéristiques ; les pouvoirs de
-bijoux se débloquent avec la forge. Les doublons et butins de sorts suivent
-les règles de progression des catalogues.
+Le héros commence avec 10 Attaque, 100 PV et 10 Défense. Chaque niveau de
+compte donne cinq points à répartir entre Force, Vitalité, Agilité,
+Intelligence et Sagesse. Mage, Sorcier et Moine apportent une spécialisation
+finale changeable contre des Gouttes.
+
+Les récompenses financent l'équipement, la forge et les maîtrises. La forge
+compte vingt niveaux par objet ; chacun regroupe la puissance et le prix de cinq
+anciens niveaux, sans modifier le coût total jusqu’au maximum. Les dix armes,
+anneaux, bracelets et colliers possèdent une statistique principale, un bonus
+fixe et un passif. Les familiers sont autonomes, ont leur propre Attaque et
+accordent un petit passif au héros. Les pouvoirs de bijoux débloqués par la forge
+restent passifs : cumul de dégâts, cinquième attaque, sursis ou incantation. Les
+doublons et butins de sorts suivent les garanties des catalogues.
 
 Les identifiants historiques d'équipement et migrations de sauvegarde restent
 pris en charge afin de conserver les objets et rangs déjà acquis.
 
-Sources : `data/catalogue_objets.gd`, `data/effets_bijoux.gd`,
+Sources : `data/personnage.gd`, `data/catalogue_objets.gd`, `data/catalogue_familiers.gd`, `data/effets_bijoux.gd`,
 `data/arbre_competences.gd`, `data/progression_statistiques.gd`,
 `data/recompenses.gd`, `autoload/reglages_joueur.gd`.
 

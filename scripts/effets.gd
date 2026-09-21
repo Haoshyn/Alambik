@@ -7,6 +7,8 @@ extends Node2D
 const GRAVITE := 220.0
 const AnimationSorts = preload("res://scripts/presentation/animation_sorts.gd")
 const CatalogueAnimations = preload("res://data/animations_sorts.gd")
+const AnimationAugments = preload("res://scripts/presentation/animation_augments.gd")
+const CatalogueAugments = preload("res://data/animations_augments.gd")
 
 var _particules: Array[Dictionary] = []
 var _ondes: Array[Dictionary] = []
@@ -14,6 +16,7 @@ var _arcs: Array[Dictionary] = []
 var _textes: Array[Dictionary] = []
 var _sorts: Array[Dictionary] = []
 var _segments_sorts: Array[Dictionary] = []
+var _augments: Array[Dictionary] = []
 
 func _process(delta: float) -> void:
 	_segments_sorts.clear()
@@ -24,6 +27,13 @@ func _process(delta: float) -> void:
 			sorts_vivants.append(sort)
 			_segments_sorts.append_array(AnimationSorts.segments(sort, ReglagesJoueur.effets_reduits))
 	_sorts = sorts_vivants
+	var augments_vivants: Array[Dictionary] = []
+	for animation in _augments:
+		animation["age"] = float(animation["age"]) + delta
+		if float(animation["age"]) < float(animation["duree"]):
+			augments_vivants.append(animation)
+			_segments_sorts.append_array(AnimationAugments.segments(animation, ReglagesJoueur.effets_reduits))
+	_augments = augments_vivants
 	# On itere a rebours : la liste se vide pendant qu'on la parcourt.
 	for i in range(_particules.size() - 1, -1, -1):
 		var p := _particules[i]
@@ -98,6 +108,18 @@ func apparition(position: Vector2, couleur: Color, rayon: float, majeure := fals
 func onde(position: Vector2, rayon: float, couleur: Color, duree := 0.45) -> void:
 	_ondes.append({"position": position, "vie": duree, "vie_max": duree, "rayon": rayon, "couleur": couleur})
 
+func animer_augment(id: String, centre: Vector2, rayon: float, arrivee := Vector2.ZERO) -> void:
+	var animation := AnimationAugments.creer(id, centre, rayon, arrivee)
+	if animation.is_empty():
+		return
+	# Les procs ne doivent pas evincer une animation d'ultime.
+	if _augments.size() >= CatalogueAugments.MAX_SIMULTANES:
+		_augments.pop_front()
+	_augments.append(animation)
+
+func effacer_augments() -> void:
+	_augments.clear()
+
 func animer_sort(id: String, centre: Vector2, rayon: float) -> void:
 	var animation := AnimationSorts.creer(id, centre,
 		CatalogueAnimations.RAYON_ULTIME if is_inf(rayon) else rayon)
@@ -123,7 +145,21 @@ func _draw() -> void:
 		_dessiner_textes()
 		return
 	for segment in _segments_sorts:
-		draw_line(segment["depart"], segment["arrivee"], segment["couleur"], 3.0, true)
+		if segment.has("points"):
+			var points: Array = segment["points"]
+			var hauteurs: Array = segment["hauteurs"]
+			var projetes := PackedVector2Array()
+			for i in 3:
+				projetes.append(_projeter_animation(points[i], float(hauteurs[i])))
+			if absf((projetes[1] - projetes[0]).cross(projetes[2] - projetes[0])) > 0.01:
+				draw_colored_polygon(projetes, segment["couleur"])
+		else:
+			var largeur := float(segment["largeur"])
+			var couleur: Color = segment["couleur"]
+			var debut := _projeter_animation(segment["depart"], float(segment["hauteur"]))
+			var fin := _projeter_animation(segment["arrivee"], float(segment["hauteur_fin"]))
+			draw_line(debut, fin, Color(couleur, couleur.a * 0.15), largeur * 2.6, true)
+			draw_line(debut, fin, couleur, largeur, true)
 	for o in _ondes:
 		var t: float = 1.0 - o["vie"] / o["vie_max"]
 		var c: Color = o["couleur"]
@@ -149,6 +185,9 @@ func _draw() -> void:
 		draw_rect(Rect2(Retro16.pixel(p["position"]) - Vector2.ONE * taille * 0.5,
 			Vector2.ONE * taille), c)
 	_dessiner_textes()
+
+func _projeter_animation(point: Vector2, hauteur: float) -> Vector2:
+	return point + Vector2.UP * hauteur * cos(deg_to_rad(Pont3D.INCLINAISON)) / Pont3D.ECHELLE
 
 func _dessiner_textes() -> void:
 	var police := ThemeDB.fallback_font

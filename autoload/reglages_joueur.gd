@@ -21,6 +21,8 @@ var remboursement_maitrises := 0
 var tutoriel_vu := false
 var niveau_compte := 1
 var experience_compte := 0
+var attributs := {"force": 0, "vitalite": 0, "agilite": 0, "intelligence": 0, "sagesse": 0}
+var specialisation := ""
 var mode_dev := false
 var volume_musique := 1.0
 var volume_effets := 1.0
@@ -29,8 +31,8 @@ var piste_menu := "accueil"
 var secousses_ecran := true
 var effets_reduits := false
 var vibrations := true
-# Comment le Sort actif part : par son icone seule, par une tape rapide dans la
-# zone de deplacement, ou par une double tape rapide.
+# Comment le Sort actif part : visee manuelle apres l'icone, cible proche apres
+# l'icone, ou tape courte sur l'ecran vers la cible proche.
 var raccourci_sort := RaccourciTactile.MODE_DEFAUT
 var sort_actif_equipe := ""
 var ultime_equipe := ""
@@ -40,8 +42,11 @@ var objets: Array[String] = []
 var dernier_objet_obtenu := ""
 var grands_coffres_sans_objet := {}
 var epreuves_sans_sort := {}
-var equipements := {"anneau_gauche": "", "anneau_droit": "", "collier": ""}
+var epreuves_sans_coeur := {}
+var coeurs_mana := {}
+var equipements := {"anneau": "", "bracelet": "", "collier": ""}
 var projectile_equipe := "standard"
+var familier_equipe := "homoncule_encre"
 # Chaque bijou et chaque arme garde ses niveaux de forge sous son propre ID.
 var forge_niveaux := {}
 var version_forge := Reglages.FORGE_VERSION
@@ -78,8 +83,14 @@ func charger() -> void:
 	# en realite une progression de compte.
 	niveau_compte = maxi(1, int(config.get_value("compte", "niveau",
 		config.get_value("heros", "niveau", 1))))
+	niveau_compte = clampi(niveau_compte, 1, Personnage.NIVEAU_MAX)
 	experience_compte = int(config.get_value("compte", "experience",
 		config.get_value("heros", "experience", 0)))
+	attributs = config.get_value("compte", "attributs", attributs)
+	_normaliser_attributs()
+	specialisation = str(config.get_value("compte", "specialisation", ""))
+	if not specialisation.is_empty():
+		specialisation = Personnage.specialisation_valide(specialisation)
 	mode_dev = outils_developpement_disponibles() and bool(config.get_value("options", "mode_dev", false))
 	volume_musique = clampf(float(config.get_value("audio", "musique", 1.0)), 0.0, 1.0)
 	volume_effets = clampf(float(config.get_value("audio", "effets", 1.0)), 0.0, 1.0)
@@ -114,8 +125,12 @@ func charger() -> void:
 	dernier_objet_obtenu = str(config.get_value("stuff", "dernier", ""))
 	grands_coffres_sans_objet = config.get_value("stuff", "pities", {})
 	epreuves_sans_sort = config.get_value("epreuves", "pities", {})
+	epreuves_sans_coeur = config.get_value("epreuves", "pities_coeur", {})
+	coeurs_mana = config.get_value("epreuves", "coeurs_mana", {})
 	equipements = config.get_value("stuff", "equipements", equipements)
 	projectile_equipe = str(config.get_value("stuff", "projectile", "standard"))
+	familier_equipe = str(config.get_value("stuff", "familier", "homoncule_encre"))
+	if not CatalogueFamiliers.contient(familier_equipe): familier_equipe = "homoncule_encre"
 	forge_niveaux = config.get_value("stuff", "forge", forge_niveaux)
 	version_forge = int(config.get_value("stuff", "version_forge", 1))
 	pierres_forge = maxi(0, int(config.get_value("stuff", "pierres_forge", 0)))
@@ -151,6 +166,8 @@ func sauvegarder() -> void:
 	config.set_value("aide", "premiers_pas", tutoriel_vu)
 	config.set_value("compte", "niveau", niveau_compte)
 	config.set_value("compte", "experience", experience_compte)
+	config.set_value("compte", "attributs", attributs)
+	config.set_value("compte", "specialisation", specialisation)
 	config.set_value("options", "mode_dev", mode_dev)
 	config.set_value("audio", "musique", volume_musique)
 	config.set_value("audio", "effets", volume_effets)
@@ -168,8 +185,11 @@ func sauvegarder() -> void:
 	config.set_value("stuff", "dernier", dernier_objet_obtenu)
 	config.set_value("stuff", "pities", grands_coffres_sans_objet)
 	config.set_value("epreuves", "pities", epreuves_sans_sort)
+	config.set_value("epreuves", "pities_coeur", epreuves_sans_coeur)
+	config.set_value("epreuves", "coeurs_mana", coeurs_mana)
 	config.set_value("stuff", "equipements", equipements)
 	config.set_value("stuff", "projectile", projectile_equipe)
+	config.set_value("stuff", "familier", familier_equipe)
 	config.set_value("stuff", "forge", forge_niveaux)
 	config.set_value("stuff", "version_forge", version_forge)
 	config.set_value("stuff", "pierres_forge", pierres_forge)
@@ -180,12 +200,18 @@ func sauvegarder() -> void:
 func _migrer_maitrises() -> void:
 	if version_maitrises >= Reglages.MAITRISE_VERSION: return
 	remboursement_maitrises = 0
-	for branche in ArbreCompetences.BRANCHES.values():
-		for i in branche.size():
-			var id: String = branche[i]
-			var plafond := 2 if id in ["distillation","prescience"] else 1 if id == "savoir" else 10
-			for rang in clampi(int(rangs_competences.get(id,0)),0,plafond):
-				remboursement_maitrises += ArbreCompetences.ancien_cout(i, rang)
+	if version_maitrises >= 2:
+		for id in rangs_competences:
+			if not ArbreCompetences.NOEUDS.has(id): continue
+			for rang in clampi(int(rangs_competences[id]), 0, ArbreCompetences.rangs(str(id))):
+				remboursement_maitrises += ArbreCompetences.cout(str(id), rang)
+	else:
+		for branche in ArbreCompetences.BRANCHES.values():
+			for i in branche.size():
+				var id: String = branche[i]
+				var plafond := 2 if id in ["distillation","prescience"] else 1 if id == "savoir" else 10
+				for rang in clampi(int(rangs_competences.get(id,0)),0,plafond):
+					remboursement_maitrises += ArbreCompetences.ancien_cout(i, rang)
 	gouttes += remboursement_maitrises
 	rangs_competences.clear()
 	version_maitrises = Reglages.MAITRISE_VERSION
@@ -214,7 +240,15 @@ func ajouter_objet(id: String) -> bool:
 	return true
 
 func _migrer_equipements() -> void:
-	for slot in ["anneau_gauche", "anneau_droit", "collier"]:
+	# La Bague devient le Bracelet ; les identifiants d'objets et leurs niveaux
+	# restent intacts pour ne rien retirer aux anciennes sauvegardes.
+	if not equipements.has("anneau"):
+		equipements["anneau"] = str(equipements.get("anneau_gauche", ""))
+	if not equipements.has("bracelet"):
+		equipements["bracelet"] = str(equipements.get("anneau_droit", ""))
+	equipements.erase("anneau_gauche")
+	equipements.erase("anneau_droit")
+	for slot in ["anneau", "bracelet", "collier"]:
 		var id := str(equipements.get(slot, ""))
 		if not CatalogueObjets.compatible(slot, id) or id not in objets:
 			equipements[slot] = ""
@@ -222,24 +256,32 @@ func _migrer_equipements() -> void:
 func _migrer_forge_par_objet() -> void:
 	# Anciennes sauvegardes : le niveau etait stocke sur le slot. On le donne a
 	# l'objet actuellement equipe, puis on retire les trois anciennes cles.
-	for slot in ["anneau_gauche", "anneau_droit", "collier"]:
+	for slot in ["anneau", "bracelet", "collier", "anneau_gauche", "anneau_droit"]:
 		if not forge_niveaux.has(slot):
 			continue
-		var id := str(equipements.get(slot, ""))
+		var slot_actuel: String = str({"anneau_gauche": "anneau", "anneau_droit": "bracelet"}.get(slot, slot))
+		var id := str(equipements.get(slot_actuel, ""))
 		if not id.is_empty():
 			forge_niveaux[id] = maxi(int(forge_niveaux.get(id, 0)), int(forge_niveaux[slot]))
 		forge_niveaux.erase(slot)
 
 func _migrer_niveaux_forge() -> void:
 	if version_forge >= Reglages.FORGE_VERSION: return
-	for id in forge_niveaux.keys():
-		var ancien := clampi(int(forge_niveaux[id]),0,Reglages.FORGE_ANCIEN_NIVEAU_MAX)
-		# Arrondir en faveur du joueur preserve aussi un ancien niveau impair.
-		forge_niveaux[id] = ceili(float(ancien)/Reglages.FORGE_REGROUPEMENT)
+	if version_forge < 2:
+		for id in forge_niveaux.keys():
+			var ancien := clampi(int(forge_niveaux[id]), 0, Reglages.FORGE_ANCIEN_NIVEAU_MAX)
+			# Arrondir en faveur du joueur preserve aussi un ancien niveau impair.
+			forge_niveaux[id] = ceili(float(ancien) / Reglages.FORGE_REGROUPEMENT)
+		version_forge = 2
+	if version_forge < 3:
+		for id in forge_niveaux.keys():
+			var ancien := clampi(int(forge_niveaux[id]), 0,
+				Reglages.FORGE_NIVEAU_MAX_AVANT_COMPRESSION)
+			forge_niveaux[id] = ceili(float(ancien) / Reglages.FORGE_COMPRESSION)
 	version_forge = Reglages.FORGE_VERSION
 
 func _equipement_automatique(id: String) -> void:
-	for slot in ["anneau_gauche", "anneau_droit", "collier"]:
+	for slot in ["anneau", "bracelet", "collier"]:
 		if str(equipements.get(slot, "")).is_empty() and CatalogueObjets.compatible(slot, id):
 			equipements[slot] = id
 			return
@@ -296,6 +338,35 @@ func ameliorer_arme(id: String) -> bool:
 	maitrise_changee.emit()
 	return true
 
+func familiers_disponibles() -> Array[String]:
+	return CatalogueFamiliers.disponibles(niveau_campagne_atteint())
+
+func familier_equipe_effectif() -> String:
+	return familier_equipe if familier_equipe in familiers_disponibles() else "homoncule_encre"
+
+func equiper_familier(id: String) -> bool:
+	if id not in familiers_disponibles():
+		return false
+	familier_equipe = id
+	sauvegarder()
+	maitrise_changee.emit()
+	return true
+
+func niveau_familier(id: String) -> int:
+	return clampi(int(forge_niveaux.get(id, 0)), 0, Reglages.FORGE_NIVEAU_MAX) \
+		if CatalogueFamiliers.contient(id) else 0
+
+func ameliorer_familier(id: String) -> bool:
+	var niveau := niveau_familier(id)
+	var cout := Reglages.cout_forge(niveau)
+	if id not in familiers_disponibles() or niveau >= Reglages.FORGE_NIVEAU_MAX or pierres_forge < cout:
+		return false
+	pierres_forge -= cout
+	forge_niveaux[id] = niveau + 1
+	sauvegarder()
+	maitrise_changee.emit()
+	return true
+
 func niveau_objet(id: String) -> int:
 	return clampi(int(forge_niveaux.get(id, 0)), 0, Reglages.FORGE_NIVEAU_MAX) \
 		if CatalogueObjets.OBJETS.has(id) else 0
@@ -337,6 +408,34 @@ func epreuves_ratees(niveau: int) -> int:
 func enregistrer_coffre_epreuve(niveau: int, sort_obtenu: bool) -> void:
 	epreuves_sans_sort[str(niveau)] = 0 if sort_obtenu else mini(Reglages.EPREUVE_GARANTIE_CAPACITE-1,epreuves_ratees(niveau)+1)
 	sauvegarder()
+
+func coeur_mana_obtenu(niveau: int) -> bool:
+	return bool(coeurs_mana.get(str(niveau), false))
+
+func epreuves_sans_coeur_mana(niveau: int) -> int:
+	return maxi(0, int(epreuves_sans_coeur.get(str(niveau), 0)))
+
+func enregistrer_coeur_mana(niveau: int, obtenu: bool) -> void:
+	var cle := str(niveau)
+	if coeur_mana_obtenu(niveau):
+		return
+	if obtenu:
+		coeurs_mana[cle] = true
+		epreuves_sans_coeur[cle] = 0
+	else:
+		epreuves_sans_coeur[cle] = mini(Reglages.EPREUVE_GARANTIE_COEUR - 1,
+			epreuves_sans_coeur_mana(niveau) + 1)
+	sauvegarder()
+
+func nombre_coeurs_mana() -> int:
+	var total := 0
+	for niveau in coeurs_mana:
+		if bool(coeurs_mana[niveau]):
+			total += 1
+	return total
+
+func multiplicateur_coeurs_mana() -> float:
+	return 1.0 + float(nombre_coeurs_mana()) * Reglages.COEUR_MANA_BONUS_FINAL
 
 func definir_reglages_audio(musique: float, effets: float) -> void:
 	volume_musique = clampf(musique, 0.0, 1.0)
@@ -392,25 +491,85 @@ func ajouter_gouttes(nombre: int) -> void:
 	maitrise_changee.emit()
 
 func experience_compte_requise() -> int:
+	if niveau_compte >= Personnage.NIVEAU_MAX:
+		return 0
 	var profondeur := maxi(0, niveau_compte - 1)
 	return maxi(1, roundi(Reglages.XP_COMPTE_BASE \
 		+ float(profondeur) * Reglages.XP_COMPTE_PENTE \
 		+ float(profondeur * profondeur) * Reglages.XP_COMPTE_QUADRATIQUE))
 
 func ajouter_experience_compte(nombre: int) -> void:
-	if nombre <= 0:
+	if nombre <= 0 or niveau_compte >= Personnage.NIVEAU_MAX:
 		return
 	var gain := gain_experience_compte(nombre)
 	experience_compte += maxi(1, gain)
-	while experience_compte >= experience_compte_requise():
+	while niveau_compte < Personnage.NIVEAU_MAX and experience_compte >= experience_compte_requise():
 		var requis := experience_compte_requise()
 		experience_compte -= requis
 		niveau_compte += 1
+	if niveau_compte >= Personnage.NIVEAU_MAX:
+		experience_compte = 0
 	sauvegarder()
 	maitrise_changee.emit()
 
 func niveau_compte_effectif() -> int:
-	return niveau_compte
+	return clampi(niveau_compte, 1, Personnage.NIVEAU_MAX)
+
+func _normaliser_attributs() -> void:
+	var propres := {}
+	for id in Personnage.ATTRIBUTS:
+		propres[id] = maxi(0, int(attributs.get(id, 0)))
+	attributs = propres
+	var excedent := Personnage.points_depenses(attributs) - Personnage.points_totaux(niveau_compte_effectif())
+	if excedent <= 0:
+		return
+	# Une sauvegarde corrompue perd d'abord les derniers attributs de la liste,
+	# sans jamais produire de points negatifs.
+	for id in ["sagesse", "intelligence", "agilite", "vitalite", "force"]:
+		var retrait := mini(excedent, int(attributs[id]))
+		attributs[id] = int(attributs[id]) - retrait
+		excedent -= retrait
+		if excedent <= 0:
+			break
+
+func points_attributs_disponibles() -> int:
+	return maxi(0, Personnage.points_totaux(niveau_compte_effectif()) \
+		- Personnage.points_depenses(attributs))
+
+func rang_attribut(id: String) -> int:
+	return maxi(0, int(attributs.get(id, 0))) if Personnage.ATTRIBUTS.has(id) else 0
+
+func augmenter_attribut(id: String) -> bool:
+	if not Personnage.ATTRIBUTS.has(id) or points_attributs_disponibles() <= 0:
+		return false
+	attributs[id] = rang_attribut(id) + 1
+	sauvegarder()
+	maitrise_changee.emit()
+	return true
+
+func reinitialiser_attributs() -> void:
+	for id in Personnage.ATTRIBUTS:
+		attributs[id] = 0
+	sauvegarder()
+	maitrise_changee.emit()
+
+func bonus_attributs() -> Dictionary:
+	return Personnage.bonus(attributs)
+
+func specialisation_effective() -> String:
+	return specialisation if Personnage.SPECIALISATIONS.has(specialisation) else ""
+
+func choisir_specialisation(id: String) -> bool:
+	if not Personnage.SPECIALISATIONS.has(id) or id == specialisation:
+		return false
+	var cout := 0 if specialisation.is_empty() or mode_dev else Personnage.COUT_CHANGEMENT_SPECIALISATION
+	if gouttes < cout:
+		return false
+	gouttes -= cout
+	specialisation = id
+	sauvegarder()
+	maitrise_changee.emit()
+	return true
 
 func titre_compte() -> String:
 	return "COMPTE"
@@ -445,14 +604,24 @@ func bonus_objets_effectifs() -> Dictionary:
 	var arme := projectile_equipe_effectif()
 	bonus["attaque_base"] = float(bonus.get("attaque_base", 0.0)) \
 		+ CatalogueProjectiles.attaque_base(arme, niveau_arme(arme))
+	var bonus_arme := CatalogueProjectiles.bonus_heros(arme)
+	for champ in bonus_arme:
+		bonus[champ] = float(bonus.get(champ, 0.0)) + float(bonus_arme[champ])
+	var bonus_familier: Dictionary = CatalogueFamiliers.bonus_heros(familier_equipe_effectif())
+	for champ in bonus_familier:
+		bonus[champ] = float(bonus.get(champ, 0.0)) \
+			+ float(bonus_familier[champ])
 	return bonus
 
 func passifs_equipes_effectifs() -> Dictionary:
 	var resultat := {}
 	for id in passifs_equipes:
 		if Sorts.PASSIFS.has(id) and sort_debloque(id):
-			resultat[id] = efficacite_sort(id)
+			resultat[id] = rang_sort(id)
 	return resultat
+
+func effets_objets_effectifs() -> Array[String]:
+	return CatalogueObjets.effets_equipes(equipements, forge_niveaux)
 
 func cout_competence(id: String) -> int:
 	return ArbreCompetences.cout(id, rang_competence(id))
@@ -526,22 +695,24 @@ func nombre_capacites_debloquees() -> int:
 	return Sorts.nombre_capacites_debloquees(rangs_sorts, mode_dev)
 
 func multiplicateur_degats_deblocages() -> float:
-	return Sorts.multiplicateur_degats_deblocages(rangs_sorts, mode_dev)
+	return 1.0
 
 func sort_decouvert(id: String) -> bool:
 	return Sorts.contient(id) and (mode_dev or rang_sort(id) > 0 \
 		or Epreuves.niveau_pour(id) <= niveau_epreuve_debloque)
 
 func rang_sort(id: String) -> int:
-	return Reglages.CAPACITE_RANG_MAX if mode_dev and Sorts.contient(id) \
-		else clampi(int(rangs_sorts.get(id, 0)), 0, Reglages.CAPACITE_RANG_MAX)
+	return Sorts.rang_max(id) if mode_dev and Sorts.contient(id) \
+		else clampi(int(rangs_sorts.get(id, 0)), 0, Sorts.rang_max(id))
 
 func efficacite_sort(id: String) -> float:
 	var rang := rang_sort(id)
+	if Sorts.PASSIFS.has(id):
+		return float(rang)
 	return 0.0 if rang <= 0 else 1.0 + float(rang - 1) * Reglages.CAPACITE_BONUS_PAR_RANG
 
 func debloquer_sort(id: String) -> bool:
-	if not Sorts.contient(id) or not sort_decouvert(id) or rang_sort(id) >= Reglages.CAPACITE_RANG_MAX:
+	if not Sorts.contient(id) or not sort_decouvert(id) or rang_sort(id) >= Sorts.rang_max(id):
 		return false
 	rangs_sorts[id] = rang_sort(id) + 1
 	sauvegarder()
@@ -596,6 +767,8 @@ func reinitialiser_progression() -> void:
 	rangs_competences.clear()
 	niveau_compte = 1
 	experience_compte = 0
+	attributs = {"force": 0, "vitalite": 0, "agilite": 0, "intelligence": 0, "sagesse": 0}
+	specialisation = ""
 	sort_actif_equipe = ""
 	ultime_equipe = ""
 	passifs_equipes.clear()
@@ -604,8 +777,11 @@ func reinitialiser_progression() -> void:
 	dernier_objet_obtenu = ""
 	grands_coffres_sans_objet.clear()
 	epreuves_sans_sort.clear()
-	equipements = {"anneau_gauche": "", "anneau_droit": "", "collier": ""}
+	epreuves_sans_coeur.clear()
+	coeurs_mana.clear()
+	equipements = {"anneau": "", "bracelet": "", "collier": ""}
 	projectile_equipe = "standard"
+	familier_equipe = "homoncule_encre"
 	forge_niveaux = {}
 	pierres_forge = 0
 	mode_run_choisi = "grimoire"
@@ -713,8 +889,13 @@ func choisir_mode_run(mode: String) -> void:
 	sauvegarder()
 
 func recharge_sort(id: String, mods_liste: Array = []) -> float:
-	return Sorts.recharge(id, passifs_equipes_effectifs(), rangs_competences_effectifs(),
+	var base := float(Sorts.donnees(id).get("recharge", 0.0))
+	var intelligence := float(bonus_attributs().get("recuperation_sorts", 0.0))
+	var recharge := Sorts.recharge(id, passifs_equipes_effectifs(), rangs_competences_effectifs(),
 		projectile_equipe_effectif(), Mods.facteur_heros(mods_liste, "recharge_sorts_mult"))
+	recharge *= maxf(0.05, 1.0 - intelligence) \
+		* Personnage.multiplicateur_recharge(specialisation_effective())
+	return maxf(base * Reglages.RECHARGE_PLANCHER, recharge)
 
 func choisir_epreuve(niveau: int) -> bool:
 	if not mode_debloque("epreuve_sorts") or niveau < 1 or niveau > (Epreuves.nombre() if mode_dev else niveau_epreuve_debloque): return false
@@ -724,7 +905,13 @@ func choisir_epreuve(niveau: int) -> bool:
 
 func gain_gouttes(nombre: int) -> int:
 	if nombre <= 0: return 0
-	return maxi(1, roundi(float(nombre) * ArbreCompetences.multiplicateur_collecte(rangs_competences_effectifs())))
+	var bonus_butin := float(bonus_attributs().get("butin", 0.0)) \
+		+ float(bonus_objets_effectifs().get("butin", 0.0))
+	return maxi(1, roundi(float(nombre) * ArbreCompetences.multiplicateur_collecte(
+		rangs_competences_effectifs()) * (1.0 + bonus_butin)))
 
 func gain_experience_compte(nombre: int) -> int:
-	return maxi(1, roundi(float(nombre) * ArbreCompetences.multiplicateur_experience(rangs_competences_effectifs()))) if nombre > 0 else 0
+	if nombre <= 0 or niveau_compte >= Personnage.NIVEAU_MAX:
+		return 0
+	return maxi(1, roundi(float(nombre) * ArbreCompetences.multiplicateur_experience(
+		rangs_competences_effectifs())))

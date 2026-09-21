@@ -5,9 +5,9 @@ extends RefCounted
 # graine ne change que l'ordre interne de certaines vagues : le joueur peut
 # apprendre une salle tout en gardant une petite variation d'execution.
 
-# Une salle normale contient desormais trois vagues, quatre en toute fin de
-# chapitre. On augmente la duree par le nombre de decisions et de cibles, pas
-# par des PV artificiels. La taille d'une vague reste volontairement bornee a
+# Les quatre premieres salles gardent deux vagues pour laisser le build demarrer.
+# Apres le premier miniboss, une salle normale en contient trois, puis quatre en
+# toute fin de chapitre. La taille d'une vague reste volontairement bornee a
 # quatre ennemis : la pression vient de l'enchainement et des compositions.
 const RENCONTRES := [
 	[["encrier_rampant", "plume_sentinelle"], ["encrier_rampant", "encrier_rampant"], ["tache_veloce", "encrier_rampant", "plume_sentinelle"]],
@@ -48,7 +48,8 @@ static func pour_salle(numero: int, chapitre := 0, graine := 0, mode := "grimoir
 	if Chapitres.est_boss(chapitre, numero):
 		return [[donnees["boss"]]] if numero == 20 else _miniboss_campagne(numero, chapitre, graine)
 	var index := clampi(numero - 1, 0, RENCONTRES.size() - 1)
-	var resultat: Array = RENCONTRES[index].slice(0, 2).duplicate(true)
+	var nombre_vagues: int = 2 if numero < 6 else RENCONTRES[index].size()
+	var resultat: Array = RENCONTRES[index].slice(0, nombre_vagues).duplicate(true)
 	var alea := RandomNumberGenerator.new()
 	alea.seed = graine * 7919 + chapitre * 104729 + numero * 31
 	for i in resultat.size():

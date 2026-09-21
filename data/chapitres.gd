@@ -99,7 +99,9 @@ static func progression(index: int, salle: int) -> float:
 	return clampf(float(salle - 1) / maxf(1.0, float(chapitre["salles"] - 1)), 0.0, 1.0)
 
 static func facteur_pv(index: int, salle: int) -> float:
-	return par_index(index)["pv_mult"] * pow(1.0 + Reglages.MONTEE_PV, progression(index, salle))
+	return par_index(index)["pv_mult"] * Reglages.CAMPAGNE_PV_DEPART \
+		* pow(1.0 + Reglages.MONTEE_PV, progression(index, salle))
 
 static func facteur_degats(index: int, salle: int) -> float:
-	return par_index(index)["degats_mult"] * pow(1.0 + Reglages.MONTEE_DEGATS, progression(index, salle))
+	return par_index(index)["degats_mult"] * Reglages.CAMPAGNE_DEGATS_DEPART \
+		* pow(1.0 + Reglages.MONTEE_DEGATS, progression(index, salle))

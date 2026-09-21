@@ -5,12 +5,12 @@ extends Control
 # regarder ses doigts.
 
 signal intention_changee(direction: Vector2, intensite: float)
-# Nombre de tapes rapides enchainees au meme endroit. Le combat decide de ce
-# qu'il en fait : l'ecran de reglages choisit le mode, pas le joystick.
+# Une tape courte peut venir d'un autre doigt pendant le deplacement. Le combat
+# decide de son effet : l'ecran de reglages choisit le mode, pas le joystick.
 signal tape_rapide(nombre: int)
 
 var _logique := JoystickLogique.new()
-var _raccourci := RaccourciTactile.new()
+var _raccourcis := {}
 var _doigt := -1
 
 func _ready() -> void:
@@ -25,12 +25,17 @@ func _zone_valide(position: Vector2) -> bool:
 func annuler() -> void:
 	_doigt = -1
 	_logique.relacher()
-	_raccourci.annuler()
+	for valeur in _raccourcis.values():
+		var raccourci: RaccourciTactile = valeur
+		raccourci.annuler()
+	_raccourcis.clear()
 	intention_changee.emit(Vector2.ZERO, 0.0)
 	queue_redraw()
 
 func consommer_raccourci() -> void:
-	_raccourci.consommer()
+	for valeur in _raccourcis.values():
+		var raccourci: RaccourciTactile = valeur
+		raccourci.consommer()
 
 func _notification(quoi: int) -> void:
 	if quoi in [NOTIFICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT]:
@@ -41,25 +46,36 @@ func _temps() -> float:
 
 func _input(evenement: InputEvent) -> void:
 	var tapes := 0
+	var mouvement_change := false
 	if evenement is InputEventScreenTouch:
-		if evenement.pressed and _doigt == -1:
-			if not _zone_valide(evenement.position):
-				return
-			_doigt = evenement.index
-			_logique.appuyer(evenement.position)
-			_raccourci.appuyer(evenement.position, _temps())
-		elif not evenement.pressed and evenement.index == _doigt:
-			_doigt = -1
-			_logique.relacher()
-			tapes = _raccourci.relacher(_temps())
+		if evenement.pressed:
+			var raccourci_nouveau := RaccourciTactile.new()
+			_raccourcis[evenement.index] = raccourci_nouveau
+			raccourci_nouveau.appuyer(evenement.position, _temps())
+			if _doigt == -1 and _zone_valide(evenement.position):
+				_doigt = evenement.index
+				_logique.appuyer(evenement.position)
+				mouvement_change = true
 		else:
-			return
-	elif evenement is InputEventScreenDrag and evenement.index == _doigt:
-		_logique.deplacer(evenement.position)
-		_raccourci.deplacer(evenement.position)
+			var raccourci_relache: RaccourciTactile = _raccourcis.get(evenement.index)
+			if raccourci_relache != null:
+				tapes = raccourci_relache.relacher(_temps())
+				_raccourcis.erase(evenement.index)
+			if evenement.index == _doigt:
+				_doigt = -1
+				_logique.relacher()
+				mouvement_change = true
+	elif evenement is InputEventScreenDrag:
+		var raccourci_deplace: RaccourciTactile = _raccourcis.get(evenement.index)
+		if raccourci_deplace != null:
+			raccourci_deplace.deplacer(evenement.position)
+		if evenement.index == _doigt:
+			_logique.deplacer(evenement.position)
+			mouvement_change = true
 	else:
 		return
-	intention_changee.emit(_logique.direction(), _logique.intensite())
+	if mouvement_change:
+		intention_changee.emit(_logique.direction(), _logique.intensite())
 	if tapes > 0:
 		tape_rapide.emit(tapes)
 	queue_redraw()

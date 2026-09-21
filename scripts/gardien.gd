@@ -1,6 +1,8 @@
 class_name Gardien
 extends CharacterBody2D
 
+signal attaque_portee(origine: Vector2, cible: Vector2)
+
 # Le gardien est une vraie cible ennemie : il possede ses PV, peut tomber et se
 # reforme apres un delai. Son dessin reste geometrique pour respecter le repli.
 
@@ -45,7 +47,8 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 	elif _attaque <= 0.0:
 		_attaque = Reglages.GARDIEN_INTERVALLE
-		var degats: float = heros.degats_finaux(heros.attaque_reelle() * Reglages.GARDIEN_PART_DEGATS)
+		attaque_portee.emit(global_position, cible.global_position)
+		var degats: float = heros.degats_finaux(heros.attaque_reelle() * Reglages.GARDIEN_PART_DEGATS, "familier")
 		cible.recevoir_degats(degats)
 
 func recevoir_degats(montant: float, _effets: Array = []) -> void:

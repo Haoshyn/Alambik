@@ -16,7 +16,7 @@ var _categories: Dictionary = {}
 
 func _ready() -> void:
 	var col := StyleAzur.page(self,"Sorts",integre_menu)
-	StyleAzur.banniere(col, "Le grimoire vivant", "6 sorts actifs, 10 passifs et 4 ultimes à découvrir. Préparez un actif, deux passifs et un ultime.", "grimoire")
+	StyleAzur.banniere(col, "Le grimoire vivant", "6 sorts actifs, 8 passifs et 4 ultimes à découvrir. Préparez un actif, deux passifs et un ultime.", "grimoire")
 	_collection = StyleAzur.texte("", 26, StyleAzur.MAGIE)
 	col.add_child(_collection)
 	var categories := HBoxContainer.new()
@@ -70,8 +70,7 @@ func _ready() -> void:
 
 func _rendre() -> void:
 	var debloques := ReglagesJoueur.nombre_capacites_debloquees()
-	var bonus := roundi((ReglagesJoueur.multiplicateur_degats_deblocages() - 1.0) * 100.0)
-	_collection.text = "%d / %d capacités débloquées · +%d %% de dégâts finaux\nChaque première découverte donne +%d %%, équipée ou non. Les rangs améliorent l’effet." % [debloques, Sorts.nombre_capacites_debloquees({}, true), bonus, roundi(Sorts.BONUS_FINAL_PAR_DEBLOCAGE * 100.0)]
+	_collection.text = "%d / %d capacités débloquées · %d / %d Cœurs de mana\nChaque Cœur donne +10 %% de dégâts finaux. Les rangs améliorent seulement la capacité concernée." % [debloques, Sorts.nombre_capacites_debloquees({}, true), ReglagesJoueur.nombre_coeurs_mana(), Epreuves.nombre()]
 	_statut.text = _message
 	_statut.visible = not _message.is_empty()
 	for cat: String in _categories:
@@ -123,13 +122,13 @@ func _rendre() -> void:
 		texte.add_child(StyleAzur.texte(str(d["nom"]),34))
 		texte.add_child(StyleAzur.texte(str(d["description"]),27,StyleAzur.ATTENUE))
 		var rang := ReglagesJoueur.rang_sort(id)
-		texte.add_child(StyleAzur.texte(("Découverte acquise : +%d %% de dégâts finaux" if rang > 0 else "Première découverte : +%d %% de dégâts finaux") % roundi(Sorts.BONUS_FINAL_PAR_DEBLOCAGE * 100.0), 24, StyleAzur.CUIVRE))
+		texte.add_child(StyleAzur.texte("Découverte acquise" if rang > 0 else "À découvrir dans les Épreuves", 24, StyleAzur.CUIVRE))
 		texte.add_child(StyleAzur.texte("Rang %d : %s" % [maxi(1, rang), Sorts.resume_rang(id, rang)], 24, StyleAzur.MAGIE))
 		texte.add_child(StyleAzur.texte(Sorts.progression_rang(id), 23, StyleAzur.ATTENUE))
 		if d.has("recharge"):
 			var recharge := String.num(ReglagesJoueur.recharge_sort(id), 1).trim_suffix(".0").replace(".", ",")
 			texte.add_child(StyleAzur.texte("Récupération avec vos bonus : %s s" % recharge, 24, StyleAzur.MAGIE))
-		texte.add_child(StyleAzur.texte("RANG %d / %d" % [ReglagesJoueur.rang_sort(id), Reglages.CAPACITE_RANG_MAX],23,StyleAzur.CUIVRE))
+		texte.add_child(StyleAzur.texte("RANG %d / %d" % [ReglagesJoueur.rang_sort(id), Sorts.rang_max(id)],23,StyleAzur.CUIVRE))
 		texte.add_child(StyleAzur.texte("Équipé · toucher pour retirer" if id in equipes else "Toucher pour équiper" if ReglagesJoueur.sort_debloque(id) else Epreuves.provenance(id),24,StyleAzur.MAGIE))
 		marge.minimum_size_changed.connect(func(): b.custom_minimum_size.y = maxf(230.0,marge.get_combined_minimum_size().y))
 		if not ReglagesJoueur.sort_debloque(id):

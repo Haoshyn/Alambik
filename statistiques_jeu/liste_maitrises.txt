@@ -1,0 +1,36 @@
+RANG NORMAL | Règle | 10 rangs ; coût d’un rang = coût de base × (1 + 0,25 × rangs déjà acquis), arrondi au multiple de 5
+POUVOIR MAJEUR | Règle | Achat unique ; coût de sa position ×4
+COÛTS DE BASE | Positions 1 à 10 | 10, 15, 25, 40, 60, 100, 150, 250, 400, 600 Gouttes
+
+Force maîtrisée | Offensif · coût de base 10 | Attaque +10 % par rang ; maximum +100 %
+Œil sûr | Offensif · coût de base 15 | Chance critique +1,5 % par rang ; maximum +15 %
+Frappe souveraine | Offensif majeur · coût 100 | Chance critique +10 %
+Puissance | Offensif · coût de base 40 | Attaque +20 % par rang ; maximum +200 %
+Impact critique | Offensif · coût de base 60 | Dégâts critiques +5 % par rang ; maximum +50 %
+Catalyse absolue | Offensif majeur · coût 400 | Attaque +50 %
+Maîtrise du trait | Offensif · coût de base 150 | Attaque +30 % par rang ; maximum +300 %
+Instinct critique | Offensif · coût de base 250 | Chance critique +2,5 % par rang ; maximum +25 %
+Domination | Offensif majeur · coût 1 600 | Attaque +75 %
+Grand Œuvre | Offensif · coût de base 600 | Attaque +32,5 % par rang ; maximum +325 %
+
+Constitution | Défensif · coût de base 10 | PV +10 % par rang ; maximum +100 %
+Défense | Défensif · coût de base 15 | Défense +10 % par rang ; maximum +100 %
+Vitalité souveraine | Défensif majeur · coût 100 | PV +50 %
+Rempart vivant | Défensif · coût de base 40 | PV +20 % par rang ; maximum +200 %
+Robustesse | Défensif · coût de base 60 | Défense +20 % par rang ; maximum +200 %
+Carapace absolue | Défensif majeur · coût 400 | Dégâts reçus −25 % avant la Défense
+Endurance | Défensif · coût de base 150 | PV +30 % par rang ; maximum +300 %
+Bastion | Défensif · coût de base 250 | Défense +30 % par rang ; maximum +300 %
+Colosse | Défensif majeur · coût 1 600 | PV +100 %
+Immortel | Défensif · coût de base 600 | PV +30 % par rang ; maximum +300 %
+
+Alchimie réparatrice | Utilitaire · coût de base 10 | Soins reçus +5 % par rang ; maximum +50 %
+Prospection | Utilitaire · coût de base 15 | Butin +5 % par rang ; maximum +50 %
+Distillation | Utilitaire majeur · coût 100 | +1 relance d’augments ; plafond partagé de 3
+Puissance magique | Utilitaire · coût de base 40 | Dégâts des sorts +5 % par rang ; maximum +50 %
+Étude | Utilitaire · coût de base 60 | XP de compte +5 % par rang ; maximum +50 %
+Double discipline | Utilitaire majeur · coût 400 | Permet d’équiper un second passif
+Cycle arcanique | Utilitaire · coût de base 150 | Récupération des sorts −2 % par rang ; maximum −20 %
+Expansion rituelle | Utilitaire · coût de base 250 | Rayon des sorts +3 % par rang ; maximum +30 %
+Prescience | Utilitaire majeur · coût 1 600 | +1 relance d’augments ; plafond partagé de 3
+Abondance | Utilitaire · coût de base 600 | Butin +5 % et XP de compte +5 % par rang ; maximum +50 % chacun

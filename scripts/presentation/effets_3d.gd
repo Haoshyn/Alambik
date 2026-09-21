@@ -5,6 +5,7 @@ var _particules: MultiMesh
 var _lignes := ImmediateMesh.new()
 var _sorts := ImmediateMesh.new()
 var _mat := StandardMaterial3D.new()
+var _mat_sorts: StandardMaterial3D
 
 func _ready() -> void:
 	_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -12,6 +13,9 @@ func _ready() -> void:
 	_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_mat.no_depth_test = true
 	_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	# Le relief magique passe derriere les acteurs et les obstacles.
+	_mat_sorts = _mat.duplicate() as StandardMaterial3D
+	_mat_sorts.no_depth_test = false
 	var mesh := SphereMesh.new()
 	mesh.radius = 1.0
 	mesh.height = 2.0
@@ -82,12 +86,38 @@ func _dessiner_sorts() -> void:
 	var segments: Array = source.get("_segments_sorts")
 	if segments.is_empty():
 		return
-	_sorts.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _mat)
+	_sorts.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _mat_sorts)
 	for segment in segments:
-		var debut := Pont3D.vers_monde(segment["depart"]) + Vector3.UP * 0.035
-		var fin := Pont3D.vers_monde(segment["arrivee"]) + Vector3.UP * 0.035
-		var cote := (fin - debut).cross(Vector3.UP).normalized() * 0.025
-		_sorts.surface_set_color(segment["couleur"])
-		for sommet in [debut - cote, debut + cote, fin + cote, debut - cote, fin + cote, fin - cote]:
-			_sorts.surface_add_vertex(sommet)
+		var couleur: Color = segment["couleur"]
+		if segment.has("points"):
+			var points: Array = segment["points"]
+			var hauteurs: Array = segment["hauteurs"]
+			_sorts.surface_set_color(couleur)
+			for i in 3:
+				_sorts.surface_add_vertex(Pont3D.vers_monde(points[i], float(hauteurs[i])))
+			continue
+		var debut := Pont3D.vers_monde(segment["depart"], float(segment["hauteur"]))
+		var fin := Pont3D.vers_monde(segment["arrivee"], float(segment["hauteur_fin"]))
+		var direction := (fin - debut).cross(Vector3.UP).normalized()
+		if direction.is_zero_approx():
+			direction = Vector3.RIGHT
+		var cote := direction * float(segment["largeur"]) * Pont3D.ECHELLE * 0.5
+		_bande_sort(debut - cote, debut + cote, fin - cote, fin + cote, couleur, couleur)
+		# Les bords transparents adoucissent les rubans sans bloom plein ecran.
+		var transparent := Color(couleur, 0.0)
+		_bande_sort(debut - cote * 2.6, debut - cote, fin - cote * 2.6, fin - cote, transparent, couleur)
+		_bande_sort(debut + cote, debut + cote * 2.6, fin + cote, fin + cote * 2.6, couleur, transparent)
 	_sorts.surface_end()
+
+func _bande_sort(a: Vector3, b: Vector3, c: Vector3, d: Vector3, gauche: Color, droite: Color) -> void:
+	_sorts.surface_set_color(gauche)
+	_sorts.surface_add_vertex(a)
+	_sorts.surface_set_color(droite)
+	_sorts.surface_add_vertex(b)
+	_sorts.surface_add_vertex(d)
+	_sorts.surface_set_color(gauche)
+	_sorts.surface_add_vertex(a)
+	_sorts.surface_set_color(droite)
+	_sorts.surface_add_vertex(d)
+	_sorts.surface_set_color(gauche)
+	_sorts.surface_add_vertex(c)

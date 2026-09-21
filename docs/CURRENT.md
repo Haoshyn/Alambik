@@ -1,4 +1,4 @@
-# État courant — 20 septembre 2026
+# État courant — 21 septembre 2026
 
 - Godot 4.7.1, Android portrait ; simulation 2D, combat présenté en 3D.
 - Héros unique : `assets/3d/characters/mage_sculpte.glb`, matériaux standard,
@@ -7,8 +7,19 @@
   partagent le kit peint `assets/visual/interface/` et le scriptorium saphir.
 - Cinq mondes, sept chapitres de vingt salles chacun ; Mine et Épreuves de sorts.
   Contours et obstacles fixes par chapitre, terrains élémentaires en campagne.
-- Augments, sorts, équipement, forge, maîtrises et garanties de butin actifs.
+- Attributs de compte, trois spécialisations, familiers autonomes, Cœurs de
+  mana, augments, équipement, forge, maîtrises et garanties de butin actifs.
   Le détail est dans `docs/design/GAME_DESIGN.md` et les valeurs dans `data/`.
+- Huit passifs à deux rangs : un seul doublon double leur effet. Les bijoux de
+  forge 10 utilisent seulement des bonus passifs courts, sans attaque automatique.
+- La forge est plafonnée à 20 niveaux avec la puissance et le coût total de
+  l’ancienne forge 100. Les armes n’emploient aucun bonus final ni augment caché.
+- Équilibrage fixe sur 35 profils achetables : standards autour de trois
+  attaques, petits autour de deux, gros autour de sept à huit, augments de run
+  séparés des Maîtrises et cinq boss de monde à mécaniques distinctes.
+- Les tirs n’ont plus de portée maximale par défaut : murs, limites et impacts
+  les arrêtent. Les augments de trajectoire, défense et phénomènes utilisent
+  leurs mécaniques révisées, détaillées dans `statistiques_jeu/liste_augments.txt`.
 - Bilan : nouvelle tentative directe et raccourcis vers la maîtrise ou le bijou
   améliorable. Effets sonores distincts avec variantes et priorités ; vibrations
   Android désactivables. Outils développeur réservés aux versions de debug.

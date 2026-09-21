@@ -167,6 +167,13 @@ func _jouer_immediatement() -> void:
 func _lancer_mode(mode: String, destination: Dictionary) -> void:
 	if _lancement or not ReglagesJoueur.mode_debloque(mode):
 		return
+	if ReglagesJoueur.specialisation.is_empty():
+		# Le premier choix est gratuit et structure tout le build ; une aventure
+		# ne doit pas commencer avec une specialisation choisie en silence.
+		if _superposition != null:
+			_fermer_superposition(_superposition)
+		_afficher_page(PAGES.find("maitrises"))
+		return
 	_lancement = true
 	ReglagesJoueur.choisir_mode_run(mode)
 	Sons.jouer("choix", -10.0)

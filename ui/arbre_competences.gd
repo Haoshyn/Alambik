@@ -11,6 +11,9 @@ var _solde: Label
 var _achat: Button
 var _noeuds := {}
 var _embleme: TextureRect
+var _resume_personnage: Label
+var _boutons_attributs := {}
+var _boutons_specialisations := {}
 
 func _ready() -> void:
 	if ArbreCompetences.NOEUDS.has(maitrise_initiale):
@@ -23,6 +26,7 @@ func _ready() -> void:
 	_solde.visible = not integre_menu
 	col.add_child(_solde)
 	var contenu := StyleAzur.defilement(col)
+	_construire_personnage(contenu)
 	var branches := HBoxContainer.new()
 	branches.add_theme_constant_override("separation",18)
 	contenu.add_child(branches)
@@ -109,6 +113,53 @@ func _ready() -> void:
 	_rafraichir()
 	Capture.programmer(self)
 
+func _construire_personnage(contenu: VBoxContainer) -> void:
+	var fiche := StyleAzur.plaque(contenu, true)
+	fiche.add_child(StyleAzur.texte("Personnage", 34, StyleAzur.IVOIRE))
+	_resume_personnage = StyleAzur.texte("", 27, StyleAzur.ATTENUE)
+	fiche.add_child(_resume_personnage)
+	var specialisations := HBoxContainer.new()
+	specialisations.add_theme_constant_override("separation", 10)
+	fiche.add_child(specialisations)
+	for valeur in Personnage.SPECIALISATIONS:
+		var id := str(valeur)
+		var b := StyleAzur.bouton("", func(): _choisir_specialisation(id))
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.custom_minimum_size.y = 150
+		specialisations.add_child(b)
+		_boutons_specialisations[id] = b
+	var attributs := GridContainer.new()
+	attributs.columns = 2
+	attributs.add_theme_constant_override("h_separation", 10)
+	attributs.add_theme_constant_override("v_separation", 10)
+	fiche.add_child(attributs)
+	for valeur in Personnage.ATTRIBUTS:
+		var id := str(valeur)
+		var b := StyleAzur.bouton("", func(): _augmenter_attribut(id), true)
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		b.custom_minimum_size.y = 116
+		attributs.add_child(b)
+		_boutons_attributs[id] = b
+	fiche.add_child(StyleAzur.bouton("Réinitialiser les points de statistiques", func():
+		ReglagesJoueur.reinitialiser_attributs()
+		_message = "Points de statistiques rendus."
+		_rafraichir()))
+
+func _choisir_specialisation(id: String) -> void:
+	if ReglagesJoueur.choisir_specialisation(id):
+		_message = "%s est maintenant votre spécialisation." % Personnage.SPECIALISATIONS[id]["nom"]
+		Sons.jouer("fusion", -12.0)
+	elif id != ReglagesJoueur.specialisation:
+		_message = "Il faut %d Gouttes pour changer de spécialisation." % Personnage.COUT_CHANGEMENT_SPECIALISATION
+	_rafraichir()
+
+func _augmenter_attribut(id: String) -> void:
+	if ReglagesJoueur.augmenter_attribut(id):
+		_message = "%s augmenté." % Personnage.ATTRIBUTS[id]["nom"]
+		Sons.jouer("choix", -15.0)
+	_rafraichir()
+
 func _style_noeud(accent: Color, selection := false, ouvert := true) -> StyleBoxFlat:
 	# Les petites cellules gardent la place pour l'icone et le rang plutot que l'ornement.
 	var style := StyleBoxFlat.new()
@@ -122,6 +173,22 @@ func _style_noeud(accent: Color, selection := false, ouvert := true) -> StyleBox
 
 func _rafraichir() -> void:
 	_solde.text = "%s gouttes disponibles" % ReglagesJoueur.gouttes_affichees()
+	_resume_personnage.text = "Niveau %d/%d · %d point(s) disponible(s) · spécialisation : %s" % [
+		ReglagesJoueur.niveau_compte_effectif(), Personnage.NIVEAU_MAX,
+		ReglagesJoueur.points_attributs_disponibles(),
+		"à choisir" if ReglagesJoueur.specialisation.is_empty() else Personnage.SPECIALISATIONS[ReglagesJoueur.specialisation]["nom"]]
+	for id in _boutons_attributs:
+		var donnees: Dictionary = Personnage.ATTRIBUTS[id]
+		var bouton: Button = _boutons_attributs[id]
+		bouton.text = "%s · %d\n%s" % [donnees["nom"], ReglagesJoueur.rang_attribut(id), donnees["description"]]
+		bouton.disabled = ReglagesJoueur.points_attributs_disponibles() <= 0
+	for id in _boutons_specialisations:
+		var donnees: Dictionary = Personnage.SPECIALISATIONS[id]
+		var bouton: Button = _boutons_specialisations[id]
+		var active := id == ReglagesJoueur.specialisation_effective() and not ReglagesJoueur.specialisation.is_empty()
+		bouton.text = "%s%s\n%s" % ["✓ " if active else "", donnees["nom"], donnees["description"]]
+		bouton.disabled = active or (not ReglagesJoueur.specialisation.is_empty() \
+			and not ReglagesJoueur.mode_dev and ReglagesJoueur.gouttes < Personnage.COUT_CHANGEMENT_SPECIALISATION)
 	for id in _noeuds:
 		var b: Button = _noeuds[id]
 		var ouvert := ReglagesJoueur.mode_dev or ArbreCompetences.prerequis_atteint(id,ReglagesJoueur.rangs_competences)

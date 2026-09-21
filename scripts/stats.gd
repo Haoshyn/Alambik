@@ -4,17 +4,21 @@ extends RefCounted
 var pv_max: float
 var pv: float
 var soin_restant := INF
+var soin_mult := 1.0
 var vitesse: float
 var cadence: float          # tirs par seconde
 var attaque_base: float
 var bonus_attaque: float
 var degats: float           # ATK reelle permanente, avant coefficients et degats finaux
+var defense: float
+var critique: float
+var degats_critiques: float
+var degats_sorts: float
 var vitesse_projectile: float
 var portee: float
 
-# Le parametre niveau est conserve pour compatibilite avec la progression, mais
-# le niveau de compte ne donne plus de statistiques brutes. Maitrises, Passifs
-# et equipement portent la progression permanente de combat.
+# Le niveau ouvre des points a repartir ; il ne gonfle pas directement les
+# bases, afin que le joueur voie exactement d'ou vient chaque statistique.
 static func base_pv(niveau: int) -> float:
 	return Reglages.HEROS_PV * (1.0 + float(maxi(0, niveau - 1)) * Reglages.NIVEAU_PV_PAR_NIVEAU)
 
@@ -25,16 +29,29 @@ static func base_cadence(niveau: int) -> float:
 	return Reglages.HEROS_CADENCE * (1.0 + float(maxi(0, niveau - 1)) * Reglages.NIVEAU_CADENCE_PAR_NIVEAU)
 
 static func depuis_reglages(rangs: Dictionary = {}, passifs: Dictionary = {}, objets: Dictionary = {},
-		niveau := 1) -> Stats:
+		niveau := 1, attributs: Dictionary = {}) -> Stats:
 	var s := Stats.new()
-	s.pv_max = (base_pv(niveau) + float(objets.get("pv_base", 0.0)) + ArbreCompetences.bonus_pv(rangs)) \
+	var bonus_attributs := Personnage.bonus(attributs)
+	s.pv_max = (base_pv(niveau) + float(bonus_attributs["pv_base"]) \
+		+ float(objets.get("pv_base", 0.0)) + ArbreCompetences.bonus_pv(rangs)) \
 		* ArbreCompetences.multiplicateur_pv(rangs) * Sorts.multiplicateur_pv(passifs)
 	s.pv = s.pv_max
-	s.vitesse = Reglages.HEROS_VITESSE * ArbreCompetences.multiplicateur_vitesse(rangs) * Sorts.multiplicateur_vitesse(passifs) * (1.0 + float(objets.get("vitesse", 0.0)))
+	s.vitesse = Reglages.HEROS_VITESSE * ArbreCompetences.multiplicateur_vitesse(rangs) \
+		* Sorts.multiplicateur_vitesse(passifs) * (1.0 + float(objets.get("vitesse", 0.0)))
 	s.cadence = base_cadence(niveau) * ArbreCompetences.multiplicateur_cadence(rangs) * Sorts.multiplicateur_cadence(passifs) * (1.0 + float(objets.get("cadence", 0.0)))
-	s.attaque_base = base_degats(niveau) + float(objets.get("attaque_base", 0.0))
-	s.bonus_attaque = ArbreCompetences.bonus_attaque(rangs)
+	s.attaque_base = base_degats(niveau) + float(bonus_attributs["attaque_base"]) \
+		+ float(objets.get("attaque_base", 0.0))
+	s.bonus_attaque = ArbreCompetences.bonus_attaque(rangs) + float(objets.get("attaque_mult", 0.0))
 	s.degats = s.attaque_reelle()
+	s.defense = (Reglages.HEROS_DEFENSE + float(bonus_attributs["defense_base"]) \
+		+ float(objets.get("defense_base", 0.0))) * ArbreCompetences.multiplicateur_defense(rangs)
+	s.critique = clampf(float(bonus_attributs["critique"]) + float(objets.get("critique", 0.0)) \
+		+ ArbreCompetences.bonus_critique(rangs), 0.0, 1.0)
+	s.degats_critiques = float(bonus_attributs["degats_critiques"]) \
+		+ float(objets.get("degats_critiques", 0.0)) + ArbreCompetences.bonus_degats_critiques(rangs)
+	s.degats_sorts = float(bonus_attributs["degats_sorts"]) + float(objets.get("degats_sorts", 0.0)) \
+		+ ArbreCompetences.bonus_degats_sorts(rangs)
+	s.soin_mult = ArbreCompetences.multiplicateur_soin(rangs)
 	s.vitesse_projectile = Reglages.TIR_VITESSE * ArbreCompetences.multiplicateur_projectile(rangs) * Sorts.multiplicateur_projectile(passifs)
 	s.portee = Reglages.TIR_PORTEE * ArbreCompetences.multiplicateur_projectile(rangs) * Sorts.multiplicateur_projectile(passifs)
 	return s
@@ -48,16 +65,16 @@ func blesser(montant: float) -> void:
 func soigner(montant: float) -> void:
 	if est_mort():
 		return
-	var rendu := minf(maxf(0.0, montant), minf(pv_max - pv, soin_restant))
+	var rendu := minf(maxf(0.0, montant) * soin_mult, minf(pv_max - pv, soin_restant))
 	pv += rendu
 	soin_restant -= rendu
 
 func soigner_garanti(montant: float) -> void:
 	# Une riposte mortelle peut tuer un ennemi et declencher un soin avant que
-	# le heros traite sa mort ; seule Seconde chance doit pouvoir le relever.
+	# le heros traite sa mort ; seul le Sursis d'un bracelet peut le relever.
 	if est_mort():
 		return
-	pv = minf(pv_max, pv + maxf(0.0, montant))
+	pv = minf(pv_max, pv + maxf(0.0, montant) * soin_mult)
 
 func est_mort() -> bool:
 	return pv <= 0.0

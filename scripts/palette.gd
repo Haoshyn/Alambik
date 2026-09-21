@@ -42,6 +42,7 @@ static func effet(nom: String) -> Color:
 		"eau": return GIVRE
 		"braise": return BRAISE
 		"givre": return GIVRE
+		"sang_froid_1", "sang_froid_2": return GIVRE
 		"acide": return ACIDE
 		"terre": return Color(0.66, 0.50, 0.28)
 		"lumiere": return Color(1.00, 0.92, 0.58)
