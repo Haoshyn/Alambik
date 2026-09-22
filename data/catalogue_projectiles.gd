@@ -24,7 +24,9 @@ static func contient(id: String) -> bool:
 static func attaque_base(id: String, niveau_forge: int) -> float:
 	if not contient(id):
 		return 0.0
-	return ATTAQUE_BASE + FORGE_ATTAQUE_PAR_NIVEAU * float(clampi(niveau_forge, 0, Reglages.FORGE_NIVEAU_MAX))
+	var croissance := pow(Reglages.EQUIPEMENT_CROISSANCE_PAR_PALIER, niveau_deblocage(id) - 1)
+	return (ATTAQUE_BASE + FORGE_ATTAQUE_PAR_NIVEAU
+		* float(clampi(niveau_forge, 0, Reglages.FORGE_NIVEAU_MAX))) * croissance
 
 static func niveau_deblocage(id: String) -> int:
 	return int(TYPES.get(id, TYPES["standard"]).get("niveau", 1))

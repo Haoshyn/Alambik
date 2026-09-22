@@ -6,13 +6,14 @@ il n'est pas nécessaire de lire tous les fichiers d'une ligne.
 | Besoin | Point d'entrée | Dépendances utiles |
 |---|---|---|
 | Boucle, salles, transitions et récompenses | `scripts/run.gd`, `scripts/bilan_run.gd` | `autoload/jeu.gd`, `data/butins_run.gd`, `data/recompenses.gd` |
-| Campagne, rencontres et difficulté | `data/chapitres.gd`, `data/vagues.gd` | `data/catalogue_ennemis.gd`, `data/progression_statistiques.gd`, `data/profils_progression.gd`, `data/evolution_ennemis.gd` |
+| XP au sol et ramassage en Mine | `scripts/collecte_experience.gd`, `scripts/salle.gd` | `scripts/presentation/experience_sol.gd`, `data/reglages.gd` |
+| Campagne, rencontres et difficulté | `data/chapitres.gd`, `data/vagues.gd` | `data/catalogue_ennemis.gd`, `data/bestiaire_mondes.gd`, `data/progression_statistiques.gd`, `data/profils_progression.gd`, `data/evolution_ennemis.gd` |
 | Épreuves et butins de sorts | `data/epreuves.gd`, `data/sorts.gd` | `ui/selection_grimoire.gd`, `ui/apercu_butin.gd` |
 | Sorts et leurs animations | `scripts/bonus_sorts.gd`, `data/animations_sorts.gd` | `scripts/presentation/animation_sorts.gd`, `scripts/effets.gd`, `scripts/presentation/effets_3d.gd` |
 | Augments et phénomènes de combat | `data/catalogue_reactifs.gd`, `scripts/mods.gd` | `scripts/draft_logique.gd`, `scripts/reactif.gd`, `scripts/details_reactif.gd`, `data/progression_augments.gd` |
 | Héros, déplacement et dégâts reçus | `scripts/heros.gd`, `scripts/stats.gd` | `data/reglages.gd`, `scripts/joystick_logique.gd`, `ui/joystick.gd` |
 | Premiers pas et apprentissage | `scripts/apprentissage.gd`, `ui/conseils_debut.gd` | `scripts/run.gd`, `scripts/heros.gd`, `data/reglages.gd` |
-| Ennemis et boss | `scripts/ennemi.gd`, `scripts/boss.gd` | `scripts/cerveaux.gd`, `scripts/gardien.gd`, `scripts/salle.gd` |
+| Ennemis et boss | `scripts/ennemi.gd`, `scripts/boss.gd` | `scripts/cerveaux.gd`, `scripts/capacites_ennemis.gd`, `scripts/motifs_boss_mondes.gd`, `scripts/zone_hostile.gd`, `scripts/salle.gd` |
 | Tirs, ciblage et impacts | `scripts/tir.gd`, `scripts/projectile.gd`, `scripts/ciblage.gd` | `scripts/priorite_projectile.gd`, `data/catalogue_projectiles.gd` |
 | Formes, obstacles et terrains | `scripts/salle.gd`, `scripts/geometrie.gd` | `data/formes_salles.gd`, `data/terrains_mondes.gd`, `scripts/terrain_elementaire.gd` |
 | Statistiques, spécialisations, équipement et forge | `data/personnage.gd`, `data/catalogue_objets.gd` | `data/catalogue_familiers.gd`, `data/catalogue_projectiles.gd`, `ui/equipement.gd` |
@@ -23,6 +24,7 @@ il n'est pas nécessaire de lire tous les fichiers d'une ligne.
 | Style commun de l'interface | `scripts/presentation/style_azur.gd`, `scripts/style_interface.gd` | `scripts/palette.gd`, `scripts/polices.gd`, `assets/visual/interface/ORIGINE.md` |
 | Rendu 3D et décor | `scripts/presentation/monde_3d.gd`, `data/visuels_3d.gd` | `scripts/presentation/arene_3d.gd`, `scripts/presentation/proxy_3d.gd`, `data/decors_mondes.gd` |
 | Héros 3D, matières, animations et armes | `scripts/presentation/materiaux_apprenti.gd`, `scripts/presentation/animation_heros_3d.gd` | `scripts/presentation/suivi_visuel_2d.gd`, `scripts/presentation/arme_tenue_3d.gd` |
+| Animation des monstres et percussions | `scripts/presentation/animation_ennemis_3d.gd`, `scripts/presentation/animation_impacts.gd` | `data/animations_combat.gd`, `scripts/presentation/proxy_3d.gd`, `scripts/effets.gd` |
 | Effets et shaders | `scripts/presentation/effets_3d.gd`, `scripts/presentation/phenomenes_3d.gd` | `scripts/presentation/projectile_3d.gd`, `scripts/presentation/portail_3d.gd`, `shaders/` |
 | Présentation 2D de secours | `scripts/dessin.gd`, `scripts/retro16.gd` | `scripts/fond.gd`, `scripts/fond_adaptatif.gd`, `scripts/cadre_retro.gd` |
 | Transitions et raccourcis tactiles | `scripts/voile_transition.gd`, `scripts/raccourci_tactile.gd` | `ui/transition_grimoire.gd`, `scripts/presentation/passage_manga.gd` |

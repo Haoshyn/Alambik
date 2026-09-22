@@ -18,12 +18,21 @@ static func lignes(reactif: Reactif, copies := 1) -> Array[String]:
 	_ajouter_multiplicateur(resultat, mods, "pv_max_mult", "PV maximum", copies)
 	_ajouter_multiplicateur(resultat, mods, "defense_mult", "Défense", copies)
 	_ajouter_multiplicateur(resultat, mods, "deplacement_mult", "Déplacement", copies)
+	_ajouter_multiplicateur(resultat, mods, "soin_mult", "Soins reçus", copies)
 	_ajouter_multiplicateur(resultat, mods, "attaque_sorts_mult", "Attaque des sorts", copies)
 	_ajouter_multiplicateur(resultat, mods, "recharge_sorts_mult", "Récupération des sorts", copies)
 	_ajouter_multiplicateur(resultat, mods, "rayon_sorts_mult", "Rayon du sort actif", copies)
 	_ajouter_multiplicateur(resultat, mods, "degats_projectile_mult", "Dégâts par projectile", copies)
 	_ajouter_multiplicateur(resultat, mods, "degats_finaux_projectile_mult", "Dégâts finaux de tous les projectiles", copies)
 	_ajouter_multiplicateur(resultat, mods, "degats_hors_baguette_mult", "Dégâts hors attaque de base", copies)
+	if mods.has("critique_add"):
+		resultat.append("Chance critique +%s points, plafonnée à 100 %%" % _nombre(float(mods["critique_add"]) * 100.0 * poids))
+	if mods.has("degats_critiques_add"):
+		resultat.append("Dégâts critiques +%s points" % _nombre(float(mods["degats_critiques_add"]) * 100.0 * poids))
+	if mods.has("invulnerabilite_add"):
+		resultat.append("Invulnérabilité après un coup reçu ou bloqué +%s s" % _nombre(float(mods["invulnerabilite_add"]) * poids))
+	if mods.has("boucliers_salle_add"):
+		resultat.append("Boucliers par salle : +%d · chacun annule un coup · sans cumul entre les salles" % (int(mods["boucliers_salle_add"]) * maxi(1, copies)))
 	if mods.has("soin_part"):
 		resultat.append("Soin immédiat : %s %% des PV max" % _nombre(float(mods["soin_part"]) * 100.0))
 	_ajouter_entier(resultat, mods, "nb_projectiles_add", "projectile", copies)
@@ -63,14 +72,14 @@ static func _ajouter_entier(resultat: Array[String], mods: Dictionary,
 
 static func _detail_effet(effet: String) -> String:
 	match effet:
-		"braise": return "Brûlure proportionnelle aux dégâts"
-		"givre": return "Ralentit la cible"
-		"acide": return "Rend la cible vulnérable"
+		"braise": return "Brûlure : %s %% des dégâts du tir par seconde pendant %s s · se renouvelle sans se cumuler" % [_nombre(Reglages.BRAISE_PART_DEGATS_PAR_SECONDE * 100.0), _nombre(Reglages.BRAISE_DUREE)]
+		"givre": return "Déplacement de la cible −%s %% pendant %s s · durée renouvelée à chaque impact" % [_nombre((1.0 - Reglages.GIVRE_RALENTISSEMENT) * 100.0), _nombre(Reglages.GIVRE_DUREE)]
+		"acide": return "Coups suivants sur la cible : dégâts +%s %% pendant %s s · durée renouvelée à chaque impact" % [_nombre((Reglages.ACIDE_VULNERABILITE - 1.0) * 100.0), _nombre(Reglages.ACIDE_DUREE)]
 	return effet.capitalize()
 
 static func _detail_drapeau(drapeau: String) -> String:
 	match drapeau:
-		"rafale": return "Rafale de %d tirs, intervalle %s s" % [Reglages.RAFALE_NOMBRE, _nombre(Reglages.RAFALE_INTERVALLE)]
+		"rafale": return "Rafale de %d tirs successifs, intervalle maximal %s s · raccourci à haute cadence" % [Reglages.RAFALE_NOMBRE, _nombre(Reglages.RAFALE_INTERVALLE)]
 		"homing": return "Les projectiles se dirigent vers les ennemis"
 		"perfore_tout": return "Traverse tous les ennemis sans perte de dégâts"
 		"egide": return "Dégâts subis −%s %% · rend immédiatement tous les PV" % _nombre((1.0 - Reglages.EGIDE_REDUCTION) * 100.0)

@@ -26,6 +26,9 @@ var _trainee: Array[Vector2] = []
 var _age := 0.0
 var _dernier_touche := 0
 var _termine := false
+var _rebonds_murs_restants := 0
+var _normale_mur := Vector2.ZERO
+var _dernier_rebond := -1
 
 func _ready() -> void:
 	# Le rendu suit les positions entre deux ticks physiques, indispensable sur
@@ -33,6 +36,7 @@ func _ready() -> void:
 	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
 	($CollisionShape2D.shape as CircleShape2D).radius = RAYON
 	_rebonds_restants = tir.rebonds
+	_rebonds_murs_restants = tir.rebonds_murs
 	_perforations_restantes = tir.perforations
 	if cible_exclue != 0:
 		_deja_touches.append(cible_exclue)
@@ -44,6 +48,7 @@ func _ready() -> void:
 		collision_layer = 16
 		collision_mask = 1 | 4
 	else:
+		add_to_group("tirs_heros")
 		collision_layer = 8
 		collision_mask = 2 | 4
 		if "traverse_murs" in tir.drapeaux:
@@ -59,13 +64,19 @@ func _physics_process(delta: float) -> void:
 		return
 	_appliquer_guidage(delta)
 	var pas := direction * tir.vitesse * delta
+	if hostile and tir.trajectoire == "sinus":
+		var avant := sin(_age * TAU * tir.frequence)
+		var apres := sin((_age + delta) * TAU * tir.frequence)
+		pas += direction.orthogonal() * tir.amplitude * (apres - avant)
 	# Le segment bouche les trous entre deux positions de l'Area2D rapide.
 	# Les contacts lateraux restent geres par sa forme circulaire.
 	var requete := PhysicsRayQueryParameters2D.create(global_position, global_position + pas, collision_mask, _corps_exclus)
 	var impact := get_world_2d().direct_space_state.intersect_ray(requete)
 	if not impact.is_empty():
 		global_position = impact["position"]
+		_normale_mur = impact["normal"]
 		_sur_contact(impact["collider"])
+		_normale_mur = Vector2.ZERO
 	else:
 		position += pas
 	_distance_parcourue += pas.length()
@@ -150,6 +161,25 @@ func _exploser_orbe(cible_principale: Node, degats_principaux: float) -> void:
 	impact_visuel.emit(global_position, couleur, 1.5)
 
 func _heurter_un_mur(_mur: Node) -> void:
+	if hostile and _dernier_rebond == Engine.get_physics_frames(): return
+	if hostile and _rebonds_murs_restants > 0:
+		var normale := _normale_mur
+		if normale.is_zero_approx():
+			# Le contact lateral peut preceder le rayon central. On cherche alors
+			# la face du mur sans teleporter le projectile de l'autre cote.
+			var depart := global_position - direction * BestiaireMondes.REBOND_MARGE
+			var requete := PhysicsRayQueryParameters2D.create(depart, global_position + direction * BestiaireMondes.REBOND_MARGE, 4)
+			var impact := get_world_2d().direct_space_state.intersect_ray(requete)
+			if not impact.is_empty():
+				normale = impact["normal"]
+				global_position = impact["position"]
+		if not normale.is_zero_approx():
+			_rebonds_murs_restants -= 1
+			_dernier_rebond = Engine.get_physics_frames()
+			direction = direction.bounce(normale).normalized()
+			global_position += normale * BestiaireMondes.REBOND_MARGE
+			impact_visuel.emit(global_position, couleur, .6)
+			return
 	if not hostile:
 		Jeu.tirs_dans_un_mur += 1
 	# Ricochet ne concerne que les impacts sur une creature. Rediriger un tir

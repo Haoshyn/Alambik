@@ -12,8 +12,9 @@ var _temps_touche := 0.0
 var _mort := false
 var _derniere_animation := ""
 var _orientation := Vector2.DOWN
-var _visee_mesh: MeshInstance3D
 var _arme_tenue: Node3D
+var _animation_ennemi: Node3D
+const RenduCombat = preload("res://data/animations_combat.gd")
 
 func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 	logique = cible
@@ -21,6 +22,11 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 	_installer_modele(scene)
 	if genre == "ennemi":
 		var donnees: Dictionary = logique.get("donnees")
+		preload("res://scripts/presentation/habillage_ennemis_3d.gd").appliquer(modele, donnees)
+		_animation_ennemi = preload("res://scripts/presentation/animation_ennemis_3d.gd").new()
+		add_child(_animation_ennemi)
+		_animation_ennemi.preparer(donnees)
+		modele.reparent(_animation_ennemi, false)
 		facteur = float(donnees["rayon"]) / (65.0 if donnees.get("cerveau", "") == "boss" else 30.0)
 		if bool(donnees.get("elite", false)):
 			var insigne := MeshInstance3D.new()
@@ -32,6 +38,8 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 			mat.albedo_color = RangsEnnemis.COULEUR_ELITE
 			mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 			insigne.material_override = mat
+			if bool(donnees.get("incendiaire", false)):
+				mat.albedo_color = Color("ff7347")
 			insigne.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			add_child(insigne)
 	if genre == "heros":
@@ -47,15 +55,11 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 				animation_heros.toucher())
 		logique.connect("morte", func(): _mort = true)
 	elif genre == "ennemi":
-		_visee_mesh = MeshInstance3D.new()
-		_visee_mesh.mesh = ImmediateMesh.new()
-		var matiere := StandardMaterial3D.new()
-		matiere.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		matiere.albedo_color = Color("ff965b")
-		_visee_mesh.material_override = matiere
-		add_child(_visee_mesh)
-		logique.connect("tir_demande", func(_tir, _origine, _direction): _temps_attaque = 0.25)
-		logique.connect("touche", func(_position, _couleur): _temps_touche = 0.22)
+		logique.connect("tir_demande", func(_tir, _origine, _direction): _projeter_ennemi())
+		logique.connect("zone_demandee", func(_point, _origine, profil: Dictionary, _degats):
+			if bool(profil.get("lob", false)): _projeter_ennemi())
+		logique.connect("invocation_demandee", func(_id, _position): _projeter_ennemi())
+		logique.connect("touche", func(_position, _couleur): _animation_ennemi.toucher())
 	elif genre == "gardien":
 		logique.connect("attaque_portee", func(origine: Vector2, cible_attaque: Vector2):
 			_orientation = origine.direction_to(cible_attaque)
@@ -89,12 +93,13 @@ func mettre_a_jour(delta: float) -> void:
 		queue_free()
 		return
 	visible = logique.is_visible_in_tree()
-	if _visee_mesh != null: _dessiner_visee()
 	position = Pont3D.vers_monde(suivi.position_affichee() if is_instance_valid(suivi) else logique.global_position)
 	# Le mage conserve ses volumes dans toutes les orientations.
 	scale = Vector3.ONE * facteur if genre == "heros" else Vector3(facteur, facteur, facteur / sin(deg_to_rad(Pont3D.INCLINAISON)))
-	_temps_attaque = maxf(0.0, _temps_attaque - delta)
-	_temps_touche = maxf(0.0, _temps_touche - delta)
+	var fige := genre == "ennemi" and float(logique.get("_gel")) > 0.0
+	if not fige:
+		_temps_attaque = maxf(0.0, _temps_attaque - delta)
+		_temps_touche = maxf(0.0, _temps_touche - delta)
 	var direction := Vector2.DOWN
 	var vitesse := 0.0
 	if logique is CharacterBody2D:
@@ -109,9 +114,15 @@ func mettre_a_jour(delta: float) -> void:
 		var cible: Node2D = logique.get("_cible")
 		if is_instance_valid(cible):
 			direction = logique.global_position.direction_to(cible.global_position)
-		var cerveau := str(logique.get("donnees").get("cerveau", ""))
-		if cerveau in ["sentinelle", "harceleur"] and str(logique.get("_etat")) == "vise":
+		var donnees: Dictionary = logique.get("donnees")
+		var boss := str(donnees["cerveau"]) == "boss"
+		var etat := str(logique.get("_motif" if boss else "_etat"))
+		if etat in ["preparer", "charger", "charge"]:
+			direction = logique.get("_direction_charge")
+		elif not boss and etat in ["vise", "vise_orbite", "tisser", "crache", "bombarde", "phase"]:
 			direction = logique.global_position.direction_to(logique.get("_point_vise"))
+		elif boss and float(logique._motifs_mondes.annonce) > 0.0:
+			direction = logique.global_position.direction_to(logique._motifs_mondes.cible)
 	elif genre == "gardien" and _temps_attaque > 0.0:
 		direction = _orientation
 	elif genre == "projectile":
@@ -121,6 +132,17 @@ func mettre_a_jour(delta: float) -> void:
 	var angle := atan2(direction_monde.x, direction_monde.z) if genre == "heros" else atan2(direction.x, direction.y)
 	var ecart := angle_difference(modele.rotation.y, angle)
 	modele.rotation.y = lerp_angle(modele.rotation.y, angle, 1.0-exp(-Visuels3D.HEROS_LISSAGE_ORIENTATION*delta)) if genre == "heros" and delta > 0.0 else angle
+	if genre == "ennemi":
+		if fige:
+			modele.rotation.y = angle - ecart
+			if lecteur != null: lecteur.speed_scale = 0.0
+			return
+		modele.rotation.y = angle - ecart * exp(-RenduCombat.LISSAGE_ORIENTATION * delta) if delta > 0.0 else angle
+		_animation_ennemi.mettre_a_jour(logique, delta, modele.rotation.y, vitesse)
+		if lecteur != null:
+			var donnees: Dictionary = logique.get("donnees")
+			var cadence := clampf(vitesse / maxf(float(donnees["vitesse"]) * Reglages.ENNEMI_VITESSE_MULT, 1.0), RenduCombat.CADENCE_MIN, RenduCombat.CADENCE_MAX)
+			lecteur.speed_scale = cadence if vitesse > 4.0 and _temps_attaque <= 0.0 else 1.0
 	if animation_heros != null:
 		var inclinaison := -clampf(ecart, -1.0, 1.0) * Visuels3D.HEROS_INCLINAISON_VIRAGE * minf(vitesse / Reglages.HEROS_VITESSE, 1.0) if not _mort else 0.0
 		modele.rotation.z = lerpf(modele.rotation.z, inclinaison, 1.0-exp(-Visuels3D.HEROS_LISSAGE_MOUVEMENT*delta))
@@ -147,6 +169,12 @@ func _jouer_tir(_tir, _origine: Vector2, direction: Vector2) -> void:
 		if not _mort:
 			animation_heros.projeter()
 
+func _projeter_ennemi() -> void:
+	if _temps_attaque <= RenduCombat.ATTAQUE_DUREE - RenduCombat.ATTAQUE_REARMEMENT:
+		_derniere_animation = ""
+	_temps_attaque = RenduCombat.ATTAQUE_DUREE
+	_animation_ennemi.projeter()
+
 func _armer_tir(direction: Vector2) -> void:
 	_orientation = direction.normalized()
 	if animation_heros != null and not _mort:
@@ -159,18 +187,3 @@ func _exit_tree() -> void:
 		logique.remove_meta("visuel_3d")
 		logique.queue_redraw()
 
-func _dessiner_visee() -> void:
-	var maillage := _visee_mesh.mesh as ImmediateMesh
-	maillage.clear_surfaces()
-	var donnees: Dictionary = logique.get("donnees")
-	var cerveau := str(donnees.get("cerveau", ""))
-	if cerveau not in ["sentinelle", "harceleur", "veloce", "rampant", "tisseur"]: return
-	var etat := str(logique.get("_etat"))
-	if etat not in ["vise", "preparer", "tisser"]: return
-	var cible: Vector2 = logique.get("_point_vise") if cerveau not in ["veloce","rampant"] else logique.global_position + Vector2(logique.get("_direction_charge")) * 650.0
-	var debut := to_local(Pont3D.vers_monde(logique.global_position, 0.035))
-	var fin := to_local(Pont3D.vers_monde(cible, 0.035))
-	maillage.surface_begin(Mesh.PRIMITIVE_LINES)
-	maillage.surface_add_vertex(debut)
-	maillage.surface_add_vertex(fin)
-	maillage.surface_end()

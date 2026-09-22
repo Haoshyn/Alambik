@@ -6,6 +6,7 @@ extends Node2D
 
 signal terminee
 signal ennemi_abattu(experience: int)
+signal experience_ramassee(experience: int, fin_run: bool)
 
 const PROJECTILE := preload("res://scenes/projectile.tscn")
 const ENNEMI := preload("res://scenes/ennemi.tscn")
@@ -39,6 +40,11 @@ var _mine_temps := 0.0
 var _mine_prochain_spawn := 0.0
 var _mine_boss_apparu := false
 var _terrain: Node2D
+var _budgets_experience: Array[int] = []
+var _experience_au_sol := 0
+var _depots_experience: Node2D
+var _collecte_en_cours := false
+var _collecte_mine: Node2D
 
 func _ready() -> void:
 	add_to_group("salle")
@@ -56,6 +62,12 @@ func demarrer(numero_: int, limites_: Rect2) -> void:
 	numero = numero_
 	limites = limites_
 	_vagues = Vagues.pour_salle(numero, Jeu.chapitre, Jeu.graine, Jeu.mode_run)
+	_budgets_experience = Vagues.budgets_experience(numero, Jeu.chapitre, Jeu.graine, Jeu.mode_run)
+	_experience_au_sol = 0
+	_collecte_en_cours = false
+	_collecte_mine = null
+	_depots_experience = preload("res://scripts/presentation/experience_sol.gd").new()
+	add_child(_depots_experience)
 	_vague_courante = -1
 	_alea_elites.seed = Jeu.graine + Jeu.chapitre * 104729 + numero * 7919
 	_finie = false
@@ -204,6 +216,12 @@ func _process(delta: float) -> void:
 
 func _demarrer_mine() -> void:
 	_mine_active = true
+	_collecte_mine = preload("res://scripts/collecte_experience.gd").new()
+	_collecte_mine.configurer(get_tree().get_first_node_in_group("heros"), _depots_experience, self)
+	_collecte_mine.ramassee.connect(func(experience: int) -> void:
+		if _mine_active and not _finie:
+			experience_ramassee.emit(experience, false))
+	add_child(_collecte_mine)
 	Jeu.temps_mine_restant = Reglages.MINE_DUREE
 	# Quelques adversaires installent immediatement la boucle de combat, sans
 	# transformer le depart en mur compact.
@@ -212,17 +230,11 @@ func _demarrer_mine() -> void:
 	_mine_prochain_spawn = Reglages.MINE_INTERVALLE_DEBUT
 
 func _avancer_mine(delta: float) -> void:
-	if _mine_boss_apparu:
-		return
 	_mine_temps = minf(Reglages.MINE_DUREE, _mine_temps + delta)
 	Jeu.temps_mine_restant = maxf(0.0, Reglages.MINE_DUREE - _mine_temps)
 	var progression := clampf(_mine_temps / Reglages.MINE_DUREE, 0.0, 1.0)
-	if _mine_temps >= Reglages.MINE_DUREE:
-		# A 0:00, la horde cesse. Le boss obtient ensuite sa propre phase lisible,
-		# des que les derniers survivants ont ete nettoyes.
-		if get_tree().get_nodes_in_group("ennemis").is_empty():
-			_apparaitre_boss_mine()
-		return
+	if _mine_temps >= Reglages.MINE_DUREE and not _mine_boss_apparu:
+		_apparaitre_boss_mine()
 	_mine_prochain_spawn -= delta
 	if _mine_prochain_spawn > 0.0:
 		return
@@ -235,8 +247,8 @@ func _avancer_mine(delta: float) -> void:
 func _apparaitre_boss_mine() -> void:
 	if _mine_boss_apparu:
 		return
-	_mine_boss_apparu = true
 	Jeu.temps_mine_restant = 0.0
+	_mine_boss_apparu = true
 	var id := Vagues.boss_mine(Jeu.graine)
 	faire_apparaitre(id,
 		Vector2(limites.get_center().x, limites.position.y + 180.0))
@@ -245,6 +257,13 @@ func _apparaitre_boss_mine() -> void:
 	Sons.musique_boss()
 
 func _vague_suivante() -> void:
+	# Une vague entiere attend sa place : le retard ne deborde pas le plafond.
+	var suivante := _vague_courante + 1
+	if suivante < _vagues.size():
+		var a_venir: Array = _vagues[suivante]
+		if get_tree().get_nodes_in_group("ennemis").size() + a_venir.size() > Vagues.plafond_salle(numero, Jeu.chapitre, Jeu.graine, Jeu.mode_run):
+			_attente_vague = Reglages.DELAI_VAGUE_SATUREE
+			return
 	_vague_courante += 1
 	if _vague_courante >= _vagues.size():
 		_attente_vague = -1.0
@@ -254,16 +273,29 @@ func _vague_suivante() -> void:
 	var vague: Array = _vagues[_vague_courante]
 	var index_elite := -1
 	if Jeu.mode_run == "grimoire" and Jeu.chapitre >= RangsEnnemis.PREMIER_CHAPITRE_ELITES \
+			and numero >= RangsEnnemis.PREMIERE_SALLE_ELITES \
 			and not Chapitres.est_boss(Jeu.chapitre, numero) and get_tree().get_nodes_in_group("elites").is_empty():
 		if not vague.is_empty() and _alea_elites.randf() < RangsEnnemis.CHANCE_ELITE_PAR_VAGUE:
 			index_elite = _alea_elites.randi_range(0, vague.size() - 1)
 	for i in vague.size():
-		faire_apparaitre(str(vague[i]), _position_d_apparition(), null, i == index_elite)
-	_attente_vague = Reglages.DELAI_VAGUE_FORCE if _vague_courante < _vagues.size() - 1 else -1.0
+		var budget := _budgets_experience[_vague_courante]
+		var experience := floori(float(budget * (i + 1)) / vague.size()) - floori(float(budget * i) / vague.size())
+		faire_apparaitre(str(vague[i]), _position_d_apparition(), null, i == index_elite, experience)
+	_attente_vague = Reglages.DELAI_VAGUE_FORCE + maxi(0, vague.size() - Vagues.EFFECTIF_REFERENCE_DELAI) * Reglages.DELAI_VAGUE_PAR_RENFORT \
+		if _vague_courante < _vagues.size() - 1 else -1.0
 
 func _ouvrir_portail() -> void:
-	if _finie or _portail_ouvert:
+	if _finie or _portail_ouvert or _collecte_en_cours:
 		return
+	_attente_vague = -1.0
+	if is_instance_valid(_terrain): _terrain.set_physics_process(false)
+	if Jeu.mode_run == "mine":
+		_mine_active = false
+		_collecte_mine.set_physics_process(false)
+		_nettoyer_dangers()
+	else:
+		await _ramasser_experience(numero >= Jeu.salles_du_chapitre())
+	if not is_inside_tree(): return
 	Jeu.marquer_salle_terminee(numero)
 	if numero >= Jeu.salles_du_chapitre() or Jeu.mode_run == "epreuve_sorts":
 		_finie = true
@@ -295,7 +327,7 @@ func _sur_corps_dans_portail(corps: Node) -> void:
 	_finie = true
 	terminee.emit()
 
-func faire_apparaitre(id: String, position: Vector2, invocateur: Node = null, elite := false) -> void:
+func faire_apparaitre(id: String, position: Vector2, invocateur: Node = null, elite := false, experience := -1) -> void:
 	var donnees: Dictionary = CatalogueEnnemis.par_id(id)
 	if donnees.is_empty():
 		push_error("Ennemi inconnu : " + id)
@@ -303,6 +335,8 @@ func faire_apparaitre(id: String, position: Vector2, invocateur: Node = null, el
 	donnees = _mis_a_l_echelle(donnees, id)
 	if elite and invocateur == null and str(donnees["cerveau"]) != "boss":
 		donnees = RangsEnnemis.renforcer(donnees)
+		donnees["incendiaire"] = _alea_elites.randf() < RangsEnnemis.CHANCE_ELITE_INCENDIAIRE
+	if experience >= 0: donnees["experience"] = experience
 	var noeud: Node2D
 	if donnees["cerveau"] == "boss":
 		noeud = BOSS.instantiate()
@@ -321,6 +355,7 @@ func faire_apparaitre(id: String, position: Vector2, invocateur: Node = null, el
 	noeud.tir_demande.connect(_sur_tir_ennemi)
 	noeud.invocation_demandee.connect(_sur_invocation.bind(noeud))
 	noeud.touche.connect(_sur_ennemi_touche)
+	noeud.zone_demandee.connect(_sur_zone_demandee)
 	add_child(noeud)
 	if effets != null:
 		effets.apparition(noeud.global_position, donnees["couleur"], donnees["rayon"],
@@ -330,6 +365,8 @@ func faire_apparaitre(id: String, position: Vector2, invocateur: Node = null, el
 # troisieme chapitre plus que celle du premier. Le catalogue reste la reference :
 # on n'y touche pas, on met a l'echelle une copie.
 func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
+	var chapitre_patterns := Jeu.chapitre if Jeu.mode_run == "grimoire" else (Epreuves.palier(Jeu.niveau_epreuve) if Jeu.mode_run == "epreuve_sorts" else ReglagesJoueur.palier_atteint())
+	donnees = BestiaireMondes.appliquer(donnees, id, chapitre_patterns)
 	var copie := donnees.duplicate(true)
 	copie["id"] = id
 	if Jeu.mode_run == "epreuve_sorts":
@@ -357,17 +394,18 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 			copie["pv"] *= Reglages.BOSS_SIGNATURE_PV_MULT if signature \
 				else ProgressionStatistiques.facteur_miniboss(Chapitres.palier(Jeu.chapitre))
 			copie["degats"] *= Reglages.BOSS_SIGNATURE_DEGATS_MULT if signature else Reglages.MINIBOSS_DEGATS_MULT
-	# Les monstres communs gagnent de la menace par leur rythme, pas par des PV.
+	# Les differences de robustesse viennent du catalogue, puis du palier fixe.
 	if donnees["cerveau"] != "boss":
 		copie["degats"] = float(copie["degats"]) * Reglages.ENNEMI_DEGATS_MULT
 		if copie.has("vitesse_projectile"):
 			copie["vitesse_projectile"] = float(copie["vitesse_projectile"]) * Reglages.ENNEMI_PROJECTILE_VITESSE_MULT
 		if copie.has("recharge"):
 			copie["recharge"] = float(copie["recharge"]) * Reglages.ENNEMI_RECHARGE_MULT
-	var chapitre_patterns := Jeu.chapitre if Jeu.mode_run == "grimoire" else (Epreuves.palier(Jeu.niveau_epreuve) if Jeu.mode_run == "epreuve_sorts" else ReglagesJoueur.palier_atteint())
 	copie = EvolutionEnnemis.appliquer(copie,chapitre_patterns)
 	if donnees["cerveau"] == "boss" and Jeu.mode_run != "grimoire":
 		copie["pv"] = float(copie["pv"])*EvolutionEnnemis.ANNEXE_PV_BOSS
+	if donnees["cerveau"] == "boss":
+		copie["pv"] = float(copie["pv"]) * Reglages.BOSS_ENDURANCE_MULT
 	return copie
 
 func _sur_ennemi_touche(position: Vector2, couleur: Color) -> void:
@@ -375,6 +413,7 @@ func _sur_ennemi_touche(position: Vector2, couleur: Color) -> void:
 		effets.eclats(position, couleur.lightened(0.3), 3, 140.0, 0.5)
 
 func _sur_mort_ennemi(qui: Node, position: Vector2, couleur: Color) -> void:
+	if _finie: return
 	if qui.is_in_group("boss"):
 		Jeu.marquer_boss_vaincu(numero)
 		# Les renforts ne prolongent pas artificiellement la rencontre terminee.
@@ -382,43 +421,46 @@ func _sur_mort_ennemi(qui: Node, position: Vector2, couleur: Color) -> void:
 			if int(renfort.get_meta("invocateur", 0)) == qui.get_instance_id():
 				renfort.remove_from_group("ennemis")
 				renfort.queue_free()
-		if numero >= Jeu.salles_du_chapitre():
-			Jeu.ennemis_abattus += 1
-			_ouvrir_portail.call_deferred()
-			return
 	if not qui.has_meta("invocateur"):
 		if bool(qui.donnees.get("elite", false)):
 			Jeu.elites_par_salle[numero] = int(Jeu.elites_par_salle.get(numero, 0)) + 1
 		Jeu.ennemis_abattus += 1
+		var experience := int(qui.donnees.get("experience", 0))
+		if Jeu.mode_run == "mine":
+			_collecte_mine.deposer(position, experience)
+		else:
+			_experience_au_sol += experience
+			_depots_experience.deposer(position)
 		ennemi_abattu.emit(int(qui.donnees.get("experience", 1)))
 	if effets != null:
 		effets.mort(position, couleur)
+	if Jeu.mode_run == "mine":
+		if qui.is_in_group("boss"):
+			# La victoire depend du boss, pas du nettoyage d'une horde continue.
+			_mine_active = false
+			for survivant in get_tree().get_nodes_in_group("ennemis"):
+				survivant.set_physics_process(false)
+				survivant.remove_from_group("ennemis")
+				survivant.queue_free()
+			_ouvrir_portail()
+		return
 	# Le noeud mort est encore dans l'arbre a cet instant : on attend une frame
 	# avant de compter, sinon la vague ne se termine jamais.
 	await get_tree().process_frame
 	if _finie or not is_inside_tree():
-		return
-	if Jeu.mode_run == "mine":
-		if _mine_boss_apparu and get_tree().get_nodes_in_group("ennemis").is_empty():
-			_mine_active = false
-			_ouvrir_portail()
-		elif not _mine_boss_apparu and _mine_temps >= Reglages.MINE_DUREE \
-				and get_tree().get_nodes_in_group("ennemis").is_empty():
-			_apparaitre_boss_mine()
 		return
 	if get_tree().get_nodes_in_group("ennemis").is_empty():
 		if Jeu.mode_auto:
 			print("derniere creature retiree salle %d vague %d/%d" % [numero,
 				_vague_courante + 1, _vagues.size()])
 		if _vague_courante < _vagues.size() - 1:
-			_attente_vague = 0.0
-			_vague_suivante()
+			_attente_vague = Reglages.DELAI_VAGUE_NETTOYEE
 		else:
 			_ouvrir_portail()
 
 func _sur_invocation(id: String, position: Vector2, invocateur: Node = null) -> void:
-	if Jeu.mode_run == "mine" and _mine_temps >= Reglages.MINE_DUREE:
-		return
+	if _collecte_en_cours or _portail_ouvert or _finie: return
+	if Jeu.mode_run != "mine" and get_tree().get_nodes_in_group("ennemis").size() >= Vagues.plafond_salle(numero, Jeu.chapitre, Jeu.graine, Jeu.mode_run): return
 	if Jeu.mode_run == "mine" and get_tree().get_nodes_in_group("ennemis").size() >= _plafond_mine():
 		return
 	var p := position
@@ -427,6 +469,33 @@ func _sur_invocation(id: String, position: Vector2, invocateur: Node = null) -> 
 	if not _place_libre(p):
 		p = _position_d_apparition()
 	faire_apparaitre(id, p, invocateur)
+
+func _nettoyer_dangers() -> void:
+	for groupe in ["tirs_ennemis", "zones_hostiles"]:
+		for danger in get_tree().get_nodes_in_group(groupe):
+			danger.set_physics_process(false)
+			danger.queue_free()
+
+func _ramasser_experience(fin_run := false) -> void:
+	_collecte_en_cours = true
+	_nettoyer_dangers()
+	var heros := get_tree().get_first_node_in_group("heros") as Node2D
+	_depots_experience.ramasser(heros)
+	await get_tree().create_timer(Reglages.XP_RAMASSAGE_DUREE, false).timeout
+	var experience := _experience_au_sol
+	_experience_au_sol = 0
+	experience_ramassee.emit(experience, fin_run)
+	_collecte_en_cours = false
+
+func _sur_zone_demandee(point: Vector2, origine: Vector2, profil: Dictionary, degats: float) -> void:
+	if _collecte_en_cours or _portail_ouvert or _finie: return
+	if get_tree().get_nodes_in_group("zones_hostiles").size() >= BestiaireMondes.ZONES_PLAFOND: return
+	var zone := preload("res://scripts/zone_hostile.gd").new()
+	zone.profil = profil.duplicate(true)
+	zone.degats = degats
+	zone.origine = origine
+	zone.position = Geometrie.contraindre_dans_rect(point, limites, 0.0)
+	add_child(zone)
 
 func _plafond_mine() -> int:
 	var progression := clampf(_mine_temps / Reglages.MINE_DUREE, 0.0, 1.0)
@@ -459,6 +528,9 @@ func _place_libre(position: Vector2) -> bool:
 		return false
 	for rect in _obstacles:
 		if rect.grow(70.0).has_point(position):
+			return false
+	for ennemi in get_tree().get_nodes_in_group("ennemis"):
+		if is_instance_valid(ennemi) and ennemi.global_position.distance_to(position) < FormesSalles.MARGE_APPARITION + float(ennemi.donnees["rayon"]):
 			return false
 	return true
 

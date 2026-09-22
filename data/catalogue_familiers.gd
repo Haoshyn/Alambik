@@ -38,8 +38,9 @@ static func disponibles(niveau_campagne: int) -> Array[String]:
 
 static func attaque(id: String, niveau_forge: int) -> float:
 	var donnees: Dictionary = TYPES.get(id, TYPES["homoncule_encre"])
-	return float(donnees["attaque"]) + float(clampi(niveau_forge, 0, Reglages.FORGE_NIVEAU_MAX)) \
-		* FORGE_ATTAQUE_PAR_NIVEAU
+	var croissance := pow(Reglages.EQUIPEMENT_CROISSANCE_PAR_PALIER, niveau_deblocage(id) - 1)
+	return (float(donnees["attaque"]) + float(clampi(niveau_forge, 0, Reglages.FORGE_NIVEAU_MAX)) \
+		* FORGE_ATTAQUE_PAR_NIVEAU) * croissance
 
 static func bonus_heros(id: String) -> Dictionary:
 	if not contient(id):

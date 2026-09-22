@@ -9,6 +9,8 @@ const AnimationSorts = preload("res://scripts/presentation/animation_sorts.gd")
 const CatalogueAnimations = preload("res://data/animations_sorts.gd")
 const AnimationAugments = preload("res://scripts/presentation/animation_augments.gd")
 const CatalogueAugments = preload("res://data/animations_augments.gd")
+const AnimationImpacts = preload("res://scripts/presentation/animation_impacts.gd")
+const RenduCombat = preload("res://data/animations_combat.gd")
 
 var _particules: Array[Dictionary] = []
 var _ondes: Array[Dictionary] = []
@@ -17,6 +19,7 @@ var _textes: Array[Dictionary] = []
 var _sorts: Array[Dictionary] = []
 var _segments_sorts: Array[Dictionary] = []
 var _augments: Array[Dictionary] = []
+var _impacts: Array[Dictionary] = []
 
 func _process(delta: float) -> void:
 	_segments_sorts.clear()
@@ -34,6 +37,13 @@ func _process(delta: float) -> void:
 			augments_vivants.append(animation)
 			_segments_sorts.append_array(AnimationAugments.segments(animation, ReglagesJoueur.effets_reduits))
 	_augments = augments_vivants
+	var impacts_vivants: Array[Dictionary] = []
+	for effet in _impacts:
+		effet["age"] = float(effet["age"]) + delta
+		if float(effet["age"]) < float(effet["duree"]):
+			impacts_vivants.append(effet)
+			_segments_sorts.append_array(AnimationImpacts.segments(effet, ReglagesJoueur.effets_reduits))
+	_impacts = impacts_vivants
 	# On itere a rebours : la liste se vide pendant qu'on la parcourt.
 	for i in range(_particules.size() - 1, -1, -1):
 		var p := _particules[i]
@@ -58,31 +68,31 @@ func eclats(position: Vector2, couleur: Color, nombre := 8, force := 260.0, poid
 		nombre = maxi(2, ceili(float(nombre) * 0.45))
 	for i in nombre:
 		var angle := randf() * TAU
+		var vie := randf_range(0.25, 0.55)
 		_particules.append({
 			"position": position,
 			"precedente": position,
 			"vitesse": Vector2(cos(angle), sin(angle)) * force * randf_range(0.35, 1.0),
-			"vie": randf_range(0.25, 0.55),
-			"vie_max": 0.55,
+			"vie": vie,
+			"vie_max": vie,
 			"taille": randf_range(3.0, 7.0),
 			"couleur": couleur,
 			"poids": poids,
 		})
 
 func impact(position: Vector2, couleur: Color, ampleur := 1.0) -> void:
-	eclats(position, couleur, int(7 * ampleur) + 4, 270.0 * ampleur, 0.45)
-	eclats(position, couleur.lightened(0.48), int(3 * ampleur) + 2, 150.0 * ampleur, 0.1)
-	_ondes.append({"position": position, "vie": 0.22, "vie_max": 0.22,
-		"rayon": 22.0 * ampleur, "couleur": couleur})
-	_ondes.append({"position": position, "vie": 0.12, "vie_max": 0.12,
-		"rayon": 44.0 * ampleur, "couleur": couleur.lightened(0.55)})
+	eclats(position, couleur, int(4 * ampleur) + 2, 270.0 * ampleur, 0.45)
+	_ajouter_percussion(position, couleur, ampleur, false)
 
 func mort(position: Vector2, couleur: Color) -> void:
-	eclats(position, couleur, 22, 390.0, 0.82)
-	eclats(position, couleur.lightened(0.55), 12, 220.0, 0.18)
-	_ondes.append({"position": position, "vie": 0.4, "vie_max": 0.4, "rayon": 70.0, "couleur": couleur})
-	_ondes.append({"position": position, "vie": 0.22, "vie_max": 0.22,
-		"rayon": 118.0, "couleur": Palette.LUMIERE_AMBIANTE})
+	eclats(position, couleur, 14, 390.0, 0.82)
+	eclats(position, couleur.lightened(0.55), 6, 220.0, 0.18)
+	_ajouter_percussion(position, couleur, 1.0, true)
+
+func _ajouter_percussion(position: Vector2, couleur: Color, ampleur: float, mort: bool) -> void:
+	var plafond := RenduCombat.IMPACTS_REDUITS if ReglagesJoueur.effets_reduits else RenduCombat.IMPACTS_MAX
+	if _impacts.size() >= plafond: _impacts.pop_front()
+	_impacts.append(AnimationImpacts.creer(position, couleur, ampleur, mort))
 
 func apparition(position: Vector2, couleur: Color, rayon: float, majeure := false) -> void:
 	var nombre := 18 if majeure else 9

@@ -7,8 +7,16 @@ extends RefCounted
 
 # Les quatre premieres salles gardent deux vagues pour laisser le build demarrer.
 # Apres le premier miniboss, une salle normale en contient trois, puis quatre en
-# toute fin de chapitre. La taille d'une vague reste volontairement bornee a
-# quatre ennemis : la pression vient de l'enchainement et des compositions.
+# toute fin de chapitre. Les renforts legers dependent de la surface disponible ;
+# le budget d'XP reste celui de la composition d'origine.
+const EFFECTIF_NORMAL := 5
+const EFFECTIF_GRANDE_SALLE := 7
+const EFFECTIF_DEBUT := 4
+const EFFECTIF_REFERENCE_DELAI := 4
+const GRANDE_SALLE_SURFACE := 1.06
+const RENFORTS_GRANDE_SALLE := 3
+const RENFORTS_NORMAUX := 1
+const RENFORTS := ["encrier_rampant", "tache_veloce", "encrier_rampant"]
 const RENCONTRES := [
 	[["encrier_rampant", "plume_sentinelle"], ["encrier_rampant", "encrier_rampant"], ["tache_veloce", "encrier_rampant", "plume_sentinelle"]],
 	[["plume_sentinelle", "encrier_rampant"], ["tache_veloce", "encrier_rampant"], ["plume_sentinelle", "tache_veloce", "encrier_rampant"]],
@@ -37,7 +45,7 @@ const POOL_MINE_FIN := ["encrier_rampant", "plume_sentinelle", "tache_veloce", "
 	"folio_orbiteur", "sceau_belier", "marge_harceleuse", "miroir_encre",
 	"cachet_phaseur", "fuseau_tisseur", "fiole_volatile"]
 
-static func pour_salle(numero: int, chapitre := 0, graine := 0, mode := "grimoire") -> Array:
+static func pour_salle(numero: int, chapitre := 0, graine := 0, mode := "grimoire", renforcer := true) -> Array:
 	if mode == "epreuve_sorts":
 		return _miniboss_aleatoire(numero, graine)
 	if mode == "mine":
@@ -55,9 +63,33 @@ static func pour_salle(numero: int, chapitre := 0, graine := 0, mode := "grimoir
 	for i in resultat.size():
 		resultat[i] = RangsEnnemis.limiter_costauds(resultat[i])
 		var vague: Array = resultat[i]
+		if renforcer:
+			var grande := grande_salle(numero, chapitre, graine, mode)
+			var plafond := EFFECTIF_DEBUT if numero < 5 else (EFFECTIF_GRANDE_SALLE if grande else EFFECTIF_NORMAL)
+			var ajouts := RENFORTS_GRANDE_SALLE if grande and numero >= 6 else RENFORTS_NORMAUX
+			for ajout in mini(ajouts, plafond - vague.size()):
+				vague.append(RENFORTS[(i + ajout) % RENFORTS.size()])
 		if alea.randf() < 0.5:
 			vague.reverse()
 	return resultat
+
+static func grande_salle(numero: int, chapitre: int, graine: int, mode: String) -> bool:
+	var taille := FormesSalles.taille(numero, chapitre, graine, mode)
+	return taille.x * taille.y >= Reglages.ARENE_TAILLE.x * Reglages.ARENE_TAILLE.y * GRANDE_SALLE_SURFACE
+
+static func plafond_salle(numero: int, chapitre: int, graine: int, mode: String) -> int:
+	if mode != "grimoire": return Reglages.PLAFOND_ENNEMIS
+	if numero < 5: return EFFECTIF_DEBUT
+	return EFFECTIF_GRANDE_SALLE if grande_salle(numero, chapitre, graine, mode) else EFFECTIF_NORMAL
+
+static func budgets_experience(numero: int, chapitre: int, graine: int, mode: String) -> Array[int]:
+	var budgets: Array[int] = []
+	for vague: Array in pour_salle(numero, chapitre, graine, mode, false):
+		var budget := 0
+		for id in vague:
+			budget += int(CatalogueEnnemis.par_id(str(id)).get("experience", 0))
+		budgets.append(budget)
+	return budgets
 
 static func _miniboss_campagne(numero: int, chapitre: int, graine: int) -> Array:
 	var candidats: Array[String] = CatalogueEnnemis.ids_miniboss()

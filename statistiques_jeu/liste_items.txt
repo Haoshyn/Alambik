@@ -1,7 +1,11 @@
 RÈGLES DE FORGE
 Tous les modèles | Identité fixe | Statistiques, bonus spécial et pouvoir identiques pour tous les exemplaires ; aucun tirage aléatoire
-Coût | Niveau actuel 0 à 20 | Chaque niveau regroupe le prix des 5 anciens niveaux correspondants ; 10 900 Pierres du niveau 0 au niveau 20, soit le même total qu’avant
-Arme | Statistique principale | Attaque brute +4 au niveau 0, puis +2,5 par niveau ; +29 au niveau 10 ; +54 au niveau 20
+Coût | Niveau actuel n de 0 à 19 | 30 + 20n + 3n², arrondi au multiple de 5 ; 30 Pierres pour le premier achat ; 11 810 Pierres du niveau 0 au niveau 20
+Provenance des armes et familiers | Multiplicateur de l’Attaque brute, forge comprise | 1,065 puissance (niveau de déblocage − 1)
+Provenance des bijoux | Multiplicateur de toutes les statistiques brutes, forge comprise | 1,065 puissance (7 × indice du monde) ; indice de 0 à 4 ; les modèles historiques sont plafonnés au monde V
+Statistiques ci-dessous | Bases avant provenance | Les pourcentages et pouvoirs ne sont pas multipliés par la provenance
+Arme | Statistique principale avant provenance | Attaque brute +4 au niveau 0, puis +2,5 par niveau ; +29 au niveau 10 ; +54 au niveau 20
+Bijou | Attaque brute avant provenance | Anneau et bracelet +1 ; collier +2 ; chaque niveau de forge ajoute +0,25
 Anneau | Statistique principale | PV bruts +15 au niveau 0, puis +10 par niveau ; +115 au niveau 10 ; +215 au niveau 20
 Bracelet | Statistique principale | Défense brute +3 au niveau 0, puis +1,25 par niveau ; +15,5 au niveau 10 ; +28 au niveau 20
 Collier | Statistique principale | Dégâts des sorts +8 % au niveau 0, puis +2,5 points par niveau ; +33 % au niveau 10 ; +58 % au niveau 20

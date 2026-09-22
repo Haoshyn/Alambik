@@ -7,6 +7,8 @@ var _matiere_coeur: ShaderMaterial
 var _couleur := Color.WHITE
 var _hostile := false
 var _aiguille := false
+var _tourbillon: Node3D
+var _rotation_tourbillon := 0.0
 static var _perle: SphereMesh
 
 func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
@@ -50,6 +52,10 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 	coeur.material_override = _matiere_coeur
 	coeur.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	modele.add_child(coeur)
+	if hostile and tir.silhouette != "trait":
+		coeur.visible = false
+		_tourbillon = preload("res://scripts/presentation/formes_projectiles_hostiles.gd").construire(tir.silhouette)
+		modele.add_child(_tourbillon)
 	if not hostile:
 		# Une vraie silhouette volumique evite de voir le support rectangulaire
 		# des anciens quads depuis la camera plongeante du telephone.
@@ -90,7 +96,13 @@ func mettre_a_jour(_delta: float) -> void:
 	position = Pont3D.vers_monde(logique.global_position)
 	visible = logique.is_visible_in_tree()
 	var direction: Vector2 = logique.get("direction")
+	var points: Array[Vector2] = logique.get("_trainee")
+	if points.size() > 1 and points[0].distance_squared_to(points[1]) > 0.01:
+		direction = points[1].direction_to(points[0])
 	modele.rotation.y = atan2(direction.x,direction.y)
+	if _tourbillon != null:
+		_rotation_tourbillon += _delta * 6.0
+		_tourbillon.rotation.y = _rotation_tourbillon if str(logique.tir.silhouette) in ["vrille", "lame"] else 0.0
 	_ruban.clear_surfaces()
 	if not _hostile:
 		for index in range(1, modele.get_child_count()):
@@ -100,7 +112,6 @@ func mettre_a_jour(_delta: float) -> void:
 	else:
 		_matiere_coeur.set_shader_parameter("reduit",ReglagesJoueur.effets_reduits)
 	# Le ruban continu garde l'aiguille lisible entre deux positions rapides.
-	var points: Array[Vector2] = logique.get("_trainee")
 	var nombre := mini(points.size(),3 if ReglagesJoueur.effets_reduits else 8)
 	if nombre < 2: return
 	_ruban.surface_begin(Mesh.PRIMITIVE_TRIANGLES,_matiere_ruban)

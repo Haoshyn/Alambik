@@ -43,6 +43,12 @@ static func facteur_heros(mods_liste: Array, cle: String) -> float:
 			bonus += facteur - 1.0
 	return maxf(Reglages.MODS_PLANCHER, (1.0 + bonus) * penalite)
 
+static func bonus_heros(mods_liste: Array, cle: String) -> float:
+	var bonus := 0.0
+	for mod: Dictionary in mods_liste:
+		bonus += float(mod.get(cle, 0.0))
+	return bonus
+
 static func bonus_attaque(mods_liste: Array, pour_sort := false) -> float:
 	var bonus := 0.0
 	var annule_malus := _contient_drapeau(mods_liste, "annule_malus_degats")

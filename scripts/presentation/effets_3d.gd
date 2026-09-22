@@ -57,7 +57,13 @@ func _process(_delta: float) -> void:
 		var fraction := clampf(float(p["vie"])/float(p["vie_max"]),0,1)
 		var taille := maxf(0.015,float(p["taille"])*Pont3D.ECHELLE*fraction)
 		var couleur: Color = p["couleur"]
-		_particules.set_instance_transform(i,Transform3D(Basis.IDENTITY.scaled(Vector3.ONE*taille),Pont3D.vers_monde(p["position"])))
+		var vitesse: Vector2 = p["vitesse"]
+		var direction := Pont3D.vers_monde(vitesse).normalized()
+		var angle := atan2(direction.x, direction.z)
+		var etirement := 1.0 + minf(vitesse.length() / 180.0, 2.5) * fraction
+		var forme := Basis(Vector3.UP, angle) * Basis.from_scale(Vector3(taille * 0.65, taille * 0.65, taille * etirement))
+		var hauteur := 0.06 + sin((1.0 - fraction) * PI) * float(p["poids"]) * 0.45
+		_particules.set_instance_transform(i,Transform3D(forme,Pont3D.vers_monde(p["position"], hauteur)))
 		_particules.set_instance_color(i,Color(couleur,fraction))
 	_lignes.clear_surfaces()
 	var ondes: Array = source.get("_ondes")

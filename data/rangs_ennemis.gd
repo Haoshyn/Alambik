@@ -2,20 +2,24 @@ class_name RangsEnnemis
 extends RefCounted
 
 const COSTAUDS := ["scribe_essaimeur", "sceau_belier", "miroir_encre", "fuseau_tisseur"]
+const FRAGILES := ["encrier_rampant", "tache_veloce", "fiole_volatile"]
 const COSTAUDS_PAR_VAGUE := 1
 const REMPLACANT_COMMUN := "encrier_rampant"
 const PREMIER_CHAPITRE_ELITES := 1
+const PREMIERE_SALLE_ELITES := 3
 const CHANCE_ELITE_PAR_VAGUE := .10
-const ELITE_PV_COMMUN := 1.50
-const ELITE_PV_COSTAUD := 1.25
-const ELITE_DEGATS_COMMUN := 1.15
-const ELITE_DEGATS_COSTAUD := 1.10
-const ELITE_EXPERIENCE := 2.0
+const ELITE_PV := 2.0
+const ELITE_DEGATS := 2.0
+const ELITE_VITESSE := 1.12
+const ELITE_RECHARGE := 0.90
+const ELITE_PROJECTILE := 1.08
+const CHANCE_ELITE_INCENDIAIRE := 0.35
 const ELITE_GOUTTES := 2.0
 const COULEUR_ELITE := Color("e7bc65")
 
 static func categorie(id: String) -> String:
-	return "costaud" if id in COSTAUDS else "commun"
+	if id in COSTAUDS: return "costaud"
+	return "fragile" if id in FRAGILES else "commun"
 
 static func limiter_costauds(vague: Array) -> Array:
 	var resultat: Array = []
@@ -30,12 +34,15 @@ static func limiter_costauds(vague: Array) -> Array:
 
 static func renforcer(source: Dictionary) -> Dictionary:
 	var resultat := source.duplicate(true)
-	var costaud := str(resultat.get("categorie", "commun")) == "costaud"
 	resultat["elite"] = true
 	resultat["nom"] = "%s élite" % str(resultat["nom"])
-	resultat["pv"] = float(resultat["pv"]) * (ELITE_PV_COSTAUD if costaud else ELITE_PV_COMMUN)
-	resultat["degats"] = float(resultat["degats"]) * (ELITE_DEGATS_COSTAUD if costaud else ELITE_DEGATS_COMMUN)
-	resultat["experience"] = ceili(float(resultat["experience"]) * ELITE_EXPERIENCE)
+	resultat["pv"] = float(resultat["pv"]) * ELITE_PV
+	resultat["degats"] = float(resultat["degats"]) * ELITE_DEGATS
+	resultat["vitesse"] = float(resultat["vitesse"]) * ELITE_VITESSE
+	if resultat.has("recharge"):
+		resultat["recharge"] = float(resultat["recharge"]) * ELITE_RECHARGE
+	if resultat.has("vitesse_projectile"):
+		resultat["vitesse_projectile"] = float(resultat["vitesse_projectile"]) * ELITE_PROJECTILE
 	return resultat
 
 static func bonus_gouttes(chapitre: int, nombre: int) -> int:

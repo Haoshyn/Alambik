@@ -17,12 +17,14 @@ static func segments(sort: Dictionary, reduit: bool) -> Array[Dictionary]:
 	var centre: Vector2 = sort["centre"]
 	var rayon := float(sort["rayon"])
 	var teinte: Color = sort["couleur"]
-	var opacite := (1.0 - smoothstep(0.35, 1.0, t)) * (0.52 if reduit else 0.85)
+	var opacite := (1.0 - smoothstep(0.18, 1.0, t)) * (0.52 if reduit else 0.85)
 	var couleur := Color(teinte, opacite)
 	var creme := Color(teinte.lightened(0.72), opacite)
 	var or_chaud := Color(Color("ffdb91"), opacite * 0.8)
 	var expansion := 1.0 - pow(1.0 - t, 4.0)
 	var nombre := 6 if reduit else 12
+	var ultime := str(sort["id"]) in Catalogue.ULTIMES
+	_percussion(resultat, centre, rayon, teinte, float(sort["age"]), ultime, reduit)
 	match str(sort["id"]):
 		"onde_alchimique":
 			for i in (2 if reduit else 3):
@@ -60,7 +62,7 @@ static func segments(sort: Dictionary, reduit: bool) -> Array[Dictionary]:
 				var direction := Vector2.from_angle(TAU * i / float(nombre))
 				var precedent := centre + direction * rayon * 0.08
 				for j in range(1, 6):
-					var battement := 0.0 if reduit else floorf(t * 9.0) * 2.0
+					var battement := 0.0 if reduit else sin(t * TAU * 2.0) * 0.18 * (1.0 - t)
 					var ecart := sin(float(i * 7 + j * 13) + battement) * rayon * 0.13
 					var point := centre + direction * rayon * float(j) / 5.0 + direction.orthogonal() * ecart
 					_ruban(resultat, precedent, point, couleur, 8.0, 0.12, 0.12)
@@ -69,15 +71,18 @@ static func segments(sort: Dictionary, reduit: bool) -> Array[Dictionary]:
 						_ruban(resultat, point, point + direction.rotated(0.8) * rayon * 0.3, couleur, 3.0, 0.12, 0.4)
 					precedent = point
 		"explosion_corrosive":
+			_anneau(resultat, centre, rayon * expansion, 7.0 * (1.0 - t), Color(couleur, opacite * 0.45))
 			for i in nombre:
 				var angle := TAU * i / float(nombre)
 				var point := centre + Vector2.from_angle(angle) * rayon * (0.3 + 0.48 * expansion)
-				var taille := rayon * (0.05 + 0.06 * sin(PI * t + float(i % 3) * 0.3))
+				var phase_bulle := clampf((t - float(i % 3) * 0.08) / 0.65, 0.0, 1.0)
+				var taille := rayon * 0.10 * sin(PI * phase_bulle)
 				_anneau(resultat, point, taille, 5.0, couleur, 0.03, 16)
-				var hauteur := sin(t * PI) * (0.3 + 0.16 * float(i % 3))
+				var hauteur := phase_bulle * (0.3 + 0.16 * float(i % 3))
 				_bulle(resultat, point, taille * 0.5, couleur, hauteur)
 			_sceau(resultat, centre, rayon * 0.35, t * 0.2, couleur, reduit)
 		"vortex_alchimique":
+			_anneau(resultat, centre, rayon * (0.18 + 0.08 * sin(t * PI)), 6.0 * (1.0 - t), creme, 0.12)
 			for i in (3 if reduit else 5):
 				var precedent := centre
 				var hauteur_precedente := 0.75
@@ -133,6 +138,23 @@ static func segments(sort: Dictionary, reduit: bool) -> Array[Dictionary]:
 				_cristal(resultat, point, angle, taille, creme, 0.2, 0.6)
 				_ruban(resultat, point - direction.orthogonal() * taille, point + direction.orthogonal() * taille, or_chaud, 3.0, 0.25, 0.25)
 	return resultat
+
+static func _percussion(resultat: Array[Dictionary], centre: Vector2, rayon: float,
+		teinte: Color, age: float, ultime: bool, reduit: bool) -> void:
+	var duree := Catalogue.PERCUSSION_DUREE_ULTIME if ultime else Catalogue.PERCUSSION_DUREE
+	var t := clampf(age / duree, 0.0, 1.0)
+	if t >= 1.0: return
+	var expansion := 1.0 - pow(1.0 - t, 3.0)
+	var force := pow(1.0 - t, 2.0) * (0.45 if reduit else 0.75)
+	var coeur := Color(teinte.lightened(0.85), force)
+	var taille := rayon * (0.06 + expansion * 0.18)
+	var nombre := 4 if reduit else (8 if ultime else 6)
+	for i in nombre:
+		var direction := Vector2.from_angle(TAU * float(i) / nombre + PI * 0.25)
+		var pointe := centre + direction * taille * (1.6 if i % 2 == 0 else 1.0)
+		var cote := direction.orthogonal() * taille * 0.12 * (1.0 - t)
+		_triangle(resultat, [centre + cote, centre - cote, pointe], [0.12, 0.12, 0.12], coeur)
+	_anneau(resultat, centre, rayon * (0.08 + 0.42 * expansion), 10.0 * (1.0 - t), Color(teinte, force * 0.65), 0.035, 24 if reduit else 48)
 
 static func _ruban(resultat: Array[Dictionary], debut: Vector2, fin: Vector2, couleur: Color,
 		largeur := 3.0, hauteur := 0.04, hauteur_fin := -1.0) -> void:

@@ -9,6 +9,7 @@ signal tir_demande(tir_ennemi: Tir, origine: Vector2, direction: Vector2)
 signal invocation_demandee(id: String, position: Vector2)
 signal touche(position: Vector2, couleur: Color)
 signal phase_changee(phase: int)
+signal zone_demandee(point: Vector2, origine: Vector2, profil: Dictionary, degats: float)
 
 const MOTIFS_PHASE_1: Array[String] = ["barrage_horizontal", "eventail_lent", "pause"]
 const MOTIFS_PHASE_2: Array[String] = ["barrage_croise", "invocation", "charge", "pause"]
@@ -16,7 +17,8 @@ const MOTIFS_CONNUS: Array[String] = ["barrage_horizontal", "eventail_lent", "ba
 	"invocation", "charge", "spirale", "anneau_breche", "pluie", "poursuite", "pause",
 	"griffure", "echo_errata", "quadrillage", "machoire", "calligraphie", "indexation",
 	"onde_marge", "rosace", "estampille", "copie_double", "frontieres_encre",
-	"remparts_terre", "marees_eau", "couloirs_air", "foyers_feu"]
+	"remparts_terre", "marees_eau", "couloirs_air", "foyers_feu",
+	"encrage_cible", "pierres_rebondissantes", "lames_ondulees", "vrilles_errantes", "foyers_cibles"]
 const MOTIFS_SIGNATURE: Array[String] = ["griffure", "echo_errata", "quadrillage", "machoire",
 	"calligraphie", "indexation", "onde_marge", "rosace", "estampille", "copie_double",
 	"frontieres_encre", "remparts_terre", "marees_eau", "couloirs_air", "foyers_feu"]
@@ -63,6 +65,8 @@ var _telegraphe_signature := 0.0
 var _alternance := 0
 var _recharge_invocation := 0.0
 var _invocation_motif_effectuee := false
+var _motifs_mondes := preload("res://scripts/motifs_boss_mondes.gd").new()
+var _contact_restant := 0.0
 
 func configurer(donnees_: Dictionary) -> void:
 	donnees = donnees_
@@ -75,8 +79,9 @@ func _ready() -> void:
 	collision_layer = 2
 	collision_mask = 4
 	_cible = get_tree().get_first_node_in_group("cibles_ennemis")
-	($CollisionShape2D.shape as CircleShape2D).radius = float(donnees["rayon"]) \
-		* Reglages.BOSS_HITBOX_MULT
+	var forme := CircleShape2D.new()
+	forme.radius = float(donnees["rayon"]) * Reglages.BOSS_HITBOX_MULT
+	$CollisionShape2D.shape = forme
 	# Il tient le haut de la salle : le joueur garde toute la profondeur pour
 	# esquiver. Sans ancre fixe, il derivait dans un coin et devenait illisible.
 	_ancre = Vector2((limites.position.x + limites.end.x) / 2.0, limites.position.y + 240.0)
@@ -85,6 +90,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_anim += delta
+	_contact_restant = maxf(0.0, _contact_restant - delta)
 	_recharge_invocation = maxf(0.0, _recharge_invocation - delta)
 	_apparition = minf(1.0, _apparition + delta / Reglages.BOSS_APPARITION_DUREE)
 	_eclat_phase = maxf(0.0, _eclat_phase - delta)
@@ -125,7 +131,8 @@ func _physics_process(delta: float) -> void:
 
 	_minuterie -= delta
 	if _minuterie <= 0.0:
-		_motif = motif_suivant(_phase, _index_motif, str(donnees.get("id", "le_correcteur")))
+		var motifs: Array = donnees["motifs_phase_1" if _phase == 1 else "motifs_phase_2"]
+		_motif = str(motifs[_index_motif % motifs.size()])
 		_index_motif += 1
 		_minuterie = _duree_du_motif(_motif)
 		_cadence_motif = 0.0
@@ -138,11 +145,13 @@ func _physics_process(delta: float) -> void:
 		($CollisionShape2D.shape as CircleShape2D).radius)
 
 func _duree_du_motif(motif: String) -> float:
+	if motif in BestiaireMondes.BOSS_MOTIF_PAR_MONDE: return BestiaireMondes.BOSS_DUREE_NOUVELLE
 	if Reglages.BOSS_DUREES_MOTIFS.has(motif):
 		return float(Reglages.BOSS_DUREES_MOTIFS[motif])
 	return float(Reglages.BOSS_DUREES_MOTIFS["pause_phase_2" if _phase == 2 else "pause_phase_1"])*EvolutionEnnemis.REPOS_BOSS[int(donnees.get("evolution",0))]
 
 func _commencer_motif(motif: String) -> void:
+	_motifs_mondes.reinitialiser()
 	if motif == "invocation":
 		# L'arrivee part apres le telegraphe commun, jamais au changement de motif.
 		return
@@ -172,6 +181,7 @@ func _executer_motif(motif: String, delta: float) -> void:
 	# deux salves a l'interieur d'un motif.
 	var evolution := int(donnees.get("evolution",0))
 	_cadence_motif -= delta / (Reglages.BOSS_CADENCE_MOTIF_MULT*EvolutionEnnemis.RECHARGE[evolution])
+	if _motifs_mondes.avancer(self, motif, delta): return
 	match motif:
 		"invocation":
 			_flotter(delta)
@@ -392,19 +402,22 @@ func _executer_motif(motif: String, delta: float) -> void:
 					if _phase == 2 or evolution >= 2:
 						_lancer(origine, origine.direction_to(_cible.global_position).rotated(float(cote) * 0.18), 0.48)
 		"charge":
-			# Six dixiemes de seconde de visee avant le mouvement : une charge
-			# puissante doit tester l'esquive, pas surprendre hors ecran.
-			if _minuterie > 2.0:
+			if _annonce_charge():
 				velocity = Vector2.ZERO
 			else:
-				velocity = _direction_charge * donnees["vitesse"] * 2.2 \
+				var avant := global_position
+				velocity = _direction_charge * donnees["vitesse"] * BestiaireMondes.BOSS_CHARGE_VITESSE \
 					* Reglages.ENNEMI_VITESSE_MULT * _facteur_ralentissement()
 				move_and_slide()
 				global_position = Geometrie.contraindre_dans_rect(global_position, limites,
 					($CollisionShape2D.shape as CircleShape2D).radius)
-				if global_position.distance_to(_cible.global_position) < donnees["rayon"] + 40.0:
+				var proche := Geometry2D.get_closest_point_to_segment(_cible.global_position, avant, global_position)
+				if proche.distance_to(_cible.global_position) < ($CollisionShape2D.shape as CircleShape2D).radius + Reglages.HEROS_RAYON and _contact_restant <= 0.0:
 					_cible.recevoir_degats(donnees["degats"])
-					_direction_charge = -_direction_charge
+					_contact_restant = BestiaireMondes.BOSS_DEGATS_CONTACT_RECHARGE
+				# L'impact termine l'elan : pas de retour imprevisible sans annonce.
+				if get_slide_collision_count() > 0 or avant.is_equal_approx(global_position):
+					_minuterie = 0.0
 		_:
 			_flotter(delta)
 
@@ -413,6 +426,9 @@ func _signature_prete(motif: String) -> bool:
 		return false
 	_cadence_motif = float(Reglages.BOSS_CADENCES_SIGNATURE[motif])
 	return true
+
+func _annonce_charge() -> bool:
+	return _motif == "charge" and _minuterie > _duree_du_motif("charge") - BestiaireMondes.BOSS_CHARGE_ANNONCE
 
 func _flotter(_delta: float) -> void:
 	# Il revient toujours vers le haut de l'arene : le joueur garde de la place.
@@ -433,7 +449,11 @@ func _lancer_regle(origine: Vector2, direction: Vector2, part_degats: float,
 	t.vitesse = donnees.get("vitesse_projectile", 380.0) \
 		* Reglages.BOSS_PROJECTILE_VITESSE_MULT * vitesse_mult
 	t.portee = 2200.0
+	t.portee_limitee = true
 	t.cadence = 1.0
+	# Les motifs conservent leurs trajectoires et leurs ouvertures, avec une
+	# silhouette elementaire commune aux tirs annonces du meme monde.
+	t.silhouette = BestiaireMondes.SILHOUETTES_TIRS[int(donnees.get("monde_visuel", 0))]
 	tir_demande.emit(t, origine, direction)
 
 func recevoir_degats(montant: float, effets: Array = []) -> void:
@@ -476,6 +496,7 @@ func _mourir() -> void:
 	queue_free()
 
 func _draw() -> void:
+	preload("res://scripts/presentation/annonces_ennemis.gd").dessiner_boss(self, _motifs_mondes.cible, _motifs_mondes.annonce)
 	if has_meta("visuel_3d"):
 		var rayon: float = donnees["rayon"]
 		if _telegraphe_signature > 0.0:
@@ -483,8 +504,8 @@ func _draw() -> void:
 			draw_arc(Vector2.ZERO, rayon * (2.1 - avancee * 0.72), 0.0, TAU, 42,
 				Color(Palette.DANGER, 0.28 + avancee * 0.52), 4.0 + avancee * 4.0, true)
 			_dessiner_annonce_signature(rayon)
-		if _motif == "charge" and _minuterie > 2.0:
-			draw_line(_direction_charge * rayon, _direction_charge * 1050.0, Palette.DANGER, 5.0, true)
+		if _annonce_charge():
+			preload("res://scripts/presentation/annonces_ennemis.gd").dessiner_charge_boss(self)
 		if _eclat_phase > 0.0:
 			draw_arc(Vector2.ZERO, rayon * (1.35 + (1.0 - _eclat_phase) * 1.25), 0.0, TAU, 42,
 				Color(Palette.DANGER, _eclat_phase * 0.72), 4.0, true)
@@ -547,9 +568,8 @@ func _draw() -> void:
 		_:
 			Dessin.contour(self, Dessin.etoile(Vector2.ZERO, r * 1.82, r * 1.36, 10,
 				_anim * 0.14), Color(couleur, 0.48), 4.0)
-	if _motif == "charge" and _minuterie > 2.0:
-		draw_line(_direction_charge * r, _direction_charge * 1050.0,
-			Color(Palette.DANGER, 0.30 + 0.20 * sin(_anim * 26.0)), 7.0, true)
+	if _annonce_charge():
+		preload("res://scripts/presentation/annonces_ennemis.gd").dessiner_charge_boss(self)
 	if _phase == 2:
 		Dessin.contour(self, Dessin.etoile(Vector2.ZERO, r * 1.6, r * 1.25, 9, _anim * 0.9), Color(Palette.DANGER, 0.5), 3.0)
 	Retro16.dessiner_boss(self, donnees, _anim, _phase, _motif)

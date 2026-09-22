@@ -5,13 +5,14 @@ extends RefCounted
 # Les bijoux des mondes retires restent utilisables dans les anciennes sauvegardes.
 #
 # La forge augmente la base avant les bonus en pourcentage du build.
-# Les mondes se distinguent par leurs pouvoirs, pas par un bonus cache aux statistiques.
+# La provenance renforce les bases, y compris la forge, avant les pourcentages.
 const PROFILS := [
-	{"pv_base": 15.0},
-	{"defense_base": 3.0},
-	{"degats_sorts": 0.08},
+	{"pv_base": 15.0, "attaque_base": 1.0},
+	{"defense_base": 3.0, "attaque_base": 1.0},
+	{"degats_sorts": 0.08, "attaque_base": 2.0},
 ]
-const FORGE_PAR_STAT := {"pv_base": 10.0, "defense_base": 1.25, "degats_sorts": 0.025}
+const FORGE_PAR_STAT := {"pv_base": 10.0, "defense_base": 1.25, "degats_sorts": 0.025, "attaque_base": 0.25}
+const STATS_BRUTES := ["pv_base", "defense_base", "attaque_base"]
 const STATS_PRINCIPALES := ["pv_base", "defense_base", "degats_sorts"]
 
 # Chaque modele garde le meme petit bonus, quel que soit l'exemplaire obtenu.
@@ -102,15 +103,21 @@ static func bonus_objet(id: String, niveau: int, _monde_reference := -1) -> Dict
 	var donnees: Dictionary = OBJETS[id]
 	var forge := clampi(niveau, 0, Reglages.FORGE_NIVEAU_MAX)
 	var profil: Dictionary = donnees["profil"]
+	# Les modeles historiques restent au dernier monde actif, sans bonus de monde retire.
+	var monde := clampi(int(donnees["monde"]), 0, Chapitres.MONDES.size() - 1)
+	var croissance := pow(Reglages.EQUIPEMENT_CROISSANCE_PAR_PALIER,
+		monde * Chapitres.CHAPITRES_PAR_MONDE)
 	for champ in profil:
 		var forge_par := float(FORGE_PAR_STAT.get(champ, 0.0)) \
-			if champ == str(donnees["stat_principale"]) else 0.0
-		resultat[champ] = float(profil[champ]) + forge_par * float(forge)
+			if champ == str(donnees["stat_principale"]) or champ == "attaque_base" else 0.0
+		resultat[champ] = (float(profil[champ]) + forge_par * float(forge)) \
+			* (croissance if champ in STATS_BRUTES else 1.0)
 	return resultat
 
 static func description_bonus(id: String, niveau: int) -> String:
 	var bonus := bonus_objet(id, niveau)
 	var lignes: Array[String] = []
+	if bonus.has("attaque_base"): lignes.append("Attaque brute +%s" % _nombre(float(bonus["attaque_base"])))
 	if bonus.has("pv_base"): lignes.append("PV bruts +%d" % roundi(float(bonus["pv_base"])))
 	if bonus.has("defense_base"): lignes.append("Défense brute +%s" % _nombre(float(bonus["defense_base"])))
 	if bonus.has("degats_sorts"): lignes.append("Dégâts des sorts +%s %%" % _nombre(float(bonus["degats_sorts"]) * 100.0))
@@ -123,7 +130,7 @@ static func description_bonus(id: String, niveau: int) -> String:
 	return " · ".join(lignes)
 
 static func bonus_effectifs(equipements: Dictionary, forge_niveaux: Dictionary, monde_reference := -1) -> Dictionary:
-	var bonus := {"pv_base": 0.0, "defense_base": 0.0, "degats_sorts": 0.0,
+	var bonus := {"attaque_base": 0.0, "pv_base": 0.0, "defense_base": 0.0, "degats_sorts": 0.0,
 		"critique": 0.0, "degats_critiques": 0.0, "vitesse": 0.0, "cadence": 0.0,
 		"attaque_mult": 0.0, "butin": 0.0}
 	for slot in ["anneau", "bracelet", "collier"]:

@@ -23,7 +23,7 @@ const XP_COMPTE_QUADRATIQUE := 0.35
 # Bases lisibles du premier chapitre, avant equipement et maitrises.
 const HEROS_PV := 100.0
 const HEROS_DEFENSE := 10.0
-const HEROS_VITESSE := 560.0
+const HEROS_VITESSE := 728.0
 const HEROS_ACCELERATION := 3100.0
 const HEROS_FREINAGE := 4200.0
 const HEROS_CADENCE := 1.6          # tirs par seconde
@@ -45,7 +45,7 @@ const GEL_SORT_DUREE := 1.5
 const GEL_ULTIME_DUREE := 3.0
 const SORT_REPOUSSEE := 120.0
 const GOUTTES_PAR_SALLE := 3
-const ENNEMI_VITESSE_MULT := 1.12
+const ENNEMI_VITESSE_MULT := 1.288
 # La densite ne suffit pas si chaque creature laisse trop de temps au joueur.
 # Ces trois multiplicateurs renforcent la menace sans gonfler leurs PV : coups
 # un peu plus lourds, projectiles plus difficiles a distancer et attaques plus
@@ -204,16 +204,11 @@ const SALLES_PAR_RUN := 20
 
 # La courbe entre chapitres vit dans data/progression_statistiques.gd.
 
-# La campagne laisse de la marge au build dans les premieres salles, puis exige
-# que sa puissance acquise suive la densite. Ces bases ne touchent que la courbe
-# interne d'une run : la progression entre chapitres reste intacte.
-const CAMPAGNE_PV_DEPART := 1.00
-const CAMPAGNE_DEGATS_DEPART := 1.00
-# Les dix choix de niveau et les trois choix de palier donnent au profil median
-# environ x2,05 de degats utiles en fin de run. Les PV suivent ce profil ; les
-# degats montent moins vite afin que l'esquive reste la reponse principale.
-const MONTEE_PV := 1.05          # x2,05 entre la premiere et la derniere salle
-const MONTEE_DEGATS := 0.38      # x1,38 sur les degats
+# Les premiers choix doivent rester accessibles avec un build encore incomplet.
+# La pression monte apres eux, meme si le legendaire ne tombe qu'avant la salle 15.
+const CAMPAGNE_SALLES_COURBE := [1, 4, 5, 10, 15, 20]
+const CAMPAGNE_COURBE_PV := [0.55, 0.72, 0.88, 1.28, 1.78, 2.35]
+const CAMPAGNE_COURBE_DEGATS := [0.58, 0.70, 0.86, 1.12, 1.38, 1.65]
 const DEFI_MONTEE_PV := 1.0       # x2 entre la premiere et la derniere rencontre
 const DEFI_MONTEE_DEGATS := 0.45  # x1,45 : la densite porte deja la pression
 const DEFI_PV_BASE := 1.25
@@ -230,9 +225,7 @@ const VISEE_VITESSE_TEMPS := 0.10
 # avant les salles 5/10/15/20, meme avec les nouvelles vagues plus denses.
 const XP_RUN_SEUILS := [10, 26, 55, 80, 145, 220]
 
-# Les 170 victoires du parcours de reference donnent au moins 11 560 Gouttes
-# meme sans compter la croissance. Les reprises et annexes financent les
-# variantes ; completer les trois branches reste un objectif de tres long terme.
+# Les budgets des tentatives et du farm sont chiffres dans ProfilsProgression.
 const MAITRISE_COUTS := [10, 15, 25, 40, 60, 100, 150, 250, 400, 600]
 const MAITRISE_VERSION := 3
 const MAITRISE_COUT_MAJEUR := 4
@@ -240,6 +233,7 @@ const MAITRISE_RANG_MAX := 10
 const MAITRISE_COUT_AJOUT_PAR_RANG := 0.25
 const COUT_PAS_ARRONDI := 5
 const GOUTTES_MULT_PAR_CHAPITRE := 1.055
+const EQUIPEMENT_CROISSANCE_PAR_PALIER := 1.065
 
 # L'ATK equipee porte la courbe de campagne ; les rangs renforcent les sorts
 # sans ajouter une seconde croissance automatique avec le chapitre.
@@ -252,20 +246,20 @@ const COEUR_MANA_BONUS_FINAL := 0.10
 const EPREUVE_NIVEAU_DEBLOCAGE := 2
 const MINE_NIVEAU_DEBLOCAGE := 4
 
-# Vingt niveaux remplacent les cent : un nouveau niveau regroupe cinq anciens
-# achats, puissance et cout cumule compris. La version 1 passait deja par un
-# regroupement par deux ; la migration se fait donc en deux etapes.
+# Les regroupements restent ceux des migrations historiques. Le prix courant
+# donne acces a la premiere forge apres deux echecs a 5 puis 10 salles.
 const FORGE_VERSION := 3
 const FORGE_ANCIEN_NIVEAU_MAX := 60
 const FORGE_REGROUPEMENT := 2
 const FORGE_NIVEAU_MAX_AVANT_COMPRESSION := 100
 const FORGE_COMPRESSION := 5
 const FORGE_NIVEAU_MAX := 20
-const FORGE_COUT_BASE := 10
-const FORGE_COUT_PAR_NIVEAU := 2
-const PIERRES_CAMPAGNE_PAR_SALLE := 1.0
-const PIERRES_CAMPAGNE_VICTOIRE := 5.0
-const PIERRES_CAMPAGNE_CROISSANCE := 0.08
+const FORGE_COUT_BASE := 30
+const FORGE_COUT_PAR_NIVEAU := 20
+const FORGE_COUT_QUADRATIQUE := 3
+const PIERRES_CAMPAGNE_PAR_SALLE := 2.0
+const PIERRES_CAMPAGNE_VICTOIRE := 10.0
+const PIERRES_CAMPAGNE_CROISSANCE := 0.12
 const MINE_PIERRES_RECOMPENSE := 80
 const MINE_PIERRES_PAR_PALIER := 6
 # Le boss complete la recompense ; une defaite finance deja la reprise.
@@ -277,12 +271,9 @@ static func cout_maitrise(cout_base: int, rang_acquis: int) -> int:
 
 static func cout_forge(niveau_acquis: int) -> int:
 	var niveau := clampi(niveau_acquis, 0, FORGE_NIVEAU_MAX - 1)
-	var total := 0
-	for ancien_niveau in range(niveau * FORGE_COMPRESSION, (niveau + 1) * FORGE_COMPRESSION):
-		var brut := float(FORGE_COUT_BASE + FORGE_COUT_PAR_NIVEAU * ancien_niveau)
-		total += maxi(COUT_PAS_ARRONDI,
-			roundi(brut / float(COUT_PAS_ARRONDI)) * COUT_PAS_ARRONDI)
-	return total
+	var brut := float(FORGE_COUT_BASE + FORGE_COUT_PAR_NIVEAU * niveau
+		+ FORGE_COUT_QUADRATIQUE * niveau * niveau)
+	return maxi(COUT_PAS_ARRONDI, roundi(brut / float(COUT_PAS_ARRONDI)) * COUT_PAS_ARRONDI)
 
 static func pierres_mine(palier: int) -> int:
 	return MINE_PIERRES_RECOMPENSE + MINE_PIERRES_PAR_PALIER * maxi(0, palier)
@@ -311,21 +302,27 @@ const MINE_BOSS_PV_MULT := 2.00
 const MINE_BOSS_DEGATS_MULT := 0.80
 const MINE_SOIN_NIVEAU := 0.30
 const MINE_CAMERA_ZOOM := 0.74
+const MINE_XP_RAYON_RAMASSAGE := 70.0
 
 # Plus de vagues ne doit pas provoquer une avalanche instantanee chez un joueur
 # un peu en retard. Un joueur puissant declenche toujours la suivante des que la
 # vague est nettoyee ; ce delai ne ralentit donc jamais artificiellement un clear.
-const DELAI_VAGUE_FORCE := 8.5
+const DELAI_VAGUE_FORCE := 12.0
+const DELAI_VAGUE_PAR_RENFORT := 0.8
+const DELAI_VAGUE_NETTOYEE := 0.85
+const DELAI_VAGUE_SATUREE := 1.0
+const XP_RAMASSAGE_DUREE := 0.55
 # Un invocateur qui produit plus vite qu'on ne tue rend la salle infinie : la
 # sonde a bloque deux fois dessus. Le plafond est une regle de jeu, pas un
 # pansement — il borne aussi ce que l'ecran doit rester capable d'afficher.
 const PLAFOND_ENNEMIS := 10
 
 # La courbe de chapitre porte la progression ; aucun second crescendo de PV.
-# Recalibres sur l'attaque de reference 14, sans ancien bonus final d'arme :
-# environ 40 attaques pour un miniboss salle 5 et 70 pour une signature salle 20.
+# Ces coefficients de campagne precedent la reserve d'endurance commune.
 const MINIBOSS_PV_MULT := 2.28
 const BOSS_SIGNATURE_PV_MULT := 2.50
+# Reserve supplementaire commune a la campagne, la Mine et les Epreuves.
+const BOSS_ENDURANCE_MULT := 1.25
 const MINIBOSS_DEGATS_MULT := 1.00
 const BOSS_SIGNATURE_DEGATS_MULT := 1.10
 const BOSS_PROJECTILE_VITESSE_MULT := 1.20

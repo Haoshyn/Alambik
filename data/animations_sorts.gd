@@ -15,3 +15,6 @@ const PROFILS := {
 }
 const RAYON_ULTIME := 620.0
 const MAX_SIMULTANES := 8
+const PERCUSSION_DUREE := 0.18
+const PERCUSSION_DUREE_ULTIME := 0.26
+const ULTIMES := ["grand_oeuvre", "temps_suspendu", "transmutation_totale", "purification_totale"]

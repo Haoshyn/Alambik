@@ -28,6 +28,19 @@ Sceau de ruine | Rare | Attaque de run +35 % ; dégâts subis +15 %
 Puissance arcanique | Rare | Toutes les formes de dégâts sauf l’attaque de base +30 %
 Cycle arcanique | Rare | Récupération des sorts actifs et ultimes −25 %
 Apothéose | Légendaire | Dégâts des sorts +100 % ; récupération −50 % ; rayon inchangé
+Battement triple | Légendaire | Chaque attaque lance 3 tirs successifs à 75 % des dégâts chacun, soit 225 % si tous touchent ; suivi de la cible ; intervalle maximal 0,07 s, raccourci à haute cadence
+Couronne incisive | Légendaire | Chance critique +30 points ; dégâts critiques +100 points ; cadence +20 % ; chance totale plafonnée à 100 %
+Garde rémanente | Épique | PV maximum +15 % ; 1 bouclier annule un coup et revient à chaque nouvelle salle ; charges inutilisées non cumulées entre les salles
+Encre mordante | Épique | Attaque de run +20 % ; les tirs rendent la cible vulnérable aux coups suivants : dégâts reçus +25 % pendant 4 s
+Grand cercle | Épique | Attaque de run des sorts +50 % ; rayon du sort actif +45 % ; proposé uniquement si un sort actif ou un ultime est équipé
+Noyau pesant | Épique | Attaque de run +60 % ; cadence −10 % ; vitesse des projectiles −20 %
+Pointe lucide | Rare | Chance critique +15 points ; dégâts critiques +25 points ; chance totale plafonnée à 100 %
+Peau de cuivre | Rare | Défense +30 % ; PV maximum +10 %
+Pas de brume | Rare | Déplacement +15 % ; invulnérabilité après un coup reçu ou bloqué +0,15 s
+Encrage vif | Rare | Attaque de run +15 % ; vitesse des projectiles +30 %
+Baume profond | Rare | Soins reçus +25 % ; PV maximum +10 % ; aucun soin immédiat
+Braise liée | Rare | Attaque de run +10 % ; les tirs brûlent pendant 4 s à 10 % des dégâts du tir par seconde ; durée renouvelée et plus forte brûlure conservée, sans cumul des brûlures
+Trait de givre | Rare | Les tirs ralentissent les déplacements de 55 % pendant 2 s ; chaque impact renouvelle la durée
 Soin immédiat | Commun | Soigne immédiatement 30 % des PV maximum
 Poudre vive | Commun | Attaque +10 % par choix pour la run
 Réserve vitale | Commun | PV maximum +10 % par choix pour la run ; aucun soin immédiat

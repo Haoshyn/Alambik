@@ -114,6 +114,7 @@ func _ready() -> void:
 	_salle = SALLE.instantiate()
 	add_child(_salle)
 	_salle.ennemi_abattu.connect(_sur_ennemi_abattu)
+	_salle.experience_ramassee.connect(_sur_experience_ramassee)
 
 	_heros = HEROS.instantiate()
 	add_child(_heros)
@@ -230,8 +231,8 @@ func _doter_progression_intermediaire() -> void:
 	ReglagesJoueur.forge_niveaux.clear()
 	for id in anciens:
 		ReglagesJoueur.objets.append(str(id))
-		ReglagesJoueur.forge_niveaux[str(id)] = ProfilsProgression.FORGE_FAMILIER[
-			ProfilsProgression.FORGE_FAMILIER.size() - 1]
+		ReglagesJoueur.forge_niveaux[str(id)] = int(ProfilsProgression.par_palier(
+			Chapitres.nombre() - 1)["forge_familier"])
 	ReglagesJoueur.equipements = {"anneau": str(anciens[0]),
 		"bracelet": str(anciens[1]), "collier": str(anciens[2])}
 
@@ -871,11 +872,20 @@ func _frapper_flaque(flaque: Dictionary) -> void:
 func _sur_bouclier_brise(position: Vector2) -> void:
 	_effets.onde(position, 200.0, Color(0.85, 0.92, 1.0), 0.5)
 
-func _sur_ennemi_abattu(experience: int) -> void:
-	if Jeu.mode_run in ["grimoire", "mine"]:
-		_niveaux_en_attente += Jeu.gagner_experience_run(experience)
-		if _niveaux_en_attente > 0 and _panneau == null and not _terminee:
-			_ouvrir_recompense_etage()
+func _sur_experience_ramassee(experience: int, fin_run: bool) -> void:
+	if _terminee or Jeu.mode_run not in ["grimoire", "mine"]: return
+	# La Mine ramasse pendant le combat ; la campagne collecte apres nettoyage.
+	_niveaux_en_attente += Jeu.gagner_experience_run(experience)
+	if Jeu.mode_run == "grimoire":
+		_niveaux_en_attente += Jeu.garantir_niveaux_fin_salle()
+	if fin_run:
+		_niveaux_en_attente = 0
+		return
+	if _niveaux_en_attente > 0 and _panneau == null:
+		_neutraliser_deplacement()
+		_ouvrir_recompense_etage()
+
+func _sur_ennemi_abattu(_experience: int) -> void:
 	if "soif_de_sang" in _heros.tir_courant.drapeaux:
 		_heros.stats.soigner_garanti(_heros.stats.pv_max * Reglages.SOIF_DE_SANG_PART)
 	var passifs := ReglagesJoueur.passifs_equipes_effectifs()

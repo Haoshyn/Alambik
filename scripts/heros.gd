@@ -15,7 +15,7 @@ var stats := Stats.depuis_reglages(ReglagesJoueur.rangs_competences_effectifs(),
 	ReglagesJoueur.niveau_compte_effectif(), ReglagesJoueur.attributs)
 var tir_courant: Tir
 var bouclier := 0
-var _bouclier_accorde := false
+var _boucliers_accordes := 0
 var limites := Rect2(Vector2(80, 300), Vector2(920, 1400))
 
 var _intention := Vector2.ZERO
@@ -53,10 +53,10 @@ func _ready() -> void:
 	if collision != null:
 		collision.shape = collision.shape.duplicate()
 		(collision.shape as CircleShape2D).radius = Reglages.HEROS_RAYON
-	stats.soin_restant = stats.pv_max * Reglages.SOIN_COMBAT_PAR_SALLE * stats.soin_mult
 	add_to_group("cibles_ennemis")
 	tir_courant = Tir.de_base(stats)
 	recalculer()
+	stats.soin_restant = stats.pv_max * Reglages.SOIN_COMBAT_PAR_SALLE * stats.soin_mult
 
 func definir_intention(direction: Vector2, intensite := 1.0) -> void:
 	_intention = direction
@@ -72,14 +72,23 @@ func configurer_apprentissage(proteger: bool, suspendre_tir: bool) -> void:
 		_rafale_restante = 0
 
 var _pv_max_sans_augments := 0.0
+var _critique_sans_augments := 0.0
+var _degats_critiques_sans_augments := 0.0
+var _soin_sans_augments := 1.0
 
 func recalculer() -> void:
 	var mods_run := Jeu.mods()
-	# Repartir de la base evite de regagner des PV maximum a chaque recalcul.
+	# Repartir des bases evite de reappliquer les bonus a chaque choix ou salle.
 	if _pv_max_sans_augments <= 0.0:
 		_pv_max_sans_augments = stats.pv_max
+		_critique_sans_augments = stats.critique
+		_degats_critiques_sans_augments = stats.degats_critiques
+		_soin_sans_augments = stats.soin_mult
 	stats.pv_max = _pv_max_sans_augments * Mods.facteur_heros(mods_run, "pv_max_mult")
 	stats.pv = minf(stats.pv, stats.pv_max)
+	stats.critique = clampf(_critique_sans_augments + Mods.bonus_heros(mods_run, "critique_add"), 0.0, 1.0)
+	stats.degats_critiques = _degats_critiques_sans_augments + Mods.bonus_heros(mods_run, "degats_critiques_add")
+	stats.soin_mult = _soin_sans_augments * Mods.facteur_heros(mods_run, "soin_mult")
 	var tir_de_run := Mods.appliquer(Tir.de_base(stats), mods_run)
 	tir_courant = CatalogueProjectiles.appliquer(ReglagesJoueur.projectile_equipe_effectif(), tir_de_run)
 	if "familier_tireur" in tir_courant.drapeaux:
@@ -94,17 +103,21 @@ func recalculer() -> void:
 	if "egide" in drapeaux and not _egide_active:
 		stats.pv = stats.pv_max
 	_egide_active = "egide" in drapeaux
-	if not _bouclier_accorde and ArbreCompetences.donne_bouclier(ReglagesJoueur.rangs_competences_effectifs()):
-		bouclier = 1
-		_bouclier_accorde = true
+	var boucliers_par_salle := int(ArbreCompetences.donne_bouclier(ReglagesJoueur.rangs_competences_effectifs())) \
+		+ maxi(0, roundi(Mods.bonus_heros(mods_run, "boucliers_salle_add")))
+	# Une nouvelle source accorde sa charge, mais un recalcul ne recharge pas un coup bloque.
+	if boucliers_par_salle > _boucliers_accordes:
+		bouclier += boucliers_par_salle - _boucliers_accordes
+		_boucliers_accordes = boucliers_par_salle
 
 func preparer_nouvelle_salle() -> void:
-	_bouclier_accorde = false
-	stats.soin_restant = stats.pv_max * Reglages.SOIN_COMBAT_PAR_SALLE * stats.soin_mult
+	bouclier = 0
+	_boucliers_accordes = 0
 	_a_bouge_dans_la_salle = false
 	_tirs_prepares.clear()
 	_rafale_restante = 0
 	recalculer()
+	stats.soin_restant = stats.pv_max * Reglages.SOIN_COMBAT_PAR_SALLE * stats.soin_mult
 	if "regeneration" in tir_courant.drapeaux:
 		stats.soigner(stats.pv_max * Reglages.REGENERATION_PART)
 	var soin := ArbreCompetences.soin_par_salle(ReglagesJoueur.rangs_competences_effectifs()) + Sorts.soin_par_salle(ReglagesJoueur.passifs_equipes_effectifs())
@@ -164,7 +177,7 @@ func _process(delta: float) -> void:
 		return
 	if immobile and _temps_immobile < Reglages.TIR_DELAI_ARRET:
 		return
-	if _recharge > 0.0:
+	if _recharge > 0.0 or _rafale_restante > 0:
 		return
 	var positions := cibles_visibles()
 	var index := Ciblage.plus_proche(global_position, positions)
@@ -178,6 +191,7 @@ func _process(delta: float) -> void:
 		_rafale_restante = Reglages.RAFALE_NOMBRE
 		_rafale_minuterie = 0.0
 		_rafale_direction = direction
+		_avancer_rafale(0.0)
 	else:
 		_preparer_tir(direction)
 
@@ -188,18 +202,18 @@ func _avancer_rafale(delta: float) -> void:
 	if _rafale_restante <= 0:
 		return
 	_rafale_minuterie -= delta
-	if _rafale_minuterie > 0.0:
-		return
-	_rafale_minuterie = Reglages.RAFALE_INTERVALLE
-	_rafale_restante -= 1
-	# La rafale suit la cible pendant qu'elle part : sinon elle tire dans le vide
-	# des que l'ennemi bouge un peu.
-	var positions := cibles_visibles()
-	var index := Ciblage.plus_proche(global_position, positions)
-	if index != -1:
-		_rafale_direction = global_position.direction_to(_point_vise(index))
-		_visee = _rafale_direction
-	_preparer_tir(_rafale_direction)
+	# Garder tous les tirs lorsque la cadence augmente ou qu'une frame prend du retard.
+	var intervalle := minf(Reglages.RAFALE_INTERVALLE,
+		1.0 / (maxf(Reglages.MODS_PLANCHER, cadence_effective_actuelle()) * float(Reglages.RAFALE_NOMBRE)))
+	while _rafale_restante > 0 and _rafale_minuterie <= 0.0:
+		_rafale_minuterie += intervalle
+		_rafale_restante -= 1
+		var positions := cibles_visibles()
+		var index := Ciblage.plus_proche(global_position, positions)
+		if index != -1:
+			_rafale_direction = global_position.direction_to(_point_vise(index))
+			_visee = _rafale_direction
+		_preparer_tir(_rafale_direction)
 
 func _preparer_tir(direction: Vector2) -> void:
 	if stats.pv <= 0 or not peut_tirer(): return
@@ -251,14 +265,16 @@ func _point_vise(index: int) -> Vector2:
 func recevoir_degats(montant: float, _effets: Array = []) -> void:
 	if _protection_apprentissage or _invulnerable > 0.0 or stats.est_mort():
 		return
+	var passifs := ReglagesJoueur.passifs_equipes_effectifs()
+	var invulnerabilite := Reglages.HEROS_INVULNERABILITE + Sorts.bonus_invulnerabilite(passifs) \
+		+ Mods.bonus_heros(Jeu.mods(), "invulnerabilite_add")
 	if bouclier > 0:
 		bouclier -= 1
-		_invulnerable = Reglages.HEROS_INVULNERABILITE
+		_invulnerable = invulnerabilite
 		bouclier_brise.emit(global_position)
 		Sons.jouer("impact", -8.0, 0.7)
 		return
 	_secousse = 1.0
-	var passifs := ReglagesJoueur.passifs_equipes_effectifs()
 	var degats_apres_defenses := montant * ((1.0 - Reglages.PEAU_DE_PIERRE_REDUCTION) if "peau_de_pierre" in tir_courant.drapeaux else 1.0) \
 		* (Reglages.EGIDE_REDUCTION if "egide" in tir_courant.drapeaux else 1.0) \
 		* ((1.0 - Reglages.SCEAU_GARDE_REDUCTION) if "sceau_garde" in tir_courant.drapeaux else 1.0) \
@@ -269,7 +285,7 @@ func recevoir_degats(montant: float, _effets: Array = []) -> void:
 			* Mods.facteur_heros(Jeu.mods(), "defense_mult")))
 	stats.blesser(degats_apres_defenses)
 	_temps_depuis_degats = 0.0
-	_invulnerable = Reglages.HEROS_INVULNERABILITE + Sorts.bonus_invulnerabilite(passifs)
+	_invulnerable = invulnerabilite
 	touchee.emit(global_position)
 	Sons.jouer("degat", -6.0)
 	if stats.est_mort():

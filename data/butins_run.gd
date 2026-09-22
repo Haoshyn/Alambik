@@ -4,9 +4,7 @@ extends RefCounted
 const GOUTTES_SALLE := 2.0
 const BONUS_PAR_BOSS := 0.10
 const XP_SALLE := 2
-# La victoire garde un bonus, mais l'essentiel de l'XP vient des salles. Avec
-# ce partage, le panier 8/11/13/15/17/19 salles vaut 86 % de quatre victoires
-# precedentes et une septieme defaite tardive atteint 106 %.
+# Les salles validees financent la reprise, la victoire garde le meilleur rendement.
 const XP_VICTOIRE := 8
 const XP_BOSS_EPREUVE := 2
 
@@ -15,6 +13,8 @@ static func offre(mode: String, chapitre: int, salles: int, boss: int, victoire:
 		niveau_epreuve: int, rangs: Dictionary, objets: Array[String], echecs: int, echecs_sorts := 0,
 		palier_mine := 0, temps_mine := 0.0, coeur_obtenu := false, echecs_coeur := 0) -> Dictionary:
 	var rang := clampi(boss, 0, Recompenses.COFFRES.size() - 1)
+	if mode == "grimoire" and (not victoire or salles < Reglages.SALLES_PAR_RUN):
+		rang = mini(rang, Recompenses.COFFRES.size() - 2)
 	var resultat := {"nom": Recompenses.COFFRES[rang]["nom"], "rang": rang, "gouttes_min": 0, "gouttes_max": 0,
 		"xp": 0, "pierres": 0, "objets": [], "chance_objet": 0.0, "sorts": [],
 		"chance_sort": 0.0, "chance_coeur": 0.0, "cadeaux": []}
@@ -34,14 +34,15 @@ static func offre(mode: String, chapitre: int, salles: int, boss: int, victoire:
 		resultat["gouttes_min"] = roundi((progression + float(coffre["gouttes_min"])) * croissance)
 		resultat["gouttes_max"] = roundi((progression + float(coffre["gouttes_max"])) * croissance)
 		resultat["xp"] = salles * XP_SALLE + (XP_VICTOIRE if victoire else 0)
+		# Un coffre partiel peut donner le bijou, sans avancer la garantie de victoire.
+		resultat["objets"] = CatalogueObjets.manquants(chapitre, objets)
+		if not resultat["objets"].is_empty():
+			resultat["chance_objet"] = Recompenses.chance_objet(coffre, echecs)
 		if victoire:
 			for niveau in Sorts.RECOMPENSES_CAMPAGNE:
 				var cadeau := str(Sorts.RECOMPENSES_CAMPAGNE[niveau])
 				if int(niveau) <= chapitre + 2 and int(rangs.get(cadeau, 0)) == 0:
 					resultat["cadeaux"].append(cadeau)
-			resultat["objets"] = CatalogueObjets.manquants(chapitre, objets)
-			if not resultat["objets"].is_empty():
-				resultat["chance_objet"] = 1.0 if chapitre == 0 else Recompenses.chance_garantie(Recompenses.GARANTIE_APRES_GRANDS_COFFRES,echecs)
 	elif mode == "epreuve_sorts":
 		resultat["gouttes_min"] = boss
 		resultat["gouttes_max"] = boss * Recompenses.GOUTTES_EPREUVE_MAX

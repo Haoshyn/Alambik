@@ -25,6 +25,7 @@ const HEROS_OS_HAUT := [
 const OMBRES_ANDROID := false
 const PARTICULES_MAX := 160
 const PARTICULES_REDUITES := 48
+const DEPOTS_EXPERIENCE_MAX := 96
 const COMMUNS := {
 	"goutte": "encrier_rampant", "plume": "plume_sentinelle", "dard": "tache_veloce",
 	"masque": "scribe_essaimeur", "orbite": "folio_orbiteur", "belier": "sceau_belier",

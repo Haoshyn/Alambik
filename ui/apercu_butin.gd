@@ -46,9 +46,16 @@ func _ready() -> void:
 			col.add_child(StyleAzur.texte("Cœur de mana : %.0f %% · garanti sous %d victoire(s) maximum. Un seul pour ce niveau." % [float(offre["chance_coeur"]) * 100.0, maxi(1, Reglages.EPREUVE_GARANTIE_COEUR - ReglagesJoueur.epreuves_sans_coeur_mana(niveau_epreuve))], 27, StyleAzur.CUIVRE))
 	elif mode == "grimoire":
 		if not (offre["objets"] as Array).is_empty():
-			col.add_child(StyleAzur.texte("Garantie de ce chapitre : objet sous %d victoire(s) maximum." % (1 if chapitre == 0 else maxi(1,Recompenses.GARANTIE_APRES_GRANDS_COFFRES-ReglagesJoueur.grands_coffres_rates(chapitre))),27,StyleAzur.ATTENUE))
-		col.add_child(StyleAzur.texte("Sans objet : %.0f %%\nPremier chapitre : objet garanti à la première victoire. Un objet manquant garanti au plus tard au 3e coffre complet, s’il reste un objet à obtenir." % [(1.0 - float(offre["chance_objet"])) * 100.0], 27, StyleAzur.ATTENUE))
-	col.add_child(StyleAzur.texte("Chaque salle remplit le coffre ; chaque boss augmente son rang. Abandon ou défaite : les gains des salles terminées restent acquis. Objets et sorts exigent la victoire finale.\nMontants avec vos bonus actuels, hors augmentations de l’aventure. Aucune salle terminée : coffre vide.", 27, StyleAzur.ATTENUE))
+			col.add_child(StyleAzur.texte("Garantie de ce chapitre : objet sous %d victoire(s) complètes maximum." % maxi(1,Recompenses.GARANTIE_APRES_GRANDS_COFFRES-ReglagesJoueur.grands_coffres_rates(chapitre)),27,StyleAzur.ATTENUE))
+		col.add_child(StyleAzur.texte("Sans objet à la victoire : %.0f %%\nUn objet manquant garanti au plus tard au %de coffre complet du même chapitre." % [(1.0 - float(offre["chance_objet"])) * 100.0, Recompenses.GARANTIE_APRES_GRANDS_COFFRES], 27, StyleAzur.ATTENUE))
+		var paliers: Array[String] = []
+		for coffre: Dictionary in Recompenses.COFFRES:
+			var palier := int(coffre["palier"])
+			if palier > 0 and palier < Reglages.SALLES_PAR_RUN:
+				paliers.append("%d salles terminées : %.1f %%" % [palier, float(coffre["chance_objet"]) * 100.0])
+		col.add_child(StyleAzur.texte("Même en cas de défaite, le coffre peut donner un bijou manquant :\n" + " · ".join(paliers)
+			+ ".\nLes défaites ne font pas avancer le compteur des trois victoires.", 27, StyleAzur.ATTENUE))
+	col.add_child(StyleAzur.texte("Chaque salle remplit le coffre ; chaque boss augmente son rang. Abandon ou défaite : les gains des salles terminées restent acquis. Les sorts et les Cœurs de mana exigent la victoire en Épreuve.\nMontants avec vos bonus actuels, hors augmentations de l’aventure. Aucune salle terminée : coffre vide.", 27, StyleAzur.ATTENUE))
 
 var _detail: Control
 
@@ -99,7 +106,7 @@ func _ouvrir_detail(id: String, type: String) -> void:
 		col.add_child(StyleAzur.texte("À l’obtention\n" + _resume_objet(id, 0), 30))
 		col.add_child(StyleAzur.texte("Forge 10\n" + _resume_objet(id, 10), 30))
 		col.add_child(StyleAzur.texte(CatalogueObjets.description_effets(id, 10), 28))
-		col.add_child(StyleAzur.texte("Un pouvoir fixe au niveau 10. La forge augmente la statistique principale : PV de l’anneau, Défense du bracelet ou dégâts des sorts du collier.", 26, StyleAzur.ATTENUE))
+		col.add_child(StyleAzur.texte("Un pouvoir fixe au niveau 10. La forge augmente l’Attaque brute et la statistique principale : PV de l’anneau, Défense du bracelet ou dégâts des sorts du collier. Les bijoux des mondes avancés apportent davantage de statistiques brutes.", 26, StyleAzur.ATTENUE))
 	else:
 		col.add_child(StyleAzur.texte(str(d["description"]), 30))
 		var rang_max := Sorts.rang_max(id)

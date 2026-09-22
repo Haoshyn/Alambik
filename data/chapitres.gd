@@ -5,10 +5,7 @@ extends RefCounted
 # contenus sont reutilises entre les sept, tandis que densite et statistiques
 # montent. Le septieme porte le boss signature du monde.
 #
-# Les Mondes ne portent plus leurs multiplicateurs : la difficulte est une
-# fonction du palier, c'est-a-dire du rang du chapitre dans la campagne. Une
-# table figee obligeait a recalculer dix lignes a chaque retouche et rendait
-# l'entree d'un Monde deux fois plus dure que ses propres chapitres.
+# Chaque palier suit un profil d'achats fixe, independant de la sauvegarde.
 
 const CHAPITRES_PAR_MONDE := 7
 
@@ -63,8 +60,7 @@ static func _construire_chapitres() -> Array[Dictionary]:
 			})
 	return resultat
 
-# Definies pour tout palier positif, y compris au-dela de la campagne : ajouter
-# un nouveau Monde ne demande qu'une entree dans MONDES.
+# Un palier hors campagne conserve le dernier profil connu.
 static func pv_du_palier(palier: int) -> float:
 	var p := maxi(0, palier)
 	return ProgressionStatistiques.facteur_pv(p)
@@ -99,9 +95,17 @@ static func progression(index: int, salle: int) -> float:
 	return clampf(float(salle - 1) / maxf(1.0, float(chapitre["salles"] - 1)), 0.0, 1.0)
 
 static func facteur_pv(index: int, salle: int) -> float:
-	return par_index(index)["pv_mult"] * Reglages.CAMPAGNE_PV_DEPART \
-		* pow(1.0 + Reglages.MONTEE_PV, progression(index, salle))
+	return float(par_index(index)["pv_mult"]) * _facteur_salle(salle, Reglages.CAMPAGNE_COURBE_PV)
 
 static func facteur_degats(index: int, salle: int) -> float:
-	return par_index(index)["degats_mult"] * Reglages.CAMPAGNE_DEGATS_DEPART \
-		* pow(1.0 + Reglages.MONTEE_DEGATS, progression(index, salle))
+	return float(par_index(index)["degats_mult"]) * _facteur_salle(salle, Reglages.CAMPAGNE_COURBE_DEGATS)
+
+static func _facteur_salle(salle: int, valeurs: Array) -> float:
+	var etages: Array = Reglages.CAMPAGNE_SALLES_COURBE
+	var numero := clampi(salle, int(etages.front()), int(etages.back()))
+	for i in range(1, etages.size()):
+		if numero <= int(etages[i]):
+			var part := float(numero - int(etages[i - 1])) / float(int(etages[i]) - int(etages[i - 1]))
+			var debut := float(valeurs[i - 1])
+			return debut * pow(float(valeurs[i]) / debut, part)
+	return float(valeurs.back())

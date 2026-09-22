@@ -1,13 +1,13 @@
 extends CharacterBody2D
 
-# Base commune des huit archetypes. Les decisions viennent de Cerveaux, qui
-# est pur et testable ; ce fichier ne fait que les traduire en mouvement, en
-# tir ou en invocation.
+# Les decisions des familles viennent de Cerveaux et les capacites specialisees
+# de CapacitesEnnemis. Le monde fournit les variantes de leur profil.
 
 signal mort(qui: Node, position: Vector2, couleur: Color)
 signal tir_demande(tir_ennemi: Tir, origine: Vector2, direction: Vector2)
 signal invocation_demandee(id: String, position: Vector2)
 signal touche(position: Vector2, couleur: Color)
+signal zone_demandee(point: Vector2, origine: Vector2, profil: Dictionary, degats: float)
 
 var donnees: Dictionary
 var pv := 0.0
@@ -36,6 +36,8 @@ var _sens_contournement := 1.0
 var _salves: Array[Dictionary] = []
 var _anneau_index := 0
 var _charges_effectuees := 0
+var _capacites := CapacitesEnnemis.new()
+var _destination_phase := Vector2.ZERO
 func configurer(donnees_: Dictionary) -> void:
 	donnees = donnees_
 	pv = donnees["pv"]
@@ -47,8 +49,11 @@ func _ready() -> void:
 	collision_layer = 2
 	collision_mask = 4
 	_cible = get_tree().get_first_node_in_group("heros")
-	var forme := $CollisionShape2D.shape as CircleShape2D
+	# Les familles n'ont pas le meme rayon : la ressource partagee de la scene
+	# ne doit pas remplacer les collisions de tous les ennemis a chaque apparition.
+	var forme := CircleShape2D.new()
 	forme.radius = float(donnees["rayon"]) * Reglages.ENNEMI_HITBOX_MULT
+	$CollisionShape2D.shape = forme
 	_recharge = float(donnees.get("recharge", 1.0)) * 0.5
 
 func _physics_process(delta: float) -> void:
@@ -72,6 +77,10 @@ func _physics_process(delta: float) -> void:
 		return
 	velocity = Vector2.ZERO
 	_relancer_salves(delta)
+	if _capacites.avancer(self, delta):
+		_contraindre_aux_murs()
+		_capacites.laisser_trace(self, delta)
+		return
 	match donnees["cerveau"]:
 		"rampant": _agir_rampant(delta)
 		"sentinelle": _agir_sentinelle()
@@ -84,6 +93,7 @@ func _physics_process(delta: float) -> void:
 		"tisseur": _agir_tisseur(delta)
 		"volatile": _agir_volatile(delta)
 	_contraindre_aux_murs()
+	_capacites.laisser_trace(self, delta)
 
 func _cible_la_plus_proche() -> Node2D:
 	var meilleure: Node2D = null
@@ -216,6 +226,7 @@ func _tirer_vers(cible: Vector2, relance := false) -> void:
 	t.nb_projectiles = int(donnees.get("projectiles", 1))
 	t.angle_eventail = float(donnees.get("angle_eventail", 0.0))
 	t.ecart_lateral = float(donnees.get("ecart_lateral", 0.0))
+	CapacitesEnnemis.configurer_tir(t, donnees)
 	tir_demande.emit(t, global_position, global_position.direction_to(cible))
 	if not relance: _programmer_salves(cible,0)
 
@@ -227,6 +238,7 @@ func _tirer_cercle(nombre: int, relance := false) -> void:
 	t.cadence = 1.0
 	var decalage := _anneau_index*EvolutionEnnemis.DECALAGE_ANNEAU if int(donnees.get("evolution",0)) > 0 else 0.0
 	_anneau_index += 1
+	CapacitesEnnemis.configurer_tir(t, donnees)
 	for i in nombre:
 		var direction := Vector2.RIGHT.rotated(TAU * float(i) / float(nombre)+decalage)
 		tir_demande.emit(t, global_position, direction)
@@ -250,12 +262,11 @@ func _agir_veloce(_delta: float) -> void:
 				_etat = "charger"
 				_charges_effectuees += 1
 				_minuterie = donnees.get("duree_charge", 0.5)
+			var avant := global_position
 			velocity = _direction_charge * donnees["vitesse"] * _facteur_vitesse()
 			move_and_slide()
 			_contraindre_aux_murs()
-			if distance <= _distance_contact() and _recharge <= 0.0:
-				_recharge = 1.0
-				_cible.recevoir_degats(donnees["degats"])
+			CapacitesEnnemis.frapper_sur_segment(self, avant)
 		"repos":
 			if _etat != "repos":
 				if _charges_effectuees < int(donnees.get("charges",1)):
@@ -361,10 +372,12 @@ func _agir_phaseur(_delta: float) -> void:
 		"avancer": _avancer_vers(_cible.global_position, donnees["vitesse"])
 		"tourner":
 			var radial := _cible.global_position.direction_to(global_position)
-			velocity = radial.rotated(PI * 0.5 * _sens_contournement) * donnees["vitesse"] * 0.55
+			velocity = radial.rotated(PI * 0.5 * _sens_contournement) * donnees["vitesse"] * 0.55 * _facteur_vitesse()
 			move_and_slide()
 		"phase":
 			_etat = "phase"
+			_destination_phase = _capacites.destination_phase(self)
+			_point_vise = _viser()
 			_minuterie = donnees.get("telegraphe", 0.62)
 			_recharge = donnees.get("recharge", 2.55)
 		"disparaitre":
@@ -372,12 +385,10 @@ func _agir_phaseur(_delta: float) -> void:
 		"reapparaitre":
 			# Il traverse le centre plutot que de se teleporter sur le joueur : le
 			# changement de cote surprend, mais la distance reste previsible.
-			var radial := _cible.global_position.direction_to(global_position)
-			var destination := _cible.global_position - radial * float(donnees["portee"])
-			global_position = Geometrie.contraindre_dans_rect(destination, limites, _rayon_collision())
+			global_position = _destination_phase
 			_etat = "repos"
 			_tirer_cercle(int(donnees.get("projectiles_cercle", 6)))
-			_tirer_vers(_cible.global_position)
+			_tirer_vers(_point_vise)
 
 func _rayon_collision() -> float:
 	return ($CollisionShape2D.shape as CircleShape2D).radius
@@ -397,7 +408,7 @@ func _agir_tisseur(_delta: float) -> void:
 		velocity = Vector2.ZERO
 		if _minuterie <= 0.0:
 			_etat = "repos"
-			_tirer_vers(_point_vise if int(donnees.get("evolution",0)) > 0 else _cible.global_position)
+			_tirer_vers(_point_vise)
 		return
 	var distance := global_position.distance_to(_cible.global_position)
 	match Cerveaux.tisseur(distance, donnees["portee"], _recharge):
@@ -524,6 +535,7 @@ func _draw() -> void:
 func _dessiner_telegraphe(r: float) -> void:
 	if _cible == null:
 		return
+	if preload("res://scripts/presentation/annonces_ennemis.gd").dessiner(self, r): return
 	var vers := global_position.direction_to(_cible.global_position)
 	if (donnees.get("cerveau", "") in ["sentinelle", "harceleur"] and _etat == "vise") \
 			or (donnees.get("cerveau", "") == "orbiteur" and _etat == "vise_orbite") \

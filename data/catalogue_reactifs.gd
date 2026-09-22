@@ -1,12 +1,12 @@
 class_name CatalogueReactifs
 extends RefCounted
 
-# Les pouvoirs uniques se repartissent en 15 rares, 10 epiques et 5 legendaires.
+# Les pouvoirs uniques se repartissent en 22 rares, 14 epiques et 7 legendaires.
 const PROJECTILE := "projectile"
 const HEROS := "heros"
 const PHENOMENE := "phenomene"
 const SCEAU := "sceau"
-const AUGMENTS_SORTS := ["puissance_arcanique", "cycle_arcanique", "apotheose"]
+const AUGMENTS_SORTS := ["puissance_arcanique", "cycle_arcanique", "apotheose", "grand_cercle"]
 
 # Reutiliser les illustrations du jeu pour les dosages simples.
 const ICONES_COMMUNES := {
@@ -16,6 +16,19 @@ const ICONES_COMMUNES := {
 	"puissance_arcanique": "sceau_furie",
 	"cycle_arcanique": "sceau_celerite",
 	"apotheose": "meteores",
+	"battement_triple": "salve",
+	"couronne_incisive": "domination",
+	"garde_remanente": "egide",
+	"encre_mordante": "explosion_corrosive",
+	"grand_cercle": "grand_oeuvre",
+	"noyau_pesant": "frappe_lourde",
+	"pointe_lucide": "cadence",
+	"peau_cuivre": "armure",
+	"pas_brume": "elan_vital",
+	"encrage_vif": "sceau_portee",
+	"baume_profond": "regeneration",
+	"braise_liee": "barrage_de_braise",
+	"trait_givre": "nova_de_givre",
 }
 
 static var TOUS := {
@@ -123,6 +136,59 @@ static var TOUS := {
 		"Dégâts des sorts +100 % et récupération −50 %, sans modifier leur rayon.",
 		{"attaque_sorts_mult": 2.0, "recharge_sorts_mult": 0.50},
 		Color("ffcb70"), "etoile", 1, PHENOMENE, Reactif.LEGENDAIRE),
+
+	"battement_triple": Reactif.creer("battement_triple", "Battement triple",
+		"Chaque attaque lance une rafale de trois tirs successifs à 75 % des dégâts chacun. La rafale suit la cible.",
+		{"drapeaux": ["rafale"], "degats_projectile_mult": 0.75},
+		Color("ffce81"), "triple_barre", 1, PROJECTILE, Reactif.LEGENDAIRE),
+	"couronne_incisive": Reactif.creer("couronne_incisive", "Couronne incisive",
+		"Chance critique +30 points, dégâts critiques +100 points et cadence +20 %.",
+		{"critique_add": 0.30, "degats_critiques_add": 1.0, "cadence_mult": 1.20},
+		Color("ffd98b"), "etoile", 1, HEROS, Reactif.LEGENDAIRE),
+
+	"garde_remanente": Reactif.creer("garde_remanente", "Garde rémanente",
+		"PV maximum +15 %. Un bouclier annule un coup et revient dans chaque nouvelle salle, sans cumul entre les salles.",
+		{"pv_max_mult": 1.15, "boucliers_salle_add": 1},
+		Color("b7caef"), "hexagone", 1, HEROS, Reactif.EPIQUE),
+	"encre_mordante": Reactif.creer("encre_mordante", "Encre mordante",
+		"Attaque de run +20 %. Les tirs rendent la cible vulnérable aux coups suivants pendant 4 s : dégâts reçus +25 %.",
+		{"attaque_mult": 1.20, "effets": ["acide"]},
+		Color("abd98c"), "fiole", 1, PROJECTILE, Reactif.EPIQUE),
+	"grand_cercle": Reactif.creer("grand_cercle", "Grand cercle",
+		"Attaque de run des sorts +50 % et rayon du sort actif +45 %.",
+		{"attaque_sorts_mult": 1.50, "rayon_sorts_mult": 1.45},
+		Color("c4a1ef"), "etoile", 1, PHENOMENE, Reactif.EPIQUE),
+	"noyau_pesant": Reactif.creer("noyau_pesant", "Noyau pesant",
+		"Attaque de run +60 %, mais cadence −10 % et vitesse des projectiles −20 %.",
+		{"attaque_mult": 1.60, "cadence_mult": 0.90, "vitesse_mult": 0.80},
+		Color("d5ac8b"), "masse", 1, PROJECTILE, Reactif.EPIQUE),
+
+	"pointe_lucide": Reactif.creer("pointe_lucide", "Pointe lucide",
+		"Chance critique +15 points et dégâts critiques +25 points.",
+		{"critique_add": 0.15, "degats_critiques_add": 0.25},
+		Color("9edcea"), "oeil", 1, HEROS, Reactif.RARE),
+	"peau_cuivre": Reactif.creer("peau_cuivre", "Peau de cuivre",
+		"Défense +30 % et PV maximum +10 %.",
+		{"defense_mult": 1.30, "pv_max_mult": 1.10},
+		Color("d7b193"), "hexagone", 1, HEROS, Reactif.RARE),
+	"pas_brume": Reactif.creer("pas_brume", "Pas de brume",
+		"Déplacement +15 %. Après un coup reçu ou bloqué, l’invulnérabilité dure 0,15 s de plus.",
+		{"deplacement_mult": 1.15, "invulnerabilite_add": 0.15},
+		Color("a3daca"), "sillage", 1, HEROS, Reactif.RARE),
+	"encrage_vif": Reactif.creer("encrage_vif", "Encrage vif",
+		"Attaque de run +15 % et vitesse des projectiles +30 %.",
+		{"attaque_mult": 1.15, "vitesse_mult": 1.30},
+		Color("a6bff2"), "lance", 1, PROJECTILE, Reactif.RARE),
+	"baume_profond": Reactif.creer("baume_profond", "Baume profond",
+		"Soins reçus +25 % et PV maximum +10 %, sans soin immédiat.",
+		{"soin_mult": 1.25, "pv_max_mult": 1.10},
+		Color("a9dfa8"), "goutte", 1, HEROS, Reactif.RARE),
+	"braise_liee": Reactif.creer("braise_liee", "Braise liée",
+		"Attaque de run +10 %. Les tirs brûlent pendant 4 s à 10 % des dégâts du tir par seconde. La brûlure se renouvelle sans se cumuler.",
+		{"attaque_mult": 1.10, "effets": ["braise"]}, Color("e9aa7d"), "flamme", 1, PROJECTILE, Reactif.RARE),
+	"trait_givre": Reactif.creer("trait_givre", "Trait de givre",
+		"Les tirs ralentissent les déplacements de la cible de 55 % pendant 2 s. Chaque impact renouvelle la durée.",
+		{"effets": ["givre"]}, Color("92d7ed"), "cristal", 1, PROJECTILE, Reactif.RARE),
 
 	"soin": Reactif.creer("soin", "Soin immédiat",
 		"Récupère 30 % des PV maximum.", {"soin_part": ProgressionAugments.SOIN_CHOIX},

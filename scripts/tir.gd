@@ -24,6 +24,11 @@ var degats_zone_mult := 0.0
 var degats_projectiles_supplementaires := 1.0
 var degats_finaux_projectile_mult := 1.0
 var cible_verrouillee := 0
+var trajectoire := "droite"
+var silhouette := "trait"
+var amplitude := 0.0
+var frequence := 0.0
+var rebonds_murs := 0
 var effets: Array[String] = []
 var drapeaux: Array[String] = []
 
@@ -98,6 +103,11 @@ func copie() -> Tir:
 	t.degats_projectiles_supplementaires = degats_projectiles_supplementaires
 	t.degats_finaux_projectile_mult = degats_finaux_projectile_mult
 	t.cible_verrouillee = cible_verrouillee
+	t.trajectoire = trajectoire
+	t.silhouette = silhouette
+	t.amplitude = amplitude
+	t.frequence = frequence
+	t.rebonds_murs = rebonds_murs
 	t.effets = effets.duplicate()
 	t.drapeaux = drapeaux.duplicate()
 	return t

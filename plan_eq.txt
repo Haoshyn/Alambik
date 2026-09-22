@@ -1,280 +1,309 @@
-PLAN D’ÉQUILIBRAGE — ALAMBIK — VERSION IMPLÉMENTÉE
-Révision : 21 septembre 2026, après la refonte du personnage et de l’équipement.
-Base : arbre de travail courant, modifications non commitées conservées.
-Statut des chiffres : calculs de conception appliqués ; aucune partie, simulation,
-sonde, import Godot ou mesure en jeu n’a été exécuté pour cette révision.
+ÉQUILIBRAGE — ALAMBIK — 22 SEPTEMBRE 2026
 
-1. OBJECTIFS CONSERVÉS
+Calculs de conception appliqués aux 35 chapitres. Aucun lancement de Godot,
+test, bot ou simulation de combat. Les nombres de tentatives sont des cibles,
+pas une mesure de réussite ni une garantie : l’esquive, les augments et les
+achats réels changent le résultat. Les données de data/ font foi.
 
-- Environ 3 attaques de référence pour un standard, 2 pour un petit, 7 à 8
-  pour un gros, 40 pour un miniboss et 70 pour un boss signature.
-- Environ 6 blessures ordinaires pour tuer le héros de référence.
-- Ennemis actifs, rôles différents et chaque attaque annoncée visuellement.
-- Une combinaison synergique facilite nettement la run ; une combinaison peu
-  heureuse reste jouable. Aucun tirage ne garantit ou n’interdit la victoire.
-- Progression fixe par niveau et par salle. Aucun PV ou dégât ennemi ne lit le
-  build, les statistiques, les victoires ou les défaites réelles du joueur.
-- Les 35 niveaux sont construits depuis les achats, Cœurs, Épreuves et Mines
-  accessibles. Les anciens attributs, spécialisations, familiers autonomes,
-  bijoux distincts, forge par objet et migrations de sauvegarde sont conservés.
-- Six à sept défaites avancées dans N financent une progression comparable à
-  quatre victoires dans N−1 ; une mort précoce ne reçoit aucun forfait de mort.
+1. PARCOURS VISÉ
 
-2. UNITÉS ET FORMULES JOUÉES
+Monde I : 3–4 tentatives, sans farm obligatoire.
+Monde II : 5–6 tentatives et 1–2 victoires de farm sur le chapitre précédent.
+Monde III : 7–8 tentatives et 2–3 victoires de farm.
+Monde IV : 9–10 tentatives et 4–5 victoires de farm.
+Monde V : dix échecs et 5–6 victoires de farm, puis la tentative de référence.
 
-Une attaque est un déclenchement complet de l’arme. Les traits simultanés ne
-comptent pas comme plusieurs attaques. Une blessure est une perte de PV admise
-après invulnérabilité, protections et Défense.
+Les achats de chaque profil sont financés AVANT la tentative cible. Sa future
+victoire ne finance jamais sa propre difficulté. Au chapitre suivant, sa
+récompense est ajoutée une fois, puis le farm précédent et les échecs prévus.
+Aucun ajustement des ennemis ne lit la sauvegarde, les défaites ou l’équipement.
 
-La portée des tirs n’est pas bornée par défaut : ils disparaissent sur un mur,
-une limite de terrain ou un ennemi. Une réduction explicite, comme celle de
-l’Aiguille vive, réactive une distance maximale calculée depuis la référence 1400.
+Les profondeurs sont des SALLES TERMINÉES, jamais le numéro de la salle de mort :
+2 échecs : 5, 10.
+3 : 5, 10, 15.
+4 : 5, 9, 13, 17.
+5 : 5, 8, 11, 15, 19.
+6 : 5, 8, 11, 14, 17, 19.
+7 : 5, 8, 10, 13, 15, 17, 19.
+8 : 5, 7, 9, 11, 13, 15, 17, 19.
+9 : 5, 7, 9, 11, 13, 15, 17, 18, 19.
+10 : 5, 7, 9, 11, 13, 15, 16, 17, 18, 19.
 
-Attaque brute = 10 + 0,10 × Force + attaque de l’arme forgée.
-Attaque permanente = attaque brute × (1 + somme des bonus permanents).
-Attaque de run = attaque permanente × (1 + somme des bonus de run).
+Ces hypothèses décrivent un joueur qui progresse dans ses tentatives. Mourir
+dix fois avant la première salle ne donne ni ces ressources ni cette puissance.
 
-Les bonus de run ne partagent plus la somme des Maîtrises : un +20 % de run
-reste un gain relatif de 20 % avant les autres coefficients, même en campagne
-avancée. Les bonus de run s’additionnent entre eux, les pénalités se composent.
+2. MONNAIES ET ÉCHECS
 
-Sans augment de salve, les projectiles d’une arme gardent le coefficient propre
-de cette arme. Tir multiple et Salve ajoutent respectivement un et deux traits
-parallèles, puis appliquent chacun ×0,80 aux dégâts finaux de tous les traits.
-Frappe cataclysmique annule ces malus après avoir ajouté +100 % d’attaque de run.
-Ricochet perd 20 % par rebond ; Perforation ne perd rien. Leur combinaison
-redirige le tir jusqu’à épuiser les ennemis, chacun ne pouvant être touché qu’une fois.
+Pour le chapitre d’indice p (0–34), s salles terminées, b boss vaincus :
+Gouttes minimales = arrondi([2s × (1 + 0,1b) + coffre minimum] × 1,055^p).
+Minimum du coffre aux paliers 0/5/10/15/20 : 0/2/4/7/12.
+Pierres = arrondi([2s + 10 si victoire] × [1 + 0,12p]).
+XP = 2s + 8 si victoire.
 
-Critique moyen = 1 + chance critique × (0,50 + bonus de dégâts critiques).
-Puis s’appliquent Cœurs et spécialisation de la source. Les armes n’ajoutent
-aucun multiplicateur final : leur identité vient du tir, des sorts ou du rythme.
-Le familier conserve sa propre Attaque, sa cadence et sa forge ; il ne critique
-pas. Familier tireur renforce de 30 % son attaque propre et de 20 % sa cadence.
+Le compte gagne cinq points par niveau. Le passage depuis le niveau n coûte
+arrondi(10 + 4(n−1) + 0,35(n−1)²) XP ; niveau maximal 30.
+La première forge coûte 30 Pierres. Le prochain achat depuis le niveau n coûte
+30 + 20n + 3n², arrondi au multiple de 5 ; total 0–20 : 11 810 Pierres.
+Les migrations historiques de rangs restent intactes ; aucun remboursement
+ou transfert entre modèles n’est supposé.
 
-PV effectifs avant bouclier = PV × (1 + DEF ÷ 100) ÷ protections directes.
-Dégâts reçus = dégâts bruts × protections × vulnérabilités × 100 ÷ (100 + DEF).
+Exemples de budgets minimaux, hors victoire de la tentative cible :
+- Chapitre 1, échecs à 5 puis 10 : 41 Gouttes, 30 Pierres, 30 XP.
+  Financement effectif : arme +1, Force maîtrisée 1, Constitution 1,
+  niveau de compte 3. Coût : 20 Gouttes et 30 Pierres.
+  Avec 4 Force, 4 Vitalité, 2 Intelligence : 18,59 ATK, 114,4 PV, 10,4 DEF.
+- Chapitre 15, six échecs : 440 Gouttes, 397 Pierres, 148 XP.
+  Deux victoires du chapitre 14 ajoutent 272 Gouttes, 256 Pierres, 96 XP.
+  Soit 5,24 victoires précédentes en Gouttes et 5,10 en Pierres.
+- Chapitre 35, dix échecs : 2 307 Gouttes, 1 321 Pierres, 260 XP.
+  Six victoires du chapitre 34 : 2 388 Gouttes, 1 488 Pierres, 288 XP.
+  Total : 4 695 Gouttes, 2 809 Pierres, 548 XP.
+  Équivalent : 11,80 victoires précédentes en Gouttes, 11,33 en Pierres,
+  11,42 en XP. Farmer environ douze fois le précédent finance donc également
+  ce palier, à parcours antérieur comparable.
 
-3. CALIBRATION DU NIVEAU 1
+Une défaite à 19 salles vaut, face à la victoire précédente :
+chapitre 2 : 88,2 % des Gouttes, 86 % des Pierres, 79,2 % de l’XP ;
+chapitre 35 : 87,4 %, 77,8 %, 79,2 %. Les coffres moyens gardent aussi cet ordre.
+Les bonus de butin, les élites et Avidité peuvent modifier un tirage concret.
 
-Héros neuf : 100 PV, 10 DEF, 10 ATK de base et arme +4.
-Attaque non critique de référence = 10 + 4 = 14.
-PV effectifs du héros = 100 × 1,10 = 110.
+Le calcul utilise le minimum de chaque coffre et ne dépense pas par avance
+les bonus économiques des maîtrises ou des bijoux. Ces surplus, les Mines et
+les Épreuves financent les variantes et réduisent le farm réel nécessaire.
+Les soins et la Prospection achetés restent donc des marges utiles, pas une
+puissance fictive convertie en ATK.
 
-Standard : Encrier 42 PV. 42 ÷ 14 = 3 attaques.
-Petits : Tache 24 PV = 1,71 attaque ; Plume 28 PV = 2, donc 2.
-Gros : Fuseau 90 PV = 6,43 ; Miroir 100 = 7,14 ; Bélier 108 = 7,71.
-Les ennemis intermédiaires et supports occupent volontairement 3 à 5 attaques.
+3. BIJOUX ET GARANTIE
 
-Contact d’Encrier : 19 ÷ 1,10 = 17,27 PV reçus, mort à la 6e blessure.
-Trait de Plume : 26 × 0,75 ÷ 1,10 = 17,73, mort à la 6e blessure.
-Charge de Tache : 22 ÷ 1,10 = 20, mort à la 5e blessure, avec 0,70 s d’annonce.
-Ces résultats sont des calculs sur les valeurs, pas des mesures de parties.
+Le coffre de la tentative peut donner le bijou manquant du chapitre :
+5 salles terminées : 1/30 ; 10 : 1/20 ; 15 : 1/10.
+Ces chances ne se cumulent pas dans une même tentative : seul le meilleur
+coffre atteint est ouvert. Mourir dans la salle 20 après en avoir terminé 19
+donne le coffre d’or ; mourir dans la salle 5 sans la finir ne donne pas bronze.
 
-4. MONTÉE DANS UNE RUN ET GAINS D’AUGMENTS
+Victoire complète : 1/3, puis 1/3, puis 100 % si l’objet manque toujours.
+La garantie ne compte que les victoires du MÊME chapitre et vaut aussi au
+chapitre 1. Une défaite ne fait ni avancer ni reculer ce compteur.
+Un objet déjà possédé sort du tirage, comme avant.
 
-La salle 20 vaut ×2,05 PV et ×1,38 dégâts par rapport à la salle 1.
-Points de repère PV : salle 5 ×1,16 ; 10 ×1,41 ; 15 ×1,70 ; 20 ×2,05.
-Points de repère dégâts : salle 5 ×1,07 ; 10 ×1,16 ; 15 ×1,27 ; 20 ×1,38.
+Probabilité d’au moins un objet sur les échecs seuls :
+5, 10, 15 salles : 1 − (29/30 × 19/20 × 9/10) = 17,35 %.
+Les dix échecs de fin : 1 − (29/30)^3 × (19/20)^2 × (9/10)^5 = 51,86 %.
+Les profils n’anticipent aucun de ces drops : ils équipent uniquement les
+bijoux garantis par trois succès déjà financés d’un même chapitre.
+Les sorts et les Cœurs gardent leurs règles d’Épreuves.
 
-Modèle analytique historique : précision 75 %, temps de tir 65 % sous forte
-pression, dégâts automatiques comptés pendant l’esquive, contrôle non compté
-deux fois. Depuis la refonte des augments, le tableau ci-dessous reste une
-enveloppe cible de difficulté, pas une moyenne recalculée ni une distribution
-mesurée de victoires. Les interactions certaines sont chiffrées séparément.
+4. STATISTIQUES BRUTES ET DÉGÂTS RÉELS
 
-Niveau d’augment             1     2     3     4     5     6     7     8     9    10
-Offense faible             1,00  1,04  1,08  1,13  1,18  1,24  1,30  1,36  1,42  1,48
-Offense médiane            1,00  1,08  1,16  1,26  1,37  1,49  1,62  1,75  1,90  2,05
-Offense forte              1,00  1,12  1,25  1,42  1,62  1,85  2,12  2,43  2,76  3,10
-Survie faible              1,00  1,02  1,04  1,07  1,10  1,14  1,18  1,22  1,27  1,32
-Survie médiane             1,00  1,04  1,08  1,13  1,18  1,24  1,30  1,37  1,44  1,52
-Survie forte               1,00  1,07  1,14  1,23  1,33  1,44  1,56  1,69  1,83  1,98
+Provenance d’une arme ou d’un familier : q = 1,065^(niveau de déblocage − 1).
+Arme : (4 + 2,5 × forge) × q Attaque brute.
+Familier : (attaque du modèle + 2 × forge) × q ; attaque indépendante du héros.
 
-La courbe de PV suit l’offense médiane. Le profil faible termine donc autour de
-4 attaques sur un standard de fin de run, le médian autour de 3, le fort autour
-de 2. Les salles comportent plusieurs ennemis et vagues : ce ratio ne promet pas
-un temps de salle exact.
+Provenance d’un bijou : q = 1,065^(7 × indice du monde).
+Monde I/II/III/IV/V : ×1 / ×1,554 / ×2,415 / ×3,753 / ×5,832.
+Les modèles historiques restent plafonnés au facteur du monde V.
+Anneau : (15 + 10 × forge) × q PV.
+Bracelet : (3 + 1,25 × forge) × q Défense.
+Attaque d’un anneau/bracelet : (1 + 0,25 × forge) × q.
+Attaque d’un collier : (2 + 0,25 × forge) × q.
+Collier : 8 % + 2,5 points par forge en dégâts des sorts, sans facteur q.
+Les autres bonus en pourcentage et les pouvoirs gardent leurs valeurs.
+Un bonus secondaire de PV ou Défense est également brut et reçoit q.
 
-Combo Tir multiple + Salve : 4 traits parallèles à ×0,80 ×0,80, soit ×2,56
-si tous touchent. Avec Frappe cataclysmique, les deux malus disparaissent et
-l’attaque de run gagne +100 % : pris seuls ensemble, les trois donnent ×8 si
-les quatre traits touchent, avant les autres bonus additifs.
-Traque alchimique ne donne plus de puissance : elle apporte seulement le guidage.
+Exemples à forge identique :
+arme initiale +4 ATK ; Alambic souverain +21,90 ATK sans forge ;
+à forge 10 : +29 contre +158,80 ATK.
+Anneau initial +15 PV ; anneau du monde V +87,47 PV sans forge.
+Un ancien objet très forgé peut rester meilleur qu’un nouveau non forgé.
+Le choix du modèle et le réinvestissement restent donc utiles.
 
-Défense extrême : Égide + Peau de pierre = 1,50 ×1,20 ÷(0,50 ×0,80) =
-×4,50 de PV effectifs, plus le soin intégral immédiat. Avec Sceau de garde :
-×5,29. Courage peut encore ajouter +20 % PV et Défense ainsi qu’une vie entière ;
-ce cumul volontairement légendaire devra être confirmé en jeu.
+A = [10 + 0,1 × Force + arme + bijoux] × [1 + maîtrises ATK + bonus ATK équipés].
+Le bonus d’attaque d’augment multiplie ensuite A séparément.
+Critique moyen C = 1 + chance critique × (0,5 + dégâts critiques supplémentaires).
+Dégâts finaux = dégâts de la source × C si critique autorisé
+  × (1 + 0,1 × nombre de Cœurs) × spécialisation × bonus finaux de combat.
 
-5. BUDGETS DE BOSS
+L’Alambic souverain apporte aussi coefficient de tir 2 et cadence 2 : ce ×4
+est compté, distinctement de son attaque brute. Les armes n’ajoutent aucun
+multiplicateur final caché. Le familier ne critique pas et ne reçoit pas les
+maîtrises ATK du héros. Ses dégâts finaux reçoivent cependant les Cœurs.
 
-Miniboss : PV de base × courbe du niveau × courbe de salle ×2,28.
-Boss signature : même formule avec ×2,50.
+PV = [100 + Vitalité + bijoux PV] × [1 + maîtrises PV].
+DEF = [10 + 0,1 × Vitalité + bijoux DEF] × [1 + maîtrises DEF].
+PV effectifs = PV × (1 + DEF/100) / (1 − réduction directe des maîtrises).
+Carapace vaut 25 % de réduction ; ce n’est pas 25 points de Défense.
+Les protections, soins, résurrections et boucliers de run s’ajoutent ensuite.
 
-Un miniboss moyen en salle 5 vaut environ :
-290 ×1,16 ×2,28 = 767 PV. L’attaque médiane de salle 5 vaut
-14 ×1,37 = 19,18, soit 40 attaques.
+5. CONSTRUCTION DES 35 PROFILS
 
-Un boss signature moyen en salle 20 vaut environ :
-396 ×2,05 ×2,50 = 2 030 PV. L’attaque médiane vaut
-14 ×2,05 = 28,70, soit 70,7 attaques.
+Chaque ligne stocke dans data/profils_progression.gd :
+revenus cumulés, coûts réellement payés, rang de chaque maîtrise, points
+d’attributs, modèles équipés et forge de TOUS les objets déjà améliorés.
+Les anciens investissements ne sont ni remboursés ni réutilisés sur un nouvel
+objet. Les armes et familiers doivent être débloqués au chapitre considéré.
+Un objet garanti par un farm du chapitre précédent peut être équipé aussitôt.
 
-Un boss final ordinaire reste un miniboss, même en salle 20. Les bases propres
-font varier ces résultats ; les cibles sont des centres de plage, pas des quotas.
+Politique d’achat de référence, sans prétendre qu’elle est optimale :
+- Gouttes réservées : 45 % offense, 40 % défense, 15 % utilitaire.
+- Offense/défense : acheter parmi les rangs accessibles celui qui augmente
+  le plus la puissance relative par Goutte, dans l’enveloppe de la branche.
+  Offense : produit du facteur ATK et du critique moyen.
+  Défense : produit des facteurs PV, Défense effective et réduction directe,
+  avec la Défense brute du niveau et de l’équipement financé.
+  Un rang du prérequis suffit, conformément au jeu. Cela répartit les achats
+  de critiques et de Défense au lieu de les reporter tous à la fin.
+  Les petits bonus équipés de critique/ATK ne pilotent pas cet ordre d’achat ;
+  ils figurent bien dans les statistiques finales. Ce choix reste une
+  heuristique d’achats, pas une optimisation globale de toutes les capacités.
+- Utilitaire : deux rangs de soin et de collecte, relance, dix de Puissance
+  magique, compléter soin/collecte, puis Étude et le reste dans l’ordre.
+- Forge : première arme +1 prioritaire, puis enveloppes de 40/25/15/10/10 %
+  pour arme/anneau/bracelet/collier/familier. La réservation initiale de 30
+  Pierres est déduite des quatre enveloppes secondaires. Les Pierres encore
+  sans emploi restent disponibles ; les bijoux non garantis ne sont pas forgés.
+- Au sein d’une enveloppe, comparer les améliorations finançables de tous les
+  modèles possédés, en gardant les dépenses historiques. Les niveaux actuels
+  de forge et les dépenses cumulées de chaque ligne sont la référence figée.
+- Attributs : 40 % Force, 40 % Vitalité, reste Intelligence ; Mage.
+- Onde rang 1 dès le chapitre 2, Grand Œuvre rang 1 dès le chapitre 3,
+  tous deux offerts par la campagne ; aucun sort aléatoire ou passif requis.
 
-Mécaniques des cinq signatures actives :
-- Encre : frontières verticales successives avec deux ouvertures visibles.
-- Terre : remparts croisés depuis les côtés avec un passage annoncé.
-- Eau : marées latérales alternées avec deux voies sûres.
-- Air : trois couloirs rapides annoncés dans la direction du héros.
-- Feu : foyers radiaux lents alternant avec les charges.
+DPS de référence, avant augments et Cœurs :
+Baguette = A × cadence du héros × cadence de l’arme × coefficient de tir total
+  × critique moyen × 0,65 de temps de tir × 0,75 de précision.
+Sorts = A × [1 + bonus sorts] × [4/12 + 12/75, selon déblocages]
+  × critique moyen × 1,30 du Mage / récupération relative × 0,60.
+La récupération inclut arme, Intelligence et Cycle arcanique, avec le plancher
+réel de 0,45. Le facteur 0,60 réserve les sorts manqués ou non lancés immédiatement.
+Familier = attaque propre / intervalle × 0,75 de précision.
+DPS = baguette + sorts + familier.
 
-Chaque motif signature a 0,72 s d’annonce directionnelle. Les charges, tirs,
-explosions et invocations ordinaires ont aussi une préparation visuelle.
+Les effets de zone secondaires, pouvoirs de bijoux forge 10 et fenêtres
+conditionnelles de la Cornue ne sont pas requis dans cette référence prudente.
+Les soins utilitaires ne sont pas convertis en PV effectifs constants.
 
-6. RÔLES ENNEMIS
+Héros neuf : DPS = 14 × 1,6 × 0,65 × 0,75 × 1,01 + 6 × 0,75 = 15,5292.
+PV effectifs neufs : 100 × 1,10 = 110.
+Multiplicateur des PV ennemis = DPS du profil / 15,5292.
+Multiplicateur des dégâts ennemis = PV effectifs du profil / 110.
 
-- Encrier : standard actif, approche, frappe annoncée 0,48 s ou crachat lent
-  annoncé 0,62 s à moyenne portée.
-- Plume : petit tireur fixe, éventail annoncé 0,65 s.
-- Tache : petit rusher, direction verrouillée et annoncée 0,70 s.
-- Scribe : support intermédiaire, invocation annoncée 0,78 s et réserve bornée.
-- Folio : standard mobile, orbite puis s’arrête 0,50 s avant son tir.
-- Bélier : gros bloqueur, 7–8 attaques, charge annoncée 1,05 s.
-- Marge et Cachet : harceleurs mobiles, arrêt ou phase avant les salves.
-- Miroir et Fuseau : gros tireurs, 7 attaques environ, zones et lignes annoncées.
-- Fiole : petit explosif, surface dangereuse affichée pendant 0,88 s.
+Cela remplace les anciens profils dont l’attaque était simplement définie comme
+14 fois un multiplicateur ennemi déjà choisi. Ici, les rangs et les équipements
+financés produisent d’abord la puissance, puis celle-ci produit la difficulté.
+Les grands multiplicateurs tardifs incluent notamment la cadence, les critiques,
+la forge par provenance et les maîtrises ; ils ne désignent pas un bonus isolé.
 
-Les recharges ordinaires sont ×0,92 et le mouvement ×1,12 : les monstres sont
-plus actifs sans raccourcir leurs annonces. Le plafond reste 10 ennemis et le
-délai de vague forcée passe à 8,5 s pour ne pas ensevelir un build faible.
+N = chapitre ; T = tentative cible ; F = victoires supplémentaires du précédent ;
+V/E = victoires/échecs cumulés AVANT T ; G/P = Gouttes/Pierres minimales cumulées ;
+NC = niveau de compte ; PV/DEG = multiplicateurs ennemis hors salle.
 
-7. ÉCONOMIE DES DÉFAITES
+ N  T  F   V   E      G      P NC       PV      DEG
+ 1  3  0   0   2     41     30  3     1,23     1,15
+ 2  3  0   1   4    153    113  6     2,14     1,55
+ 3  3  0   2   6    270    206  8     2,81     1,85
+ 4  3  0   3   8    394    309  9     3,78     2,02
+ 5  4  0   4  11    582    466 10     4,33     2,33
+ 6  4  0   5  14    780    636 12     5,04     2,60
+ 7  4  0   6  17    989    819 13     5,88     2,70
+ 8  5  1   8  21   1353   1153 14     8,03     3,72
+ 9  5  1  10  25   1737   1510 16    10,54     4,52
+10  5  1  12  29   2141   1889 17    16,82     5,20
+11  5  2  15  33   2677   2395 18    25,29     5,96
+12  6  2  18  38   3323   2994 20    34,52    12,56
+13  6  2  21  43   4006   3625 21    41,84    17,96
+14  6  2  24  48   4724   4288 22    51,36    20,76
+15  7  2  27  54   5572   5069 23    61,87    24,29
+16  7  2  30  60   6469   5885 24    71,47    32,70
+17  7  2  33  66   7417   6737 25    84,97    40,57
+18  7  3  37  72   8574   7771 26    95,68    46,16
+19  7  3  41  78   9796   8847 27   103,43    55,67
+20  8  3  45  85  11197  10050 28   117,22    60,91
+21  8  3  49  92  12677  11297 29   134,32    71,71
+22  9  4  54 100  14504  12823 30   143,15    79,07
+23  9  4  59 108  16430  14402 30   174,09   119,78
+24  9  4  64 116  18466  16036 30   202,71   151,89
+25  9  4  69 124  20612  17720 30   281,93   182,00
+26  9  4  74 132  22876  19458 30   347,03   225,20
+27 10  5  80 141  25738  21598 30   413,10   275,53
+28 10  5  86 150  28761  23799 30   720,42   321,86
+29 11  5  92 160  32170  26205 30   915,41   408,11
+30 11  5  98 170  35759  28677 30  1126,57   462,67
+31 11  5 104 180  39548  31217 30  1310,98   548,31
+32 11  5 110 190  43548  33824 30  1480,27   594,51
+33 11  6 117 200  48128  36734 30  1621,67   663,15
+34 11  6 124 210  52955  39718 30  1768,94   715,42
+35 11  6 131 220  58048  42775 30  1984,77   806,52
 
-La victoire donne 8 XP en plus des 2 XP par salle, soit 48 XP au total.
-Panier de six défaites : salles 8, 11, 13, 15, 17 et 19.
-Panier de sept : le même plus une seconde tentative à 19.
+Au chapitre 35 : 56 605 Gouttes et 40 680 Pierres dépensées, contre 58 048 et
+42 775 disponibles. Les dépenses de tous les anciens modèles sont incluses.
+Ces montants ne supposent aucune Mine, Épreuve ou ressource future.
 
-Six défaites = 166 XP = 86 % des 192 XP de quatre victoires.
-Sept défaites = 204 XP = 106 % des quatre victoires.
-Six défaites donnent environ 263 Gouttes avant croissance, contre 272 à 288
-pour quatre victoires précédentes. La croissance du nouveau niveau est ×1,055.
-Sept défaites paient 102 salles en Pierres, contre 100 Pierres pour les quatre
-victoires précédentes, avant la petite différence de palier.
+6. AUGMENTS ET PRESSION DANS LA RUN
 
-Les monnaies ne sont pas additionnées en un score fictif. Les trois écarts sont
-comparables dans la fenêtre de ±15 % autour de six ou sept essais selon l’achat.
-Une mort avant la première salle rapporte zéro ; chaque salle et boss franchi
-augmente le rendement. Aucun Cœur, objet unique ou sort n’est versé à la mort.
+Salle                      1      4      5     10     15     20
+Multiplicateur PV        0,55   0,72   0,88   1,28   1,78   2,35
+Multiplicateur dégâts    0,58   0,70   0,86   1,12   1,38   1,65
 
-8. PROFILS FIXES DES 35 NIVEAUX
+Interpolation géométrique entre ces repères. La fin vaut ×4,27 PV et ×2,84
+dégâts par rapport au départ. Les augments permettent d’absorber une partie de
+cette montée ; elle n’est plus neutralisée entièrement par leur gain médian.
+Les premiers choix garantis restent après les salles 1, 3 et 4.
+Le légendaire reste tiré entre les paliers précédant 5, 10 et 15.
 
-La table suivante est le parcours de confort qui construit la courbe fixe.
-V = victoires de campagne antérieures. FA/FB/FF = forge 0–20 de l’arme, du
-bijou principal et du familier. Un rang actuel regroupe cinq anciens achats ;
-la conversion ci-dessous arrondit vers le bas pour ne pas inventer un achat.
-MO/MD = rangs offensifs/défensifs achetés. M = Mines
-cumulées. C = Cœurs garantis après le farm des Épreuves déjà ouvertes.
-PV et DEG sont les multiplicateurs ennemis effectivement appliqués.
+Les enveloppes de ProgressionAugments restent des hypothèses de conception :
+gain offensif final faible/médian/fort ×1,48 / ×2,05 / ×3,10 ;
+survie ×1,32 / ×1,52 / ×1,98. Elles ne lisent jamais les choix réels du joueur.
+À la puissance permanente de référence, le rapport PV/DPS final donne un
+monstre moyen de 46 PV à environ 4,70 / 3,40 / 2,25 secondes de dégâts utiles.
+Ce sont des rapports analytiques, pas des temps mesurés dans une salle.
 
-N  V    FA FB FF  MO MD  M  C   PV      DEG
-1  0     0  0  0   0  0  0  0    1,00   1,00
-2  5     1  0  0  10  2  0  0    2,40   1,22
-3  10    1  0  0  12  4  0  1    3,20   1,45
-4  15    2  0  0  14  6  0  1    4,20   1,70
-5  20    2  1  0  16  8  1  1    5,10   1,95
-6  25    3  2  0  18 10  1  2    6,00   2,20
-7  30    3  2  0  20 12  2  2    7,00   2,50
-8  35    3  2  1  22 14  2  2    8,00   2,80
-9  40    4  2  1  24 16  3  3    9,30   3,10
-10 45    4  3  2  26 18  3  3   10,70   3,45
-11 50    5  3  2  28 20  4  3   12,20   3,80
-12 55    5  4  2  30 21  4  4   13,80   4,20
-13 60    5  4  3  32 22  5  4   15,70   4,60
-14 65    6  4  3  34 23  5  4   17,80   5,00
-15 70    6  5  4  36 24  6  5   20,00   5,45
-16 75    7  5  4  38 25  6  5   22,50   5,90
-17 80    7  6  4  40 26  7  5   25,30   6,40
-18 85    7  6  5  41 27  7  6   28,40   6,90
-19 90    8  6  5  42 28  8  6   31,80   7,45
-20 95    8  7  6  43 29  8  6   35,50   8,00
-21 100   9  7  6  44 30  9  7   39,50   8,60
-22 105   9  8  6  45 31  9  7   43,80   9,20
-23 110   9  8  6  45 32 10  7   48,60   9,85
-24 115  10  8  6  45 32 10  8   53,80  10,50
-25 120  10  8  6  45 32 11  8   59,50  11,20
-26 125  11  8  6  45 32 11  8   65,70  11,90
-27 130  11  8  6  45 32 12  9   72,50  12,65
-28 135  11  8  6  45 32 12  9   79,90  13,40
-29 140  11  8  6  45 32 13  9   88,00  14,20
-30 145  11  8  6  45 32 13 10   96,90  15,00
-31 150  11  8  6  45 32 14 10  106,50  15,80
-32 155  11  8  6  45 32 14 10  117,00  16,70
-33 160  11  8  6  45 32 15 11  128,50  17,60
-34 165  11  8  6  45 32 15 11  141,00  18,50
-35 170  11  8  6  45 32 16 11  155,00  19,50
+Boss moyen de base 290 PV ×2,28 ×1,25 :
+à la salle 20 et au gain médian, environ 61,0 secondes de dégâts utiles.
+Signature de base 396 ×2,50 ×1,25 : environ 91,4 secondes.
+La réserve d’endurance ×1,25 s’applique aussi aux boss de Mine et d’Épreuves.
+Elle ajoute 25 % de PV fixes, sans modifier les dégâts ni plafonner ceux du joueur.
+Déplacements, phases, invocations et pertes de dégâts changent ces durées.
+La refonte du bestiaire distingue désormais 22–32 PV pour les fragiles,
+36–46 pour les moyens et 76–116 pour les costauds, avant mise à l’échelle.
+La première salle passe de 154 à 152 PV de base cumulés malgré deux ennemis
+supplémentaires ; les renforts suivants utilisent surtout les profils fragiles.
+Les plafonds passent à 4 au début, 5 normalement et 7 dans les grandes salles.
+Les élites doublent leurs PV/dégâts ; la fréquence reste calculée par vague.
+Les budgets d’XP sont répartis entre les effectifs, puis collectés hors combat.
+Ces changements de mobilité et de patterns ne modifient pas les budgets d’achats,
+mais leur effet sur la réussite doit encore être apprécié en jouant.
 
-Financement vérifiable dans les données :
-- 5 victoires du niveau 1 donnent au minimum 340 Gouttes et 125 Pierres.
-  Force maîtrisée 10/10 coûte 225 Gouttes ; arme +1 coûte 70 Pierres.
-- La forge reste par objet. La trajectoire plafonne l’arme à +11, le bijou
-  principal à +8 et le familier à +6 ; elle ne suppose aucune forge 20 gratuite.
-  Monter un objet de 0 à 20 coûte exactement 10 900 Pierres, comme les cent
-  anciens achats regroupés cinq par cinq.
-- Une Mine sur deux niveaux à partir du déblocage fournit les 16 Mines du profil.
-- Un Cœur garanti demande jusqu’à 10 victoires admissibles dans l’Épreuve.
-  Les 11 Cœurs ne sont donc présents qu’après le farm explicite correspondant.
-- Les mêmes victoires d’Épreuve servent aux sorts et au Cœur : elles ne sont
-  jamais comptées deux fois. La garantie de sort reste distincte et à 5 essais.
-- Les rangs de maîtrise sont des achats répartis entre branches ; les plafonds
-  45/32 restent sous les maxima et laissent un budget aux spécialisations utiles.
-- Le chemin offensif de référence à 45 rangs coûte 3 740 Gouttes : Force 10,
-  Œil sûr 10, Frappe souveraine, Puissance 10, Impact critique 10, Catalyse
-  et trois rangs de Maîtrise du trait. Le chemin défensif à 32 rangs coûte
-  1 560 Gouttes : Constitution 10, Défense 10, Vitalité souveraine,
-  Rempart 10 et un rang de Robustesse. Total : 5 300 Gouttes.
-- Même en ignorant toute croissance, les 170 victoires antérieures au niveau 35
-  donnent au moins 11 560 Gouttes brutes. Les coûts ci-dessus sont donc
-  finançables avant Butin, Épreuves et défaites, sans puissance fictive.
-- Cinq victoires donnent désormais 240 XP bruts. Les 4 612 XP cumulés du niveau
-  de compte 30 sont atteints autour de l’entrée du niveau 21 sans bonus, au lieu
-  d’épuiser les points d’attribut pendant la première moitié de la campagne.
-- Les 170 victoires financent 9 860 Pierres avant arrondis de run. Les seize
-  Mines planifiées ajoutent 3 104 Pierres avec leurs paliers 4 à 34. Les forges
-  +11, +8 et +6 coûtent toujours 6 650 Pierres : elles regroupent exactement
-  les anciens achats +55, +40 et +30. La marge finance les autres bijoux ou
-  un changement d’arme sans supposer une forge 20.
+7. CŒURS, SYNERGIES ET VARIANTES
 
-Le profil d’attaque de référence vaut 14 × PV. Le profil défensif de référence
-vaut 110 × DEG en PV effectifs. Ces deux égalités construisent les cibles fixes ;
-elles ne prétendent pas qu’un équipement unique produit exactement ces valeurs.
-Les armes, critiques, sorts, familiers et bijoux créent les variantes de DPS,
-de burst et de survie autour de ces centres.
+La référence sans Cœur évite d’ajouter silencieusement jusqu’à 110 victoires
+d’Épreuves au parcours de campagne. Les Cœurs restent pleinement fonctionnels :
+1 / 5 / 11 Cœurs = ×1,10 / ×1,50 / ×2,10 aux dégâts finaux.
+À build identique et sans nouvelle contrainte de déplacement, les durées de
+combat passent à 90,9 % / 66,7 % / 47,6 %. Ils ne changent pas les PV effectifs.
+Leur chance et garantie restent 1/10 et dix succès maximum par Épreuve.
 
-9. ANNEXES ET GARANTIES
+Les cumuls exacts peuvent dépasser les enveloppes :
+Tir multiple + Salve = quatre traits ×0,8 ×0,8 = ×2,56 sur une arme simple.
+Tir multiple + Frappe cataclysmique = deux traits sans malus ×2 ATK, soit ×4.
+Salve et Frappe sont deux légendaires : le parcours actuel n’en donne qu’une,
+donc leur cumul n’entre pas dans les estimations de campagne.
+Égide + Peau de pierre = (1 + 0,5 + 0,2) / (0,5 ×0,8) = ×4,25 PV effectifs,
+avant Sceau de garde, soin intégral ou résurrection.
+Mage, Sorcier et Moine favorisent des parts différentes du DPS. Les bijoux,
+passifs et rangs de sorts restent d’autres choix ; aucun calcul ne transforme
+un bonus de sort en multiplicateur de tous les tirs.
 
-Les Épreuves commencent au niveau de campagne atteint 2 et suivent leur chaîne
-de victoires. Leurs dégâts de base passent à ×0,75 et leur montée à ×1,45 afin
-que leur propre récompense ne soit pas nécessaire pour les terminer.
-La Mine reste ouverte au niveau 4 ; les échecs paient la progression temporelle
-×0,65 et la victoire complète le rendement. La forge attendue déduit d’abord
-les Pierres de campagne avant de compter une Mine.
+8. LIMITES À CONFRONTER AUX PARTIES DU PROPRIÉTAIRE
 
-La première récompense d’objet du niveau 1 reste garantie ; les autres utilisent
-la garantie au troisième grand coffre. Aucun profil ne suppose un objet obtenu
-avant sa garantie. Les bonus fixes distincts des bijoux et leur seule statistique
-principale forgée sont conservés.
+Les calculs établissent le financement et les rapports de puissance sous des
+hypothèses explicites. Ils ne prouvent pas une victoire à la troisième ou à la
+onzième tentative. Les morts avant les premiers boss, les achats différents,
+les choix d’augments et les bonus de butin modifient le parcours.
+Le profil conservateur laisse une avance aux joueurs qui obtiennent leurs
+objets tôt ou farment toutes les activités. Aucun rattrapage invisible ne gomme
+cet avantage. La difficulté et les coûts ayant changé, une sauvegarde avancée
+avec les anciens investissements peut devoir retravailler son équipement.
 
-10. POINTS À CONFIRMER EN JEU PAR LE PROPRIÉTAIRE
-
-- Lisibilité réelle des annonces sous les effets de sorts, Salve et familiers.
-- Durée des salles et des boss, car temps de tir, précision et dégâts perdus ne
-  sont pas mesurés ici.
-- Sensation du saut entre niveaux 1 et 2 après cinq victoires et les achats.
-- Valeur réelle des profils faible/médian/fort et du combo à six projectiles.
-- Pression des compositions tardives, en particulier invocateur + bloqueur.
-- Temps de farm accepté pour les 11 Cœurs garantis et les 16 Mines du parcours.
-
-Les corrections futures doivent viser la cause observée — cadence, précision,
-temps de tir, couverture, soin, composition ou rendement — sans autoscaling et
-sans remplacer ces calculs de conception par des résultats prétendument mesurés.
+Les points les plus sensibles sont la survie avant le premier augment, les
+changements d’arme et les hauts rangs de Défense, les boss sans légendaire
+offensif, et le nombre d’achats réellement utiles après plusieurs défaites.

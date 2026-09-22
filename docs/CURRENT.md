@@ -1,4 +1,4 @@
-# État courant — 21 septembre 2026
+# État courant — 22 septembre 2026
 
 - Godot 4.7.1, Android portrait ; simulation 2D, combat présenté en 3D.
 - Héros unique : `assets/3d/characters/mage_sculpte.glb`, matériaux standard,
@@ -7,18 +7,38 @@
   partagent le kit peint `assets/visual/interface/` et le scriptorium saphir.
 - Cinq mondes, sept chapitres de vingt salles chacun ; Mine et Épreuves de sorts.
   Contours et obstacles fixes par chapitre, terrains élémentaires en campagne.
+- Déplacement du héros à 728 px/s (+30 %), coefficient de vitesse ennemi +15 %.
+  Familles fragiles/moyennes/costaudes et 55 identités de monde avec habillages 3D.
+  Charges, esquives, tirs ondulants, rebonds et impacts ciblés annoncés actifs.
+  Élites : PV/dégâts doublés ; certaines laissent des traces brûlantes.
+- Animation de combat : préparations, recul et mouvements par famille en 3D,
+  impacts et dissipation des sorts, tirs en cloche annoncés et vrilles en rubans.
+  Les réactions aux coups préservent la lecture des attaques. Boss : +25 % de PV
+  dans les trois modes ; attaques propres conservées et salves de monde alternées.
+- Vagues de 3–5 ennemis, jusqu’à 7 dans les grandes salles, départ limité à 4.
+  Espacement accru, plafond simultané appliqué aussi aux invocations et XP conservée.
+  En campagne, l’XP reste au sol jusqu’au nettoyage ; les choix arrivent hors combat.
+- Mine survivor : horde continue, cristaux d’XP à ramasser près des ennemis abattus,
+  augments obtenus pendant la survie. Boss à cinq minutes sans nettoyage préalable ;
+  les apparitions continuent jusqu’à sa mort, qui termine immédiatement la run.
 - Attributs de compte, trois spécialisations, familiers autonomes, Cœurs de
   mana, augments, équipement, forge, maîtrises et garanties de butin actifs.
   Le détail est dans `docs/design/GAME_DESIGN.md` et les valeurs dans `data/`.
 - Huit passifs à deux rangs : un seul doublon double leur effet. Les bijoux de
   forge 10 utilisent seulement des bonus passifs courts, sans attaque automatique.
-- La forge est plafonnée à 20 niveaux avec la puissance et le coût total de
-  l’ancienne forge 100. Les armes n’emploient aucun bonus final ni augment caché.
-- Équilibrage fixe sur 35 profils achetables : standards autour de trois
-  attaques, petits autour de deux, gros autour de sept à huit, augments de run
-  séparés des Maîtrises et cinq boss de monde à mécaniques distinctes.
-- Les tirs n’ont plus de portée maximale par défaut : murs, limites et impacts
-  les arrêtent. Les augments de trajectoire, défense et phénomènes utilisent
+- Augments : 22 rares, 14 épiques et 7 légendaires, plus les trois communs.
+  Rafales, critiques de run, bouclier par salle et tirs élémentaires disponibles.
+- Forge sur 20 niveaux : premier achat à 30 Pierres, coût croissant. Les bases
+  des armes, bijoux et familiers augmentent avec leur provenance ; les bijoux
+  donnent aussi de l’Attaque brute. Aucun bonus final caché sur les armes.
+- Équilibrage fixe sur 35 budgets d’achats : cible 3–4 tentatives au début,
+  6–7 au milieu, jusqu’à 10 échecs et 5–6 victoires de farm en fin de campagne.
+  Premières salles adoucies puis montée accentuée ; légendaire toujours aléatoire.
+  Calculs et hypothèses dans `plan_eq.txt`, sans validation par parties.
+- Bijou possible dès 5/10/15 salles terminées à 1/30, 1/20 et 1/10 ; garantie
+  au troisième succès complet du même chapitre, y compris au premier chapitre.
+- Les tirs du héros n’ont pas de portée maximale par défaut ; les tirs hostiles
+  ont une distance maximale, y compris après rebond. Les augments utilisent
   leurs mécaniques révisées, détaillées dans `statistiques_jeu/liste_augments.txt`.
 - Bilan : nouvelle tentative directe et raccourcis vers la maîtrise ou le bijou
   améliorable. Effets sonores distincts avec variantes et priorités ; vibrations

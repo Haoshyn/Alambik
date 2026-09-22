@@ -7,9 +7,9 @@ const GARANTIE_APRES_GRANDS_COFFRES := 3
 # vaincu, meme lorsque la tentative se termine ensuite sur une defaite.
 const COFFRES := [
 	{"palier": 0, "nom": "Coffre de voyage", "gouttes_min": 0, "gouttes_max": 0, "chance_objet": 0.0},
-	{"palier": 5, "nom": "Coffre de bronze", "gouttes_min": 2, "gouttes_max": 3, "chance_objet": 0.0},
-	{"palier": 10, "nom": "Coffre d’argent", "gouttes_min": 4, "gouttes_max": 6, "chance_objet": 0.0},
-	{"palier": 15, "nom": "Coffre d’or", "gouttes_min": 7, "gouttes_max": 10, "chance_objet": 0.0},
+	{"palier": 5, "nom": "Coffre de bronze", "gouttes_min": 2, "gouttes_max": 3, "chance_objet": 1.0 / 30.0},
+	{"palier": 10, "nom": "Coffre d’argent", "gouttes_min": 4, "gouttes_max": 6, "chance_objet": 1.0 / 20.0},
+	{"palier": 15, "nom": "Coffre d’or", "gouttes_min": 7, "gouttes_max": 10, "chance_objet": 1.0 / 10.0},
 	{"palier": 20, "nom": "Grand coffre", "gouttes_min": 12, "gouttes_max": 16, "chance_objet": 1.0 / GARANTIE_APRES_GRANDS_COFFRES},
 ]
 const GOUTTES_EPREUVE_MIN := 1
@@ -31,9 +31,12 @@ static func tirer_gouttes_coffre(coffre: Dictionary, chapitre: int, rng: RandomN
 
 static func donne_objet(coffre: Dictionary, grands_coffres_sans_objet: int,
 		rng: RandomNumberGenerator) -> bool:
+	return rng.randf() < chance_objet(coffre, grands_coffres_sans_objet)
+
+static func chance_objet(coffre: Dictionary, grands_coffres_sans_objet: int) -> float:
 	if int(coffre.get("palier", 0)) < Reglages.SALLES_PAR_RUN:
-		return false
-	return rng.randf() < chance_garantie(GARANTIE_APRES_GRANDS_COFFRES, grands_coffres_sans_objet)
+		return float(coffre.get("chance_objet", 0.0))
+	return chance_garantie(GARANTIE_APRES_GRANDS_COFFRES, grands_coffres_sans_objet)
 
 static func chance_garantie(essais: int, echecs: int) -> float:
 	return 1.0 if echecs >= maxi(1,essais)-1 else 1.0 / float(maxi(1,essais))
