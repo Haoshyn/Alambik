@@ -1,7 +1,5 @@
 extends Control
 
-signal passe
-
 var _marge: MarginContainer
 var _progression: Label
 var _titre: Label
@@ -33,10 +31,6 @@ func _ready() -> void:
 	_progression.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_progression.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	entete.add_child(_progression)
-	var passer := StyleAzur.bouton("Passer", func() -> void: passe.emit())
-	passer.size_flags_horizontal = Control.SIZE_SHRINK_END
-	passer.custom_minimum_size.x = 190
-	entete.add_child(passer)
 	var ligne := HBoxContainer.new()
 	ligne.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ligne.add_theme_constant_override("separation", 18)
@@ -73,4 +67,4 @@ func afficher_etape(numero: int) -> void:
 			_icone.texture = StyleAzur.texture_interface("portail")
 
 func _replacer() -> void:
-	_marge.offset_top = Ecran.marge_haute() + 210
+	_marge.offset_top = Ecran.marge_haute() + 394

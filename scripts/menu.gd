@@ -18,6 +18,7 @@ var _onglets: Array[Button] = []
 var _page := 1
 var _lancement := false
 var _selection_initiale := ""
+var _guide_tutoriel: GuideAccueil
 
 
 func _ready() -> void:
@@ -44,6 +45,13 @@ func _ready() -> void:
 	if "--ouvrir-reglages" in OS.get_cmdline_user_args():
 		call_deferred("_ouvrir_reglages")
 	Capture.programmer(self)
+	if not Capture.demandee() and DisplayServer.get_name() != "headless":
+		_guide_tutoriel = preload("res://ui/guide_accueil.gd").new()
+		add_child(_guide_tutoriel)
+		_guide_tutoriel.action_demandee.connect(_action_tutoriel)
+		_guide_tutoriel.passe.connect(_actualiser_tutoriel)
+		ReglagesJoueur.maitrise_changee.connect(_actualiser_tutoriel)
+		call_deferred("_presenter_tutoriel")
 
 func _construire_structure() -> void:
 	_conteneur_pages = Control.new()
@@ -157,6 +165,7 @@ func _creer_aventure() -> Control:
 	page.reglages.connect(_ouvrir_reglages)
 	page.jouer.connect(_jouer_immediatement)
 	page.page_demandee.connect(_afficher_page)
+	page.tutoriel_demande.connect(_presenter_tutoriel)
 	return page
 
 func _jouer_immediatement() -> void:
@@ -167,7 +176,10 @@ func _jouer_immediatement() -> void:
 func _lancer_mode(mode: String, destination: Dictionary) -> void:
 	if _lancement or not ReglagesJoueur.mode_debloque(mode):
 		return
-	if ReglagesJoueur.specialisation.is_empty():
+	if ParcoursTutoriel.niveau_a_faire() and mode != DonneesTutoriel.MODE:
+		_presenter_tutoriel()
+		return
+	if mode != DonneesTutoriel.MODE and ReglagesJoueur.specialisation.is_empty():
 		# Le premier choix est gratuit et structure tout le build ; une aventure
 		# ne doit pas commencer avec une specialisation choisie en silence.
 		if _superposition != null:
@@ -175,6 +187,11 @@ func _lancer_mode(mode: String, destination: Dictionary) -> void:
 		_afficher_page(PAGES.find("maitrises"))
 		return
 	_lancement = true
+	if is_instance_valid(_guide_tutoriel):
+		_guide_tutoriel.hide()
+	if mode == DonneesTutoriel.MODE:
+		ParcoursTutoriel.commencer()
+		Jeu.nouvelle_tentative = {"mode": mode, "chapitre": 0, "epreuve": 1}
 	ReglagesJoueur.choisir_mode_run(mode)
 	Sons.jouer("choix", -10.0)
 	Sons.demarrer_musique_combat()
@@ -190,8 +207,51 @@ func _ouvrir_campagne(mode := "") -> void:
 	selection.mode_initial = mode
 	_ouvrir_superposition(selection)
 
-func _ouvrir_reglages() -> void:
-	_ouvrir_superposition(REGLAGES.instantiate())
+func _ouvrir_reglages(section := "") -> void:
+	var reglages := REGLAGES.instantiate()
+	reglages.section_tutoriel = section
+	_ouvrir_superposition(reglages)
+
+func _presenter_tutoriel() -> void:
+	if is_instance_valid(_guide_tutoriel) and not _lancement and _superposition == null \
+			and not _transition_page:
+		_guide_tutoriel.presenter()
+
+func _actualiser_tutoriel() -> void:
+	if is_instance_valid(_guide_tutoriel):
+		_guide_tutoriel.actualiser()
+	if is_instance_valid(_page_actuelle) and _page_actuelle.has_method("rafraichir"):
+		_page_actuelle.rafraichir()
+
+func _action_tutoriel(action: String) -> void:
+	match action:
+		"combat":
+			_lancer_mode(DonneesTutoriel.MODE, {"nom": "Premiers pas · Tutoriel"})
+		"accueil", "maitrises":
+			ParcoursTutoriel.noter("accueil_vu")
+			_selection_initiale = DonneesTutoriel.MAITRISE
+			_afficher_page(PAGES.find("maitrises"))
+			_selection_initiale = ""
+		"musique":
+			_ouvrir_reglages("musique")
+		"mine":
+			_lancer_mode("mine", {"nom": "La Mine"})
+		"epreuve_sorts":
+			ReglagesJoueur.choisir_epreuve(1)
+			_lancer_mode("epreuve_sorts", {"nom": "Épreuve de magie · niveau 1"})
+		"commandes":
+			ReglagesJoueur.equiper_sort(ParcoursTutoriel.sort_a_expliquer(), "actif")
+			_ouvrir_reglages("commandes")
+		"sort":
+			_afficher_page(PAGES.find("sorts"))
+		"campagne":
+			_lancer_mode("grimoire", Chapitres.par_index(ReglagesJoueur.chapitre_choisi))
+		"fin":
+			ParcoursTutoriel.conclure()
+		"plus_tard":
+			if ParcoursTutoriel.prochaine_etape() == "accueil":
+				ParcoursTutoriel.noter("accueil_vu")
+	_actualiser_tutoriel()
 
 func _ouvrir_superposition(panneau: Control) -> void:
 	if _superposition != null or _lancement or _transition_page:
@@ -219,6 +279,8 @@ func _fermer_superposition(panneau: Control) -> void:
 	queue_redraw()
 
 func _notification(quoi: int) -> void:
+	if is_instance_valid(_guide_tutoriel) and _guide_tutoriel.est_ouvert():
+		return
 	if quoi != NOTIFICATION_WM_GO_BACK_REQUEST or _lancement or _transition_page:
 		return
 	if _superposition != null and is_instance_valid(_superposition):

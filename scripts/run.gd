@@ -47,6 +47,7 @@ var _camera: Camera2D
 var _voile_salle: VOILE_TRANSITION
 var _transition_salle := false
 var _apprentissage: APPRENTISSAGE
+var _guide_tutoriel: GuideTutoriel
 var _flaques_alchimiques: Array[Dictionary] = []
 var _retardements: Array[Dictionary] = []
 var _compteur_attaques_objet := 0
@@ -164,6 +165,13 @@ func _ready() -> void:
 		var monde: Node3D = load("res://scenes/3d/monde_3d.tscn").instantiate()
 		add_child(monde)
 		monde.relier(_salle, _heros, _fond)
+	if ParcoursTutoriel.actif() and not Jeu.mode_auto and not Capture.demandee() \
+			and DisplayServer.get_name() != "headless":
+		_guide_tutoriel = GuideTutoriel.new()
+		_guide_tutoriel.en_combat = true
+		add_child(_guide_tutoriel)
+		_guide_tutoriel.ouverture.connect(_preparer_guide_tutoriel)
+		_guide_tutoriel.passe.connect(_sur_tutoriel_passe)
 	_animer_entree_salle()
 	if APPRENTISSAGE.disponible(arguments):
 		_apprentissage = APPRENTISSAGE.new()
@@ -173,7 +181,6 @@ func _ready() -> void:
 		_apprentissage.consigne_changee.connect(conseils.afficher_etape)
 		_apprentissage.visibilite_changee.connect(conseils.set_visible)
 		_apprentissage.termine.connect(conseils.queue_free)
-		conseils.passe.connect(_apprentissage.passer)
 		_apprentissage.configurer(_heros, _salle)
 	# Arguments de capture reserves au controle visuel automatise des panneaux.
 	if "--ouvrir-pause" in arguments:
@@ -455,6 +462,7 @@ func _avancer_salle() -> void:
 	_voile_salle.visible = false
 	_voile_salle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_transition_salle = false
+	_presenter_lecon_tutoriel()
 
 func _construire_voile_salle() -> void:
 	_voile_salle = VOILE_TRANSITION.new()
@@ -469,6 +477,8 @@ func _animer_entree_salle() -> void:
 			"SURVIVEZ 5 MINUTES" if Jeu.mode_run == "mine" else "CINQ RITUELS")
 	if Jeu.mode_run == "epreuve_sorts":
 		sous_titre = "Choisissez une augmentation après chaque boss"
+	elif Jeu.mode_run == DonneesTutoriel.MODE:
+		sous_titre = "Cinq étages pour découvrir l’atelier"
 	_voile_salle.configurer(titre, sous_titre)
 	_voile_salle.visible = true
 	_voile_salle.modulate.a = 1.0
@@ -481,6 +491,34 @@ func _animer_entree_salle() -> void:
 	await ouverture.finished
 	_voile_salle.visible = false
 	_voile_salle.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_presenter_lecon_tutoriel()
+
+func _preparer_guide_tutoriel() -> void:
+	if _visee_active:
+		_fermer_visee()
+	_neutraliser_deplacement()
+
+func _presenter_lecon_tutoriel() -> void:
+	if not is_instance_valid(_guide_tutoriel) or not ParcoursTutoriel.actif() or _terminee:
+		return
+	if Jeu.mode_run == DonneesTutoriel.MODE:
+		var lecon: Array = DonneesTutoriel.LECONS[Jeu.salle_courante]
+		_guide_tutoriel.afficher("Étage %d / %d · %s" % [Jeu.salle_courante, DonneesTutoriel.nombre_salles(), lecon[0]],
+			str(lecon[1]), [["continuer", "À moi de jouer"]])
+	elif ParcoursTutoriel.fait("commandes_vues") and not ParcoursTutoriel.fait("sort_lance") \
+			and not ReglagesJoueur.sort_actif_effectif().is_empty():
+		_guide_tutoriel.afficher("Essayez votre sort actif", "Votre commande actuelle : %s.\n\nL’icône du sort est à droite de l’arène. Visez un ennemi, lancez le sort et attendez sa recharge. Le geste reste modifiable depuis Pause → Paramètres." % RaccourciTactile.nom_mode(ReglagesJoueur.raccourci_sort), [["continuer", "Essayer mon sort"]])
+
+func _sur_tutoriel_passe() -> void:
+	if is_instance_valid(_apprentissage):
+		_apprentissage.interrompre()
+	if Jeu.mode_run != DonneesTutoriel.MODE:
+		return
+	_terminee = true
+	Jeu.nouvelle_tentative.clear()
+	Jeu.destination_menu = {"page": "aventure"}
+	get_tree().paused = false
+	get_tree().change_scene_to_file.call_deferred("res://scenes/menu.tscn")
 
 func _ouvrir_recompense_etage() -> void:
 	if _terminee or _panneau != null or _niveaux_en_attente <= 0:
@@ -581,6 +619,8 @@ func _fermer_pause() -> void:
 		Sons.musique_combat(0.5)
 
 func _notification(quoi: int) -> void:
+	if is_instance_valid(_guide_tutoriel) and _guide_tutoriel.est_ouvert():
+		return
 	if quoi in [NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT]:
 		if is_node_ready() and not _terminee and not Jeu.mode_auto and not Capture.demandee() \
 				and (_panneau == null or _visee_active):
@@ -930,7 +970,7 @@ func _lancer_sort_actif(visee_manuelle := true) -> void:
 	_neutraliser_deplacement()
 	_panneau = load("res://ui/visee_sort.gd").new()
 	_panneau.point = _heros.global_position
-	_panneau.rayon = BonusSorts.rayon(float(Sorts.ACTIFS[id]["rayon"]), Jeu.mods())
+	_panneau.rayon = BonusSorts.rayon(float(Sorts.ACTIFS[id]["rayon"]), Jeu.mods(), ReglagesJoueur.rangs_competences_effectifs())
 	_panneau.vers_logique = _point_sort
 	_panneau.vers_ecran = _ecran_sort
 	_panneau.confirme.connect(func(point: Vector2):
@@ -974,6 +1014,8 @@ func _confirmer_sort(point: Vector2) -> void:
 	var degats: float = _heros.degats_finaux(_heros.attaque_reelle(true) * multiplicateur, "sort")
 	_recharge_sort_actif = ReglagesJoueur.recharge_sort(id, Jeu.mods())
 	_appliquer_sort(float(sort["rayon"]), multiplicateur, str(sort["effet"]), false, point, id, degats)
+	if ParcoursTutoriel.fait("commandes_vues") and not ParcoursTutoriel.sort_a_expliquer().is_empty():
+		ParcoursTutoriel.noter("sort_lance")
 	var passifs := ReglagesJoueur.passifs_equipes_effectifs()
 	if passifs.has("echo_alchimique"):
 		_lancer_echos(point, id, efficacite, Sorts.nombre_echos(passifs))

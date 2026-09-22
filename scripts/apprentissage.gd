@@ -18,7 +18,7 @@ var _noeuds_suspendus: Array[Dictionary] = []
 
 static func disponible(arguments: PackedStringArray) -> bool:
 	if Jeu.mode_auto or Capture.demandee() or DisplayServer.get_name() == "headless" \
-			or ReglagesJoueur.tutoriel_vu or Jeu.mode_run != "grimoire" \
+			or not ParcoursTutoriel.niveau_a_faire() or Jeu.mode_run != DonneesTutoriel.MODE \
 			or Jeu.chapitre != 0 or Jeu.salle_courante != 1:
 		return false
 	for argument in arguments:
@@ -104,8 +104,7 @@ func _terminer(enregistrer: bool) -> void:
 		_heros.configurer_apprentissage(false, false)
 	_actualiser_visibilite()
 	if enregistrer:
-		ReglagesJoueur.tutoriel_vu = true
-		ReglagesJoueur.sauvegarder()
+		ParcoursTutoriel.noter("deplacement_appris")
 	termine.emit()
 	queue_free()
 

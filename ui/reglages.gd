@@ -3,11 +3,24 @@ signal ferme
 signal reprise_demandee
 var _confirmation_reset := false
 var _bouton_reset: Button
+var section_tutoriel := ""
+var _avance: Control
 
 func _ready() -> void:
 	var col := StyleAzur.page(self,"Paramètres")
 	var contenu := StyleAzur.defilement(col)
 	StyleAzur.banniere(contenu, "À votre mesure", "L’ambiance et le confort de votre atelier.", "astrolabe")
+	var tutoriel_commandes := ParcoursTutoriel.actif() and section_tutoriel == "commandes" \
+		and not ParcoursTutoriel.sort_a_expliquer().is_empty()
+	if tutoriel_commandes:
+		var aide := StyleAzur.plaque(contenu)
+		aide.add_child(StyleAzur.texte("Choisissez votre geste de lancement", 32, StyleAzur.CUIVRE))
+		aide.add_child(StyleAzur.texte("Votre sort actif est équipé. Comparez les trois modes ci-dessous ; vous pourrez toujours revenir sur votre choix depuis la pause.", 27))
+		_construire_commandes(aide)
+		call_deferred("_noter_section_tutoriel", "commandes_vues")
+	elif ParcoursTutoriel.actif() and section_tutoriel == "musique":
+		contenu.add_child(StyleAzur.texte("Essayez les listes de morceaux ci-dessous : la musique de l’aventure et celle de l’atelier se choisissent séparément.", 28, StyleAzur.MENTHE))
+		call_deferred("_noter_section_tutoriel", "musique_vue")
 	var audio := StyleAzur.plaque(contenu)
 	audio.add_child(StyleAzur.texte("AMBIANCE SONORE", 25, StyleAzur.CUIVRE))
 	_volume(audio,"Musique",ReglagesJoueur.volume_musique,func(v): ReglagesJoueur.definir_reglages_audio(v,ReglagesJoueur.volume_effets))
@@ -36,23 +49,13 @@ func _ready() -> void:
 	if OS.has_feature("android"):
 		_option(confort,"Vibrations",ReglagesJoueur.vibrations,func(v): ReglagesJoueur.definir_vibrations(v))
 		confort.add_child(StyleAzur.texte("Un retour bref lors des dégâts et des récompenses importantes.",24,StyleAzur.ATTENUE))
-	confort.add_child(StyleAzur.texte("Raccourci du sort actif",27,StyleAzur.ATTENUE))
-	var raccourci := _selecteur(confort)
-	for mode in RaccourciTactile.MODES:
-		raccourci.add_item(RaccourciTactile.nom_mode(mode))
-		var index := raccourci.item_count-1
-		raccourci.set_item_metadata(index,mode)
-		if mode == ReglagesJoueur.raccourci_sort: raccourci.selected = index
-	raccourci.item_selected.connect(func(i): ReglagesJoueur.definir_raccourci_sort(str(raccourci.get_item_metadata(i))))
-	confort.add_child(StyleAzur.texte("Visée libre après l’icône, cible la plus proche par l’icône, ou tape courte n’importe où dans l’arène.",24,StyleAzur.ATTENUE))
+	if not tutoriel_commandes:
+		_construire_commandes(confort)
 	StyleAzur.separateur(contenu)
 	var progression := StyleAzur.plaque(contenu)
-	progression.get_parent().visible = false
-	var ouvrir_progression := StyleAzur.bouton("Progression ›",func(): progression.get_parent().visible = not progression.get_parent().visible)
-	contenu.add_child(ouvrir_progression)
-	contenu.move_child(ouvrir_progression,progression.get_parent().get_index())
 	_bouton_reset = StyleAzur.bouton("Réinitialiser la progression",_sur_reset)
 	progression.add_child(_bouton_reset)
+	progression.add_child(StyleAzur.texte("Efface le compte et relance le tutoriel. Vos préférences audio et de commandes sont conservées.", 24, StyleAzur.ATTENUE))
 	if ReglagesJoueur.outils_developpement_disponibles():
 		var developpement := StyleAzur.plaque(contenu)
 		developpement.get_parent().visible = false
@@ -60,9 +63,25 @@ func _ready() -> void:
 		contenu.add_child(ouvrir)
 		contenu.move_child(ouvrir,developpement.get_parent().get_index())
 		_option(developpement,"Mode développeur",ReglagesJoueur.mode_dev,func(v): ReglagesJoueur.definir_mode_dev(v))
+		developpement.add_child(StyleAzur.bouton("Avancer à…", _ouvrir_avance))
 	# Le retour reste accessible meme quand les options sont longues a faire defiler.
 	col.add_child(StyleAzur.bouton("Reprendre", _reprendre, true))
 	Capture.programmer(self)
+
+func _noter_section_tutoriel(cle: String) -> void:
+	ParcoursTutoriel.noter(cle)
+
+func _construire_commandes(parent: Node) -> void:
+	parent.add_child(StyleAzur.texte("Raccourci du sort actif", 27, StyleAzur.ATTENUE))
+	var raccourci := _selecteur(parent)
+	for mode in RaccourciTactile.MODES:
+		raccourci.add_item(RaccourciTactile.nom_mode(mode))
+		var index := raccourci.item_count - 1
+		raccourci.set_item_metadata(index, mode)
+		if mode == ReglagesJoueur.raccourci_sort:
+			raccourci.selected = index
+	raccourci.item_selected.connect(func(i): ReglagesJoueur.definir_raccourci_sort(str(raccourci.get_item_metadata(i))))
+	parent.add_child(StyleAzur.texte("Visée libre après l’icône, cible la plus proche par l’icône, ou tape courte n’importe où dans l’arène.", 24, StyleAzur.ATTENUE))
 
 func _reprendre() -> void:
 	if not reprise_demandee.get_connections().is_empty():
@@ -152,8 +171,8 @@ func _sur_reset() -> void:
 	if _confirmation_reset:
 		_confirmation_reset = false
 		ReglagesJoueur.reinitialiser_progression()
-		_bouton_reset.text = "Progression réinitialisée"
 		_bouton_reset.disabled = true
+		_retour_apres_progression()
 		return
 	_confirmation_reset = true
 	_bouton_reset.text = "Toucher à nouveau pour tout effacer"
@@ -161,3 +180,22 @@ func _sur_reset() -> void:
 	if _confirmation_reset:
 		_confirmation_reset = false
 		_bouton_reset.text = "Réinitialiser la progression"
+
+func _ouvrir_avance() -> void:
+	if is_instance_valid(_avance) or not ReglagesJoueur.outils_developpement_disponibles():
+		return
+	_avance = preload("res://ui/avance_developpement.gd").new()
+	_avance.ferme.connect(func():
+		_avance.queue_free()
+		_avance = null)
+	_avance.progression_appliquee.connect(_retour_apres_progression)
+	add_child(_avance)
+
+func _retour_apres_progression() -> void:
+	# Une run ouverte avant le remplacement ne doit plus attribuer son coffre.
+	Jeu.nouvelle_tentative.clear()
+	Jeu.destination_menu.clear()
+	Jeu.bilan_run.clear()
+	get_tree().change_scene_to_file.call_deferred("res://scenes/menu.tscn")
+	Engine.time_scale = 1.0
+	get_tree().paused = false

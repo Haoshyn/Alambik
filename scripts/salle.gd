@@ -89,6 +89,9 @@ func _construire_obstacles() -> void:
 	_types_obstacles.clear()
 	_retraits.clear()
 	_contour = FormesSalles.contour(limites, FormesSalles.indice(numero, Jeu.chapitre, Jeu.graine, Jeu.mode_run))
+	if Jeu.mode_run == DonneesTutoriel.MODE:
+		_construire_murs_perimetre()
+		return
 	var combat_de_boss := Jeu.mode_run == "grimoire" and Chapitres.est_boss(Jeu.chapitre, numero) \
 		or Jeu.mode_run == "epreuve_sorts"
 	if combat_de_boss or _vagues.is_empty() and Jeu.mode_run != "mine":
@@ -332,7 +335,12 @@ func faire_apparaitre(id: String, position: Vector2, invocateur: Node = null, el
 func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 	var copie := donnees.duplicate(true)
 	copie["id"] = id
-	if Jeu.mode_run == "epreuve_sorts":
+	if Jeu.mode_run == DonneesTutoriel.MODE:
+		copie["pv"] = float(donnees["pv"]) * DonneesTutoriel.PV_MULT
+		copie["degats"] = float(donnees["degats"]) * DonneesTutoriel.DEGATS_MULT
+		if donnees["cerveau"] == "boss":
+			copie["pv"] = float(copie["pv"]) * DonneesTutoriel.BOSS_PV_MULT
+	elif Jeu.mode_run == "epreuve_sorts":
 		var progression_defi := clampf(float(numero - 1) / 4.0, 0.0, 1.0)
 		var palier_defi := Epreuves.palier(Jeu.niveau_epreuve)
 		copie["pv"] = float(donnees["pv"]) * Reglages.facteur_annexe_pv(palier_defi) \
@@ -365,8 +373,10 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 		if copie.has("recharge"):
 			copie["recharge"] = float(copie["recharge"]) * Reglages.ENNEMI_RECHARGE_MULT
 	var chapitre_patterns := Jeu.chapitre if Jeu.mode_run == "grimoire" else (Epreuves.palier(Jeu.niveau_epreuve) if Jeu.mode_run == "epreuve_sorts" else ReglagesJoueur.palier_atteint())
+	if Jeu.mode_run == DonneesTutoriel.MODE:
+		chapitre_patterns = 0
 	copie = EvolutionEnnemis.appliquer(copie,chapitre_patterns)
-	if donnees["cerveau"] == "boss" and Jeu.mode_run != "grimoire":
+	if donnees["cerveau"] == "boss" and Jeu.mode_run in ["mine", "epreuve_sorts"]:
 		copie["pv"] = float(copie["pv"])*EvolutionEnnemis.ANNEXE_PV_BOSS
 	return copie
 

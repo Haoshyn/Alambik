@@ -11,7 +11,8 @@ il n'est pas nécessaire de lire tous les fichiers d'une ligne.
 | Sorts et leurs animations | `scripts/bonus_sorts.gd`, `data/animations_sorts.gd` | `scripts/presentation/animation_sorts.gd`, `scripts/effets.gd`, `scripts/presentation/effets_3d.gd` |
 | Augments et phénomènes de combat | `data/catalogue_reactifs.gd`, `scripts/mods.gd` | `scripts/draft_logique.gd`, `scripts/reactif.gd`, `scripts/details_reactif.gd`, `data/progression_augments.gd` |
 | Héros, déplacement et dégâts reçus | `scripts/heros.gd`, `scripts/stats.gd` | `data/reglages.gd`, `scripts/joystick_logique.gd`, `ui/joystick.gd` |
-| Premiers pas et apprentissage | `scripts/apprentissage.gd`, `ui/conseils_debut.gd` | `scripts/run.gd`, `scripts/heros.gd`, `data/reglages.gd` |
+| Tutoriel séparé et guidage de l'atelier | `data/tutoriel.gd`, `scripts/parcours_tutoriel.gd` | `ui/guide_tutoriel.gd`, `ui/guide_accueil.gd`, `scripts/apprentissage.gd`, `ui/conseils_debut.gd` |
+| Avance et réinitialisation de progression | `data/avance_developpement.gd`, `scripts/progression_developpement.gd` | `ui/avance_developpement.gd`, `ui/reglages.gd`, `sondes/test_tutoriel_progression.tscn` |
 | Ennemis et boss | `scripts/ennemi.gd`, `scripts/boss.gd` | `scripts/cerveaux.gd`, `scripts/gardien.gd`, `scripts/salle.gd` |
 | Tirs, ciblage et impacts | `scripts/tir.gd`, `scripts/projectile.gd`, `scripts/ciblage.gd` | `scripts/priorite_projectile.gd`, `data/catalogue_projectiles.gd` |
 | Formes, obstacles et terrains | `scripts/salle.gd`, `scripts/geometrie.gd` | `data/formes_salles.gd`, `data/terrains_mondes.gd`, `scripts/terrain_elementaire.gd` |

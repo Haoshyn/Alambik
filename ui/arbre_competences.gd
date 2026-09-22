@@ -185,7 +185,7 @@ func _rafraichir() -> void:
 	for id in _boutons_specialisations:
 		var donnees: Dictionary = Personnage.SPECIALISATIONS[id]
 		var bouton: Button = _boutons_specialisations[id]
-		var active := id == ReglagesJoueur.specialisation_effective() and not ReglagesJoueur.specialisation.is_empty()
+		var active: bool = id == ReglagesJoueur.specialisation_effective() and not ReglagesJoueur.specialisation.is_empty()
 		bouton.text = "%s%s\n%s" % ["✓ " if active else "", donnees["nom"], donnees["description"]]
 		bouton.disabled = active or (not ReglagesJoueur.specialisation.is_empty() \
 			and not ReglagesJoueur.mode_dev and ReglagesJoueur.gouttes < Personnage.COUT_CHANGEMENT_SPECIALISATION)

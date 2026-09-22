@@ -38,6 +38,8 @@ const POOL_MINE_FIN := ["encrier_rampant", "plume_sentinelle", "tache_veloce", "
 	"cachet_phaseur", "fuseau_tisseur", "fiole_volatile"]
 
 static func pour_salle(numero: int, chapitre := 0, graine := 0, mode := "grimoire") -> Array:
+	if mode == DonneesTutoriel.MODE:
+		return DonneesTutoriel.RENCONTRES[clampi(numero - 1, 0, DonneesTutoriel.nombre_salles() - 1)].duplicate(true)
 	if mode == "epreuve_sorts":
 		return _miniboss_aleatoire(numero, graine)
 	if mode == "mine":

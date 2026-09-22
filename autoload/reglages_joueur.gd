@@ -7,6 +7,13 @@ const FICHIER := "user://alambic.cfg"
 # La structure 5 x 7 conserve les indices lineaires de la version 2 : les
 # victoires, le chapitre choisi et les garanties restent au meme rang.
 const VERSION_CAMPAGNE := 2
+const CHAMPS_PROGRESSION := ["victoires", "runs", "meilleures_par_chapitre", "chapitre_choisi",
+	"gouttes", "rangs_competences", "version_maitrises", "remboursement_maitrises", "tutoriel_vu",
+	"parcours_tutoriel", "niveau_compte", "experience_compte", "attributs", "specialisation",
+	"sort_actif_equipe", "ultime_equipe", "passifs_equipes", "rangs_sorts", "objets",
+	"dernier_objet_obtenu", "grands_coffres_sans_objet", "epreuves_sans_sort", "epreuves_sans_coeur",
+	"coeurs_mana", "equipements", "projectile_equipe", "familier_equipe", "forge_niveaux",
+	"version_forge", "pierres_forge", "mode_run_choisi", "niveau_epreuve_choisi", "niveau_epreuve_debloque"]
 
 var victoires := 0
 var runs := 0
@@ -19,6 +26,7 @@ var rangs_competences := {}
 var version_maitrises := Reglages.MAITRISE_VERSION
 var remboursement_maitrises := 0
 var tutoriel_vu := false
+var parcours_tutoriel: Dictionary = {"etat": "nouveau"}
 var niveau_compte := 1
 var experience_compte := 0
 var attributs := {"force": 0, "vitalite": 0, "agilite": 0, "intelligence": 0, "sagesse": 0}
@@ -139,6 +147,13 @@ func charger() -> void:
 	_migrer_niveaux_forge()
 	niveau_epreuve_debloque = clampi(int(config.get_value("epreuves", "debloque", 1)), 1, Epreuves.nombre())
 	niveau_epreuve_choisi = clampi(int(config.get_value("epreuves", "choisi", 1)), 1, niveau_epreuve_debloque)
+	# L'ancien conseil de deplacement ne suffit pas a decrire ce parcours.
+	# Une sauvegarde deja jouee garde sa progression sans recevoir le cadeau.
+	var deja_joue := tutoriel_vu or runs > 0 or not meilleures_par_chapitre.is_empty() \
+		or niveau_compte > 1 or gouttes > 0 or not rangs_competences.is_empty() \
+		or not rangs_sorts.is_empty() or not objets.is_empty()
+	parcours_tutoriel = config.get_value("aide", "parcours_tutoriel",
+		{"etat": "ancien" if deja_joue else "nouveau"})
 	mode_run_choisi = str(config.get_value("options", "mode_run", "grimoire"))
 	# Les anciens modes retires reviennent en campagne.
 	if mode_run_choisi not in ["grimoire", "epreuve_sorts", "mine"] \
@@ -164,6 +179,7 @@ func sauvegarder() -> void:
 	config.set_value("maitrise", "rangs", rangs_competences)
 	config.set_value("maitrise", "version", version_maitrises)
 	config.set_value("aide", "premiers_pas", tutoriel_vu)
+	config.set_value("aide", "parcours_tutoriel", parcours_tutoriel)
 	config.set_value("compte", "niveau", niveau_compte)
 	config.set_value("compte", "experience", experience_compte)
 	config.set_value("compte", "attributs", attributs)
@@ -639,6 +655,8 @@ func acheter_competence(id: String) -> bool:
 	if not mode_dev:
 		gouttes -= cout_competence(id)
 	rangs_competences[id] = rang_competence(id) + 1
+	if ParcoursTutoriel.etat() == "accueil":
+		parcours_tutoriel["maitrise_achetee"] = true
 	sauvegarder()
 	maitrise_changee.emit()
 	return true
@@ -756,7 +774,12 @@ func definir_mode_dev(actif: bool) -> void:
 	reglages_changes.emit()
 
 func reinitialiser_progression() -> void:
+	mode_dev = false
+	version_maitrises = Reglages.MAITRISE_VERSION
+	version_forge = Reglages.FORGE_VERSION
+	remboursement_maitrises = 0
 	tutoriel_vu = false
+	parcours_tutoriel = {"etat": "nouveau"}
 	niveau_epreuve_choisi = 1
 	niveau_epreuve_debloque = 1
 	victoires = 0
@@ -788,6 +811,29 @@ func reinitialiser_progression() -> void:
 	sauvegarder()
 	maitrise_changee.emit()
 	reglages_changes.emit()
+
+func capturer_progression() -> Dictionary:
+	var resultat := {}
+	for cle: String in CHAMPS_PROGRESSION:
+		var valeur: Variant = get(cle)
+		resultat[cle] = valeur.duplicate(true) if valeur is Dictionary or valeur is Array else valeur
+	return resultat
+
+func appliquer_progression(progression: Dictionary) -> bool:
+	if not outils_developpement_disponibles():
+		return false
+	for cle: String in CHAMPS_PROGRESSION:
+		if not progression.has(cle):
+			return false
+	# Le profil simule est une vraie progression ; le mode infini la masquerait.
+	mode_dev = false
+	for cle: String in CHAMPS_PROGRESSION:
+		var valeur: Variant = progression[cle]
+		set(cle, valeur.duplicate(true) if valeur is Dictionary or valeur is Array else valeur)
+	sauvegarder()
+	maitrise_changee.emit()
+	reglages_changes.emit()
+	return true
 
 func enregistrer_resultat(salle: int, victoire: bool, chapitre := 0) -> void:
 	runs += 1
@@ -844,7 +890,11 @@ func palier_atteint() -> int:
 	return niveau_campagne_atteint() - 1
 
 func mode_debloque(mode: String) -> bool:
+	if mode == DonneesTutoriel.MODE:
+		return ParcoursTutoriel.niveau_a_faire()
 	if mode_dev or mode == "grimoire":
+		return true
+	if mode in ["epreuve_sorts", "mine"] and ParcoursTutoriel.annexes_ouvertes():
 		return true
 	if mode == "epreuve_sorts":
 		return niveau_campagne_atteint() >= Reglages.EPREUVE_NIVEAU_DEBLOCAGE

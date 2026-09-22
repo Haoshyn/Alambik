@@ -1,4 +1,4 @@
-# État courant — 21 septembre 2026
+# État courant — 22 septembre 2026
 
 - Godot 4.7.1, Android portrait ; simulation 2D, combat présenté en 3D.
 - Héros unique : `assets/3d/characters/mage_sculpte.glb`, matériaux standard,
@@ -23,8 +23,18 @@
 - Bilan : nouvelle tentative directe et raccourcis vers la maîtrise ou le bijou
   améliorable. Effets sonores distincts avec variantes et priorités ; vibrations
   Android désactivables. Outils développeur réservés aux versions de debug.
-- Premiers pas progressifs : déplacement et premier tir avec ennemis suspendus,
-  puis indication du portail après le combat. Pause lors du passage en arrière-plan.
+- Tutoriel hors campagne : cinq étages, baguette de départ, un choix d'augment
+  et un mini-boss. Cadeau unique au coût du premier rang de maîtrise, sans XP
+  de compte ni progression de campagne. Mine et Épreuve 1 ouvertes à la sortie.
+- Guidage de l'atelier sauvegardé : maîtrises, spécialisation, musique, Mine,
+  Épreuves, puis commandes après un sort actif obtenu en Épreuve. Passage avec
+  confirmation en haut à droite ; anciennes sauvegardes jouées non forcées.
+- Paramètres : réinitialisation avec confirmation et retour à un accueil neuf.
+  « Avancer à » en debug prépare cinq victoires par chapitre précédent, Mine
+  ouverte et Épreuve de difficulté correspondante, avec aperçu des vrais butins
+  à tirages fixes. Ressources non dépensées, mode développeur désactivé à l'application.
+- Déplacement et premier tir avec ennemis suspendus, puis indication du portail.
+  Pause lors du passage en arrière-plan.
 - Identifiants historiques et migrations de sauvegarde conservés ; rendu 2D
   de secours et outils de capture toujours disponibles sur demande.
 

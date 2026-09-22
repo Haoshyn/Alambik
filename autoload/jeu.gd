@@ -47,6 +47,8 @@ func chapitre_courant() -> Dictionary:
 	return Chapitres.par_index(chapitre)
 
 func salles_du_chapitre() -> int:
+	if mode_run == DonneesTutoriel.MODE:
+		return DonneesTutoriel.nombre_salles()
 	if mode_run == "epreuve_sorts":
 		return 5
 	if mode_run == "mine":
@@ -54,6 +56,8 @@ func salles_du_chapitre() -> int:
 	return int(chapitre_courant()["salles"])
 
 func nom_run() -> String:
+	if mode_run == DonneesTutoriel.MODE:
+		return "Premiers pas · Tutoriel"
 	if mode_run == "epreuve_sorts":
 		return "Épreuve de magie · niveau %d" % niveau_epreuve
 	if mode_run == "mine":
@@ -61,6 +65,8 @@ func nom_run() -> String:
 	return str(chapitre_courant()["nom"])
 
 func est_boss_courant() -> bool:
+	if mode_run == DonneesTutoriel.MODE:
+		return salle_courante == DonneesTutoriel.nombre_salles()
 	if mode_run == "epreuve_sorts":
 		return true
 	if mode_run == "mine":
@@ -86,7 +92,7 @@ func demarrer_run(graine_demandee: int = 0, salle_de_depart: int = 1, chapitre_d
 	graine = graine_demandee if graine_demandee != 0 else randi()
 	rng = RandomNumberGenerator.new()
 	rng.seed = graine
-	mode_run = mode_demande if mode_demande in ["grimoire", "epreuve_sorts", "mine"] else "grimoire"
+	mode_run = mode_demande if mode_demande in ["grimoire", "epreuve_sorts", "mine", DonneesTutoriel.MODE] else "grimoire"
 	# Le defi a sa propre courbe : il ne depend jamais du dernier livre consulte.
 	chapitre = 0 if mode_run != "grimoire" else clampi(chapitre_demande, 0, Chapitres.nombre() - 1)
 	niveau_epreuve = clampi(epreuve_demandee, 1, Epreuves.nombre())
@@ -97,7 +103,9 @@ func demarrer_run(graine_demandee: int = 0, salle_de_depart: int = 1, chapitre_d
 	inventaire = []
 	experience_run = 0
 	niveau_run = 0
-	niveaux_rares = ProgressionAugments.tirer_niveaux_rares(rng) if mode_run == "grimoire" else []
+	niveaux_rares.clear()
+	if mode_run == "grimoire":
+		niveaux_rares = ProgressionAugments.tirer_niveaux_rares(rng)
 	# Fixer le palier avant toute offre empeche une relance de changer sa rarete.
 	etage_legendaire = ProgressionAugments.tirer_etage_legendaire(rng) if mode_run == "grimoire" else 0
 	_relances_utilisees = 0
@@ -152,6 +160,11 @@ func gagner_experience_run(nombre: int) -> int:
 	return _monter_niveaux_run(plafond)
 
 func garantir_niveaux_fin_salle() -> int:
+	if mode_run == DonneesTutoriel.MODE:
+		if salle_courante != DonneesTutoriel.ETAGE_AUGMENT or niveau_run > 0:
+			return 0
+		experience_run = int(seuils_experience_run()[0])
+		return _monter_niveaux_run(1)
 	if mode_run != "grimoire":
 		return 0
 	var cible := ProgressionAugments.plafond_salle(salle_courante, salles_du_chapitre())

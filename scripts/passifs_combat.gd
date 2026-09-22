@@ -1,5 +1,7 @@
 extends RefCounted
 
+const ReglagesPassifs := preload("res://data/passifs_combat.gd")
+
 static func dissiper_projectiles(arbre: SceneTree, centre: Vector2, rayon := INF) -> void:
 	for projectile: Node2D in arbre.get_nodes_in_group("tirs_ennemis"):
 		if not is_instance_valid(projectile) or projectile.is_queued_for_deletion() \

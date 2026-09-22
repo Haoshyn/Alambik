@@ -25,8 +25,22 @@ parcours fixe par chapitre. Le centre et les accès restent praticables.
 La Mine et les Épreuves de sorts sont accessibles depuis l'accueil. Leurs
 récompenses et difficultés viennent des mêmes catalogues que l'aperçu de butin.
 
+Un nouveau profil commence par un tutoriel distinct de cinq étages, terminé
+par un mini-boss. Il équipe la Baguette d'acier, enseigne déplacement, tir,
+portails et augmentations, puis offre une seule fois le coût d'un premier
+rang de maîtrise. Il ne donne ni XP de compte ni progression de campagne.
+Le tutoriel terminé ou passé ouvre la Mine et l'Épreuve 1 ; le passage demande
+confirmation et désactive les conseils suivants. Les sauvegardes déjà jouées
+conservent leur progression sans introduction imposée ni cadeau rétroactif.
+
+Le guidage de l'accueil encourage ensuite maîtrises, spécialisation, musique,
+Mine et Épreuves. Les gestes de lancement sont présentés dans les paramètres
+après l'obtention d'un sort actif en Épreuve, puis rappelés en combat jusqu'au
+premier lancement. Chaque étape validée est conservée dans la sauvegarde.
+
 Sources : `data/chapitres.gd`, `data/vagues.gd`, `data/formes_salles.gd`,
-`data/epreuves.gd`, `data/butins_run.gd`, `scripts/bilan_run.gd`.
+`data/epreuves.gd`, `data/butins_run.gd`, `scripts/bilan_run.gd`,
+`data/tutoriel.gd`, `scripts/parcours_tutoriel.gd`.
 
 ## Combat et terrains
 

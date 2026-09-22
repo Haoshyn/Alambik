@@ -29,6 +29,9 @@ func afficher(victoire: bool, salle_atteinte: int) -> void:
 	if _affiche: return
 	_affiche = true
 	var gains := BilanRun.finaliser(victoire, salle_atteinte)
+	if Jeu.mode_run == DonneesTutoriel.MODE:
+		var texte_tutoriel := "Votre baguette est conservée. Mine et Épreuve 1 sont ouvertes ! Achetez maintenant votre premier rang de maîtrise." if victoire else "Réessayez les cinq étages pour obtenir le cadeau d’initiation. La campagne n’a pas avancé."
+		_bilan.add_child(StyleAzur.texte(texte_tutoriel, 28, StyleAzur.MENTHE))
 	StyleAzur.banniere(_bilan, "Victoire !" if victoire else "L’aventure s’achève", Jeu.nom_run(), "victoire" if victoire else "defaite")
 	var parcours := StyleAzur.texte("%d salles terminées  ·  %d boss vaincus" % [Jeu.salles_terminees.size(), Jeu.boss_vaincus.size()], 28, StyleAzur.ATTENUE)
 	parcours.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -73,7 +76,8 @@ func afficher(victoire: bool, salle_atteinte: int) -> void:
 	_actions_fin.add_theme_constant_override("separation", 18)
 	_actions_fin.hide()
 	_page.add_child(_actions_fin)
-	_ajouter_action(_actions_fin, "Rejouer" if victoire else "Réessayer", _reessayer, true)
+	if Jeu.mode_run != DonneesTutoriel.MODE or not victoire:
+		_ajouter_action(_actions_fin, "Rejouer" if victoire else "Réessayer", _reessayer, true)
 	_ajouter_action(_actions_fin, "Retour à l’accueil", _retourner)
 	if Jeu.mode_auto: _ouvrir()
 

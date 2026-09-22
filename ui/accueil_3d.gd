@@ -5,6 +5,7 @@ signal epreuve
 signal reglages
 signal jouer
 signal page_demandee(index: int)
+signal tutoriel_demande
 
 var _surface: Control
 var _gouttes: Label
@@ -18,6 +19,7 @@ var _bas: Control
 var _raccourcis: Control
 var _mine: Button
 var _epreuve: Button
+var _tutoriel: Button
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
@@ -84,6 +86,11 @@ func _ready() -> void:
 	titre.add_theme_constant_override("outline_size", 8)
 	titre.add_theme_color_override("font_outline_color", Color("192d5b"))
 	_haut.add_child(titre)
+	_tutoriel = StyleAzur.bouton("", func() -> void: tutoriel_demande.emit(), true)
+	_tutoriel.position = Vector2(48, 368)
+	_tutoriel.size = Vector2(928, 110)
+	_tutoriel.add_theme_font_size_override("font_size", 27)
+	_haut.add_child(_tutoriel)
 	_bas = Control.new()
 	_bas.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_surface.add_child(_bas)
@@ -184,6 +191,14 @@ func _cadrer() -> void:
 
 func rafraichir() -> void:
 	if _gouttes == null: return
+	_tutoriel.visible = ParcoursTutoriel.actif()
+	var etape := ParcoursTutoriel.prochaine_etape()
+	var invitation: String = {"combat": "Commencer le tutoriel · 5 étages", "accueil": "Tutoriel · Découvrez votre atelier",
+		"maitrises": "À essayer · Votre première maîtrise", "musique": "À découvrir · Choisissez votre musique",
+		"mine": "À essayer · La Mine et la forge", "epreuve_sorts": "À essayer · Votre premier sort en Épreuve",
+		"commandes": "Nouveau sort · Découvrez ses commandes", "sort": "À essayer · Lancez votre sort",
+		"fin": "Tutoriel · Terminer les premiers pas"}.get(etape, "Continuer le tutoriel")
+	_tutoriel.text = invitation + " ›"
 	_gouttes.text = "%s gouttes" % ReglagesJoueur.gouttes_affichees()
 	_pierres.text = "%d pierres" % ReglagesJoueur.pierres_forge
 	_niveau.text = "Alchimiste · niveau %d" % ReglagesJoueur.niveau_compte_effectif()
