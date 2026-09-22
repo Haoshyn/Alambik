@@ -4,14 +4,25 @@
 - Héros unique : `assets/3d/characters/mage_sculpte.glb`, matériaux standard,
   six animations et armes séparées. Sources et générateurs actifs conservés.
 - Accueil : `ui/accueil_clairiere.tscn`, composé de scènes indépendantes dans
-  `ui/composants/`. Académie arcanique, héros détouré au centre, modes
-  latéraux, destination et Jouer en bas ; cinq onglets fixes et zones sûres.
-- Kit A « Émail arcanique » : turquoise, ivoire et bronze, volumes simplifiés.
-  Cadres « Sceaux liquides », emplacements et commandes circulaires ; onglets
-  Héros, Équipement, Aventure, Maîtrises, Sorts. Héros : portrait, commandes −/+
-  et reset gratuit, sous-menu de classe obligatoire au premier accueil sans classe.
+  `ui/composants/`. Héros violet découpé devant la clairière bleu-violet,
+  respiration et léger balancement, feuillages animés par brises intermittentes,
+  reflet discret sur l'eau et paysage fixe, lueurs de baguette
+  et de décor animées, Mine et Épreuves sur les bords juste au-dessus de la
+  destination, puis Jouer en bas ; cinq onglets fixes et zones sûres.
+  L'illustration couvre les formats portrait à échelle uniforme et rogne les bords.
+- Kit A « Émail arcanique » : pervenche, violet, indigo, ivoire lavande,
+  touches de cyan et de champagne, volumes simplifiés. Les pages partagent le
+  même éclairage bleu-violet que l'accueil ; charte dans `docs/design/DIRECTION_ARTISTIQUE.md`.
+  Cadres « Sceaux liquides », emplacements et commandes circulaires ; onglet
+  actif éclairé sans second cercle. Lecture en DM Sans gras, grands titres en
+  Fondamento ; onglets
+  Héros, Équipement, Aventure, Maîtrises, Sorts. Héros : illustration de l'accueil, commandes −/+
+  et reset gratuit, choix de classe obligatoire au premier accueil sans classe,
+  suivi de la première aventure guidée.
   Composition : Héros asymétrique autour du personnage, maîtrises en constellation,
-  sorts en symboles avec fiches détaillées, parure en sceaux décalés. Titres et
+  sorts en grille de cartes avec accents par catégorie et fiches contextuelles,
+  parure en sceaux décalés. Les fiches Sorts et Maîtrises se ferment aussi en
+  touchant à côté, sans changer de page. Titres et
   ressources sans cadres ; marges intérieures protégées sous les ornements.
   SVG natifs légers (icônes, cadres, équipements, capacités et contrôles),
   filtrage avec mipmaps et sans ancien détourage alpha. Générateur :
@@ -55,8 +66,9 @@
 - Bilan : nouvelle tentative directe et raccourcis vers la maîtrise ou le bijou
   améliorable. Effets sonores distincts avec variantes et priorités ; vibrations
   Android désactivables. Outils développeur réservés aux versions de debug.
-- Premiers pas progressifs : déplacement et premier tir avec ennemis suspendus,
-  puis indication du portail après le combat. Pause lors du passage en arrière-plan.
+- Premiers pas progressifs : choix de classe, lancement du premier chapitre,
+  déplacement et premier tir avec ennemis suspendus, puis indication du portail
+  après le combat. Pause lors du passage en arrière-plan.
 - Identifiants historiques et migrations de sauvegarde conservés ; rendu 2D
   de secours et outils de capture toujours disponibles sur demande.
 

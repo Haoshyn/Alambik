@@ -32,7 +32,7 @@ func _draw() -> void:
 		var points := PackedVector2Array()
 		for point in trace: points.append(point * facteur)
 		if points.size() > 1:
-			draw_polyline(points, Color("142e4966"), 9.0 * facteur, true)
-			draw_polyline(points, Color("75bdbd77"), 2.0 * facteur, true)
+			draw_polyline(points, Color("26315466"), 9.0 * facteur, true)
+			draw_polyline(points, Color("a690d877"), 2.0 * facteur, true)
 			for point in points:
-				draw_circle(point, 4.0 * facteur, Color("d0b88899"))
+				draw_circle(point, 4.0 * facteur, Color("dbc4a099"))

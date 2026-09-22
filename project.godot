@@ -36,7 +36,7 @@ window/handheld/orientation=1
 
 [gui]
 
-theme/custom_font="res://assets/fonts/DMSans-Variable.ttf"
+theme/custom_font="res://assets/fonts/Nunito-Variable.ttf"
 
 [input_devices]
 

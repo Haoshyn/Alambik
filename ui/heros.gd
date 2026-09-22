@@ -17,13 +17,13 @@ func _ready() -> void:
 	_contenu.add_child(_resume)
 	var scene := CompositionArcane.new()
 	scene.hauteur = 1130
-	scene.traces = [PackedVector2Array([Vector2(270,400),Vector2(665,120),Vector2(735,355),Vector2(670,580),Vector2(615,875),Vector2(205,905)])]
+	scene.traces = [PackedVector2Array([Vector2(270,400),Vector2(715,120),Vector2(715,355),Vector2(715,580),Vector2(625,980),Vector2(205,980)])]
 	_contenu.add_child(scene)
-	var portrait := preload("res://ui/composants/portrait_heros_3d.gd").new()
+	var portrait := preload("res://ui/composants/portrait_heros_illustre.gd").new()
 	scene.placer(portrait, Rect2(15, 100, 470, 675))
 	_classe = StyleAzur.bouton("", _ouvrir_classes, true)
 	scene.placer(_classe, Rect2(25, 725, 405, 116))
-	var positions := [Vector2(475,20), Vector2(555,260), Vector2(480,495), Vector2(430,820), Vector2(10,885)]
+	var positions := [Vector2(520,20), Vector2(520,260), Vector2(520,495), Vector2(430,885), Vector2(10,885)]
 	var index := 0
 	for valeur in Personnage.ATTRIBUTS:
 		var id := str(valeur)

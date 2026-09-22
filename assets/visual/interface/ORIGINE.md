@@ -1,7 +1,8 @@
 # Interface — Émail arcanique
 
 Direction A validée le 22 septembre 2026 : fantasy magique à volumes doux,
-bronze, turquoise et ivoire, sans thème nature ni microtextures dans les contrôles.
+bleu-violet et ivoire lavande, avec accents cyan et champagne, sans microtextures
+dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.md`.
 
 - `tools/generer_email_arcanique.py` appelle `tools/habillage_svg_source.py` :
   navigation, ressources, bijoux et capacités utilisent les silhouettes Wenrexa
@@ -13,14 +14,26 @@ bronze, turquoise et ivoire, sans thème nature ni microtextures dans les contr�
 - `cadres/` : surfaces séparées pour cases, cartes, boutons, compteurs, panneaux,
   navigation et zones de texte, avec variantes sélectionnées, pressées et focus.
   Taille logique 128 px, étirement en neuf zones avec coins de 40 px fixes.
-  Textes et icônes restent indépendants des surfaces. Palette Charbon végétal
-  (sauge #829e8b, charbon #3d5749, métal grisé #bdc6af), appliquée par
-  `tools/palette_cadres.py`, sans changement de silhouette.
+  Textes et icônes restent indépendants des surfaces. Palette bleu-violet
+  appliquée par `tools/palette_cadres.py` selon les rôles (lecture, action,
+  sélection, navigation), sans changement de silhouette.
 - `equipement/`, `armes/` et `../azur/glyphes/` : SVG natifs du même kit.
-- `academie_arcanique.png` : cour-jardin d’alchimiste, pierre claire et verdure sauge,
-  générée avec ImageGen, source `exec-c03e3e5d-fb90-4ec8-8bc3-2b7921e4379c.png`.
-- Le héros affiché utilise désormais `Visuels3D.HEROS_MODELE` dans un viewport
-  transparent indépendant, à l’accueil et dans l’onglet Héros.
+- `academie_arcanique.png` : cour-jardin d'alchimiste en lumière pervenche,
+  générée avec ImageGen depuis `exec-c03e3e5d-fb90-4ec8-8bc3-2b7921e4379c.png`
+  et le nouvel accueil ; source active `exec-aa297b86-19bc-45e3-9445-903050898759.png`.
+- `accueil_mage_clairiere.png` : accueil complet généré avec ImageGen à partir
+  de la clairière `exec-9d36c702-f864-44af-b40c-d036376f1ae8.png` et du mage
+  `exec-16d43dd8-3eb5-4b79-bfc6-a3549fb6bd9b.png` ; source finale
+  `exec-ec7b4eee-6008-4ac4-8986-b0f566a8a11f.png`, retravaillée en bleu-violet
+  dans `exec-16a0b57f-242d-40f0-bd74-6ed50facb2b8.png` puis éclaircie dans
+  `exec-305a623a-3b0c-4e71-ad84-1cb6f57302e9.png`. Source de référence pour
+  les deux couches de l'accueil animé.
+- `accueil_fond_anime.png` : fond sans mage, source ImageGen
+  `exec-4a7fe8c6-8dcc-4ab9-aae3-145ac642c7c6.png`.
+- `accueil_mage_detoure.png` : mage isolé avec transparence, source ImageGen
+  `exec-467be333-9b5e-4a17-9ab1-4802ae8c0c6e.png`. Leurs dimensions et leur
+  recadrage communs sont définis dans `ui/composants/illustration_accueil.gd`.
+  L'onglet Héros réutilise le même mage détouré que l'accueil.
 - `heros_email.png` : ancienne illustration indépendante générée avec ImageGen depuis
   la proposition A, source `exec-7a15a3a7-833f-4208-bfdf-230a1d165e99.png`.
 - Les illustrations restent en PNG. Les contrôles et icônes sont vectoriels ;

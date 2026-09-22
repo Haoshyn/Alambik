@@ -20,6 +20,11 @@ func _ready() -> void:
 	profil.custom_minimum_size = Vector2(330, 112)
 	profil.tooltip_text = "Voir le héros"
 	add_child(profil)
+	var fond_profil := Panel.new()
+	fond_profil.add_theme_stylebox_override("panel", StyleAzur.fond_legende(0.80, 20))
+	fond_profil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	profil.add_child(fond_profil)
+	fond_profil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var marge := MarginContainer.new()
 	marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	marge.mouse_filter = Control.MOUSE_FILTER_IGNORE

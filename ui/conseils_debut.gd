@@ -29,7 +29,7 @@ func _ready() -> void:
 	entete.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	entete.add_theme_constant_override("separation", 18)
 	col.add_child(entete)
-	_progression = StyleAzur.texte("PREMIERS PAS · 1/3", 24, StyleAzur.CUIVRE)
+	_progression = StyleAzur.texte("PREMIERS PAS · 2/4", 24, StyleAzur.CUIVRE)
 	_progression.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_progression.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	entete.add_child(_progression)
@@ -56,7 +56,7 @@ func _ready() -> void:
 	col.add_child(_contexte)
 
 func afficher_etape(numero: int) -> void:
-	_progression.text = "PREMIERS PAS · %d/3" % numero
+	_progression.text = "PREMIERS PAS · %d/4" % (numero + 1)
 	match numero:
 		1:
 			_titre.text = "Glissez pour vous déplacer"

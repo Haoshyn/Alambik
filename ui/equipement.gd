@@ -164,7 +164,7 @@ func _afficher_inventaire() -> void:
 	for i in SLOTS.size():
 		var id := str(ReglagesJoueur.equipements.get(SLOTS[i],""))
 		_boutons_slots[i].icon = StyleAzur.icone(2 if SLOTS[i] == "collier" else 0) if id.is_empty() else StyleAzur.icone(StyleAzur.icone_objet(id))
-		_boutons_slots[i].add_theme_color_override("icon_normal_color", Color("728d9c") if id.is_empty() else Color.WHITE)
+		_boutons_slots[i].add_theme_color_override("icon_normal_color", Color("98a8ca") if id.is_empty() else Color.WHITE)
 		_libelles_slots[i].text = NOMS_SLOTS[SLOTS[i]]+ ("\nLibre" if id.is_empty() else "\nNiveau %d" % ReglagesJoueur.niveau_objet(id))
 		_boutons_slots[i].add_theme_stylebox_override("normal", StyleAzur.cercle(SLOTS[i] == _slot_selectionne))
 	var ids := _objets_page()

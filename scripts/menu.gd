@@ -52,7 +52,16 @@ func _ouvrir_classes_initiales() -> void:
 		_fermer_superposition(_superposition)
 	var choix := preload("res://ui/choix_classe.gd").new()
 	choix.obligatoire = true
+	choix.premiers_pas = not ReglagesJoueur.tutoriel_vu
 	_ouvrir_superposition(choix)
+	if _superposition == choix and choix.premiers_pas:
+		choix.ferme.connect(_demarrer_premiers_pas)
+
+func _demarrer_premiers_pas() -> void:
+	if ReglagesJoueur.specialisation_effective().is_empty():
+		return
+	ReglagesJoueur.choisir_chapitre(0)
+	_lancer_mode("grimoire", Chapitres.par_index(0))
 
 func _construire_structure() -> void:
 	_conteneur_pages = Control.new()
@@ -88,6 +97,8 @@ func _creer_page(index: int) -> Control:
 func _afficher_page(index: int, anime := true) -> void:
 	if _superposition != null or _lancement or _transition_page:
 		return
+	if is_instance_valid(_page_actuelle) and _page_actuelle.has_method("fermer_fiche") and bool(_page_actuelle.call("fermer_fiche")):
+		return
 	index = clampi(index, 0, PAGES.size() - 1)
 	if _page_actuelle != null and index == _page:
 		return
@@ -104,24 +115,24 @@ func _afficher_page(index: int, anime := true) -> void:
 	if ancienne == null:
 		return
 	Sons.jouer("choix", -17.0, 1.08)
-	if not anime:
+	if not anime or ReglagesJoueur.effets_reduits:
 		ancienne.queue_free()
 		return
 	_transition_page = true
 	ancienne.process_mode = Node.PROCESS_MODE_DISABLED
 	var direction := 1.0 if index > ancienne_page else -1.0
-	var distance := 32.0 if ReglagesJoueur.effets_reduits else 180.0
+	var distance := 96.0
 	nouvelle.position.x = distance * direction
 	nouvelle.modulate.a = 0.0
 	var sortie := ancienne.create_tween().set_parallel(true)
 	sortie.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	sortie.set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN_OUT)
-	sortie.tween_property(ancienne, "position:x", -distance * direction, 0.22)
-	sortie.tween_property(ancienne, "modulate:a", 0.0, 0.16)
+	sortie.tween_property(ancienne, "position:x", -distance * direction, 0.16)
+	sortie.tween_property(ancienne, "modulate:a", 0.0, 0.12)
 	var entree := nouvelle.create_tween().set_parallel(true)
 	entree.set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
-	entree.tween_property(nouvelle, "position:x", 0.0, 0.34)
-	entree.tween_property(nouvelle, "modulate:a", 1.0, 0.24)
+	entree.tween_property(nouvelle, "position:x", 0.0, 0.24)
+	entree.tween_property(nouvelle, "modulate:a", 1.0, 0.18)
 	await sortie.finished
 	if is_instance_valid(ancienne):
 		ancienne.queue_free()
@@ -146,7 +157,7 @@ func _jouer_immediatement() -> void:
 func _lancer_mode(mode: String, destination: Dictionary) -> void:
 	if _lancement or not ReglagesJoueur.mode_debloque(mode):
 		return
-	if ReglagesJoueur.specialisation.is_empty():
+	if ReglagesJoueur.specialisation_effective().is_empty():
 		# Une aventure ne doit pas commencer avec une classe choisie en silence.
 		if _superposition != null:
 			_fermer_superposition(_superposition)
@@ -198,6 +209,8 @@ func _fermer_superposition(panneau: Control) -> void:
 
 func _notification(quoi: int) -> void:
 	if quoi != NOTIFICATION_WM_GO_BACK_REQUEST or _lancement or _transition_page:
+		return
+	if is_instance_valid(_page_actuelle) and _page_actuelle.has_method("fermer_fiche") and bool(_page_actuelle.call("fermer_fiche")):
 		return
 	if _superposition != null and is_instance_valid(_superposition):
 		if bool(_superposition.get("obligatoire")): return

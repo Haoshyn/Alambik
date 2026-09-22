@@ -2,13 +2,11 @@ extends Control
 signal ferme
 var integre_menu := false
 var _categorie := "Actifs"
-var _page := 0
 var _message := ""
-var _precedent: Button
-var _suivant: Button
 var _cartes: VBoxContainer
 var _statut: Label
 var _collection: Label
+var _fiche_popup: FenetreFiche
 var _slots: Array[Button] = []
 var _icones_slots: Array[TextureRect] = []
 var _textes_slots: Array[Label] = []
@@ -26,44 +24,46 @@ func _ready() -> void:
 		var bouton := StyleAzur.bouton(cat,func(): _afficher(cat))
 		categories.add_child(bouton)
 		_categories[cat] = bouton
-	var equipe := CompositionArcane.new()
-	equipe.hauteur = 280
-	equipe.traces = [PackedVector2Array([Vector2(106,156),Vector2(346,106),Vector2(586,126),Vector2(826,166)])]
+	col.add_child(StyleAzur.texte("Sorts équipés", 34, StyleAzur.IVOIRE))
+	var equipe := GridContainer.new()
+	equipe.columns = 4
+	equipe.add_theme_constant_override("h_separation", 18)
+	equipe.add_theme_constant_override("v_separation", 12)
+	StyleAzur.adapter_grille(equipe, 152.0, 4)
 	col.add_child(equipe)
 	for i in 4:
 		var b := StyleAzur.bouton("",func(): _retirer_slot(i))
-		b.custom_minimum_size = Vector2(192,192)
+		b.custom_minimum_size = Vector2(136,136)
+		b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		var bloc := VBoxContainer.new()
+		bloc.custom_minimum_size.x = 152
+		bloc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		bloc.add_theme_constant_override("separation", 4)
+		equipe.add_child(bloc)
+		bloc.add_child(b)
 		var marge := MarginContainer.new()
 		marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		marge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		for cote in ["left", "right", "top", "bottom"]: marge.add_theme_constant_override("margin_" + cote, 38)
+		for cote in ["left", "right", "top", "bottom"]: marge.add_theme_constant_override("margin_" + cote, 26)
 		b.add_child(marge)
 		var composition := VBoxContainer.new()
 		composition.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		composition.add_theme_constant_override("separation", 4)
 		composition.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		marge.add_child(composition)
-		var illustration := StyleAzur.vignette("onde_alchimique", 56)
+		var illustration := StyleAzur.vignette("onde_alchimique", 58)
 		illustration.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		composition.add_child(illustration)
 		_icones_slots.append(illustration)
-		var legende := StyleAzur.texte("", 22, StyleAzur.IVOIRE)
+		var legende := StyleAzur.texte("", 24, StyleAzur.IVOIRE)
 		legende.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		composition.add_child(legende)
+		bloc.add_child(legende)
 		_textes_slots.append(legende)
-		b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		equipe.placer(b, Rect2(10 + i * 240, [60, 10, 30, 70][i], 192, 192))
 		_slots.append(b)
 	col.add_child(categories)
 	_statut = StyleAzur.texte("",26,StyleAzur.IVOIRE)
 	col.add_child(_statut)
 	_cartes = StyleAzur.defilement(col)
-	var pagination := HBoxContainer.new()
-	col.add_child(pagination)
-	_precedent = StyleAzur.bouton("‹ Précédent",func(): _changer_page(-1))
-	_suivant = StyleAzur.bouton("Suivant ›",func(): _changer_page(1))
-	pagination.add_child(_precedent)
-	pagination.add_child(_suivant)
 	_rafraichir()
 	Capture.programmer(self)
 
@@ -75,57 +75,85 @@ func _rendre() -> void:
 	for cat: String in _categories:
 		var symbole: String = {"Actifs":"onde_alchimique", "Passifs":"sagesse", "Ultimes":"grand_oeuvre"}[cat]
 		StyleAzur.onglet_symbolique(_categories[cat], StyleAzur.glyphe(symbole), cat == _categorie)
-	_precedent.get_parent().visible = _ids().size() > 6
+		if cat == _categorie:
+			var accent := _couleur_categorie(cat)
+			_categories[cat].add_theme_color_override("font_color", accent)
+			_categories[cat].add_theme_color_override("icon_normal_color", accent)
 	var passifs := ReglagesJoueur.passifs_equipes
 	var equipes := [ReglagesJoueur.sort_actif_equipe,str(passifs[0]) if passifs.size()>0 else "",str(passifs[1]) if passifs.size()>1 else "",ReglagesJoueur.ultime_equipe]
 	for i in 4:
 		var vide := str(equipes[i]).is_empty()
 		var legende: String = ["Actif","Passif I","Passif II","Ultime"][i]
-		_textes_slots[i].text = legende
+		_textes_slots[i].text = legende if vide else "%s\n%s" % [legende, str(Sorts.donnees(equipes[i]).get("nom", ""))]
+		_textes_slots[i].add_theme_color_override("font_color", _couleur_categorie(["Actifs", "Passifs", "Passifs", "Ultimes"][i]))
 		_slots[i].tooltip_text = str(Sorts.donnees(equipes[i]).get("nom","Vide")) if not str(equipes[i]).is_empty() else "Emplacement vide"
 		_slots[i].accessibility_name = legende + " · " + _slots[i].tooltip_text
 		_icones_slots[i].texture = StyleAzur.glyphe(["onde_alchimique", "sagesse", "endurance", "grand_oeuvre"][i]) if vide else StyleAzur.glyphe(str(equipes[i]))
-		_icones_slots[i].modulate = Color("b4ac95") if vide else Color.WHITE
-		_slots[i].self_modulate = Color("b4ac95") if vide else Color.WHITE
+		_icones_slots[i].modulate = Color("a9b4ce") if vide else Color.WHITE
+		_slots[i].self_modulate = Color("a9b4ce") if vide else Color.WHITE
 		for etat in ["normal", "hover", "pressed", "disabled"]:
 			_slots[i].add_theme_stylebox_override(etat, StyleAzur.cercle(not vide))
 	for enfant in _cartes.get_children():
 		_cartes.remove_child(enfant)
 		enfant.queue_free()
-	var ids := _ids_page()
-	var constellation := CompositionArcane.new()
-	constellation.hauteur = 950
-	_cartes.add_child(constellation)
-	var positions := [Vector2(80,20), Vector2(560,80), Vector2(320,300), Vector2(20,490), Vector2(650,490), Vector2(365,710)]
+	var ids := _ids()
+	var grille := GridContainer.new()
+	grille.columns = 2
+	grille.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	grille.add_theme_constant_override("h_separation", 18)
+	grille.add_theme_constant_override("v_separation", 18)
+	StyleAzur.adapter_grille(grille, 300.0, 2)
+	_cartes.add_child(grille)
 	for i in ids.size():
 		var id := ids[i]
 		var d: Dictionary = _catalogue()[id]
-		var b := StyleAzur.bouton_rond("", _ouvrir_fiche.bind(i), 160)
-		b.icon = StyleAzur.glyphe(id)
-		b.expand_icon = true
-		b.add_theme_constant_override("icon_max_width", 100)
+		var ouvert := ReglagesJoueur.sort_debloque(id)
+		var equipe := id == ReglagesJoueur.sort_actif_equipe or id == ReglagesJoueur.ultime_equipe or id in ReglagesJoueur.passifs_equipes
+		var accent := _couleur_categorie(_categorie)
+		var b := StyleAzur.bouton("", _ouvrir_fiche.bind(i))
+		b.custom_minimum_size = Vector2(300, 190)
+		StyleAzur.case_objet(b, equipe)
 		b.tooltip_text = str(d["nom"])
 		b.accessibility_name = str(d["nom"])
-		if not ReglagesJoueur.sort_debloque(id): b.self_modulate = Color("9dabb7")
-		constellation.placer(b, Rect2(positions[i] + Vector2(40, 0), Vector2(160,160)))
-		var nom := StyleAzur.texte(str(d["nom"]), 27, StyleAzur.IVOIRE)
-		nom.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		constellation.placer(nom, Rect2(positions[i] + Vector2(0,166), Vector2(240,70)))
+		if equipe:
+			var style := b.get_theme_stylebox("normal") as StyleBoxTexture
+			style.modulate_color = Color.WHITE.lerp(accent, 0.16)
+		grille.add_child(b)
+		var marge := MarginContainer.new()
+		marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		marge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		for cote in ["left", "right", "top", "bottom"]: marge.add_theme_constant_override("margin_" + cote, 24)
+		b.add_child(marge)
+		var ligne := HBoxContainer.new()
+		ligne.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		ligne.add_theme_constant_override("separation", 14)
+		marge.add_child(ligne)
+		var icone := StyleAzur.vignette(id, 104)
+		icone.modulate = Color.WHITE if ouvert else Color("8995b5")
+		icone.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		ligne.add_child(icone)
+		var textes := VBoxContainer.new()
+		textes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		textes.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		textes.add_theme_constant_override("separation", 8)
+		ligne.add_child(textes)
+		textes.add_child(StyleAzur.texte(str(d["nom"]), 30, StyleAzur.IVOIRE))
+		var statut := "Équipé" if equipe else ("Rang %d / %d" % [ReglagesJoueur.rang_sort(id), Sorts.rang_max(id)] if ouvert else "À découvrir")
+		textes.add_child(StyleAzur.texte(statut, 24, accent if ouvert else accent.darkened(0.12)))
 
 func _ouvrir_fiche(index: int) -> void:
-	var id := _ids_page()[index]
+	var id := _ids()[index]
 	var donnees: Dictionary = _catalogue()[id]
-	var fiche := Control.new()
-	add_child(fiche)
-	var col := StyleAzur.page(fiche, "Grimoire", true)
-	var contenu := StyleAzur.defilement(col)
-	contenu.add_child(StyleAzur.bouton("‹ Refermer le grimoire", func(): fiche.queue_free()))
-	var illustration := StyleAzur.vignette(id, 210)
-	illustration.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	contenu.add_child(illustration)
-	contenu.add_child(StyleAzur.texte(str(donnees["nom"]), 42))
+	if is_instance_valid(_fiche_popup): _fiche_popup.queue_free()
+	var fiche := FenetreFiche.new()
+	var parent_fiche: Node = get_parent().get_parent() if integre_menu else self
+	parent_fiche.add_child(fiche)
+	_fiche_popup = fiche
+	fiche.configurer(str(donnees["nom"]), id)
+	var contenu := fiche.contenu
+	contenu.add_child(StyleAzur.texte(_categorie.trim_suffix("s") + " · " + ("Débloqué" if ReglagesJoueur.sort_debloque(id) else "À découvrir"), 25, _couleur_categorie(_categorie)))
 	var lecture := StyleAzur.plaque(contenu)
-	lecture.add_child(StyleAzur.texte(str(donnees["description"]), 30))
+	lecture.add_child(StyleAzur.texte(str(donnees["description"]), 29))
 	var rang := ReglagesJoueur.rang_sort(id)
 	lecture.add_child(StyleAzur.texte("Rang %d / %d · %s" % [rang, Sorts.rang_max(id), Sorts.resume_rang(id, rang)], 26))
 	lecture.add_child(StyleAzur.texte(Sorts.progression_rang(id), 24))
@@ -135,9 +163,23 @@ func _ouvrir_fiche(index: int) -> void:
 	if ReglagesJoueur.sort_debloque(id):
 		contenu.add_child(StyleAzur.bouton("Retirer" if equipe else "Équiper", func():
 			_choisir_index(index)
-			fiche.queue_free(), true))
+			fiche.fermer(), true))
 	else:
 		lecture.add_child(StyleAzur.texte(Epreuves.provenance(id), 26))
+
+func fermer_fiche() -> bool:
+	if not is_instance_valid(_fiche_popup) or not _fiche_popup.visible: return false
+	_fiche_popup.fermer()
+	return true
+
+func _exit_tree() -> void:
+	if is_instance_valid(_fiche_popup): _fiche_popup.queue_free()
+
+func _couleur_categorie(categorie: String) -> Color:
+	match categorie:
+		"Passifs": return StyleAzur.LILAS
+		"Ultimes": return StyleAzur.CUIVRE
+	return StyleAzur.MAGIE
 
 func _catalogue() -> Dictionary:
 	match _categorie:
@@ -150,35 +192,16 @@ func _ids() -> Array[String]:
 	for id in _catalogue(): ids.append(id)
 	return ids
 
-func _ids_page() -> Array[String]:
-	var ids := _ids()
-	var debut := _page * 6
-	var resultat: Array[String] = []
-	for index in range(debut, mini(debut + 6, ids.size())):
-		resultat.append(ids[index])
-	return resultat
-
 func _afficher(categorie: String) -> void:
-	if categorie == _categorie and _page == 0:
+	if categorie == _categorie:
 		return
 	_categorie = categorie
-	_page = 0
-	_message = ""
-	Sons.jouer("choix", -17.0)
-	_rafraichir()
-
-func _changer_page(direction: int) -> void:
-	var pages := maxi(1, ceili(float(_ids().size()) / 6.0))
-	var nouvelle := clampi(_page + direction, 0, pages - 1)
-	if nouvelle == _page:
-		return
-	_page = nouvelle
 	_message = ""
 	Sons.jouer("choix", -17.0)
 	_rafraichir()
 
 func _choisir_index(index: int) -> void:
-	var ids := _ids_page()
+	var ids := _ids()
 	if index >= ids.size():
 		return
 	var id := ids[index]
@@ -227,7 +250,4 @@ func _retirer_slot(index: int) -> void:
 	_rafraichir()
 
 func _rafraichir() -> void:
-	var pages := maxi(1, ceili(float(_ids().size()) / 6.0))
-	_precedent.disabled = _page <= 0
-	_suivant.disabled = _page >= pages - 1
 	_rendre()

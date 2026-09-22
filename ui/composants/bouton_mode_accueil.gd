@@ -3,6 +3,7 @@ extends Button
 
 var _visuel: Control
 var _icone: TextureRect
+var _fond_legende: Panel
 var _libelle: Label
 var _condition: Label
 var _verrou: TextureRect
@@ -29,18 +30,22 @@ func _ready() -> void:
 	_icone.offset_right = -38
 	_icone.offset_top = 38
 	_icone.offset_bottom = -38
+	_fond_legende = Panel.new()
+	_fond_legende.name = "FondLegende"
+	_fond_legende.add_theme_stylebox_override("panel", StyleAzur.fond_legende(0.86, 14))
+	_fond_legende.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_fond_legende)
 	_libelle = StyleAzur.texte("", 27, StyleAzur.IVOIRE)
 	_libelle.name = "Libelle"
+	_libelle.add_theme_font_override("font", Polices.TITRE)
 	_libelle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_libelle.autowrap_mode = TextServer.AUTOWRAP_OFF
-	_libelle.add_theme_constant_override("outline_size", 5)
-	_libelle.add_theme_color_override("font_outline_color", Color("213c51"))
+	_libelle.add_theme_constant_override("outline_size", 1)
 	add_child(_libelle)
 	_condition = StyleAzur.texte("", 22, StyleAzur.CUIVRE)
 	_condition.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_condition.autowrap_mode = TextServer.AUTOWRAP_OFF
-	_condition.add_theme_constant_override("outline_size", 4)
-	_condition.add_theme_color_override("font_outline_color", Color("213c51"))
+	_condition.add_theme_constant_override("outline_size", 1)
 	add_child(_condition)
 	_verrou = StyleAzur.illustration("cadenas", 0)
 	_verrou.name = "Verrou"
@@ -59,7 +64,8 @@ func definir_acces(ouvert: bool, niveau: int) -> void:
 	disabled = not ouvert
 	_verrou.visible = not ouvert
 	_condition.text = "Niveau %d" % niveau if not ouvert else ""
-	_icone.modulate = Color.WHITE if ouvert else Color("a49e87")
+	_icone.modulate = Color.WHITE if ouvert else Color("a6afc9")
+	_replacer()
 
 func _replacer() -> void:
 	if _visuel == null: return
@@ -67,6 +73,8 @@ func _replacer() -> void:
 	_visuel.position = Vector2((size.x - cote) * 0.5, 0)
 	_visuel.size = Vector2.ONE * cote
 	_visuel.pivot_offset = _visuel.size * 0.5
+	_fond_legende.position = Vector2(0, cote)
+	_fond_legende.size = Vector2(size.x, 72 if not _condition.text.is_empty() else 38)
 	_libelle.add_theme_font_size_override("font_size", int(clampf(size.x * 0.16, 20.0, 27.0)))
 	_condition.add_theme_font_size_override("font_size", int(clampf(size.x * 0.13, 18.0, 22.0)))
 	_libelle.position = Vector2(0, cote + 2)

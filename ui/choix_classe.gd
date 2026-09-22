@@ -1,6 +1,7 @@
 extends Control
 signal ferme
 var obligatoire := false
+var premiers_pas := false
 var _index := 0
 var _nom: Label
 var _description: Label
@@ -11,12 +12,14 @@ var _classes: Array = Personnage.SPECIALISATIONS.keys()
 func _ready() -> void:
 	if not ReglagesJoueur.specialisation_effective().is_empty():
 		_index = _classes.find(ReglagesJoueur.specialisation_effective())
-	var col := StyleAzur.page(self, "Votre voie", true)
+	var col := StyleAzur.page(self, "Premiers pas" if premiers_pas else "Votre voie", true)
 	var contenu := StyleAzur.defilement(col)
-	var titre := StyleAzur.texte("Choisissez votre classe", 42)
+	var titre := StyleAzur.texte("1/4 · Choisissez votre classe" if premiers_pas else "Choisissez votre classe", 42)
 	titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	contenu.add_child(titre)
-	var aide := StyleAzur.texte("Ce choix est nécessaire pour commencer. Vous pourrez changer gratuitement depuis Héros.", 26, StyleAzur.ATTENUE)
+	var message := "Votre première aventure commence après ce choix. Vous pourrez changer de classe depuis Héros." \
+		if premiers_pas else "Choisissez la classe qui vous plaît. Le changement est gratuit."
+	var aide := StyleAzur.texte(message, 26, StyleAzur.ATTENUE)
 	aide.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	contenu.add_child(aide)
 	var ligne := HBoxContainer.new()

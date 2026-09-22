@@ -43,13 +43,13 @@ func _ready() -> void:
 	var ambiance := Environment.new()
 	ambiance.background_mode = Environment.BG_CLEAR_COLOR
 	ambiance.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	ambiance.ambient_light_color = Color("e0e8d9")
+	ambiance.ambient_light_color = Color("dbe1f5")
 	ambiance.ambient_light_energy = 0.7
 	environnement.environment = ambiance
 	monde.add_child(environnement)
 	var lumiere := DirectionalLight3D.new()
 	lumiere.rotation_degrees = Vector3(-35, -30, 0)
-	lumiere.light_color = Color("fff4df")
+	lumiere.light_color = Color("f6edff")
 	lumiere.light_energy = 1.15
 	monde.add_child(lumiere)
 	resized.connect(_cadrer)

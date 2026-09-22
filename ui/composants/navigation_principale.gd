@@ -18,7 +18,7 @@ func _ready() -> void:
 	_socle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	HabillagePeint.appliquer(_socle)
 	var fond := StyleBoxFlat.new()
-	fond.bg_color = Color("142b45e6")
+	fond.bg_color = Color(StyleAzur.OMBRE_CLAIRIERE, 0.91)
 	_socle.add_theme_stylebox_override("panel", fond)
 	add_child(_socle)
 	_barre = HBoxContainer.new()

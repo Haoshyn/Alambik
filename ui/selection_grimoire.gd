@@ -197,8 +197,8 @@ func _rafraichir() -> void:
 		_zones_chapitres[i].accessibility_name = legende.replace("\n", " · ")
 		_zones_chapitres[i].tooltip_text = legende.replace("\n", " · ")
 		# L'etat verrouille attenue le decor, jamais la legende qui l'explique.
-		_zones_chapitres[i].self_modulate = Color.WHITE if accessible else Color("b4ac95")
-		_icones_chapitres[i].modulate = Color.WHITE if accessible else Color("b4ac95")
+		_zones_chapitres[i].self_modulate = Color.WHITE if accessible else Color("a9b4ce")
+		_icones_chapitres[i].modulate = Color.WHITE if accessible else Color("a9b4ce")
 		StyleAzur.case_objet(_zones_chapitres[i], i == _chapitre_monde)
 	_bouton_selectionner.disabled = not ReglagesJoueur.chapitre_debloque(_index_selectionne())
 	_bouton_epreuve.disabled = not ReglagesJoueur.mode_debloque("epreuve_sorts")

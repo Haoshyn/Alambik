@@ -46,17 +46,17 @@ static func styliser_bouton(bouton: Button, _accent := Palette.OR, secondaire :=
 	bouton.action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
 	for etat in ["normal", "hover", "pressed", "focus", "disabled"]:
 		var style := StyleAzur.sceau(not secondaire, Color.WHITE, etat == "pressed")
-		if etat == "disabled": style.modulate_color = Color("87949d")
+		if etat == "disabled": style.modulate_color = Color("8995b5")
 		bouton.add_theme_stylebox_override(etat, style)
-	bouton.add_theme_color_override("font_color", Palette.TEXTE)
+	bouton.add_theme_color_override("font_color", StyleAzur.TEXTE)
 	bouton.add_theme_color_override("font_hover_color", Color.WHITE)
 	bouton.add_theme_color_override("font_pressed_color", Color.WHITE)
 	bouton.add_theme_color_override("font_focus_color", Color.WHITE)
-	bouton.add_theme_color_override("font_disabled_color", Color("cbbfa6"))
+	bouton.add_theme_color_override("font_disabled_color", Color("c1c7d8"))
 	bouton.add_theme_constant_override("outline_size", 1)
 	bouton.add_theme_constant_override("icon_max_width", 64)
 	bouton.add_theme_constant_override("h_separation", 16)
-	bouton.add_theme_color_override("font_outline_color", Color("183444cc"))
+	bouton.add_theme_color_override("font_outline_color", Color("263154cc"))
 	if not bouton.has_meta("micro_animation_installee"):
 		bouton.set_meta("micro_animation_installee", true)
 		bouton.resized.connect(func() -> void: bouton.pivot_offset = bouton.size * 0.5)
@@ -83,8 +83,8 @@ static func styliser_selecteur(selecteur: OptionButton, accent := Palette.ESSENC
 	HabillagePeint.appliquer(selecteur)
 	selecteur.focus_mode = Control.FOCUS_NONE
 	selecteur.add_theme_font_size_override("font_size", 23)
-	selecteur.add_theme_color_override("font_color", Palette.TEXTE)
-	selecteur.add_theme_color_override("font_disabled_color", Color("cbbfa6"))
+	selecteur.add_theme_color_override("font_color", StyleAzur.TEXTE)
+	selecteur.add_theme_color_override("font_disabled_color", Color("c1c7d8"))
 	selecteur.add_theme_stylebox_override("normal", panneau_leger(accent, 18))
 	selecteur.add_theme_stylebox_override("hover",
 		panneau(Color(accent, 0.10), Color(accent, 0.48), 18, 4))
@@ -94,7 +94,7 @@ static func styliser_selecteur(selecteur: OptionButton, accent := Palette.ESSENC
 		panneau(Color(0.025, 0.022, 0.040, 0.72), Color(accent, 0.12), 18, 1))
 	var menu := selecteur.get_popup()
 	menu.add_theme_font_size_override("font_size", 22)
-	menu.add_theme_color_override("font_color", Palette.TEXTE)
+	menu.add_theme_color_override("font_color", StyleAzur.TEXTE)
 	menu.add_theme_color_override("font_hover_color", Color.WHITE)
 	menu.add_theme_stylebox_override("panel", panneau(Color(0.025, 0.020, 0.045, 0.99),
 		Color(accent, 0.42), 18, 8))

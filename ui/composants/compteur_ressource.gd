@@ -8,7 +8,7 @@ var _libelle: Label
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	HabillagePeint.appliquer(self)
-	add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	add_theme_stylebox_override("panel", StyleAzur.fond_legende(0.80, 20))
 	var ligne := HBoxContainer.new()
 	ligne.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ligne.add_theme_constant_override("separation", 10)

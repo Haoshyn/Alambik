@@ -5,5 +5,5 @@
 [resource]
 base_font = ExtResource("1_police")
 variation_opentype = {
-"wght": 700.0
+"wght": 800.0
 }

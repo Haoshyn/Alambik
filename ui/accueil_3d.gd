@@ -19,12 +19,12 @@ signal page_demandee(index: int)
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	theme = StyleAzur.theme_interface()
-	_titre.add_theme_font_override("font", Polices.TITRE)
-	_titre.add_theme_color_override("font_color", Color("fff0bf"))
+	_titre.add_theme_font_override("font", Polices.LOGO)
+	_titre.add_theme_color_override("font_color", Color("f7e4c2"))
 	_titre.add_theme_constant_override("outline_size", 3)
-	_titre.add_theme_color_override("font_outline_color", StyleAzur.FOND)
+	_titre.add_theme_color_override("font_outline_color", StyleAzur.OMBRE_CLAIRIERE)
 	_titre.add_theme_constant_override("shadow_offset_y", 5)
-	_titre.add_theme_color_override("font_shadow_color", Color(StyleAzur.FOND, 0.6))
+	_titre.add_theme_color_override("font_shadow_color", Color(StyleAzur.OMBRE_CLAIRIERE, 0.6))
 	_bandeau.profil_demande.connect(func(): page_demandee.emit(0))
 	_bandeau.reglages_demandes.connect(func(): reglages.emit())
 	_scene.mine_demandee.connect(func(): mine.emit())
@@ -47,7 +47,10 @@ func _cadrer() -> void:
 	_marges.add_theme_constant_override("margin_bottom", int(Ecran.marge_basse() + StyleAzur.HAUTEUR_NAVIGATION + 20))
 	var largeur := maxf(0.0, size.x - maxf(lateral, Ecran.marge_gauche()) - maxf(lateral, Ecran.marge_droite()))
 	_depart.custom_minimum_size.x = minf(850.0, largeur)
-	_titre.add_theme_font_size_override("font_size", int(clampf(largeur * 0.082, 48.0, 84.0)))
+	var taille_titre := int(clampf(largeur * 0.1, 48.0, 84.0))
+	while taille_titre > 40 and Polices.LOGO.get_string_size("ALAMBIK", HORIZONTAL_ALIGNMENT_LEFT, -1, taille_titre).x > largeur - 12.0:
+		taille_titre -= 1
+	_titre.add_theme_font_size_override("font_size", taille_titre)
 
 func rafraichir() -> void:
 	_bandeau.afficher(ReglagesJoueur.niveau_compte_effectif(), ReglagesJoueur.experience_compte,

@@ -11,7 +11,7 @@ var _solde: Label
 var _achat: Button
 var _noeuds := {}
 var _embleme: TextureRect
-var _fiche_popup: Control
+var _fiche_popup: FenetreFiche
 
 func _ready() -> void:
 	if ArbreCompetences.NOEUDS.has(maitrise_initiale):
@@ -91,11 +91,12 @@ func _ready() -> void:
 			rang_noeud += 1
 			_noeuds[id] = b
 		branches.traces.append(trace)
-	_fiche_popup = Control.new()
-	add_child(_fiche_popup)
-	var panneau_details := StyleAzur.page(_fiche_popup, "Maîtrise", true)
-	var defilement_details := StyleAzur.defilement(panneau_details)
-	defilement_details.add_child(StyleAzur.bouton("‹ Retour à la constellation", func(): _fiche_popup.hide()))
+	_fiche_popup = FenetreFiche.new()
+	_fiche_popup.detruire_en_fermant = false
+	var parent_fiche: Node = get_parent().get_parent() if integre_menu else self
+	parent_fiche.add_child(_fiche_popup)
+	_fiche_popup.configurer("Maîtrise", "astrolabe")
+	var defilement_details := _fiche_popup.contenu
 	var fiche := StyleAzur.plaque(defilement_details,true)
 	var ligne_details := HBoxContainer.new()
 	ligne_details.add_theme_constant_override("separation",24)
@@ -122,9 +123,17 @@ func _ready() -> void:
 	_rafraichir()
 	Capture.programmer(self)
 
+func fermer_fiche() -> bool:
+	if not is_instance_valid(_fiche_popup) or not _fiche_popup.visible: return false
+	_fiche_popup.fermer()
+	return true
+
+func _exit_tree() -> void:
+	if is_instance_valid(_fiche_popup): _fiche_popup.queue_free()
+
 func _style_noeud(accent: Color, selection := false, ouvert := true) -> StyleBoxTexture:
 	var style := StyleAzur.cercle(selection)
-	style.modulate_color = Color.WHITE.lerp(accent, 0.12) if ouvert else Color("938d7b")
+	style.modulate_color = Color.WHITE.lerp(accent, 0.12) if ouvert else Color("8993ad")
 	return style
 
 
@@ -134,7 +143,7 @@ func _rafraichir() -> void:
 		var b: Button = _noeuds[id]
 		var ouvert := ReglagesJoueur.mode_dev or ArbreCompetences.prerequis_atteint(id,ReglagesJoueur.rangs_competences)
 		var icone: TextureRect = b.get_meta("icone")
-		icone.modulate = Color.WHITE if ouvert else Color("a39c86")
+		icone.modulate = Color.WHITE if ouvert else Color("a6afc9")
 		var rang: Label = b.get_meta("rang")
 		rang.text = "%d / %d" % [ReglagesJoueur.rang_competence(id),ArbreCompetences.rangs(id)] if ouvert else ""
 		var etat: TextureRect = b.get_meta("etat")

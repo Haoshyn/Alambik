@@ -1,25 +1,26 @@
 class_name StyleAzur
 extends RefCounted
 
-const FOND := Color("213c51")
-const PANNEAU := Color("28586b")
-const CUIVRE := Color("e1c396")
+const FOND := Color("253459")
+const PANNEAU := Color("344c7b")
+const CUIVRE := Color("dbc4a0")
 const CORAIL := Color("ee9482")
-const MENTHE := Color("a7d9cb")
-const LILAS := Color("c5abdf")
-const TEXTE := Color("fff9ed")
-const ATTENUE := Color("dae5e7")
-const MAGIE := Color("75d9dc")
-const IVOIRE := Color("fff9ed")
-const ENCRE := Color("234457")
-const ENCRE_ATTENUE := Color("526675")
+const MENTHE := Color("a7d8e8")
+const LILAS := Color("d0baf3")
+const TEXTE := Color("f8f6ff")
+const ATTENUE := Color("edf2ff")
+const MAGIE := Color("8fe5f1")
+const OMBRE_CLAIRIERE := Color("263154")
+const IVOIRE := Color("f8f6ff")
+const ENCRE := Color("253052")
+const ENCRE_ATTENUE := Color("53617d")
 const ICONES_OBJETS := [
 	"anneau_azur", "anneau_amethyste", "pendentif_azur", "anneau_givre",
 	"anneau_ambre", "pendentif_lune", "anneau_emeraude", "pendentif_soleil",
 	"feu", "egide", "grimoire", "pierres", "vitalite", "temps_suspendu", "astrolabe", "savoir",
 ]
 const HAUTEUR_NAVIGATION := 176.0
-const VIOLET := Color("4f6385")
+const VIOLET := Color("735aad")
 const FOND_ATELIER := preload("res://assets/visual/interface/academie_arcanique.png")
 const TITRE_ATELIER := Polices.TITRE
 # Les ressources explicites restent incluses dans les exports Android.
@@ -124,17 +125,17 @@ static func bouton(texte: String, action := Callable(), principal := false) -> B
 	b.add_theme_font_size_override("font_size", 29)
 	StyleInterface.styliser_bouton(b, MAGIE if principal else CUIVRE, not principal)
 	b.add_theme_stylebox_override("normal",sceau(principal))
-	b.add_theme_stylebox_override("hover",sceau(principal, Color("fff5db")))
+	b.add_theme_stylebox_override("hover",sceau(principal, Color("eee7ff")))
 	b.add_theme_stylebox_override("pressed",sceau(principal, Color.WHITE, true))
-	b.add_theme_stylebox_override("disabled",sceau(principal, Color("9a9281")))
+	b.add_theme_stylebox_override("disabled",sceau(principal, Color("8993aa")))
 	for etat in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 		b.add_theme_color_override(etat, IVOIRE)
-	b.add_theme_color_override("font_disabled_color", Color("bdb4a4"))
+	b.add_theme_color_override("font_disabled_color", Color("c1c7d8"))
 	b.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 	if principal:
 		b.add_theme_font_size_override("font_size",34)
 	b.add_theme_constant_override("outline_size",1)
-	b.add_theme_color_override("font_outline_color",Color("183444"))
+	b.add_theme_color_override("font_outline_color",OMBRE_CLAIRIERE)
 	if b.icon != null: b.add_theme_constant_override("icon_max_width", 34)
 	if action.is_valid(): b.pressed.connect(action)
 	return b
@@ -148,17 +149,19 @@ static func sceau(principal := false, teinte := Color.WHITE, enfonce := false) -
 
 static func habiller_accueil(b: Button, principal := false) -> void:
 	b.add_theme_stylebox_override("normal", sceau(principal))
-	b.add_theme_stylebox_override("hover", sceau(principal, Color("fff4df")))
+	b.add_theme_stylebox_override("hover", sceau(principal, Color("eee7ff")))
 	b.add_theme_stylebox_override("pressed", sceau(principal, Color.WHITE, true))
 	b.add_theme_font_size_override("font_size", 44 if principal else 30)
 
 static func texte(contenu: String, taille := 30, couleur := TEXTE) -> Label:
 	var l := Label.new()
 	l.text = contenu
-	l.add_theme_font_override("font",Polices.TITRE if taille >= 34 else Polices.CORPS)
+	l.add_theme_font_override("font",Polices.LOGO if taille >= 40 else (Polices.TITRE if taille >= 34 else Polices.CORPS))
 	l.add_theme_font_size_override("font_size",taille)
 	l.add_theme_color_override("font_color",couleur)
-	l.add_theme_color_override("font_shadow_color",Color("183444b3"))
+	l.add_theme_color_override("font_outline_color", Color("1a2644e8"))
+	l.add_theme_constant_override("outline_size", 1)
+	l.add_theme_color_override("font_shadow_color",Color("17233bd9"))
 	l.add_theme_constant_override("shadow_offset_x",0)
 	l.add_theme_constant_override("shadow_offset_y",2)
 	l.add_theme_constant_override("line_spacing",4)
@@ -171,7 +174,7 @@ static func texte(contenu: String, taille := 30, couleur := TEXTE) -> Label:
 # La surface la plus proche decide du contraste, meme dans les panneaux imbriques.
 static func _adapter_encre(label: Label, couleur: Color) -> void:
 	label.add_theme_color_override("font_color", couleur)
-	label.add_theme_color_override("font_shadow_color", Color("183444b3"))
+	label.add_theme_color_override("font_shadow_color", Color("17233bd9"))
 	var ancetre := label.get_parent()
 	while ancetre != null:
 		if ancetre.has_meta("surface_lecture"):
@@ -181,10 +184,17 @@ static func _adapter_encre(label: Label, couleur: Color) -> void:
 					encre = couleur.darkened(0.57)
 				label.add_theme_color_override("font_color", encre)
 				label.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
+				label.add_theme_constant_override("outline_size", 0)
 			return
 		if ancetre is BaseButton:
 			return
 		ancetre = ancetre.get_parent()
+
+static func fond_legende(opacite := 0.78, rayon := 18) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(FOND, opacite)
+	style.set_corner_radius_all(rayon)
+	return style
 
 static func habiller_lecture(controle: Control) -> void:
 	controle.set_meta("surface_lecture", true)
@@ -194,7 +204,7 @@ static func habiller_lecture(controle: Control) -> void:
 	elif controle is Button:
 		for etat in ["normal", "hover", "pressed", "disabled"]:
 			var variante := style.duplicate() as StyleBoxTexture
-			variante.modulate_color = Color("d6cbb5") if etat == "pressed" else Color.WHITE
+			variante.modulate_color = Color("c9c4e7") if etat == "pressed" else Color.WHITE
 			controle.add_theme_stylebox_override(etat, variante)
 
 static func image(index: int, cote := 128.0) -> TextureRect:
@@ -328,7 +338,7 @@ static func fond_atelier(parent: Control, calme := false) -> void:
 	parent.add_child(fond)
 	if calme:
 		var voile := ColorRect.new()
-		voile.color = Color("29352e8f")
+		voile.color = Color("26365aa6")
 		voile.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		voile.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		parent.add_child(voile)
@@ -337,10 +347,10 @@ static func case_objet(b: Button, selection := false) -> void:
 	b.add_theme_stylebox_override("normal",texture_etirable("case_selection" if selection else "case",24,28,24))
 	b.add_theme_stylebox_override("hover",texture_etirable("case_selection",24,28,24))
 	var pressee := texture_etirable("case_selection",24,28,24)
-	pressee.modulate_color = Color("bddadb")
+	pressee.modulate_color = Color("c8c1f0")
 	b.add_theme_stylebox_override("pressed",pressee)
 	var desactivee := texture_etirable("case",24,28,24)
-	desactivee.modulate_color = Color("82949c")
+	desactivee.modulate_color = Color("8995b5")
 	b.add_theme_stylebox_override("disabled",desactivee)
 	for etat in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:
 		b.add_theme_color_override(etat,IVOIRE)
@@ -366,7 +376,12 @@ static func bouton_rond(texte: String, action: Callable, cote := 88.0) -> Button
 	return b
 
 static func onglet_symbolique(b: Button, symbole: Texture2D, selection: bool) -> void:
-	var espace := StyleBoxEmpty.new()
+	var espace := StyleBoxFlat.new()
+	espace.bg_color = Color("5d4a91e0") if selection else Color("263154b8")
+	espace.set_corner_radius_all(18)
+	if selection:
+		espace.border_color = LILAS
+		espace.border_width_bottom = 3
 	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
 		espace.set_content_margin(cote, 12)
 	for etat in ["normal", "hover", "pressed", "disabled", "focus"]:
@@ -375,7 +390,7 @@ static func onglet_symbolique(b: Button, symbole: Texture2D, selection: bool) ->
 	b.expand_icon = true
 	b.add_theme_constant_override("icon_max_width", 56)
 	b.add_theme_color_override("font_color", MAGIE if selection else ATTENUE)
-	b.add_theme_color_override("icon_normal_color", Color.WHITE if selection else Color("7b949f"))
+	b.add_theme_color_override("icon_normal_color", Color.WHITE if selection else Color("a6b8da"))
 	b.add_theme_font_override("font", Polices.TITRE if selection else Polices.CORPS)
 
 static func medaillon(index: int, cote := 128.0) -> PanelContainer:
@@ -428,7 +443,12 @@ static func illustration(nom: String, cote := 128.0) -> TextureRect:
 static func banniere(parent: Node, titre: String, sous_titre: String, embleme := "grimoire") -> VBoxContainer:
 	var panneau := PanelContainer.new()
 	HabillagePeint.appliquer(panneau)
-	panneau.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	var fond := fond_legende(0.72, 18)
+	fond.content_margin_left = 14
+	fond.content_margin_right = 18
+	fond.content_margin_top = 10
+	fond.content_margin_bottom = 12
+	panneau.add_theme_stylebox_override("panel", fond)
 	parent.add_child(panneau)
 	var ligne := HBoxContainer.new()
 	ligne.add_theme_constant_override("separation",24)
@@ -442,7 +462,7 @@ static func banniere(parent: Node, titre: String, sous_titre: String, embleme :=
 	col.add_theme_constant_override("separation",8)
 	ligne.add_child(col)
 	col.add_child(texte(titre,36,IVOIRE))
-	if not sous_titre.is_empty(): col.add_child(texte(sous_titre,25,ATTENUE))
+	if not sous_titre.is_empty(): col.add_child(texte(sous_titre,28,ATTENUE))
 	return col
 
 static func dessiner_icone(surface: CanvasItem, nom: String, rect: Rect2, teinte := Color.WHITE) -> void:
@@ -467,11 +487,11 @@ static func theme_interface() -> Theme:
 		for etat in ["unchecked", "unchecked_disabled"]:
 			_theme.set_icon(etat, type, texture_interface("non"))
 	_theme.set_color("font_color","Label",TEXTE)
-	_theme.set_color("font_shadow_color","Label",Color("183444b3"))
+	_theme.set_color("font_shadow_color","Label",Color("263154b3"))
 	_theme.set_constant("shadow_offset_x","Label",0)
 	_theme.set_constant("shadow_offset_y","Label",2)
 	_theme.set_stylebox("panel","TooltipPanel",cadre())
-	_theme.set_color("font_color","TooltipLabel",TEXTE)
+	_theme.set_color("font_color","TooltipLabel",ENCRE)
 	_theme.set_font_size("font_size","TooltipLabel",25)
 	for type in ["LineEdit", "TextEdit"]:
 		_theme.set_stylebox("normal",type,texture_etirable("saisie",24,24,20))
@@ -482,10 +502,10 @@ static func theme_interface() -> Theme:
 		_theme.set_color("font_color",type,ENCRE)
 		_theme.set_color("font_placeholder_color",type,ENCRE_ATTENUE)
 		_theme.set_color("caret_color",type,ENCRE)
-		_theme.set_color("selection_color",type,Color("8bbfcb"))
+		_theme.set_color("selection_color",type,Color("b4a8e8"))
 	for type in ["VScrollBar","HScrollBar"]:
 		var rail := StyleBoxFlat.new()
-		rail.bg_color = Color("244557cc")
+		rail.bg_color = Color("2b3b66cc")
 		rail.set_corner_radius_all(6)
 		rail.content_margin_left = 6 if type == "VScrollBar" else 1
 		rail.content_margin_right = rail.content_margin_left
