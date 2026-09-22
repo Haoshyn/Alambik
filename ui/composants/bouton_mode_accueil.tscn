@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/composants/bouton_mode_accueil.gd" id="1"]
+
+[node name="BoutonMode" type="Button"]
+custom_minimum_size = Vector2(112, 184)
+offset_right = 176.0
+offset_bottom = 248.0
+script = ExtResource("1")

@@ -68,7 +68,7 @@ func _ajouter_carte(col: VBoxContainer, id: String, type: String, chance: float)
 	marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	marge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for cote in ["left", "right", "top", "bottom"]:
-		marge.add_theme_constant_override("margin_" + cote, 24)
+		marge.add_theme_constant_override("margin_" + cote, 44)
 	carte.add_child(marge)
 	var ligne := HBoxContainer.new()
 	ligne.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -82,7 +82,12 @@ func _ajouter_carte(col: VBoxContainer, id: String, type: String, chance: float)
 	textes.add_child(StyleAzur.texte("GARANTI" if chance >= 1.0 else "CHANCE D’OBTENTION · %.1f %%" % (chance * 100.0), 22, StyleAzur.CUIVRE))
 	textes.add_child(StyleAzur.texte(str(d["nom"]), 32))
 	textes.add_child(StyleAzur.texte(_resume_objet(id, 0) if type == "objet" else str(d["description"]), 25, StyleAzur.ATTENUE))
-	textes.add_child(StyleAzur.texte("Consulter les pouvoirs ›", 24, StyleAzur.MAGIE))
+	var consulter := HBoxContainer.new()
+	consulter.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	consulter.add_theme_constant_override("separation", 8)
+	consulter.add_child(StyleAzur.texte("Consulter les pouvoirs", 24, StyleAzur.MAGIE))
+	consulter.add_child(StyleAzur.illustration("fleche_droite", 28))
+	textes.add_child(consulter)
 	marge.minimum_size_changed.connect(func(): carte.custom_minimum_size.y = maxf(204.0, marge.get_combined_minimum_size().y))
 	StyleAzur.case_objet(carte)
 	col.add_child(carte)

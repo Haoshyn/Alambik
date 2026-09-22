@@ -1,0 +1,145 @@
+{
+  "nom": "Laboratoire de potions",
+  "reference": "Références · silhouettes et couleurs des fioles",
+  "palette": {
+    "id": "E",
+    "nom": "Laboratoire de potions",
+    "origine": "Références · silhouettes et couleurs des fioles",
+    "forme": "fiole",
+    "fond": "#9796ce",
+    "fond2": "#6b71ac",
+    "panneau": "#423c77",
+    "bord": "#322e60",
+    "action": "#8ae5e8",
+    "action2": "#50abbc",
+    "papier": "#f0edff",
+    "texte": "#f8f0ff",
+    "encre": "#3b3668",
+    "accent": "#ffc37b",
+    "second": "#aa8fda",
+    "icone": "#8fe7ed"
+  },
+  "viewport": [
+    1080,
+    1920
+  ],
+  "composants": {
+    "principal_normal": {
+      "taille": [
+        984,
+        178
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "principal_presse": {
+      "taille": [
+        984,
+        178
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "principal_desactive": {
+      "taille": [
+        984,
+        178
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "secondaire_normal": {
+      "taille": [
+        320,
+        124
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "secondaire_presse": {
+      "taille": [
+        320,
+        124
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "secondaire_desactive": {
+      "taille": [
+        320,
+        124
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "lecture_normal": {
+      "taille": [
+        984,
+        152
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "navigation_normal": {
+      "taille": [
+        984,
+        180
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "compteur_normal": {
+      "taille": [
+        270,
+        100
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    }
+  }
+}

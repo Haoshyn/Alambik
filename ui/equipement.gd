@@ -9,6 +9,7 @@ var _objet_selectionne := ""
 var _arme_selectionnee := ""
 var _page := 0
 var _boutons_slots: Array[Button] = []
+var _libelles_slots: Array[Label] = []
 var _boutons_objets: Array[Button] = []
 var _actions: Array[Button] = []
 var _precedent: Button
@@ -23,14 +24,15 @@ var _vide: VBoxContainer
 var _portrait_objet: TextureRect
 var _fiche_objet: PanelContainer
 var _bijoux: VBoxContainer
-var _actions_ligne: HBoxContainer
+var _actions_ligne: BoxContainer
 var _onglets_atelier: Array[Button] = []
 var _page_collection: Label
 
 func _ready() -> void:
 	var col := StyleAzur.page(self,"Équipement",integre_menu)
 	StyleAzur.banniere(col, "L’atelier des reliques", "Arme pour l’Attaque, anneau pour les PV, bracelet pour la Défense et collier pour la magie.", "forge")
-	var onglets := HBoxContainer.new()
+	var onglets := BoxContainer.new()
+	StyleAzur.adapter_ligne(onglets)
 	onglets.add_theme_constant_override("separation", 14)
 	col.add_child(onglets)
 	for index in 3:
@@ -38,7 +40,8 @@ func _ready() -> void:
 		onglets.add_child(onglet)
 		_onglets_atelier.append(onglet)
 	var contenu := StyleAzur.defilement(col)
-	var bilan := StyleAzur.plaque(contenu)
+	var bilan := VBoxContainer.new()
+	contenu.add_child(bilan)
 	_resume = StyleAzur.texte("", 30, StyleAzur.IVOIRE)
 	_resume.add_theme_constant_override("line_spacing", 8)
 	bilan.add_child(_resume)
@@ -52,24 +55,27 @@ func _ready() -> void:
 	_bijoux = VBoxContainer.new()
 	_bijoux.add_theme_constant_override("separation", 20)
 	contenu.add_child(_bijoux)
-	var slots := HBoxContainer.new()
-	slots.add_theme_constant_override("separation",16)
+	var slots := CompositionArcane.new()
+	slots.hauteur = 390
+	slots.traces = [PackedVector2Array([Vector2(160,210),Vector2(465,110),Vector2(790,225)])]
 	_bijoux.add_child(StyleAzur.texte("Votre parure", 34, StyleAzur.IVOIRE))
 	_bijoux.add_child(slots)
 	for i in SLOTS.size():
-		var b := StyleAzur.bouton(NOMS_SLOTS[SLOTS[i]],func(): _selectionner_slot(SLOTS[i]))
-		b.custom_minimum_size.y = 210
-		b.add_theme_font_size_override("font_size", 30)
-		b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		var b := StyleAzur.bouton_rond("",func(): _selectionner_slot(SLOTS[i]), 180)
 		b.expand_icon = true
-		b.add_theme_constant_override("icon_max_width",112)
-		slots.add_child(b)
+		b.add_theme_constant_override("icon_max_width",104)
+		var position_sceau := Vector2([70, 375, 700][i], [120, 20, 135][i])
+		slots.placer(b, Rect2(position_sceau, Vector2(180,180)))
 		_boutons_slots.append(b)
+		var nom := StyleAzur.texte("", 26)
+		nom.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		slots.placer(nom, Rect2(position_sceau + Vector2(-35,190), Vector2(250,70)))
+		_libelles_slots.append(nom)
 	StyleAzur.separateur(_bijoux)
 	_bijoux.add_child(StyleAzur.texte("Le coffret de bijoux",35))
 	var grille := GridContainer.new()
 	grille.columns = 2
+	StyleAzur.adapter_grille(grille, 310.0, 2)
 	grille.add_theme_constant_override("h_separation",16)
 	grille.add_theme_constant_override("v_separation",16)
 	_bijoux.add_child(grille)
@@ -98,7 +104,8 @@ func _ready() -> void:
 	invitation.add_child(invitation_texte)
 	invitation_texte.add_child(StyleAzur.texte("Votre collection commence ici",34))
 	invitation_texte.add_child(StyleAzur.texte("Ouvrez les coffres de la campagne pour découvrir de nouveaux bijoux.",28,StyleAzur.ATTENUE))
-	var pages := HBoxContainer.new()
+	var pages := BoxContainer.new()
+	StyleAzur.adapter_ligne(pages)
 	_bijoux.add_child(pages)
 	_precedent = StyleAzur.bouton("‹ Précédent",func(): _changer_page(-1))
 	_suivant = StyleAzur.bouton("Suivant ›",func(): _changer_page(1))
@@ -124,7 +131,8 @@ func _ready() -> void:
 	_effets_objet = StyleAzur.texte("",28,StyleAzur.ATTENUE)
 	_effets_objet.add_theme_constant_override("line_spacing", 8)
 	fiche.add_child(_effets_objet)
-	_actions_ligne = HBoxContainer.new()
+	_actions_ligne = BoxContainer.new()
+	StyleAzur.adapter_ligne(_actions_ligne)
 	_actions_ligne.add_theme_constant_override("separation",12)
 	col.add_child(_actions_ligne)
 	for d in [["Équiper",_equiper],["Retirer",_retirer],["Forge",_ameliorer]]:
@@ -149,15 +157,16 @@ func _changer_atelier(index: int) -> void:
 	_bijoux.visible = index == 0
 	_actions_ligne.visible = index == 0
 	for i in _onglets_atelier.size():
-		StyleAzur.case_objet(_onglets_atelier[i], i == index)
+		StyleAzur.onglet_symbolique(_onglets_atelier[i], [StyleAzur.icone(0), StyleAzur.icone_arme("standard"), StyleAzur.glyphe("familier_gardien")][i], i == index)
 
 func _afficher_inventaire() -> void:
 	_resume.text = _resume_heros()
 	for i in SLOTS.size():
 		var id := str(ReglagesJoueur.equipements.get(SLOTS[i],""))
-		_boutons_slots[i].icon = null if id.is_empty() else StyleAzur.icone(StyleAzur.icone_objet(id))
-		_boutons_slots[i].text = NOMS_SLOTS[SLOTS[i]]+ ("\nLibre" if id.is_empty() else "\nNiveau %d" % ReglagesJoueur.niveau_objet(id))
-		StyleAzur.case_objet(_boutons_slots[i],SLOTS[i] == _slot_selectionne)
+		_boutons_slots[i].icon = StyleAzur.icone(2 if SLOTS[i] == "collier" else 0) if id.is_empty() else StyleAzur.icone(StyleAzur.icone_objet(id))
+		_boutons_slots[i].add_theme_color_override("icon_normal_color", Color("728d9c") if id.is_empty() else Color.WHITE)
+		_libelles_slots[i].text = NOMS_SLOTS[SLOTS[i]]+ ("\nLibre" if id.is_empty() else "\nNiveau %d" % ReglagesJoueur.niveau_objet(id))
+		_boutons_slots[i].add_theme_stylebox_override("normal", StyleAzur.cercle(SLOTS[i] == _slot_selectionne))
 	var ids := _objets_page()
 	_vide.get_parent().visible = ids.is_empty()
 	_precedent.get_parent().visible = _objets_compatibles().size() > 6
@@ -304,6 +313,7 @@ func _afficher_armes() -> void:
 		_arme_selectionnee = ReglagesJoueur.projectile_equipe_effectif()
 	var ligne := GridContainer.new()
 	ligne.columns = 2
+	StyleAzur.adapter_grille(ligne, 310.0, 2)
 	ligne.add_theme_constant_override("h_separation",10)
 	ligne.add_theme_constant_override("v_separation",10)
 	_armes.add_child(ligne)
@@ -337,7 +347,8 @@ func _afficher_armes() -> void:
 		fiche_arme.add_child(StyleAzur.texte("Prochain niveau : attaque de base +%s\nForge : %d pierres" % [_nombre(CatalogueProjectiles.attaque_base(_arme_selectionnee,niveau+1)),ReglagesJoueur.cout_forge_arme(_arme_selectionnee)],28,StyleAzur.ATTENUE))
 	else:
 		fiche_arme.add_child(StyleAzur.texte("Limite de forge atteinte",28,StyleAzur.ATTENUE))
-	var actions := HBoxContainer.new()
+	var actions := BoxContainer.new()
+	StyleAzur.adapter_ligne(actions)
 	actions.add_theme_constant_override("separation",12)
 	fiche_arme.add_child(actions)
 	var equiper := StyleAzur.bouton("Équiper",_equiper_arme,true)
@@ -358,6 +369,7 @@ func _afficher_familiers() -> void:
 		_familier_selectionne = ReglagesJoueur.familier_equipe_effectif()
 	var grille := GridContainer.new()
 	grille.columns = 2
+	StyleAzur.adapter_grille(grille, 310.0, 2)
 	grille.add_theme_constant_override("h_separation", 10)
 	grille.add_theme_constant_override("v_separation", 10)
 	_familiers.add_child(grille)
@@ -382,7 +394,8 @@ func _afficher_familiers() -> void:
 	fiche.add_child(StyleAzur.texte("Attaque %s · une attaque toutes les %s s\n%s" % [
 		_nombre(CatalogueFamiliers.attaque(_familier_selectionne, niveau)),
 		_nombre(float(d["intervalle"])), d["description"]], 28, StyleAzur.ATTENUE))
-	var actions := HBoxContainer.new()
+	var actions := BoxContainer.new()
+	StyleAzur.adapter_ligne(actions)
 	actions.add_theme_constant_override("separation", 12)
 	fiche.add_child(actions)
 	var equiper := StyleAzur.bouton("Équiper", func():

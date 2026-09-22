@@ -1,0 +1,145 @@
+{
+  "nom": "Magie graphique",
+  "reference": "Piste B · facettes simples et aplats",
+  "palette": {
+    "id": "B",
+    "nom": "Magie graphique",
+    "origine": "Piste B · facettes simples et aplats",
+    "forme": "angle",
+    "fond": "#647fac",
+    "fond2": "#415b8c",
+    "panneau": "#253e6b",
+    "bord": "#1a2c51",
+    "action": "#ffce62",
+    "action2": "#d8993e",
+    "papier": "#f3eddb",
+    "texte": "#fff1cf",
+    "encre": "#243355",
+    "accent": "#ffce62",
+    "second": "#547cbd",
+    "icone": "#78d9f0"
+  },
+  "viewport": [
+    1080,
+    1920
+  ],
+  "composants": {
+    "principal_normal": {
+      "taille": [
+        984,
+        178
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "principal_presse": {
+      "taille": [
+        984,
+        178
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "principal_desactive": {
+      "taille": [
+        984,
+        178
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "secondaire_normal": {
+      "taille": [
+        320,
+        124
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "secondaire_presse": {
+      "taille": [
+        320,
+        124
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "secondaire_desactive": {
+      "taille": [
+        320,
+        124
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "lecture_normal": {
+      "taille": [
+        984,
+        152
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "navigation_normal": {
+      "taille": [
+        984,
+        180
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "compteur_normal": {
+      "taille": [
+        270,
+        100
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    }
+  }
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 128 128"><defs>
+<linearGradient id="bronze" x1="0" y1="0" x2=".25" y2="1"><stop stop-color="#dddcd1" /><stop offset=".3" stop-color="#c8cbc0" /><stop offset=".65" stop-color="#90998f" /><stop offset="1" stop-color="#c8cbc0" /></linearGradient>
+<linearGradient id="email" x1=".2" y1="0" x2=".75" y2="1"><stop stop-color="#96a19a" /><stop offset=".36" stop-color="#77837b" /><stop offset="1" stop-color="#5d6a62" /></linearGradient>
+<linearGradient id="profond" x2=".4" y2="1"><stop stop-color="#56625b" /><stop offset="1" stop-color="#3c4640" /></linearGradient>
+<linearGradient id="ivoire" x2=".4" y2="1"><stop stop-color="#eae8de" /><stop offset="1" stop-color="#d3d5c9" /></linearGradient>
+<linearGradient id="violet" x2=".5" y2="1"><stop stop-color="#d7d9cf" /><stop offset=".4" stop-color="#bbbfb6" /><stop offset="1" stop-color="#99a097" /></linearGradient>
+<linearGradient id="argent" x2=".5" y2="1"><stop stop-color="#dbddd3" /><stop offset=".4" stop-color="#c3c7bd" /><stop offset="1" stop-color="#9da59c" /></linearGradient>
+<radialGradient id="ambre" cx=".3" cy=".2" r=".9"><stop stop-color="#d8dccf" /><stop offset=".35" stop-color="#96a19a" /><stop offset=".7" stop-color="#748078" /><stop offset="1" stop-color="#5d6a62" /></radialGradient>
+<radialGradient id="verre" cx=".3" cy=".25" r=".85"><stop stop-color="#cad3c8" /><stop offset=".4" stop-color="#96a19a" /><stop offset="1" stop-color="#5d6a62" /></radialGradient>
+</defs><circle cx="64" cy="64" r="60" fill="url(#bronze)" /><circle cx="64" cy="64" r="55" fill="url(#email)" /><circle cx="64" cy="64" r="47" fill="url(#profond)" stroke="url(#bronze)" stroke-width="2" /><path d="M17 45A51 51 0 0 1 92 20" fill="none" stroke="#d1d3ca" stroke-width="2" /><circle cx="25" cy="106" r="12" fill="url(#bronze)" /><circle cx="25" cy="106" r="8" fill="url(#ambre)" /></svg>

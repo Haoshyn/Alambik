@@ -1,0 +1,145 @@
+{
+  "nom": "Sceaux de combat",
+  "reference": "Références · sorts cyan et ambre, emblèmes RPG",
+  "palette": {
+    "id": "F",
+    "nom": "Sceaux de combat",
+    "origine": "Références · sorts cyan et ambre, emblèmes RPG",
+    "forme": "sceau",
+    "fond": "#7d8ab9",
+    "fond2": "#545f96",
+    "panneau": "#34345c",
+    "bord": "#242543",
+    "action": "#f4b36d",
+    "action2": "#ce824e",
+    "papier": "#f9ecd9",
+    "texte": "#fff1db",
+    "encre": "#323251",
+    "accent": "#78dbe8",
+    "second": "#6d68b2",
+    "icone": "#ffca87"
+  },
+  "viewport": [
+    1080,
+    1920
+  ],
+  "composants": {
+    "principal_normal": {
+      "taille": [
+        984,
+        178
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "principal_presse": {
+      "taille": [
+        984,
+        178
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "principal_desactive": {
+      "taille": [
+        984,
+        178
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "secondaire_normal": {
+      "taille": [
+        320,
+        124
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "secondaire_presse": {
+      "taille": [
+        320,
+        124
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "secondaire_desactive": {
+      "taille": [
+        320,
+        124
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "lecture_normal": {
+      "taille": [
+        984,
+        152
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "navigation_normal": {
+      "taille": [
+        984,
+        180
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "compteur_normal": {
+      "taille": [
+        270,
+        100
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    }
+  }
+}

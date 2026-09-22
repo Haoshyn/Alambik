@@ -12,7 +12,7 @@ var _coffre: Button
 var _recompenses: VBoxContainer
 var _cadre_recompenses: Control
 var _indication: Label
-var _actions_fin: HBoxContainer
+var _actions_fin: BoxContainer
 var _boutons_sortie: Array[Button] = []
 var _anim := 0.0
 var _ouvert := false
@@ -69,7 +69,8 @@ func afficher(victoire: bool, salle_atteinte: int) -> void:
 	if _recompenses.get_child_count() == 0:
 		_recompenses.add_child(StyleAzur.texte("Le coffre est vide.\nTerminez une salle pour commencer à le remplir.", 30, StyleAzur.ENCRE))
 	_afficher_ameliorations_disponibles()
-	_actions_fin = HBoxContainer.new()
+	_actions_fin = BoxContainer.new()
+	StyleAzur.adapter_ligne(_actions_fin)
 	_actions_fin.add_theme_constant_override("separation", 18)
 	_actions_fin.hide()
 	_page.add_child(_actions_fin)

@@ -1,7 +1,6 @@
 class_name IconesArcane
 extends RefCounted
 
-const PLANCHES := [preload("res://assets/visual/manga/icones_0.png"), preload("res://assets/visual/manga/icones_1.png"), preload("res://assets/visual/manga/icones_2.png")]
 const ICONES_INTERFACE := {
 	"parametres": "parametres",
 	"gouttes": "gouttes",
@@ -39,16 +38,7 @@ static func texture(id: String) -> Texture2D:
 	if ICONES_INTERFACE.has(id):
 		return HabillagePeint.texture(str(ICONES_INTERFACE[id]))
 	if _textures.has(id): return _textures[id]
-	var index := IDENTIFIANTS.find(id)
-	if index < 0: return null
-	var atlas := AtlasTexture.new()
-	atlas.atlas = PLANCHES[index / 30]
-	# La premiere planche comprend deux marges externes ; les exclure du pas
-	# preserve le bas des silhouettes, contrairement a une division plein cadre.
-	var grille := Rect2(0,70,1374,1020) if index < 30 else Rect2(Vector2.ZERO,atlas.atlas.get_size())
-	var cellule := grille.size / Vector2(6,5)
-	var position := index % 30
-	atlas.region = Rect2(grille.position + Vector2(position % 6, position / 6) * cellule, cellule)
-	atlas.filter_clip = true
-	_textures[id] = atlas
-	return atlas
+	if id not in IDENTIFIANTS: return null
+	var icone := load("res://assets/visual/azur/glyphes/" + id + ".svg") as Texture2D
+	_textures[id] = icone
+	return icone

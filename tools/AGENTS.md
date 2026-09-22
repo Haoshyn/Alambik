@@ -12,7 +12,10 @@ aucune génération, vérification ou export automatique après une retouche.
 | Héros actuel | `blender/mage_sculpte.py` |
 | Bestiaire, gardien et portail | `blender/build_all.py`, `blender/portail_azur.py` |
 | Armes tenues | `blender/armes_tenues.py` |
-| Glyphes de secours de l'interface | `generer_icones.py` |
+| Kit actif Émail arcanique, SVG natifs | `generer_email_arcanique.py`, `habillage_svg_source.py`, `../SVG/` et `sources_email/` |
+| Anciennes icônes peintes en SVG | `vectoriser_icones.py` (Python avec Pillow et NumPy) |
+| Anciens contrôles SVG du kit B | `generer_controles_grimoire.py` |
+| Anciens glyphes filaires de secours | `generer_icones.py` (écrase les glyphes actifs ; ne pas utiliser pour le kit peint) |
 | Musiques originales | `audio/composer.py`, `audio/collection.py` |
 | Icônes de l'application | `preparer_identite.gd` |
 

@@ -82,20 +82,20 @@ func _selecteur(parent: Node) -> OptionButton:
 	for etat in ["normal","hover","pressed"]:
 		b.add_theme_stylebox_override(etat,StyleAzur.cadre())
 	for etat in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:
-		b.add_theme_color_override(etat,StyleAzur.ENCRE)
+		b.add_theme_color_override(etat,StyleAzur.IVOIRE)
 	b.add_theme_font_size_override("font_size",29)
 	b.add_theme_stylebox_override("focus",StyleAzur.cadre(Color.TRANSPARENT,StyleAzur.MAGIE))
 	var liste := b.get_popup()
 	liste.add_theme_font_override("font",Polices.CORPS)
 	liste.add_theme_font_size_override("font_size",29)
 	liste.add_theme_stylebox_override("panel",StyleAzur.cadre())
-	liste.add_theme_stylebox_override("hover",StyleAzur.cadre(Color("436a9f"),StyleAzur.MAGIE))
+	liste.add_theme_stylebox_override("hover",StyleAzur.cadre(StyleAzur.MAGIE.darkened(0.4),StyleAzur.MAGIE))
 	for etat in ["font_color","font_hover_color","font_accelerator_color"]:
-		liste.add_theme_color_override(etat,StyleAzur.ENCRE)
+		liste.add_theme_color_override(etat,StyleAzur.IVOIRE)
 	liste.add_theme_color_override("font_disabled_color",StyleAzur.ATTENUE)
 	liste.add_theme_constant_override("v_separation",64)
-	liste.add_theme_icon_override("radio_checked",preload("res://assets/visual/atelier/oui.svg"))
-	liste.add_theme_icon_override("radio_unchecked",preload("res://assets/visual/atelier/non.svg"))
+	liste.add_theme_icon_override("radio_checked",StyleAzur.texture_interface("oui"))
+	liste.add_theme_icon_override("radio_unchecked",StyleAzur.texture_interface("non"))
 	liste.about_to_popup.connect(func():
 		# La liste defile au lieu de depasser la zone accessible du telephone.
 		liste.max_size = Vector2i(int(get_viewport_rect().size.x-72),int(get_viewport_rect().size.y-Ecran.marge_haute()-Ecran.marge_basse()-96)))
@@ -123,7 +123,7 @@ func _volume(parent: Node, titre: String, valeur: float, action: Callable) -> vo
 	for etat in ["grabber_area","grabber_area_highlight"]:
 		slider.add_theme_stylebox_override(etat,rempli)
 	for etat in ["grabber","grabber_highlight","grabber_disabled"]:
-		slider.add_theme_icon_override(etat,preload("res://assets/visual/atelier/curseur.svg"))
+		slider.add_theme_icon_override(etat,StyleAzur.texture_interface("curseur"))
 	col.add_child(slider)
 	slider.value_changed.connect(func(v):
 		label.text = "%s · %d %%" % [titre,roundi(v*100)]
@@ -142,9 +142,9 @@ func _option(parent: Node, titre: String, valeur: bool, action: Callable) -> voi
 		b.add_theme_stylebox_override(etat,StyleAzur.cadre())
 	b.add_theme_stylebox_override("focus",StyleAzur.cadre(Color.TRANSPARENT,StyleAzur.MAGIE))
 	for etat in ["font_color","font_hover_color","font_pressed_color","font_hover_pressed_color"]:
-		b.add_theme_color_override(etat,StyleAzur.ENCRE)
-	b.add_theme_icon_override("checked",preload("res://assets/visual/atelier/oui.svg"))
-	b.add_theme_icon_override("unchecked",preload("res://assets/visual/atelier/non.svg"))
+		b.add_theme_color_override(etat,StyleAzur.IVOIRE)
+	b.add_theme_icon_override("checked",StyleAzur.texture_interface("oui"))
+	b.add_theme_icon_override("unchecked",StyleAzur.texture_interface("non"))
 	b.toggled.connect(func(v): action.call(v))
 	parent.add_child(b)
 

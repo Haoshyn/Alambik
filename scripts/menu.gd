@@ -6,16 +6,16 @@ const SELECTION_GRIMOIRE := preload("res://ui/selection_grimoire.tscn")
 const REGLAGES := preload("res://ui/reglages.tscn")
 const EQUIPEMENT := preload("res://ui/equipement.tscn")
 const TRANSITION := preload("res://ui/transition_grimoire.tscn")
-const ONGLET_MENU := preload("res://ui/onglet_menu.gd")
-const PAGES := ["equipement", "aventure", "maitrises", "sorts"]
+const ACCUEIL := preload("res://ui/accueil_clairiere.tscn")
+const NAVIGATION := preload("res://ui/composants/navigation_principale.tscn")
+const PAGES := ["heros", "equipement", "aventure", "maitrises", "sorts"]
 
 var _conteneur_pages: Control
 var _page_actuelle: Control
-var _navigation: Control
+var _navigation: NavigationPrincipale
 var _superposition: Control
 var _transition_page := false
-var _onglets: Array[Button] = []
-var _page := 1
+var _page := 2
 var _lancement := false
 var _selection_initiale := ""
 
@@ -33,7 +33,7 @@ func _ready() -> void:
 	Jeu.destination_menu.clear()
 	_selection_initiale = str(destination.get("selection", ""))
 	var page_initiale := PAGES.find(str(destination.get("page", "aventure")))
-	_afficher_page(page_initiale if page_initiale >= 0 else 1, false)
+	_afficher_page(page_initiale if page_initiale >= 0 else 2, false)
 	_selection_initiale = ""
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--page-menu="):
@@ -44,6 +44,15 @@ func _ready() -> void:
 	if "--ouvrir-reglages" in OS.get_cmdline_user_args():
 		call_deferred("_ouvrir_reglages")
 	Capture.programmer(self)
+	if ReglagesJoueur.specialisation_effective().is_empty():
+		_ouvrir_classes_initiales.call_deferred()
+
+func _ouvrir_classes_initiales() -> void:
+	if _superposition != null:
+		_fermer_superposition(_superposition)
+	var choix := preload("res://ui/choix_classe.gd").new()
+	choix.obligatoire = true
+	_ouvrir_superposition(choix)
 
 func _construire_structure() -> void:
 	_conteneur_pages = Control.new()
@@ -52,39 +61,9 @@ func _construire_structure() -> void:
 	_construire_navigation()
 
 func _construire_navigation() -> void:
-	_navigation = Control.new()
-	_navigation.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_navigation.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_navigation = NAVIGATION.instantiate() as NavigationPrincipale
+	_navigation.page_demandee.connect(_afficher_page)
 	add_child(_navigation)
-	var socle := Panel.new()
-	HabillagePeint.appliquer(socle)
-	socle.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	socle.offset_top = -StyleAzur.HAUTEUR_NAVIGATION - Ecran.marge_basse()
-	socle.offset_left = 12
-	socle.offset_right = -12
-	socle.add_theme_stylebox_override("panel", StyleAzur.texture_etirable("navigation", 40, 24, 16))
-	socle.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_navigation.add_child(socle)
-	var barre := HBoxContainer.new()
-	barre.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	barre.offset_top = -StyleAzur.HAUTEUR_NAVIGATION - Ecran.marge_basse()
-	barre.offset_bottom = -Ecran.marge_basse()
-	barre.offset_left = 24
-	barre.offset_right = -24
-	barre.add_theme_constant_override("separation", 8)
-	_navigation.add_child(barre)
-	var donnees := [
-		["stuff", "ÉQUIPEMENT", 2],
-		["aventure", "AVENTURE", 0],
-		["arbre", "MAÎTRISES", 3],
-		["sorts", "SORTS", 4],
-	]
-	for index in donnees.size():
-		var onglet := OngletMenu.new()
-		onglet.configurer(donnees[index][0], donnees[index][1], index)
-		onglet.pressed.connect(func() -> void: _afficher_page(index))
-		barre.add_child(onglet)
-		_onglets.append(onglet)
 
 func _creer_page(index: int) -> Control:
 	match PAGES[index]:
@@ -98,6 +77,8 @@ func _creer_page(index: int) -> Control:
 			arbre.integre_menu = true
 			arbre.maitrise_initiale = _selection_initiale
 			return arbre
+		"heros":
+			return preload("res://ui/heros.gd").new()
 		"sorts":
 			var sorts := MENU_SORTS.instantiate()
 			sorts.integre_menu = true
@@ -119,8 +100,7 @@ func _afficher_page(index: int, anime := true) -> void:
 	var nouvelle := _creer_page(index)
 	_page_actuelle = nouvelle
 	_conteneur_pages.add_child(nouvelle)
-	for i in _onglets.size():
-		_onglets[i].actif = i == _page
+	_navigation.selectionner(_page)
 	if ancienne == null:
 		return
 	Sons.jouer("choix", -17.0, 1.08)
@@ -149,8 +129,7 @@ func _afficher_page(index: int, anime := true) -> void:
 	_transition_page = false
 
 func _creer_aventure() -> Control:
-	var page := Control.new()
-	page.set_script(preload("res://ui/accueil_3d.gd"))
+	var page := ACCUEIL.instantiate() as AccueilClairiere
 	page.campagne.connect(_ouvrir_campagne)
 	page.mine.connect(func(): _ouvrir_campagne("mine"))
 	page.epreuve.connect(func(): _ouvrir_campagne("epreuve_sorts"))
@@ -168,11 +147,10 @@ func _lancer_mode(mode: String, destination: Dictionary) -> void:
 	if _lancement or not ReglagesJoueur.mode_debloque(mode):
 		return
 	if ReglagesJoueur.specialisation.is_empty():
-		# Le premier choix est gratuit et structure tout le build ; une aventure
-		# ne doit pas commencer avec une specialisation choisie en silence.
+		# Une aventure ne doit pas commencer avec une classe choisie en silence.
 		if _superposition != null:
 			_fermer_superposition(_superposition)
-		_afficher_page(PAGES.find("maitrises"))
+		_ouvrir_classes_initiales()
 		return
 	_lancement = true
 	ReglagesJoueur.choisir_mode_run(mode)
@@ -222,10 +200,11 @@ func _notification(quoi: int) -> void:
 	if quoi != NOTIFICATION_WM_GO_BACK_REQUEST or _lancement or _transition_page:
 		return
 	if _superposition != null and is_instance_valid(_superposition):
+		if bool(_superposition.get("obligatoire")): return
 		var cible := _superposition
 		StyleInterface.sortir_puis(cible, _fermer_superposition.bind(cible))
-	elif _page != 1:
-		_afficher_page(1)
+	elif _page != 2:
+		_afficher_page(2)
 	else:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MINIMIZED)
 

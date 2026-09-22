@@ -37,7 +37,7 @@ func mettre_a_jour(ennemi: Node2D, delta: float, orientation: float, vitesse: fl
 	_impact = maxf(0.0, _impact - delta)
 	var donnees: Dictionary = ennemi.get("donnees")
 	var etat := str(ennemi.get("_motif" if _boss else "_etat"))
-	var charge := etat == "charger" or (_boss and etat == "charge" and not ennemi._annonce_charge())
+	var charge: bool = etat == "charger" or (_boss and etat == "charge" and not ennemi._annonce_charge())
 	if charge and not _charge_precedente: projeter()
 	_charge_precedente = charge
 	var armer := _progression_preparation(ennemi, donnees, etat)

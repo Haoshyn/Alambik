@@ -1,0 +1,145 @@
+{
+  "nom": "Hologramme arcanique",
+  "reference": "Références · contours lumineux des kits Hologram",
+  "palette": {
+    "id": "D",
+    "nom": "Hologramme arcanique",
+    "origine": "Références · contours lumineux des kits Hologram",
+    "forme": "holo",
+    "fond": "#567b99",
+    "fond2": "#345575",
+    "panneau": "#203e56",
+    "bord": "#75ede3",
+    "action": "#68e8d5",
+    "action2": "#31acae",
+    "papier": "#d9f4ed",
+    "texte": "#e6fff5",
+    "encre": "#173b4b",
+    "accent": "#bba6f2",
+    "second": "#357a8e",
+    "icone": "#83f5e5"
+  },
+  "viewport": [
+    1080,
+    1920
+  ],
+  "composants": {
+    "principal_normal": {
+      "taille": [
+        984,
+        178
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "principal_presse": {
+      "taille": [
+        984,
+        178
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "principal_desactive": {
+      "taille": [
+        984,
+        178
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "secondaire_normal": {
+      "taille": [
+        320,
+        124
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "secondaire_presse": {
+      "taille": [
+        320,
+        124
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "secondaire_desactive": {
+      "taille": [
+        320,
+        124
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "lecture_normal": {
+      "taille": [
+        984,
+        152
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "navigation_normal": {
+      "taille": [
+        984,
+        180
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "compteur_normal": {
+      "taille": [
+        270,
+        100
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    }
+  }
+}

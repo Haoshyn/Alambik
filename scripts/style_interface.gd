@@ -8,20 +8,17 @@ static func panneau(fond: Color, bord: Color, rayon := 24, _ombre := 10) -> Styl
 	if fond.a == 0.0:
 		style.draw_center = false
 	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
-		style.set_texture_margin(cote, 24)
+		style.set_texture_margin(cote, 40)
 	for cote in [SIDE_LEFT, SIDE_RIGHT]: style.set_content_margin(cote, 44)
-	for cote in [SIDE_TOP, SIDE_BOTTOM]: style.set_content_margin(cote, 30)
+	for cote in [SIDE_TOP, SIDE_BOTTOM]: style.set_content_margin(cote, 42)
 	style.modulate_color = Color.WHITE.lerp(bord, 0.18)
 	style.modulate_color.a = fond.a if fond.a > 0.0 else bord.a
 	return style
 
 static func panneau_leger(accent := Palette.ESSENCE, rayon := 22) -> StyleBoxTexture:
-	return panneau(Color(0.075, 0.105, 0.205, 0.9), accent, rayon, 6)
+	return panneau(Color(StyleAzur.FOND, 0.95), accent, rayon, 6)
 
-# Les ecrans premium sont peints : leurs boutons ne sont que des zones tactiles
-# posees sur la peinture. Un Button garde pourtant ses styleboxes de survol, de
-# clic et de focus, que Godot dessine par-dessus le decor — d'ou les rectangles
-# gris qui apparaissaient sous la souris. `flat` n'enleve que l'etat normal.
+# Les zones tactiles superposees aux images ne doivent pas ajouter un fond natif.
 static func rendre_invisible(bouton: Button) -> Button:
 	bouton.flat = true
 	bouton.focus_mode = Control.FOCUS_NONE
@@ -39,28 +36,27 @@ static func zone_tactile(action := Callable()) -> Button:
 		bouton.pressed.connect(action)
 	return bouton
 
-static func styliser_bouton(bouton: Button, accent := Palette.OR, secondaire := false) -> void:
+static func styliser_bouton(bouton: Button, _accent := Palette.OR, secondaire := false) -> void:
 	HabillagePeint.appliquer(bouton)
+	# Le ScrollContainer doit recevoir le geste et annuler l'appui quand il defile.
+	bouton.mouse_filter = Control.MOUSE_FILTER_PASS
 	# Pas de focus clavier ni de déclenchement au premier contact : sur mobile,
 	# le joueur doit pouvoir glisser hors du bouton pour annuler son geste.
 	bouton.focus_mode = Control.FOCUS_NONE
 	bouton.action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
-	var fond := Color(0.095, 0.125, 0.235, 0.96) if secondaire else Color(accent.darkened(0.46), 0.94)
-	bouton.add_theme_stylebox_override("normal", panneau(fond, Color(accent, 0.42), 0, 0))
-	# L'état hover ne porte aucune information : un écran tactile n'en a pas.
-	bouton.add_theme_stylebox_override("hover", panneau(fond, Color(accent, 0.42), 0, 0))
-	bouton.add_theme_stylebox_override("pressed", panneau(Color(accent, 0.48), accent.lightened(0.24), 0, 3))
-	bouton.add_theme_stylebox_override("focus", panneau(Color(accent, 0.24), accent, 0, 0))
-	bouton.add_theme_stylebox_override("disabled", panneau(Color(0.06, 0.05, 0.08, 0.72), Color(accent, 0.14), 0, 0))
+	for etat in ["normal", "hover", "pressed", "focus", "disabled"]:
+		var style := StyleAzur.sceau(not secondaire, Color.WHITE, etat == "pressed")
+		if etat == "disabled": style.modulate_color = Color("87949d")
+		bouton.add_theme_stylebox_override(etat, style)
 	bouton.add_theme_color_override("font_color", Palette.TEXTE)
 	bouton.add_theme_color_override("font_hover_color", Color.WHITE)
 	bouton.add_theme_color_override("font_pressed_color", Color.WHITE)
 	bouton.add_theme_color_override("font_focus_color", Color.WHITE)
-	bouton.add_theme_color_override("font_disabled_color", Color("dedceb"))
-	bouton.add_theme_constant_override("outline_size", 4)
+	bouton.add_theme_color_override("font_disabled_color", Color("cbbfa6"))
+	bouton.add_theme_constant_override("outline_size", 1)
 	bouton.add_theme_constant_override("icon_max_width", 64)
 	bouton.add_theme_constant_override("h_separation", 16)
-	bouton.add_theme_color_override("font_outline_color", Color(0.03, 0.05, 0.13, 0.88))
+	bouton.add_theme_color_override("font_outline_color", Color("183444cc"))
 	if not bouton.has_meta("micro_animation_installee"):
 		bouton.set_meta("micro_animation_installee", true)
 		bouton.resized.connect(func() -> void: bouton.pivot_offset = bouton.size * 0.5)
@@ -88,7 +84,7 @@ static func styliser_selecteur(selecteur: OptionButton, accent := Palette.ESSENC
 	selecteur.focus_mode = Control.FOCUS_NONE
 	selecteur.add_theme_font_size_override("font_size", 23)
 	selecteur.add_theme_color_override("font_color", Palette.TEXTE)
-	selecteur.add_theme_color_override("font_disabled_color", Color("dedceb"))
+	selecteur.add_theme_color_override("font_disabled_color", Color("cbbfa6"))
 	selecteur.add_theme_stylebox_override("normal", panneau_leger(accent, 18))
 	selecteur.add_theme_stylebox_override("hover",
 		panneau(Color(accent, 0.10), Color(accent, 0.48), 18, 4))

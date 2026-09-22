@@ -39,3 +39,10 @@ func marge_basse() -> float:
 func hauteur_visible() -> float:
 	var taille := get_viewport().get_visible_rect().size
 	return taille.y
+
+func marge_gauche() -> float:
+	return maxf(24.0, _zone_sure().position.x)
+
+func marge_droite() -> float:
+	var visible := get_viewport().get_visible_rect()
+	return maxf(24.0, visible.end.x - _zone_sure().end.x)

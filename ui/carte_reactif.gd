@@ -48,9 +48,9 @@ func _construire() -> void:
 	_contenu.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_contenu.modulate.a = 0.45 if desactivee else 1.0
 	for cote in ["left", "right"]:
-		_contenu.add_theme_constant_override("margin_" + cote, 30)
+		_contenu.add_theme_constant_override("margin_" + cote, 44)
 	for cote in ["top", "bottom"]:
-		_contenu.add_theme_constant_override("margin_" + cote, 24)
+		_contenu.add_theme_constant_override("margin_" + cote, 44)
 	add_child(_contenu)
 	var ligne := HBoxContainer.new()
 	ligne.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -63,13 +63,13 @@ func _construire() -> void:
 	ligne.add_child(illustration)
 	var medaillon := Panel.new()
 	HabillagePeint.appliquer(medaillon)
-	medaillon.add_theme_stylebox_override("panel", StyleAzur.cadre(StyleAzur.VIOLET, reactif.couleur_rarete(), 64))
+	medaillon.add_theme_stylebox_override("panel", StyleAzur.cercle())
 	medaillon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	medaillon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	illustration.add_child(medaillon)
-	var glyphe := StyleAzur.vignette(reactif.id, 116)
-	glyphe.position = Vector2(20, 20)
-	glyphe.size = Vector2(116, 116)
+	var glyphe := StyleAzur.vignette(reactif.id, 88)
+	glyphe.position = Vector2(34, 34)
+	glyphe.size = Vector2(88, 88)
 	illustration.add_child(glyphe)
 	var textes := VBoxContainer.new()
 	textes.size_flags_horizontal = Control.SIZE_EXPAND_FILL

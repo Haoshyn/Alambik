@@ -3,7 +3,6 @@ extends RefCounted
 
 const NIVEAU_MAX := 30
 const POINTS_PAR_NIVEAU := 5
-const COUT_CHANGEMENT_SPECIALISATION := 100
 const SPECIALISATION_DEFAUT := "mage"
 
 # Les points de compte renforcent la base sans remplacer les Maitrises, qui

@@ -1,0 +1,145 @@
+{
+  "nom": "Alchimie pop",
+  "reference": "Piste C · capsules souples et couleurs chaudes",
+  "palette": {
+    "id": "C",
+    "nom": "Alchimie pop",
+    "origine": "Piste C · capsules souples et couleurs chaudes",
+    "forme": "pop",
+    "fond": "#b792bd",
+    "fond2": "#91699f",
+    "panneau": "#583968",
+    "bord": "#482b58",
+    "action": "#ff858a",
+    "action2": "#d95677",
+    "papier": "#fff2dc",
+    "texte": "#fff2dc",
+    "encre": "#513354",
+    "accent": "#ffcba0",
+    "second": "#a968c9",
+    "icone": "#f9bba4"
+  },
+  "viewport": [
+    1080,
+    1920
+  ],
+  "composants": {
+    "principal_normal": {
+      "taille": [
+        984,
+        178
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "principal_presse": {
+      "taille": [
+        984,
+        178
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "principal_desactive": {
+      "taille": [
+        984,
+        178
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "secondaire_normal": {
+      "taille": [
+        320,
+        124
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "secondaire_presse": {
+      "taille": [
+        320,
+        124
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "secondaire_desactive": {
+      "taille": [
+        320,
+        124
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "lecture_normal": {
+      "taille": [
+        984,
+        152
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "navigation_normal": {
+      "taille": [
+        984,
+        180
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    },
+    "compteur_normal": {
+      "taille": [
+        270,
+        100
+      ],
+      "marges_neuf_zones": [
+        48,
+        40,
+        48,
+        40
+      ],
+      "texte_incorpore": false
+    }
+  }
+}

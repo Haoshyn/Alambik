@@ -3,8 +3,20 @@
 - Godot 4.7.1, Android portrait ; simulation 2D, combat présenté en 3D.
 - Héros unique : `assets/3d/characters/mage_sculpte.glb`, matériaux standard,
   six animations et armes séparées. Sources et générateurs actifs conservés.
-- Accueil : `assets/visual/arcane/accueil.png`. Menus, HUD, augments et récompenses
-  partagent le kit peint `assets/visual/interface/` et le scriptorium saphir.
+- Accueil : `ui/accueil_clairiere.tscn`, composé de scènes indépendantes dans
+  `ui/composants/`. Académie arcanique, héros détouré au centre, modes
+  latéraux, destination et Jouer en bas ; cinq onglets fixes et zones sûres.
+- Kit A « Émail arcanique » : turquoise, ivoire et bronze, volumes simplifiés.
+  Cadres « Sceaux liquides », emplacements et commandes circulaires ; onglets
+  Héros, Équipement, Aventure, Maîtrises, Sorts. Héros : portrait, commandes −/+
+  et reset gratuit, sous-menu de classe obligatoire au premier accueil sans classe.
+  Composition : Héros asymétrique autour du personnage, maîtrises en constellation,
+  sorts en symboles avec fiches détaillées, parure en sceaux décalés. Titres et
+  ressources sans cadres ; marges intérieures protégées sous les ornements.
+  SVG natifs légers (icônes, cadres, équipements, capacités et contrôles),
+  filtrage avec mipmaps et sans ancien détourage alpha. Générateur :
+  `tools/generer_email_arcanique.py`. Zones sûres latérales, grilles adaptatives
+  et accueil défilable ; menus, HUD, augments et récompenses partagent le kit.
 - Cinq mondes, sept chapitres de vingt salles chacun ; Mine et Épreuves de sorts.
   Contours et obstacles fixes par chapitre, terrains élémentaires en campagne.
 - Déplacement du héros à 728 px/s (+30 %), coefficient de vitesse ennemi +15 %.
@@ -61,6 +73,9 @@ Le nettoyage précédent (fusions, anciens modèles et prototypes) est dans
 `../OldAlambik/2026-09-20/retires/` ; les copies avant chaque passe sont dans
 leurs dossiers d'archive respectifs. Les prochaines sorties vont dans `tmp/`
 et `build/`.
+
+La version précédant la composition modulaire est conservée dans
+`../OldAlambik/2026-09-22/interface-avant-composition-161302/`.
 
 Relecture statique uniquement : aucun test, import Godot, lancement ou APK.
 Le propriétaire teste le jeu ; les règles de travail restent dans `AGENTS.md`.

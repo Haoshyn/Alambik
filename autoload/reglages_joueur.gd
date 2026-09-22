@@ -547,6 +547,14 @@ func augmenter_attribut(id: String) -> bool:
 	maitrise_changee.emit()
 	return true
 
+func diminuer_attribut(id: String) -> bool:
+	if not Personnage.ATTRIBUTS.has(id) or rang_attribut(id) <= 0:
+		return false
+	attributs[id] = rang_attribut(id) - 1
+	sauvegarder()
+	maitrise_changee.emit()
+	return true
+
 func reinitialiser_attributs() -> void:
 	for id in Personnage.ATTRIBUTS:
 		attributs[id] = 0
@@ -562,10 +570,6 @@ func specialisation_effective() -> String:
 func choisir_specialisation(id: String) -> bool:
 	if not Personnage.SPECIALISATIONS.has(id) or id == specialisation:
 		return false
-	var cout := 0 if specialisation.is_empty() or mode_dev else Personnage.COUT_CHANGEMENT_SPECIALISATION
-	if gouttes < cout:
-		return false
-	gouttes -= cout
 	specialisation = id
 	sauvegarder()
 	maitrise_changee.emit()

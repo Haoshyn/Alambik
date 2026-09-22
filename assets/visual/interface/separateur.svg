@@ -1,1 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="32" viewBox="0 0 512 32"><defs><linearGradient id="or"><stop stop-color="#d9bd7c" stop-opacity="0"/><stop offset=".4" stop-color="#d9bd7c"/><stop offset=".6" stop-color="#d9bd7c"/><stop offset="1" stop-color="#d9bd7c" stop-opacity="0"/></linearGradient></defs><path d="M0 16h230m52 0h230" stroke="url(#or)" stroke-width="2"/><path d="M256 2l14 14-14 14-14-14Z" fill="#173453" stroke="#dfc58c" stroke-width="2"/><path d="M256 9l7 7-7 7-7-7Z" fill="#73dcd5"/><path d="M227 11l5 5-5 5-5-5ZM285 11l5 5-5 5-5-5Z" fill="#e5c889"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="32" viewBox="0 0 512 32"><defs>
+<linearGradient id="bronze" x1="0" y1="0" x2=".25" y2="1"><stop stop-color="#fff0c7"/><stop offset=".3" stop-color="#d8b37c"/><stop offset=".65" stop-color="#9b7449"/><stop offset="1" stop-color="#e1c396"/></linearGradient>
+<linearGradient id="email" x1=".2" y1="0" x2=".75" y2="1"><stop stop-color="#73c9c8"/><stop offset=".36" stop-color="#328b98"/><stop offset="1" stop-color="#184a60"/></linearGradient>
+<linearGradient id="profond" x2=".4" y2="1"><stop stop-color="#32667b"/><stop offset="1" stop-color="#19394f"/></linearGradient>
+<linearGradient id="ivoire" x2=".4" y2="1"><stop stop-color="#fff9e9"/><stop offset="1" stop-color="#ded4bd"/></linearGradient>
+<linearGradient id="violet" x2=".5" y2="1"><stop stop-color="#e4d5ff"/><stop offset=".4" stop-color="#ad8cdd"/><stop offset="1" stop-color="#65549b"/></linearGradient>
+<linearGradient id="argent" x2=".5" y2="1"><stop stop-color="#f3f3ec"/><stop offset=".4" stop-color="#b5c3ce"/><stop offset="1" stop-color="#667991"/></linearGradient>
+<radialGradient id="ambre" cx=".3" cy=".2" r=".9"><stop stop-color="#fff3ad"/><stop offset=".35" stop-color="#efbc54"/><stop offset=".7" stop-color="#b77728"/><stop offset="1" stop-color="#795021"/></radialGradient>
+<radialGradient id="verre" cx=".3" cy=".25" r=".85"><stop stop-color="#b9f6ef"/><stop offset=".4" stop-color="#5bd5d9"/><stop offset="1" stop-color="#226e8b"/></radialGradient>
+</defs><path d="M8 16H234M278 16H504" stroke="url(#bronze)" stroke-width="2"/><path d="M256 3L269 16L256 29L243 16Z" fill="url(#email)" stroke="#234758" stroke-width="1.5" stroke-linejoin="round"/></svg>

@@ -16,10 +16,11 @@ il n'est pas nécessaire de lire tous les fichiers d'une ligne.
 | Ennemis et boss | `scripts/ennemi.gd`, `scripts/boss.gd` | `scripts/cerveaux.gd`, `scripts/capacites_ennemis.gd`, `scripts/motifs_boss_mondes.gd`, `scripts/zone_hostile.gd`, `scripts/salle.gd` |
 | Tirs, ciblage et impacts | `scripts/tir.gd`, `scripts/projectile.gd`, `scripts/ciblage.gd` | `scripts/priorite_projectile.gd`, `data/catalogue_projectiles.gd` |
 | Formes, obstacles et terrains | `scripts/salle.gd`, `scripts/geometrie.gd` | `data/formes_salles.gd`, `data/terrains_mondes.gd`, `scripts/terrain_elementaire.gd` |
+| Onglet Héros, classe et points de statistiques | `ui/heros.gd`, `data/personnage.gd` | `autoload/reglages_joueur.gd`, `scripts/menu.gd` |
 | Statistiques, spécialisations, équipement et forge | `data/personnage.gd`, `data/catalogue_objets.gd` | `data/catalogue_familiers.gd`, `data/catalogue_projectiles.gd`, `ui/equipement.gd` |
 | Listes lisibles des capacités, maîtrises, items et augments | `statistiques_jeu/` | `data/sorts.gd`, `data/arbre_competences.gd`, catalogues de `data/` |
 | Maîtrises, sauvegarde et migrations | `autoload/reglages_joueur.gd`, `data/arbre_competences.gd` | `ui/arbre_competences.gd`, `autoload/jeu.gd` |
-| Accueil et navigation | `scripts/menu.gd`, `ui/accueil_3d.gd` | `ui/onglet_menu.gd`, `ui/selection_grimoire.gd` |
+| Accueil et navigation | `scripts/menu.gd`, `ui/accueil_clairiere.tscn`, `ui/accueil_3d.gd` | `ui/composants/`, `ui/onglet_menu.gd`, `ui/selection_grimoire.gd` |
 | Écran ou panneau particulier | chercher son nom dans `ui/` avec `rg --files ui` | `ui/hud.gd`, `ui/draft.gd`, `ui/pause.gd`, `ui/sorts.gd`, `ui/fin_de_run.gd` |
 | Style commun de l'interface | `scripts/presentation/style_azur.gd`, `scripts/style_interface.gd` | `scripts/palette.gd`, `scripts/polices.gd`, `assets/visual/interface/ORIGINE.md` |
 | Rendu 3D et décor | `scripts/presentation/monde_3d.gd`, `data/visuels_3d.gd` | `scripts/presentation/arene_3d.gd`, `scripts/presentation/proxy_3d.gd`, `data/decors_mondes.gd` |

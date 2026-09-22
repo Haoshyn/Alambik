@@ -1,25 +1,39 @@
 class_name StyleAzur
 extends RefCounted
 
-const FOND := Color("12243f")
-const PANNEAU := Color("203d62")
-const CUIVRE := Color("edc77e")
-const CORAIL := Color("f47787")
-const MENTHE := Color("8fe5bd")
-const LILAS := Color("bea0ff")
+const FOND := Color("213c51")
+const PANNEAU := Color("28586b")
+const CUIVRE := Color("e1c396")
+const CORAIL := Color("ee9482")
+const MENTHE := Color("a7d9cb")
+const LILAS := Color("c5abdf")
 const TEXTE := Color("fff9ed")
-const ATTENUE := Color("e3e8f5")
-const MAGIE := Color("69e1da")
+const ATTENUE := Color("dae5e7")
+const MAGIE := Color("75d9dc")
 const IVOIRE := Color("fff9ed")
-const ENCRE := Color("fff9ed")
-const ATLAS := preload("res://assets/visual/azur/icones.png")
+const ENCRE := Color("234457")
+const ENCRE_ATTENUE := Color("526675")
+const ICONES_OBJETS := [
+	"anneau_azur", "anneau_amethyste", "pendentif_azur", "anneau_givre",
+	"anneau_ambre", "pendentif_lune", "anneau_emeraude", "pendentif_soleil",
+	"feu", "egide", "grimoire", "pierres", "vitalite", "temps_suspendu", "astrolabe", "savoir",
+]
 const HAUTEUR_NAVIGATION := 176.0
-const VIOLET := Color("3a426c")
-const FOND_ATELIER := preload("res://assets/visual/interface/scriptorium.png")
+const VIOLET := Color("4f6385")
+const FOND_ATELIER := preload("res://assets/visual/interface/academie_arcanique.png")
 const TITRE_ATELIER := Polices.TITRE
-const ARMES_ATELIER := preload("res://assets/visual/atelier/armes.png")
 # Les ressources explicites restent incluses dans les exports Android.
 const TEXTURES_INTERFACE := {
+	"fleche_bas": preload("res://assets/visual/interface/fleche_bas.svg"),
+	"validation": preload("res://assets/visual/interface/validation.svg"),
+	"selection": preload("res://assets/visual/interface/selection.svg"),
+	"oui": preload("res://assets/visual/interface/oui.svg"),
+	"non": preload("res://assets/visual/interface/non.svg"),
+	"curseur": preload("res://assets/visual/interface/curseur.svg"),
+	"fleche_gauche": preload("res://assets/visual/interface/fleche_gauche.svg"),
+	"fleche_droite": preload("res://assets/visual/interface/fleche_droite.svg"),
+	"cadenas": preload("res://assets/visual/interface/cadenas.svg"),
+	"pause": preload("res://assets/visual/interface/pause.svg"),
 	"panneau": preload("res://assets/visual/interface/panneau.svg"),
 	"cadre": preload("res://assets/visual/interface/cadre.svg"),
 	"carte_augment": preload("res://assets/visual/interface/carte_augment.svg"),
@@ -48,14 +62,16 @@ static var _icones := {}
 static var _cadres := {}
 static var _theme: Theme
 
-static func icone(index: int) -> AtlasTexture:
-	index = posmod(index, 16)
+static func icone(index: int) -> Texture2D:
+	index = posmod(index, ICONES_OBJETS.size())
 	if not _icones.has(index):
-		var texture := AtlasTexture.new()
-		texture.atlas = ATLAS
-		var cote := ATLAS.get_width() / 4.0
-		texture.region = Rect2((index % 4) * cote, (index / 4) * cote, cote, cote)
-		_icones[index] = texture
+		var nom: String = ICONES_OBJETS[index]
+		if index < 8:
+			_icones[index] = load("res://assets/visual/interface/equipement/" + nom + ".svg")
+		elif nom in HabillagePeint.ICONES:
+			_icones[index] = HabillagePeint.texture(nom)
+		else:
+			_icones[index] = IconesArcane.texture(nom)
 	return _icones[index]
 
 static func icone_objet(id: String) -> int:
@@ -66,24 +82,14 @@ static func icone_objet(id: String) -> int:
 		return [2,5,7][int(d["monde"]) % 3]
 	return [0,1,3,4,6][int(d["chapitre"]) % 5]
 
-static func icone_arme(id: String) -> AtlasTexture:
+static func icone_arme(id: String) -> Texture2D:
 	var cle := "arme/"+id
 	if not _icones.has(cle):
-		if id == "standard":
-			var baguette := AtlasTexture.new()
-			baguette.atlas = preload("res://assets/visual/manga/baguette_atelier.png")
-			baguette.region = Rect2(Vector2.ZERO, baguette.atlas.get_size())
-			_icones[cle] = baguette
-			return baguette
 		var variantes := {"prisme":"veloce","resonant":"lourd","draconique":"explosif","neant":"chercheur","royal":"lourd"}
-		var index := ["standard","veloce","lourd","chercheur","explosif"].find(str(variantes.get(id,id)))
-		index = maxi(index,0)
-		var texture := AtlasTexture.new()
-		texture.atlas = ARMES_ATELIER
-		var cellule := Vector2(ARMES_ATELIER.get_width()/3.0,ARMES_ATELIER.get_height()/2.0)
-		texture.region = Rect2(Vector2(index%3,index/3)*cellule,cellule)
-		texture.filter_clip = true
-		_icones[cle] = texture
+		var nom := str(variantes.get(id, id))
+		if nom not in ["standard", "veloce", "lourd", "chercheur", "explosif"]:
+			nom = "standard"
+		_icones[cle] = load("res://assets/visual/interface/armes/" + nom + ".svg")
 	return _icones[cle]
 
 static func cadre(couleur := PANNEAU, bord := CUIVRE, rayon := 28) -> StyleBox:
@@ -94,7 +100,7 @@ static func cadre(couleur := PANNEAU, bord := CUIVRE, rayon := 28) -> StyleBox:
 	style.draw_center = couleur.a > 0.0
 	style.modulate_color = Color.WHITE.lerp(bord, 0.08)
 	if couleur.a > 0.0:
-		style.modulate_color = style.modulate_color.lerp(couleur.lightened(0.75), 0.18)
+		style.modulate_color = style.modulate_color.lerp(couleur.lightened(0.75), 0.06)
 		style.modulate_color.a = couleur.a
 	_cadres[cle] = style
 	return style
@@ -103,6 +109,13 @@ static func bouton(texte: String, action := Callable(), principal := false) -> B
 	var b := Button.new()
 	HabillagePeint.appliquer(b)
 	b.text = texte
+	if texte.begins_with("‹") or texte.ends_with("›"):
+		var retour := texte.begins_with("‹")
+		b.text = texte.trim_prefix("‹").trim_suffix("›").strip_edges()
+		b.icon = texture_interface("fleche_gauche" if retour else "fleche_droite")
+		b.expand_icon = true
+		b.icon_alignment = HORIZONTAL_ALIGNMENT_LEFT if retour else HORIZONTAL_ALIGNMENT_RIGHT
+		b.tooltip_text = "Retour" if retour else "Suivant"
 	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	b.custom_minimum_size.y = Ecran.CIBLE_TACTILE
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -112,28 +125,31 @@ static func bouton(texte: String, action := Callable(), principal := false) -> B
 	StyleInterface.styliser_bouton(b, MAGIE if principal else CUIVRE, not principal)
 	b.add_theme_stylebox_override("normal",sceau(principal))
 	b.add_theme_stylebox_override("hover",sceau(principal, Color("fff5db")))
-	b.add_theme_stylebox_override("pressed",sceau(principal, Color("b9e5db")))
-	b.add_theme_stylebox_override("disabled",sceau(principal, Color("73758d")))
+	b.add_theme_stylebox_override("pressed",sceau(principal, Color.WHITE, true))
+	b.add_theme_stylebox_override("disabled",sceau(principal, Color("9a9281")))
 	for etat in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
-		b.add_theme_color_override(etat, ENCRE)
-	b.add_theme_color_override("font_disabled_color", Color("e0dcea"))
+		b.add_theme_color_override(etat, IVOIRE)
+	b.add_theme_color_override("font_disabled_color", Color("bdb4a4"))
 	b.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 	if principal:
 		b.add_theme_font_size_override("font_size",34)
-	b.add_theme_constant_override("outline_size",3)
-	b.add_theme_color_override("font_outline_color",Color("160d30"))
+	b.add_theme_constant_override("outline_size",1)
+	b.add_theme_color_override("font_outline_color",Color("183444"))
+	if b.icon != null: b.add_theme_constant_override("icon_max_width", 34)
 	if action.is_valid(): b.pressed.connect(action)
 	return b
 
-static func sceau(principal := false, teinte := Color.WHITE) -> StyleBoxTexture:
-	var style := texture_etirable("bouton_principal" if principal else "bouton_secondaire", 44, 44, 30)
+static func sceau(principal := false, teinte := Color.WHITE, enfonce := false) -> StyleBoxTexture:
+	var nom := "bouton_principal" if principal else "bouton_secondaire"
+	if enfonce: nom = "action_pressee" if principal else "secondaire_pressee"
+	var style := texture_etirable(nom, 24, 36, 24)
 	style.modulate_color = teinte
 	return style
 
 static func habiller_accueil(b: Button, principal := false) -> void:
 	b.add_theme_stylebox_override("normal", sceau(principal))
-	b.add_theme_stylebox_override("hover", sceau(principal, Color("fff2cf")))
-	b.add_theme_stylebox_override("pressed", sceau(principal, Color("b6dedc")))
+	b.add_theme_stylebox_override("hover", sceau(principal, Color("fff4df")))
+	b.add_theme_stylebox_override("pressed", sceau(principal, Color.WHITE, true))
 	b.add_theme_font_size_override("font_size", 44 if principal else 30)
 
 static func texte(contenu: String, taille := 30, couleur := TEXTE) -> Label:
@@ -142,14 +158,44 @@ static func texte(contenu: String, taille := 30, couleur := TEXTE) -> Label:
 	l.add_theme_font_override("font",Polices.TITRE if taille >= 34 else Polices.CORPS)
 	l.add_theme_font_size_override("font_size",taille)
 	l.add_theme_color_override("font_color",couleur)
-	l.add_theme_color_override("font_shadow_color",Color("160d30e6"))
+	l.add_theme_color_override("font_shadow_color",Color("183444b3"))
 	l.add_theme_constant_override("shadow_offset_x",0)
 	l.add_theme_constant_override("shadow_offset_y",2)
 	l.add_theme_constant_override("line_spacing",4)
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	l.tree_entered.connect(func(): _adapter_encre(l, couleur))
 	return l
+
+# La surface la plus proche decide du contraste, meme dans les panneaux imbriques.
+static func _adapter_encre(label: Label, couleur: Color) -> void:
+	label.add_theme_color_override("font_color", couleur)
+	label.add_theme_color_override("font_shadow_color", Color("183444b3"))
+	var ancetre := label.get_parent()
+	while ancetre != null:
+		if ancetre.has_meta("surface_lecture"):
+			if bool(ancetre.get_meta("surface_lecture")):
+				var encre := ENCRE_ATTENUE if couleur == ATTENUE else ENCRE
+				if couleur not in [TEXTE, IVOIRE, ATTENUE, ENCRE]:
+					encre = couleur.darkened(0.57)
+				label.add_theme_color_override("font_color", encre)
+				label.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
+			return
+		if ancetre is BaseButton:
+			return
+		ancetre = ancetre.get_parent()
+
+static func habiller_lecture(controle: Control) -> void:
+	controle.set_meta("surface_lecture", true)
+	var style := texture_etirable("zone_texte", 24, 32, 28)
+	if controle is PanelContainer:
+		controle.add_theme_stylebox_override("panel", style)
+	elif controle is Button:
+		for etat in ["normal", "hover", "pressed", "disabled"]:
+			var variante := style.duplicate() as StyleBoxTexture
+			variante.modulate_color = Color("d6cbb5") if etat == "pressed" else Color.WHITE
+			controle.add_theme_stylebox_override(etat, variante)
 
 static func image(index: int, cote := 128.0) -> TextureRect:
 	var t := TextureRect.new()
@@ -170,25 +216,31 @@ static func page(parent: Control, titre: String, integre := false) -> VBoxContai
 	fond_atelier(parent, true)
 	var marge := MarginContainer.new()
 	marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for nom in ["left","right"]: marge.add_theme_constant_override("margin_"+nom,36)
-	marge.add_theme_constant_override("margin_top",int(Ecran.marge_haute())+20)
-	marge.add_theme_constant_override("margin_bottom",int(HAUTEUR_NAVIGATION+Ecran.marge_basse()+20) if integre else int(Ecran.marge_basse())+24)
+	var recadrer := func() -> void:
+		var lateral := maxi(28, int((parent.size.x - 1080.0) * 0.5))
+		marge.add_theme_constant_override("margin_left", maxi(lateral, int(Ecran.marge_gauche())))
+		marge.add_theme_constant_override("margin_right", maxi(lateral, int(Ecran.marge_droite())))
+		marge.add_theme_constant_override("margin_top", int(Ecran.marge_haute()) + 20)
+		marge.add_theme_constant_override("margin_bottom", int(HAUTEUR_NAVIGATION + Ecran.marge_basse() + 20) if integre else int(Ecran.marge_basse()) + 24)
+	parent.resized.connect(recadrer)
+	recadrer.call()
 	parent.add_child(marge)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation",22)
 	marge.add_child(col)
 	var cartouche := PanelContainer.new()
 	HabillagePeint.appliquer(cartouche)
-	cartouche.add_theme_stylebox_override("panel",texture_etirable("bandeau",44,48,28))
+	cartouche.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	col.add_child(cartouche)
 	var contenu_entete := VBoxContainer.new()
 	contenu_entete.add_theme_constant_override("separation",12)
 	cartouche.add_child(contenu_entete)
-	var entete := HBoxContainer.new()
-	entete.add_theme_constant_override("separation",16)
+	var entete := HFlowContainer.new()
+	entete.add_theme_constant_override("h_separation",16)
+	entete.add_theme_constant_override("v_separation",12)
 	contenu_entete.add_child(entete)
-	var id_entete: String = {"Maîtrises":"navigation_maitrises", "Sorts":"navigation_sorts", "Équipement":"navigation_equipement", "Paramètres":"parametres"}.get(titre, "grand_oeuvre")
-	var embl := vignette(id_entete,64)
+	var id_entete: String = {"Maîtrises":"astrolabe", "Sorts":"grimoire", "Équipement":"forge", "Héros":"heros", "Paramètres":"parametres", "Campagne & modes":"portail"}.get(titre, "grimoire")
+	var embl := illustration(id_entete,72)
 	entete.add_child(embl)
 	var label := texte(titre,42)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -224,7 +276,7 @@ static func page(parent: Control, titre: String, integre := false) -> VBoxContai
 	return col
 
 static func defilement(col: VBoxContainer) -> VBoxContainer:
-	var scroll := ScrollContainer.new()
+	var scroll := preload("res://ui/composants/defilement_tactile.gd").new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.follow_focus = true
@@ -236,10 +288,10 @@ static func defilement(col: VBoxContainer) -> VBoxContainer:
 	scroll.add_child(contenu)
 	return contenu
 
-static func plaque(parent: Node, claire := false) -> VBoxContainer:
+static func plaque(parent: Node, _claire := false) -> VBoxContainer:
 	var panneau := PanelContainer.new()
 	HabillagePeint.appliquer(panneau)
-	panneau.add_theme_stylebox_override("panel",cadre(VIOLET if claire else PANNEAU))
+	habiller_lecture(panneau)
 	parent.add_child(panneau)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation",18)
@@ -272,22 +324,59 @@ static func fond_atelier(parent: Control, calme := false) -> void:
 	fond.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	fond.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fond.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	fond.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	fond.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	parent.add_child(fond)
 	if calme:
 		var voile := ColorRect.new()
-		voile.color = Color("10172f88")
+		voile.color = Color("29352e8f")
 		voile.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		voile.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		parent.add_child(voile)
 
 static func case_objet(b: Button, selection := false) -> void:
-	b.add_theme_stylebox_override("normal",carte_augment(MAGIE if selection else CUIVRE,selection))
-	b.add_theme_stylebox_override("hover",carte_augment(CUIVRE,true))
-	b.add_theme_stylebox_override("pressed",carte_augment(MAGIE,true))
+	b.add_theme_stylebox_override("normal",texture_etirable("case_selection" if selection else "case",24,28,24))
+	b.add_theme_stylebox_override("hover",texture_etirable("case_selection",24,28,24))
+	var pressee := texture_etirable("case_selection",24,28,24)
+	pressee.modulate_color = Color("bddadb")
+	b.add_theme_stylebox_override("pressed",pressee)
+	var desactivee := texture_etirable("case",24,28,24)
+	desactivee.modulate_color = Color("82949c")
+	b.add_theme_stylebox_override("disabled",desactivee)
 	for etat in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:
 		b.add_theme_color_override(etat,IVOIRE)
 	b.add_theme_font_override("font",Polices.CORPS)
+
+static func cercle(selection := false) -> StyleBoxTexture:
+	var style := StyleBoxTexture.new()
+	style.texture = preload("res://assets/visual/interface/cadres/rond_selection.svg") if selection else preload("res://assets/visual/interface/cadres/rond.svg")
+	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
+		style.set_content_margin(cote, 18)
+	return style
+
+static func bouton_rond(texte: String, action: Callable, cote := 88.0) -> Button:
+	var b := bouton(texte, action)
+	b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	b.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
+	b.autowrap_mode = TextServer.AUTOWRAP_OFF
+	b.custom_minimum_size = Vector2.ONE * cote
+	b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	for etat in ["normal", "disabled"]: b.add_theme_stylebox_override(etat, cercle())
+	for etat in ["hover", "pressed"]: b.add_theme_stylebox_override(etat, cercle(true))
+	return b
+
+static func onglet_symbolique(b: Button, symbole: Texture2D, selection: bool) -> void:
+	var espace := StyleBoxEmpty.new()
+	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
+		espace.set_content_margin(cote, 12)
+	for etat in ["normal", "hover", "pressed", "disabled", "focus"]:
+		b.add_theme_stylebox_override(etat, espace)
+	b.icon = symbole
+	b.expand_icon = true
+	b.add_theme_constant_override("icon_max_width", 56)
+	b.add_theme_color_override("font_color", MAGIE if selection else ATTENUE)
+	b.add_theme_color_override("icon_normal_color", Color.WHITE if selection else Color("7b949f"))
+	b.add_theme_font_override("font", Polices.TITRE if selection else Polices.CORPS)
 
 static func medaillon(index: int, cote := 128.0) -> PanelContainer:
 	var socle := PanelContainer.new()
@@ -305,18 +394,18 @@ static func texture_interface(nom: String) -> Texture2D:
 static func texture_etirable(nom: String, coin := 32, marge_x := 24, marge_y := 16) -> StyleBoxTexture:
 	var style := StyleBoxTexture.new()
 	style.texture = texture_interface(nom)
-	# Le kit importe a 128 px garde une dorure fine, independante des marges de lecture.
-	var peinte := nom in HabillagePeint.SURFACES or nom == "bouton_principal"
-	var marge_texture := 24 if peinte and coin > 0 else coin
+	# Les cadres SVG ont une taille logique de 128 px ; leurs coins ne s'etirent pas.
+	var peinte := HabillagePeint.CADRES.has(nom) or nom in HabillagePeint.SURFACES or nom == "bouton_principal"
+	var marge_texture := 40 if peinte and coin > 0 else coin
 	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
 		style.set_texture_margin(cote, marge_texture)
-	for cote in [SIDE_LEFT, SIDE_RIGHT]: style.set_content_margin(cote, marge_x)
-	for cote in [SIDE_TOP, SIDE_BOTTOM]: style.set_content_margin(cote, marge_y)
+	for cote in [SIDE_LEFT, SIDE_RIGHT]: style.set_content_margin(cote, maxi(44, marge_x) if peinte else marge_x)
+	for cote in [SIDE_TOP, SIDE_BOTTOM]: style.set_content_margin(cote, maxi(42, marge_y) if peinte else marge_y)
 	return style
 
 static func carte_augment(accent: Color, selection := false) -> StyleBoxTexture:
-	var style := texture_etirable("carte_augment",44,44,32)
-	style.modulate_color = Color.WHITE.lerp(accent,0.35 if selection else 0.2)
+	var style := texture_etirable("carte_selection" if selection else "carte_augment",24,32,28)
+	style.modulate_color = Color.WHITE.lerp(accent,0.12 if selection else 0.06)
 	if selection: style.modulate_color = style.modulate_color.lightened(0.12)
 	return style
 
@@ -339,12 +428,12 @@ static func illustration(nom: String, cote := 128.0) -> TextureRect:
 static func banniere(parent: Node, titre: String, sous_titre: String, embleme := "grimoire") -> VBoxContainer:
 	var panneau := PanelContainer.new()
 	HabillagePeint.appliquer(panneau)
-	panneau.add_theme_stylebox_override("panel",cadre(PANNEAU,CUIVRE))
+	panneau.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	parent.add_child(panneau)
 	var ligne := HBoxContainer.new()
 	ligne.add_theme_constant_override("separation",24)
 	panneau.add_child(ligne)
-	var dessin := illustration(embleme,132)
+	var dessin := illustration(embleme,104)
 	dessin.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	ligne.add_child(dessin)
 	var col := VBoxContainer.new()
@@ -370,16 +459,33 @@ static func theme_interface() -> Theme:
 	_theme = Theme.new()
 	_theme.default_font = Polices.CORPS
 	_theme.default_font_size = 28
+	_theme.set_icon("arrow", "OptionButton", texture_interface("fleche_bas"))
+	_theme.set_icon("submenu", "PopupMenu", texture_interface("fleche_droite"))
+	for type in ["CheckButton", "CheckBox"]:
+		for etat in ["checked", "checked_disabled"]:
+			_theme.set_icon(etat, type, texture_interface("oui"))
+		for etat in ["unchecked", "unchecked_disabled"]:
+			_theme.set_icon(etat, type, texture_interface("non"))
 	_theme.set_color("font_color","Label",TEXTE)
-	_theme.set_color("font_shadow_color","Label",Color("160d30e6"))
+	_theme.set_color("font_shadow_color","Label",Color("183444b3"))
 	_theme.set_constant("shadow_offset_x","Label",0)
 	_theme.set_constant("shadow_offset_y","Label",2)
 	_theme.set_stylebox("panel","TooltipPanel",cadre())
 	_theme.set_color("font_color","TooltipLabel",TEXTE)
 	_theme.set_font_size("font_size","TooltipLabel",25)
+	for type in ["LineEdit", "TextEdit"]:
+		_theme.set_stylebox("normal",type,texture_etirable("saisie",24,24,20))
+		_theme.set_stylebox("read_only",type,texture_etirable("zone_texte",24,24,20))
+		var focus := texture_etirable("saisie_focus",24,24,20)
+		focus.draw_center = false
+		_theme.set_stylebox("focus",type,focus)
+		_theme.set_color("font_color",type,ENCRE)
+		_theme.set_color("font_placeholder_color",type,ENCRE_ATTENUE)
+		_theme.set_color("caret_color",type,ENCRE)
+		_theme.set_color("selection_color",type,Color("8bbfcb"))
 	for type in ["VScrollBar","HScrollBar"]:
 		var rail := StyleBoxFlat.new()
-		rail.bg_color = Color("10172fcc")
+		rail.bg_color = Color("244557cc")
 		rail.set_corner_radius_all(6)
 		rail.content_margin_left = 6 if type == "VScrollBar" else 1
 		rail.content_margin_right = rail.content_margin_left
@@ -396,3 +502,25 @@ static func theme_interface() -> Theme:
 			curseur.content_margin_bottom = curseur.content_margin_top
 			_theme.set_stylebox(etat,type,curseur)
 	return _theme
+
+# Les colonnes se recomposent sans reduire les icones ni les cibles tactiles.
+static func adapter_grille(grille: GridContainer, largeur_cellule: float, colonnes_max: int) -> void:
+	var reference: WeakRef = weakref(grille)
+	var adapter := func() -> void:
+		var cible := reference.get_ref() as GridContainer
+		if cible == null or not cible.is_inside_tree(): return
+		var espace := cible.get_theme_constant("h_separation")
+		cible.columns = clampi(floori((cible.size.x + espace) / (largeur_cellule + espace)), 1, colonnes_max)
+	grille.resized.connect(adapter)
+	adapter.call_deferred()
+
+static func adapter_ligne(ligne: BoxContainer, seuil := 620.0) -> void:
+	var reference: WeakRef = weakref(ligne)
+	var adapter := func() -> void:
+		var cible := reference.get_ref() as BoxContainer
+		if cible == null or not cible.is_inside_tree(): return
+		var largeur := minf(cible.size.x, cible.get_viewport_rect().size.x - Ecran.marge_gauche() - Ecran.marge_droite())
+		cible.vertical = largeur < seuil
+	ligne.resized.connect(adapter)
+	ligne.tree_entered.connect(func(): adapter.call_deferred())
+	adapter.call_deferred()

@@ -133,7 +133,9 @@ Sources : `data/catalogue_reactifs.gd`, `data/progression_augments.gd`,
 Le héros commence avec 10 Attaque, 100 PV et 10 Défense. Chaque niveau de
 compte donne cinq points à répartir entre Force, Vitalité, Agilité,
 Intelligence et Sagesse. Mage, Sorcier et Moine apportent une spécialisation
-finale changeable contre des Gouttes.
+finale changeable gratuitement à tout moment depuis l’onglet Héros. Ce même
+onglet permet de réinitialiser gratuitement tous les points de statistiques
+pour les redistribuer, sans limite.
 
 Les récompenses financent l'équipement, la forge et les maîtrises. La forge
 compte vingt niveaux par objet, avec un premier achat accessible après deux

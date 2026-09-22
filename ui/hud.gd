@@ -14,9 +14,9 @@ var _charge_ultime := 0.0
 var _ultimes_utilises := 0
 var _fond_jauge: StyleBoxTexture
 var _plein_jauge: StyleBoxTexture
-var _panneau_hud: StyleBoxFlat
-var _panneau_presse: StyleBoxFlat
-var _panneau_indisponible: StyleBoxFlat
+var _panneau_hud: StyleBoxTexture
+var _panneau_presse: StyleBoxTexture
+var _panneau_indisponible: StyleBoxTexture
 var _icone_gouttes: TextureRect
 var _icone_augments: TextureRect
 var _icone_boss: TextureRect
@@ -43,9 +43,9 @@ func _ready() -> void:
 	_bouton_pause.tooltip_text = "Pause"
 	_fond_jauge = _style_jauge("jauge_fond")
 	_plein_jauge = _style_jauge("jauge_plein")
-	_panneau_hud = _style_compact(Color("111a32"), Color("9c8857"))
-	_panneau_presse = _style_compact(Color("223453"), Color("f0d7a2"))
-	_panneau_indisponible = _style_compact(Color("111a32"), Color("636b80"))
+	_panneau_hud = _style_compact(StyleAzur.FOND, StyleAzur.CUIVRE)
+	_panneau_presse = _style_compact(StyleAzur.PANNEAU, StyleAzur.MAGIE)
+	_panneau_indisponible = _style_compact(StyleAzur.FOND, StyleAzur.ATTENUE.darkened(0.3))
 	_replacer_boutons()
 	get_viewport().size_changed.connect(_replacer_boutons)
 
@@ -63,24 +63,24 @@ func _creer_illustration(nom: String) -> TextureRect:
 func _replacer_boutons() -> void:
 	var taille := get_viewport_rect().size
 	var haut := Ecran.marge_haute() + 12.0
-	_bouton_pause.position = Vector2(18, haut)
+	_bouton_pause.position = Vector2(Ecran.marge_gauche(), haut)
 	_bouton_pause.size = Vector2(124, 124)
-	_bouton_actif.position = Vector2(taille.x - 164, taille.y - Ecran.marge_basse() - 365)
+	_bouton_actif.position = Vector2(taille.x - Ecran.marge_droite() - 146, taille.y - Ecran.marge_basse() - 365)
 	_bouton_actif.size = Vector2(146, 146)
-	_bouton_ultime.position = Vector2(taille.x - 164, taille.y - Ecran.marge_basse() - 577)
+	_bouton_ultime.position = Vector2(taille.x - Ecran.marge_droite() - 146, taille.y - Ecran.marge_basse() - 577)
 	_bouton_ultime.size = Vector2(146, 146)
 	_replacer_illustrations()
 
 func _replacer_illustrations() -> void:
 	var taille := get_viewport_rect().size
 	var haut := Ecran.marge_haute() + 12.0
-	var points := Vector2(taille.x - 192, haut) + _decalage_secousse
+	var points := Vector2(taille.x - Ecran.marge_droite() - 176, haut) + _decalage_secousse
 	_placer_illustration(_icone_gouttes, Rect2(points + Vector2(12, 10), Vector2(48, 48)))
 	_placer_illustration(_icone_augments, Rect2(points + Vector2(12, 66), Vector2(48, 48)))
 	var boss := get_tree().get_first_node_in_group("boss")
 	_icone_boss.visible = boss != null and is_instance_valid(boss) and float(boss.pv_max) > 0.0
 	if _icone_boss.visible:
-		_placer_illustration(_icone_boss, Rect2(Vector2(144, haut + 174) + _decalage_secousse, Vector2(52, 52)))
+		_placer_illustration(_icone_boss, Rect2(Vector2(Ecran.marge_gauche() + 126, haut + 174) + _decalage_secousse, Vector2(52, 52)))
 	_replacer_icone_sort(_icone_active, _bouton_actif, ReglagesJoueur.sort_actif_effectif())
 	_replacer_icone_sort(_icone_ultime, _bouton_ultime, ReglagesJoueur.ultime_effectif())
 
@@ -140,12 +140,12 @@ func _draw() -> void:
 	var tremble := _decalage_secousse
 	_dessiner_flash(taille)
 	_dessiner_pause(police, Rect2(_bouton_pause.position + tremble, _bouton_pause.size))
-	_dessiner_progression(police, Rect2(Vector2(150, haut) + tremble, Vector2(taille.x - 354, 126)))
-	_dessiner_points(police, Rect2(Vector2(taille.x - 192, haut) + tremble, Vector2(176, 126)))
+	_dessiner_progression(police, Rect2(Vector2(Ecran.marge_gauche() + 132, haut) + tremble, Vector2(taille.x - Ecran.marge_gauche() - Ecran.marge_droite() - 312, 126)))
+	_dessiner_points(police, Rect2(Vector2(taille.x - Ecran.marge_droite() - 176, haut) + tremble, Vector2(176, 126)))
 	var boss := get_tree().get_first_node_in_group("boss")
 	var boss_visible := boss != null and is_instance_valid(boss) and float(boss.pv_max) > 0.0
 	if boss_visible:
-		_dessiner_barre_boss(boss, Polices.TITRE, Rect2(Vector2(130, haut + 154) + tremble, Vector2(taille.x - 260, 92)))
+		_dessiner_barre_boss(boss, Polices.TITRE, Rect2(Vector2(Ecran.marge_gauche() + 112, haut + 154) + tremble, Vector2(taille.x - Ecran.marge_gauche() - Ecran.marge_droite() - 224, 92)))
 	_dessiner_bouton_sort(police, _bouton_actif, false)
 	_dessiner_bouton_sort(police, _bouton_ultime, true)
 
@@ -161,8 +161,7 @@ func _dessiner_flash(taille: Vector2) -> void:
 
 func _dessiner_pause(police: Font, rect: Rect2) -> void:
 	draw_style_box(_panneau_presse if _bouton_pause.button_pressed else _panneau_hud, rect)
-	for x in [45.0, 69.0]:
-		draw_rect(Rect2(rect.position + Vector2(x, 28), Vector2(10, 35)), StyleAzur.TEXTE)
+	StyleAzur.dessiner_icone(self, "pause", Rect2(rect.position + Vector2((rect.size.x - 50.0) * 0.5, 20), Vector2(50, 50)))
 	_draw_centre(police, Vector2(rect.position.x, rect.end.y - 26), rect.size.x, "PAUSE", 18, StyleAzur.TEXTE)
 
 func _dessiner_progression(police: Font, rect: Rect2) -> void:
@@ -228,14 +227,11 @@ func _style_jauge(nom: String) -> StyleBoxTexture:
 		style.set_texture_margin(cote, 6.0 if cote in [SIDE_LEFT, SIDE_RIGHT] else 2.0)
 	return style
 
-func _style_compact(fond: Color, bord: Color) -> StyleBoxFlat:
-	# Les panneaux de combat gardent l'espace disponible pour les valeurs et les jauges.
-	var style := StyleBoxFlat.new()
-	style.bg_color = fond
-	style.border_color = bord
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(12)
+func _style_compact(_fond: Color, bord: Color) -> StyleBoxTexture:
+	var style := StyleAzur.texture_etirable("compteur", 16, 8, 6)
+	style.modulate_color = Color.WHITE.lerp(bord, 0.12)
 	return style
+
 
 func _draw_centre(police: Font, position: Vector2, largeur: float, texte: String,
 		taille_police: int, couleur: Color) -> void:

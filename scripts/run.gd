@@ -940,7 +940,8 @@ func _lancer_sort_actif(visee_manuelle := true) -> void:
 	_neutraliser_deplacement()
 	_panneau = load("res://ui/visee_sort.gd").new()
 	_panneau.point = _heros.global_position
-	_panneau.rayon = BonusSorts.rayon(float(Sorts.ACTIFS[id]["rayon"]), Jeu.mods())
+	_panneau.rayon = BonusSorts.rayon(float(Sorts.ACTIFS[id]["rayon"]), Jeu.mods(),
+		ReglagesJoueur.rangs_competences_effectifs())
 	_panneau.vers_logique = _point_sort
 	_panneau.vers_ecran = _ecran_sort
 	_panneau.confirme.connect(func(point: Vector2):
