@@ -687,7 +687,7 @@ func _avancer_phenomenes(delta: float) -> void:
 			var origine := _heros.global_position + Reglages.FAMILIER_DECALAGE
 			var cible := _ennemi_plus_proche(origine)
 			if cible != null:
-				var vitesse_familier := _heros.stats.vitesse_projectile * Reglages.FAMILIER_PROJECTILE_VITESSE_MULT
+				var vitesse_familier: float = _heros.stats.vitesse_projectile * Reglages.FAMILIER_PROJECTILE_VITESSE_MULT
 				var vise := Geometrie.point_anticipe(cible.global_position,
 					_vitesse_de(cible), origine, vitesse_familier)
 				# La lueur souligne le tir du compagnon visible dans le monde 3D.
@@ -739,8 +739,8 @@ func _tirer_familier(id: String, origine: Vector2, direction: Vector2) -> void:
 	var attaque := CatalogueFamiliers.attaque(id, ReglagesJoueur.niveau_familier(id))
 	if "familier_renforce" in _heros.tir_courant.drapeaux:
 		attaque *= Reglages.FAMILIER_TIREUR_ATTAQUE_MULT
-	var degats_familier := _heros.degats_finaux(attaque, "familier", false)
-	var degats_heros := _heros.degats_finaux(_heros.attaque_reelle(), "baguette", false)
+	var degats_familier: float = _heros.degats_finaux(attaque, "familier", false)
+	var degats_heros: float = _heros.degats_finaux(_heros.attaque_reelle(), "baguette", false)
 	tir.degats = minf(degats_familier, degats_heros * Reglages.FAMILIER_DEGATS_MAX_PART_HEROS)
 	tir.drapeaux.append("trait_familier")
 	_salle.tirer(tir, origine, direction, false)

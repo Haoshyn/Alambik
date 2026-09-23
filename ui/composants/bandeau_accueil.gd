@@ -1,55 +1,47 @@
 class_name BandeauAccueil
-extends HFlowContainer
+extends Control
 
 signal profil_demande
 signal reglages_demandes
 
 const COMPTEUR := preload("res://ui/composants/compteur_ressource.tscn")
+
+var _profil_fond: Panel
+var _profil: Button
+var _reglages: Button
 var _niveau: Label
 var _experience: ProgressBar
+var _experience_libelle: Label
 var _gouttes: CompteurRessource
 var _pierres: CompteurRessource
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_theme_constant_override("h_separation", 12)
-	add_theme_constant_override("v_separation", 10)
-	var profil := StyleAzur.bouton("", func(): profil_demande.emit())
-	profil.name = "Profil"
-	StyleInterface.rendre_invisible(profil)
-	profil.custom_minimum_size = Vector2(330, 112)
-	profil.tooltip_text = "Voir le héros"
-	add_child(profil)
-	var fond_profil := Panel.new()
-	fond_profil.add_theme_stylebox_override("panel", StyleAzur.fond_legende(0.80, 20))
-	fond_profil.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	profil.add_child(fond_profil)
-	fond_profil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var marge := MarginContainer.new()
-	marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	marge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for cote in ["left", "right"]: marge.add_theme_constant_override("margin_" + cote, 20)
-	for cote in ["top", "bottom"]: marge.add_theme_constant_override("margin_" + cote, 14)
-	profil.add_child(marge)
-	var ligne := HBoxContainer.new()
-	ligne.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ligne.add_theme_constant_override("separation", 12)
-	marge.add_child(ligne)
-	ligne.add_child(StyleAzur.illustration("heros", 64))
-	var identite := VBoxContainer.new()
-	identite.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	identite.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	identite.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	ligne.add_child(identite)
-	_niveau = StyleAzur.texte("", 28)
-	identite.add_child(_niveau)
+	_profil_fond = Panel.new()
+	_profil_fond.name = "CadreNiveau"
+	_profil_fond.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_profil_fond.add_theme_stylebox_override("panel", StyleAzur.texture_etirable("bandeau", 40, 0, 0))
+	add_child(_profil_fond)
+	_profil = StyleInterface.zone_tactile(func(): profil_demande.emit())
+	_profil.name = "Profil"
+	_profil.tooltip_text = "Voir le héros"
+	add_child(_profil)
+	_niveau = StyleAzur.texte("", 37, StyleAzur.IVOIRE)
+	_niveau.name = "Niveau"
+	_niveau.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_niveau.clip_text = true
+	add_child(_niveau)
+	_experience_libelle = StyleAzur.texte("", 24, StyleAzur.ATTENUE)
+	_experience_libelle.name = "ExperienceTexte"
+	_experience_libelle.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_experience_libelle.clip_text = true
+	add_child(_experience_libelle)
 	_experience = ProgressBar.new()
-	_experience.custom_minimum_size.y = 12
 	_experience.show_percentage = false
 	_experience.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_experience.add_theme_stylebox_override("background", StyleAzur.jauge(false))
 	_experience.add_theme_stylebox_override("fill", StyleAzur.jauge(true, StyleAzur.MAGIE))
-	identite.add_child(_experience)
+	add_child(_experience)
 	_gouttes = COMPTEUR.instantiate() as CompteurRessource
 	_gouttes.name = "Gouttes"
 	add_child(_gouttes)
@@ -58,21 +50,62 @@ func _ready() -> void:
 	_pierres.name = "Pierres"
 	add_child(_pierres)
 	_pierres.configurer("pierres", "Pierres")
-	var reglages := StyleAzur.bouton("", func(): reglages_demandes.emit())
-	reglages.name = "Reglages"
-	reglages.custom_minimum_size = Vector2.ONE * Ecran.CIBLE_TACTILE
-	reglages.size_flags_horizontal = Control.SIZE_SHRINK_END
-	reglages.tooltip_text = "Paramètres"
-	reglages.icon = StyleAzur.texture_interface("parametres")
-	reglages.expand_icon = true
-	reglages.add_theme_constant_override("icon_max_width", 74)
+	_reglages = StyleAzur.bouton("", func(): reglages_demandes.emit())
+	_reglages.name = "Reglages"
+	_reglages.tooltip_text = "Paramètres"
+	_reglages.icon = StyleAzur.texture_interface("parametres")
+	_reglages.expand_icon = true
+	_reglages.add_theme_constant_override("icon_max_width", 54)
 	for etat in ["normal", "hover", "pressed", "disabled"]:
-		reglages.add_theme_stylebox_override(etat, StyleAzur.cercle())
-	add_child(reglages)
+		_reglages.add_theme_stylebox_override(etat, StyleAzur.cercle())
+	add_child(_reglages)
+	resized.connect(_replacer)
+	_replacer()
 
 func afficher(niveau: int, experience: float, experience_requise: float, gouttes: String, pierres: String) -> void:
-	_niveau.text = "Alchimiste · niv. %d" % niveau
+	_niveau.text = "Niv. %d" % niveau
+	_profil.accessibility_name = "Niveau %d. Expérience %d sur %d. Voir le héros." % [niveau, int(experience), int(experience_requise)]
 	_experience.max_value = experience_requise
 	_experience.value = experience
+	_experience_libelle.text = "XP %d / %d" % [int(experience), int(experience_requise)]
 	_gouttes.afficher(gouttes)
 	_pierres.afficher(pierres)
+	_replacer()
+
+func _replacer() -> void:
+	if _profil == null or size.x <= 0.0:
+		return
+	var largeur_profil := minf(370.0, size.x * 0.37)
+	var hauteur_profil := 136.0
+	_profil_fond.position = Vector2.ZERO
+	_profil_fond.size = Vector2(largeur_profil, hauteur_profil)
+	_profil.position = Vector2.ZERO
+	_profil.size = _profil_fond.size
+	_niveau.position = Vector2(26, 14)
+	_niveau.size = Vector2(largeur_profil - 52, 54)
+	_experience_libelle.position = Vector2(27, 72)
+	_experience_libelle.size = Vector2(largeur_profil - 54, 30)
+	_experience.position = Vector2(26, 106)
+	_experience.size = Vector2(largeur_profil - 52, 18)
+	if size.x >= 880.0:
+		custom_minimum_size.y = 142.0
+		_reglages.position = Vector2(size.x - 112, 12)
+		_reglages.size = Vector2(112, 112)
+		_pierres.position = Vector2(size.x - 112 - 14 - 200, 12)
+		_pierres.size = Vector2(200, 100)
+		_gouttes.position = Vector2(size.x - 112 - 14 - 200 - 14 - 200, 12)
+		_gouttes.size = Vector2(200, 100)
+	else:
+		custom_minimum_size.y = 248.0
+		_profil_fond.size.x = size.x - 126.0
+		_profil.size.x = _profil_fond.size.x
+		_niveau.size.x = _profil.size.x - 52.0
+		_experience_libelle.size.x = _profil.size.x - 54.0
+		_experience.size.x = _profil.size.x - 52.0
+		_reglages.position = Vector2(size.x - 112, 12)
+		_reglages.size = Vector2(112, 112)
+		var largeur_compteur := (size.x - 14.0) * 0.5
+		_gouttes.position = Vector2(0, 151)
+		_gouttes.size = Vector2(largeur_compteur, 90)
+		_pierres.position = Vector2(largeur_compteur + 14.0, 151)
+		_pierres.size = Vector2(largeur_compteur, 90)

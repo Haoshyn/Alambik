@@ -2,7 +2,8 @@
 
 [ext_resource type="Script" path="res://ui/composants/bandeau_accueil.gd" id="1"]
 
-[node name="BandeauAccueil" type="HFlowContainer"]
+[node name="BandeauAccueil" type="Control"]
+custom_minimum_size = Vector2(0, 142)
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2

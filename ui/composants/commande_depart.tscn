@@ -2,7 +2,9 @@
 
 [ext_resource type="Script" path="res://ui/composants/commande_depart.gd" id="1"]
 
-[node name="CommandeDepart" type="VBoxContainer"]
+[node name="CommandeDepart" type="Control"]
+custom_minimum_size = Vector2(0, 246)
 layout_mode = 2
+size_flags_horizontal = 3
 mouse_filter = 2
 script = ExtResource("1")

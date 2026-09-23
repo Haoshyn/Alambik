@@ -1,30 +1,85 @@
 class_name SceneAccueil
 extends Control
 
-signal mine_demandee
-signal epreuve_demandee
+signal campagne_demandee
 
-@onready var _mine: BoutonModeAccueil = $Mine
-@onready var _epreuve: BoutonModeAccueil = $Epreuves
+const ILES := [
+	preload("res://assets/visual/interface/campagne_encre.png"),
+	preload("res://assets/visual/interface/campagne_terre.png"),
+	preload("res://assets/visual/interface/campagne_eau.png"),
+	preload("res://assets/visual/interface/campagne_air.png"),
+	preload("res://assets/visual/interface/campagne_feu.png"),
+]
+
+var _ile: TextureRect
+var _choisir: Button
+var _legende: Panel
+var _titre: Label
+var _niveau: Label
 
 func _ready() -> void:
-	_mine.configurer("mine", "La Mine")
-	_epreuve.configurer("epreuves", "Épreuves")
-	_mine.pressed.connect(func(): mine_demandee.emit())
-	_epreuve.pressed.connect(func(): epreuve_demandee.emit())
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_ile = TextureRect.new()
+	_ile.name = "IllustrationCampagne"
+	_ile.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_ile.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_ile.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	_ile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_ile)
+	_legende = Panel.new()
+	_legende.name = "LegendeCampagne"
+	_legende.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var fond := StyleAzur.fond_legende(0.88, 22)
+	fond.border_color = Color("c6c7e5a8")
+	fond.set_border_width_all(1)
+	fond.shadow_color = Color("10193488")
+	fond.shadow_size = 7
+	_legende.add_theme_stylebox_override("panel", fond)
+	add_child(_legende)
+	_choisir = StyleInterface.zone_tactile(func(): campagne_demandee.emit())
+	_choisir.name = "ChoisirCampagne"
+	_choisir.tooltip_text = "Choisir une campagne"
+	add_child(_choisir)
+	_titre = StyleAzur.texte("", 46, StyleAzur.IVOIRE)
+	_titre.name = "TitreCampagne"
+	_titre.add_theme_font_override("font", Polices.TITRE)
+	_titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_titre.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_titre.clip_text = true
+	add_child(_titre)
+	_niveau = StyleAzur.texte("", 29, StyleAzur.ATTENUE)
+	_niveau.name = "NiveauCampagne"
+	_niveau.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_niveau.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_niveau.clip_text = true
+	add_child(_niveau)
 	resized.connect(_replacer)
 	_replacer()
 
-func definir_acces(mine_ouverte: bool, niveau_mine: int, epreuve_ouverte: bool, niveau_epreuve: int) -> void:
-	_mine.definir_acces(mine_ouverte, niveau_mine)
-	_epreuve.definir_acces(epreuve_ouverte, niveau_epreuve)
+func afficher_campagne(index_monde: int, numero_niveau: int, nom_monde: String) -> void:
+	_ile.texture = ILES[clampi(index_monde, 0, ILES.size() - 1)]
+	_titre.text = "Monde %d · %s" % [index_monde + 1, nom_monde]
+	_niveau.text = "Niveau %d sélectionné  ›" % numero_niveau
+	_choisir.accessibility_name = "Choisir une campagne. Monde %d, %s, niveau %d." % [index_monde + 1, nom_monde, numero_niveau]
+	_replacer()
 
 func _replacer() -> void:
-	if _mine == null or _epreuve == null: return
-	var largeur_mode := clampf(size.x * 0.22, Ecran.CIBLE_TACTILE, 176.0)
-	var hauteur_mode := largeur_mode + 72.0
-	var position_modes := maxf(0.0, size.y - hauteur_mode - 8.0)
-	_mine.position = Vector2(0, position_modes)
-	_epreuve.position = Vector2(size.x - largeur_mode, position_modes)
-	_mine.size = Vector2(largeur_mode, hauteur_mode)
-	_epreuve.size = Vector2(largeur_mode, hauteur_mode)
+	if _ile == null or _ile.texture == null or size.x <= 0.0 or size.y <= 0.0:
+		return
+	var dimensions := _ile.texture.get_size()
+	var rapport := dimensions.y / dimensions.x
+	var largeur := maxf(0.0, minf(size.x * 0.64, (size.y - 170.0) / rapport))
+	var hauteur := largeur * rapport
+	var haut := maxf(0.0, (size.y - hauteur - 155.0) * 0.5)
+	_ile.position = Vector2((size.x - largeur) * 0.5, haut)
+	_ile.size = Vector2(largeur, hauteur)
+	var largeur_legende := minf(610.0, size.x - 42.0)
+	var haut_legende := minf(size.y - 134.0, haut + hauteur - 8.0)
+	_legende.position = Vector2((size.x - largeur_legende) * 0.5, haut_legende)
+	_legende.size = Vector2(largeur_legende, 122.0)
+	_choisir.position = _ile.position
+	_choisir.size = Vector2(_ile.size.x, haut_legende + _legende.size.y - haut)
+	_titre.position = _legende.position + Vector2(18, 8)
+	_titre.size = Vector2(largeur_legende - 36.0, 62.0)
+	_niveau.position = _legende.position + Vector2(18, 65)
+	_niveau.size = Vector2(largeur_legende - 36.0, 42.0)

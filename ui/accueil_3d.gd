@@ -11,25 +11,18 @@ signal page_demandee(index: int)
 @onready var _marges: MarginContainer = $ZoneSure
 @onready var _bandeau: BandeauAccueil = $ZoneSure/Defilement/Composition/Bandeau
 @onready var _scene: SceneAccueil = $ZoneSure/Defilement/Composition/Scene
-@onready var _depart: CommandeDepart = $ZoneSure/Defilement/Composition/CentrageDepart/Depart
+@onready var _depart: CommandeDepart = $ZoneSure/Defilement/Composition/Depart
 @onready var _defilement: ScrollContainer = $ZoneSure/Defilement
 @onready var _composition: VBoxContainer = $ZoneSure/Defilement/Composition
-@onready var _titre: Label = $ZoneSure/Defilement/Composition/Titre
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	theme = StyleAzur.theme_interface()
-	_titre.add_theme_font_override("font", Polices.LOGO)
-	_titre.add_theme_color_override("font_color", Color("f7e4c2"))
-	_titre.add_theme_constant_override("outline_size", 3)
-	_titre.add_theme_color_override("font_outline_color", StyleAzur.OMBRE_CLAIRIERE)
-	_titre.add_theme_constant_override("shadow_offset_y", 5)
-	_titre.add_theme_color_override("font_shadow_color", Color(StyleAzur.OMBRE_CLAIRIERE, 0.6))
 	_bandeau.profil_demande.connect(func(): page_demandee.emit(0))
 	_bandeau.reglages_demandes.connect(func(): reglages.emit())
-	_scene.mine_demandee.connect(func(): mine.emit())
-	_scene.epreuve_demandee.connect(func(): epreuve.emit())
-	_depart.destination_demandee.connect(func(): campagne.emit())
+	_scene.campagne_demandee.connect(func(): campagne.emit())
+	_depart.mine_demandee.connect(func(): mine.emit())
+	_depart.epreuve_demandee.connect(func(): epreuve.emit())
 	_depart.depart_demande.connect(func(): jouer.emit())
 	ReglagesJoueur.maitrise_changee.connect(rafraichir)
 	resized.connect(_cadrer)
@@ -47,23 +40,15 @@ func _cadrer() -> void:
 	_marges.add_theme_constant_override("margin_bottom", int(Ecran.marge_basse() + StyleAzur.HAUTEUR_NAVIGATION + 20))
 	var largeur := maxf(0.0, size.x - maxf(lateral, Ecran.marge_gauche()) - maxf(lateral, Ecran.marge_droite()))
 	_depart.custom_minimum_size.x = minf(850.0, largeur)
-	var taille_titre := int(clampf(largeur * 0.1, 48.0, 84.0))
-	while taille_titre > 40 and Polices.LOGO.get_string_size("ALAMBIK", HORIZONTAL_ALIGNMENT_LEFT, -1, taille_titre).x > largeur - 12.0:
-		taille_titre -= 1
-	_titre.add_theme_font_size_override("font_size", taille_titre)
 
 func rafraichir() -> void:
 	_bandeau.afficher(ReglagesJoueur.niveau_compte_effectif(), ReglagesJoueur.experience_compte,
 		ReglagesJoueur.experience_compte_requise(), ReglagesJoueur.gouttes_affichees(), str(ReglagesJoueur.pierres_forge))
-	_scene.definir_acces(ReglagesJoueur.mode_debloque("mine"), Reglages.MINE_NIVEAU_DEBLOCAGE,
+	_depart.definir_acces(ReglagesJoueur.mode_debloque("mine"), Reglages.MINE_NIVEAU_DEBLOCAGE,
 		ReglagesJoueur.mode_debloque("epreuve_sorts"), Reglages.EPREUVE_NIVEAU_DEBLOCAGE)
-	var mode := ReglagesJoueur.mode_run_choisi
 	var chapitre: Dictionary = Chapitres.par_index(ReglagesJoueur.chapitre_choisi)
 	var monde: Dictionary = Chapitres.MONDES[int(chapitre["monde"])]
-	var destination := Chapitres.libelle_court(ReglagesJoueur.chapitre_choisi) + " — " + str(monde["nom"])
-	if mode == "mine": destination = "La Mine"
-	elif mode != "grimoire": destination = "Épreuve · niveau %d" % ReglagesJoueur.niveau_epreuve_choisi
-	_depart.afficher(destination, mode)
+	_scene.afficher_campagne(int(chapitre["monde"]), int(chapitre["chapitre_monde"]), str(monde["nom"]))
 
 func _adapter_hauteur() -> void:
 	_composition.custom_minimum_size.y = _defilement.size.y

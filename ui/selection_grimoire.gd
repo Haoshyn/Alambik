@@ -1,8 +1,10 @@
 extends Control
 signal ferme
 signal selection_changee
+signal epreuve_lancement_demande
 const TRANSITION := preload("res://ui/transition_grimoire.tscn")
 var selection_seulement := false
+var lancer_epreuve_apres_choix := false
 var mode_initial := ""
 var _defilement: ScrollContainer
 var _monde := 0
@@ -267,7 +269,10 @@ func _fermer() -> void:
 func _choisir_epreuve(niveau: int) -> void:
 	if not ReglagesJoueur.choisir_epreuve(niveau): return
 	selection_changee.emit()
-	_fermer()
+	if lancer_epreuve_apres_choix:
+		epreuve_lancement_demande.emit()
+	else:
+		_fermer()
 
 func _voir_loots(mode: String, chapitre := 0, niveau := 1) -> void:
 	if is_instance_valid(_apercu): return

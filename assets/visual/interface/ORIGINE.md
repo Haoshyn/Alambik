@@ -4,19 +4,19 @@ Direction A validée le 22 septembre 2026 : fantasy magique à volumes doux,
 bleu-violet et ivoire lavande, avec accents cyan et champagne, sans microtextures
 dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.md`.
 
-- `tools/generer_email_arcanique.py` appelle `tools/habillage_svg_source.py` :
-  navigation, ressources, bijoux et capacités utilisent les silhouettes Wenrexa
-  fournies par le propriétaire dans `SVG/`. Les originaux restent intacts ; les
-  copies ajoutent couleurs de matière, ombre et liseré. Les petits sceaux de
-  variantes ont été retirés ; les silhouettes sont centrées sur leur contenu visible
-  avec `tools/sources_email/cadrages_wenrexa.json` (bornes alpha des originaux).
-  Les contrôles absents du pack conservent leurs tracés originaux Alambik.
+- `tools/refonte_svg.py` génère les pictogrammes et surfaces actifs depuis
+  des formes vectorielles originales. `tools/signatures_svg.py` contient les
+  gravures propres aux capacités et `tools/design_svg/` les cinq exemples
+  dessinés à la main qui définissent cette construction.
+  `tools/generer_email_arcanique.py` reste un point d’entrée compatible vers
+  cette refonte. Les SVG Wenrexa fournis dans `SVG/` restent intacts et ne
+  sont plus intégrés aux ressources actives.
 - `cadres/` : surfaces séparées pour cases, cartes, boutons, compteurs, panneaux,
   navigation et zones de texte, avec variantes sélectionnées, pressées et focus.
   Taille logique 128 px, étirement en neuf zones avec coins de 40 px fixes.
   Textes et icônes restent indépendants des surfaces. Palette bleu-violet
-  appliquée par `tools/palette_cadres.py` selon les rôles (lecture, action,
-  sélection, navigation), sans changement de silhouette.
+  appliquée à chaque surface selon son rôle (lecture, action, sélection,
+  navigation).
 - `equipement/`, `armes/` et `../azur/glyphes/` : SVG natifs du même kit.
 - `academie_arcanique.png` : cour-jardin d'alchimiste en lumière pervenche,
   générée avec ImageGen depuis `exec-c03e3e5d-fb90-4ec8-8bc3-2b7921e4379c.png`
@@ -30,13 +30,22 @@ dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.
   les deux couches de l'accueil animé.
 - `accueil_fond_anime.png` : fond sans mage, source ImageGen
   `exec-4a7fe8c6-8dcc-4ab9-aae3-145ac642c7c6.png`.
+- `campagne_encre.png`, `campagne_terre.png`, `campagne_eau.png`,
+  `campagne_air.png` et `campagne_feu.png` : cinq illustrations transparentes
+  et indépendantes pour le choix du monde. Sources ImageGen respectives :
+  `exec-76157d15-7984-43d0-a70d-fa6488e0a819.png`,
+  `exec-3a1c6cf8-46a4-420d-90f9-7771be2a94dd.png`,
+  `exec-0c067fcf-ed60-4c21-8677-60bcf7185c42.png`,
+  `exec-fef64f02-8c24-4b99-94b4-410b427f9f59.png`,
+  `exec-c67b0d30-4995-4931-ad85-03e998004266.png`.
 - `accueil_mage_detoure.png` : mage isolé avec transparence, source ImageGen
   `exec-467be333-9b5e-4a17-9ab1-4802ae8c0c6e.png`. Leurs dimensions et leur
-  recadrage communs sont définis dans `ui/composants/illustration_accueil.gd`.
-  L'onglet Héros réutilise le même mage détouré que l'accueil.
-- `chargement_clairiere.png` : écran de lancement créé avec ImageGen à partir
-  du fond et du mage de l'accueil ; source finale
-  `exec-4bfc5a52-94fa-46b1-b9c1-c8b42be377aa.png`.
+  recadrage communs sont conservés dans leurs sources. Le mage détouré reste
+  utilisé dans l'onglet Héros.
+- `chargement_clairiere.png` : écran de lancement à fiole alchimique et vapeurs
+  lavande sur fond indigo, distinct du menu et dans sa palette bleu-violet/cyan.
+  Créé avec ImageGen, ancien écran utilisé comme référence de palette ; source
+  `exec-32ec51ca-8810-48f2-b2b3-a11ac8d48dfd.png`.
 - `heros_email.png` : ancienne illustration indépendante générée avec ImageGen depuis
   la proposition A, source `exec-7a15a3a7-833f-4208-bfdf-230a1d165e99.png`.
 - Les illustrations restent en PNG. Les contrôles et icônes sont vectoriels ;
@@ -45,5 +54,4 @@ dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.
   de `peint/` sont des anciennes explorations. Les générateurs du grimoire
   végétal et de vectorisation peinte ne doivent pas écraser le kit actif.
 
-Les SVG Wenrexa fournis sont utilisés directement comme sources vectorielles.
-Aucun PNG de ces packs n'est incorporé dans les icônes SVG du jeu.
+Les ressources actives sont des SVG autonomes sans image incorporée.

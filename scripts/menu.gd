@@ -155,8 +155,8 @@ func _afficher_page(index: int, anime := true) -> void:
 func _creer_aventure() -> Control:
 	var page := ACCUEIL.instantiate() as AccueilClairiere
 	page.campagne.connect(_ouvrir_campagne)
-	page.mine.connect(func(): _ouvrir_campagne("mine"))
-	page.epreuve.connect(func(): _ouvrir_campagne("epreuve_sorts"))
+	page.mine.connect(func(): _lancer_mode("mine", {"nom": "La Mine"}))
+	page.epreuve.connect(_ouvrir_epreuves)
 	page.reglages.connect(_ouvrir_reglages)
 	page.jouer.connect(_jouer_immediatement)
 	page.page_demandee.connect(_afficher_page)
@@ -164,8 +164,7 @@ func _creer_aventure() -> Control:
 
 func _jouer_immediatement() -> void:
 	var chapitre := Chapitres.par_index(ReglagesJoueur.chapitre_choisi)
-	var mode := ReglagesJoueur.mode_run_choisi
-	_lancer_mode(mode, chapitre if mode == "grimoire" else {"nom":"La Mine" if mode == "mine" else "Épreuves de magie"})
+	_lancer_mode("grimoire", chapitre)
 
 func _lancer_mode(mode: String, destination: Dictionary, apprentissage_initial := false) -> void:
 	if _lancement or not ReglagesJoueur.mode_debloque(mode):
@@ -183,10 +182,19 @@ func _lancer_mode(mode: String, destination: Dictionary, apprentissage_initial :
 	transition.terminee.connect(func() -> void:
 		get_tree().change_scene_to_file("res://scenes/run.tscn"))
 
-func _ouvrir_campagne(mode := "") -> void:
+func _ouvrir_campagne() -> void:
 	var selection := SELECTION_GRIMOIRE.instantiate()
 	selection.selection_seulement = true
-	selection.mode_initial = mode
+	_ouvrir_superposition(selection)
+
+func _ouvrir_epreuves() -> void:
+	var selection := SELECTION_GRIMOIRE.instantiate()
+	selection.selection_seulement = true
+	selection.lancer_epreuve_apres_choix = true
+	selection.mode_initial = "epreuve_sorts"
+	selection.epreuve_lancement_demande.connect(func() -> void:
+		_fermer_superposition(selection)
+		_lancer_mode("epreuve_sorts", {"nom": "Épreuves de magie"}))
 	_ouvrir_superposition(selection)
 
 func _ouvrir_reglages() -> void:

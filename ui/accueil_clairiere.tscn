@@ -53,19 +53,8 @@ theme_override_constants/separation = 16
 [node name="Bandeau" parent="ZoneSure/Defilement/Composition" instance=ExtResource("3")]
 layout_mode = 2
 
-[node name="Titre" type="Label" parent="ZoneSure/Defilement/Composition"]
-layout_mode = 2
-mouse_filter = 2
-text = "ALAMBIK"
-horizontal_alignment = 1
-vertical_alignment = 1
-
 [node name="Scene" parent="ZoneSure/Defilement/Composition" instance=ExtResource("4")]
 layout_mode = 2
 
-[node name="CentrageDepart" type="CenterContainer" parent="ZoneSure/Defilement/Composition"]
-layout_mode = 2
-mouse_filter = 2
-
-[node name="Depart" parent="ZoneSure/Defilement/Composition/CentrageDepart" instance=ExtResource("5")]
+[node name="Depart" parent="ZoneSure/Defilement/Composition" instance=ExtResource("5")]
 layout_mode = 2

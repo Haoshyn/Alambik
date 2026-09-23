@@ -1,59 +1,51 @@
 class_name CommandeDepart
-extends VBoxContainer
+extends Control
 
-signal destination_demandee
 signal depart_demande
+signal mine_demandee
+signal epreuve_demandee
 
-var _chapitre: Label
-var _mode: Label
-var _embleme: TextureRect
+const MODE := preload("res://ui/composants/bouton_mode_accueil.tscn")
+
+var _mine: BoutonModeAccueil
+var _epreuve: BoutonModeAccueil
+var _jouer: Button
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_theme_constant_override("separation", 16)
-	var destination := StyleAzur.bouton("", func(): destination_demandee.emit())
-	destination.name = "Destination"
-	StyleAzur.habiller_lecture(destination)
-	destination.tooltip_text = "Choisir un niveau ou un mode"
-	destination.custom_minimum_size.y = 136
-	add_child(destination)
-	var marge := MarginContainer.new()
-	marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	marge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for cote in ["left", "right", "top", "bottom"]:
-		marge.add_theme_constant_override("margin_" + cote, 44)
-	destination.add_child(marge)
-	var ligne := HBoxContainer.new()
-	ligne.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ligne.add_theme_constant_override("separation", 18)
-	marge.add_child(ligne)
-	_embleme = StyleAzur.illustration("grimoire", 82)
-	ligne.add_child(_embleme)
-	var textes := VBoxContainer.new()
-	textes.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	textes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	textes.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	textes.add_theme_constant_override("separation", 2)
-	ligne.add_child(textes)
-	_mode = StyleAzur.texte("", 21, StyleAzur.CUIVRE)
-	textes.add_child(_mode)
-	_chapitre = StyleAzur.texte("", 31, StyleAzur.IVOIRE)
-	textes.add_child(_chapitre)
-	ligne.add_child(StyleAzur.illustration("fleche_droite", 40))
-	# Le chapitre peut passer sur deux lignes sans deborder du bouton.
-	marge.minimum_size_changed.connect(func(): destination.custom_minimum_size.y = maxf(136.0, marge.get_combined_minimum_size().y))
-	var depart := StyleAzur.bouton("JOUER", func(): depart_demande.emit(), true)
-	depart.name = "Jouer"
-	StyleAzur.habiller_accueil(depart, true)
-	depart.add_theme_font_size_override("font_size", 54)
-	depart.custom_minimum_size.y = 156
-	depart.icon = StyleAzur.texture_interface("portail")
-	depart.expand_icon = true
-	depart.add_theme_constant_override("icon_max_width", 96)
-	depart.add_theme_constant_override("h_separation", 28)
-	add_child(depart)
+	_mine = MODE.instantiate() as BoutonModeAccueil
+	_mine.name = "Mine"
+	add_child(_mine)
+	_mine.configurer("mine", "Mine")
+	_mine.pressed.connect(func(): mine_demandee.emit())
+	_jouer = StyleAzur.bouton("JOUER", func(): depart_demande.emit(), true)
+	_jouer.name = "Jouer"
+	StyleAzur.habiller_accueil(_jouer, true)
+	_jouer.add_theme_font_size_override("font_size", 61)
+	add_child(_jouer)
+	_epreuve = MODE.instantiate() as BoutonModeAccueil
+	_epreuve.name = "Epreuves"
+	add_child(_epreuve)
+	_epreuve.configurer("epreuves", "Épreuves")
+	_epreuve.pressed.connect(func(): epreuve_demandee.emit())
+	resized.connect(_replacer)
+	_replacer()
 
-func afficher(chapitre: String, mode: String) -> void:
-	_chapitre.text = chapitre
-	_mode.text = "CAMPAGNE" if mode == "grimoire" else ("SURVIE" if mode == "mine" else "ÉPREUVES DE MAGIE")
-	_embleme.texture = StyleAzur.texture_interface("grimoire" if mode == "grimoire" else ("mine" if mode == "mine" else "epreuves"))
+func definir_acces(mine_ouverte: bool, niveau_mine: int, epreuve_ouverte: bool, niveau_epreuve: int) -> void:
+	_mine.definir_acces(mine_ouverte, niveau_mine)
+	_epreuve.definir_acces(epreuve_ouverte, niveau_epreuve)
+
+func _replacer() -> void:
+	if _jouer == null or size.x <= 0.0:
+		return
+	var largeur_mode := clampf(size.x * 0.17, Ecran.CIBLE_TACTILE, 182.0)
+	var hauteur_mode := minf(size.y, largeur_mode + 68.0)
+	var largeur_jouer := minf(size.x * 0.64, size.x - largeur_mode * 2.0 - 24.0)
+	largeur_jouer = maxf(0.0, largeur_jouer)
+	var hauteur_jouer := minf(160.0, size.y * 0.75)
+	_mine.position = Vector2(0, (size.y - hauteur_mode) * 0.5)
+	_mine.size = Vector2(largeur_mode, hauteur_mode)
+	_epreuve.position = Vector2(size.x - largeur_mode, (size.y - hauteur_mode) * 0.5)
+	_epreuve.size = Vector2(largeur_mode, hauteur_mode)
+	_jouer.position = Vector2((size.x - largeur_jouer) * 0.5, (size.y - hauteur_jouer) * 0.5 - 12.0)
+	_jouer.size = Vector2(largeur_jouer, hauteur_jouer)

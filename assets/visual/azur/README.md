@@ -4,8 +4,8 @@
   flamme, protection, livre, cristal, vitalité, sablier, magie et plume.
   Source : `exec-21ba8482-1ff8-4283-8545-02285b9cdd8f.png`.
 - `glyphes/` : SVG natifs de capacités, sorts et maîtrises, générés par
-  `tools/generer_email_arcanique.py`. Silhouettes lisibles, motifs distincts et
-  dégradés simples remplacent les anciennes vectorisations peintes.
+  `tools/refonte_svg.py`. Les bases illustrées et les gravures propres à chaque
+  capacité remplacent les anciennes vectorisations peintes.
 - Les bijoux et armes utilisent les SVG de `assets/visual/interface/equipement/`
   et `armes/`, générés avec le même kit.
 - `tools/generer_icones.py` fournit les motifs historiques ; ne pas l'exécuter

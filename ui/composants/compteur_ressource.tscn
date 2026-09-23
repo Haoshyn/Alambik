@@ -3,6 +3,6 @@
 [ext_resource type="Script" path="res://ui/composants/compteur_ressource.gd" id="1"]
 
 [node name="CompteurRessource" type="PanelContainer"]
-custom_minimum_size = Vector2(180, 112)
+custom_minimum_size = Vector2(182, 90)
 mouse_filter = 2
 script = ExtResource("1")

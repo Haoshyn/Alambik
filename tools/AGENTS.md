@@ -2,7 +2,7 @@
 
 Outils de maintenance des ressources actives et de publication Android.
 Ils ne font pas partie du jeu exporté. Les règles de `../AGENTS.md` s'appliquent :
-aucune génération, vérification ou export automatique après une retouche.
+vérifier les changements avec des contrôles proportionnés à leur portée.
 
 ## Entrées utiles
 
@@ -12,7 +12,7 @@ aucune génération, vérification ou export automatique après une retouche.
 | Héros actuel | `blender/mage_sculpte.py` |
 | Bestiaire, gardien et portail | `blender/build_all.py`, `blender/portail_azur.py` |
 | Armes tenues | `blender/armes_tenues.py` |
-| Kit actif Émail arcanique, SVG natifs | `generer_email_arcanique.py`, `habillage_svg_source.py`, `../SVG/` et `sources_email/` |
+| Kit actif Émail arcanique, SVG natifs | `generer_email_arcanique.py`, `refonte_svg.py`, `signatures_svg.py` et `design_svg/` |
 | Anciennes icônes peintes en SVG | `vectoriser_icones.py` (Python avec Pillow et NumPy) |
 | Anciens contrôles SVG du kit B | `generer_controles_grimoire.py` |
 | Anciens glyphes filaires de secours | `generer_icones.py` (écrase les glyphes actifs ; ne pas utiliser pour le kit peint) |

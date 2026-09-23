@@ -24,19 +24,12 @@ Ne pas lire par défaut les archives `../OldAlambik/`, caches `.godot/`, sorties
 - Ne pas modifier un tableau pendant son itération.
 - Pour les blocs de salle, utiliser `Geometrie.ligne_libre` plutôt qu'un rayon lancé depuis `_process`.
 
-## Processus léger par défaut
+## Vérification
 
-Modifier, relire les changements, faire un retour court. Le propriétaire teste le jeu.
+Vérifier chaque modification avec un contrôle adapté à sa portée. Pour une petite retouche, privilégier la relecture du diff et un test ciblé rapide. Pour un changement plus large, vérifier les scènes ou comportements touchés et lire les erreurs détaillées. Éviter les batteries de tests sans rapport avec la modification.
 
-- Sans demande explicite : aucun test ajouté ou exécuté, sonde, simulation, vérification générale, import global Godot, export APK, incrément de version ou installation. Cela vaut aussi après un retour à une ancienne version.
-- Ne pas demander systématiquement confirmation pour lancer ces opérations : par défaut, ne pas les lancer.
-- Si des tests sont demandés, respecter le périmètre demandé sans élargir à toute la suite ou aux vingt runs. Restaurer uniquement les diagnostics nécessaires et leurs dépendances.
-- Une demande d'APK autorise export et contrôles de version, paquet et signature, sans batterie de tests ou de runs.
-- Pour une demande d'APK, produire un seul fichier `Alambic.apk` à la racine du projet. Ne conserver aucune autre APK dans le dépôt ; les journaux et métadonnées restent dans `build/android/`.
-- Ne pas créer de guide, rapport ou captures pour une petite retouche ; corriger brièvement une information devenue fausse suffit.
+Garder les exécutions sans fenêtre ni prise de focus : Godot `--headless`, Blender `--background`, processus Windows `-WindowStyle Hidden`. Pour les runs du jeu, isoler le profil de la sauvegarde réelle.
 
-## Exécutions demandées
+Une demande d'APK autorise export et contrôles de version, paquet et signature. Produire un seul fichier `Alambic.apk` à la racine du projet ; conserver journaux et métadonnées dans `build/android/`.
 
-Garder les exécutions nécessaires sans fenêtre ni prise de focus : Godot `--headless`, Blender `--background`, processus Windows `-WindowStyle Hidden`. Ouvrir un atelier interactif ou le jeu seulement sur demande explicite.
-
-Pour les tests ou runs demandés, isoler le profil de la sauvegarde réelle et lire les erreurs et résultats détaillés, pas seulement le code de sortie.
+Ne pas créer de guide ou rapport pour une petite retouche ; corriger brièvement une information devenue fausse suffit.

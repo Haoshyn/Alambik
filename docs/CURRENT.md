@@ -1,19 +1,19 @@
-# État courant — 22 septembre 2026
+# État courant — 23 septembre 2026
 
 - Godot 4.7.1, Android portrait ; simulation 2D, combat présenté en 3D.
 - Héros unique : `assets/3d/characters/mage_sculpte.glb`, matériaux standard,
   six animations et armes séparées. Sources et générateurs actifs conservés.
 - Accueil : `ui/accueil_clairiere.tscn`, composé de scènes indépendantes dans
-  `ui/composants/`. Héros violet découpé devant la clairière bleu-violet,
-  respiration et léger balancement, feuillages animés par brises intermittentes,
-  reflet discret sur l'eau et paysage fixe, lueurs de baguette
-  et de décor animées, Mine et Épreuves sur les bords juste au-dessus de la
-  destination, puis Jouer en bas ; cinq onglets fixes et zones sûres.
-  L'illustration couvre les formats portrait à échelle uniforme et rogne les bords.
+  `ui/composants/`. Une illustration indépendante du monde choisi occupe le
+  centre ; la toucher ouvre le choix des campagnes. Mine, Jouer élargi et
+  Épreuves partagent une rangée sous l'illustration. Jouer lance le chapitre
+  choisi. Niveau et XP en haut à gauche, monnaies encadrées à droite ; en bas,
+  seules les icônes des onglets restent visibles et l'onglet actif agrandit son
+  icône et affiche son titre. Le fond de clairière reste animé.
 - Kit A « Émail arcanique » : pervenche, violet, indigo, ivoire lavande,
   touches de cyan et de champagne, volumes simplifiés. Les pages partagent le
   même éclairage bleu-violet que l'accueil ; charte dans `docs/design/DIRECTION_ARTISTIQUE.md`.
-  Cadres « Sceaux liquides », emplacements et commandes circulaires ; onglet
+  Cadres en émail redessinés, emplacements et commandes circulaires ; onglet
   actif éclairé sans second cercle. Lecture en DM Sans gras, grands titres en
   Fondamento ; onglets
   Héros, Équipement, Aventure, Maîtrises, Sorts. Héros : illustration de l'accueil, commandes −/+

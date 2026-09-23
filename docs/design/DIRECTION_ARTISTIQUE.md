@@ -35,22 +35,24 @@ elles conservent les idées historiques sans définir le rendu actuel.
   magique et champagne servent d'accents, avec des ombres indigo.
   Pas de bois sculpté, de grain ni de microgravures dans les contrôles.
   Le décor reste naturel : jardin calme et magie visible mais légère, sans thème céleste.
-- Boutons en émail, cadres biseautés simples, larges reflets et zones de lecture
-  ivoire avec encre bleue. Le relief ne repose pas sur de gros contours noirs.
-  Déclinaison retenue pour les cadres : A « Sceaux liquides », contour arrondi
-  en émail indigo, bec verseur en métal lavande grisé et lentille de coin.
-  Palette des cadres : bleus et violets nuancés selon leur fonction, ivoire
-  lavande pour la lecture, violet plus soutenu pour les actions, cyan dans les
-  détails magiques ;
-  les silhouettes et les couleurs propres aux icônes sont conservées. Les nœuds et commandes
-  d'attributs utilisent des sceaux circulaires. L'onglet actif éclaire son emblème et
-  son libellé cyan, avec un trait court sous celui-ci ; aucun anneau supplémentaire.
-- `tools/generer_email_arcanique.py` construit les SVG natifs actifs : navigation,
-  ressources, contrôles, bijoux, armes, capacités, maîtrises et coffre. Chemins
-  simples et dégradés larges remplacent les vectorisations de peintures denses.
-  `tools/habillage_svg_source.py` adapte les silhouettes Wenrexa du dossier
-  `SVG/` fourni par le propriétaire : couleurs de matière, relief léger et
-  cadrage sur la silhouette visible, sans petit badge superposé. Les originaux restent intacts.
+- Boutons en émail mat, bord métallique fin et zones de lecture ivoire avec
+  encre bleue. Les reflets sont localisés ; éviter les grosses gemmes répétées,
+  les contours blancs continus et les ombres épaisses qui donnent un aspect
+  plastique. Les surfaces d'action restent violettes, les panneaux secondaires
+  indigo, et les signes magiques utilisent le cyan par touches. Les nœuds et
+  commandes d'attributs utilisent des sceaux circulaires. L'onglet actif éclaire
+  son emblème et son libellé cyan ; les autres n'affichent que leurs icônes.
+- `tools/refonte_svg.py` dessine les SVG natifs actifs : navigation, ressources,
+  contrôles, bijoux, armes, capacités, maîtrises et coffre. Les pictogrammes
+  principaux sont des objets illustrés aux formes originales, composés de
+  pièces et de reflets distincts. Les capacités possèdent une base illustrée
+  selon leur fonction et une gravure redessinée pour chacune dans
+  `tools/signatures_svg.py`. Les exemples sources se trouvent dans
+  `tools/design_svg/`. Chaque icône et chaque cadre reste un
+  fichier autonome, repositionnable dans Godot. Le générateur historique
+  `tools/generer_email_arcanique.py` reste un point d’entrée compatible ;
+  `SVG/` reste une référence fournie par le propriétaire, sans reprise directe
+  de ses tracés dans les ressources actives.
 - Les cadres de `interface/cadres/` s'étirent en neuf zones avec coins fixes.
   Cases, cartes, boutons, compteurs et zones de lecture ont des assets dédiés,
   avec états de sélection, pression et focus séparés.
@@ -58,33 +60,26 @@ elles conservent les idées historiques sans définir le rendu actuel.
   Le SVG est une source vectorielle ; Godot en importe une texture. Les mipmaps
   et le filtrage linéaire accompagnent les changements d'échelle. Le shader de
   détourage de l'ancien kit peint n'est plus appliqué à l'interface native.
-- L'accueil associe `accueil_fond_anime.png` et `accueil_mage_detoure.png`, créés
-  depuis l'illustration commune `accueil_mage_clairiere.png`. Le mage respire et
-  se balance autour de ses pieds ; son ombre le garde ancré sur le sceau.
-  `shaders/accueil_vivant.gdshader` laisse fixes le ciel, les nuages, les montagnes
-  et les rives. Quelques feuilles et herbes frémissent avec de petites brises
-  irrégulières ; seule la lumière de l'eau miroite discrètement.
-  `ui/composants/lueurs_accueil.gd` anime la baguette, quelques lucioles et les
-  runes. `academie_arcanique.png` reprend la même lumière
-  dans les pages. L'onglet Héros reprend le mage illustré et détouré de l'accueil.
-  Les lectures restent ivoire
-  lavande avec encre indigo.
-  Ce sont des illustrations, pas des icônes ni un menu aplati.
-- La scène illustrée conserve le rapport de ses sources : mise à l'échelle uniforme
-  pour couvrir l'écran, centrée sur le mage, puis rognage du surplus. Ne pas étirer
-  séparément le fond et le personnage. Le réglage « animations et flashes réduits »
-  arrête les mouvements et lueurs décoratifs.
+- L'accueil utilise la clairière sans personnage comme fond animé et une
+  illustration PNG transparente distincte pour chacun des cinq mondes. Seule
+  l'illustration du monde choisi apparaît au centre, sans carte rectangulaire ;
+  la toucher ouvre la sélection de campagne. Mine, Jouer élargi et Épreuves
+  partagent une rangée dessous. Jouer lance directement le chapitre choisi.
+  Le niveau et l'XP occupent le haut gauche ; les monnaies ont chacune leur
+  symbole et un petit cadre à droite. Le menu ne montre ni logo ni héros.
+  L'onglet Héros conserve son illustration dédiée.
+- `shaders/accueil_vivant.gdshader` laisse fixes le ciel, les nuages, les
+  montagnes et les rives. Quelques feuilles et herbes frémissent et l'eau
+  miroite discrètement. Le fond couvre l'écran à échelle uniforme.
 - L'accueil reste `ui/accueil_clairiere.tscn` pour conserver les références.
-  Profil et ressources en haut, héros au centre, Mine et Épreuves sur les bords
-  juste au-dessus de la destination ; Jouer en bas, suivi des cinq onglets :
-  Héros, Équipement, Aventure, Maîtrises et Sorts.
+  Le bas contient les cinq onglets Héros, Équipement, Aventure, Maîtrises et
+  Sorts : seule l'icône est visible au repos ; l'onglet actif grandit légèrement
+  et révèle son titre.
 - Typographie : DM Sans gras pour la lecture et extra-gras pour les commandes ;
-  Fondamento pour le logo et les grands titres. Le logo en champagne clair se
-  détache du ciel bleu-violet par un contour et une ombre indigo. Les textes
-  sur illustration ont une ombre nette ou un voile indigo discret ; les petites
-  légendes ne reposent jamais sur un contour épais. Garder les
-  textes longs en DM Sans. Les deux familles sont fournies avec leur licence OFL
-  dans `assets/fonts/`.
+  Fondamento pour les grands titres des pages. Les textes sur illustration ont
+  une ombre nette ou un voile indigo discret ; les petites légendes ne reposent
+  jamais sur un contour épais. Garder les textes longs en DM Sans. Les deux
+  familles sont fournies avec leur licence OFL dans `assets/fonts/`.
 - Les zones sûres sont prises en compte sur les quatre côtés. La largeur de
   lecture est plafonnée ; grilles et groupes d'actions se recomposent. L'accueil
   peut défiler si sa hauteur minimale dépasse la place disponible, sans rogner

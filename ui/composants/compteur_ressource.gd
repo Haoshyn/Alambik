@@ -3,33 +3,34 @@ extends PanelContainer
 
 var _icone: TextureRect
 var _valeur: Label
-var _libelle: Label
+var _libelle := ""
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	HabillagePeint.appliquer(self)
-	add_theme_stylebox_override("panel", StyleAzur.fond_legende(0.80, 20))
+	var cadre := StyleBoxTexture.new()
+	cadre.texture = HabillagePeint.texture("compteur")
+	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
+		cadre.set_texture_margin(cote, 40)
+		cadre.set_content_margin(cote, 8)
+	add_theme_stylebox_override("panel", cadre)
 	var ligne := HBoxContainer.new()
 	ligne.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ligne.add_theme_constant_override("separation", 10)
+	ligne.add_theme_constant_override("separation", 6)
 	add_child(ligne)
-	_icone = StyleAzur.illustration("gouttes", 54)
+	_icone = StyleAzur.illustration("gouttes", 59)
 	ligne.add_child(_icone)
-	var textes := VBoxContainer.new()
-	textes.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	textes.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	textes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	textes.add_theme_constant_override("separation", 0)
-	ligne.add_child(textes)
-	_libelle = StyleAzur.texte("", 21, StyleAzur.ATTENUE)
-	textes.add_child(_libelle)
-	_valeur = StyleAzur.texte("", 30, StyleAzur.IVOIRE)
+	_valeur = StyleAzur.texte("", 36, StyleAzur.IVOIRE)
 	_valeur.autowrap_mode = TextServer.AUTOWRAP_OFF
-	textes.add_child(_valeur)
+	_valeur.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_valeur.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	ligne.add_child(_valeur)
 
 func configurer(icone: String, libelle: String) -> void:
 	_icone.texture = StyleAzur.texture_interface(icone)
-	_libelle.text = libelle
+	_libelle = libelle
+	tooltip_text = libelle
 
 func afficher(valeur: String) -> void:
 	_valeur.text = valeur
+	accessibility_name = "%s : %s" % [_libelle, valeur]

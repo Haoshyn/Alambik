@@ -19,7 +19,7 @@ const ICONES_OBJETS := [
 	"anneau_ambre", "pendentif_lune", "anneau_emeraude", "pendentif_soleil",
 	"feu", "egide", "grimoire", "pierres", "vitalite", "temps_suspendu", "astrolabe", "savoir",
 ]
-const HAUTEUR_NAVIGATION := 176.0
+const HAUTEUR_NAVIGATION := 146.0
 const VIOLET := Color("735aad")
 const FOND_ATELIER := preload("res://assets/visual/interface/academie_arcanique.png")
 const TITRE_ATELIER := Polices.TITRE
