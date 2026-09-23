@@ -6,17 +6,24 @@ dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.
 
 - `tools/refonte_svg.py` génère les pictogrammes et surfaces actifs depuis
   des formes vectorielles originales. `tools/signatures_svg.py` contient les
-  gravures propres aux capacités et `tools/design_svg/` les cinq exemples
+  gravures propres aux capacités et `tools/design_svg/` les exemples
   dessinés à la main qui définissent cette construction.
   `tools/generer_email_arcanique.py` reste un point d’entrée compatible vers
   cette refonte. Les SVG Wenrexa fournis dans `SVG/` restent intacts et ne
   sont plus intégrés aux ressources actives.
 - `cadres/` : surfaces séparées pour cases, cartes, boutons, compteurs, panneaux,
   navigation et zones de texte, avec variantes sélectionnées, pressées et focus.
-  Taille logique 128 px, étirement en neuf zones avec coins de 40 px fixes.
+  Les surfaces de 128 px logiques s'étirent en neuf zones avec coins de
+  40 px fixes, sauf la capsule Jouer à coins de 58 px ; les sceaux ronds gardent
+  leurs proportions. Les cases et actions secondaires ont des angles coupés,
+  les compteurs des bouts arrondis, les augments une plaque asymétrique et les
+  panneaux de lecture un filet fin.
   Textes et icônes restent indépendants des surfaces. Palette bleu-violet
   appliquée à chaque surface selon son rôle (lecture, action, sélection,
-  navigation).
+  navigation). La navigation taillée bleu pétrole, les sceaux bronze de la
+  Mine et améthyste des Épreuves, l'action Jouer, les deux compteurs et le
+  cartouche des mondes ont leurs sources dans `tools/design_svg/` et
+  `tools/refonte_svg.py`.
 - `equipement/`, `armes/` et `../azur/glyphes/` : SVG natifs du même kit.
 - `academie_arcanique.png` : cour-jardin d'alchimiste en lumière pervenche,
   générée avec ImageGen depuis `exec-c03e3e5d-fb90-4ec8-8bc3-2b7921e4379c.png`
@@ -30,6 +37,18 @@ dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.
   les deux couches de l'accueil animé.
 - `accueil_fond_anime.png` : fond sans mage, source ImageGen
   `exec-4a7fe8c6-8dcc-4ab9-aae3-145ac642c7c6.png`.
+- `clairiere_vivante/` : couches PNG RGBA créées avec ImageGen le 24 septembre
+  2026 à partir de ce fond, pour l'accueil en plusieurs plans. `paysage.png`
+  retire le ciel et les éléments proches (source
+  `exec-ac043df7-d004-4da8-8247-e3b716e8a3a4.png`) ; `vegetation.png`
+  isole les arbres et plantes du premier plan
+  (`exec-61566b70-f4d7-4d20-a209-2f5c56f06d05.png`) ; `eau.png`
+  isole la cascade et le lac (`exec-0846e992-792a-49c2-bcd9-5a6d51bf1a87.png`).
+  `atmosphere.png` est un atlas 2 × 2 : deux nuages en haut, brume puis fumée
+  en bas (`exec-78209fef-e462-42c3-9013-9c89cc921055.png`).
+  Le ciel est un dégradé Godot ; les animations et cadrages sont définis dans
+  `data/animations_decors.gd`, `ui/composants/illustration_accueil.gd` et
+  `ui/composants/ile_animee.gd`.
 - `campagne_encre.png`, `campagne_terre.png`, `campagne_eau.png`,
   `campagne_air.png` et `campagne_feu.png` : cinq illustrations transparentes
   et indépendantes pour le choix du monde. Sources ImageGen respectives :
@@ -46,12 +65,18 @@ dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.
   lavande sur fond indigo, distinct du menu et dans sa palette bleu-violet/cyan.
   Créé avec ImageGen, ancien écran utilisé comme référence de palette ; source
   `exec-32ec51ca-8810-48f2-b2b3-a11ac8d48dfd.png`.
+- `coffre_ferme.png` et `coffre_pieces.png` : coffre de fin de run en émail
+  indigo, ferrures champagne et intérieur mauve lumineux. Le premier fournit
+  le couvercle fermé ; le second sépare caisse et couvercle pour l'ouverture.
+  Sources ImageGen `exec-020b857b-17e2-43bc-9141-8f4d98f24c6c.png` et
+  `exec-40332cf7-3da1-4fe4-87df-5456ae59fb46.png`.
 - `heros_email.png` : ancienne illustration indépendante générée avec ImageGen depuis
   la proposition A, source `exec-7a15a3a7-833f-4208-bfdf-230a1d165e99.png`.
-- Les illustrations restent en PNG. Les contrôles et icônes sont vectoriels ;
-  leurs textures importées utilisent un filtrage linéaire avec mipmaps.
+- Les illustrations et le coffre restent en PNG. Les autres contrôles et icônes
+  sont vectoriels ; leurs textures importées utilisent un filtrage linéaire avec
+  mipmaps. Le coffre garde ses détails nets à l'échelle de l'écran.
 - `clairiere_magique.png`, `heros_accueil.png`, `scriptorium.png` et les planches
   de `peint/` sont des anciennes explorations. Les générateurs du grimoire
   végétal et de vectorisation peinte ne doivent pas écraser le kit actif.
 
-Les ressources actives sont des SVG autonomes sans image incorporée.
+Les SVG actifs sont autonomes sans image incorporée.

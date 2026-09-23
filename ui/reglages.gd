@@ -47,29 +47,67 @@ func _ready() -> void:
 	confort.add_child(StyleAzur.texte("Visée libre après l’icône, cible la plus proche par l’icône, ou tape courte n’importe où dans l’arène.",24,StyleAzur.ATTENUE))
 	StyleAzur.separateur(contenu)
 	var progression := StyleAzur.plaque(contenu)
-	progression.get_parent().visible = false
-	var ouvrir_progression := StyleAzur.bouton("Progression ›",func(): progression.get_parent().visible = not progression.get_parent().visible)
+	var panneau_progression := progression.get_parent() as Control
+	panneau_progression.hide()
+	var ouvrir_progression := StyleAzur.bouton("Progression ›", _basculer_section.bind(panneau_progression))
 	contenu.add_child(ouvrir_progression)
 	contenu.move_child(ouvrir_progression,progression.get_parent().get_index())
 	_bouton_reset = StyleAzur.bouton("Réinitialiser la progression",_sur_reset)
 	progression.add_child(_bouton_reset)
 	if ReglagesJoueur.outils_developpement_disponibles():
 		var developpement := StyleAzur.plaque(contenu)
-		developpement.get_parent().visible = false
-		var ouvrir := StyleAzur.bouton("Outils de développement",func(): developpement.get_parent().visible = not developpement.get_parent().visible)
+		var panneau_developpement := developpement.get_parent() as Control
+		panneau_developpement.hide()
+		var ouvrir := StyleAzur.bouton("Outils de développement", _basculer_section.bind(panneau_developpement))
 		contenu.add_child(ouvrir)
 		contenu.move_child(ouvrir,developpement.get_parent().get_index())
 		_option(developpement,"Mode développeur",ReglagesJoueur.mode_dev,func(v): ReglagesJoueur.definir_mode_dev(v))
 	# Le retour reste accessible meme quand les options sont longues a faire defiler.
 	col.add_child(StyleAzur.bouton("Reprendre", _reprendre, true))
 	Capture.programmer(self)
+	StyleInterface.animer_entree(self, 18.0)
 
 func _reprendre() -> void:
 	if not reprise_demandee.get_connections().is_empty():
 		reprise_demandee.emit()
 		return
 	Sons.jouer("choix", -12.0)
-	ferme.emit()
+	StyleInterface.sortir_puis(self, func() -> void: ferme.emit(), 12.0)
+
+func _basculer_section(panneau: Control) -> void:
+	var ouvrir := not bool(panneau.get_meta("section_ouverte", false))
+	panneau.set_meta("section_ouverte", ouvrir)
+	var precedente: Variant = panneau.get_meta("section_animation", null)
+	if precedente is Tween and (precedente as Tween).is_valid():
+		(precedente as Tween).kill()
+	if ReglagesJoueur.effets_reduits:
+		panneau.visible = ouvrir
+		panneau.modulate.a = 1.0
+		panneau.scale = Vector2.ONE
+		return
+	if ouvrir:
+		var etait_visible := panneau.visible
+		panneau.show()
+		panneau.pivot_offset = panneau.size * 0.5
+		if not etait_visible:
+			panneau.modulate.a = 0.0
+			panneau.scale = Vector2(1.0, 0.96)
+		var entree := panneau.create_tween().set_parallel(true)
+		entree.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		entree.tween_property(panneau, "modulate:a", 1.0, 0.23)
+		entree.tween_property(panneau, "scale", Vector2.ONE, 0.28)
+		panneau.set_meta("section_animation", entree)
+	else:
+		var sortie := panneau.create_tween().set_parallel(true)
+		sortie.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+		sortie.tween_property(panneau, "modulate:a", 0.0, 0.16)
+		sortie.tween_property(panneau, "scale", Vector2(1.0, 0.98), 0.18)
+		sortie.chain().tween_callback(func() -> void:
+			if not bool(panneau.get_meta("section_ouverte", false)):
+				panneau.hide()
+				panneau.modulate.a = 1.0
+				panneau.scale = Vector2.ONE)
+		panneau.set_meta("section_animation", sortie)
 
 func _selecteur(parent: Node) -> OptionButton:
 	var b := OptionButton.new()
@@ -79,12 +117,13 @@ func _selecteur(parent: Node) -> OptionButton:
 	b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.add_theme_font_override("font",Polices.CORPS)
-	for etat in ["normal","hover","pressed"]:
-		b.add_theme_stylebox_override(etat,StyleAzur.cadre())
+	b.add_theme_stylebox_override("normal",_cadre_controle())
+	b.add_theme_stylebox_override("hover",_cadre_controle(false,true))
+	b.add_theme_stylebox_override("pressed",_cadre_controle(true))
 	for etat in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:
 		b.add_theme_color_override(etat,StyleAzur.IVOIRE)
 	b.add_theme_font_size_override("font_size",29)
-	b.add_theme_stylebox_override("focus",StyleAzur.cadre(Color.TRANSPARENT,StyleAzur.MAGIE))
+	b.add_theme_stylebox_override("focus",_cadre_controle_focus())
 	var liste := b.get_popup()
 	liste.add_theme_font_override("font",Polices.CORPS)
 	liste.add_theme_font_size_override("font_size",29)
@@ -138,15 +177,28 @@ func _option(parent: Node, titre: String, valeur: bool, action: Callable) -> voi
 	b.custom_minimum_size.y = Ecran.CIBLE_TACTILE
 	b.add_theme_font_override("font",Polices.CORPS)
 	b.add_theme_font_size_override("font_size",28)
-	for etat in ["normal","hover","pressed","hover_pressed"]:
-		b.add_theme_stylebox_override(etat,StyleAzur.cadre())
-	b.add_theme_stylebox_override("focus",StyleAzur.cadre(Color.TRANSPARENT,StyleAzur.MAGIE))
+	b.add_theme_stylebox_override("normal",_cadre_controle())
+	b.add_theme_stylebox_override("hover",_cadre_controle(false,true))
+	b.add_theme_stylebox_override("pressed",_cadre_controle(true))
+	b.add_theme_stylebox_override("hover_pressed",_cadre_controle(true,true))
+	b.add_theme_stylebox_override("focus",_cadre_controle_focus())
 	for etat in ["font_color","font_hover_color","font_pressed_color","font_hover_pressed_color"]:
 		b.add_theme_color_override(etat,StyleAzur.IVOIRE)
 	b.add_theme_icon_override("checked",StyleAzur.texture_interface("oui"))
 	b.add_theme_icon_override("unchecked",StyleAzur.texture_interface("non"))
 	b.toggled.connect(func(v): action.call(v))
 	parent.add_child(b)
+
+func _cadre_controle(enfonce := false, survol := false) -> StyleBoxTexture:
+	var style := StyleAzur.texture_etirable("secondaire_pressee" if enfonce else "bouton_secondaire",24,24,20)
+	if survol:
+		style.modulate_color = Color("e9f4fb")
+	return style
+
+func _cadre_controle_focus() -> StyleBoxTexture:
+	var style := StyleAzur.texture_etirable("case_selection",24,24,20)
+	style.draw_center = false
+	return style
 
 func _sur_reset() -> void:
 	if _confirmation_reset:

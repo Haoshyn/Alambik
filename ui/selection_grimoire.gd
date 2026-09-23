@@ -116,6 +116,7 @@ func _ready() -> void:
 	ligne_mine.add_theme_constant_override("separation", 14)
 	mine.add_child(ligne_mine)
 	_bouton_mine = StyleAzur.bouton("Choisir la Mine", func(): _choisir_mode("mine"))
+	StyleAzur.habiller_mode(_bouton_mine, "mine")
 	ligne_mine.add_child(_bouton_mine)
 	var info_mine := StyleAzur.bouton("Butin", func(): _voir_loots("mine"))
 	info_mine.size_flags_horizontal = Control.SIZE_FILL
@@ -130,12 +131,14 @@ func _ready() -> void:
 	texte_epreuve.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	presentation_epreuve.add_child(texte_epreuve)
 	_bouton_epreuve = StyleAzur.bouton("Explorer les épreuves", func(): _choisir_mode("epreuve_sorts"))
+	StyleAzur.habiller_mode(_bouton_epreuve, "epreuve_sorts")
 	epreuve.add_child(_bouton_epreuve)
 	_liste_epreuves = VBoxContainer.new()
 	_liste_epreuves.add_theme_constant_override("separation", 18)
 	epreuve.add_child(_liste_epreuves)
 	_liste_epreuves.visible = ReglagesJoueur.mode_run_choisi == "epreuve_sorts"
 	_liste_epreuves.add_child(StyleAzur.texte("Une augmentation entre chaque boss. Chaque niveau cache un Cœur de mana unique : +10 % de dégâts finaux.", 25, StyleAzur.ATTENUE))
+	var epreuves_ouvertes := ReglagesJoueur.mode_debloque("epreuve_sorts")
 	for i in Epreuves.nombre():
 		var niveau := i + 1
 		var fiche := StyleAzur.plaque(_liste_epreuves)
@@ -151,8 +154,12 @@ func _ready() -> void:
 		ligne.add_theme_constant_override("separation", 14)
 		fiche.add_child(ligne)
 		var bouton := StyleAzur.bouton("Choisir l’épreuve", func(): _choisir_epreuve(niveau))
-		bouton.disabled = not ReglagesJoueur.mode_dev and niveau > ReglagesJoueur.niveau_epreuve_debloque
-		if bouton.disabled: bouton.text = "Terminez le niveau précédent"
+		StyleAzur.habiller_mode(bouton, "epreuve_sorts")
+		bouton.disabled = not epreuves_ouvertes or (not ReglagesJoueur.mode_dev and niveau > ReglagesJoueur.niveau_epreuve_debloque)
+		if not epreuves_ouvertes:
+			bouton.text = "Niveau %d de campagne requis" % Reglages.EPREUVE_NIVEAU_DEBLOCAGE
+		elif bouton.disabled:
+			bouton.text = "Terminez le niveau précédent"
 		ligne.add_child(bouton)
 		var info := StyleAzur.bouton("Butin", func(): _voir_loots("epreuve_sorts", 0, niveau))
 		info.size_flags_horizontal = Control.SIZE_FILL
@@ -164,10 +171,15 @@ func _ready() -> void:
 
 func _ouvrir_mode_initial() -> void:
 	if mode_initial == "epreuve_sorts": _liste_epreuves.show()
-	# Attendre la mise en page pour amener le raccourci au bon endroit.
+	# L'acces direct doit montrer le mode vise sans refaire defiler l'atlas.
 	await get_tree().process_frame
 	if is_instance_valid(_defilement):
-		_defilement.ensure_control_visible(_bouton_epreuve if mode_initial == "epreuve_sorts" else _bouton_mine)
+		var section: Control = _bouton_epreuve if mode_initial == "epreuve_sorts" else _bouton_mine
+		while section != null and not section is PanelContainer:
+			section = section.get_parent() as Control
+		if section != null:
+			var decalage := section.global_position.y - _defilement.global_position.y
+			_defilement.scroll_vertical = maxi(0, _defilement.scroll_vertical + roundi(decalage) - 24)
 
 func _choisir_mode(mode: String) -> void:
 	if _lancement:
@@ -205,8 +217,8 @@ func _rafraichir() -> void:
 	_bouton_selectionner.disabled = not ReglagesJoueur.chapitre_debloque(_index_selectionne())
 	_bouton_epreuve.disabled = not ReglagesJoueur.mode_debloque("epreuve_sorts")
 	_bouton_mine.disabled = not ReglagesJoueur.mode_debloque("mine")
-	_bouton_epreuve.text = "Explorer les épreuves" if not _bouton_epreuve.disabled else "Accessible au niveau %d" % Reglages.EPREUVE_NIVEAU_DEBLOCAGE
-	_bouton_mine.text = "Choisir la Mine" if not _bouton_mine.disabled else "Accessible au niveau %d" % Reglages.MINE_NIVEAU_DEBLOCAGE
+	_bouton_epreuve.text = "Explorer les épreuves" if not _bouton_epreuve.disabled else "Niveau %d de campagne requis" % Reglages.EPREUVE_NIVEAU_DEBLOCAGE
+	_bouton_mine.text = "Choisir la Mine" if not _bouton_mine.disabled else "Niveau %d de campagne requis" % Reglages.MINE_NIVEAU_DEBLOCAGE
 	var chapitre := Chapitres.par_index(_index_selectionne())
 	_details.text = "%s\nMeilleur étage : %d / %d" % [chapitre["nom"], ReglagesJoueur.meilleure_du_chapitre(_index_selectionne()), chapitre["salles"]]
 	if not _message.is_empty(): _details.text += "\n" + _message

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<defs>
+ <linearGradient id="bord" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#faf0d4"/><stop offset=".46" stop-color="#b3c8d3"/><stop offset="1" stop-color="#8196b0"/></linearGradient>
+ <linearGradient id="email" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#8a77b5"/><stop offset=".48" stop-color="#695a9c"/><stop offset="1" stop-color="#3f4279"/></linearGradient>
+ <linearGradient id="lumiere" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffffff" stop-opacity=".19"/><stop offset=".42" stop-color="#a9ddf1" stop-opacity=".035"/><stop offset="1" stop-color="#111d39" stop-opacity=".13"/></linearGradient>
+</defs>
+<path d="M26 5H95Q116 5 123 26V105L105 123H30Q5 123 5 97V26Z" fill="#172647" opacity=".28" transform="translate(0 3)"/>
+<path d="M26 5H95Q116 5 123 26V105L105 123H30Q5 123 5 97V26Z" fill="url(#bord)" stroke="#526786" stroke-width=".9"/>
+<path d="M27 9H95Q112 9 119 27V103L103 119H30Q9 119 9 97V27Z" fill="#223451"/>
+<path d="M28 13H95Q108 13 115 28V101L101 115H30Q13 115 13 97V28Z" fill="url(#email)"/>
+<path d="M28 13H95Q108 13 115 28V101L101 115H30Q13 115 13 97V28Z" fill="url(#lumiere)"/>
+<path d="M25 21 21 25V99M36 15H92Q105 15 111 26M34 113H99" fill="none" stroke="#faf0d4" stroke-opacity=".62" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M18 37V91M114 42V96" fill="none" stroke="#9fcee0" stroke-opacity=".48" stroke-width="1.2" stroke-linecap="round"/>
+<path d="M102 112 112 102M18 24 25 17" fill="none" stroke="#d9c29d" stroke-opacity=".8" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

@@ -9,7 +9,9 @@
   Épreuves partagent une rangée sous l'illustration. Jouer lance le chapitre
   choisi. Niveau et XP en haut à gauche, monnaies encadrées à droite ; en bas,
   seules les icônes des onglets restent visibles et l'onglet actif agrandit son
-  icône et affiche son titre. Le fond de clairière reste animé.
+  icône et affiche son titre. La clairière utilise des couches peintes séparées
+  (paysage, végétation, eau, nuages/brumes), avec vent et parallaxe. Les matières
+  des cinq îles sont animées ; les effets réduits figent l'ensemble.
 - Kit A « Émail arcanique » : pervenche, violet, indigo, ivoire lavande,
   touches de cyan et de champagne, volumes simplifiés. Les pages partagent le
   même éclairage bleu-violet que l'accueil ; charte dans `docs/design/DIRECTION_ARTISTIQUE.md`.

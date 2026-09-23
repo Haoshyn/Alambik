@@ -36,26 +36,28 @@ func _ready() -> void:
 		var chance := float(offre["chance_" + type])
 		for id in candidats:
 			_ajouter_carte(col, str(id), type, chance / float(candidats.size()))
+	var precisions := StyleAzur.plaque(col, true)
+	precisions.add_child(StyleAzur.texte("À savoir", 29, StyleAzur.ENCRE))
 	if mode == "epreuve_sorts":
 		if not (offre["sorts"] as Array).is_empty():
-			col.add_child(StyleAzur.texte("Garantie de ce niveau : un sort sous %d victoire(s) maximum. Le compteur repart après chaque sort obtenu." % maxi(1,Reglages.EPREUVE_GARANTIE_CAPACITE-ReglagesJoueur.epreuves_ratees(niveau_epreuve)),27,StyleAzur.ATTENUE))
-		col.add_child(StyleAzur.texte("Un sort au maximum. Les sorts au rang maximal sortent du tirage.\nSans sort : %.0f %%" % [(1.0 - float(offre["chance_sort"])) * 100.0], 27, StyleAzur.ATTENUE))
+			precisions.add_child(StyleAzur.texte("Garantie de ce niveau : un sort sous %d victoire(s) maximum. Le compteur repart après chaque sort obtenu." % maxi(1,Reglages.EPREUVE_GARANTIE_CAPACITE-ReglagesJoueur.epreuves_ratees(niveau_epreuve)),27,StyleAzur.ATTENUE))
+		precisions.add_child(StyleAzur.texte("Un sort au maximum. Les sorts au rang maximal sortent du tirage.\nSans sort : %.0f %%" % [(1.0 - float(offre["chance_sort"])) * 100.0], 27, StyleAzur.ATTENUE))
 		if ReglagesJoueur.coeur_mana_obtenu(niveau_epreuve):
-			col.add_child(StyleAzur.texte("Cœur de mana déjà obtenu dans ce niveau.", 27, StyleAzur.CUIVRE))
+			precisions.add_child(StyleAzur.texte("Cœur de mana déjà obtenu dans ce niveau.", 27, StyleAzur.CUIVRE))
 		else:
-			col.add_child(StyleAzur.texte("Cœur de mana : %.0f %% · garanti sous %d victoire(s) maximum. Un seul pour ce niveau." % [float(offre["chance_coeur"]) * 100.0, maxi(1, Reglages.EPREUVE_GARANTIE_COEUR - ReglagesJoueur.epreuves_sans_coeur_mana(niveau_epreuve))], 27, StyleAzur.CUIVRE))
+			precisions.add_child(StyleAzur.texte("Cœur de mana : %.0f %% · garanti sous %d victoire(s) maximum. Un seul pour ce niveau." % [float(offre["chance_coeur"]) * 100.0, maxi(1, Reglages.EPREUVE_GARANTIE_COEUR - ReglagesJoueur.epreuves_sans_coeur_mana(niveau_epreuve))], 27, StyleAzur.CUIVRE))
 	elif mode == "grimoire":
 		if not (offre["objets"] as Array).is_empty():
-			col.add_child(StyleAzur.texte("Garantie de ce niveau : objet sous %d victoire(s) complètes maximum." % maxi(1,Recompenses.GARANTIE_APRES_GRANDS_COFFRES-ReglagesJoueur.grands_coffres_rates(chapitre)),27,StyleAzur.ATTENUE))
-		col.add_child(StyleAzur.texte("Sans objet à la victoire : %.0f %%\nUn objet manquant garanti au plus tard au %de coffre complet du même niveau." % [(1.0 - float(offre["chance_objet"])) * 100.0, Recompenses.GARANTIE_APRES_GRANDS_COFFRES], 27, StyleAzur.ATTENUE))
+			precisions.add_child(StyleAzur.texte("Garantie de ce niveau : objet sous %d victoire(s) complètes maximum." % maxi(1,Recompenses.GARANTIE_APRES_GRANDS_COFFRES-ReglagesJoueur.grands_coffres_rates(chapitre)),27,StyleAzur.ATTENUE))
+		precisions.add_child(StyleAzur.texte("Sans objet à la victoire : %.0f %%\nUn objet manquant garanti au plus tard au %de coffre complet du même niveau." % [(1.0 - float(offre["chance_objet"])) * 100.0, Recompenses.GARANTIE_APRES_GRANDS_COFFRES], 27, StyleAzur.ATTENUE))
 		var paliers: Array[String] = []
 		for coffre: Dictionary in Recompenses.COFFRES:
 			var palier := int(coffre["palier"])
 			if palier > 0 and palier < Reglages.SALLES_PAR_RUN:
 				paliers.append("%d salles terminées : %.1f %%" % [palier, float(coffre["chance_objet"]) * 100.0])
-		col.add_child(StyleAzur.texte("Même en cas de défaite, le coffre peut donner un bijou manquant :\n" + " · ".join(paliers)
+		precisions.add_child(StyleAzur.texte("Même en cas de défaite, le coffre peut donner un bijou manquant :\n" + " · ".join(paliers)
 			+ ".\nLes défaites ne font pas avancer le compteur des trois victoires.", 27, StyleAzur.ATTENUE))
-	col.add_child(StyleAzur.texte("Chaque salle remplit le coffre ; chaque boss augmente son rang. Abandon ou défaite : les gains des salles terminées restent acquis. Les sorts et les Cœurs de mana exigent la victoire en Épreuve.\nMontants avec vos bonus actuels, hors augmentations de l’aventure. Aucune salle terminée : coffre vide.", 27, StyleAzur.ATTENUE))
+	precisions.add_child(StyleAzur.texte("Chaque salle remplit le coffre ; chaque boss augmente son rang. Abandon ou défaite : les gains des salles terminées restent acquis. Les sorts et les Cœurs de mana exigent la victoire en Épreuve.\nMontants avec vos bonus actuels, hors augmentations de l’aventure. Aucune salle terminée : coffre vide.", 27, StyleAzur.ATTENUE))
 
 var _detail: Control
 
@@ -85,7 +87,10 @@ func _ajouter_carte(col: VBoxContainer, id: String, type: String, chance: float)
 	var consulter := HBoxContainer.new()
 	consulter.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	consulter.add_theme_constant_override("separation", 8)
-	consulter.add_child(StyleAzur.texte("Consulter les pouvoirs", 24, StyleAzur.MAGIE))
+	var consulter_texte := StyleAzur.texte("Consulter les pouvoirs", 24, StyleAzur.MAGIE)
+	consulter_texte.autowrap_mode = TextServer.AUTOWRAP_OFF
+	consulter_texte.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	consulter.add_child(consulter_texte)
 	consulter.add_child(StyleAzur.illustration("fleche_droite", 28))
 	textes.add_child(consulter)
 	marge.minimum_size_changed.connect(func(): carte.custom_minimum_size.y = maxf(204.0, marge.get_combined_minimum_size().y))

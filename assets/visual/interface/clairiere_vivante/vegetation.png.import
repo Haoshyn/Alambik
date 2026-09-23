@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b41x1756a8rk2"
-path="res://.godot/imported/coffre_couvercle.svg-63e6aeb4871ba08223bbeddefb4e774d.ctex"
+uid="uid://d1tds4werctw2"
+path="res://.godot/imported/vegetation.png-2758aeb4e61c8f6a1119f8c7cad5948f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/visual/interface/coffre_couvercle.svg"
-dest_files=["res://.godot/imported/coffre_couvercle.svg-63e6aeb4871ba08223bbeddefb4e774d.ctex"]
+source_file="res://assets/visual/interface/clairiere_vivante/vegetation.png"
+dest_files=["res://.godot/imported/vegetation.png-2758aeb4e61c8f6a1119f8c7cad5948f.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

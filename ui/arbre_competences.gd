@@ -47,27 +47,29 @@ func _ready() -> void:
 				_rafraichir()
 				_fiche_popup.show())
 			b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			var diametre := 212.0 if ArbreCompetences.rangs(id) == 1 else 184.0
+			var majeur := ArbreCompetences.rangs(id) == 1
+			var diametre := 216.0 if majeur else 190.0
 			b.custom_minimum_size = Vector2.ONE * diametre
 			b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			b.set_meta("majeur", majeur)
 			var marge := MarginContainer.new()
 			marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 			marge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			for cote in ["left", "right", "top", "bottom"]:
-				marge.add_theme_constant_override("margin_" + cote, 40)
+				marge.add_theme_constant_override("margin_" + cote, 28)
 			b.add_child(marge)
 			var contenu_noeud := VBoxContainer.new()
 			contenu_noeud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			contenu_noeud.alignment = BoxContainer.ALIGNMENT_CENTER
 			contenu_noeud.add_theme_constant_override("separation", 8)
 			marge.add_child(contenu_noeud)
-			var icone := StyleAzur.vignette(id, 56, true)
+			var icone := StyleAzur.vignette(id, 78 if majeur else 72, true)
 			icone.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 			contenu_noeud.add_child(icone)
 			b.set_meta("embleme", icone.texture)
 			b.set_meta("icone", icone)
 			b.set_meta("accent", accent)
-			var rang := StyleAzur.texte("", 24, StyleAzur.IVOIRE)
+			var rang := StyleAzur.texte("", 26, StyleAzur.IVOIRE)
 			rang.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			rang.autowrap_mode = TextServer.AUTOWRAP_OFF
 			var ligne_rang := HBoxContainer.new()
@@ -79,9 +81,9 @@ func _ready() -> void:
 			ligne_rang.add_child(rang)
 			b.set_meta("etat", etat)
 			b.set_meta("rang", rang)
-			b.add_theme_stylebox_override("hover", _style_noeud(accent, true))
-			b.add_theme_stylebox_override("pressed", _style_noeud(StyleAzur.MAGIE, true))
-			var focus := _style_noeud(StyleAzur.IVOIRE, true)
+			b.add_theme_stylebox_override("hover", _style_noeud(accent, true, true, majeur))
+			b.add_theme_stylebox_override("pressed", _style_noeud(StyleAzur.MAGIE, true, true, majeur))
+			var focus := _style_noeud(StyleAzur.IVOIRE, true, true, majeur)
 			focus.draw_center = false
 			b.add_theme_stylebox_override("focus", focus)
 			var oscillation := float([0, 40, -24, 28][rang_noeud % 4])
@@ -131,9 +133,10 @@ func fermer_fiche() -> bool:
 func _exit_tree() -> void:
 	if is_instance_valid(_fiche_popup): _fiche_popup.queue_free()
 
-func _style_noeud(accent: Color, selection := false, ouvert := true) -> StyleBoxTexture:
+func _style_noeud(accent: Color, selection := false, ouvert := true, majeur := false) -> StyleBoxTexture:
 	var style := StyleAzur.cercle(selection)
-	style.modulate_color = Color.WHITE.lerp(accent, 0.12) if ouvert else Color("8993ad")
+	var nuance := accent.lerp(StyleAzur.CUIVRE, 0.35) if majeur else accent
+	style.modulate_color = Color.WHITE.lerp(nuance, 0.34 if majeur else 0.22) if ouvert else Color("8993ad").lerp(nuance, 0.12)
 	return style
 
 
@@ -151,7 +154,7 @@ func _rafraichir() -> void:
 		etat.texture = StyleAzur.texture_interface("cadenas" if not ouvert else ("selection" if id == _selection else "validation"))
 		b.tooltip_text = str(ArbreCompetences.NOEUDS[id]["nom"]) + (" · Pouvoir majeur" if ArbreCompetences.rangs(id)==1 else "")
 		var accent: Color = b.get_meta("accent")
-		b.add_theme_stylebox_override("normal",_style_noeud(accent, id == _selection, ouvert))
+		b.add_theme_stylebox_override("normal",_style_noeud(accent, id == _selection, ouvert, bool(b.get_meta("majeur"))))
 	var n: Dictionary = ArbreCompetences.NOEUDS[_selection]
 	var selection: Button = _noeuds[_selection]
 	_embleme.texture = selection.get_meta("embleme")
@@ -160,9 +163,9 @@ func _rafraichir() -> void:
 	_message_details.text = _message
 	_message_details.visible = not _message.is_empty()
 	var rang_actuel := ReglagesJoueur.rang_competence(_selection)
-	_details.text += "\nBonus du nœud : %s" % ArbreCompetences.valeur_au_rang(_selection, rang_actuel)
+	_details.text += "\nBonus : %s" % ArbreCompetences.valeur_au_rang(_selection, rang_actuel)
 	if rang_actuel < ArbreCompetences.rangs(_selection):
-		_details.text += " → %s" % ArbreCompetences.valeur_au_rang(_selection, rang_actuel + 1)
+		_details.text += "\nRang suivant : %s" % ArbreCompetences.valeur_au_rang(_selection, rang_actuel + 1)
 	_achat.text = "%s · %d gouttes" % ["Débloquer" if ArbreCompetences.rangs(_selection)==1 else "Améliorer",ReglagesJoueur.cout_competence(_selection)]
 	_achat.disabled = ReglagesJoueur.rang_competence(_selection) >= ArbreCompetences.rangs(_selection) or (not ReglagesJoueur.mode_dev and (not ArbreCompetences.prerequis_atteint(_selection,ReglagesJoueur.rangs_competences) or ReglagesJoueur.gouttes < ReglagesJoueur.cout_competence(_selection)))
 	var requis := str(n.get("requis",""))

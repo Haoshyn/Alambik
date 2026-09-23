@@ -2,8 +2,10 @@ class_name BoutonModeAccueil
 extends Button
 
 var _visuel: Control
+var _cadre: Panel
 var _icone: TextureRect
 var _legende_fond: Panel
+var _legende_style: StyleBoxFlat
 var _libelle: Label
 var _condition: Label
 var _verrou: TextureRect
@@ -16,22 +18,22 @@ func _ready() -> void:
 	_visuel.name = "Sceau"
 	_visuel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_visuel)
-	var cadre := Panel.new()
-	cadre.name = "Cadre"
-	cadre.add_theme_stylebox_override("panel", StyleAzur.cercle())
-	cadre.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_visuel.add_child(cadre)
-	cadre.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_cadre = Panel.new()
+	_cadre.name = "Cadre"
+	_cadre.add_theme_stylebox_override("panel", StyleAzur.cercle())
+	_cadre.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_visuel.add_child(_cadre)
+	_cadre.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_icone = StyleAzur.illustration("mine", 0)
 	_icone.name = "Icone"
 	_visuel.add_child(_icone)
 	_legende_fond = Panel.new()
 	_legende_fond.name = "FondLegende"
 	_legende_fond.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var fond := StyleAzur.fond_legende(0.84, 13)
-	fond.border_color = Color("c1c9e3a0")
-	fond.set_border_width_all(1)
-	_legende_fond.add_theme_stylebox_override("panel", fond)
+	_legende_style = StyleAzur.fond_legende(0.88, 13)
+	_legende_style.border_color = Color("c1c9e3a0")
+	_legende_style.set_border_width_all(1)
+	_legende_fond.add_theme_stylebox_override("panel", _legende_style)
 	add_child(_legende_fond)
 	_libelle = StyleAzur.texte("", 29, StyleAzur.IVOIRE)
 	_libelle.name = "Libelle"
@@ -53,6 +55,11 @@ func _ready() -> void:
 
 func configurer(icone: String, libelle: String) -> void:
 	_icone.texture = StyleAzur.texture_interface(icone)
+	_cadre.add_theme_stylebox_override("panel", StyleAzur.cercle_mode(icone))
+	_legende_style.bg_color = Color("42394ae6") if icone == "mine" else Color("302d58e6")
+	_legende_style.border_color = Color("ddb788") if icone == "mine" else Color("ae9cd6")
+	_legende_style.border_width_top = 2
+	_libelle.add_theme_color_override("font_color", Color("f8e6cd") if icone == "mine" else Color("eee2ff"))
 	_libelle.text = libelle
 	tooltip_text = libelle
 	accessibility_name = libelle
@@ -60,8 +67,9 @@ func configurer(icone: String, libelle: String) -> void:
 func definir_acces(ouvert: bool, niveau: int) -> void:
 	disabled = not ouvert
 	_verrou.visible = not ouvert
-	_condition.text = "Niveau %d" % niveau if not ouvert else ""
+	_condition.text = "Campagne %d" % niveau if not ouvert else ""
 	_icone.modulate = Color.WHITE if ouvert else Color("d4d9e9")
+	_cadre.modulate = Color.WHITE if ouvert else Color("e2dce6")
 	_replacer()
 
 func _replacer() -> void:

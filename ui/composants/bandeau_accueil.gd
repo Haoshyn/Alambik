@@ -50,14 +50,12 @@ func _ready() -> void:
 	_pierres.name = "Pierres"
 	add_child(_pierres)
 	_pierres.configurer("pierres", "Pierres")
-	_reglages = StyleAzur.bouton("", func(): reglages_demandes.emit())
+	_reglages = StyleAzur.bouton_rond("", func(): reglages_demandes.emit(), 112.0)
 	_reglages.name = "Reglages"
 	_reglages.tooltip_text = "Paramètres"
 	_reglages.icon = StyleAzur.texture_interface("parametres")
 	_reglages.expand_icon = true
 	_reglages.add_theme_constant_override("icon_max_width", 54)
-	for etat in ["normal", "hover", "pressed", "disabled"]:
-		_reglages.add_theme_stylebox_override(etat, StyleAzur.cercle())
 	add_child(_reglages)
 	resized.connect(_replacer)
 	_replacer()
@@ -83,17 +81,17 @@ func _replacer() -> void:
 	_profil.size = _profil_fond.size
 	_niveau.position = Vector2(26, 14)
 	_niveau.size = Vector2(largeur_profil - 52, 54)
-	_experience_libelle.position = Vector2(27, 72)
+	_experience_libelle.position = Vector2(27, 68)
 	_experience_libelle.size = Vector2(largeur_profil - 54, 30)
-	_experience.position = Vector2(26, 106)
+	_experience.position = Vector2(26, 100)
 	_experience.size = Vector2(largeur_profil - 52, 18)
 	if size.x >= 880.0:
 		custom_minimum_size.y = 142.0
 		_reglages.position = Vector2(size.x - 112, 12)
 		_reglages.size = Vector2(112, 112)
-		_pierres.position = Vector2(size.x - 112 - 14 - 200, 12)
+		_pierres.position = Vector2(size.x - 112 - 14 - 200, 17)
 		_pierres.size = Vector2(200, 100)
-		_gouttes.position = Vector2(size.x - 112 - 14 - 200 - 14 - 200, 12)
+		_gouttes.position = Vector2(size.x - 112 - 14 - 200 - 14 - 200, 17)
 		_gouttes.size = Vector2(200, 100)
 	else:
 		custom_minimum_size.y = 248.0

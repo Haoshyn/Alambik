@@ -11,6 +11,8 @@ var _choisi := false
 var _rarete := ""
 var _propositions: Array[String] = []
 var _cartes: VBoxContainer
+var _espace_haut: Control
+var _consigne: Label
 var _bouton_reroll: Button
 
 func _ready() -> void:
@@ -37,10 +39,13 @@ func _ready() -> void:
 	var col := StyleAzur.page(self, "Augmentations")
 	StyleAzur.banniere(col, titre, sous_titre, "fiole")
 	_cartes = StyleAzur.defilement(col)
-	_cartes.add_theme_constant_override("separation", 22)
-	var consigne := StyleAzur.texte("Touchez la carte du pouvoir à emporter", 25, StyleAzur.ATTENUE)
-	consigne.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	col.add_child(consigne)
+	_cartes.add_theme_constant_override("separation", 28)
+	_espace_haut = Control.new()
+	_cartes.add_child(_espace_haut)
+	_consigne = StyleAzur.texte("Touchez le pouvoir à emporter", 26, StyleAzur.MENTHE)
+	_consigne.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_cartes.add_child(_consigne)
+	_cartes.get_parent().resized.connect(_recentrer_cartes)
 	_bouton_reroll = StyleAzur.bouton("", _sur_reroll)
 	col.add_child(_bouton_reroll)
 	_nouveau_tirage()
@@ -57,6 +62,8 @@ func _nouveau_tirage() -> void:
 	_propositions = DraftLogique.proposer(Jeu.ameliorations_effectives(), Jeu.rng,
 		ProgressionAugments.NOMBRE_CHOIX, _rarete, etage_recompense if campagne else 0, anciennes, _contexte)
 	for enfant in _cartes.get_children():
+		if enfant == _espace_haut or enfant == _consigne:
+			continue
 		_cartes.remove_child(enfant)
 		enfant.queue_free()
 	if _propositions.is_empty():
@@ -69,15 +76,30 @@ func _nouveau_tirage() -> void:
 		carte.configurer(reactif)
 		carte.choisie.connect(_sur_choix)
 		_cartes.add_child(carte)
+	_recentrer_cartes.call_deferred()
 	var disponibles := DraftLogique.candidats(Jeu.ameliorations_effectives(),
 		_rarete, etage_recompense if campagne else 0, _contexte)
 	var peut_changer := false
 	for id in disponibles:
 		if id not in _propositions:
 			peut_changer = true
-	_bouton_reroll.text = "Renouveler les cartes · %d restant(s) · %d max par aventure" % [Jeu.rerolls_restants, Reglages.RELANCES_MAX_PAR_RUN]
-	_bouton_reroll.disabled = not ProgressionAugments.relance_autorisee(_rarete) or Jeu.rerolls_restants <= 0 or not peut_changer
-	_bouton_reroll.visible = ProgressionAugments.relance_autorisee(_rarete)
+	_bouton_reroll.text = "Renouveler les cartes · %d relance%s" % [Jeu.rerolls_restants,
+		"s" if Jeu.rerolls_restants > 1 else ""]
+	_bouton_reroll.visible = ProgressionAugments.relance_autorisee(_rarete) and Jeu.rerolls_restants > 0 and peut_changer
+	_bouton_reroll.disabled = not _bouton_reroll.visible
+
+func _recentrer_cartes() -> void:
+	if not is_instance_valid(_cartes) or not is_instance_valid(_espace_haut):
+		return
+	var hauteur := _consigne.get_combined_minimum_size().y
+	var nombre := 0
+	for enfant in _cartes.get_children():
+		if enfant is CarteReactif:
+			hauteur += (enfant as Control).get_combined_minimum_size().y
+			nombre += 1
+	hauteur += float(nombre) * float(_cartes.get_theme_constant("separation"))
+	var defilement := _cartes.get_parent() as ScrollContainer
+	_espace_haut.custom_minimum_size.y = clampf((defilement.size.y - hauteur) * 0.42, 0.0, 300.0)
 
 func _sur_reroll() -> void:
 	if _choisi or _bouton_reroll.disabled:

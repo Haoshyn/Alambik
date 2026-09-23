@@ -142,40 +142,72 @@ def controles():
 
 def cadres():
     modele('action', INTERFACE / 'cadres/action.svg')
-    exemple = (MODELES / 'action.svg').read_text(encoding='utf-8')
-    exemple = exemple.replace('width="256" height="256"', 'width="128" height="128"')
-    # Les quatre coins des surfaces restent au meme endroit pour le 9-slice Godot.
+    # Les silhouettes gardent leurs coins dans les 40 px fixes du 9-slice Godot.
     variantes = {
-        'action': ('#8a77b5', '#695a9c', '#3f4279', '#faf0d4'),
-        'action_pressee': ('#635787', '#4d4a7a', '#34365e', '#d4c8be'),
-        'secondaire': ('#596b98', '#364c7a', '#203358', '#d8dce2'),
-        'secondaire_pressee': ('#40527d', '#2a3b67', '#1a2a4d', '#bac3ce'),
-        'navigation': ('#52628b', '#344568', '#202d4e', '#c6c9d4'),
-        'bandeau': ('#52638e', '#344872', '#1d2e55', '#d8d4c7'),
-        'compteur': ('#566a93', '#3c507b', '#23375f', '#c7ced3'),
-        'conteneur': ('#596888', '#3b5071', '#263957', '#c8c2b7'),
-        'carte': ('#5b5a89', '#403e6d', '#232e55', '#d6c7c8'),
-        'carte_selection': ('#8e7cac', '#6e5c99', '#3e437a', '#faf1de'),
-        'case': ('#586b90', '#394b75', '#253658', '#d0d3d5'),
-        'case_selection': ('#8079aa', '#5c638f', '#314572', '#f2e7d9'),
-        'medaillon': ('#5c668d', '#3a4c78', '#26385d', '#e7d5ba'),
-        'panneau': ('#fffaf0', '#f0eae5', '#c9ced9', '#ded5bf'),
-        'zone_texte': ('#fffaf1', '#f1ece7', '#cbd2df', '#dfd3c2'),
-        'saisie': ('#f6f4ef', '#e5e5e6', '#bfc9d9', '#d8d7d4'),
-        'saisie_focus': ('#fffaf0', '#ebecf5', '#c9d6ec', '#f0e6d3'),
+        'action': ('#816bb3', '#624b9c', '#413771', '#f2e3cd'),
+        'action_depart': ('#9b7bc5', '#6d54ad', '#3c3a79', '#f6deb6'),
+        'action_pressee': ('#675886', '#4f4579', '#37325f', '#cfc3c1'),
+        'secondaire': ('#5976a0', '#3d5987', '#273f6b', '#d2d9db'),
+        'secondaire_pressee': ('#455e86', '#344a73', '#1d3259', '#bcc6ce'),
+        'secondaire_mine': ('#9d816c', '#695b68', '#34415a', '#e6c49b'),
+        'secondaire_epreuves': ('#8b80b3', '#625c9b', '#384573', '#dfd2ee'),
+        'bandeau': ('#556a91', '#3e5178', '#243a61', '#d1cec8'),
+        'compteur': ('#576f98', '#405981', '#29416b', '#c7cdcf'),
+        'compteur_gouttes': ('#66959e', '#3d687f', '#244660', '#add9d8'),
+        'compteur_pierres': ('#917dab', '#625b90', '#3a426c', '#dec8dc'),
+        'conteneur': ('#5f7295', '#465b7d', '#2c4265', '#d3c9ba'),
+        'carte': ('#61749a', '#455a7d', '#293e62', '#d3d2d1'),
+        'carte_selection': ('#8d78ae', '#6c5c9a', '#413d76', '#efe2cf'),
+        'recompense': ('#6282a0', '#416080', '#283d62', '#d4d3c2'),
+        'recompense_selection': ('#a08dbd', '#705d9a', '#493d75', '#f3d9b3'),
+        'case': ('#5f779d', '#405a84', '#284169', '#ccd4d5'),
+        'case_selection': ('#8a7baf', '#665f9b', '#3c4a7a', '#f1e5d7'),
+        'medaillon': ('#5b6a95', '#425583', '#2b3d68', '#dad2c0'),
+        'panneau': ('#fff9ec', '#f4ebec', '#e1e6f1', '#d5b992'),
+        'zone_texte': ('#faf9ff', '#ebedf9', '#d7e0f4', '#b7c7de'),
+        'saisie': ('#f9f8f7', '#edeef0', '#d9e2ed', '#cbd0cf'),
+        'saisie_focus': ('#ffffff', '#eef1fa', '#d5e1f2', '#ede1d5'),
     }
     for nom, (haut, milieu, bas, bord) in variantes.items():
+        if nom == 'action_depart':
+            famille = 'capsule_large'
+        elif nom in ('compteur_gouttes', 'compteur_pierres'):
+            famille = 'pilule'
+        elif nom in ('secondaire', 'secondaire_pressee', 'secondaire_mine', 'secondaire_epreuves',
+                     'bandeau', 'carte', 'carte_selection', 'case', 'case_selection'):
+            famille = 'angulaire'
+        elif nom in ('panneau', 'zone_texte', 'saisie', 'saisie_focus'):
+            famille = 'lecture'
+        elif nom in ('recompense', 'recompense_selection'):
+            famille = 'recompense'
+        else:
+            famille = 'action'
+        exemple = (MODELES / f'{famille}.svg').read_text(encoding='utf-8')
+        exemple = exemple.replace('width="256" height="256"', 'width="128" height="128"')
         svg = exemple.replace('#8a77b5', haut).replace('#695a9c', milieu).replace('#3f4279', bas).replace('#faf0d4', bord)
         if nom.endswith('selection') or nom.endswith('focus'):
-            svg = svg.replace('</svg>', '<path d="M27 16H99Q112 16 112 30V98Q112 112 98 112H30Q16 112 16 98V30Q16 16 27 16Z" fill="none" stroke="#a9dbe6" stroke-opacity=".8" stroke-width="1.4"/></svg>')
+            trace = 'M27 16H101L112 27V101L101 112H27L16 101V27Z' if famille == 'angulaire' else 'M29 16H99Q112 16 112 29V99Q112 112 99 112H29Q16 112 16 99V29Q16 16 29 16Z'
+            if famille == 'recompense':
+                trace = 'M29 17H95Q106 17 111 29V99L99 111H30Q17 111 17 97V29Z'
+            svg = svg.replace('</svg>', f'<path d="{trace}" fill="none" stroke="#a9dbe6" stroke-opacity=".75" stroke-width="1.3"/></svg>')
         if nom in ('panneau', 'zone_texte', 'saisie', 'saisie_focus'):
-            svg = svg.replace('stroke="#eadad6"', 'stroke="#7f91aa"').replace('stroke="#fff6eb"', 'stroke="#ffffff"')
+            svg = svg.replace('fill="#1e2c4e"', 'fill="#7e90a9"').replace('stroke="#394b70"', 'stroke="#aab7c6"')
+        if nom == 'action_depart':
+            svg = svg.replace('</svg>', '<path d="M31 34 35 29 39 34 35 39ZM97 34 93 29 89 34 93 39ZM31 94 35 89 39 94 35 99ZM97 94 93 89 89 94 93 99Z" fill="#b8e4e5" fill-opacity=".68"/><path d="M57 19H71M57 109H71" fill="none" stroke="#f7e6bd" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/></svg>')
+        elif nom == 'secondaire_mine':
+            svg = svg.replace('</svg>', '<path d="M27 31 32 25 37 31 32 37ZM101 31 96 25 91 31 96 37Z" fill="#f0cb94" fill-opacity=".7"/></svg>')
+        elif nom == 'secondaire_epreuves':
+            svg = svg.replace('</svg>', '<path d="M27 31 32 24 37 31 32 38ZM101 31 96 24 91 31 96 38Z" fill="#9ee4ec" fill-opacity=".72"/></svg>')
         (INTERFACE / 'cadres' / f'{nom}.svg').write_text(svg, encoding='utf-8')
+    modele('navigation', INTERFACE / 'cadres/navigation.svg')
+    modele('bandeau_monde', INTERFACE / 'cadres/bandeau_monde.svg')
+    modele('mode_mine', INTERFACE / 'cadres/mode_mine.svg')
+    modele('mode_epreuves', INTERFACE / 'cadres/mode_epreuves.svg')
     rond = (MODELES / 'rond.svg').read_text(encoding='utf-8')
     (INTERFACE / 'cadres/rond.svg').write_text(rond, encoding='utf-8')
     rond_selection = rond.replace('</svg>', '<circle cx="64" cy="62" r="53" fill="none" stroke="#b6eef2" stroke-width="2"/><path d="M26 25q16-16 37-17" fill="none" stroke="#fff7df" stroke-width="2" stroke-linecap="round"/></svg>')
     (INTERFACE / 'cadres/rond_selection.svg').write_text(rond_selection, encoding='utf-8')
-    for nom, cadre in {'panneau':'conteneur', 'cadre':'conteneur', 'carte_augment':'carte',
+    for nom, cadre in {'panneau':'conteneur', 'cadre':'conteneur', 'carte_augment':'recompense',
                        'bouton_principal':'action', 'bouton_secondaire':'secondaire',
                        'bandeau':'bandeau', 'medaillon':'medaillon'}.items():
         (INTERFACE / f'{nom}.svg').write_text((INTERFACE / 'cadres' / f'{cadre}.svg').read_text(encoding='utf-8'), encoding='utf-8')
@@ -348,18 +380,6 @@ def composants():
     defaite += p('M68 32 51 58 64 65 47 89', 'none', '#bfc9dc', 4)
     defaite += trait('M49 62 62 68 47 91M31 38l28-17', '#fff', 1.5, .53)
     ecrire(INTERFACE / 'defaite.svg', defaite)
-    # Les deux moities du coffre restent deux textures pour l'animation existante.
-    ecrire(INTERFACE / 'coffre_corps.svg',
-           p('M23 30h274v116l-14 11H37l-14-11Z', 'url(#cuir)', '#454a65', 4)
-           + p('M34 39h252v99H34Z', 'url(#nuit)', '#afa7a5', 2)
-           + p('M142 30h36v61h-36Z', 'url(#or)', '#736878', 2)
-           + '<circle cx="160" cy="61" r="9" fill="url(#turquoise)" stroke="#e3ddc7" stroke-width="1.5"/>'
-           + trait('M45 43v96M275 43v96M26 130h268', '#f5dcb2', 5, .7), '0 0 320 160', (640, 320))
-    ecrire(INTERFACE / 'coffre_couvercle.svg',
-           p('M23 134V73Q23 18 78 17h164q55 1 55 56v61Z', 'url(#cuir)', '#454a65', 4)
-           + p('M35 124V73q0-44 43-45h164q43 1 43 45v51Z', 'url(#email)', '#c9bda8', 2)
-           + p('M137 27h46v99h-46Z', 'url(#or)', '#756779', 1.8)
-           + trait('M46 118V72q0-29 32-32h164q32 3 32 32v46M25 126h270', '#f4e1c2', 4, .7), '0 0 320 160', (640, 320))
     ecrire(INTERFACE / 'halo_recompense.svg',
            '<defs><radialGradient id="halo"><stop stop-color="#fff8e8" stop-opacity=".67"/><stop offset=".36" stop-color="#b9d7f0" stop-opacity=".43"/><stop offset="1" stop-color="#a18dcb" stop-opacity="0"/></radialGradient></defs>'
            '<circle cx="256" cy="256" r="248" fill="url(#halo)"/>'

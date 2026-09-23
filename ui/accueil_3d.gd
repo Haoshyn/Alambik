@@ -37,7 +37,7 @@ func _cadrer() -> void:
 	_marges.add_theme_constant_override("margin_left", maxi(lateral, int(Ecran.marge_gauche())))
 	_marges.add_theme_constant_override("margin_right", maxi(lateral, int(Ecran.marge_droite())))
 	_marges.add_theme_constant_override("margin_top", int(Ecran.marge_haute()))
-	_marges.add_theme_constant_override("margin_bottom", int(Ecran.marge_basse() + StyleAzur.HAUTEUR_NAVIGATION + 20))
+	_marges.add_theme_constant_override("margin_bottom", int(Ecran.marge_basse() + StyleAzur.HAUTEUR_NAVIGATION + StyleAzur.MARGE_NAVIGATION_BAS + 20))
 	var largeur := maxf(0.0, size.x - maxf(lateral, Ecran.marge_gauche()) - maxf(lateral, Ecran.marge_droite()))
 	_depart.custom_minimum_size.x = minf(850.0, largeur)
 

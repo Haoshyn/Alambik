@@ -1,16 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
 <defs>
- <linearGradient id="bord" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c8c2b7"/><stop offset=".33" stop-color="#c7bda9"/><stop offset=".7" stop-color="#7e81a4"/><stop offset="1" stop-color="#d3c7b2"/></linearGradient>
- <linearGradient id="email" x1="0" y1="0" x2=".2" y2="1"><stop stop-color="#596888"/><stop offset=".42" stop-color="#3b5071"/><stop offset="1" stop-color="#263957"/></linearGradient>
- <linearGradient id="lueur" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d1bceb" stop-opacity=".45"/><stop offset="1" stop-color="#d1bceb" stop-opacity="0"/></linearGradient>
+ <linearGradient id="bord" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#d3c9ba"/><stop offset=".23" stop-color="#d6d8dd"/><stop offset=".57" stop-color="#858fa9"/><stop offset=".82" stop-color="#687996"/><stop offset="1" stop-color="#bfc4cd"/></linearGradient>
+ <linearGradient id="email" x1=".1" y1="0" x2=".74" y2="1"><stop stop-color="#5f7295"/><stop offset=".48" stop-color="#465b7d"/><stop offset="1" stop-color="#2c4265"/></linearGradient>
+ <radialGradient id="lueur" cx=".13" cy=".02" r=".95"><stop stop-color="#fffafd" stop-opacity=".21"/><stop offset=".37" stop-color="#dce5f4" stop-opacity=".07"/><stop offset="1" stop-color="#aec9e8" stop-opacity="0"/></radialGradient>
+ <linearGradient id="ombre" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#1b2a4a" stop-opacity="0"/><stop offset="1" stop-color="#172540" stop-opacity=".16"/></linearGradient>
 </defs>
-<path d="M31 5H93Q112 5 122 24V100Q122 122 99 122H29Q6 122 6 99V28Q6 5 31 5Z" fill="#172344" opacity=".38" transform="translate(0 4)"/>
-<path d="M31 5H93Q112 5 122 24V100Q122 122 99 122H29Q6 122 6 99V28Q6 5 31 5Z" fill="url(#bord)" stroke="#595575" stroke-width="1.3"/>
-<path d="M31 12H91Q105 12 115 26V99Q115 115 98 115H30Q13 115 13 98V29Q13 12 31 12Z" fill="url(#email)" stroke="#312e61" stroke-width="1.4"/>
-<path d="M29 19H92Q103 19 108 30V93Q108 108 95 108H31Q20 108 20 96V31Q20 19 29 19Z" fill="none" stroke="#eadad6" stroke-opacity=".6" stroke-width="1.25"/>
-<path d="M29 20H97Q110 22 111 37V51Q85 41 62 48Q37 54 20 66V31Q20 20 29 20Z" fill="url(#lueur)"/>
-<path d="M29 17h48M22 34v36" stroke="#fff6eb" stroke-opacity=".62" stroke-width="1.7" stroke-linecap="round"/>
-<path d="M32 111H94Q110 111 111 94" fill="none" stroke="#252851" stroke-opacity=".68" stroke-width="2"/>
-<path d="M26 12q-2 7-10 10M102 115q8-2 11-10" fill="none" stroke="#e7d8b6" stroke-opacity=".78" stroke-width="2" stroke-linecap="round"/>
-<path d="M8 40v18M120 70v18" fill="none" stroke="#837b9b" stroke-width="1.2"/>
+<path d="M30 5H98Q119 5 123 26V99Q123 122 100 123H29Q5 123 5 100V28Q5 5 30 5Z" fill="#142442" opacity=".29" transform="translate(0 3)"/>
+<path d="M30 5H98Q119 5 123 26V99Q123 122 100 123H29Q5 123 5 100V28Q5 5 30 5Z" fill="url(#bord)" stroke="#52617c" stroke-width="1"/>
+<path d="M30 11H96Q112 11 117 27V98Q117 116 99 117H30Q11 117 11 99V29Q11 11 30 11Z" fill="#1e2c4e" stroke="#394b70" stroke-width="1.1"/>
+<path d="M30 15H96Q108 15 113 28V97Q113 112 98 113H30Q15 113 15 98V30Q15 15 30 15Z" fill="url(#email)"/>
+<path d="M30 15H96Q108 15 113 28V97Q113 112 98 113H30Q15 113 15 98V30Q15 15 30 15Z" fill="url(#lueur)"/>
+<path d="M30 15H96Q108 15 113 28V97Q113 112 98 113H30Q15 113 15 98V30Q15 15 30 15Z" fill="url(#ombre)"/>
+<path d="M30 15H96Q105 15 110 24" fill="none" stroke="#fff9ed" stroke-opacity=".55" stroke-width="1.3" stroke-linecap="round"/>
+<path d="M16 31V77" fill="none" stroke="#dce9f2" stroke-opacity=".21" stroke-width="1.2" stroke-linecap="round"/>
+<path d="M29 113H98Q109 113 112 101" fill="none" stroke="#172543" stroke-opacity=".52" stroke-width="1.4" stroke-linecap="round"/>
+<path d="M12 27Q16 15 28 12M100 117Q113 114 117 101" fill="none" stroke="#f3e4ca" stroke-opacity=".43" stroke-width="1.5" stroke-linecap="round"/>
 </svg>

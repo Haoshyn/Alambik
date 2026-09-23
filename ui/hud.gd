@@ -17,6 +17,11 @@ var _plein_jauge: StyleBoxTexture
 var _panneau_hud: StyleBoxTexture
 var _panneau_presse: StyleBoxTexture
 var _panneau_indisponible: StyleBoxTexture
+var _sceau_pause: StyleBoxTexture
+var _sceau_actif: StyleBoxTexture
+var _sceau_ultime: StyleBoxTexture
+var _compteur_gouttes: StyleBoxTexture
+var _compteur_augments: StyleBoxTexture
 var _icone_gouttes: TextureRect
 var _icone_augments: TextureRect
 var _icone_boss: TextureRect
@@ -44,8 +49,17 @@ func _ready() -> void:
 	_fond_jauge = _style_jauge("jauge_fond")
 	_plein_jauge = _style_jauge("jauge_plein")
 	_panneau_hud = _style_compact(StyleAzur.FOND, StyleAzur.CUIVRE)
-	_panneau_presse = _style_compact(StyleAzur.PANNEAU, StyleAzur.MAGIE)
-	_panneau_indisponible = _style_compact(StyleAzur.FOND, StyleAzur.ATTENUE.darkened(0.3))
+	_panneau_presse = StyleAzur.cercle(true)
+	_panneau_presse.modulate_color = Color.WHITE.lerp(StyleAzur.MAGIE, 0.3)
+	_panneau_indisponible = StyleAzur.cercle()
+	_panneau_indisponible.modulate_color = Color("8390aa")
+	_sceau_pause = StyleAzur.cercle()
+	_sceau_actif = StyleAzur.cercle()
+	_sceau_actif.modulate_color = Color.WHITE.lerp(StyleAzur.MENTHE, 0.18)
+	_sceau_ultime = StyleAzur.cercle()
+	_sceau_ultime.modulate_color = Color.WHITE.lerp(StyleAzur.MAGIE, 0.28)
+	_compteur_gouttes = StyleAzur.texture_etirable("compteur_gouttes", 16, 8, 6)
+	_compteur_augments = StyleAzur.texture_etirable("compteur_pierres", 16, 8, 6)
 	_replacer_boutons()
 	get_viewport().size_changed.connect(_replacer_boutons)
 
@@ -76,7 +90,7 @@ func _replacer_illustrations() -> void:
 	var haut := Ecran.marge_haute() + 12.0
 	var points := Vector2(taille.x - Ecran.marge_droite() - 176, haut) + _decalage_secousse
 	_placer_illustration(_icone_gouttes, Rect2(points + Vector2(12, 10), Vector2(48, 48)))
-	_placer_illustration(_icone_augments, Rect2(points + Vector2(12, 66), Vector2(48, 48)))
+	_placer_illustration(_icone_augments, Rect2(points + Vector2(12, 85), Vector2(48, 48)))
 	var boss := get_tree().get_first_node_in_group("boss")
 	_icone_boss.visible = boss != null and is_instance_valid(boss) and float(boss.pv_max) > 0.0
 	if _icone_boss.visible:
@@ -94,7 +108,7 @@ func _replacer_icone_sort(illustration: TextureRect, bouton: Button, id: String)
 	if not illustration.visible:
 		return
 	illustration.texture = StyleAzur.glyphe(id)
-	_placer_illustration(illustration, Rect2(bouton.position + Vector2((bouton.size.x - 70.0) * 0.5, 31), Vector2(70, 70)))
+	_placer_illustration(illustration, Rect2(bouton.position + Vector2((bouton.size.x - 64.0) * 0.5, 39), Vector2(64, 64)))
 	illustration.modulate = Color("afb8cd") if bouton.disabled else Color.WHITE
 
 func rafraichir_sorts(recharge_active: float, charge_ultime: float, utilisations := 0) -> void:
@@ -160,9 +174,9 @@ func _dessiner_flash(taille: Vector2) -> void:
 	draw_rect(Rect2(taille.x - e, 0, e, taille.y), Color(Palette.DANGER, alpha))
 
 func _dessiner_pause(police: Font, rect: Rect2) -> void:
-	draw_style_box(_panneau_presse if _bouton_pause.button_pressed else _panneau_hud, rect)
+	draw_style_box(_panneau_presse if _bouton_pause.button_pressed else _sceau_pause, rect)
 	StyleAzur.dessiner_icone(self, "pause", Rect2(rect.position + Vector2((rect.size.x - 50.0) * 0.5, 20), Vector2(50, 50)))
-	_draw_centre(police, Vector2(rect.position.x, rect.end.y - 26), rect.size.x, "PAUSE", 18, StyleAzur.TEXTE)
+	_draw_centre(police, Vector2(rect.position.x, rect.end.y - 28), rect.size.x, "PAUSE", 18, StyleAzur.TEXTE)
 
 func _dessiner_progression(police: Font, rect: Rect2) -> void:
 	draw_style_box(_panneau_hud, rect)
@@ -174,9 +188,10 @@ func _dessiner_progression(police: Font, rect: Rect2) -> void:
 	_barre_premium(barre, clampf(float(xp["actuelle"]) / maxf(1.0, float(xp["requise"])), 0.0, 1.0), StyleAzur.MAGIE)
 
 func _dessiner_points(police: Font, rect: Rect2) -> void:
-	draw_style_box(_panneau_hud, rect)
-	_draw_centre(police, rect.position + Vector2(60, 45), rect.size.x - 74, ReglagesJoueur.gouttes_affichees(), 22, StyleAzur.TEXTE)
-	_draw_centre(police, rect.position + Vector2(60, 99), rect.size.x - 74, str(Jeu.inventaire.size()), 22, StyleAzur.TEXTE)
+	draw_style_box(_compteur_gouttes, Rect2(rect.position, Vector2(rect.size.x, 68)))
+	draw_style_box(_compteur_augments, Rect2(rect.position + Vector2(0, 74), Vector2(rect.size.x, 68)))
+	_draw_centre(police, rect.position + Vector2(60, 45), rect.size.x - 74, ReglagesJoueur.gouttes_affichees(), 24, StyleAzur.TEXTE)
+	_draw_centre(police, rect.position + Vector2(60, 119), rect.size.x - 74, str(Jeu.inventaire.size()), 24, StyleAzur.TEXTE)
 
 func _dessiner_barre_boss(boss: Node, police: Font, rect: Rect2) -> void:
 	var ratio := clampf(float(boss.pv) / maxf(1.0, float(boss.pv_max)), 0.0, 1.0)
@@ -190,9 +205,9 @@ func _dessiner_bouton_sort(police: Font, bouton: Button, ultime: bool) -> void:
 	if bouton == null or not bouton.visible:
 		return
 	var rect := Rect2(bouton.position, bouton.size)
-	var accent := StyleAzur.MAGIE if ultime else StyleAzur.CUIVRE
-	var panneau := _panneau_indisponible if bouton.disabled else _panneau_hud
-	draw_style_box(_panneau_presse if bouton.button_pressed else panneau, rect)
+	var accent := StyleAzur.MAGIE if ultime else StyleAzur.MENTHE
+	var panneau := _panneau_indisponible if bouton.disabled else (_sceau_ultime if ultime else _sceau_actif)
+	draw_style_box(panneau, rect)
 	var id := ReglagesJoueur.ultime_effectif() if ultime else ReglagesJoueur.sort_actif_effectif()
 	var ratio := 0.0
 	var texte := "PRÊT"
@@ -201,10 +216,13 @@ func _dessiner_bouton_sort(police: Font, bouton: Button, ultime: bool) -> void:
 	ratio = 1.0 - clampf(restant / maxf(0.01, recharge_max), 0.0, 1.0)
 	texte = "%d s" % ceili(restant) if restant > 0.0 else "PRÊT"
 
-	var jauge := Rect2(rect.position + Vector2(18, 108), Vector2(rect.size.x - 36, 10))
-	_barre_premium(jauge, ratio, accent)
-	_draw_centre(police, rect.position + Vector2(10, 23), rect.size.x - 20, "ULTIME" if ultime else "SORT", 17, StyleAzur.TEXTE)
-	_draw_centre(police, Vector2(rect.position.x + 10, rect.end.y - 9), rect.size.x - 20, texte, 18, StyleAzur.TEXTE)
+	var centre := rect.get_center()
+	var rayon := rect.size.x * 0.445
+	draw_arc(centre, rayon, -PI * 0.5, PI * 1.5, 64, Color(accent, 0.24), 4.0, true)
+	if ratio > 0.01:
+		draw_arc(centre, rayon, -PI * 0.5, -PI * 0.5 + TAU * ratio, 64, accent, 5.0, true)
+	_draw_centre(police, rect.position + Vector2(10, 33), rect.size.x - 20, "ULTIME" if ultime else "SORT", 17, StyleAzur.TEXTE)
+	_draw_centre(police, Vector2(rect.position.x + 10, rect.end.y - 13), rect.size.x - 20, texte, 18, StyleAzur.TEXTE)
 	# Un raccourci invisible n'est jamais utilise : l'icone rappelle le geste
 	# choisi dans les reglages tant qu'il en existe un.
 	if not ultime and RaccourciTactile.tapes_requises(ReglagesJoueur.raccourci_sort) > 0:
@@ -228,7 +246,7 @@ func _style_jauge(nom: String) -> StyleBoxTexture:
 	return style
 
 func _style_compact(_fond: Color, bord: Color) -> StyleBoxTexture:
-	var style := StyleAzur.texture_etirable("compteur", 16, 8, 6)
+	var style := StyleAzur.texture_etirable("bandeau", 16, 8, 6)
 	style.modulate_color = Color.WHITE.lerp(bord, 0.12)
 	return style
 

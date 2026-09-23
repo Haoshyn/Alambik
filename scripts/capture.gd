@@ -21,7 +21,10 @@ static func programmer(noeud: Node) -> void:
 	var image := noeud.get_viewport().get_texture().get_image()
 	image.save_png(fichier)
 	print("capture ecrite : " + fichier)
-	noeud.get_tree().quit()
+	Sons.arreter()
+	var arbre := noeud.get_tree()
+	await arbre.create_timer(0.3).timeout
+	arbre.quit()
 
 static func _argument(prefixe: String) -> String:
 	for argument in OS.get_cmdline_user_args():

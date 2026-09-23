@@ -25,8 +25,10 @@ elles conservent les idées historiques sans définir le rendu actuel.
   parure en trois sceaux décalés. Titres et ressources restent hors des cadres.
 - Réserver les cadres aux actions et aux lectures détaillées. Les légers
   chevauchements concernent les illustrations, jamais le texte ou les commandes.
-  Les surfaces à coins de 40 px réservent au moins 44 px horizontalement et
-  42 px verticalement ; les contenus ancrés manuellement ont leurs propres marges.
+  Les surfaces courantes à coins de 40 px réservent au moins 44 px
+  horizontalement et 42 px verticalement ; la capsule Jouer utilise des coins
+  de 58 px et ses propres marges. Les contenus ancrés manuellement ont leurs
+  propres marges.
   Les cercles contiennent seulement des signes compacts ; leurs légendes longues
   se placent en dehors. Revoir les captures après chaque changement de silhouette.
 
@@ -43,8 +45,9 @@ elles conservent les idées historiques sans définir le rendu actuel.
   commandes d'attributs utilisent des sceaux circulaires. L'onglet actif éclaire
   son emblème et son libellé cyan ; les autres n'affichent que leurs icônes.
 - `tools/refonte_svg.py` dessine les SVG natifs actifs : navigation, ressources,
-  contrôles, bijoux, armes, capacités, maîtrises et coffre. Les pictogrammes
-  principaux sont des objets illustrés aux formes originales, composés de
+  contrôles, bijoux, armes, capacités et maîtrises. Le coffre de fin de run
+  utilise deux illustrations PNG assorties pour sa caisse et son couvercle.
+  Les pictogrammes principaux sont des objets illustrés aux formes originales, composés de
   pièces et de reflets distincts. Les capacités possèdent une base illustrée
   selon leur fonction et une gravure redessinée pour chacune dans
   `tools/signatures_svg.py`. Les exemples sources se trouvent dans
@@ -54,8 +57,10 @@ elles conservent les idées historiques sans définir le rendu actuel.
   `SVG/` reste une référence fournie par le propriétaire, sans reprise directe
   de ses tracés dans les ressources actives.
 - Les cadres de `interface/cadres/` s'étirent en neuf zones avec coins fixes.
-  Cases, cartes, boutons, compteurs et zones de lecture ont des assets dédiés,
-  avec états de sélection, pression et focus séparés.
+  Les cases, cartes et actions secondaires ont des angles coupés et un filet
+  léger ; les compteurs sont arrondis, Jouer prend une forme de capsule et les
+  zones de lecture gardent un bord fin et des angles doux. Leurs états de
+  sélection, pression et focus restent séparés.
   Icônes, textes Godot, boutons, panneaux, personnage et décor sont indépendants.
   Le SVG est une source vectorielle ; Godot en importe une texture. Les mipmaps
   et le filtrage linéaire accompagnent les changements d'échelle. Le shader de
@@ -68,9 +73,18 @@ elles conservent les idées historiques sans définir le rendu actuel.
   Le niveau et l'XP occupent le haut gauche ; les monnaies ont chacune leur
   symbole et un petit cadre à droite. Le menu ne montre ni logo ni héros.
   L'onglet Héros conserve son illustration dédiée.
-- `shaders/accueil_vivant.gdshader` laisse fixes le ciel, les nuages, les
-  montagnes et les rives. Quelques feuilles et herbes frémissent et l'eau
-  miroite discrètement. Le fond couvre l'écran à échelle uniforme.
+- La clairière est composée de couches indépendantes dans
+  `assets/visual/interface/clairiere_vivante/` : paysage sans ciel, végétation
+  proche, eau et atlas de nuages/brumes. Le ciel en dégradé et les nuages sont
+  derrière la silhouette des montagnes ; les branches passent devant.
+  Une légère parallaxe accompagne le vent dans le feuillage peint, la cascade,
+  les reflets du lac et les runes. Le fond couvre l'écran à échelle uniforme.
+- Les îles flottent légèrement ; leurs matières s'animent dans des zones
+  définies par `data/animations_decors.gd` : encre et eau coulantes, sable,
+  lave, feuillage, bannières et portails. Brumes, nuages et fumées utilisent des
+  sprites distincts. La pierre et les silhouettes restent stables.
+  L'option d'effets réduits fige les horloges sans masquer de couche ; les
+  animations s'arrêtent aussi lorsque la page est cachée.
 - L'accueil reste `ui/accueil_clairiere.tscn` pour conserver les références.
   Le bas contient les cinq onglets Héros, Équipement, Aventure, Maîtrises et
   Sorts : seule l'icône est visible au repos ; l'onglet actif grandit légèrement
@@ -91,7 +105,14 @@ elles conservent les idées historiques sans définir le rendu actuel.
   toucher le voile ou Fermer les referme sans réinitialiser la liste.
   Les transitions entre onglets restent courtes et disparaissent avec les
   effets réduits.
+- Héros, Équipement et Sorts regroupent leurs informations de progression dans
+  un cartouche fin ; les attributs et les branches de Maîtrises gardent leurs
+  accents propres. Les augments ont une plaque asymétrique distincte des cases
+  de catalogue, avec un filet de rareté près du nom.
 - Menus, cartes, paramètres, pause, récompenses et HUD partagent le même kit.
+  Dans le HUD, le temps de salle reste en bandeau, les ressources sont en deux
+  compteurs et les commandes de pause et de sorts sont rondes. La transition
+  d'entrée reprend le portail sur un halo discret et un cartouche de monde.
   La simulation, les silhouettes de combat et les couleurs de danger gardent
   leurs règles de lisibilité ; cette refonte concerne l'habillage d'interface.
 - Le rendu mobile et les changements de format doivent être jugés dans le jeu :
@@ -114,6 +135,11 @@ elles conservent les idées historiques sans définir le rendu actuel.
   claire sur les pages, boutons violets sur le décor, barre de navigation indigo
   au bas de l'écran, sélection lilas. Leurs dégradés fournissent une lumière et
   une profondeur communes sans en faire des aplats identiques.
+- Le socle de navigation prend un reflet bleu pétrole et des angles taillés ;
+  les accès Mine et Épreuves gardent des sceaux séparés, bronze et améthyste.
+  Leurs actions reprennent ces accents, tandis que les compteurs distinguent
+  les gouttes cyan des pierres violettes. La légende de campagne reprend
+  discrètement la couleur du monde sans concurrencer son illustration.
 - Sur une illustration claire, un texte clair reçoit une ombre indigo ou un voile ;
   dans un panneau clair, le texte passe en encre indigo. Pour les contrôles et le
   texte, viser les contrastes WCAG 2.2 : 4,5:1 pour le texte courant, 3:1 pour le

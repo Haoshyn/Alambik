@@ -20,6 +20,7 @@ const ICONES_OBJETS := [
 	"feu", "egide", "grimoire", "pierres", "vitalite", "temps_suspendu", "astrolabe", "savoir",
 ]
 const HAUTEUR_NAVIGATION := 146.0
+const MARGE_NAVIGATION_BAS := 12.0
 const VIOLET := Color("735aad")
 const FOND_ATELIER := preload("res://assets/visual/interface/academie_arcanique.png")
 const TITRE_ATELIER := Polices.TITRE
@@ -55,8 +56,6 @@ const TEXTURES_INTERFACE := {
 	"jauge_plein": preload("res://assets/visual/interface/jauge_plein.svg"),
 	"joystick_base": preload("res://assets/visual/interface/joystick_base.svg"),
 	"joystick_curseur": preload("res://assets/visual/interface/joystick_curseur.svg"),
-	"coffre_corps": preload("res://assets/visual/interface/coffre_corps.svg"),
-	"coffre_couvercle": preload("res://assets/visual/interface/coffre_couvercle.svg"),
 	"halo_recompense": preload("res://assets/visual/interface/halo_recompense.svg"),
 }
 static var _icones := {}
@@ -117,6 +116,9 @@ static func bouton(texte: String, action := Callable(), principal := false) -> B
 		b.expand_icon = true
 		b.icon_alignment = HORIZONTAL_ALIGNMENT_LEFT if retour else HORIZONTAL_ALIGNMENT_RIGHT
 		b.tooltip_text = "Retour" if retour else "Suivant"
+	if b.text.is_empty():
+		b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		b.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
 	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	b.custom_minimum_size.y = Ecran.CIBLE_TACTILE
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -148,10 +150,25 @@ static func sceau(principal := false, teinte := Color.WHITE, enfonce := false) -
 	return style
 
 static func habiller_accueil(b: Button, principal := false) -> void:
-	b.add_theme_stylebox_override("normal", sceau(principal))
-	b.add_theme_stylebox_override("hover", sceau(principal, Color("eee7ff")))
-	b.add_theme_stylebox_override("pressed", sceau(principal, Color.WHITE, true))
+	if principal:
+		for etat in ["normal", "hover", "pressed"]:
+			var style := texture_etirable("action_depart", 24, 36, 24)
+			for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
+				style.set_texture_margin(cote, 58)
+			style.modulate_color = Color("f4edff") if etat == "hover" else Color("c4bed2") if etat == "pressed" else Color.WHITE
+			b.add_theme_stylebox_override(etat, style)
+	else:
+		b.add_theme_stylebox_override("normal", sceau(false))
+		b.add_theme_stylebox_override("hover", sceau(false, Color("eee7ff")))
+		b.add_theme_stylebox_override("pressed", sceau(false, Color.WHITE, true))
 	b.add_theme_font_size_override("font_size", 44 if principal else 30)
+
+static func habiller_mode(b: Button, mode: String) -> void:
+	var nom := "secondaire_mine" if mode == "mine" else "secondaire_epreuves"
+	for etat in ["normal", "hover", "pressed", "disabled"]:
+		var style := texture_etirable(nom, 24, 36, 24)
+		style.modulate_color = Color("edf6fa") if etat == "hover" else Color("b6bac7") if etat == "disabled" else Color("c6c0d1") if etat == "pressed" else Color.WHITE
+		b.add_theme_stylebox_override(etat, style)
 
 static func texte(contenu: String, taille := 30, couleur := TEXTE) -> Label:
 	var l := Label.new()
@@ -231,7 +248,7 @@ static func page(parent: Control, titre: String, integre := false) -> VBoxContai
 		marge.add_theme_constant_override("margin_left", maxi(lateral, int(Ecran.marge_gauche())))
 		marge.add_theme_constant_override("margin_right", maxi(lateral, int(Ecran.marge_droite())))
 		marge.add_theme_constant_override("margin_top", int(Ecran.marge_haute()) + 20)
-		marge.add_theme_constant_override("margin_bottom", int(HAUTEUR_NAVIGATION + Ecran.marge_basse() + 20) if integre else int(Ecran.marge_basse()) + 24)
+		marge.add_theme_constant_override("margin_bottom", int(HAUTEUR_NAVIGATION + MARGE_NAVIGATION_BAS + Ecran.marge_basse() + 20) if integre else int(Ecran.marge_basse()) + 24)
 	parent.resized.connect(recadrer)
 	recadrer.call()
 	parent.add_child(marge)
@@ -308,6 +325,27 @@ static func plaque(parent: Node, _claire := false) -> VBoxContainer:
 	panneau.add_child(col)
 	return col
 
+static func cartouche_infos(parent: Node, accent: Color) -> VBoxContainer:
+	var panneau := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("253459cf")
+	style.border_color = Color(accent, 0.72)
+	style.border_width_left = 3
+	style.border_width_bottom = 1
+	style.corner_radius_top_left = 12
+	style.corner_radius_top_right = 20
+	style.corner_radius_bottom_left = 20
+	style.corner_radius_bottom_right = 12
+	for cote in [SIDE_LEFT, SIDE_RIGHT]:
+		style.set_content_margin(cote, 24)
+	for cote in [SIDE_TOP, SIDE_BOTTOM]:
+		style.set_content_margin(cote, 14)
+	panneau.add_theme_stylebox_override("panel", style)
+	parent.add_child(panneau)
+	var contenu := VBoxContainer.new()
+	panneau.add_child(contenu)
+	return contenu
+
 static func glyphe(id: String) -> Texture2D:
 	id = str(CatalogueReactifs.ICONES_COMMUNES.get(id, id))
 	if IconesArcane.contient(id): return IconesArcane.texture(id)
@@ -363,6 +401,13 @@ static func cercle(selection := false) -> StyleBoxTexture:
 		style.set_content_margin(cote, 18)
 	return style
 
+static func cercle_mode(mode: String) -> StyleBoxTexture:
+	var style := StyleBoxTexture.new()
+	style.texture = preload("res://assets/visual/interface/cadres/mode_mine.svg") if mode == "mine" else preload("res://assets/visual/interface/cadres/mode_epreuves.svg")
+	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
+		style.set_content_margin(cote, 18)
+	return style
+
 static func bouton_rond(texte: String, action: Callable, cote := 88.0) -> Button:
 	var b := bouton(texte, action)
 	b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -377,11 +422,16 @@ static func bouton_rond(texte: String, action: Callable, cote := 88.0) -> Button
 
 static func onglet_symbolique(b: Button, symbole: Texture2D, selection: bool) -> void:
 	var espace := StyleBoxFlat.new()
-	espace.bg_color = Color("5d4a91e0") if selection else Color("263154b8")
-	espace.set_corner_radius_all(18)
+	espace.bg_color = Color("594a80d9") if selection else Color("26315466")
+	espace.corner_radius_top_left = 20
+	espace.corner_radius_top_right = 20
+	espace.corner_radius_bottom_left = 9
+	espace.corner_radius_bottom_right = 9
 	if selection:
-		espace.border_color = LILAS
-		espace.border_width_bottom = 3
+		espace.border_color = Color("c1b4ddeb")
+		espace.border_width_bottom = 2
+		espace.shadow_color = Color("141c3870")
+		espace.shadow_size = 3
 	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
 		espace.set_content_margin(cote, 12)
 	for etat in ["normal", "hover", "pressed", "disabled", "focus"]:
@@ -419,9 +469,9 @@ static func texture_etirable(nom: String, coin := 32, marge_x := 24, marge_y := 
 	return style
 
 static func carte_augment(accent: Color, selection := false) -> StyleBoxTexture:
-	var style := texture_etirable("carte_selection" if selection else "carte_augment",24,32,28)
-	style.modulate_color = Color.WHITE.lerp(accent,0.12 if selection else 0.06)
-	if selection: style.modulate_color = style.modulate_color.lightened(0.12)
+	var style := texture_etirable("recompense_selection" if selection else "recompense",24,32,28)
+	style.modulate_color = Color.WHITE.lerp(accent,0.24 if selection else 0.16)
+	if selection: style.modulate_color = style.modulate_color.lightened(0.08)
 	return style
 
 static func jauge(remplie := false, teinte := Color.WHITE) -> StyleBoxTexture:

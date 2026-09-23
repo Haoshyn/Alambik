@@ -15,8 +15,9 @@ var _categories: Dictionary = {}
 func _ready() -> void:
 	var col := StyleAzur.page(self,"Sorts",integre_menu)
 	StyleAzur.banniere(col, "Le grimoire vivant", "6 sorts actifs, 8 passifs et 4 ultimes à découvrir. Préparez un actif, deux passifs et un ultime.", "grimoire")
-	_collection = StyleAzur.texte("", 26, StyleAzur.MAGIE)
-	col.add_child(_collection)
+	var infos := StyleAzur.cartouche_infos(col, StyleAzur.MENTHE)
+	_collection = StyleAzur.texte("", 26, StyleAzur.IVOIRE)
+	infos.add_child(_collection)
 	var categories := BoxContainer.new()
 	StyleAzur.adapter_ligne(categories)
 	categories.add_theme_constant_override("separation", 14)
@@ -115,10 +116,16 @@ func _rendre() -> void:
 		StyleAzur.case_objet(b, equipe)
 		b.tooltip_text = str(d["nom"])
 		b.accessibility_name = str(d["nom"])
-		if equipe:
-			var style := b.get_theme_stylebox("normal") as StyleBoxTexture
-			style.modulate_color = Color.WHITE.lerp(accent, 0.16)
+		for etat in ["normal", "hover", "pressed"]:
+			var style := b.get_theme_stylebox(etat) as StyleBoxTexture
+			style.modulate_color = Color.WHITE.lerp(accent, 0.24 if equipe else 0.14)
 		grille.add_child(b)
+		var filet := ColorRect.new()
+		filet.color = Color(accent, 0.86 if ouvert else 0.56)
+		filet.position = Vector2(30, 22)
+		filet.size = Vector2(100, 3)
+		filet.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(filet)
 		var marge := MarginContainer.new()
 		marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		marge.mouse_filter = Control.MOUSE_FILTER_IGNORE

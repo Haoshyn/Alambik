@@ -83,6 +83,12 @@ func _construire() -> void:
 	elif not pour_choix and possedees > 0:
 		etiquette += "  ·  Acquis ×%d" % possedees
 	textes.add_child(StyleAzur.texte(etiquette, 22, reactif.couleur_rarete()))
+	var filet := ColorRect.new()
+	filet.color = Color(reactif.couleur_rarete(), 0.82)
+	filet.custom_minimum_size = Vector2(90, 3)
+	filet.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	filet.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	textes.add_child(filet)
 	textes.add_child(StyleAzur.texte(reactif.nom, 35, StyleAzur.IVOIRE))
 	textes.add_child(StyleAzur.texte(reactif.description, 27, StyleAzur.ATTENUE))
 	if pour_choix and reactif.rarete != Reactif.COMMUN:

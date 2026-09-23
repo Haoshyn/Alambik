@@ -92,9 +92,10 @@ func _ready() -> void:
 	var contenu := StyleAzur.defilement(col)
 	var bilan := VBoxContainer.new()
 	contenu.add_child(bilan)
-	_resume = StyleAzur.texte("", 30, StyleAzur.IVOIRE)
-	_resume.add_theme_constant_override("line_spacing", 8)
-	bilan.add_child(_resume)
+	var infos := StyleAzur.cartouche_infos(bilan, StyleAzur.CUIVRE)
+	_resume = StyleAzur.texte("", 28, StyleAzur.IVOIRE)
+	_resume.add_theme_constant_override("line_spacing", 5)
+	infos.add_child(_resume)
 	_armes = VBoxContainer.new()
 	_armes.add_theme_constant_override("separation", 20)
 	contenu.add_child(_armes)
@@ -108,7 +109,7 @@ func _ready() -> void:
 	var slots := CompositionArcane.new()
 	slots.hauteur = 390
 	slots.traces = [PackedVector2Array([Vector2(160,210),Vector2(465,110),Vector2(790,225)])]
-	_bijoux.add_child(StyleAzur.texte("Votre parure", 34, StyleAzur.IVOIRE))
+	_bijoux.add_child(StyleAzur.texte("Votre parure", 34, StyleAzur.CUIVRE))
 	_bijoux.add_child(slots)
 	for i in SLOTS.size():
 		var b := StyleAzur.bouton_rond("",func(): _selectionner_slot(SLOTS[i]), 180)

@@ -13,8 +13,9 @@ var _sous_menu: Control
 func _ready() -> void:
 	var col := StyleAzur.page(self, "Héros", true)
 	_contenu = StyleAzur.defilement(col)
-	_resume = StyleAzur.texte("", 30)
-	_contenu.add_child(_resume)
+	var infos := StyleAzur.cartouche_infos(_contenu, StyleAzur.MENTHE)
+	_resume = StyleAzur.texte("", 28, StyleAzur.IVOIRE)
+	infos.add_child(_resume)
 	var scene := CompositionArcane.new()
 	scene.hauteur = 1130
 	scene.traces = [PackedVector2Array([Vector2(270,400),Vector2(715,120),Vector2(715,355),Vector2(715,580),Vector2(625,980),Vector2(205,980)])]
@@ -24,17 +25,27 @@ func _ready() -> void:
 	_classe = StyleAzur.bouton("", _ouvrir_classes, true)
 	scene.placer(_classe, Rect2(25, 725, 405, 116))
 	var positions := [Vector2(520,20), Vector2(520,260), Vector2(520,495), Vector2(430,885), Vector2(10,885)]
+	var accents := {"force": StyleAzur.CORAIL, "vitalite": StyleAzur.MENTHE,
+		"agilite": Color("a7d6f0"), "intelligence": StyleAzur.MAGIE,
+		"sagesse": StyleAzur.CUIVRE}
 	var index := 0
 	for valeur in Personnage.ATTRIBUTS:
 		var id := str(valeur)
 		var donnees: Dictionary = Personnage.ATTRIBUTS[id]
+		var accent: Color = accents.get(id, StyleAzur.MENTHE)
 		var contenu := VBoxContainer.new()
 		contenu.add_theme_constant_override("separation", 10)
 		scene.placer(contenu, Rect2(positions[index], Vector2(390,190)))
 		index += 1
-		var nom := StyleAzur.texte(str(donnees["nom"]), 30)
+		var nom := StyleAzur.texte(str(donnees["nom"]), 29, accent)
 		nom.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		contenu.add_child(nom)
+		var filet := ColorRect.new()
+		filet.color = Color(accent, 0.78)
+		filet.custom_minimum_size = Vector2(84, 3)
+		filet.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		filet.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		contenu.add_child(filet)
 		var commandes := HBoxContainer.new()
 		commandes.alignment = BoxContainer.ALIGNMENT_CENTER
 		commandes.add_theme_constant_override("separation", 16)
@@ -46,11 +57,14 @@ func _ready() -> void:
 		sceau.icon = StyleAzur.glyphe(str(GLYPHES[id]))
 		sceau.expand_icon = true
 		sceau.add_theme_constant_override("icon_max_width", 74)
+		var surface := StyleAzur.cercle()
+		surface.modulate_color = Color.WHITE.lerp(accent, 0.19)
+		sceau.add_theme_stylebox_override("normal", surface)
 		commandes.add_child(sceau)
 		var plus := StyleAzur.bouton_rond("+", func(): _modifier(id, 1))
 		commandes.add_child(plus)
 		_plus[id] = plus
-		var rang := StyleAzur.texte("", 32, StyleAzur.MAGIE)
+		var rang := StyleAzur.texte("", 25, accent)
 		rang.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		contenu.add_child(rang)
 		_rangs[id] = rang
@@ -91,7 +105,7 @@ func rafraichir() -> void:
 	_resume.text = "Niveau %d · %d points disponibles" % [ReglagesJoueur.niveau_compte_effectif(), ReglagesJoueur.points_attributs_disponibles()]
 	for id: String in _rangs:
 		var rang: Label = _rangs[id]
-		rang.text = str(ReglagesJoueur.rang_attribut(id))
+		rang.text = "Rang %d" % ReglagesJoueur.rang_attribut(id)
 		var plus: Button = _plus[id]
 		var moins: Button = _moins[id]
 		plus.disabled = ReglagesJoueur.points_attributs_disponibles() <= 0

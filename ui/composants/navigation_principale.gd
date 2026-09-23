@@ -17,9 +17,7 @@ func _ready() -> void:
 	_socle.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	_socle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	HabillagePeint.appliquer(_socle)
-	var fond := StyleBoxFlat.new()
-	fond.bg_color = Color(StyleAzur.OMBRE_CLAIRIERE, 0.91)
-	_socle.add_theme_stylebox_override("panel", fond)
+	_socle.add_theme_stylebox_override("panel", StyleAzur.texture_etirable("navigation", 40, 0, 0))
 	add_child(_socle)
 	_barre = HBoxContainer.new()
 	_barre.name = "Onglets"
@@ -42,11 +40,11 @@ func selectionner(index: int) -> void:
 func _replacer() -> void:
 	if _socle == null: return
 	var marge := maxf(12.0, (size.x - 1080.0) * 0.5)
-	var bas := Ecran.marge_basse()
+	var bas := Ecran.marge_basse() + StyleAzur.MARGE_NAVIGATION_BAS
 	_socle.offset_top = -StyleAzur.HAUTEUR_NAVIGATION - bas
 	_socle.offset_left = maxf(marge, Ecran.marge_gauche())
 	_socle.offset_right = -maxf(marge, Ecran.marge_droite())
-	_socle.offset_bottom = 0
+	_socle.offset_bottom = -bas
 	_barre.offset_top = -StyleAzur.HAUTEUR_NAVIGATION - bas
 	_barre.offset_bottom = -bas
 	_barre.offset_left = maxf(marge, Ecran.marge_gauche()) + 12

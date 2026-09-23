@@ -3,38 +3,25 @@ extends Control
 
 signal campagne_demandee
 
-const ILES := [
-	preload("res://assets/visual/interface/campagne_encre.png"),
-	preload("res://assets/visual/interface/campagne_terre.png"),
-	preload("res://assets/visual/interface/campagne_eau.png"),
-	preload("res://assets/visual/interface/campagne_air.png"),
-	preload("res://assets/visual/interface/campagne_feu.png"),
-]
+const ILE_ANIMEE := preload("res://ui/composants/ile_animee.gd")
 
-var _ile: TextureRect
+var _ile: IleAnimee
 var _choisir: Button
 var _legende: Panel
+var _fond_legende: StyleBoxTexture
 var _titre: Label
 var _niveau: Label
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_ile = TextureRect.new()
+	_ile = ILE_ANIMEE.new()
 	_ile.name = "IllustrationCampagne"
-	_ile.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_ile.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_ile.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	_ile.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_ile)
 	_legende = Panel.new()
 	_legende.name = "LegendeCampagne"
 	_legende.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var fond := StyleAzur.fond_legende(0.88, 22)
-	fond.border_color = Color("c6c7e5a8")
-	fond.set_border_width_all(1)
-	fond.shadow_color = Color("10193488")
-	fond.shadow_size = 7
-	_legende.add_theme_stylebox_override("panel", fond)
+	_fond_legende = StyleAzur.texture_etirable("bandeau_monde", 40, 0, 0)
+	_legende.add_theme_stylebox_override("panel", _fond_legende)
 	add_child(_legende)
 	_choisir = StyleInterface.zone_tactile(func(): campagne_demandee.emit())
 	_choisir.name = "ChoisirCampagne"
@@ -57,7 +44,10 @@ func _ready() -> void:
 	_replacer()
 
 func afficher_campagne(index_monde: int, numero_niveau: int, nom_monde: String) -> void:
-	_ile.texture = ILES[clampi(index_monde, 0, ILES.size() - 1)]
+	_ile.afficher_monde(index_monde)
+	var monde: Dictionary = Chapitres.MONDES[clampi(index_monde, 0, Chapitres.MONDES.size() - 1)]
+	var teinte: Color = monde["teinte"]
+	_fond_legende.modulate_color = Color.WHITE.lerp(teinte, 0.16)
 	_titre.text = "Monde %d · %s" % [index_monde + 1, nom_monde]
 	_niveau.text = "Niveau %d sélectionné  ›" % numero_niveau
 	_choisir.accessibility_name = "Choisir une campagne. Monde %d, %s, niveau %d." % [index_monde + 1, nom_monde, numero_niveau]

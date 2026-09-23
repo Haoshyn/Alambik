@@ -96,7 +96,7 @@ static func abords(parent: Node3D, centre: Vector3, taille: Vector3, monde: int,
 				var teinte := Color("45a9bd") if monde == 2 else Color("e98436")
 				DECOR.bloc(parent,centre+Vector3(x,-.10,0),Vector3(.66,.06,taille.z*.92),teinte)
 				for i in 6:
-					var p := centre + Vector3(x,.0,(i-2.5)*taille.z*.14)
+					var p :=  centre + Vector3(x,.0,(i-2.5)*taille.z*.14)
 					if monde == 2:
 						DECOR.bloc(parent,p,Vector3(.50,.025,.08),Color("abd8df"))
 					else:

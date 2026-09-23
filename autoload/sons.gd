@@ -92,6 +92,24 @@ func _notification(quoi: int) -> void:
 		_application_active = false
 	elif quoi in [NOTIFICATION_APPLICATION_FOCUS_IN, NOTIFICATION_APPLICATION_RESUMED]:
 		_application_active = true
+	elif quoi == NOTIFICATION_WM_CLOSE_REQUEST:
+		arreter()
+
+func _exit_tree() -> void:
+	arreter()
+
+func arreter() -> void:
+	# Les flux Ogg doivent s'arreter avant la destruction du serveur audio.
+	actif = false
+	for musique in _musiques:
+		musique.stop()
+		musique.stream = null
+	for voix in _voix:
+		voix.stop()
+		voix.stream = null
+	_musiques.clear()
+	_voix.clear()
+	_banque.clear()
 
 func musique_menu() -> void:
 	_regler_musique(-8.0, -80.0)

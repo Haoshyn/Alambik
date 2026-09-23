@@ -1,10 +1,9 @@
 extends Control
 
 signal termine
-const COFFRE_DEBUT_OUVERTURE := 1.05
-const COFFRE_FIN_OUVERTURE := 1.62
-const COFFRE_REVELATION := 1.48
-const COFFRE_DUREE_ECRAN := 4.8
+const COFFRE_FIN_OUVERTURE := 1.08
+const COFFRE_REVELATION := 0.82
+const COFFRE_DUREE_ECRAN := 5.2
 const TRANSITION := preload("res://ui/transition_grimoire.tscn")
 var _bilan: VBoxContainer
 var _page: VBoxContainer
@@ -119,22 +118,47 @@ func _afficher_ameliorations_disponibles() -> void:
 func _ouvrir() -> void:
 	if _ouvert: return
 	_ouvert = true
-	_anim = COFFRE_DEBUT_OUVERTURE
+	_anim = 0.0
 	_coffre.disabled = true
 	_indication.text = "Ouverture…"
+	Sons.jouer("coffre", -5.0)
 
 func _process(delta: float) -> void:
 	if not _ouvert or _sortie: return
-	_anim += delta
+	_anim += delta * (1.8 if ReglagesJoueur.effets_reduits else 1.0)
 	_coffre.ouverture = progression_ouverture(_anim)
-	if not _revele and _anim >= COFFRE_FIN_OUVERTURE:
+	if not _revele and _anim >= COFFRE_REVELATION:
 		_revele = true
-		Sons.jouer("coffre", -5.0)
 		_indication.text = "Récompenses obtenues"
-		_cadre_recompenses.show()
-		_actions_fin.show()
-		StyleInterface.animer_entree(_cadre_recompenses, 12.0)
+		_animer_recompenses()
 	if Jeu.mode_auto and _anim >= COFFRE_DUREE_ECRAN: _retourner()
+
+func _animer_recompenses() -> void:
+	_cadre_recompenses.show()
+	_actions_fin.show()
+	if ReglagesJoueur.effets_reduits:
+		return
+	_cadre_recompenses.modulate.a = 0.0
+	_actions_fin.modulate.a = 0.0
+	var apparition := create_tween().set_parallel(true)
+	apparition.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	apparition.tween_property(_cadre_recompenses, "modulate:a", 1.0, 0.24)
+	var index := 0
+	for noeud in _recompenses.get_children():
+		if not noeud is Control:
+			continue
+		var element := noeud as Control
+		if index == 0:
+			index += 1
+			continue
+		element.modulate.a = 0.0
+		element.pivot_offset = element.size * 0.5
+		element.scale = Vector2.ONE * 0.96
+		var retard := 0.08 + float(index - 1) * 0.075
+		apparition.tween_property(element, "modulate:a", 1.0, 0.23).set_delay(retard)
+		apparition.tween_property(element, "scale", Vector2.ONE, 0.31).set_delay(retard)
+		index += 1
+	apparition.tween_property(_actions_fin, "modulate:a", 1.0, 0.24).set_delay(0.18 + float(index) * 0.075)
 
 func _verrouiller_sortie() -> bool:
 	if _sortie or not _revele: return false
@@ -158,6 +182,8 @@ func _retourner(page_menu := "aventure", selection := "") -> void:
 	if not _verrouiller_sortie(): return
 	if Jeu.mode_auto:
 		get_tree().paused = false
+		Sons.arreter()
+		await get_tree().create_timer(0.3).timeout
 		get_tree().quit()
 		return
 	Jeu.destination_menu = {"page": page_menu, "selection": selection}
@@ -192,8 +218,11 @@ func _notification(quoi: int) -> void:
 		else: _ouvrir()
 
 static func progression_ouverture(temps: float) -> float:
-	var brut := clampf((temps - COFFRE_DEBUT_OUVERTURE) / (COFFRE_FIN_OUVERTURE - COFFRE_DEBUT_OUVERTURE), 0.0, 1.0)
-	return brut * brut * (3.0 - 2.0 * brut)
-
-static func progression_revelation(temps: float) -> float:
-	return clampf((temps - COFFRE_REVELATION) / 0.55, 0.0, 1.0)
+	var brut := clampf(temps / COFFRE_FIN_OUVERTURE, 0.0, 1.0)
+	if brut < 0.13:
+		return -0.035 * sin(brut / 0.13 * PI)
+	if brut < 0.77:
+		var mouvement := (brut - 0.13) / 0.64
+		return 1.045 * (1.0 - pow(1.0 - mouvement, 3.0))
+	var pose := (brut - 0.77) / 0.23
+	return 1.0 + 0.045 * (1.0 + cos(PI * pose)) * 0.5

@@ -8,7 +8,9 @@ const NAVIGATION := preload("res://assets/visual/interface/cadres/navigation.svg
 const CADRES := {
 	"panneau": preload("res://assets/visual/interface/cadres/conteneur.svg"),
 	"cadre": preload("res://assets/visual/interface/cadres/conteneur.svg"),
-	"carte_augment": preload("res://assets/visual/interface/cadres/carte.svg"),
+	"carte_augment": preload("res://assets/visual/interface/cadres/recompense.svg"),
+	"recompense": preload("res://assets/visual/interface/cadres/recompense.svg"),
+	"recompense_selection": preload("res://assets/visual/interface/cadres/recompense_selection.svg"),
 	"carte_selection": preload("res://assets/visual/interface/cadres/carte_selection.svg"),
 	"case": preload("res://assets/visual/interface/cadres/case.svg"),
 	"case_selection": preload("res://assets/visual/interface/cadres/case_selection.svg"),
@@ -16,9 +18,15 @@ const CADRES := {
 	"saisie": preload("res://assets/visual/interface/cadres/saisie.svg"),
 	"saisie_focus": preload("res://assets/visual/interface/cadres/saisie_focus.svg"),
 	"action_pressee": preload("res://assets/visual/interface/cadres/action_pressee.svg"),
+	"action_depart": preload("res://assets/visual/interface/cadres/action_depart.svg"),
 	"secondaire_pressee": preload("res://assets/visual/interface/cadres/secondaire_pressee.svg"),
+	"bandeau_monde": preload("res://assets/visual/interface/cadres/bandeau_monde.svg"),
 	"bandeau": preload("res://assets/visual/interface/cadres/bandeau.svg"),
 	"compteur": preload("res://assets/visual/interface/cadres/compteur.svg"),
+	"compteur_gouttes": preload("res://assets/visual/interface/cadres/compteur_gouttes.svg"),
+	"compteur_pierres": preload("res://assets/visual/interface/cadres/compteur_pierres.svg"),
+	"secondaire_mine": preload("res://assets/visual/interface/cadres/secondaire_mine.svg"),
+	"secondaire_epreuves": preload("res://assets/visual/interface/cadres/secondaire_epreuves.svg"),
 	"medaillon": preload("res://assets/visual/interface/cadres/medaillon.svg"),
 }
 const DETOURAGE := preload("res://shaders/interface_peinte.gdshader")

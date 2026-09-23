@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dpfn43xdbxh6q"
-path="res://.godot/imported/coffre_corps.svg-0a42e9640277553111b7a9ed369e96d6.ctex"
+uid="uid://io6a6utf3mjh"
+path="res://.godot/imported/recompense.svg-160448ad671d1ff092748380f403176b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/visual/interface/coffre_corps.svg"
-dest_files=["res://.godot/imported/coffre_corps.svg-0a42e9640277553111b7a9ed369e96d6.ctex"]
+source_file="res://assets/visual/interface/cadres/recompense.svg"
+dest_files=["res://.godot/imported/recompense.svg-160448ad671d1ff092748380f403176b.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
