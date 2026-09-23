@@ -39,7 +39,7 @@ func configurer(heros: CharacterBody2D, salle: Node2D) -> void:
 	_suspendre_noeud(_salle.terrain_elementaire())
 	for ennemi in get_tree().get_nodes_in_group("ennemis"):
 		_suspendre_noeud(ennemi)
-	consigne_changee.emit(1)
+	consigne_changee.emit(0)
 
 func definir_intention(direction: Vector2, intensite: float) -> void:
 	_intention = direction if intensite > 0.0 else Vector2.ZERO
@@ -60,7 +60,7 @@ func _physics_process(_delta: float) -> void:
 		if _distance_parcourue >= Reglages.APPRENTISSAGE_DISTANCE_DEPLACEMENT:
 			_etape = Etape.TIR
 			_heros.configurer_apprentissage(true, false)
-			consigne_changee.emit(2)
+			consigne_changee.emit(1)
 	_position_precedente = position_courante
 
 func _process(_delta: float) -> void:
@@ -81,6 +81,7 @@ func _sur_tir(_tir: Tir, _origine: Vector2, _direction: Vector2) -> void:
 	_etape = Etape.COMBAT
 	_reprendre_combat()
 	_heros.configurer_apprentissage(false, false)
+	consigne_changee.emit(2)
 	_actualiser_visibilite()
 
 func _sur_portail_traverse() -> void:
@@ -127,7 +128,7 @@ func _reprendre_combat() -> void:
 
 func _actualiser_visibilite() -> void:
 	var afficher := not _suspendu and not get_tree().paused \
-		and _etape in [Etape.DEPLACEMENT, Etape.TIR, Etape.PORTAIL]
+		and _etape in [Etape.DEPLACEMENT, Etape.TIR, Etape.COMBAT, Etape.PORTAIL]
 	if afficher == _conseil_visible:
 		return
 	_conseil_visible = afficher

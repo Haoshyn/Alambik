@@ -1,7 +1,7 @@
 class_name Chapitres
 extends RefCounted
 
-# Les cinq mondes actifs sont declines en sept chapitres. Les
+# Les cinq mondes actifs sont declines en sept niveaux. Les
 # contenus sont reutilises entre les sept, tandis que densite et statistiques
 # montent. Le septieme porte le boss signature du monde.
 #
@@ -44,7 +44,7 @@ static func _construire_chapitres() -> Array[Dictionary]:
 				else MINIBOSS_FINAUX[(index_monde * (CHAPITRES_PAR_MONDE - 1) + index_chapitre) % MINIBOSS_FINAUX.size()]
 			resultat.append({
 				"id": "%s_%d" % [monde["id"], chapitre_monde],
-				"nom": "Monde %s — %s · Chapitre %d" % [monde["numero"], monde["nom"], chapitre_monde],
+				"nom": "Monde %d · Niveau %d — %s" % [index_monde + 1, chapitre_monde, monde["nom"]],
 				"sous_titre": monde["sous_titre"],
 				"monde": index_monde,
 				"chapitre_monde": chapitre_monde,
@@ -77,6 +77,10 @@ static func nombre() -> int:
 
 static func par_index(index: int) -> Dictionary:
 	return TOUS[clampi(index, 0, TOUS.size() - 1)]
+
+static func libelle_court(index: int) -> String:
+	var chapitre: Dictionary = par_index(index)
+	return "Monde %d · Niveau %d" % [int(chapitre["monde"]) + 1, int(chapitre["chapitre_monde"])]
 
 static func par_id(id: String) -> Dictionary:
 	for chapitre in TOUS:

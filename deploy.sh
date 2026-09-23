@@ -19,12 +19,11 @@ if ! "$ADB" get-state >/dev/null 2>&1; then
     exit 1
 fi
 
-mkdir -p build
 echo "--- export APK debug ---"
-"$GODOT" --headless --path . --export-debug "Android" build/alambic.apk
+"$GODOT" --headless --path . --export-debug "Android" Alambic.apk
 
 echo "--- installation ---"
-"$ADB" install -r build/alambic.apk
+"$ADB" install -r Alambic.apk
 
 echo "--- lancement ---"
 "$ADB" shell monkey -p "$PAQUET" -c android.intent.category.LAUNCHER 1 >/dev/null

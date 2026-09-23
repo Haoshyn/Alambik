@@ -171,6 +171,7 @@ func _ready() -> void:
 		add_child(_apprentissage)
 		var conseils := preload("res://ui/conseils_debut.gd").new()
 		_couche.add_child(conseils)
+		conseils.configurer(_heros, _salle)
 		_apprentissage.consigne_changee.connect(conseils.afficher_etape)
 		_apprentissage.visibilite_changee.connect(conseils.set_visible)
 		_apprentissage.termine.connect(conseils.queue_free)
@@ -387,6 +388,9 @@ func _entrer_dans_la_salle() -> void:
 
 
 	_heros.preparer_nouvelle_salle()
+	var familier_id := ReglagesJoueur.familier_equipe_effectif()
+	var familier: Dictionary = CatalogueFamiliers.TYPES[familier_id]
+	_familier_minuterie = float(familier["intervalle"])
 	_flaques_alchimiques.clear()
 	_suivre_heros()
 
@@ -400,6 +404,10 @@ func _entrer_dans_la_salle() -> void:
 
 func _sur_salle_terminee() -> void:
 	if _terminee or _fin_salle_en_attente:
+		return
+	if ReglagesJoueur.specialisation_effective().is_empty() and not Jeu.mode_auto \
+			and not Capture.demandee() and DisplayServer.get_name() != "headless":
+		_ouvrir_choix_classe_apres_portail()
 		return
 	if Jeu.salle_courante >= Jeu.salles_du_chapitre():
 		Jeu.terminer_run(true)
@@ -416,6 +424,27 @@ func _sur_salle_terminee() -> void:
 		return
 	_fin_salle_en_attente = false
 	_traiter_fin_salle()
+
+func _ouvrir_choix_classe_apres_portail() -> void:
+	if _panneau != null:
+		return
+	_neutraliser_deplacement()
+	get_tree().paused = true
+	Sons.musique_calme()
+	var choix := preload("res://ui/choix_classe.gd").new()
+	choix.obligatoire = true
+	choix.premiers_pas = Jeu.mode_run == "grimoire" and Jeu.chapitre == 0 and Jeu.salle_courante == 1
+	choix.process_mode = Node.PROCESS_MODE_ALWAYS
+	_panneau = choix
+	_couche.add_child(choix)
+	choix.ferme.connect(func() -> void:
+		choix.queue_free()
+		_panneau = null
+		_heros.recalculer()
+		_hud.rafraichir()
+		get_tree().paused = false
+		Sons.musique_combat(0.35)
+		_sur_salle_terminee.call_deferred())
 
 func _traiter_fin_salle() -> void:
 	if Jeu.mode_run == "epreuve_sorts":
@@ -655,13 +684,14 @@ func _avancer_phenomenes(delta: float) -> void:
 			_familier_minuterie = float(familier["intervalle"]) \
 				/ (Reglages.FAMILIER_TIREUR_CADENCE_MULT \
 				if "familier_renforce" in drapeaux else 1.0)
-			var cible := _ennemi_plus_proche(_heros.global_position)
+			var origine := _heros.global_position + Reglages.FAMILIER_DECALAGE
+			var cible := _ennemi_plus_proche(origine)
 			if cible != null:
-				var origine := _heros.global_position + Reglages.FAMILIER_DECALAGE
+				var vitesse_familier := _heros.stats.vitesse_projectile * Reglages.FAMILIER_PROJECTILE_VITESSE_MULT
 				var vise := Geometrie.point_anticipe(cible.global_position,
-					_vitesse_de(cible), origine, _heros.stats.vitesse_projectile)
+					_vitesse_de(cible), origine, vitesse_familier)
 				# La lueur souligne le tir du compagnon visible dans le monde 3D.
-				_effets.onde(origine, 44.0, Palette.ESSENCE, 0.22)
+				_effets.onde(origine, 30.0, Palette.ESSENCE, 0.16)
 				_tirer_familier(familier_id, origine, origine.direction_to(vise))
 	if "meteores" in drapeaux:
 		_meteore_minuterie -= delta
@@ -703,12 +733,18 @@ func _tirer_phenomene(id: String, part_degats: float, origine: Vector2, directio
 func _tirer_familier(id: String, origine: Vector2, direction: Vector2) -> void:
 	if not _heros.peut_tirer(): return
 	var tir := Tir.de_base(_heros.stats)
+	tir.arme = "familier"
+	tir.vitesse *= Reglages.FAMILIER_PROJECTILE_VITESSE_MULT
+	tir.portee *= Reglages.FAMILIER_PROJECTILE_PORTEE_MULT
 	var attaque := CatalogueFamiliers.attaque(id, ReglagesJoueur.niveau_familier(id))
 	if "familier_renforce" in _heros.tir_courant.drapeaux:
 		attaque *= Reglages.FAMILIER_TIREUR_ATTAQUE_MULT
-	tir.degats = _heros.degats_finaux(attaque, "familier", false)
+	var degats_familier := _heros.degats_finaux(attaque, "familier", false)
+	var degats_heros := _heros.degats_finaux(_heros.attaque_reelle(), "baguette", false)
+	tir.degats = minf(degats_familier, degats_heros * Reglages.FAMILIER_DEGATS_MAX_PART_HEROS)
 	tir.drapeaux.append("trait_familier")
 	_salle.tirer(tir, origine, direction, false)
+	get_tree().call_group("familiers_visuels", "declencher_tir", direction)
 
 func _declencher_meteore() -> void:
 	var cible := _ennemi_plus_proche(_heros.global_position)

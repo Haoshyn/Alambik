@@ -7,6 +7,7 @@ var _matiere_coeur: ShaderMaterial
 var _couleur := Color.WHITE
 var _hostile := false
 var _aiguille := false
+var _familier := false
 var _tourbillon: Node3D
 var _rotation_tourbillon := 0.0
 static var _perle: SphereMesh
@@ -17,12 +18,17 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 	_couleur = logique.get("couleur")
 	var hostile: bool = logique.get("hostile")
 	_hostile = hostile
-	if hostile:
-		_couleur = Color("ff493a")
 	var tir: Tir = logique.get("tir")
+	if hostile:
+		_couleur = {"trait": Color("ff5848"), "aiguille": Color("ff697d"),
+			"eclat": Color("ffac56"), "lame": Color("f66aa9"),
+			"vrille": Color("ff725c")}.get(tir.silhouette, Color("ff5848"))
+	_familier = "trait_familier" in tir.drapeaux
 	_aiguille = not hostile and tir.arme == "veloce"
 	if not hostile:
 		_couleur = {"standard": Color("c5a1ff"), "veloce": Color("e6ff9c"), "lourd": Color("ffbf74"), "chercheur": Color("c2a5ff"), "explosif": Color("ff8b60")}.get(tir.arme, _couleur)
+		if _familier:
+			_couleur = Color("66dfd3")
 		if "trait_orbe" in tir.drapeaux:
 			_couleur = Color("e6b3ff")
 	var cle := _couleur.to_html()+str(hostile)+tir.arme
@@ -54,7 +60,7 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 	modele.add_child(coeur)
 	if hostile and tir.silhouette != "trait":
 		coeur.visible = false
-		_tourbillon = preload("res://scripts/presentation/formes_projectiles_hostiles.gd").construire(tir.silhouette)
+		_tourbillon = preload("res://scripts/presentation/formes_projectiles_hostiles.gd").construire(tir.silhouette, _couleur)
 		modele.add_child(_tourbillon)
 	if not hostile:
 		# Une vraie silhouette volumique evite de voir le support rectangulaire
@@ -69,17 +75,33 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 		coeur.rotation = Vector3.ZERO
 		coeur.scale = {"standard":Vector3(.14,.14,.20),"veloce":Vector3(.13,.13,.36),"lourd":Vector3(.19,.17,.26),"chercheur":Vector3(.17,.17,.17),"explosif":Vector3(.22,.22,.22)}.get(tir.arme,Vector3.ONE*.14)
 		coeur.position.y = coeur.scale.y + .025
+		if _familier:
+			coeur.scale = Vector3.ONE * .115
+			coeur.position.y = .14
 		if "trait_orbe" in tir.drapeaux:
 			coeur.scale = Vector3.ONE * 0.19
 			coeur.position.y = 0.24
-		for i in 2:
-			var perle := MeshInstance3D.new()
-			perle.mesh = _perle
-			perle.material_override = _matiere_coeur
-			perle.scale = coeur.scale * (0.48 if i == 0 else 0.24)
-			perle.position = Vector3(0,coeur.position.y,-coeur.scale.z*(1.25+i*.7))
-			perle.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			modele.add_child(perle)
+		if _familier:
+			var anneau := TorusMesh.new()
+			anneau.inner_radius = .14
+			anneau.outer_radius = .18
+			anneau.rings = 16
+			anneau.ring_segments = 6
+			var halo := MeshInstance3D.new()
+			halo.mesh = anneau
+			halo.material_override = _matiere_coeur
+			halo.position.y = .14
+			halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			modele.add_child(halo)
+		else:
+			for i in 2:
+				var perle := MeshInstance3D.new()
+				perle.mesh = _perle
+				perle.material_override = _matiere_coeur
+				perle.scale = coeur.scale * (0.48 if i == 0 else 0.24)
+				perle.position = Vector3(0,coeur.position.y,-coeur.scale.z*(1.25+i*.7))
+				perle.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				modele.add_child(perle)
 	if hostile or _aiguille:
 		var trainee := MeshInstance3D.new()
 		trainee.mesh = _ruban
@@ -101,8 +123,9 @@ func mettre_a_jour(_delta: float) -> void:
 		direction = points[1].direction_to(points[0])
 	modele.rotation.y = atan2(direction.x,direction.y)
 	if _tourbillon != null:
-		_rotation_tourbillon += _delta * 6.0
-		_tourbillon.rotation.y = _rotation_tourbillon if str(logique.tir.silhouette) in ["vrille", "lame"] else 0.0
+		if not ReglagesJoueur.effets_reduits:
+			_rotation_tourbillon += _delta * (9.0 if str(logique.tir.silhouette) == "vrille" else 4.0)
+		_tourbillon.rotation.y = _rotation_tourbillon if str(logique.tir.silhouette) in ["vrille", "lame", "eclat"] else 0.0
 	_ruban.clear_surfaces()
 	if not _hostile:
 		for index in range(1, modele.get_child_count()):
@@ -121,8 +144,9 @@ func mettre_a_jour(_delta: float) -> void:
 		var cote := (b-a).cross(Vector3.UP).normalized()
 		var debut := 1.0-float(i)/float(nombre-1)
 		var fin := 1.0-float(i+1)/float(nombre-1)
-		var sommets := [a+cote*0.085*debut,a-cote*0.085*debut,b+cote*0.085*fin,
-			b+cote*0.085*fin,a-cote*0.085*debut,b-cote*0.085*fin]
+		var largeur := 0.11 if _hostile and str(logique.tir.silhouette) in ["eclat", "vrille"] else 0.075
+		var sommets := [a+cote*largeur*debut,a-cote*largeur*debut,b+cote*largeur*fin,
+			b+cote*largeur*fin,a-cote*largeur*debut,b-cote*largeur*fin]
 		for j in 6:
 			var alpha := debut if j in [0,1,4] else fin
 			_ruban.surface_set_color(Color(_couleur.lightened(0.20),alpha*0.65))

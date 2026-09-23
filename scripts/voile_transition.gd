@@ -1,7 +1,7 @@
 extends Control
 
 var titre := "Le passage s’ouvre"
-var sous_titre := "Un nouveau chapitre vous attend…"
+var sous_titre := "Un nouveau niveau vous attend…"
 var _anim := 0.0
 
 func configurer(titre_: String, sous_titre_: String) -> void:

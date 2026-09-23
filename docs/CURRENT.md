@@ -17,8 +17,8 @@
   actif éclairé sans second cercle. Lecture en DM Sans gras, grands titres en
   Fondamento ; onglets
   Héros, Équipement, Aventure, Maîtrises, Sorts. Héros : illustration de l'accueil, commandes −/+
-  et reset gratuit, choix de classe obligatoire au premier accueil sans classe,
-  suivi de la première aventure guidée.
+  et reset gratuit. Le premier lancement sans classe ouvre l’aventure guidée ;
+  le choix de voie intervient après le premier portail.
   Composition : Héros asymétrique autour du personnage, maîtrises en constellation,
   sorts en grille de cartes avec accents par catégorie et fiches contextuelles,
   parure en sceaux décalés. Les fiches Sorts et Maîtrises se ferment aussi en
@@ -28,8 +28,8 @@
   filtrage avec mipmaps et sans ancien détourage alpha. Générateur :
   `tools/generer_email_arcanique.py`. Zones sûres latérales, grilles adaptatives
   et accueil défilable ; menus, HUD, augments et récompenses partagent le kit.
-- Cinq mondes, sept chapitres de vingt salles chacun ; Mine et Épreuves de sorts.
-  Contours et obstacles fixes par chapitre, terrains élémentaires en campagne.
+- Cinq mondes, sept niveaux de vingt salles chacun ; Mine et Épreuves de sorts.
+  Contours et obstacles fixes par niveau, terrains élémentaires en campagne.
 - Déplacement du héros à 728 px/s (+30 %), coefficient de vitesse ennemi +15 %.
   Familles fragiles/moyennes/costaudes et 55 identités de monde avec habillages 3D.
   Charges, esquives, tirs ondulants, rebonds et impacts ciblés annoncés actifs.
@@ -59,16 +59,17 @@
   Premières salles adoucies puis montée accentuée ; légendaire toujours aléatoire.
   Calculs et hypothèses dans `plan_eq.txt`, sans validation par parties.
 - Bijou possible dès 5/10/15 salles terminées à 1/30, 1/20 et 1/10 ; garantie
-  au troisième succès complet du même chapitre, y compris au premier chapitre.
+  au troisième succès complet du même niveau, y compris au premier niveau.
 - Les tirs du héros n’ont pas de portée maximale par défaut ; les tirs hostiles
   ont une distance maximale, y compris après rebond. Les augments utilisent
   leurs mécaniques révisées, détaillées dans `statistiques_jeu/liste_augments.txt`.
 - Bilan : nouvelle tentative directe et raccourcis vers la maîtrise ou le bijou
   améliorable. Effets sonores distincts avec variantes et priorités ; vibrations
   Android désactivables. Outils développeur réservés aux versions de debug.
-- Premiers pas progressifs : choix de classe, lancement du premier chapitre,
-  déplacement et premier tir avec ennemis suspendus, puis indication du portail
-  après le combat. Pause lors du passage en arrière-plan.
+- Premiers pas progressifs : premier niveau sans classe, déplacement et tir
+  avec ennemis suspendus, repères fléchés pendant le combat et vers le portail,
+  puis choix de voie expliqué avant la salle suivante. Pause lors du passage
+  en arrière-plan.
 - Identifiants historiques et migrations de sauvegarde conservés ; rendu 2D
   de secours et outils de capture toujours disponibles sur demande.
 

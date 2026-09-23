@@ -18,8 +18,24 @@ var _resume: Label
 var _details: Label
 var _effets_objet: Label
 var _armes: VBoxContainer
+var _boutons_armes: Dictionary = {}
+var _fiche_arme: PanelContainer
+var _titre_arme: Label
+var _statistiques_arme: Label
+var _forge_arme: Label
+var _equiper_arme_bouton: Button
+var _forger_arme_bouton: Button
+var _apercu_bijou: PanelContainer
+var _texte_apercu_bijou: Label
+var _atelier_actif := 0
 var _familiers: VBoxContainer
 var _familier_selectionne := "homoncule_encre"
+var _boutons_familiers: Dictionary = {}
+var _fiche_familier: PanelContainer
+var _titre_familier: Label
+var _statistiques_familier: Label
+var _equiper_familier_bouton: Button
+var _forger_familier_bouton: Button
 var _vide: VBoxContainer
 var _portrait_objet: TextureRect
 var _fiche_objet: PanelContainer
@@ -39,6 +55,40 @@ func _ready() -> void:
 		var onglet := StyleAzur.bouton(["Reliques", "Armes", "Familiers"][index], func(): _changer_atelier(index))
 		onglets.add_child(onglet)
 		_onglets_atelier.append(onglet)
+	var apercu_bijou := StyleAzur.plaque(col, true)
+	_apercu_bijou = apercu_bijou.get_parent() as PanelContainer
+	_texte_apercu_bijou = StyleAzur.texte("", 27, StyleAzur.IVOIRE)
+	apercu_bijou.add_child(_texte_apercu_bijou)
+	var fiche_arme := StyleAzur.plaque(col, true)
+	_fiche_arme = fiche_arme.get_parent() as PanelContainer
+	_titre_arme = StyleAzur.texte("", 32, StyleAzur.IVOIRE)
+	fiche_arme.add_child(_titre_arme)
+	_statistiques_arme = StyleAzur.texte("", 26, StyleAzur.ATTENUE)
+	fiche_arme.add_child(_statistiques_arme)
+	_forge_arme = StyleAzur.texte("", 25, StyleAzur.ATTENUE)
+	fiche_arme.add_child(_forge_arme)
+	var actions_arme := BoxContainer.new()
+	StyleAzur.adapter_ligne(actions_arme)
+	actions_arme.add_theme_constant_override("separation", 12)
+	fiche_arme.add_child(actions_arme)
+	_equiper_arme_bouton = StyleAzur.bouton("Équiper", _equiper_arme, true)
+	actions_arme.add_child(_equiper_arme_bouton)
+	_forger_arme_bouton = StyleAzur.bouton("Forge", _ameliorer_arme)
+	actions_arme.add_child(_forger_arme_bouton)
+	var fiche_familier := StyleAzur.plaque(col, true)
+	_fiche_familier = fiche_familier.get_parent() as PanelContainer
+	_titre_familier = StyleAzur.texte("", 32, StyleAzur.IVOIRE)
+	fiche_familier.add_child(_titre_familier)
+	_statistiques_familier = StyleAzur.texte("", 26, StyleAzur.ATTENUE)
+	fiche_familier.add_child(_statistiques_familier)
+	var actions_familier := BoxContainer.new()
+	StyleAzur.adapter_ligne(actions_familier)
+	actions_familier.add_theme_constant_override("separation", 12)
+	fiche_familier.add_child(actions_familier)
+	_equiper_familier_bouton = StyleAzur.bouton("Équiper", _equiper_familier, true)
+	actions_familier.add_child(_equiper_familier_bouton)
+	_forger_familier_bouton = StyleAzur.bouton("Forge", _ameliorer_familier)
+	actions_familier.add_child(_forger_familier_bouton)
 	var contenu := StyleAzur.defilement(col)
 	var bilan := VBoxContainer.new()
 	contenu.add_child(bilan)
@@ -152,9 +202,13 @@ func _ready() -> void:
 	Capture.programmer(self)
 
 func _changer_atelier(index: int) -> void:
+	_atelier_actif = index
 	_armes.visible = index == 1
 	_familiers.visible = index == 2
 	_bijoux.visible = index == 0
+	_fiche_arme.visible = index == 1
+	_fiche_familier.visible = index == 2
+	_apercu_bijou.visible = index == 0 and not _objet_selectionne.is_empty()
 	_actions_ligne.visible = index == 0
 	for i in _onglets_atelier.size():
 		StyleAzur.onglet_symbolique(_onglets_atelier[i], [StyleAzur.icone(0), StyleAzur.icone_arme("standard"), StyleAzur.glyphe("familier_gardien")][i], i == index)
@@ -181,6 +235,7 @@ func _afficher_inventaire() -> void:
 		StyleAzur.case_objet(b,id == _objet_selectionne)
 	_effets_objet.text = ""
 	_fiche_objet.visible = not _objet_selectionne.is_empty()
+	_apercu_bijou.visible = _atelier_actif == 0 and not _objet_selectionne.is_empty()
 	_effets_objet.visible = not _objet_selectionne.is_empty()
 	_details.text = "Sélectionnez un bijou pour consulter ses effets."
 	_portrait_objet.visible = not _objet_selectionne.is_empty()
@@ -188,6 +243,7 @@ func _afficher_inventaire() -> void:
 	var id := _objet_selectionne
 	_portrait_objet.texture = StyleAzur.icone(StyleAzur.icone_objet(id))
 	var niveau := ReglagesJoueur.niveau_objet(id)
+	_texte_apercu_bijou.text = "%s · Niveau %d\n%s" % [CatalogueObjets.OBJETS[id]["nom"], niveau, CatalogueObjets.description_bonus(id, niveau)]
 	_details.text = "%s · Niveau %d\n%s\n%s" % [CatalogueObjets.OBJETS[id]["nom"],niveau,CatalogueObjets.description_bonus(id,niveau),"Limite de forge atteinte" if niveau >= Reglages.FORGE_NIVEAU_MAX else "Forge : %d pierres" % ReglagesJoueur.cout_forge(id)]
 	if niveau < Reglages.FORGE_NIVEAU_MAX:
 		_details.text += "\nProchain niveau : " + CatalogueObjets.description_bonus(id,niveau+1)
@@ -304,107 +360,107 @@ func _ameliorer_arme() -> void:
 		_rafraichir()
 
 func _afficher_armes() -> void:
-	for enfant in _armes.get_children():
-		_armes.remove_child(enfant)
-		enfant.queue_free()
-	_armes.add_child(StyleAzur.texte("L’arsenal alchimique", 35))
-	_armes.add_child(StyleAzur.texte("Chaque arme apporte de l’Attaque brute et change le comportement des tirs de baguette.", 26, StyleAzur.ATTENUE))
+	if _boutons_armes.is_empty():
+		_armes.add_child(StyleAzur.texte("L’arsenal alchimique", 35))
+		_armes.add_child(StyleAzur.texte("Touchez une arme : ses caractéristiques restent visibles au-dessus de la collection.", 26, StyleAzur.ATTENUE))
+		var ligne := GridContainer.new()
+		ligne.columns = 2
+		StyleAzur.adapter_grille(ligne, 310.0, 2)
+		ligne.add_theme_constant_override("h_separation", 10)
+		ligne.add_theme_constant_override("v_separation", 10)
+		_armes.add_child(ligne)
+		for id: String in CatalogueProjectiles.TYPES:
+			var arme: Dictionary = CatalogueProjectiles.TYPES[id]
+			var bouton := StyleAzur.bouton(str(arme["nom"]), func(): _selectionner_arme(id))
+			bouton.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			bouton.add_theme_font_size_override("font_size", 28)
+			bouton.custom_minimum_size.y = 260
+			bouton.icon = StyleAzur.icone_arme(id)
+			bouton.expand_icon = true
+			bouton.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			bouton.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+			bouton.add_theme_constant_override("icon_max_width", 116)
+			bouton.tooltip_text = str(arme["description"])
+			ligne.add_child(bouton)
+			_boutons_armes[id] = bouton
 	if not CatalogueProjectiles.contient(_arme_selectionnee):
 		_arme_selectionnee = ReglagesJoueur.projectile_equipe_effectif()
-	var ligne := GridContainer.new()
-	ligne.columns = 2
-	StyleAzur.adapter_grille(ligne, 310.0, 2)
-	ligne.add_theme_constant_override("h_separation",10)
-	ligne.add_theme_constant_override("v_separation",10)
-	_armes.add_child(ligne)
 	var selection: Dictionary = CatalogueProjectiles.TYPES[_arme_selectionnee]
 	var disponibles := ReglagesJoueur.projectiles_disponibles()
 	for id: String in CatalogueProjectiles.TYPES:
 		var arme: Dictionary = CatalogueProjectiles.TYPES[id]
 		var disponible := id in disponibles
-		var bouton := StyleAzur.bouton(str(arme["nom"]), func(): _selectionner_arme(id))
-		bouton.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		bouton.add_theme_font_size_override("font_size",28)
-		bouton.custom_minimum_size.y = 260
-		bouton.icon = StyleAzur.icone_arme(id)
-		bouton.expand_icon = true
-		bouton.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		bouton.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
-		bouton.add_theme_constant_override("icon_max_width",116)
+		var bouton: Button = _boutons_armes[id]
 		StyleAzur.case_objet(bouton,id == _arme_selectionnee)
-		bouton.tooltip_text = str(arme["description"])
 		if disponible:
-			bouton.text += "\nNiveau %d%s" % [ReglagesJoueur.niveau_arme(id), " · Équipée" if id == ReglagesJoueur.projectile_equipe_effectif() else ""]
+			bouton.text = "%s\nNiveau %d%s" % [arme["nom"], ReglagesJoueur.niveau_arme(id), " · Équipée" if id == ReglagesJoueur.projectile_equipe_effectif() else ""]
 		else:
-			bouton.text += "\nVerrouillée · Chapitre %d" % CatalogueProjectiles.niveau_deblocage(id)
-		ligne.add_child(bouton)
+			bouton.text = "%s\nVerrouillée · %s" % [arme["nom"], Chapitres.libelle_court(CatalogueProjectiles.niveau_deblocage(id) - 1)]
 	var niveau := ReglagesJoueur.niveau_arme(_arme_selectionnee)
 	var disponible := _arme_selectionnee in disponibles
-	var fiche_arme := StyleAzur.plaque(_armes)
-	fiche_arme.add_child(StyleAzur.texte("%s · Niveau %d" % [selection["nom"], niveau], 34, StyleAzur.IVOIRE))
-	fiche_arme.add_child(StyleAzur.texte("Attaque de base +%s\nPuissance du tir : %s %% de l’attaque réelle\nCadence ×%.2f\n%s" % [_nombre(CatalogueProjectiles.attaque_base(_arme_selectionnee,niveau)),_pourcentage(float(selection["coefficient_tir"])),float(selection.get("cadence_mult",1.0)),selection["description"]],28,StyleAzur.ATTENUE))
+	_titre_arme.text = "%s · Niveau %d" % [selection["nom"], niveau]
+	_statistiques_arme.text = "Attaque +%s · Tir %s %% · Cadence ×%.2f\n%s" % [_nombre(CatalogueProjectiles.attaque_base(_arme_selectionnee,niveau)), _pourcentage(float(selection["coefficient_tir"])), float(selection.get("cadence_mult",1.0)), selection["description"]]
 	if niveau < Reglages.FORGE_NIVEAU_MAX:
-		fiche_arme.add_child(StyleAzur.texte("Prochain niveau : attaque de base +%s\nForge : %d pierres" % [_nombre(CatalogueProjectiles.attaque_base(_arme_selectionnee,niveau+1)),ReglagesJoueur.cout_forge_arme(_arme_selectionnee)],28,StyleAzur.ATTENUE))
+		_forge_arme.text = "Prochain niveau : attaque +%s · Forge : %d pierres" % [_nombre(CatalogueProjectiles.attaque_base(_arme_selectionnee,niveau+1)), ReglagesJoueur.cout_forge_arme(_arme_selectionnee)]
 	else:
-		fiche_arme.add_child(StyleAzur.texte("Limite de forge atteinte",28,StyleAzur.ATTENUE))
-	var actions := BoxContainer.new()
-	StyleAzur.adapter_ligne(actions)
-	actions.add_theme_constant_override("separation",12)
-	fiche_arme.add_child(actions)
-	var equiper := StyleAzur.bouton("Équiper",_equiper_arme,true)
-	equiper.disabled = not disponible or _arme_selectionnee == ReglagesJoueur.projectile_equipe_effectif()
-	actions.add_child(equiper)
-	var ameliorer := StyleAzur.bouton("Forge",_ameliorer_arme)
-	ameliorer.disabled = not disponible or niveau >= Reglages.FORGE_NIVEAU_MAX \
+		_forge_arme.text = "Limite de forge atteinte"
+	_equiper_arme_bouton.disabled = not disponible or _arme_selectionnee == ReglagesJoueur.projectile_equipe_effectif()
+	_forger_arme_bouton.disabled = not disponible or niveau >= Reglages.FORGE_NIVEAU_MAX \
 		or ReglagesJoueur.pierres_forge < ReglagesJoueur.cout_forge_arme(_arme_selectionnee)
-	actions.add_child(ameliorer)
+
+func _selectionner_familier(id: String) -> void:
+	_familier_selectionne = id
+	Sons.jouer("choix", -16.0)
+	_afficher_familiers()
+
+func _equiper_familier() -> void:
+	if ReglagesJoueur.equiper_familier(_familier_selectionne):
+		Sons.jouer("choix", -10.0)
+		_rafraichir()
+
+func _ameliorer_familier() -> void:
+	if ReglagesJoueur.ameliorer_familier(_familier_selectionne):
+		Sons.jouer("fusion", -10.0)
+		_rafraichir()
 
 func _afficher_familiers() -> void:
-	for enfant in _familiers.get_children():
-		_familiers.remove_child(enfant)
-		enfant.queue_free()
-	_familiers.add_child(StyleAzur.texte("Compagnons autonomes", 35))
-	_familiers.add_child(StyleAzur.texte("Chaque familier possède sa propre Attaque et cadence. Son petit passif renforce aussi le héros.", 26, StyleAzur.ATTENUE))
+	if _boutons_familiers.is_empty():
+		_familiers.add_child(StyleAzur.texte("Compagnons autonomes", 35))
+		_familiers.add_child(StyleAzur.texte("Chaque familier possède sa propre Attaque et cadence. Son petit passif renforce aussi le héros.", 26, StyleAzur.ATTENUE))
+		var grille := GridContainer.new()
+		grille.columns = 2
+		StyleAzur.adapter_grille(grille, 310.0, 2)
+		grille.add_theme_constant_override("h_separation", 10)
+		grille.add_theme_constant_override("v_separation", 10)
+		_familiers.add_child(grille)
+		for valeur in CatalogueFamiliers.TYPES:
+			var id := str(valeur)
+			var donnees: Dictionary = CatalogueFamiliers.TYPES[id]
+			var bouton := StyleAzur.bouton(str(donnees["nom"]), func(): _selectionner_familier(id))
+			bouton.custom_minimum_size.y = 130
+			bouton.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			grille.add_child(bouton)
+			_boutons_familiers[id] = bouton
 	if not CatalogueFamiliers.contient(_familier_selectionne):
 		_familier_selectionne = ReglagesJoueur.familier_equipe_effectif()
-	var grille := GridContainer.new()
-	grille.columns = 2
-	StyleAzur.adapter_grille(grille, 310.0, 2)
-	grille.add_theme_constant_override("h_separation", 10)
-	grille.add_theme_constant_override("v_separation", 10)
-	_familiers.add_child(grille)
 	var disponibles := ReglagesJoueur.familiers_disponibles()
 	for valeur in CatalogueFamiliers.TYPES:
 		var id := str(valeur)
 		var donnees: Dictionary = CatalogueFamiliers.TYPES[id]
-		var b := StyleAzur.bouton(str(donnees["nom"]), func():
-			_familier_selectionne = id
-			_afficher_familiers())
-		b.custom_minimum_size.y = 130
-		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		b.disabled = id not in disponibles
-		if b.disabled: b.text += "\nChapitre %d" % CatalogueFamiliers.niveau_deblocage(id)
-		elif id == ReglagesJoueur.familier_equipe_effectif(): b.text += "\nÉquipé"
-		StyleAzur.case_objet(b, id == _familier_selectionne)
-		grille.add_child(b)
+		var bouton: Button = _boutons_familiers[id]
+		bouton.disabled = id not in disponibles
+		bouton.text = str(donnees["nom"])
+		if bouton.disabled: bouton.text += "\n%s" % Chapitres.libelle_court(CatalogueFamiliers.niveau_deblocage(id) - 1)
+		elif id == ReglagesJoueur.familier_equipe_effectif(): bouton.text += "\nÉquipé"
+		StyleAzur.case_objet(bouton, id == _familier_selectionne)
 	var d: Dictionary = CatalogueFamiliers.TYPES[_familier_selectionne]
 	var niveau := ReglagesJoueur.niveau_familier(_familier_selectionne)
-	var fiche := StyleAzur.plaque(_familiers)
-	fiche.add_child(StyleAzur.texte("%s · Niveau %d" % [d["nom"], niveau], 34, StyleAzur.IVOIRE))
-	fiche.add_child(StyleAzur.texte("Attaque %s · une attaque toutes les %s s\n%s" % [
+	_titre_familier.text = "%s · Niveau %d" % [d["nom"], niveau]
+	_statistiques_familier.text = "Attaque %s · une attaque toutes les %s s\n%s\nChaque perle inflige au plus %d %% des dégâts d’un tir du héros." % [
 		_nombre(CatalogueFamiliers.attaque(_familier_selectionne, niveau)),
-		_nombre(float(d["intervalle"])), d["description"]], 28, StyleAzur.ATTENUE))
-	var actions := BoxContainer.new()
-	StyleAzur.adapter_ligne(actions)
-	actions.add_theme_constant_override("separation", 12)
-	fiche.add_child(actions)
-	var equiper := StyleAzur.bouton("Équiper", func():
-		if ReglagesJoueur.equiper_familier(_familier_selectionne): _rafraichir(), true)
-	equiper.disabled = _familier_selectionne not in disponibles \
+		_nombre(float(d["intervalle"])), d["description"],
+		roundi(Reglages.FAMILIER_DEGATS_MAX_PART_HEROS * 100.0)]
+	_equiper_familier_bouton.disabled = _familier_selectionne not in disponibles \
 		or _familier_selectionne == ReglagesJoueur.familier_equipe_effectif()
-	actions.add_child(equiper)
-	var ameliorer := StyleAzur.bouton("Forge", func():
-		if ReglagesJoueur.ameliorer_familier(_familier_selectionne): _rafraichir())
-	ameliorer.disabled = _familier_selectionne not in disponibles or niveau >= Reglages.FORGE_NIVEAU_MAX \
+	_forger_familier_bouton.disabled = _familier_selectionne not in disponibles or niveau >= Reglages.FORGE_NIVEAU_MAX \
 		or ReglagesJoueur.pierres_forge < Reglages.cout_forge(niveau)
-	actions.add_child(ameliorer)

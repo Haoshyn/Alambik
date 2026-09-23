@@ -3,7 +3,7 @@
 # ./publier.sh 0.4.0
 # ALAMBIK_CIBLE=play ./publier.sh 0.4.0    AAB pour Google Play
 # ALAMBIK_CIBLE=test ./publier.sh         APK de test explicite
-# Sorties : build/android/ ; guide : docs/ops/MISES_A_JOUR_ANDROID.md
+# APK : Alambic.apk ; AAB et journaux : build/android/ ; guide : docs/ops/MISES_A_JOUR_ANDROID.md
 set -eu
 cd "$(dirname "$0")" || exit 1
 export GODOT="${GODOT:-$HOME/Téléchargements/Godot_v4.7.1-stable_linux.x86_64}"

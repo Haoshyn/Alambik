@@ -13,8 +13,8 @@ config_version=5
 config/name="Alambic"
 run/main_scene="res://scenes/menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-boot_splash/bg_color=Color(0.070588, 0.141176, 0.247059, 1)
-boot_splash/image="res://assets/visual/interface/scriptorium.png"
+boot_splash/bg_color=Color(0.278431, 0.466667, 0.745098, 1)
+boot_splash/image="res://assets/visual/interface/chargement_clairiere.png"
 config/icon="res://assets/visual/identite/icone.png"
 
 [autoload]

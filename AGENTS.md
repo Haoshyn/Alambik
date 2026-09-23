@@ -32,6 +32,7 @@ Modifier, relire les changements, faire un retour court. Le propriétaire teste 
 - Ne pas demander systématiquement confirmation pour lancer ces opérations : par défaut, ne pas les lancer.
 - Si des tests sont demandés, respecter le périmètre demandé sans élargir à toute la suite ou aux vingt runs. Restaurer uniquement les diagnostics nécessaires et leurs dépendances.
 - Une demande d'APK autorise export et contrôles de version, paquet et signature, sans batterie de tests ou de runs.
+- Pour une demande d'APK, produire un seul fichier `Alambic.apk` à la racine du projet. Ne conserver aucune autre APK dans le dépôt ; les journaux et métadonnées restent dans `build/android/`.
 - Ne pas créer de guide, rapport ou captures pour une petite retouche ; corriger brièvement une information devenue fausse suffit.
 
 ## Exécutions demandées

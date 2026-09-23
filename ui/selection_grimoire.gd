@@ -53,7 +53,7 @@ func _ready() -> void:
 	_suivant = StyleAzur.bouton("Monde suivant ›", func(): _changer_monde(1))
 	navigation.add_child(_precedent)
 	navigation.add_child(_suivant)
-	contenu.add_child(StyleAzur.texte("CHOISISSEZ VOTRE CHAPITRE", 24, StyleAzur.CUIVRE))
+	contenu.add_child(StyleAzur.texte("CHOISISSEZ VOTRE NIVEAU", 24, StyleAzur.CUIVRE))
 	var chemin := GridContainer.new()
 	chemin.columns = 3
 	StyleAzur.adapter_grille(chemin, 240.0, 3)
@@ -86,14 +86,14 @@ func _ready() -> void:
 		chemin.add_child(bouton)
 		_zones_chapitres.append(bouton)
 	var selection := StyleAzur.plaque(contenu, true)
-	selection.add_child(StyleAzur.texte("LE CHAPITRE SÉLECTIONNÉ", 23, StyleAzur.MAGIE))
+	selection.add_child(StyleAzur.texte("LE NIVEAU SÉLECTIONNÉ", 23, StyleAzur.MAGIE))
 	_details = StyleAzur.texte("", 29)
 	selection.add_child(_details)
 	var actions := BoxContainer.new()
 	StyleAzur.adapter_ligne(actions)
 	actions.add_theme_constant_override("separation", 14)
 	selection.add_child(actions)
-	_bouton_selectionner = StyleAzur.bouton("Choisir ce chapitre" if selection_seulement else "Jouer ce chapitre", _selectionner, true)
+	_bouton_selectionner = StyleAzur.bouton("Choisir ce niveau" if selection_seulement else "Jouer ce niveau", _selectionner, true)
 	actions.add_child(_bouton_selectionner)
 	var recompenses := StyleAzur.bouton("Butin", func(): _voir_loots("grimoire", _index_selectionne()))
 	recompenses.size_flags_horizontal = Control.SIZE_FILL
@@ -171,7 +171,7 @@ func _choisir_mode(mode: String) -> void:
 	if _lancement:
 		return
 	if not ReglagesJoueur.mode_debloque(mode):
-		_message = "Terminez davantage de chapitres pour ouvrir ce mode."
+		_message = "Terminez davantage de niveaux pour ouvrir ce mode."
 		_rafraichir()
 		return
 	if mode == "epreuve_sorts":
@@ -183,7 +183,7 @@ func _choisir_mode(mode: String) -> void:
 
 func _rafraichir() -> void:
 	var monde: Dictionary = Chapitres.MONDES[_monde]
-	_titre.text = "Monde %s · %s" % [monde["numero"], monde["nom"]]
+	_titre.text = "Monde %d · %s" % [_monde + 1, monde["nom"]]
 	_monde_sous_titre.text = str(monde["sous_titre"])
 	var teinte: Color = monde["teinte"]
 	_embleme_monde.modulate = Color.WHITE.lerp(teinte, 0.25)
@@ -192,7 +192,7 @@ func _rafraichir() -> void:
 	for i in Chapitres.CHAPITRES_PAR_MONDE:
 		var index := _monde * Chapitres.CHAPITRES_PAR_MONDE + i
 		var accessible := ReglagesJoueur.chapitre_debloque(index)
-		var legende := "Chapitre %d\n%s" % [i + 1, "Sélectionné" if i == _chapitre_monde else "Accessible" if accessible else "Verrouillé"]
+		var legende := "Niveau %d\n%s" % [i + 1, "Sélectionné" if i == _chapitre_monde else "Accessible" if accessible else "Verrouillé"]
 		_textes_chapitres[i].text = legende
 		_zones_chapitres[i].accessibility_name = legende.replace("\n", " · ")
 		_zones_chapitres[i].tooltip_text = legende.replace("\n", " · ")
@@ -218,7 +218,7 @@ func _changer_monde(direction: int) -> void:
 		return
 	_monde = nouveau
 	_message = ""
-	# Conserver le numero de chapitre rend la comparaison entre mondes naturelle.
+	# Conserver le numero de niveau rend la comparaison entre mondes naturelle.
 	# Si celui-ci est verrouille, la fiche le dit sans modifier le choix en cachette.
 	Sons.jouer("choix", -16.0, 1.0 + float(direction) * 0.04)
 	_rafraichir()
@@ -227,7 +227,7 @@ func _choisir_chapitre(index: int) -> void:
 	if _lancement: return
 	_chapitre_monde = clampi(index, 0, Chapitres.CHAPITRES_PAR_MONDE - 1)
 	var chapitre := _index_selectionne()
-	_message = "" if ReglagesJoueur.chapitre_debloque(chapitre) else "Ce chapitre est encore verrouillé."
+	_message = "" if ReglagesJoueur.chapitre_debloque(chapitre) else "Ce niveau est encore verrouillé."
 	Sons.jouer("choix", -16.0)
 	_rafraichir()
 
@@ -235,7 +235,7 @@ func _selectionner() -> void:
 	if _lancement: return
 	var index := _index_selectionne()
 	if not ReglagesJoueur.chapitre_debloque(index):
-		_message = "Terminez le chapitre précédent pour ouvrir celui-ci."
+		_message = "Terminez le niveau précédent pour ouvrir celui-ci."
 		_rafraichir()
 		return
 	ReglagesJoueur.choisir_mode_run("grimoire")

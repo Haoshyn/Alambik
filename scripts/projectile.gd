@@ -43,6 +43,8 @@ func _ready() -> void:
 		var exclusion := instance_from_id(cible_exclue) as CollisionObject2D
 		if exclusion != null: _corps_exclus.append(exclusion.get_rid())
 	couleur = Palette.TIR_ENNEMI_HALO if hostile else Palette.teinte_du_tir(tir.effets)
+	if "trait_familier" in tir.drapeaux:
+		couleur = Color("66dfd3")
 	if hostile:
 		add_to_group("tirs_ennemis")
 		collision_layer = 16

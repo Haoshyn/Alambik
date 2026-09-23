@@ -18,9 +18,9 @@ Sources : `scripts/run.gd`, `scripts/heros.gd`, `scripts/tir.gd`,
 ## Campagne et modes annexes
 
 La campagne comprend cinq mondes — Encre, Terre, Eau, Air et Feu — de sept
-chapitres chacun. Un chapitre parcourt vingt salles ; le septième chapitre de
+niveaux chacun. Un niveau parcourt vingt salles ; le septième niveau de
 chaque monde porte son boss signature. Les salles et obstacles suivent un
-parcours fixe par chapitre. Le centre et les accès restent praticables.
+parcours fixe par niveau. Le centre et les accès restent praticables.
 
 La Mine et les Épreuves de sorts sont accessibles depuis l'accueil. Leurs
 récompenses et difficultés viennent des mêmes catalogues que l'aperçu de butin.
@@ -34,7 +34,7 @@ Les ennemis fragiles, moyens, costauds, élites, miniboss et boss ont des compor
 et motifs propres. Leur progression suit 35 profils fixes, construits depuis
 les ressources des échecs et les achats accessibles sans jamais lire le build réel.
 La cible passe de 3–4 tentatives sans farm obligatoire au début à dix échecs
-et cinq ou six victoires sur le chapitre précédent à la fin. Ce sont des cibles
+et cinq ou six victoires sur le niveau précédent à la fin. Ce sont des cibles
 de conception, sans victoire automatique après un nombre d’essais. Les premières
 salles laissent acquérir les augments avant une montée plus forte de la pression.
 Le héros se déplace à 728 px/s, soit 30 % plus vite. Le coefficient global de
@@ -58,7 +58,7 @@ Une vague compte généralement 3–5 ennemis, jusqu’à 7 dans les grandes sal
 Les quatre premières salles restent limitées à 4 ennemis simultanés. Une seule
 famille costaude occupe chaque vague conçue. La suivante attend 12–14,4 secondes
 et suffisamment de places, ou 0,85 seconde après un nettoyage complet.
-À partir du deuxième chapitre et de la salle 3, une vague ordinaire a 10 % de
+À partir du deuxième niveau et de la salle 3, une vague ordinaire a 10 % de
 chance de proposer un élite de n’importe quelle famille, avec un seul élite actif.
 Ses PV et dégâts doublent, sa vitesse gagne 12 % et sa recharge baisse de 10 %.
 Certains élites laissent des traces brûlantes annoncées lorsqu’ils se déplacent.
@@ -149,7 +149,7 @@ accordent un petit passif au héros. Les pouvoirs de bijoux débloqués par la f
 restent passifs : cumul de dégâts, cinquième attaque, sursis ou incantation. Les
 doublons et butins de sorts suivent les garanties des catalogues. Une défaite
 conserve les ressources des salles terminées et permet un bijou manquant à
-1/30 après cinq salles, 1/20 après dix, 1/10 après quinze. Chaque chapitre
+1/30 après cinq salles, 1/20 après dix, 1/10 après quinze. Chaque niveau
 garantit son bijou manquant au plus tard à la troisième victoire complète ;
 les défaites ne font pas avancer ce compteur. Les Cœurs de mana renforcent les
 dégâts finaux sans être requis par le budget minimal de campagne.

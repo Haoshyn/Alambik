@@ -7,9 +7,13 @@ var _corps: Node3D
 var _perle: MeshInstance3D
 var _taille_perle := Vector3.ZERO
 var _temps := 0.0
+var _tir_restant := 0.0
+var _direction_tir := Vector2.RIGHT
 var _sphere := SphereMesh.new()
+const DUREE_TIR := 0.34
 
 func _ready() -> void:
+	add_to_group("familiers_visuels")
 	_sphere.radius = 1.0
 	_sphere.height = 2.0
 	_sphere.radial_segments = 16
@@ -58,15 +62,25 @@ func _ready() -> void:
 				Vector3(0.17 - float(i) * 0.022, 0.048, 0.055), creme if i != 1 else turquoise)
 			plume.rotation.z = signe * (0.55 + float(i) * 0.28)
 
+func declencher_tir(direction: Vector2) -> void:
+	_direction_tir = direction.normalized()
+	_tir_restant = DUREE_TIR
+
 func animer(delta: float, reduit: bool) -> void:
 	_temps += delta
+	_tir_restant = maxf(0.0, _tir_restant - delta)
+	var impulsion := _tir_restant / DUREE_TIR
 	var amplitude := 0.1 if reduit else 0.3
 	for i in _ailes.size():
 		var signe := -1.0 if i == 0 else 1.0
 		_ailes[i].rotation.z = signe * (0.12 + sin(_temps * 8.0) * amplitude)
 		_ailes[i].rotation.y = signe * cos(_temps * 8.0) * amplitude * 0.3
-	_corps.rotation.z = sin(_temps * 2.5) * (0.015 if reduit else 0.055)
-	_perle.scale = _taille_perle * (1.0 + sin(_temps * 3.0) * (0.025 if reduit else 0.08))
+	_corps.rotation.z = sin(_temps * 2.5) * (0.015 if reduit else 0.055) \
+		- _direction_tir.x * impulsion * (0.08 if reduit else 0.25)
+	_corps.position = Vector3(_direction_tir.x, 0.0, _direction_tir.y) \
+		* impulsion * (0.025 if reduit else 0.085)
+	_perle.scale = _taille_perle * (1.0 + sin(_temps * 3.0) * (0.025 if reduit else 0.08) \
+		+ impulsion * (0.32 if reduit else 0.8))
 
 func _matiere(couleur: Color, metal: float, rugosite: float) -> StandardMaterial3D:
 	var matiere := StandardMaterial3D.new()

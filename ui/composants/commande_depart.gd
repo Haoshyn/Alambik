@@ -14,7 +14,7 @@ func _ready() -> void:
 	var destination := StyleAzur.bouton("", func(): destination_demandee.emit())
 	destination.name = "Destination"
 	StyleAzur.habiller_lecture(destination)
-	destination.tooltip_text = "Choisir un chapitre ou un mode"
+	destination.tooltip_text = "Choisir un niveau ou un mode"
 	destination.custom_minimum_size.y = 136
 	add_child(destination)
 	var marge := MarginContainer.new()

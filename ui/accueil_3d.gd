@@ -60,7 +60,7 @@ func rafraichir() -> void:
 	var mode := ReglagesJoueur.mode_run_choisi
 	var chapitre: Dictionary = Chapitres.par_index(ReglagesJoueur.chapitre_choisi)
 	var monde: Dictionary = Chapitres.MONDES[int(chapitre["monde"])]
-	var destination := "%s · Chapitre %d" % [str(monde["nom"]), int(chapitre["chapitre_monde"])]
+	var destination := Chapitres.libelle_court(ReglagesJoueur.chapitre_choisi) + " — " + str(monde["nom"])
 	if mode == "mine": destination = "La Mine"
 	elif mode != "grimoire": destination = "Épreuve · niveau %d" % ReglagesJoueur.niveau_epreuve_choisi
 	_depart.afficher(destination, mode)

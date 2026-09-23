@@ -87,8 +87,9 @@ const RETARDEMENT_DELAI := 2.0
 const EGIDE_REDUCTION := 0.50
 const FAMILIER_TIREUR_ATTAQUE_MULT := 1.30
 const FAMILIER_TIREUR_CADENCE_MULT := 1.20
-const FAMILIER_TIR_INTERVALLE := 0.75
-const FAMILIER_TIR_PART_DEGATS := 0.60
+const FAMILIER_DEGATS_MAX_PART_HEROS := 0.60
+const FAMILIER_PROJECTILE_VITESSE_MULT := 0.72
+const FAMILIER_PROJECTILE_PORTEE_MULT := 0.75
 # Le familier tire depuis ce decalage, pas depuis le heros. Sa visee doit donc
 # partir de la aussi : calculee depuis le heros, elle ratait de tout l'angle
 # separant les deux points, d'autant plus visiblement que la cible etait proche.

@@ -18,6 +18,8 @@ var _transition_page := false
 var _page := 2
 var _lancement := false
 var _selection_initiale := ""
+var _mode_apres_classe := ""
+var _destination_apres_classe := {}
 
 
 func _ready() -> void:
@@ -44,24 +46,35 @@ func _ready() -> void:
 	if "--ouvrir-reglages" in OS.get_cmdline_user_args():
 		call_deferred("_ouvrir_reglages")
 	Capture.programmer(self)
-	if ReglagesJoueur.specialisation_effective().is_empty():
-		_ouvrir_classes_initiales.call_deferred()
+	if OS.get_cmdline_user_args().is_empty() \
+			and ReglagesJoueur.specialisation_effective().is_empty() and not ReglagesJoueur.tutoriel_vu:
+		_demarrer_premiers_pas.call_deferred()
 
-func _ouvrir_classes_initiales() -> void:
+func _ouvrir_classes_initiales(mode := "", destination := {}) -> void:
 	if _superposition != null:
 		_fermer_superposition(_superposition)
+	_mode_apres_classe = mode
+	_destination_apres_classe = destination
 	var choix := preload("res://ui/choix_classe.gd").new()
 	choix.obligatoire = true
-	choix.premiers_pas = not ReglagesJoueur.tutoriel_vu
 	_ouvrir_superposition(choix)
-	if _superposition == choix and choix.premiers_pas:
-		choix.ferme.connect(_demarrer_premiers_pas)
+	if _superposition == choix:
+		choix.ferme.connect(_reprendre_apres_classe)
+
+func _reprendre_apres_classe() -> void:
+	if ReglagesJoueur.specialisation_effective().is_empty() or _mode_apres_classe.is_empty():
+		return
+	var mode := _mode_apres_classe
+	var destination: Dictionary = _destination_apres_classe
+	_mode_apres_classe = ""
+	_destination_apres_classe = {}
+	_lancer_mode.call_deferred(mode, destination)
 
 func _demarrer_premiers_pas() -> void:
-	if ReglagesJoueur.specialisation_effective().is_empty():
+	if ReglagesJoueur.tutoriel_vu or not ReglagesJoueur.specialisation_effective().is_empty():
 		return
 	ReglagesJoueur.choisir_chapitre(0)
-	_lancer_mode("grimoire", Chapitres.par_index(0))
+	_lancer_mode("grimoire", Chapitres.par_index(0), true)
 
 func _construire_structure() -> void:
 	_conteneur_pages = Control.new()
@@ -154,14 +167,11 @@ func _jouer_immediatement() -> void:
 	var mode := ReglagesJoueur.mode_run_choisi
 	_lancer_mode(mode, chapitre if mode == "grimoire" else {"nom":"La Mine" if mode == "mine" else "Épreuves de magie"})
 
-func _lancer_mode(mode: String, destination: Dictionary) -> void:
+func _lancer_mode(mode: String, destination: Dictionary, apprentissage_initial := false) -> void:
 	if _lancement or not ReglagesJoueur.mode_debloque(mode):
 		return
-	if ReglagesJoueur.specialisation_effective().is_empty():
-		# Une aventure ne doit pas commencer avec une classe choisie en silence.
-		if _superposition != null:
-			_fermer_superposition(_superposition)
-		_ouvrir_classes_initiales()
+	if ReglagesJoueur.specialisation_effective().is_empty() and not apprentissage_initial:
+		_ouvrir_classes_initiales(mode, destination)
 		return
 	_lancement = true
 	ReglagesJoueur.choisir_mode_run(mode)

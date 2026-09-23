@@ -10,12 +10,12 @@ Depuis la racine du projet (`python3` sous Linux, `python` sous Windows) :
 python3 tools/android_mises_a_jour.py verifier
 python3 tools/android_mises_a_jour.py exporter --cible test
 python3 tools/android_mises_a_jour.py exporter --cible test --installer
-python3 tools/android_mises_a_jour.py installer build/android/alambik-test.apk
+python3 tools/android_mises_a_jour.py installer Alambic.apk
 ```
 
 Choisir une seule commande d'export : `--installer` ajoute l'installation sur un téléphone autorisé. La commande `installer` utilise l'APK existant sans nouvel export. Avec plusieurs appareils, ajouter `--serie IDENTIFIANT_ADB`. Connexion et diagnostic : [MOBILE.md](MOBILE.md).
 
-Sous Windows, `Mettre_a_jour_Android.cmd` produit également `build/android/alambik-test.apk`. Pour un transfert manuel, envoyer cet APK au téléphone et accepter sa mise à jour. Les fichiers numérotés, journaux et empreintes SHA-256 restent dans `build/android/`.
+Sous Windows, `Mettre_a_jour_Android.cmd` produit également `Alambic.apk` à la racine. Pour un transfert manuel, envoyer cet APK au téléphone et accepter sa mise à jour. Chaque nouvel export remplace cette APK unique ; les journaux et empreintes SHA-256 restent dans `build/android/`.
 
 Chaque export réserve un `version/code` supérieur et synchronise les presets Android. L'outil contrôle le paquet, la version et le certificat des APK produits. L'installation utilise `adb install -r`, refuse une version égale ou antérieure et laisse Android refuser toute signature incompatible. Ne jamais contourner un refus par une désinstallation, `pm clear` ou une rétrogradation forcée : la progression est dans `user://alambic.cfg`.
 
@@ -42,7 +42,7 @@ python3 tools/android_mises_a_jour.py exporter --cible release --nom 0.4.0
 python3 tools/android_mises_a_jour.py exporter --cible play --nom 0.4.0
 ```
 
-Sorties : `build/android/alambik-release.apk` et `build/android/alambik-play.aab`. La cible Play utilise le preset **Android Google Play** et nécessite le modèle de compilation Android dans `android/build/`, son SDK requis et l'application préparée dans Play Console. Vérifier les exigences du magasin au moment de publier. Un AAB ne s'installe pas directement avec `--installer` ; le distribuer d'abord via une piste de test Play.
+Sorties : `Alambic.apk` pour `test` et `release`, `build/android/alambik-play.aab` pour `play`. La cible Play utilise le preset **Android Google Play** et nécessite le modèle de compilation Android dans `android/build/`, son SDK requis et l'application préparée dans Play Console. Vérifier les exigences du magasin au moment de publier. Un AAB ne s'installe pas directement avec `--installer` ; le distribuer d'abord via une piste de test Play.
 
 L'outil refuse une publication sans clé de production et ne bascule jamais sur la clé de test. Avec Play App Signing, la clé d'envoi peut différer du certificat distribué : ne pas supposer qu'une version Play remplacera l'APK de test. Si les certificats diffèrent, préparer la migration des sauvegardes avant la transition.
 

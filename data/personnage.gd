@@ -22,9 +22,15 @@ const ATTRIBUTS := {
 }
 
 const SPECIALISATIONS := {
-	"mage": {"nom": "Mage", "description": "Dégâts des sorts +30 % · récupération des sorts −30 %"},
-	"sorcier": {"nom": "Sorcier", "description": "Dégâts directs de baguette +20 %"},
-	"moine": {"nom": "Moine", "description": "Dégâts des augments et des familiers +20 %"},
+	"mage": {"nom": "Mage", "description": "Dégâts des sorts +30 % · récupération des sorts −30 %",
+		"atout": "Des sorts fréquents et puissants",
+		"conseil": "Choisissez cette voie si vous aimez lancer souvent vos pouvoirs et varier leurs effets."},
+	"sorcier": {"nom": "Sorcier", "description": "Dégâts directs de baguette +20 %",
+		"atout": "Une baguette fiable au combat",
+		"conseil": "Choisissez cette voie si vous préférez une attaque directe, simple à maîtriser."},
+	"moine": {"nom": "Moine", "description": "Dégâts des augments et des familiers +20 %",
+		"atout": "Des réactions et compagnons renforcés",
+		"conseil": "Choisissez cette voie si vous aimez combiner les augments et votre familier."},
 }
 
 static func points_totaux(niveau: int) -> int:

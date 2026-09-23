@@ -8,7 +8,7 @@ static func preparer(surface: Control) -> void:
 		surface.add_child(icone)
 
 static func dessiner(surface: Control, dimensions: Vector2, temps: float,
-		titre := "Le passage s’ouvre", sous_titre := "Un nouveau chapitre vous attend…") -> void:
+		titre := "Le passage s’ouvre", sous_titre := "Un nouveau niveau vous attend…") -> void:
 	var texture: Texture2D = StyleAzur.FOND_ATELIER
 	var taille_source := texture.get_size()
 	var rapport := maxf(dimensions.x / taille_source.x, dimensions.y / taille_source.y)

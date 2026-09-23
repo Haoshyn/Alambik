@@ -30,7 +30,7 @@ Après installation par l'outil de mise à jour :
 ~/Android/Sdk/platform-tools/adb logcat godot:V GodotEngine:V "*:S"
 ```
 
-`./deploy.sh` est un raccourci de développement : export debug direct dans `build/alambic.apk`, installation, lancement et logs (`--sans-logs` pour arrêter après lancement). Il ne réserve pas de nouveau numéro et ne contrôle pas le certificat historique ; utiliser l'outil de mise à jour pour les APK à distribuer.
+`./deploy.sh` est un raccourci de développement : export debug direct dans `Alambic.apk`, installation, lancement et logs (`--sans-logs` pour arrêter après lancement). Il ne réserve pas de nouveau numéro et ne contrôle pas le certificat historique ; utiliser l'outil de mise à jour pour les APK à distribuer.
 
 | Symptôme | Action |
 |---|---|

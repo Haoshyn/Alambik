@@ -34,6 +34,9 @@ dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.
   `exec-467be333-9b5e-4a17-9ab1-4802ae8c0c6e.png`. Leurs dimensions et leur
   recadrage communs sont définis dans `ui/composants/illustration_accueil.gd`.
   L'onglet Héros réutilise le même mage détouré que l'accueil.
+- `chargement_clairiere.png` : écran de lancement créé avec ImageGen à partir
+  du fond et du mage de l'accueil ; source finale
+  `exec-4bfc5a52-94fa-46b1-b9c1-c8b42be377aa.png`.
 - `heros_email.png` : ancienne illustration indépendante générée avec ImageGen depuis
   la proposition A, source `exec-7a15a3a7-833f-4208-bfdf-230a1d165e99.png`.
 - Les illustrations restent en PNG. Les contrôles et icônes sont vectoriels ;

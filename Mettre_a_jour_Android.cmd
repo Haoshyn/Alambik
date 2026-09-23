@@ -6,7 +6,7 @@ python tools\android_mises_a_jour.py exporter --cible test %*
 set "RESULTAT=%ERRORLEVEL%"
 if not "%RESULTAT%"=="0" goto fin
 echo.
-echo Envoyer build\android\alambik-test.apk au telephone et l'ouvrir.
+echo Envoyer Alambic.apk au telephone et l'ouvrir.
 echo Ne pas desinstaller la version precedente.
 :fin
 echo.

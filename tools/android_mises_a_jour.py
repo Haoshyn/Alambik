@@ -49,6 +49,8 @@ def verifier_configuration(texte: str) -> int:
     codes, noms = set(), set()
     for section in sections:
         options = section + ".options"
+        if valeur(cfg, section, "name") == "Android" and valeur(cfg, section, "export_path") != "Alambic.apk":
+            raise ValueError("Le preset Android doit exporter Alambic.apk a la racine.")
         if valeur(cfg, options, "package/unique_name") != PAQUET:
             raise ValueError("Identifiant Android modifie : mise a jour incompatible.")
         if valeur(cfg, options, "package/signed") != "true":
@@ -306,33 +308,40 @@ def exporter(args: argparse.Namespace) -> None:
         # Le code est reserve avant l'export : un echec ne peut pas reutiliser un numero publie.
         ecrire_compare(fichier, original, texte)
         extension = "aab" if args.cible == "play" else "apk"
-        destination = dossier / f"alambik-{args.cible}-{code}.{extension}"
+        destination = dossier / f"alambik-play-{code}.aab" if args.cible == "play" else RACINE / "Alambic.apk"
         temporaire = dossier / f"alambik-{args.cible}-{code}.part.{extension}"
         journal = dossier / f"export-{args.cible}-{code}.log"
         preset = PRESET_PLAY if args.cible == "play" else "Android"
         mode = "--export-debug" if args.cible == "test" else "--export-release"
         print(f"Export {args.cible} : {nom} (code {code})", flush=True)
-        executer([godot, "--headless", "--path", str(RACINE), mode, preset, str(temporaire)],
-                 env=env, delai=600, journal=journal)
-        if not temporaire.is_file() or temporaire.stat().st_size == 0:
-            raise RuntimeError("Godot n'a pas produit le fichier attendu.")
-        if args.cible != "play" and examiner_apk(temporaire, env) != (PAQUET, code, certificat):
-            raise RuntimeError("Identite, version ou signature incorrecte ; APK non distribue.")
-        if verifier_configuration(fichier.read_text(encoding="utf-8-sig")) != code:
-            raise RuntimeError("Version modifiee par un autre export ; resultat non distribue.")
-        os.replace(temporaire, destination)
-        stable = dossier / f"alambik-{args.cible}.{extension}"
-        copie = stable.with_name(stable.name + ".tmp")
-        shutil.copyfile(destination, copie)
-        os.replace(copie, stable)
-        rapport = {"paquet": PAQUET, "code": code, "nom": nom, "cible": args.cible,
-                   "certificat_signature_sha256": certificat,
-                   "fichier_sha256": hashlib.sha256(destination.read_bytes()).hexdigest(),
-                   "fichier": destination.name, "date": datetime.now().isoformat(timespec="seconds")}
-        destination.with_suffix(".json").write_text(json.dumps(rapport, indent=2) + "\n", encoding="utf-8")
-        print(f"Pret : {stable}\nJournal : {journal}", flush=True)
-        if args.installer:
-            installer(stable, env, args.serie)
+        try:
+            executer([godot, "--headless", "--path", str(RACINE), mode, preset, str(temporaire)],
+                     env=env, delai=600, journal=journal)
+            if not temporaire.is_file() or temporaire.stat().st_size == 0:
+                raise RuntimeError("Godot n'a pas produit le fichier attendu.")
+            if args.cible != "play" and examiner_apk(temporaire, env) != (PAQUET, code, certificat):
+                raise RuntimeError("Identite, version ou signature incorrecte ; APK non distribue.")
+            if verifier_configuration(fichier.read_text(encoding="utf-8-sig")) != code:
+                raise RuntimeError("Version modifiee par un autre export ; resultat non distribue.")
+            os.replace(temporaire, destination)
+            stable = destination
+            if args.cible == "play":
+                stable = dossier / "alambik-play.aab"
+                copie = stable.with_name(stable.name + ".tmp")
+                shutil.copyfile(destination, copie)
+                os.replace(copie, stable)
+            rapport = {"paquet": PAQUET, "code": code, "nom": nom, "cible": args.cible,
+                       "certificat_signature_sha256": certificat,
+                       "fichier_sha256": hashlib.sha256(destination.read_bytes()).hexdigest(),
+                       "fichier": destination.name, "date": datetime.now().isoformat(timespec="seconds")}
+            (dossier / f"export-{args.cible}-{code}.json").write_text(
+                json.dumps(rapport, indent=2) + "\n", encoding="utf-8")
+            print(f"Pret : {stable}\nJournal : {journal}", flush=True)
+            if args.installer:
+                installer(stable, env, args.serie)
+        finally:
+            temporaire.unlink(missing_ok=True)
+            Path(str(temporaire) + ".idsig").unlink(missing_ok=True)
 
 
 def main() -> int:
