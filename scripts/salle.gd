@@ -365,7 +365,7 @@ func faire_apparaitre(id: String, position: Vector2, invocateur: Node = null, el
 # troisieme chapitre plus que celle du premier. Le catalogue reste la reference :
 # on n'y touche pas, on met a l'echelle une copie.
 func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
-	var chapitre_patterns := Jeu.chapitre if Jeu.mode_run == "grimoire" else (Epreuves.palier(Jeu.niveau_epreuve) if Jeu.mode_run == "epreuve_sorts" else ReglagesJoueur.palier_atteint())
+	var chapitre_patterns := Jeu.chapitre if Jeu.mode_run == "grimoire" else (Epreuves.palier(Jeu.niveau_epreuve) if Jeu.mode_run == "epreuve_sorts" else Mine.palier(Jeu.niveau_mine))
 	donnees = BestiaireMondes.appliquer(donnees, id, chapitre_patterns)
 	var copie := donnees.duplicate(true)
 	copie["id"] = id
@@ -378,7 +378,7 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 			* Reglages.DEFI_DEGATS_BASE * pow(1.0 + Reglages.DEFI_MONTEE_DEGATS, progression_defi)
 	elif Jeu.mode_run == "mine":
 		var progression_mine := clampf(_mine_temps / Reglages.MINE_DUREE, 0.0, 1.0)
-		var palier_mine := ReglagesJoueur.palier_atteint()
+		var palier_mine := Mine.palier(Jeu.niveau_mine)
 		copie["pv"] = float(donnees["pv"]) * Reglages.facteur_annexe_pv(palier_mine) \
 			* Reglages.MINE_PV_MULT * pow(1.0 + Reglages.MINE_MONTEE_PV, progression_mine)
 		copie["degats"] = float(donnees["degats"]) * Reglages.facteur_annexe_degats(palier_mine) \

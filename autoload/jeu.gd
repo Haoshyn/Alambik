@@ -8,6 +8,7 @@ signal inventaire_change
 signal experience_run_change
 
 var niveau_epreuve := 1
+var niveau_mine := 1
 var salles_terminees: Array[int] = []
 var boss_vaincus: Array[int] = []
 var bilan_run: Dictionary = {}
@@ -57,7 +58,7 @@ func nom_run() -> String:
 	if mode_run == "epreuve_sorts":
 		return "Épreuve de magie · niveau %d" % niveau_epreuve
 	if mode_run == "mine":
-		return "Mine"
+		return "Mine · niveau %d" % niveau_mine
 	return str(chapitre_courant()["nom"])
 
 func est_boss_courant() -> bool:
@@ -68,16 +69,19 @@ func est_boss_courant() -> bool:
 	return Chapitres.est_boss(chapitre, salle_courante)
 
 func preparer_nouvelle_tentative() -> void:
-	nouvelle_tentative = {"mode": mode_run, "chapitre": chapitre, "epreuve": niveau_epreuve}
+	nouvelle_tentative = {"mode": mode_run, "chapitre": chapitre, "epreuve": niveau_epreuve,
+		"mine": niveau_mine}
 
 func demarrer_run(graine_demandee: int = 0, salle_de_depart: int = 1, chapitre_demande := 0,
 		mode_demande := "grimoire") -> void:
 	var epreuve_demandee := ReglagesJoueur.niveau_epreuve_choisi
+	var mine_demandee := ReglagesJoueur.niveau_mine_choisi
 	if not nouvelle_tentative.is_empty():
 		# Rejouer conserve la destination, mais jamais la salle, le tirage ou le bilan.
 		mode_demande = str(nouvelle_tentative["mode"])
 		chapitre_demande = int(nouvelle_tentative["chapitre"])
 		epreuve_demandee = int(nouvelle_tentative["epreuve"])
+		mine_demandee = int(nouvelle_tentative.get("mine", mine_demandee))
 		graine_demandee = 0
 		salle_de_depart = 1
 		nouvelle_tentative.clear()
@@ -90,6 +94,7 @@ func demarrer_run(graine_demandee: int = 0, salle_de_depart: int = 1, chapitre_d
 	# Le defi a sa propre courbe : il ne depend jamais du dernier livre consulte.
 	chapitre = 0 if mode_run != "grimoire" else clampi(chapitre_demande, 0, Chapitres.nombre() - 1)
 	niveau_epreuve = clampi(epreuve_demandee, 1, Epreuves.nombre())
+	niveau_mine = clampi(mine_demandee, 1, maxi(1, ReglagesJoueur.niveau_mine_debloque()))
 	salles_terminees.clear()
 	boss_vaincus.clear()
 	bilan_run.clear()
@@ -97,7 +102,9 @@ func demarrer_run(graine_demandee: int = 0, salle_de_depart: int = 1, chapitre_d
 	inventaire = []
 	experience_run = 0
 	niveau_run = 0
-	niveaux_rares = ProgressionAugments.tirer_niveaux_rares(rng) if mode_run == "grimoire" else []
+	niveaux_rares.clear()
+	if mode_run == "grimoire":
+		niveaux_rares = ProgressionAugments.tirer_niveaux_rares(rng)
 	# Fixer le palier avant toute offre empeche une relance de changer sa rarete.
 	etage_legendaire = ProgressionAugments.tirer_etage_legendaire(rng) if mode_run == "grimoire" else 0
 	_relances_utilisees = 0

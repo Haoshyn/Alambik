@@ -46,9 +46,16 @@ dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.
   isole la cascade et le lac (`exec-0846e992-792a-49c2-bcd9-5a6d51bf1a87.png`).
   `atmosphere.png` est un atlas 2 × 2 : deux nuages en haut, brume puis fumée
   en bas (`exec-78209fef-e462-42c3-9013-9c89cc921055.png`).
-  Le ciel est un dégradé Godot ; les animations et cadrages sont définis dans
-  `data/animations_decors.gd`, `ui/composants/illustration_accueil.gd` et
-  `ui/composants/ile_animee.gd`.
+  Pour l'accueil, `vegetation.png` et `eau.png` restent des peintures
+  sources exclues de l'APK. `tools/generer_clairiere_vivante.py` produit la
+  végétation fixe, quatre rameaux transparents, les masques du lac et de la
+  cascade, les reflets et les nuages/brumes recadrés. La cascade utilise quatre
+  variantes peintes depuis `tools/sources_clairiere/cascade_etude.png` ;
+  `tools/sources_clairiere/clairiere_vivante.ora` conserve la composition
+  éditable par calques. Le ciel est un dégradé Godot ; les mouvements et le
+  cadrage de l'accueil sont définis dans `data/animations_decors.gd` et
+  `ui/composants/illustration_accueil.gd`. Les îles utilisent toujours
+  `ui/composants/ile_animee.gd` et l'atlas `atmosphere.png`.
 - `campagne_encre.png`, `campagne_terre.png`, `campagne_eau.png`,
   `campagne_air.png` et `campagne_feu.png` : cinq illustrations transparentes
   et indépendantes pour le choix du monde. Sources ImageGen respectives :

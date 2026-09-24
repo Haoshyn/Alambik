@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="32" viewBox="0 0 512 32"><defs>
+<linearGradient id="acier" x1=".08" y1="0" x2=".86" y2="1"><stop stop-color="#fff9eb"/><stop offset=".22" stop-color="#d8e5ed"/><stop offset=".55" stop-color="#8ea8c3"/><stop offset=".8" stop-color="#577395"/><stop offset="1" stop-color="#b7c9d3"/></linearGradient>
+<linearGradient id="or" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff2cd"/><stop offset=".43" stop-color="#d5b891"/><stop offset="1" stop-color="#776884"/></linearGradient>
+<linearGradient id="violet" x1=".12" y1="0" x2=".8" y2="1"><stop stop-color="#f4eafc"/><stop offset=".46" stop-color="#b5a1d4"/><stop offset="1" stop-color="#645b9b"/></linearGradient>
+<linearGradient id="turquoise" x1=".13" y1="0" x2=".78" y2="1"><stop stop-color="#e6fff9"/><stop offset=".4" stop-color="#8bdce3"/><stop offset="1" stop-color="#3e80ab"/></linearGradient>
+<linearGradient id="vert" x1=".15" y1="0" x2=".8" y2="1"><stop stop-color="#efffee"/><stop offset=".42" stop-color="#a4ddba"/><stop offset="1" stop-color="#4b947e"/></linearGradient>
+<linearGradient id="ambre" x1=".12" y1="0" x2=".88" y2="1"><stop stop-color="#fff6dc"/><stop offset=".45" stop-color="#f3c487"/><stop offset="1" stop-color="#ae6680"/></linearGradient>
+<linearGradient id="cuir" x1=".12" y1="0" x2=".88" y2="1"><stop stop-color="#bd9c84"/><stop offset=".55" stop-color="#856c78"/><stop offset="1" stop-color="#443f68"/></linearGradient>
+<linearGradient id="nuit" x1="0" y1="0" x2=".35" y2="1"><stop stop-color="#52628d"/><stop offset=".42" stop-color="#31436f"/><stop offset="1" stop-color="#182950"/></linearGradient>
+<linearGradient id="email" x1="0" y1="0" x2=".2" y2="1"><stop stop-color="#8c77b4"/><stop offset=".47" stop-color="#655b9b"/><stop offset="1" stop-color="#3e4277"/></linearGradient>
+<linearGradient id="papier" x1=".15" y1="0" x2=".75" y2="1"><stop stop-color="#fff9e9"/><stop offset=".53" stop-color="#e9e4e0"/><stop offset="1" stop-color="#bcc9d8"/></linearGradient>
+<radialGradient id="lueur"><stop stop-color="#c5f7f5" stop-opacity=".38"/><stop offset="1" stop-color="#c5f7f5" stop-opacity="0"/></radialGradient>
+</defs><path d="M7 16H237M275 16h230" fill="none" stroke="#bfc9d7" stroke-width="2" stroke-opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M256 3 270 16 256 29 242 16Z" fill="url(#turquoise)" stroke="#d4c9b8" stroke-width="1.2" stroke-linejoin="round" /><path d="M256 12l1.08 2.92L260 16l-2.92 1.08L256 20l-1.08 -2.92L252 16l2.92 -1.08Z" fill="#d8fff8" stroke="none" stroke-width="0" stroke-linejoin="round" /></svg>

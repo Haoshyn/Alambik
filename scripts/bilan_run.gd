@@ -5,7 +5,7 @@ static func offre(victoire: bool) -> Dictionary:
 	var resultat := ButinsRun.offre(Jeu.mode_run, Jeu.chapitre, Jeu.salles_terminees.size(), Jeu.boss_vaincus.size(),
 		victoire, Jeu.niveau_epreuve, ReglagesJoueur.rangs_sorts, ReglagesJoueur.objets,
 		ReglagesJoueur.grands_coffres_rates(Jeu.chapitre), ReglagesJoueur.epreuves_ratees(Jeu.niveau_epreuve),
-		ReglagesJoueur.palier_atteint(), maxf(0.0, Reglages.MINE_DUREE - Jeu.temps_mine_restant),
+		Mine.palier(Jeu.niveau_mine), maxf(0.0, Reglages.MINE_DUREE - Jeu.temps_mine_restant),
 		ReglagesJoueur.coeur_mana_obtenu(Jeu.niveau_epreuve),
 		ReglagesJoueur.epreuves_sans_coeur_mana(Jeu.niveau_epreuve))
 

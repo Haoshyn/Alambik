@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
 <defs>
  <linearGradient id="bord" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d1cec8"/><stop offset=".32" stop-color="#aeb6c3"/><stop offset=".75" stop-color="#61718d"/><stop offset="1" stop-color="#b2b9c7"/></linearGradient>
- <linearGradient id="email" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#556a91"/><stop offset=".45" stop-color="#3e5178"/><stop offset="1" stop-color="#243a61"/></linearGradient>
+ <linearGradient id="email" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#5d74a3"/><stop offset=".45" stop-color="#435b8a"/><stop offset="1" stop-color="#293f69"/></linearGradient>
  <linearGradient id="lueur" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff9f4" stop-opacity=".17"/><stop offset=".38" stop-color="#c6e7f5" stop-opacity=".03"/><stop offset="1" stop-color="#101e3a" stop-opacity=".14"/></linearGradient>
 </defs>
 <path d="M20 5H108L123 20V108L108 123H20L5 108V20Z" fill="#142442" opacity=".27" transform="translate(0 3)"/>

@@ -13,6 +13,8 @@ var _sous_menu: Control
 func _ready() -> void:
 	var col := StyleAzur.page(self, "Héros", true)
 	_contenu = StyleAzur.defilement(col)
+	# La hauteur du portrait depend de la largeur; une barre auto ferait osciller le cadrage.
+	(_contenu.get_parent() as ScrollContainer).vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
 	var infos := StyleAzur.cartouche_infos(_contenu, StyleAzur.MENTHE)
 	_resume = StyleAzur.texte("", 28, StyleAzur.IVOIRE)
 	infos.add_child(_resume)

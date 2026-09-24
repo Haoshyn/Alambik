@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
 <defs>
  <linearGradient id="bord" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e6d3ae"/><stop offset=".27" stop-color="#90b3b8"/><stop offset=".66" stop-color="#526f89"/><stop offset="1" stop-color="#c5bbad"/></linearGradient>
- <linearGradient id="email" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#3c7181"/><stop offset=".25" stop-color="#294d67"/><stop offset=".7" stop-color="#1d3454"/><stop offset="1" stop-color="#182a48"/></linearGradient>
- <linearGradient id="voile" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#a6e4df" stop-opacity=".28"/><stop offset=".45" stop-color="#7fadd2" stop-opacity=".04"/><stop offset="1" stop-color="#100f36" stop-opacity=".18"/></linearGradient>
+ <linearGradient id="email" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#4a8195"/><stop offset=".25" stop-color="#315f7c"/><stop offset=".7" stop-color="#24436a"/><stop offset="1" stop-color="#1d355d"/></linearGradient>
+ <linearGradient id="voile" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#a6e4df" stop-opacity=".3"/><stop offset=".45" stop-color="#8eafe4" stop-opacity=".07"/><stop offset="1" stop-color="#100f36" stop-opacity=".16"/></linearGradient>
  <linearGradient id="filet" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#c3d7e4" stop-opacity="0"/><stop offset=".2" stop-color="#dce7e5" stop-opacity=".6"/><stop offset=".8" stop-color="#dce7e5" stop-opacity=".6"/><stop offset="1" stop-color="#c3d7e4" stop-opacity="0"/></linearGradient>
 </defs>
 <path d="M27 6H101L118 19Q123 23 123 29V99Q123 107 117 113L107 122H29Q20 122 13 115L5 106V30Q5 24 10 19L22 8Q24 6 27 6Z" fill="#0d1a36" opacity=".34" transform="translate(0 3)"/>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="384" height="384" viewBox="0 0 120 120">
+<defs>
+ <linearGradient id="acier" x1="0" y1="0" x2=".72" y2="1"><stop stop-color="#fdf8eb"/><stop offset=".24" stop-color="#d9e4f1"/><stop offset=".54" stop-color="#8fa6c5"/><stop offset=".78" stop-color="#5c759c"/><stop offset="1" stop-color="#c5d0df"/></linearGradient>
+ <linearGradient id="garde" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7e7b9"/><stop offset=".45" stop-color="#c5a778"/><stop offset="1" stop-color="#786781"/></linearGradient>
+ <linearGradient id="poignee" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#655777"/><stop offset="1" stop-color="#2c3359"/></linearGradient>
+ <radialGradient id="lueur"><stop stop-color="#d5b6fa" stop-opacity=".4"/><stop offset="1" stop-color="#d5b6fa" stop-opacity="0"/></radialGradient>
+</defs>
+<ellipse cx="60" cy="55" rx="49" ry="43" fill="url(#lueur)"/>
+<g transform="rotate(-38 60 60)">
+ <path d="M58 15 62 15 70 58 60 72 50 58Z" fill="#1d2a4d" opacity=".45" transform="translate(2 2)"/>
+ <path d="M60 9 70 60 60 75 50 60Z" fill="url(#acier)" stroke="#293b60" stroke-width="1.8"/>
+ <path d="M60 9V70L50 60Z" fill="#f9f6ea" opacity=".52"/>
+ <path d="M60 13V61" fill="none" stroke="#ffffff" stroke-opacity=".76" stroke-width="1.4"/>
+ <path d="M38 71Q51 67 60 71 69 67 82 71L78 78Q68 75 60 79 52 75 42 78Z" fill="url(#garde)" stroke="#514663" stroke-width="1.5"/>
+ <path d="M56 78H64L65 104 60 109 55 104Z" fill="url(#poignee)" stroke="#343857" stroke-width="1.5"/>
+ <path d="M56 84 64 88M56 91 64 95M56 98 64 102" stroke="#d8c8b1" stroke-opacity=".75" stroke-width="1.8"/>
+ <circle cx="60" cy="75" r="3" fill="#9de2e6" stroke="#f6e8c8" stroke-width="1.2"/>
+</g>
+<g transform="rotate(38 60 60)">
+ <path d="M58 15 62 15 70 58 60 72 50 58Z" fill="#1d2a4d" opacity=".45" transform="translate(2 2)"/>
+ <path d="M60 9 70 60 60 75 50 60Z" fill="url(#acier)" stroke="#293b60" stroke-width="1.8"/>
+ <path d="M60 9V70L50 60Z" fill="#f9f6ea" opacity=".52"/>
+ <path d="M60 13V61" fill="none" stroke="#ffffff" stroke-opacity=".76" stroke-width="1.4"/>
+ <path d="M38 71Q51 67 60 71 69 67 82 71L78 78Q68 75 60 79 52 75 42 78Z" fill="url(#garde)" stroke="#514663" stroke-width="1.5"/>
+ <path d="M56 78H64L65 104 60 109 55 104Z" fill="url(#poignee)" stroke="#343857" stroke-width="1.5"/>
+ <path d="M56 84 64 88M56 91 64 95M56 98 64 102" stroke="#d8c8b1" stroke-opacity=".75" stroke-width="1.8"/>
+ <circle cx="60" cy="75" r="3" fill="#9de2e6" stroke="#f6e8c8" stroke-width="1.2"/>
+</g>
+<path d="M60 42 69 51 60 60 51 51Z" fill="#9ab7d0" stroke="#ead8ae" stroke-width="1.5"/>
+<path d="M60 43 60 59 52 51Z" fill="#e7f8f9" opacity=".68"/>
+<circle cx="60" cy="51" r="2" fill="#f4f3da"/>
+</svg>

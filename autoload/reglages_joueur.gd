@@ -52,6 +52,7 @@ var forge_niveaux := {}
 var version_forge := Reglages.FORGE_VERSION
 var pierres_forge := 0
 var mode_run_choisi := "grimoire"
+var niveau_mine_choisi := 1
 var niveau_epreuve_choisi := 1
 var niveau_epreuve_debloque := 1
 var sauvegarde_active := true
@@ -139,6 +140,9 @@ func charger() -> void:
 	_migrer_niveaux_forge()
 	niveau_epreuve_debloque = clampi(int(config.get_value("epreuves", "debloque", 1)), 1, Epreuves.nombre())
 	niveau_epreuve_choisi = clampi(int(config.get_value("epreuves", "choisi", 1)), 1, niveau_epreuve_debloque)
+	# Une ancienne sauvegarde garde la difficulte automatique qu'elle connaissait.
+	niveau_mine_choisi = clampi(int(config.get_value("mine", "choisi", maxi(1, niveau_mine_debloque()))),
+		1, maxi(1, niveau_mine_debloque()))
 	mode_run_choisi = str(config.get_value("options", "mode_run", "grimoire"))
 	# Les anciens modes retires reviennent en campagne.
 	if mode_run_choisi not in ["grimoire", "epreuve_sorts", "mine"] \
@@ -156,6 +160,7 @@ func sauvegarder() -> void:
 	var config := ConfigFile.new()
 	config.set_value("epreuves", "choisi", niveau_epreuve_choisi)
 	config.set_value("epreuves", "debloque", niveau_epreuve_debloque)
+	config.set_value("mine", "choisi", niveau_mine_choisi)
 	config.set_value("resultats", "victoires", victoires)
 	config.set_value("resultats", "runs", runs)
 	config.set_value("resultats", "par_chapitre", meilleures_par_chapitre)
@@ -847,6 +852,16 @@ func niveau_campagne_atteint() -> int:
 func palier_atteint() -> int:
 	return niveau_campagne_atteint() - 1
 
+func niveau_mine_debloque() -> int:
+	return clampi(niveau_campagne_atteint() - Reglages.MINE_NIVEAU_DEBLOCAGE + 1, 0, Mine.nombre())
+
+func choisir_mine(niveau: int) -> bool:
+	if not mode_debloque("mine") or niveau < 1 or niveau > niveau_mine_debloque():
+		return false
+	niveau_mine_choisi = niveau
+	choisir_mode_run("mine")
+	return true
+
 func mode_debloque(mode: String) -> bool:
 	if mode_dev or mode == "grimoire":
 		return true
@@ -870,7 +885,7 @@ func monde_equipement_atteint() -> int:
 	return int(Chapitres.par_index(dernier_debloque)["monde"])
 
 func pierres_mine() -> int:
-	return Reglages.pierres_mine(palier_atteint())
+	return Reglages.pierres_mine(Mine.palier(niveau_mine_choisi))
 
 # Un chapitre s'ouvre quand le precedent a ete termine. Le premier est toujours
 # ouvert : personne ne doit rester devant une porte close au premier lancement.

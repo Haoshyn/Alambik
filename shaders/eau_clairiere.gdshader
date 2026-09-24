@@ -1,6 +1,7 @@
 shader_type canvas_item;
 render_mode unshaded;
 
+uniform sampler2D masque_eau : filter_linear_mipmap, repeat_disable;
 uniform float temps_animation = 0.0;
 varying vec4 teinte;
 
@@ -9,21 +10,20 @@ void vertex() {
 }
 
 void fragment() {
-	vec4 origine = texture(TEXTURE, UV);
-	float chute = 1.0 - smoothstep(0.47, 0.49, UV.y);
-	float courant = temps_animation * 2.4;
-	vec2 decalage = vec2(sin(UV.y * 290.0 - courant + UV.x * 26.0) * 0.0012,
-		sin(UV.y * 390.0 - courant) * 0.0008);
-	vec4 eau = texture(TEXTURE, UV + decalage * origine.a * (1.0 - chute));
-	// Deux defilements fondus font descendre la peinture sans retour visible.
-	float cycle = fract(temps_animation * 0.26);
-	vec4 premier = texture(TEXTURE, UV - vec2(0.0, cycle * 0.024));
-	vec4 second = texture(TEXTURE, UV - vec2(0.0, fract(cycle + 0.5) * 0.024));
-	vec3 ecoulement = mix(second.rgb, premier.rgb, 1.0 - abs(cycle * 2.0 - 1.0));
-	float interieur = smoothstep(0.45, 0.85, min(premier.a, second.a));
-	eau.rgb = mix(eau.rgb, ecoulement, chute * interieur * 0.85);
-	float reflet = pow(0.5 + 0.5 * sin(UV.y * 480.0 - courant * 2.0 + sin(UV.x * 38.0)), 10.0);
-	eau.rgb += vec3(0.03, 0.04, 0.045) * reflet * (1.0 - chute);
-	eau.a = origine.a;
-	COLOR = eau * teinte;
+	vec4 fixe = texture(TEXTURE, UV);
+	float masque = texture(masque_eau, UV).r;
+	float interieur = smoothstep(0.18, 0.82, masque);
+	float phase_x = UV.y * 112.0 + UV.x * 17.0;
+	float phase_y = UV.x * 48.0 + UV.y * 71.0;
+	vec2 decalage = vec2(
+		(sin(phase_x + temps_animation * 0.95) - sin(phase_x)) * 0.0025,
+		(sin(phase_y + temps_animation * 0.73) - sin(phase_y)) * 0.0065
+	) * interieur;
+	vec3 reflet = texture(TEXTURE, clamp(UV + decalage, vec2(0.0), vec2(1.0))).rgb;
+	float phase_large = UV.y * 135.0 + UV.x * 11.0;
+	float phase_fine = UV.y * 260.0 - UV.x * 9.0;
+	float ridules = (sin(phase_large + temps_animation * 1.25) - sin(phase_large)) * 0.025
+		+ (sin(phase_fine - temps_animation * 0.86) - sin(phase_fine)) * 0.015;
+	reflet += vec3(0.8, 0.91, 1.0) * ridules * interieur;
+	COLOR = vec4(reflet, fixe.a * masque) * teinte;
 }

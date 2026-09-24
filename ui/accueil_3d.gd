@@ -52,3 +52,6 @@ func rafraichir() -> void:
 
 func _adapter_hauteur() -> void:
 	_composition.custom_minimum_size.y = _defilement.size.y
+
+func cadre_monde_global() -> Rect2:
+	return _scene.cadre_monde_global()

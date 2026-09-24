@@ -3,6 +3,7 @@ signal ferme
 var mode := "grimoire"
 var chapitre := 0
 var niveau_epreuve := 1
+var niveau_mine := 1
 
 func _ready() -> void:
 	var col := StyleAzur.defilement(StyleAzur.page(self, "Récompenses possibles"))
@@ -10,10 +11,10 @@ func _ready() -> void:
 	var boss := 4 if mode == "grimoire" else 5 if mode == "epreuve_sorts" else 1
 	var offre := ButinsRun.offre(mode, chapitre, salles, boss, true, niveau_epreuve,
 		ReglagesJoueur.rangs_sorts, ReglagesJoueur.objets, ReglagesJoueur.grands_coffres_rates(chapitre),
-		ReglagesJoueur.epreuves_ratees(niveau_epreuve), ReglagesJoueur.palier_atteint(), 0.0,
+		ReglagesJoueur.epreuves_ratees(niveau_epreuve), Mine.palier(niveau_mine), 0.0,
 		ReglagesJoueur.coeur_mana_obtenu(niveau_epreuve),
 		ReglagesJoueur.epreuves_sans_coeur_mana(niveau_epreuve))
-	var titre := str(Chapitres.par_index(chapitre)["nom"]) if mode == "grimoire" else "Épreuve de magie · niveau %d" % niveau_epreuve if mode == "epreuve_sorts" else "La Mine"
+	var titre := str(Chapitres.par_index(chapitre)["nom"]) if mode == "grimoire" else "Épreuve de magie · niveau %d" % niveau_epreuve if mode == "epreuve_sorts" else "La Mine · niveau %d" % niveau_mine
 	StyleAzur.banniere(col, titre, "Le trésor d’une aventure menée à son terme.", "couronne")
 	col.add_child(StyleAzur.texte("DANS VOTRE COFFRE", 24, StyleAzur.CUIVRE))
 	for cadeau in offre["cadeaux"]:

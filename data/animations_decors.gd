@@ -3,14 +3,30 @@ extends RefCounted
 
 const TAILLE_ACCUEIL := Vector2(948, 1659)
 const PAYSAGE := preload("res://assets/visual/interface/clairiere_vivante/paysage.png")
-const VEGETATION := preload("res://assets/visual/interface/clairiere_vivante/vegetation.png")
-const EAU := preload("res://assets/visual/interface/clairiere_vivante/eau.png")
+const VEGETATION_FIXE := [
+	{"image": preload("res://assets/visual/interface/clairiere_vivante/vegetation_haut_gauche.png"), "position": Vector2.ZERO},
+	{"image": preload("res://assets/visual/interface/clairiere_vivante/vegetation_haut_droite.png"), "position": Vector2(580, 0)},
+	{"image": preload("res://assets/visual/interface/clairiere_vivante/vegetation_basse.png"), "position": Vector2(0, 1160)},
+]
+const REFLETS_LAC := preload("res://assets/visual/interface/clairiere_vivante/reflets_lac.png")
+const MASQUE_LAC := preload("res://assets/visual/interface/clairiere_vivante/masque_lac.png")
+const CASCADE_BOUCLE := preload("res://assets/visual/interface/clairiere_vivante/cascade_boucle.png")
 const ATMOSPHERE := preload("res://assets/visual/interface/clairiere_vivante/atmosphere.png")
+const BRUME_LAC := preload("res://assets/visual/interface/clairiere_vivante/brume_lac.png")
+const POSITION_LAC := Vector2(318, 748)
+const POSITION_CASCADE := Vector2(506, 652)
+const TAILLE_CASCADE := Vector2(64, 108)
+const BRUME := {"position": Vector2(230, 705), "echelle": 0.90, "vitesse_px": 4.0, "opacite": 0.22}
+# Le retour de chaque nuage se fait lorsqu'il est entierement sorti de l'ecran.
 const NUAGES := [
-	{"case": Vector2(0, 0), "taille": Vector2(640, 245), "haut": 20.0, "vitesse": 12.0, "phase": 0.36, "opacite": 0.86},
-	{"case": Vector2(1, 0), "taille": Vector2(730, 245), "haut": 155.0, "vitesse": 7.0, "phase": 0.81, "opacite": 0.80},
-	{"case": Vector2(1, 0), "taille": Vector2(430, 155), "haut": 100.0, "vitesse": 16.0, "phase": 0.12, "opacite": 0.72},
-	{"case": Vector2(0, 0), "taille": Vector2(440, 155), "haut": 275.0, "vitesse": 5.0, "phase": 0.55, "opacite": 0.65},
+	{"image": preload("res://assets/visual/interface/clairiere_vivante/nuage_gauche.png"), "position": Vector2(75, 78), "echelle": 0.75, "vitesse_px": 11.0, "opacite": 0.52},
+	{"image": preload("res://assets/visual/interface/clairiere_vivante/nuage_droit.png"), "position": Vector2(475, 143), "echelle": 0.72, "vitesse_px": 13.0, "opacite": 0.46},
+]
+const RAMEAUX := [
+	{"image": preload("res://assets/visual/interface/clairiere_vivante/rameau_gauche.png"), "position": Vector2(229, 114), "pivot": Vector2(16, 24), "amplitude": 0.045, "vitesse": 0.53, "phase": 0.2},
+	{"image": preload("res://assets/visual/interface/clairiere_vivante/rameau_droit.png"), "position": Vector2(671, 142), "pivot": Vector2(160, 24), "amplitude": -0.040, "vitesse": 0.46, "phase": 1.4},
+	{"image": preload("res://assets/visual/interface/clairiere_vivante/rameau_cote_gauche.png"), "position": Vector2(74, 350), "pivot": Vector2(11, 20), "amplitude": 0.055, "vitesse": 0.57, "phase": 2.2},
+	{"image": preload("res://assets/visual/interface/clairiere_vivante/rameau_cote_droit.png"), "position": Vector2(861, 322), "pivot": Vector2(59, 20), "amplitude": -0.050, "vitesse": 0.49, "phase": 0.9},
 ]
 
 # Les zones UV designent les matieres peintes ; le shader y epargne la pierre.
