@@ -16,12 +16,11 @@ var _numero: Label
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	custom_minimum_size = Vector2(48, 48)
+	custom_minimum_size = Vector2(76, 108)
 	_bouton = Button.new()
 	_bouton.flat = false
 	_bouton.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	add_child(_bouton)
-	_bouton.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for etat in ["normal", "hover", "pressed", "focus", "disabled"]:
 		_bouton.add_theme_stylebox_override(etat, _style_sceau(etat))
 	_bouton.pressed.connect(func(): activee.emit(numero))
@@ -42,9 +41,11 @@ func _ready() -> void:
 	_motif = StyleAzur.illustration("portail", 56)
 	_bouton.add_child(_motif)
 	_numero = StyleAzur.texte("", 24, StyleAzur.CUIVRE)
+	_numero.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_numero.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_numero.add_theme_constant_override("outline_size", 2)
 	_numero.add_theme_color_override("font_outline_color", Color("15213c"))
-	_bouton.add_child(_numero)
+	add_child(_numero)
 	resized.connect(_dimensionner)
 	_dimensionner()
 	_actualiser_halo()
@@ -67,15 +68,17 @@ func afficher(nouveau_numero: int, choisie: bool, accessible: bool, statut: Stri
 func _dimensionner() -> void:
 	if not is_instance_valid(_bouton) or size.x <= 0.0 or size.y <= 0.0:
 		return
-	var cote := minf(size.x, size.y)
+	var cote := minf(size.x, size.y - 30.0)
+	_bouton.position = Vector2.ZERO
+	_bouton.size = Vector2.ONE * cote
 	_halo.size = Vector2.ONE * cote * 1.32
-	_halo.position = (size - _halo.size) * 0.5
-	var cote_motif := cote * 0.54
+	_halo.position = (Vector2.ONE * cote - _halo.size) * 0.5
+	var cote_motif := cote * 0.59
 	_motif.size = Vector2.ONE * cote_motif
-	_motif.position = Vector2((size.x - cote_motif) * 0.5, cote * 0.03)
-	_numero.position = Vector2(0.0, cote * 0.59)
-	_numero.size = Vector2(size.x, cote * 0.30)
-	_numero.add_theme_font_size_override("font_size", maxi(19, roundi(cote * 0.26)))
+	_motif.position = (Vector2.ONE * cote - _motif.size) * 0.5
+	_numero.position = Vector2(0.0, cote + 3.0)
+	_numero.size = Vector2(cote, 28.0)
+	_numero.add_theme_font_size_override("font_size", maxi(20, roundi(cote * 0.27)))
 	for etat in ["normal", "hover", "pressed", "focus", "disabled"]:
 		_bouton.add_theme_stylebox_override(etat, _style_sceau(etat))
 

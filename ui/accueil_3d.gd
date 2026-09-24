@@ -14,6 +14,7 @@ signal page_demandee(index: int)
 @onready var _depart: CommandeDepart = $ZoneSure/Defilement/Composition/Depart
 @onready var _defilement: ScrollContainer = $ZoneSure/Defilement
 @onready var _composition: VBoxContainer = $ZoneSure/Defilement/Composition
+var _defilement_avant_campagne := 0
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
@@ -55,3 +56,12 @@ func _adapter_hauteur() -> void:
 
 func cadre_monde_global() -> Rect2:
 	return _scene.cadre_monde_global()
+
+func presenter_campagne(ouverte: bool) -> void:
+	if ouverte:
+		_defilement_avant_campagne = _defilement.scroll_vertical
+		_defilement.scroll_vertical = 0
+	_scene.visible = not ouverte
+	_depart.visible = not ouverte
+	if not ouverte:
+		_defilement.scroll_vertical = _defilement_avant_campagne

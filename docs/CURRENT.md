@@ -1,4 +1,4 @@
-# État courant — 23 septembre 2026
+# État courant — 25 septembre 2026
 
 - Godot 4.7.1, Android portrait ; simulation 2D, combat présenté en 3D.
 - Héros unique : `assets/3d/characters/mage_sculpte.glb`, matériaux standard,
@@ -8,21 +8,33 @@
   centre ; la toucher ouvre le choix des campagnes. Mine, Jouer élargi et
   Épreuves partagent une rangée sous l'illustration. Jouer lance le chapitre
   choisi. Niveau et XP en haut à gauche, monnaies encadrées à droite ; en bas,
-  seules les icônes des onglets restent visibles et l'onglet actif agrandit son
-  icône et affiche son titre. La clairière utilise des couches peintes séparées
+  icônes et titres des onglets restent visibles avec des séparateurs SVG ;
+  l'onglet actif agrandit son icône. La clairière utilise des couches peintes séparées
   (paysage, végétation, eau, nuages/brumes), avec vent et parallaxe. Les matières
   des cinq îles sont animées ; les effets réduits figent l'ensemble.
 - Kit A « Émail arcanique » : pervenche, violet, indigo, ivoire lavande,
-  touches de cyan et de champagne, volumes simplifiés. Les pages partagent le
-  même éclairage bleu-violet que l'accueil ; charte dans `docs/design/DIRECTION_ARTISTIQUE.md`.
+  avec accents corail, jade, bleu vif, or et mauve. Les cinq onglets montrent la
+  même clairière animée ; seul Aventure montre l'illustration du monde choisi.
+  Jouer porte un émail orange dans un cadre cuivre, sans flammes décoratives.
+  Les maîtrises
+  assombrissent la clairière et colorent
+  légèrement chaque sceau de branche, avec glyphes SVG lumineux et rangs séparés.
+  La sélection de campagne conserve la clairière, le niveau et les cinq onglets.
+  Elle montre la seule île de la carte avec flèches latérales et balayage ; charte
+  dans `docs/design/DIRECTION_ARTISTIQUE.md`.
   Cadres en émail redessinés, emplacements et commandes circulaires ; onglet
-  actif éclairé sans second cercle. Lecture en DM Sans gras, grands titres en
-  Fondamento ; onglets
-  Héros, Équipement, Aventure, Maîtrises, Sorts. Héros : illustration de l'accueil, commandes −/+
-  et reset gratuit. Le premier lancement sans classe ouvre l’aventure guidée ;
-  le choix de voie intervient après le premier portail.
+  actif agrandi sans second cercle. Lecture en DM Sans gras, grands titres en
+  Fondamento ; onglets Héros, Équipement, Aventure, Maîtrises, Sorts. Héros :
+  grand portrait à gauche,
+  attributs regroupés dans une colonne à droite, valeurs +N et flèches SVG
+  pour répartir les points, reset gratuit.
+  Équipement : vingt petites cases d'inventaire par page, cartes colorées avec
+  statistiques intégrées pour les armes et les familiers, et fiches contextuelles.
+  Le premier lancement sans classe ouvre
+  l’aventure guidée ; le choix de voie intervient après le premier portail.
   Composition : Héros asymétrique autour du personnage, maîtrises en constellation,
-  sorts en grille de cartes avec accents par catégorie et fiches contextuelles,
+  sorts avec bandeau de niveau, quatre médaillons équipés et grille de cartes
+  détaillées à deux colonnes, adaptative sur écran étroit ; fiches contextuelles,
   parure en sceaux décalés. Les fiches Sorts et Maîtrises se ferment aussi en
   touchant à côté, sans changer de page. Titres et
   ressources sans cadres ; marges intérieures protégées sous les ornements.
@@ -30,6 +42,9 @@
   filtrage avec mipmaps et sans ancien détourage alpha. Générateur :
   `tools/generer_email_arcanique.py`. Zones sûres latérales, grilles adaptatives
   et accueil défilable ; menus, HUD, augments et récompenses partagent le kit.
+  Les 30 glyphes de maîtrise et les 18 glyphes de sorts sont des SVG distincts
+  composés depuis les silhouettes du dossier `SVG/` par
+  `tools/generer_glyphes_menus.py` ; les sources restent intactes.
 - Cinq mondes, sept niveaux de vingt salles chacun ; Mine et Épreuves de sorts.
   Contours et obstacles fixes par niveau, terrains élémentaires en campagne.
 - Déplacement du héros à 728 px/s (+30 %), coefficient de vitesse ennemi +15 %.
@@ -92,5 +107,6 @@ et `build/`.
 La version précédant la composition modulaire est conservée dans
 `../OldAlambik/2026-09-22/interface-avant-composition-161302/`.
 
-Relecture statique uniquement : aucun test, import Godot, lancement ou APK.
+Les cinq onglets et la sélection de campagne ont été lancés sans fenêtre avec
+Godot 4.7.2, sans erreur de script ; contrôle visuel sur appareil à poursuivre.
 Le propriétaire teste le jeu ; les règles de travail restent dans `AGENTS.md`.

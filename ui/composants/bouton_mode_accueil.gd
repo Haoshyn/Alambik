@@ -56,7 +56,7 @@ func _ready() -> void:
 func configurer(icone: String, libelle: String) -> void:
 	_icone.texture = StyleAzur.texture_interface(icone)
 	_cadre.add_theme_stylebox_override("panel", StyleAzur.cercle_mode(icone))
-	_legende_style.bg_color = Color("58425de6") if icone == "mine" else Color("494074e6")
+	_legende_style.bg_color = Color("533948f0") if icone == "mine" else Color("42365ff0")
 	_legende_style.border_color = Color("ddb788") if icone == "mine" else Color("ae9cd6")
 	_legende_style.border_width_top = 2
 	_libelle.add_theme_color_override("font_color", Color("f8e6cd") if icone == "mine" else Color("eee2ff"))

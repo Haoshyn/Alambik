@@ -2,10 +2,12 @@ class_name DefilementTactile
 extends ScrollContainer
 
 const SEUIL_GLISSEMENT := 14.0
+var verrou_vertical := false
 var _doigt := -1
 var _origine := Vector2.ZERO
 var _depart := 0
 var _glisse := false
+var _axe_horizontal := false
 
 func _ready() -> void:
 	set_process_input(false)
@@ -16,6 +18,7 @@ func _gui_input(evenement: InputEvent) -> void:
 		_origine = evenement.position
 		_depart = scroll_vertical
 		_glisse = false
+		_axe_horizontal = false
 		set_process_input(true)
 
 func _input(evenement: InputEvent) -> void:
@@ -23,6 +26,12 @@ func _input(evenement: InputEvent) -> void:
 	if evenement is InputEventScreenDrag and evenement.index == _doigt:
 		var position_locale: Vector2 = get_global_transform_with_canvas().affine_inverse() * evenement.position
 		var distance: float = position_locale.y - _origine.y
+		var distance_horizontale: float = position_locale.x - _origine.x
+		if verrou_vertical and not _glisse:
+			if absf(distance_horizontale) >= SEUIL_GLISSEMENT and absf(distance_horizontale) > absf(distance) * 1.15:
+				_axe_horizontal = true
+			if _axe_horizontal:
+				return
 		if not _glisse and absf(distance) >= SEUIL_GLISSEMENT:
 			_glisse = true
 			# Annule l'activation de la case sans la desactiver ni perdre la capture du doigt.
@@ -38,6 +47,7 @@ func _input(evenement: InputEvent) -> void:
 			scroll_ended.emit()
 		_doigt = -1
 		_glisse = false
+		_axe_horizontal = false
 		set_process_input(false)
 	elif _glisse and evenement is InputEventMouseMotion:
 		# Android peut emettre aussi une souris synthetique pour le meme mouvement.

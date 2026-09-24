@@ -11,6 +11,8 @@ const REPERES := [
 ]
 
 var _ile: IleAnimee
+var _chemin_ombre: Line2D
+var _chemin_lumineux: Line2D
 var _monde := 0
 var _etapes: Array[RepereCampagne] = []
 
@@ -19,8 +21,21 @@ func _ready() -> void:
 	clip_contents = true
 	_ile = IleAnimee.new()
 	add_child(_ile)
+	_chemin_ombre = _creer_chemin(Color("172442d9"), 12.0)
+	_chemin_lumineux = _creer_chemin(Color("8fe5f1a8"), 4.0)
 	resized.connect(_replacer)
 	_replacer()
+
+func _creer_chemin(couleur: Color, largeur: float) -> Line2D:
+	var ligne := Line2D.new()
+	ligne.width = largeur
+	ligne.default_color = couleur
+	ligne.antialiased = true
+	ligne.joint_mode = Line2D.LINE_JOINT_ROUND
+	ligne.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	ligne.end_cap_mode = Line2D.LINE_CAP_ROUND
+	add_child(ligne)
+	return ligne
 
 func ajouter_etape(etape: RepereCampagne) -> void:
 	_etapes.append(etape)
@@ -30,6 +45,9 @@ func ajouter_etape(etape: RepereCampagne) -> void:
 func afficher_monde(index: int) -> void:
 	_monde = clampi(index, 0, REPERES.size() - 1)
 	_ile.afficher_monde(_monde)
+	var donnees_monde: Dictionary = Chapitres.MONDES[_monde]
+	var teinte: Color = donnees_monde["teinte"]
+	_chemin_lumineux.default_color = Color(teinte, 0.68)
 	_replacer()
 
 func _replacer() -> void:
@@ -43,10 +61,15 @@ func _replacer() -> void:
 	_ile.position = (size - Vector2(largeur, hauteur)) * 0.5
 	_ile.size = Vector2(largeur, hauteur)
 	var positions: Array = REPERES[_monde]
+	var points := PackedVector2Array()
+	for point: Vector2 in positions:
+		points.append(_ile.position + Vector2(point.x * largeur, point.y * hauteur))
+	_chemin_ombre.points = points
+	_chemin_lumineux.points = points
 	for i in mini(_etapes.size(), positions.size()):
 		var point: Vector2 = positions[i]
 		var etape := _etapes[i]
-		var cote_repere := clampf(minf(hauteur * 0.13, largeur * 0.16), 48.0, 58.0)
-		etape.size = Vector2.ONE * cote_repere
+		var cote_repere := clampf(minf(hauteur * 0.13, largeur * 0.16), 76.0, 88.0)
+		etape.size = Vector2(cote_repere, cote_repere + 32.0)
 		var centre := _ile.position + Vector2(point.x * largeur, point.y * hauteur)
-		etape.position = centre - etape.size * 0.5
+		etape.position = centre - Vector2.ONE * cote_repere * 0.5

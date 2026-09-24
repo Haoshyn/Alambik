@@ -4,6 +4,7 @@ extends Control
 signal page_demandee(index: int)
 
 const ONGLET := preload("res://ui/onglet_menu.gd")
+const FOND := preload("res://assets/visual/interface/menu/navigation_braise.svg")
 const LIBELLES := ["HÉROS", "ÉQUIPEMENT", "AVENTURE", "MAÎTRISES", "SORTS"]
 const SYMBOLES := ["heros", "equipement", "aventure", "maitrises", "sorts"]
 var _socle: Panel
@@ -17,7 +18,11 @@ func _ready() -> void:
 	_socle.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	_socle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	HabillagePeint.appliquer(_socle)
-	_socle.add_theme_stylebox_override("panel", StyleAzur.texture_etirable("navigation", 40, 0, 0))
+	var style_fond := StyleBoxTexture.new()
+	style_fond.texture = FOND
+	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
+		style_fond.set_texture_margin(cote, 40)
+	_socle.add_theme_stylebox_override("panel", style_fond)
 	add_child(_socle)
 	_barre = HBoxContainer.new()
 	_barre.name = "Onglets"

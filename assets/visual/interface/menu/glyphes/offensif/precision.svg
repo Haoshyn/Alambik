@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 256 256">
+<defs>
+<linearGradient id="email" x1=".13" y1=".03" x2=".86" y2="1"><stop stop-color="#ffffff"/><stop offset=".13" stop-color="#fff0b7"/><stop offset=".46" stop-color="#ff8739"/><stop offset=".82" stop-color="#a93439"/><stop offset="1" stop-color="#ff8739"/></linearGradient>
+<linearGradient id="reflet" x1="0" y1="0" x2=".78" y2=".88"><stop stop-color="#ffffff" stop-opacity=".76"/><stop offset=".34" stop-color="#fff0b7" stop-opacity=".14"/><stop offset=".8" stop-color="#a93439" stop-opacity="0"/></linearGradient>
+<radialGradient id="halo"><stop stop-color="#ff673f" stop-opacity=".43"/><stop offset=".52" stop-color="#ff673f" stop-opacity=".16"/><stop offset="1" stop-color="#ff673f" stop-opacity="0"/></radialGradient>
+</defs>
+<circle cx="128" cy="128" r="121" fill="url(#halo)"/>
+<path d="M28 49L31 55 28 61 25 55Z" fill="#ff673f" fill-opacity=".82"/><path d="M213 31L217 39 213 47 209 39Z" fill="#ff673f" fill-opacity=".82"/><path d="M226 167L229 173 226 179 223 173Z" fill="#ff673f" fill-opacity=".82"/><path d="M35 200L37 204 35 208 33 204Z" fill="#ff673f" fill-opacity=".82"/>
+<path d="M-0.31,209.993L43.7,196.766,180.065,63.3l3.363-38.164,72.629-24.09L233.484,57.1,192.518,68.2,53.17,206.875,30.455,255.719Zm13.482,4.882,15.846,20.279L40.86,209.178ZM194.913,33.147l49.037-19.5-9.864,21.818S236.155,18.6,194.913,33.147Z" transform="translate(27 29) scale(.82)" fill="#0a1730" fill-rule="evenodd" opacity=".72"/>
+<path d="M-0.31,209.993L43.7,196.766,180.065,63.3l3.363-38.164,72.629-24.09L233.484,57.1,192.518,68.2,53.17,206.875,30.455,255.719Zm13.482,4.882,15.846,20.279L40.86,209.178ZM194.913,33.147l49.037-19.5-9.864,21.818S236.155,18.6,194.913,33.147Z" transform="translate(23 23) scale(.82)" fill="url(#email)" fill-rule="evenodd" stroke="#a93439" stroke-width="4" stroke-linejoin="round"/>
+<path d="M-0.31,209.993L43.7,196.766,180.065,63.3l3.363-38.164,72.629-24.09L233.484,57.1,192.518,68.2,53.17,206.875,30.455,255.719Zm13.482,4.882,15.846,20.279L40.86,209.178ZM194.913,33.147l49.037-19.5-9.864,21.818S236.155,18.6,194.913,33.147Z" transform="translate(23 23) scale(.82)" fill="url(#reflet)" fill-rule="evenodd" opacity=".74"/>
+<path d="M-0.31,209.993L43.7,196.766,180.065,63.3l3.363-38.164,72.629-24.09L233.484,57.1,192.518,68.2,53.17,206.875,30.455,255.719Zm13.482,4.882,15.846,20.279L40.86,209.178ZM194.913,33.147l49.037-19.5-9.864,21.818S236.155,18.6,194.913,33.147Z" transform="translate(23 23) scale(.82)" fill="none" stroke="#fff2d8" stroke-opacity=".72" stroke-width="1.5" stroke-linejoin="round"/>
+</svg>

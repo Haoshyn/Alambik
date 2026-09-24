@@ -29,8 +29,10 @@ elles conservent les idées historiques sans définir le rendu actuel.
   horizontalement et 42 px verticalement ; la capsule Jouer utilise des coins
   de 58 px et ses propres marges. Les contenus ancrés manuellement ont leurs
   propres marges.
-  La campagne place de petits repères sur les lieux peints d’une grande île
-  animée, sur un fond sobre. Mine et Épreuves ont leurs propres parcours.
+  La campagne place sept repères sur les lieux peints d’une grande île animée.
+  Les symboles sont centrés dans les sceaux SVG et les numéros figurent dessous.
+  Le monde change par balayage ou avec deux grandes flèches latérales.
+  Mine et Épreuves ont leurs propres parcours.
   Les autres écrans s’ouvrent dans l’atelier illustré, avec une magie discrète
   en bordure et immobile lorsque les effets sont réduits.
   Les cercles contiennent seulement des signes compacts ; leurs légendes longues
@@ -44,10 +46,14 @@ elles conservent les idées historiques sans définir le rendu actuel.
 - Boutons en émail mat, bord métallique fin et zones de lecture ivoire avec
   encre bleue. Les reflets sont localisés ; éviter les grosses gemmes répétées,
   les contours blancs continus et les ombres épaisses qui donnent un aspect
-  plastique. Les surfaces d'action restent violettes, les panneaux secondaires
-  indigo, et les signes magiques utilisent le cyan par touches. Les nœuds et
-  commandes d'attributs utilisent des sceaux circulaires. L'onglet actif éclaire
-  son emblème et son libellé cyan ; les autres n'affichent que leurs icônes.
+  plastique. Les actions secondaires restent violettes ou indigo ; les actions
+  principales du menu prennent l'accent de leur page et Jouer utilise un dégradé
+  orange et braise adoucie, bordé de cuivre, avec texte crème calligraphié.
+  Les signes magiques utilisent le cyan par touches. Les nœuds de maîtrise
+  utilisent des sceaux circulaires ; les attributs du héros partagent une seule
+  colonne et des boutons ronds à flèches SVG pour répartir les points. L'onglet actif agrandit
+  son emblème ; chaque onglet garde son libellé et son accent. Les séparateurs
+  et les filets de navigation sont des SVG autonomes, sans halo de sélection.
 - `tools/refonte_svg.py` dessine les SVG natifs actifs : navigation, ressources,
   contrôles, bijoux, armes, capacités et maîtrises. Le coffre de fin de run
   utilise deux illustrations PNG assorties pour sa caisse et son couvercle.
@@ -58,8 +64,13 @@ elles conservent les idées historiques sans définir le rendu actuel.
   `tools/design_svg/`. Chaque icône et chaque cadre reste un
   fichier autonome, repositionnable dans Godot. Le générateur historique
   `tools/generer_email_arcanique.py` reste un point d’entrée compatible ;
-  `SVG/` reste une référence fournie par le propriétaire, sans reprise directe
-  de ses tracés dans les ressources actives.
+  Les sources de `SVG/` restent intactes ; les glyphes de menu en réemploient
+  les silhouettes avec de nouvelles matières et lumières.
+  `tools/variantes_svg_menu.py` crée des variantes colorées du menu dans
+  `assets/visual/interface/menu/` sans modifier les SVG sources.
+  `tools/generer_glyphes_menus.py` compose les 30 glyphes de maîtrise et les 18
+  glyphes de sorts depuis ces silhouettes SVG, chacun dans son fichier sans
+  motif secondaire superposé.
 - Les cadres de `interface/cadres/` s'étirent en neuf zones avec coins fixes.
   Les cases, cartes et actions secondaires ont des angles coupés et un filet
   léger ; les compteurs sont arrondis, Jouer prend une forme de capsule et les
@@ -86,9 +97,22 @@ elles conservent les idées historiques sans définir le rendu actuel.
   montagnes, rives et pierres restent fixes. Les reflets du lac bougent dans
   un masque intérieur, la cascade boucle sur quatre images fondues, et les
   nuages et brumes traversent lentement le cadre dans un seul sens, avec un
-  retour hors champ. Le fond et le monde choisi restent visibles sous les
-  autres pages et fenêtres du menu, avec un voile de lecture. Le fond couvre
-  l'écran à échelle uniforme.
+  retour hors champ. La clairière reste visible sous les cinq onglets ;
+  l'illustration du monde choisi apparaît seulement dans Aventure. Les autres
+  pages gardent un voile de lecture léger, plus sombre dans Maîtrises pour
+  laisser lire sa constellation. La sélection de campagne garde la clairière,
+  le bandeau de niveau et les cinq onglets, mais masque les commandes d'Aventure
+  et l'île de fond, déjà représentée sur sa carte. Le fond couvre l'écran à
+  échelle uniforme.
+- Les maîtrises n'ont aucun grand fond de colonne ni anneau coloré autour des
+  nœuds. Chaque sceau rond reçoit une teinte rouge, verte ou violette légère,
+  un glyphe SVG illustré unique, plus vif et plus grand, puis une capsule de
+  rang séparée juste en dessous. Les tracés entre sceaux restent champagne.
+- Sorts reprend le bandeau de niveau, un titre calligraphié, trois catégories,
+  quatre médaillons équipés sur une ligne dès que la largeur le permet et des
+  cartes de collection à deux colonnes. Ses cadres sont argentés et lilas ; les
+  glyphes, cadres, textes, boutons et filtres restent des éléments indépendants.
+  Les rangs et états affichés proviennent des données réelles du jeu.
 - Les îles gardent leur silhouette fixe ; leurs matières s'animent dans des zones
   définies par `data/animations_decors.gd` : encre et eau coulantes, sable,
   lave, feuillage, bannières et portails. Brumes, nuages et fumées utilisent des
@@ -110,15 +134,20 @@ elles conservent les idées historiques sans définir le rendu actuel.
   les commandes ni réduire leurs cibles tactiles.
 - Les Sorts alignent les emplacements équipés et présentent chaque catégorie
   dans une grille de deux colonnes qui défile sans pagination. Actifs, Passifs
-  et Ultimes prennent respectivement un accent cyan, lilas et champagne. Les
+  et Ultimes prennent respectivement un accent bleu vif, mauve et or. Les
   fiches Sorts et Maîtrises s'ouvrent au centre, au-dessus de la page courante ;
   toucher le voile ou Fermer les referme sans réinitialiser la liste.
   Les transitions entre onglets restent courtes et disparaissent avec les
   effets réduits.
 - Héros, Équipement et Sorts regroupent leurs informations de progression dans
   un cartouche fin ; les attributs et les branches de Maîtrises gardent leurs
-  accents propres. Les augments ont une plaque asymétrique distincte des cases
+  accents propres. Les sceaux Offensif, Défensif et Utilitaire prennent chacun
+  une teinte rouge corail, vert jade ou mauve. Les augments ont une plaque
+  asymétrique distincte des cases
   de catalogue, avec un filet de rareté près du nom.
+  L'inventaire des bijoux montre vingt petites cases par page. Chaque arme et
+  familier présente son illustration SVG et ses statistiques dans sa carte ;
+  les familles d'armes et de familiers ont des accents distincts.
 - Menus, cartes, paramètres, pause, récompenses et HUD partagent le même kit.
   Dans le HUD, le temps de salle reste en bandeau, les ressources sont en deux
   compteurs et les commandes de pause et de sorts sont rondes. La transition
@@ -136,16 +165,17 @@ elles conservent les idées historiques sans définir le rendu actuel.
 | Atmosphère | pervenche `#8FA9DE`, bleu brume `#B7C5EE` | ciel, pierre et végétation des deux décors ; garder le centre calme |
 | Socle | indigo `#253459`, ombre `#263154` | navigation, voiles sur le décor, contours et ombre des textes clairs |
 | Surfaces courantes | bleu émail `#5A70A1` vers `#2C4170` | cases, cartes et commandes secondaires ; reflets plus clairs en haut |
-| Action et sélection | violet `#7659AD` vers `#413478`, lilas `#8E76C7` | actions principales puis état sélectionné ; l'état ne repose pas sur la couleur seule |
+| Action et sélection | violet `#7659AD` vers `#413478`, lilas `#8E76C7` | actions secondaires et états choisis hors accents du menu ; l'état ne repose pas sur la couleur seule |
 | Lecture | ivoire lavande `#FAF8FF` vers `#E3E5F6`, encre `#253052` | panneaux et texte long ; encre atténuée `#53617D` pour le secondaire |
 | Magie | cyan `#8FE5F1` | baguette, runes, petits reflets et focus, jamais de grande nappe cyan |
 | Chaleur | champagne `#DBC4A0` | boucles du mage, petits ornements et récompenses, en quantité réduite |
+| Accents des menus | corail `#FF7773`, jade `#65E3A5`, bleu vif `#69D7F5`, or `#FFD15C`, mauve `#C7A0FF` | branches et catégories ; onglets vert, lavande, bleu, champagne et rose, par touches |
 
 - Les surfaces changent de valeur avec leur rôle et leur emplacement : lecture
-  claire sur les pages, boutons violets sur le décor, barre de navigation indigo
-  au bas de l'écran, sélection lilas. Leurs dégradés fournissent une lumière et
+  claire sur les pages, actions principales colorées, barre de navigation indigo
+  au bas de l'écran et sélection lumineuse. Leurs dégradés fournissent une lumière et
   une profondeur communes sans en faire des aplats identiques.
-- Le socle de navigation prend un reflet bleu pétrole et des angles taillés ;
+- Le socle de navigation prend un émail indigo sombre et un filet cuivre ;
   les accès Mine et Épreuves gardent des sceaux séparés, bronze et améthyste.
   Leurs actions reprennent ces accents, tandis que les compteurs distinguent
   les gouttes cyan des pierres violettes. La légende de campagne reprend

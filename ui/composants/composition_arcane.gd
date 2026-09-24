@@ -3,6 +3,7 @@ extends Control
 
 var hauteur := 1080.0
 var traces: Array[PackedVector2Array] = []
+var couleurs_traces: Array[Color] = []
 var _elements: Array[Dictionary] = []
 
 func _ready() -> void:
@@ -30,11 +31,14 @@ func _composer() -> void:
 
 func _draw() -> void:
 	var facteur := size.x / 960.0
-	for trace in traces:
+	for index in traces.size():
+		var trace := traces[index]
 		var points := PackedVector2Array()
 		for point in trace: points.append(point * facteur)
 		if points.size() > 1:
-			draw_polyline(points, Color("26315466"), 9.0 * facteur, true)
-			draw_polyline(points, Color("a690d877"), 2.0 * facteur, true)
+			var colore := index < couleurs_traces.size()
+			var accent := couleurs_traces[index] if colore else Color("f1d19d")
+			draw_polyline(points, Color("25304b88"), 9.0 * facteur, true)
+			draw_polyline(points, Color(accent, 0.78) if colore else Color("f1d19d99"), (3.0 if colore else 2.0) * facteur, true)
 			for point in points:
-				draw_circle(point, 4.0 * facteur, Color("dbc4a099"))
+				draw_circle(point, 4.0 * facteur, Color(accent, 0.85) if colore else Color("dbc4a099"))

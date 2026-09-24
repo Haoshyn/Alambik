@@ -8,6 +8,7 @@ var _ile: IleAnimee
 var _voile: ColorRect
 var _voile_transition: Tween
 var _page_secondaire := false
+var _monde_masque := false
 var _voile_cible := 0.0
 
 func _ready() -> void:
@@ -34,14 +35,17 @@ func _ready() -> void:
 func afficher_monde(index: int) -> void:
 	_ile.afficher_monde(index)
 
-func presenter_page(secondaire: bool) -> void:
+func presenter_page(secondaire: bool, masquer_monde := false) -> void:
 	_page_secondaire = secondaire
-	_animer_voile(0.55 if secondaire else 0.0)
+	_monde_masque = masquer_monde
+	_ile.visible = not _monde_masque
+	_animer_voile(0.30 if secondaire else 0.0)
 	if secondaire:
 		_centrer_monde()
 
-func presenter_superposition(visible: bool) -> void:
-	_animer_voile(0.72 if visible else (0.55 if _page_secondaire else 0.0))
+func presenter_superposition(visible: bool, carte_campagne := false) -> void:
+	_ile.visible = not (_monde_masque or (visible and carte_campagne))
+	_animer_voile((0.48 if carte_campagne else 0.72) if visible else (0.30 if _page_secondaire else 0.0))
 
 func _animer_voile(opacite: float) -> void:
 	_voile_cible = opacite

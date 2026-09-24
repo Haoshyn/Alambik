@@ -142,11 +142,18 @@ func _creer_page(index: int) -> Control:
 		"sorts":
 			var sorts := MENU_SORTS.instantiate()
 			sorts.integre_menu = true
+			sorts.page_demandee.connect(_afficher_page)
+			sorts.reglages.connect(_ouvrir_reglages)
 			return sorts
 	return _creer_aventure()
 
 func _afficher_page(index: int, anime := true) -> void:
-	if _superposition != null or _lancement or _transition_page:
+	if _superposition != null:
+		if bool(_superposition.get_meta("carte_campagne", false)):
+			_fermer_superposition(_superposition)
+		else:
+			return
+	if _lancement or _transition_page:
 		return
 	if is_instance_valid(_page_actuelle) and _page_actuelle.has_method("fermer_fiche") and bool(_page_actuelle.call("fermer_fiche")):
 		return
@@ -163,7 +170,7 @@ func _afficher_page(index: int, anime := true) -> void:
 	_page_actuelle = nouvelle
 	_conteneur_pages.add_child(nouvelle)
 	_navigation.selectionner(_page)
-	_fond_menu.presenter_page(index != 2)
+	_fond_menu.presenter_page(index != 2, index != 2)
 	if ancienne == null:
 		return
 	Sons.jouer("choix", -17.0, 1.08)
@@ -227,6 +234,7 @@ func _lancer_mode(mode: String, destination: Dictionary, apprentissage_initial :
 func _ouvrir_campagne() -> void:
 	var selection := SELECTION_GRIMOIRE.instantiate()
 	selection.selection_seulement = true
+	selection.set_meta("carte_campagne", true)
 	_ouvrir_superposition(selection)
 
 func _ouvrir_mine() -> void:
@@ -259,12 +267,15 @@ func _ouvrir_superposition(panneau: Control) -> void:
 	Sons.jouer("choix", -12.0)
 	_superposition = panneau
 	panneau.set_meta("fond_menu_partage", true)
+	var carte_campagne := bool(panneau.get_meta("carte_campagne", false))
+	if carte_campagne and _page_actuelle is AccueilClairiere:
+		(_page_actuelle as AccueilClairiere).presenter_campagne(true)
 	# Les _input des inventaires ne doivent pas reagir sous une fenetre modale.
 	_conteneur_pages.process_mode = Node.PROCESS_MODE_DISABLED
-	_navigation.process_mode = Node.PROCESS_MODE_DISABLED
+	_navigation.process_mode = Node.PROCESS_MODE_INHERIT if carte_campagne else Node.PROCESS_MODE_DISABLED
 	add_child(panneau)
-	_fond_menu.presenter_superposition(true)
-	move_child(panneau, get_child_count() - 1)
+	_fond_menu.presenter_superposition(true, carte_campagne)
+	move_child(_navigation if carte_campagne else panneau, get_child_count() - 1)
 	if panneau.has_signal("ferme"):
 		panneau.ferme.connect(_fermer_superposition.bind(panneau))
 
@@ -273,6 +284,8 @@ func _fermer_superposition(panneau: Control) -> void:
 		return
 	_superposition = null
 	panneau.queue_free()
+	if bool(panneau.get_meta("carte_campagne", false)) and _page_actuelle is AccueilClairiere:
+		(_page_actuelle as AccueilClairiere).presenter_campagne(false)
 	_fond_menu.presenter_superposition(false)
 	_conteneur_pages.process_mode = Node.PROCESS_MODE_INHERIT
 	_navigation.process_mode = Node.PROCESS_MODE_INHERIT

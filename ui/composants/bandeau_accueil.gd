@@ -5,11 +5,17 @@ signal profil_demande
 signal reglages_demandes
 
 const COMPTEUR := preload("res://ui/composants/compteur_ressource.tscn")
+const CADRE_NIVEAU := preload("res://assets/visual/interface/menu/niveau_braise.svg")
+const MEDAILLON_NIVEAU := preload("res://assets/visual/interface/menu/medaillon_niveau.svg")
+const XP_FOND := preload("res://assets/visual/interface/menu/xp_fond_braise.svg")
+const XP_PLEIN := preload("res://assets/visual/interface/menu/xp_plein_braise.svg")
 
 var _profil_fond: Panel
 var _profil: Button
 var _reglages: Button
 var _niveau: Label
+var _titre_niveau: Label
+var _medaillon: TextureRect
 var _experience: ProgressBar
 var _experience_libelle: Label
 var _gouttes: CompteurRessource
@@ -20,18 +26,35 @@ func _ready() -> void:
 	_profil_fond = Panel.new()
 	_profil_fond.name = "CadreNiveau"
 	_profil_fond.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_profil_fond.add_theme_stylebox_override("panel", StyleAzur.texture_etirable("bandeau", 40, 0, 0))
+	var cadre := StyleBoxTexture.new()
+	cadre.texture = CADRE_NIVEAU
+	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
+		cadre.set_texture_margin(cote, 40)
+	_profil_fond.add_theme_stylebox_override("panel", cadre)
 	add_child(_profil_fond)
 	_profil = StyleInterface.zone_tactile(func(): profil_demande.emit())
 	_profil.name = "Profil"
 	_profil.tooltip_text = "Voir le héros"
 	add_child(_profil)
-	_niveau = StyleAzur.texte("", 37, StyleAzur.IVOIRE)
+	_medaillon = TextureRect.new()
+	_medaillon.name = "MedaillonNiveau"
+	_medaillon.texture = MEDAILLON_NIVEAU
+	_medaillon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_medaillon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_medaillon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_medaillon)
+	_niveau = StyleAzur.texte("", 48, Color("ffe8b0"))
 	_niveau.name = "Niveau"
+	_niveau.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_niveau.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_niveau.clip_text = true
 	add_child(_niveau)
-	_experience_libelle = StyleAzur.texte("", 24, StyleAzur.ATTENUE)
+	_titre_niveau = StyleAzur.texte("NIVEAU", 27, Color("f7d6a0"))
+	_titre_niveau.name = "TitreNiveau"
+	_titre_niveau.add_theme_font_override("font", Polices.TITRE)
+	_titre_niveau.autowrap_mode = TextServer.AUTOWRAP_OFF
+	add_child(_titre_niveau)
+	_experience_libelle = StyleAzur.texte("", 21, Color("b9edf2"))
 	_experience_libelle.name = "ExperienceTexte"
 	_experience_libelle.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_experience_libelle.clip_text = true
@@ -39,8 +62,18 @@ func _ready() -> void:
 	_experience = ProgressBar.new()
 	_experience.show_percentage = false
 	_experience.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_experience.add_theme_stylebox_override("background", StyleAzur.jauge(false))
-	_experience.add_theme_stylebox_override("fill", StyleAzur.jauge(true, StyleAzur.MAGIE))
+	var fond_xp := StyleBoxTexture.new()
+	fond_xp.texture = XP_FOND
+	var plein_xp := StyleBoxTexture.new()
+	plein_xp.texture = XP_PLEIN
+	for cote in [SIDE_LEFT, SIDE_RIGHT]:
+		fond_xp.set_texture_margin(cote, 14)
+		plein_xp.set_texture_margin(cote, 14)
+	for cote in [SIDE_TOP, SIDE_BOTTOM]:
+		fond_xp.set_texture_margin(cote, 8)
+		plein_xp.set_texture_margin(cote, 8)
+	_experience.add_theme_stylebox_override("background", fond_xp)
+	_experience.add_theme_stylebox_override("fill", plein_xp)
 	add_child(_experience)
 	_gouttes = COMPTEUR.instantiate() as CompteurRessource
 	_gouttes.name = "Gouttes"
@@ -61,7 +94,7 @@ func _ready() -> void:
 	_replacer()
 
 func afficher(niveau: int, experience: float, experience_requise: float, gouttes: String, pierres: String) -> void:
-	_niveau.text = "Niv. %d" % niveau
+	_niveau.text = str(niveau)
 	_profil.accessibility_name = "Niveau %d. Expérience %d sur %d. Voir le héros." % [niveau, int(experience), int(experience_requise)]
 	_experience.max_value = experience_requise
 	_experience.value = experience
@@ -73,18 +106,22 @@ func afficher(niveau: int, experience: float, experience_requise: float, gouttes
 func _replacer() -> void:
 	if _profil == null or size.x <= 0.0:
 		return
-	var largeur_profil := minf(370.0, size.x * 0.37)
+	var largeur_profil := minf(400.0, size.x * 0.4)
 	var hauteur_profil := 136.0
-	_profil_fond.position = Vector2.ZERO
+	_profil_fond.position = Vector2(0, 2)
 	_profil_fond.size = Vector2(largeur_profil, hauteur_profil)
-	_profil.position = Vector2.ZERO
+	_profil.position = _profil_fond.position
 	_profil.size = _profil_fond.size
-	_niveau.position = Vector2(26, 14)
-	_niveau.size = Vector2(largeur_profil - 52, 54)
-	_experience_libelle.position = Vector2(27, 68)
-	_experience_libelle.size = Vector2(largeur_profil - 54, 30)
-	_experience.position = Vector2(26, 100)
-	_experience.size = Vector2(largeur_profil - 52, 18)
+	_medaillon.position = Vector2(0, 6)
+	_medaillon.size = Vector2(124, 124)
+	_niveau.position = Vector2(22, 37)
+	_niveau.size = Vector2(80, 62)
+	_titre_niveau.position = Vector2(132, 13)
+	_titre_niveau.size = Vector2(largeur_profil - 148, 38)
+	_experience.position = Vector2(132, 57)
+	_experience.size = Vector2(largeur_profil - 152, 25)
+	_experience_libelle.position = Vector2(134, 85)
+	_experience_libelle.size = Vector2(largeur_profil - 154, 33)
 	if size.x >= 880.0:
 		custom_minimum_size.y = 142.0
 		_reglages.position = Vector2(size.x - 112, 12)
@@ -97,9 +134,9 @@ func _replacer() -> void:
 		custom_minimum_size.y = 248.0
 		_profil_fond.size.x = size.x - 126.0
 		_profil.size.x = _profil_fond.size.x
-		_niveau.size.x = _profil.size.x - 52.0
-		_experience_libelle.size.x = _profil.size.x - 54.0
-		_experience.size.x = _profil.size.x - 52.0
+		_titre_niveau.size.x = _profil.size.x - 148.0
+		_experience_libelle.size.x = _profil.size.x - 154.0
+		_experience.size.x = _profil.size.x - 152.0
 		_reglages.position = Vector2(size.x - 112, 12)
 		_reglages.size = Vector2(112, 112)
 		var largeur_compteur := (size.x - 14.0) * 0.5

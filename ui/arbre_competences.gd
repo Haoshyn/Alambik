@@ -1,5 +1,12 @@
 extends Control
 signal ferme
+const VOILE_MAITRISES := preload("res://shaders/voile_maitrises.gdshader")
+const FONDS_NOEUDS := [
+	preload("res://assets/visual/interface/menu/noeud_offensif.svg"),
+	preload("res://assets/visual/interface/menu/noeud_defensif.svg"),
+	preload("res://assets/visual/interface/menu/noeud_utilitaire.svg"),
+]
+const FOND_RANG := preload("res://assets/visual/interface/menu/rang_maitrise.svg")
 var integre_menu := false
 var maitrise_initiale := ""
 var _selection := ""
@@ -19,22 +26,37 @@ func _ready() -> void:
 	if ReglagesJoueur.remboursement_maitrises > 0:
 		_message = "Arbre réorganisé : %d gouttes remboursées." % ReglagesJoueur.remboursement_maitrises
 	var col := StyleAzur.page(self,"Maîtrises",integre_menu)
+	var voile := ColorRect.new()
+	voile.name = "VoileMaitrises"
+	voile.color = Color.WHITE
+	voile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var matiere := ShaderMaterial.new()
+	matiere.shader = VOILE_MAITRISES
+	voile.material = matiere
+	add_child(voile)
+	voile.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	move_child(voile, col.get_parent().get_index())
 	StyleAzur.banniere(col, "La constellation des savoirs", "Les bonus d’attaque renforcent l’attaque de base de votre équipement.", "astrolabe")
 	_solde = StyleAzur.texte("",28,StyleAzur.IVOIRE)
 	_solde.visible = not integre_menu
 	col.add_child(_solde)
 	var contenu := StyleAzur.defilement(col)
 	var branches := CompositionArcane.new()
-	branches.hauteur = 2700
+	branches.hauteur = 3060
 	contenu.add_child(branches)
 	var index_branche := 0
 	for branche in ArbreCompetences.BRANCHES:
-		var accent: Color = [StyleAzur.CORAIL, StyleAzur.MENTHE, StyleAzur.CUIVRE][index_branche]
+		var accent: Color = [StyleAzur.ROUGE_VIF, StyleAzur.VERT_VIF, StyleAzur.MAUVE_VIF][index_branche]
+		var fond_noeud: Texture2D = FONDS_NOEUDS[index_branche]
+		var dossier: String = ["offensif", "defensif", "utilitaire"][index_branche]
 		var centre_x := 145.0 + index_branche * 315.0
 		var decalage: float = [0.0, 95.0, 40.0][index_branche]
-		var titre := StyleAzur.texte(branche, 32, accent)
+		var titre := StyleAzur.texte(branche.to_upper(), 37, accent.lightened(0.28))
 		titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		branches.placer(titre, Rect2(centre_x - 125, decalage + 20, 250, 54))
+		branches.placer(titre, Rect2(centre_x - 145, decalage + 20, 290, 54))
+		var sous_titre := StyleAzur.texte(["Force et précision", "Résistance et vitalité", "Savoir et fortune"][index_branche], 22, Color("f2d9b7"))
+		sous_titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		branches.placer(sous_titre, Rect2(centre_x - 145, decalage + 72, 290, 38))
 		var trace := PackedVector2Array()
 		var rang_noeud := 0
 		index_branche += 1
@@ -46,50 +68,52 @@ func _ready() -> void:
 				_message = ""
 				_rafraichir()
 				_fiche_popup.show())
+			b.name = "Noeud_" + id
 			b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			var majeur := ArbreCompetences.rangs(id) == 1
 			var diametre := 216.0 if majeur else 190.0
 			b.custom_minimum_size = Vector2.ONE * diametre
 			b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 			b.set_meta("majeur", majeur)
-			var marge := MarginContainer.new()
-			marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-			marge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			for cote in ["left", "right", "top", "bottom"]:
-				marge.add_theme_constant_override("margin_" + cote, 28)
-			b.add_child(marge)
-			var contenu_noeud := VBoxContainer.new()
-			contenu_noeud.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			contenu_noeud.alignment = BoxContainer.ALIGNMENT_CENTER
-			contenu_noeud.add_theme_constant_override("separation", 8)
-			marge.add_child(contenu_noeud)
-			var icone := StyleAzur.vignette(id, 78 if majeur else 72, true)
-			icone.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-			contenu_noeud.add_child(icone)
+			var icone := TextureRect.new()
+			icone.name = "Glyphe_" + id
+			icone.texture = load("res://assets/visual/interface/menu/glyphes/%s/%s.svg" % [dossier, id]) as Texture2D
+			icone.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			icone.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			icone.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			var cote_icone := 182.0 if majeur else 168.0
+			icone.position = Vector2.ONE * (diametre - cote_icone) * 0.5
+			icone.size = Vector2.ONE * cote_icone
+			b.add_child(icone)
 			b.set_meta("embleme", icone.texture)
 			b.set_meta("icone", icone)
 			b.set_meta("accent", accent)
-			var rang := StyleAzur.texte("", 26, StyleAzur.IVOIRE)
+			b.set_meta("fond", fond_noeud)
+			var rang_fond := Panel.new()
+			rang_fond.name = "CapsuleRang_" + id
+			rang_fond.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			var style_rang := StyleBoxTexture.new()
+			style_rang.texture = FOND_RANG
+			style_rang.set_texture_margin(SIDE_LEFT, 28)
+			style_rang.set_texture_margin(SIDE_RIGHT, 28)
+			style_rang.set_texture_margin(SIDE_TOP, 18)
+			style_rang.set_texture_margin(SIDE_BOTTOM, 18)
+			rang_fond.add_theme_stylebox_override("panel", style_rang)
+			var rang := StyleAzur.texte("", 24, Color("ffe9bd"))
 			rang.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			rang.autowrap_mode = TextServer.AUTOWRAP_OFF
-			var ligne_rang := HBoxContainer.new()
-			ligne_rang.alignment = BoxContainer.ALIGNMENT_CENTER
-			ligne_rang.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			contenu_noeud.add_child(ligne_rang)
-			var etat := StyleAzur.illustration("validation", 20)
-			ligne_rang.add_child(etat)
-			ligne_rang.add_child(rang)
-			b.set_meta("etat", etat)
+			rang_fond.add_child(rang)
+			rang.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 			b.set_meta("rang", rang)
-			b.add_theme_stylebox_override("hover", _style_noeud(accent, true, true, majeur))
-			b.add_theme_stylebox_override("pressed", _style_noeud(StyleAzur.MAGIE, true, true, majeur))
-			var focus := _style_noeud(StyleAzur.IVOIRE, true, true, majeur)
-			focus.draw_center = false
-			b.add_theme_stylebox_override("focus", focus)
+			b.set_meta("rang_fond", rang_fond)
+			b.add_theme_stylebox_override("hover", _style_noeud(fond_noeud, true, true))
+			b.add_theme_stylebox_override("pressed", _style_noeud(fond_noeud, true, true))
+			b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 			var oscillation := float([0, 40, -24, 28][rang_noeud % 4])
-			var centre := Vector2(centre_x + oscillation, 210 + rang_noeud * 238 + decalage)
+			var centre := Vector2(centre_x + oscillation, 210 + rang_noeud * 276 + decalage)
 			trace.append(centre)
 			branches.placer(b, Rect2(centre - Vector2.ONE * diametre * 0.5, Vector2.ONE * diametre))
+			branches.placer(rang_fond, Rect2(centre.x - 64.0, centre.y + diametre * 0.5 + 4.0, 128.0, 46.0))
 			rang_noeud += 1
 			_noeuds[id] = b
 		branches.traces.append(trace)
@@ -133,10 +157,10 @@ func fermer_fiche() -> bool:
 func _exit_tree() -> void:
 	if is_instance_valid(_fiche_popup): _fiche_popup.queue_free()
 
-func _style_noeud(accent: Color, selection := false, ouvert := true, majeur := false) -> StyleBoxTexture:
-	var style := StyleAzur.cercle(selection)
-	var nuance := accent.lerp(StyleAzur.CUIVRE, 0.35) if majeur else accent
-	style.modulate_color = Color.WHITE.lerp(nuance, 0.34 if majeur else 0.22) if ouvert else Color("8993ad").lerp(nuance, 0.12)
+func _style_noeud(fond: Texture2D, selection := false, ouvert := true) -> StyleBoxTexture:
+	var style := StyleBoxTexture.new()
+	style.texture = fond
+	style.modulate_color = Color("fff6e8") if selection and ouvert else Color.WHITE if ouvert else Color("bbc3d0")
 	return style
 
 
@@ -146,19 +170,23 @@ func _rafraichir() -> void:
 		var b: Button = _noeuds[id]
 		var ouvert := ReglagesJoueur.mode_dev or ArbreCompetences.prerequis_atteint(id,ReglagesJoueur.rangs_competences)
 		var icone: TextureRect = b.get_meta("icone")
-		icone.modulate = Color.WHITE if ouvert else Color("a6afc9")
 		var rang: Label = b.get_meta("rang")
-		rang.text = "%d / %d" % [ReglagesJoueur.rang_competence(id),ArbreCompetences.rangs(id)] if ouvert else ""
-		var etat: TextureRect = b.get_meta("etat")
-		etat.visible = not ouvert or id == _selection or ReglagesJoueur.rang_competence(id) > 0
-		etat.texture = StyleAzur.texture_interface("cadenas" if not ouvert else ("selection" if id == _selection else "validation"))
+		rang.text = "%d / %d" % [ReglagesJoueur.rang_competence(id),ArbreCompetences.rangs(id)]
+		rang.add_theme_color_override("font_color", Color("ffe9bd") if ouvert else Color("b7b9ca"))
+		var rang_fond: Panel = b.get_meta("rang_fond")
+		rang_fond.modulate.a = 1.0 if ouvert else 0.68
 		b.tooltip_text = str(ArbreCompetences.NOEUDS[id]["nom"]) + (" · Pouvoir majeur" if ArbreCompetences.rangs(id)==1 else "")
-		var accent: Color = b.get_meta("accent")
-		b.add_theme_stylebox_override("normal",_style_noeud(accent, id == _selection, ouvert, bool(b.get_meta("majeur"))))
+		icone.modulate = Color.WHITE if ouvert else Color(1.0, 1.0, 1.0, 0.88)
+		var fond: Texture2D = b.get_meta("fond")
+		b.add_theme_stylebox_override("normal", _style_noeud(fond, id == _selection, ouvert))
 	var n: Dictionary = ArbreCompetences.NOEUDS[_selection]
 	var selection: Button = _noeuds[_selection]
 	_embleme.texture = selection.get_meta("embleme")
+	var accent_selection: Color = selection.get_meta("accent")
+	_embleme.modulate = Color.WHITE.lerp(accent_selection, 0.22)
 	_titre_details.text = str(n["nom"])
+	_titre_details.add_theme_color_override("font_color", accent_selection.darkened(0.52))
+	StyleAzur.action_coloree(_achat, accent_selection)
 	_details.text = ArbreCompetences.description_effective(_selection)
 	_message_details.text = _message
 	_message_details.visible = not _message.is_empty()

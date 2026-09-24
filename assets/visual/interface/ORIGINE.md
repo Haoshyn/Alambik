@@ -9,8 +9,9 @@ dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.
   gravures propres aux capacités et `tools/design_svg/` les exemples
   dessinés à la main qui définissent cette construction.
   `tools/generer_email_arcanique.py` reste un point d’entrée compatible vers
-  cette refonte. Les SVG Wenrexa fournis dans `SVG/` restent intacts et ne
-  sont plus intégrés aux ressources actives.
+  cette refonte. Les SVG Wenrexa fournis dans `SVG/` restent intacts ;
+  `tools/generer_glyphes_menus.py` compose leurs silhouettes en glyphes colorés
+  indépendants pour Sorts et Maîtrises.
 - `cadres/` : surfaces séparées pour cases, cartes, boutons, compteurs, panneaux,
   navigation et zones de texte, avec variantes sélectionnées, pressées et focus.
   Les surfaces de 128 px logiques s'étirent en neuf zones avec coins de

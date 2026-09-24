@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="384" height="384" viewBox="0 0 128 128">
+<defs>
+<linearGradient id="bois" x1="0" y1="0" x2="0.2" y2="1"><stop stop-color="#934d47"/><stop offset="0.52" stop-color="#54314d"/><stop offset="1" stop-color="#34274a"/></linearGradient>
+<linearGradient id="or" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff0be"/><stop offset="0.42" stop-color="#e4ac60"/><stop offset="1" stop-color="#8f5750"/></linearGradient>
+<linearGradient id="email" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#6b688f"/><stop offset="1" stop-color="#2a335a"/></linearGradient>
+</defs>
+<path d="M18 54V38C18 22 30 15 64 15s46 7 46 23v16Z" fill="url(#bois)" stroke="url(#or)" stroke-width="6" stroke-linejoin="round"/>
+<path d="M23 52h82v52c0 6-5 10-11 10H34c-6 0-11-4-11-10Z" fill="url(#email)" stroke="url(#or)" stroke-width="6" stroke-linejoin="round"/>
+<path d="M19 56h90M31 30c10-6 56-6 66 0M32 95h64" fill="none" stroke="#ffe2a4" stroke-width="5" stroke-linecap="round"/>
+<path d="M39 19v95M89 19v95" fill="none" stroke="url(#or)" stroke-width="7"/>
+<path d="M56 53h16v25c0 6-4 11-8 11s-8-5-8-11Z" fill="url(#or)" stroke="#633e4f" stroke-width="3"/>
+<path d="M64 60l4 7-4 8h-8l-4-8Z" fill="#643e57"/>
+<path d="M23 50l-8-10 4-12M105 50l8-10-4-12" fill="none" stroke="#ffe9b3" stroke-width="2" stroke-linecap="round"/>
+</svg>

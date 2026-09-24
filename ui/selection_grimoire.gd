@@ -16,30 +16,68 @@ var _sous_titre: Label
 var _progression: Label
 var _selection_titre: Label
 var _details: Label
+var _progression_etage: ProgressBar
 var _carte: CarteCampagne
 var _panneau_selection: PanelContainer
 var _precedent: Button
 var _suivant: Button
 var _apercu: Control
+var _marges: MarginContainer
+var _zone_monde: Control
+var _defilement: DefilementTactile
+var _glissement_depart := Vector2.ZERO
+var _glissement_actif := false
 
 func _ready() -> void:
 	_monde = clampi(ReglagesJoueur.chapitre_choisi / Chapitres.CHAPITRES_PAR_MONDE, 0, Chapitres.MONDES.size() - 1)
 	_chapitre_monde = posmod(ReglagesJoueur.chapitre_choisi, Chapitres.CHAPITRES_PAR_MONDE)
-	# La campagne possede son propre fond calme pour ne pas laisser l'accueil traverser la carte.
-	StyleAzur.fond_atelier(self, true, true)
-	var col := StyleAzur.page(self, "Campagne")
-	var contenu := StyleAzur.defilement(col)
-	var navigation := HBoxContainer.new()
-	navigation.add_theme_constant_override("separation", 8)
-	contenu.add_child(navigation)
-	_precedent = StyleAzur.bouton_rond("‹", func(): _changer_monde(-1), 76.0)
-	_precedent.tooltip_text = "Monde précédent"
-	navigation.add_child(_precedent)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	theme = StyleAzur.theme_interface()
+	_marges = MarginContainer.new()
+	_marges.name = "MargesCampagne"
+	add_child(_marges)
+	_marges.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var contenu := VBoxContainer.new()
+	contenu.add_theme_constant_override("separation", 14)
+	_marges.add_child(contenu)
+	var entete := HBoxContainer.new()
+	entete.name = "EnteteCampagne"
+	entete.custom_minimum_size.y = 104
+	contenu.add_child(entete)
+	var retour := StyleAzur.bouton_rond("", _fermer, 104.0)
+	retour.name = "RetourCampagne"
+	retour.icon = StyleAzur.texture_interface("fleche_gauche")
+	retour.expand_icon = true
+	retour.add_theme_constant_override("icon_max_width", 62)
+	retour.tooltip_text = "Retour à l’aventure"
+	retour.accessibility_name = "Retour à l’aventure"
+	entete.add_child(retour)
+	var titre_campagne := StyleAzur.texte("CAMPAGNE", 42, Color("f7ddb5"))
+	titre_campagne.name = "TitreCampagne"
+	titre_campagne.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	titre_campagne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	entete.add_child(titre_campagne)
+	var espace_retour := Control.new()
+	espace_retour.custom_minimum_size.x = 104
+	entete.add_child(espace_retour)
+	_defilement = preload("res://ui/composants/defilement_tactile.gd").new()
+	_defilement.name = "DefilementCampagne"
+	_defilement.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_defilement.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_defilement.follow_focus = true
+	_defilement.verrou_vertical = true
+	contenu.add_child(_defilement)
+	var corps := VBoxContainer.new()
+	corps.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	corps.add_theme_constant_override("separation", 14)
+	_defilement.add_child(corps)
+	_defilement.resized.connect(func(): corps.custom_minimum_size.y = _defilement.size.y)
 	var textes := VBoxContainer.new()
-	textes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	textes.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	textes.add_theme_constant_override("separation", 4)
-	navigation.add_child(textes)
+	textes.name = "EnteteMonde"
+	textes.add_theme_constant_override("separation", 2)
+	corps.add_child(textes)
 	_indice_monde = StyleAzur.texte("", 20, StyleAzur.CUIVRE)
 	_titre = StyleAzur.texte("", 44)
 	_sous_titre = StyleAzur.texte("", 23, StyleAzur.ATTENUE)
@@ -47,22 +85,29 @@ func _ready() -> void:
 	for etiquette in [_indice_monde, _titre, _sous_titre, _progression]:
 		etiquette.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		textes.add_child(etiquette)
-	_suivant = StyleAzur.bouton_rond("›", func(): _changer_monde(1), 76.0)
-	_suivant.tooltip_text = "Monde suivant"
-	navigation.add_child(_suivant)
+	_zone_monde = Control.new()
+	_zone_monde.name = "ZoneMonde"
+	_zone_monde.custom_minimum_size.y = 420
+	_zone_monde.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_zone_monde.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	corps.add_child(_zone_monde)
 	_carte = CarteCampagne.new()
-	_carte.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_adapter_carte()
-	contenu.add_child(_carte)
-	resized.connect(_adapter_carte)
+	_carte.name = "CarteMonde"
+	_zone_monde.add_child(_carte)
 	for i in Chapitres.CHAPITRES_PAR_MONDE:
 		var etape := RepereCampagne.new()
 		_carte.ajouter_etape(etape)
 		etape.activee.connect(_choisir_chapitre)
 		_zones_chapitres.append(etape)
+	_precedent = _creer_fleche_monde("MondePrecedent", "fleche_gauche", -1)
+	_suivant = _creer_fleche_monde("MondeSuivant", "fleche_droite", 1)
+	_zone_monde.resized.connect(_replacer_monde)
+	resized.connect(_cadrer)
+	_cadrer()
+	_replacer_monde.call_deferred()
 	_panneau_selection = PanelContainer.new()
 	_panneau_selection.add_theme_stylebox_override("panel", _style_selection(StyleAzur.VIOLET))
-	contenu.add_child(_panneau_selection)
+	corps.add_child(_panneau_selection)
 	var selection := VBoxContainer.new()
 	selection.add_theme_constant_override("separation", 10)
 	_panneau_selection.add_child(selection)
@@ -77,14 +122,22 @@ func _ready() -> void:
 	textes_selection.add_child(_selection_titre)
 	_details = StyleAzur.texte("", 23, StyleAzur.ATTENUE)
 	textes_selection.add_child(_details)
+	_progression_etage = ProgressBar.new()
+	_progression_etage.show_percentage = false
+	_progression_etage.custom_minimum_size.y = 10
+	_progression_etage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	textes_selection.add_child(_progression_etage)
 	var actions := BoxContainer.new()
 	StyleAzur.adapter_ligne(actions, 390.0)
 	actions.add_theme_constant_override("separation", 10)
 	selection.add_child(actions)
 	_bouton_selectionner = StyleAzur.bouton("Choisir ce niveau" if selection_seulement else "Jouer ce niveau", _selectionner, true)
+	StyleAzur.habiller_accueil(_bouton_selectionner, true)
+	_bouton_selectionner.add_theme_font_size_override("font_size", 36)
+	_bouton_selectionner.custom_minimum_size.y = 102
 	actions.add_child(_bouton_selectionner)
 	var butin := StyleAzur.bouton("", func(): _voir_loots(_index_selectionne()))
-	butin.icon = preload("res://assets/visual/interface/coffre_ferme.png")
+	butin.icon = preload("res://assets/visual/interface/menu/coffre_butin.svg")
 	butin.custom_minimum_size = Vector2(128, 88)
 	butin.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	butin.add_theme_constant_override("icon_max_width", 48)
@@ -94,26 +147,70 @@ func _ready() -> void:
 	_rafraichir()
 	Capture.programmer(self)
 
-func _adapter_carte() -> void:
-	if not is_instance_valid(_carte):
+func _cadrer() -> void:
+	if not is_instance_valid(_marges):
 		return
-	_carte.custom_minimum_size.y = clampf(size.y * 0.36, 280.0, 520.0)
+	var lateral := maxi(28, int((size.x - 1080.0) * 0.5))
+	_marges.add_theme_constant_override("margin_left", maxi(lateral, int(Ecran.marge_gauche())))
+	_marges.add_theme_constant_override("margin_right", maxi(lateral, int(Ecran.marge_droite())))
+	_marges.add_theme_constant_override("margin_top", int(Ecran.marge_haute()) + (150 if size.x >= 880.0 else 264))
+	_marges.add_theme_constant_override("margin_bottom", int(Ecran.marge_basse() + StyleAzur.HAUTEUR_NAVIGATION + StyleAzur.MARGE_NAVIGATION_BAS + 24))
 
-func _style_selection(teinte: Color) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color("202b50").lerp(teinte, 0.18)
-	style.border_color = Color(teinte.r, teinte.g, teinte.b, 0.9)
-	style.set_border_width_all(2)
-	style.corner_radius_top_left = 18
-	style.corner_radius_top_right = 28
-	style.corner_radius_bottom_right = 18
-	style.corner_radius_bottom_left = 28
-	style.shadow_color = Color("111a37a8")
-	style.shadow_size = 5
-	style.set_content_margin(SIDE_LEFT, 16)
-	style.set_content_margin(SIDE_RIGHT, 16)
-	style.set_content_margin(SIDE_TOP, 12)
-	style.set_content_margin(SIDE_BOTTOM, 12)
+func _creer_fleche_monde(nom: String, symbole: String, direction: int) -> Button:
+	var bouton := StyleAzur.bouton_rond("", func(): _changer_monde(direction), 112.0)
+	bouton.name = nom
+	bouton.icon = StyleAzur.texture_interface(symbole)
+	bouton.expand_icon = true
+	bouton.add_theme_constant_override("icon_max_width", 68)
+	bouton.tooltip_text = "Monde précédent" if direction < 0 else "Monde suivant"
+	bouton.accessibility_name = bouton.tooltip_text
+	var normal := StyleAzur.cercle(true)
+	normal.modulate_color = Color("e9c79b")
+	bouton.add_theme_stylebox_override("normal", normal)
+	_zone_monde.add_child(bouton)
+	return bouton
+
+func _replacer_monde() -> void:
+	if not is_instance_valid(_zone_monde) or not is_instance_valid(_carte) or _zone_monde.size.x <= 0.0:
+		return
+	var marge_fleche := 86.0
+	_carte.position = Vector2(marge_fleche, 0)
+	_carte.size = Vector2(maxf(0.0, _zone_monde.size.x - marge_fleche * 2.0), _zone_monde.size.y)
+	var hauteur_fleches := _zone_monde.size.y * 0.42 - 56.0
+	_precedent.position = Vector2(0, hauteur_fleches)
+	_suivant.position = Vector2(_zone_monde.size.x - 112.0, hauteur_fleches)
+
+func _input(evenement: InputEvent) -> void:
+	if _lancement or not is_instance_valid(_zone_monde) or not visible:
+		return
+	if evenement is InputEventScreenTouch:
+		var toucher := evenement as InputEventScreenTouch
+		if toucher.pressed:
+			_glissement_actif = _zone_monde.get_global_rect().has_point(toucher.position)
+			_glissement_depart = toucher.position
+		elif _glissement_actif:
+			_terminer_glissement(toucher.position)
+	elif evenement is InputEventMouseButton:
+		var souris := evenement as InputEventMouseButton
+		if souris.button_index != MOUSE_BUTTON_LEFT:
+			return
+		if souris.pressed:
+			_glissement_actif = _zone_monde.get_global_rect().has_point(souris.position)
+			_glissement_depart = souris.position
+		elif _glissement_actif:
+			_terminer_glissement(souris.position)
+
+func _terminer_glissement(fin: Vector2) -> void:
+	_glissement_actif = false
+	var mouvement := fin - _glissement_depart
+	if absf(mouvement.x) < 90.0 or absf(mouvement.x) < absf(mouvement.y) * 1.25:
+		return
+	_changer_monde(-1 if mouvement.x > 0.0 else 1)
+	get_viewport().set_input_as_handled()
+
+func _style_selection(teinte: Color) -> StyleBoxTexture:
+	var style := StyleAzur.texture_etirable("bandeau_monde", 24, 40, 24)
+	style.modulate_color = Color.WHITE.lerp(teinte, 0.16)
 	return style
 
 func _rafraichir() -> void:
@@ -126,6 +223,8 @@ func _rafraichir() -> void:
 	_indice_monde.add_theme_color_override("font_color", teinte.lightened(0.2))
 	_sous_titre.add_theme_color_override("font_color", StyleAzur.IVOIRE.lerp(teinte, 0.16))
 	_details.add_theme_color_override("font_color", StyleAzur.IVOIRE.lerp(teinte, 0.18))
+	_progression_etage.add_theme_stylebox_override("background", _style_jauge(Color("1a2443")))
+	_progression_etage.add_theme_stylebox_override("fill", _style_jauge(teinte.lightened(0.12)))
 	_carte.afficher_monde(_monde)
 	_panneau_selection.add_theme_stylebox_override("panel", _style_selection(teinte))
 	_precedent.disabled = _monde == 0
@@ -151,6 +250,8 @@ func _rafraichir() -> void:
 		"BOSS DU MONDE" if _chapitre_monde == Chapitres.CHAPITRES_PAR_MONDE - 1 else str(monde["nom"]).to_upper()]
 	_details.text = "Meilleur étage : %d / %d" % [
 		ReglagesJoueur.meilleure_du_chapitre(index), int(chapitre["salles"])]
+	_progression_etage.max_value = int(chapitre["salles"])
+	_progression_etage.value = ReglagesJoueur.meilleure_du_chapitre(index)
 	if not accessible:
 		_details.text += "\nTerminez le niveau précédent pour ouvrir ce niveau."
 	if accessible:
@@ -158,6 +259,12 @@ func _rafraichir() -> void:
 	else:
 		_bouton_selectionner.text = "Niveau verrouillé"
 	_bouton_selectionner.disabled = not accessible
+
+func _style_jauge(couleur: Color) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = couleur
+	style.set_corner_radius_all(5)
+	return style
 
 func _index_selectionne() -> int:
 	return _monde * Chapitres.CHAPITRES_PAR_MONDE + _chapitre_monde

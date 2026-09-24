@@ -5,6 +5,7 @@ signal campagne_demandee
 
 const ILE_ANIMEE := preload("res://ui/composants/ile_animee.gd")
 const DONNEES := preload("res://data/animations_decors.gd")
+const FOND_LEGENDE := preload("res://assets/visual/interface/menu/bandeau_monde_braise.svg")
 
 var ile_externe := false
 var _ile: Control
@@ -30,21 +31,24 @@ func _ready() -> void:
 	_legende = Panel.new()
 	_legende.name = "LegendeCampagne"
 	_legende.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_fond_legende = StyleAzur.texture_etirable("bandeau_monde", 40, 0, 0)
+	_fond_legende = StyleBoxTexture.new()
+	_fond_legende.texture = FOND_LEGENDE
+	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
+		_fond_legende.set_texture_margin(cote, 40)
 	_legende.add_theme_stylebox_override("panel", _fond_legende)
 	add_child(_legende)
 	_choisir = StyleInterface.zone_tactile(func(): campagne_demandee.emit())
 	_choisir.name = "ChoisirCampagne"
 	_choisir.tooltip_text = "Choisir une campagne"
 	add_child(_choisir)
-	_titre = StyleAzur.texte("", 46, StyleAzur.IVOIRE)
+	_titre = StyleAzur.texte("", 46, Color("543446"))
 	_titre.name = "TitreCampagne"
 	_titre.add_theme_font_override("font", Polices.TITRE)
 	_titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_titre.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_titre.clip_text = true
 	add_child(_titre)
-	_niveau = StyleAzur.texte("", 29, StyleAzur.ATTENUE)
+	_niveau = StyleAzur.texte("", 29, Color("6c4d58"))
 	_niveau.name = "NiveauCampagne"
 	_niveau.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_niveau.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -60,7 +64,7 @@ func afficher_campagne(index_monde: int, numero_niveau: int, nom_monde: String) 
 		_animation_ile.afficher_monde(index_monde)
 	var monde: Dictionary = Chapitres.MONDES[clampi(index_monde, 0, Chapitres.MONDES.size() - 1)]
 	var teinte: Color = monde["teinte"]
-	_fond_legende.modulate_color = Color.WHITE.lerp(teinte, 0.16)
+	_fond_legende.modulate_color = Color.WHITE.lerp(teinte, 0.05)
 	_titre.text = "Monde %d · %s" % [index_monde + 1, nom_monde]
 	_niveau.text = "Niveau %d sélectionné  ›" % numero_niveau
 	_choisir.accessibility_name = "Choisir une campagne. Monde %d, %s, niveau %d." % [index_monde + 1, nom_monde, numero_niveau]
