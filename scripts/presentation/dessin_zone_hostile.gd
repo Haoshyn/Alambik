@@ -1,6 +1,7 @@
 extends RefCounted
 
 const Rendu = preload("res://data/animations_combat.gd")
+const Magie = preload("res://scripts/presentation/dessin_magie.gd")
 
 static func dessiner(noeud: Node2D, profil: Dictionary, origine: Vector2, age: float) -> void:
 	var rayon := float(profil["rayon"])
@@ -59,10 +60,14 @@ static func dessiner(noeud: Node2D, profil: Dictionary, origine: Vector2, age: f
 static func _dessiner_lob(noeud: Node2D, origine: Vector2, t: float, couleur: Color) -> void:
 	var precedent := origine.lerp(Vector2.ZERO, t) - Vector2(0, sin(t * PI) * Rendu.LOB_HAUTEUR)
 	var tete := precedent
+	var avant := origine.lerp(Vector2.ZERO, maxf(0.0, t - .015)) - Vector2(0, sin(maxf(0.0, t - .015) * PI) * Rendu.LOB_HAUTEUR)
+	var direction := avant.direction_to(tete)
 	for i in (3 if ReglagesJoueur.effets_reduits else 6):
 		var passe := maxf(0.0, t - float(i + 1) * .025)
 		var point := origine.lerp(Vector2.ZERO, passe) - Vector2(0, sin(passe * PI) * Rendu.LOB_HAUTEUR)
-		noeud.draw_line(precedent, point, Color(couleur, .5 * (1.0 - float(i) / 6.0)), maxf(1.0, 8.0 - i), true)
+		var force := 1.0 - float(i) / 6.0
+		noeud.draw_line(precedent, point, Color(couleur, .16 * force), maxf(1.0, 18.0 - i * 2), true)
+		noeud.draw_line(precedent, point, Color(couleur, .60 * force), maxf(1.0, 7.0 - i), true)
+		noeud.draw_line(precedent, point, Color(couleur.lightened(.75), .65 * force), maxf(1.0, 2.5 - i * .3), true)
 		precedent = point
-	noeud.draw_circle(tete, 10, couleur)
-	noeud.draw_circle(tete + Vector2(-2,-2), 4, couleur.lightened(.8))
+	Magie.goutte(noeud, tete, direction.angle(), 11.0, couleur)

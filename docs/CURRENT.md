@@ -1,12 +1,12 @@
-# État courant — 25 septembre 2026
+# État courant — 26 septembre 2026
 
 - Godot 4.7.1, Android portrait ; simulation 2D, combat présenté en 3D.
 - Héros unique : `assets/3d/characters/mage_sculpte.glb`, matériaux standard,
   six animations et armes séparées. Sources et générateurs actifs conservés.
 - Accueil : `ui/accueil_clairiere.tscn`, composé de scènes indépendantes dans
   `ui/composants/`. Une illustration indépendante du monde choisi occupe le
-  centre ; la toucher ouvre le choix des campagnes. Mine, Jouer élargi et
-  Épreuves partagent une rangée sous l'illustration. Jouer lance le chapitre
+  centre ; la toucher ouvre le choix des campagnes. Mine, Monde et Épreuves
+  partagent une rangée juste au-dessus de Jouer élargi. Jouer lance le chapitre
   choisi. Niveau et XP en haut à gauche, monnaies encadrées à droite ; en bas,
   icônes et titres des onglets restent visibles avec des séparateurs SVG ;
   l'onglet actif agrandit son icône. La clairière utilise des couches peintes séparées
@@ -24,22 +24,25 @@
   dans `docs/design/DIRECTION_ARTISTIQUE.md`.
   Cadres en émail redessinés, emplacements et commandes circulaires ; onglet
   actif agrandi sans second cercle. Lecture en DM Sans gras, grands titres en
-  Fondamento ; onglets Héros, Équipement, Aventure, Maîtrises, Sorts. Héros :
-  grand portrait à gauche,
-  attributs regroupés dans une colonne à droite, valeurs +N et flèches SVG
-  pour répartir les points, reset gratuit.
+  Grenze épais, chiffres en DM Sans extra-gras ; onglets Héros, Équipement,
+  Aventure, Maîtrises, Sorts. Héros :
+  sans portrait, classe et réinitialisation gratuite à gauche du compteur de
+  points ; cinq grandes jauges colorées animées, glyphes et commandes +/−.
   Équipement : vingt petites cases d'inventaire par page, cartes colorées avec
   statistiques intégrées pour les armes et les familiers, et fiches contextuelles.
   Le premier lancement sans classe ouvre
   l’aventure guidée ; le choix de voie intervient après le premier portail.
-  Composition : Héros asymétrique autour du personnage, maîtrises en constellation,
-  sorts avec bandeau de niveau, quatre médaillons équipés et grille de cartes
-  détaillées à deux colonnes, adaptative sur écran étroit ; fiches contextuelles,
-  parure en sceaux décalés. Les fiches Sorts et Maîtrises se ferment aussi en
-  touchant à côté, sans changer de page. Titres et
-  ressources sans cadres ; marges intérieures protégées sous les ornements.
+  Composition : Héros autour des caractéristiques, maîtrises en constellation
+  avec détails courts et reset compact en haut ; sorts avec catégories,
+  quatre médaillons équipés plus lisibles et grille de cartes
+  entièrement tactiles à deux colonnes, adaptative sur écran étroit ; fiches contextuelles,
+  parure en sceaux décalés. Les fiches Sorts se ferment aussi en touchant à
+  côté ; les détails de Maîtrises restent dans leur panneau fixe. Titres en
+  cartouches enluminés et marges intérieures protégées sous les ornements.
   SVG natifs légers (icônes, cadres, équipements, capacités et contrôles),
-  filtrage avec mipmaps et sans ancien détourage alpha. Générateur :
+  filtrage avec mipmaps et sans ancien détourage alpha. Fonds élémentaires
+  peints des sorts ; niveau sélectionné et meilleur étage regroupés dans le
+  cartouche du monde. Générateur du kit SVG :
   `tools/generer_email_arcanique.py`. Zones sûres latérales, grilles adaptatives
   et accueil défilable ; menus, HUD, augments et récompenses partagent le kit.
   Les 30 glyphes de maîtrise et les 18 glyphes de sorts sont des SVG distincts
@@ -107,6 +110,8 @@ et `build/`.
 La version précédant la composition modulaire est conservée dans
 `../OldAlambik/2026-09-22/interface-avant-composition-161302/`.
 
-Les cinq onglets et la sélection de campagne ont été lancés sans fenêtre avec
-Godot 4.7.2, sans erreur de script ; contrôle visuel sur appareil à poursuivre.
+Les cinq onglets et la sélection de campagne ont été vérifiés sans fenêtre avec
+Godot 4.7.1 sur quatre formats, avec profil isolé : centrage des chiffres,
+répartition des points, réinitialisations, fiches et défilement tactile des sorts. Contrôle visuel sur
+appareil à poursuivre.
 Le propriétaire teste le jeu ; les règles de travail restent dans `AGENTS.md`.

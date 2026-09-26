@@ -88,3 +88,14 @@ dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.
   végétal et de vectorisation peinte ne doivent pas écraser le kit actif.
 
 Les SVG actifs sont autonomes sans image incorporée.
+
+- `menu/sorts/fonds_elementaires.png` : atlas original de six ambiances peintes
+  (onde, givre, braise, foudre, acide, vortex), créé avec ImageGen le 26 septembre
+  2026. Source `exec-e3d26700-adb9-4a22-a9dd-d983b6fb9bbe.png`. Le shader
+  `carte_sort_peinte.gdshader` choisit la région et protège la lecture.
+- `menu/cadre_enlumine.svg` et `menu/contour_enlumine.svg` : cadres vectoriels
+  originaux, bord métallique champagne, relief violet et feuilles gravées aux coins.
+- Police Grenze : famille variable d’Omnibus-Type, provenant du
+  [dépôt Google Fonts](https://github.com/google/fonts/tree/main/ofl/grenze).
+  Fichier original conservé dans `assets/fonts/Grenze-Variable.ttf`, avec sa
+  licence SIL OFL dans `Grenze-OFL.txt` ; graisse 750 utilisée sans modifier la police.

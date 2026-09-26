@@ -2,16 +2,20 @@ extends RefCounted
 
 # Durees et couleurs du rendu, independantes de la resolution des degats.
 const PROFILS := {
-	"onde_alchimique": {"couleur": Color("bd91f5"), "duree": 0.85},
-	"nova_de_givre": {"couleur": Color("71dcff"), "duree": 1.1},
-	"barrage_de_braise": {"couleur": Color("ff823d"), "duree": 1.0},
-	"impulsion_foudroyante": {"couleur": Color("ffde70"), "duree": 0.55},
-	"explosion_corrosive": {"couleur": Color("91e35d"), "duree": 1.2},
-	"vortex_alchimique": {"couleur": Color("a98bff"), "duree": 1.15},
-	"grand_oeuvre": {"couleur": Color("f3d18a"), "duree": 1.65},
-	"temps_suspendu": {"couleur": Color("a6dfff"), "duree": 1.8},
-	"transmutation_totale": {"couleur": Color("8cf0ba"), "duree": 1.6},
-	"purification_totale": {"couleur": Color("fff1c0"), "duree": 1.5},
+	"onde_alchimique": {"couleur": Color("bb87ff"), "duree": 1.10},
+	"nova_de_givre": {"couleur": Color("62dfff"), "duree": 1.35},
+	"barrage_de_braise": {"couleur": Color("ff772e"), "duree": 1.35},
+	"impulsion_foudroyante": {"couleur": Color("ffcf46"), "duree": 0.70},
+	"explosion_corrosive": {"couleur": Color("a2f448"), "duree": 1.55},
+	"vortex_alchimique": {"couleur": Color("ae77ff"), "duree": 1.55},
+	"grand_oeuvre": {"couleur": Color("ffd05d"), "duree": 2.05},
+	"temps_suspendu": {"couleur": Color("91eeff"), "duree": 2.10},
+	"transmutation_totale": {"couleur": Color("64efaa"), "duree": 2.05},
+	"purification_totale": {"couleur": Color("fff0b9"), "duree": 1.95},
+}
+const PASSIFS := {
+	"moisson_vitale": {"couleur": Color("62f3a2"), "duree": .75},
+	"reserve_ultime": {"couleur": Color("dba0ff"), "duree": .65},
 }
 const RAYON_ULTIME := 620.0
 const MAX_SIMULTANES := 8

@@ -32,6 +32,8 @@ const ACTION_BRAISE := preload("res://assets/visual/interface/menu/action_braise
 const FOND_ATELIER := preload("res://assets/visual/interface/academie_arcanique.png")
 const FOND_SCRIPTORIUM := preload("res://assets/visual/interface/scriptorium.png")
 const TITRE_ATELIER := Polices.TITRE
+const CADRE_ENLUMINE := preload("res://assets/visual/interface/menu/cadre_enlumine.svg")
+const CONTOUR_ENLUMINE := preload("res://assets/visual/interface/menu/contour_enlumine.svg")
 # Les ressources explicites restent incluses dans les exports Android.
 const TEXTURES_INTERFACE := {
 	"fleche_bas": preload("res://assets/visual/interface/fleche_bas.svg"),
@@ -254,6 +256,50 @@ static func fond_legende(opacite := 0.78, rayon := 18) -> StyleBoxFlat:
 	style.set_corner_radius_all(rayon)
 	return style
 
+static func calligraphie(contenu: String, taille: int, couleur: Color) -> Label:
+	var label := texte(contenu, taille, couleur)
+	label.add_theme_font_override("font", Polices.GRIMOIRE)
+	return label
+
+static func cadre_enlumine(accent: Color, selection := false, interieur := true) -> StyleBoxTexture:
+	var style := StyleBoxTexture.new()
+	style.texture = CADRE_ENLUMINE if interieur else CONTOUR_ENLUMINE
+	style.draw_center = interieur
+	style.modulate_color = Color.WHITE.lerp(accent.lightened(0.35), 0.24 if selection else 0.10)
+	if selection: style.modulate_color = style.modulate_color.lightened(0.10)
+	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]: style.set_texture_margin(cote, 44)
+	for cote in [SIDE_LEFT, SIDE_RIGHT]: style.set_content_margin(cote, 36)
+	for cote in [SIDE_TOP, SIDE_BOTTOM]: style.set_content_margin(cote, 22)
+	return style
+
+static func bouton_enlumine(b: Button, accent: Color, taille := 36) -> void:
+	for etat in ["normal", "hover", "pressed", "focus", "disabled"]:
+		var style := cadre_enlumine(accent, etat in ["hover", "focus"])
+		if etat == "pressed": style.modulate_color = Color("c1b0d8")
+		if etat == "disabled": style.modulate_color = Color("898299")
+		b.add_theme_stylebox_override(etat, style)
+	b.add_theme_font_override("font", Polices.GRIMOIRE)
+	b.add_theme_font_size_override("font_size", taille)
+	texte_bouton_colore(b, accent.lightened(0.16))
+
+static func texte_bouton_colore(bouton_: Button, couleur: Color) -> void:
+	for etat in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+		bouton_.add_theme_color_override(etat, couleur)
+
+static func cadre_grimoire(accent: Color, relief := false) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("25233eef").lerp(Color(accent.darkened(0.72), 0.97), 0.28 if relief else 0.12)
+	style.border_color = CUIVRE.lerp(accent, 0.35)
+	style.set_border_width_all(2)
+	style.border_width_bottom = 4
+	style.set_corner_radius_all(28)
+	style.shadow_color = Color("17142ba0")
+	style.shadow_size = 8
+	style.shadow_offset = Vector2(0, 4)
+	for cote in [SIDE_LEFT, SIDE_RIGHT]: style.set_content_margin(cote, 24)
+	for cote in [SIDE_TOP, SIDE_BOTTOM]: style.set_content_margin(cote, 20)
+	return style
+
 static func habiller_lecture(controle: Control) -> void:
 	controle.set_meta("surface_lecture", true)
 	var style := texture_etirable("zone_texte", 24, 32, 28)
@@ -319,12 +365,22 @@ static func page(parent: Control, titre: String, integre := false) -> VBoxContai
 		"La Mine": Color("ed9857"),
 		"Épreuves": MAGIE,
 	}.get(titre, IVOIRE)
-	var embl := illustration(id_entete,72)
+	var cartouche_titre := PanelContainer.new()
+	cartouche_titre.name = "CartoucheTitre"
+	cartouche_titre.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var style_titre := cadre_enlumine(accent_entete)
+	for cote in [SIDE_TOP, SIDE_BOTTOM]: style_titre.set_content_margin(cote, 14)
+	cartouche_titre.add_theme_stylebox_override("panel", style_titre)
+	entete.add_child(cartouche_titre)
+	var ligne_titre := HBoxContainer.new()
+	ligne_titre.add_theme_constant_override("separation", 12)
+	cartouche_titre.add_child(ligne_titre)
+	var embl := illustration(id_entete,60)
 	embl.modulate = Color.WHITE.lerp(accent_entete, 0.35)
-	entete.add_child(embl)
-	var label := texte(titre,42)
+	ligne_titre.add_child(embl)
+	var label := calligraphie(titre,50,accent_entete.lightened(0.2))
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	entete.add_child(label)
+	ligne_titre.add_child(label)
 	label.add_theme_color_override("font_color", Color.WHITE.lerp(accent_entete, 0.72))
 	if not integre and parent.has_signal("ferme"):
 		var retour := bouton("‹",func(): parent.emit_signal("ferme"))

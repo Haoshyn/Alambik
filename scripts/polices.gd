@@ -5,3 +5,5 @@ extends RefCounted
 const CORPS: Font = preload("res://assets/fonts/corps.tres")
 const TITRE: Font = preload("res://assets/fonts/titre.tres")
 const LOGO: Font = preload("res://assets/fonts/logo.tres")
+const GRIMOIRE: Font = preload("res://assets/fonts/grimoire.tres")
+const CHIFFRES: Font = TITRE

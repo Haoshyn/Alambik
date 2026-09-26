@@ -37,7 +37,7 @@ func _ready() -> void:
 	add_child(_legende_fond)
 	_libelle = StyleAzur.texte("", 29, StyleAzur.IVOIRE)
 	_libelle.name = "Libelle"
-	_libelle.add_theme_font_override("font", Polices.TITRE)
+	_libelle.add_theme_font_override("font", Polices.LOGO)
 	_libelle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_libelle.autowrap_mode = TextServer.AUTOWRAP_OFF
 	add_child(_libelle)
@@ -59,7 +59,7 @@ func configurer(icone: String, libelle: String) -> void:
 	_legende_style.bg_color = Color("533948f0") if icone == "mine" else Color("42365ff0")
 	_legende_style.border_color = Color("ddb788") if icone == "mine" else Color("ae9cd6")
 	_legende_style.border_width_top = 2
-	_libelle.add_theme_color_override("font_color", Color("f8e6cd") if icone == "mine" else Color("eee2ff"))
+	_libelle.add_theme_color_override("font_color", Color("ffd294") if icone == "mine" else Color("dab0ff"))
 	_libelle.text = libelle
 	tooltip_text = libelle
 	accessibility_name = libelle
@@ -75,21 +75,21 @@ func definir_acces(ouvert: bool, niveau: int) -> void:
 func _replacer() -> void:
 	if _visuel == null:
 		return
-	var cote := minf(size.x, maxf(0.0, size.y - 68.0))
+	var cote := minf(size.x, maxf(0.0, size.y - 86.0))
 	_visuel.position = Vector2((size.x - cote) * 0.5, 0)
 	_visuel.size = Vector2.ONE * cote
 	_visuel.pivot_offset = _visuel.size * 0.5
 	var marge_icone := cote * 0.17
 	_icone.position = Vector2.ONE * marge_icone
 	_icone.size = Vector2.ONE * (cote - 2.0 * marge_icone)
-	_libelle.add_theme_font_size_override("font_size", int(clampf(size.x * 0.18, 24.0, 29.0)))
+	_libelle.add_theme_font_size_override("font_size", int(clampf(size.x * 0.21, 28.0, 34.0)))
 	_condition.add_theme_font_size_override("font_size", int(clampf(size.x * 0.14, 19.0, 22.0)))
 	_legende_fond.position = Vector2(0, cote + 1)
 	_legende_fond.size = Vector2(size.x, maxf(0.0, size.y - cote - 1.0))
 	_libelle.position = Vector2(5, cote + 3)
-	_libelle.size = Vector2(size.x - 10, 38)
-	_condition.position = Vector2(5, cote + 39)
-	_condition.size = Vector2(size.x - 10, 26)
+	_libelle.size = Vector2(size.x - 10, 48)
+	_condition.position = Vector2(5, cote + 53)
+	_condition.size = Vector2(size.x - 10, 31)
 	_verrou.position = Vector2(size.x - 43, cote - 47)
 	_verrou.size = Vector2(42, 42)
 

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="384" height="384" viewBox="0 0 128 128">
+<defs>
+ <linearGradient id="email" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4c527a"/><stop offset=".42" stop-color="#2c3659"/><stop offset="1" stop-color="#192b44"/></linearGradient>
+ <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ead8b4"/><stop offset=".35" stop-color="#a39395"/><stop offset=".72" stop-color="#726a89"/><stop offset="1" stop-color="#cbb493"/></linearGradient>
+</defs>
+<path d="M23 5H105L123 23V105L105 123H23L5 105V23Z" fill="url(#email)" stroke="url(#metal)" stroke-width="2"/>
+<path d="M13 30V25L25 13H43M85 13H103L115 25V30M13 98V103L25 115H43M85 115H103L115 103V98" fill="none" stroke="#d9c5a7" stroke-opacity=".48" stroke-width="1.3"/>
+<path d="M49 6H79M49 122H79" stroke="#f2d6a4" stroke-opacity=".7"/>
+</svg>

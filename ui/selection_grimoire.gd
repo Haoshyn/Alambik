@@ -19,6 +19,7 @@ var _details: Label
 var _progression_etage: ProgressBar
 var _carte: CarteCampagne
 var _panneau_selection: PanelContainer
+var _panneau_monde: PanelContainer
 var _precedent: Button
 var _suivant: Button
 var _apercu: Control
@@ -54,7 +55,7 @@ func _ready() -> void:
 	retour.tooltip_text = "Retour à l’aventure"
 	retour.accessibility_name = "Retour à l’aventure"
 	entete.add_child(retour)
-	var titre_campagne := StyleAzur.texte("CAMPAGNE", 42, Color("f7ddb5"))
+	var titre_campagne := StyleAzur.calligraphie("Campagne", 52, StyleAzur.OR_VIF)
 	titre_campagne.name = "TitreCampagne"
 	titre_campagne.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	titre_campagne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -76,12 +77,17 @@ func _ready() -> void:
 	_defilement.resized.connect(func(): corps.custom_minimum_size.y = _defilement.size.y)
 	var textes := VBoxContainer.new()
 	textes.name = "EnteteMonde"
-	textes.add_theme_constant_override("separation", 2)
-	corps.add_child(textes)
-	_indice_monde = StyleAzur.texte("", 20, StyleAzur.CUIVRE)
-	_titre = StyleAzur.texte("", 44)
-	_sous_titre = StyleAzur.texte("", 23, StyleAzur.ATTENUE)
-	_progression = StyleAzur.texte("", 20, StyleAzur.MAGIE)
+	textes.add_theme_constant_override("separation", 6)
+	_panneau_monde = PanelContainer.new()
+	_panneau_monde.name = "CartoucheMondeEtNiveau"
+	_panneau_monde.add_theme_stylebox_override("panel", StyleAzur.cadre_enlumine(StyleAzur.LILAS))
+	corps.add_child(_panneau_monde)
+	_panneau_monde.add_child(textes)
+	_indice_monde = StyleAzur.texte("", 28, StyleAzur.CUIVRE)
+	_indice_monde.add_theme_font_override("font", Polices.CHIFFRES)
+	_titre = StyleAzur.calligraphie("", 52, StyleAzur.OR_VIF)
+	_sous_titre = StyleAzur.texte("", 28, StyleAzur.LILAS)
+	_progression = StyleAzur.texte("", 26, StyleAzur.MAGIE)
 	for etiquette in [_indice_monde, _titre, _sous_titre, _progression]:
 		etiquette.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		textes.add_child(etiquette)
@@ -113,18 +119,21 @@ func _ready() -> void:
 	_panneau_selection.add_child(selection)
 	var presentation := HBoxContainer.new()
 	presentation.add_theme_constant_override("separation", 14)
-	selection.add_child(presentation)
+	textes.add_child(presentation)
 	presentation.add_child(StyleAzur.illustration("fiole", 64))
 	var textes_selection := VBoxContainer.new()
 	textes_selection.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	presentation.add_child(textes_selection)
-	_selection_titre = StyleAzur.texte("", 21, StyleAzur.CUIVRE)
+	_selection_titre = StyleAzur.texte("", 32, StyleAzur.CUIVRE)
+	_selection_titre.name = "NiveauSelectionne"
+	_selection_titre.add_theme_font_override("font", Polices.CHIFFRES)
 	textes_selection.add_child(_selection_titre)
-	_details = StyleAzur.texte("", 23, StyleAzur.ATTENUE)
+	_details = StyleAzur.texte("", 30, StyleAzur.MENTHE)
+	_details.name = "MeilleurEtage"
 	textes_selection.add_child(_details)
 	_progression_etage = ProgressBar.new()
 	_progression_etage.show_percentage = false
-	_progression_etage.custom_minimum_size.y = 10
+	_progression_etage.custom_minimum_size.y = 16
 	_progression_etage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	textes_selection.add_child(_progression_etage)
 	var actions := BoxContainer.new()
@@ -209,16 +218,15 @@ func _terminer_glissement(fin: Vector2) -> void:
 	get_viewport().set_input_as_handled()
 
 func _style_selection(teinte: Color) -> StyleBoxTexture:
-	var style := StyleAzur.texture_etirable("bandeau_monde", 24, 40, 24)
-	style.modulate_color = Color.WHITE.lerp(teinte, 0.16)
-	return style
+	return StyleAzur.cadre_enlumine(teinte)
 
 func _rafraichir() -> void:
 	var monde: Dictionary = Chapitres.MONDES[_monde]
-	_indice_monde.text = "MONDE %d / %d" % [_monde + 1, Chapitres.MONDES.size()]
+	_indice_monde.text = "Monde %d / %d" % [_monde + 1, Chapitres.MONDES.size()]
 	_titre.text = str(monde["nom"])
 	_sous_titre.text = str(monde["sous_titre"])
 	var teinte: Color = monde["teinte"]
+	_panneau_monde.add_theme_stylebox_override("panel", StyleAzur.cadre_enlumine(teinte))
 	_titre.add_theme_color_override("font_color", StyleAzur.IVOIRE.lerp(teinte, 0.38))
 	_indice_monde.add_theme_color_override("font_color", teinte.lightened(0.2))
 	_sous_titre.add_theme_color_override("font_color", StyleAzur.IVOIRE.lerp(teinte, 0.16))
@@ -246,8 +254,8 @@ func _rafraichir() -> void:
 	var index := _index_selectionne()
 	var chapitre: Dictionary = Chapitres.par_index(index)
 	var accessible := ReglagesJoueur.chapitre_debloque(index)
-	_selection_titre.text = "NIVEAU %02d · %s" % [_chapitre_monde + 1,
-		"BOSS DU MONDE" if _chapitre_monde == Chapitres.CHAPITRES_PAR_MONDE - 1 else str(monde["nom"]).to_upper()]
+	_selection_titre.text = "Niveau %d%s" % [_chapitre_monde + 1,
+		" · Boss du monde" if _chapitre_monde == Chapitres.CHAPITRES_PAR_MONDE - 1 else ""]
 	_details.text = "Meilleur étage : %d / %d" % [
 		ReglagesJoueur.meilleure_du_chapitre(index), int(chapitre["salles"])]
 	_progression_etage.max_value = int(chapitre["salles"])

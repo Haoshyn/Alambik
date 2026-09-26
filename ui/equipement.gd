@@ -47,7 +47,7 @@ func _ready() -> void:
 	contenu.add_child(bilan)
 	_bilan = bilan
 	var infos := StyleAzur.cartouche_infos(bilan, StyleAzur.CUIVRE)
-	_resume = StyleAzur.texte("", 28, StyleAzur.IVOIRE)
+	_resume = StyleAzur.texte("", 30, StyleAzur.MENTHE)
 	_resume.add_theme_constant_override("line_spacing", 5)
 	infos.add_child(_resume)
 	_armes = VBoxContainer.new()
@@ -63,7 +63,7 @@ func _ready() -> void:
 	var slots := CompositionArcane.new()
 	slots.hauteur = 390
 	slots.traces = [PackedVector2Array([Vector2(160,210),Vector2(465,110),Vector2(790,225)])]
-	_bijoux.add_child(StyleAzur.texte("Votre parure", 34, StyleAzur.CUIVRE))
+	_bijoux.add_child(StyleAzur.calligraphie("Votre parure", 44, StyleAzur.OR_VIF))
 	_bijoux.add_child(slots)
 	for i in SLOTS.size():
 		var b := StyleAzur.bouton_rond("",func(): _selectionner_slot(SLOTS[i]), 180)
@@ -77,7 +77,7 @@ func _ready() -> void:
 		slots.placer(nom, Rect2(position_sceau + Vector2(-35,190), Vector2(250,70)))
 		_libelles_slots.append(nom)
 	StyleAzur.separateur(_bijoux)
-	_bijoux.add_child(StyleAzur.texte("Le coffret de bijoux",35))
+	_bijoux.add_child(StyleAzur.calligraphie("Le coffret de bijoux", 44, StyleAzur.LILAS))
 	var grille := GridContainer.new()
 	grille.name = "GrilleInventaire"
 	grille.columns = 5
@@ -129,6 +129,9 @@ func _changer_atelier(index: int) -> void:
 	for i in _onglets_atelier.size():
 		StyleAzur.onglet_symbolique(_onglets_atelier[i], [StyleAzur.icone(0), StyleAzur.icone_arme("standard"), StyleAzur.glyphe("familier_gardien")][i], i == index,
 			[StyleAzur.OR_VIF, StyleAzur.ROUGE_VIF, StyleAzur.VERT_VIF][i])
+		StyleAzur.bouton_enlumine(_onglets_atelier[i], [StyleAzur.OR_VIF, StyleAzur.ROUGE_VIF, StyleAzur.VERT_VIF][i], 38)
+		_onglets_atelier[i].add_theme_stylebox_override("normal", StyleAzur.cadre_enlumine(
+			[StyleAzur.OR_VIF, StyleAzur.ROUGE_VIF, StyleAzur.VERT_VIF][i], i == index))
 
 func _adapter_grilles() -> void:
 	if _grille_inventaire == null:
@@ -511,7 +514,7 @@ func _creer_carte_atelier(grille: GridContainer, nom: String, texture: Texture2D
 
 func _afficher_armes() -> void:
 	if _boutons_armes.is_empty():
-		_armes.add_child(StyleAzur.texte("Arsenal alchimique", 35, Color("dcefff")))
+		_armes.add_child(StyleAzur.calligraphie("Arsenal alchimique", 44, StyleAzur.CORAIL))
 		var ligne := GridContainer.new()
 		ligne.name = "GrilleArmes"
 		ligne.columns = 2

@@ -17,12 +17,12 @@ func _ready() -> void:
 		_index = _classes.find(ReglagesJoueur.specialisation_effective())
 	var col := StyleAzur.page(self, "Votre voie", true)
 	var contenu := StyleAzur.defilement(col)
-	var titre := StyleAzur.texte("5/5 · Choisissez votre voie" if premiers_pas else "Choisissez votre classe", 42)
+	var titre := StyleAzur.calligraphie("5/5 · Choisissez votre voie" if premiers_pas else "Choisissez votre classe", 46, StyleAzur.LILAS)
 	titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	contenu.add_child(titre)
 	var message := "Vous avez traversé votre première salle. Choisissez maintenant votre façon de combattre. Le changement reste gratuit depuis Héros." \
 		if premiers_pas else "Chaque classe favorise une façon de jouer. Le changement est gratuit depuis Héros."
-	var aide := StyleAzur.texte(message, 26, StyleAzur.ATTENUE)
+	var aide := StyleAzur.texte(message, 30, StyleAzur.MENTHE)
 	aide.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	contenu.add_child(aide)
 	var ligne := HBoxContainer.new()
@@ -37,7 +37,7 @@ func _ready() -> void:
 	_embleme = StyleAzur.illustration("heros", 224)
 	sceau.add_child(_embleme)
 	ligne.add_child(StyleAzur.bouton_rond("›", func(): _tourner(1)))
-	_nom = StyleAzur.texte("", 48)
+	_nom = StyleAzur.calligraphie("", 52, StyleAzur.OR_VIF)
 	_nom.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	contenu.add_child(_nom)
 	_position = StyleAzur.texte("", 24, StyleAzur.CUIVRE)
@@ -47,10 +47,10 @@ func _ready() -> void:
 	_atout = StyleAzur.texte("", 31, StyleAzur.MENTHE)
 	_atout.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	fiche.add_child(_atout)
-	_description = StyleAzur.texte("", 30)
+	_description = StyleAzur.texte("", 32, StyleAzur.LILAS)
 	_description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	fiche.add_child(_description)
-	_conseil = StyleAzur.texte("", 25, StyleAzur.ATTENUE)
+	_conseil = StyleAzur.texte("", 28, StyleAzur.MENTHE)
 	_conseil.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	fiche.add_child(_conseil)
 	_choix = StyleAzur.bouton("", _confirmer, true)

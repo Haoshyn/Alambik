@@ -930,7 +930,7 @@ func _sur_ennemi_abattu(_experience: int) -> void:
 		if _compteur_moisson >= Sorts.seuil_moisson(passifs):
 			_compteur_moisson = 0
 			_heros.stats.soigner_garanti(_heros.stats.pv_max * Sorts.soin_moisson(passifs))
-			_effets.onde(_heros.global_position, 150.0, Color(0.35, 1.0, 0.58), 0.5)
+			_effets.animer_sort("moisson_vitale", _heros.global_position, 150.0)
 
 
 func _sur_tape_rapide(nombre: int) -> void:
@@ -1036,7 +1036,7 @@ func _confirmer_sort(point: Vector2) -> void:
 	duree_bonus = maxf(duree_bonus, float(arme.get("apres_sort_duree", 0.0)))
 	if bonus_apres_sort > 0.0 or cadence_apres_sort > 0.0:
 		_heros.activer_bonus_apres_sort(bonus_apres_sort, duree_bonus, cadence_apres_sort)
-		_effets.onde(_heros.global_position, 110.0, Color(0.76, 0.42, 0.94), 0.35)
+		_effets.animer_sort("reserve_ultime", _heros.global_position, 110.0)
 
 func _lancer_echos(point: Vector2, id_initial: String, efficacite: float, nombre: int) -> void:
 	var candidats: Array[String] = []

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+<defs>
+ <linearGradient id="metal" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#ffe4a2"/><stop offset=".22" stop-color="#ddaa60"/><stop offset=".47" stop-color="#a77550"/><stop offset=".68" stop-color="#624354"/><stop offset="1" stop-color="#e0b276"/></linearGradient>
+ <linearGradient id="reflet"><stop stop-color="#ffecca"/><stop offset="1" stop-color="#af8466"/></linearGradient>
+ <g id="feuille" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 43C12 22 22 12 43 12M18 40C30 37 22 24 39 21M21 39C21 30 30 27 36 30" stroke="#211b36" stroke-width="5"/><path d="M12 42C12 22 22 12 42 12M18 39C30 36 22 23 39 20M21 38C21 29 30 26 36 29" stroke="url(#reflet)" stroke-width="2.5"/><path d="M21 19Q28 11 35 14Q31 22 21 19Z" fill="#e4b979" stroke="#ffe1a3" stroke-width="1"/></g>
+</defs>
+<rect x="4" y="9" width="184" height="179" rx="32" fill="none" stroke="#101327" stroke-width="6" stroke-opacity=".65"/>
+<rect x="7" y="6" width="178" height="178" rx="29" fill="none" stroke="url(#metal)" stroke-width="6"/>
+<rect x="11" y="10" width="170" height="170" rx="25" fill="none" stroke="#251d3b" stroke-width="2"/>
+<path d="M41 9H151M15 46V92" stroke="#ffdf9e" stroke-opacity=".7" stroke-width="1.4"/>
+<path d="M42 179H150M177 104V149" stroke="#aa8dd0" stroke-opacity=".45" stroke-width="1.4"/>
+<use href="#feuille"/><use href="#feuille" transform="translate(192 0) scale(-1 1)"/><use href="#feuille" transform="translate(0 192) scale(1 -1)"/><use href="#feuille" transform="translate(192 192) scale(-1 -1)"/>
+</svg>

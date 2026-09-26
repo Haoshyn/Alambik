@@ -90,6 +90,15 @@ const CHAMPS_LISIBLES := ["attaque", "pv_mult", "defense", "cadence", "critique"
 	"degats_critiques", "degats_sorts", "projectile", "reduction", "recharge", "vitesse",
 	"soin", "rayon_sorts", "collecte", "coffre", "experience", "pierres"]
 
+const LIBELLES_BONUS := {
+	"attaque": "d’attaque", "pv_mult": "de PV maximum", "defense": "de défense",
+	"cadence": "de cadence", "critique": "de chance critique", "degats_critiques": "de dégâts critiques",
+	"degats_sorts": "de dégâts des sorts", "projectile": "de vitesse des projectiles",
+	"reduction": "de dégâts reçus", "recharge": "de récupération des sorts", "vitesse": "de vitesse",
+	"soin": "aux soins", "rayon_sorts": "de rayon des sorts", "collecte": "de butin",
+	"coffre": "aux coffres", "experience": "d’XP de compte", "pierres": "de pierres",
+}
+
 static func _nombre(valeur: float) -> String:
 	return String.num(valeur, 1).trim_suffix(".0").replace(".", ",")
 
@@ -103,16 +112,15 @@ static func valeur_au_rang(id: String, rang: int) -> String:
 		var butin := poids_rang(acquis) * float(noeud["collecte"]) * 100.0
 		var experience := poids_rang(acquis) * float(noeud["experience"]) * 100.0
 		return "+%s %% Butin · +%s %% XP de compte" % [_nombre(butin), _nombre(experience)]
-	for champ in ["attaque", "pv_mult", "defense", "cadence", "critique", "degats_critiques", "degats_sorts"]:
-		if noeud.has(champ):
-			return "+%s %%%s" % [_nombre(float(noeud[champ]) * acquis * 100.0), " d’attaque" if champ == "attaque" else ""]
 	for champ in CHAMPS_LISIBLES:
 		if noeud.has(champ):
-			return "%s%s %%" % ["-" if champ in ["reduction", "recharge"] else "+",
-				_nombre(poids_rang(acquis) * float(noeud[champ]) * 100.0)]
+			return "%s%s %% %s" % ["−" if champ in ["reduction", "recharge"] else "+",
+				_nombre(poids_rang(acquis) * float(noeud[champ]) * 100.0), str(LIBELLES_BONUS[champ])]
 	if noeud.has("rerolls"):
 		var tirages := acquis * int(noeud["rerolls"])
 		return "+%d relance%s (maximum %d au total)" % [tirages, "s" if tirages > 1 else "", Reglages.RELANCES_MAX_PAR_RUN]
+	if noeud.has("second_passif"):
+		return "Second emplacement passif débloqué" if acquis > 0 else "Second emplacement passif verrouillé"
 	return "acquis" if acquis > 0 else "aucun"
 
 static func resume_rang(id: String, rang: int) -> String:

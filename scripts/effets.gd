@@ -162,7 +162,10 @@ func _draw() -> void:
 			for i in 3:
 				projetes.append(_projeter_animation(points[i], float(hauteurs[i])))
 			if absf((projetes[1] - projetes[0]).cross(projetes[2] - projetes[0])) > 0.01:
-				draw_colored_polygon(projetes, segment["couleur"])
+				if segment.has("couleurs"):
+					draw_polygon(projetes, PackedColorArray(segment["couleurs"]))
+				else:
+					draw_colored_polygon(projetes, segment["couleur"])
 		else:
 			var largeur := float(segment["largeur"])
 			var couleur: Color = segment["couleur"]

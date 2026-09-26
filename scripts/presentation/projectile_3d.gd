@@ -1,5 +1,7 @@
 extends "res://scripts/presentation/proxy_3d.gd"
 
+const RenduProjectile = preload("res://data/animations_projectiles.gd")
+const RubanProjectile = preload("res://scripts/presentation/ruban_projectile.gd")
 static var _matieres := {}
 var _ruban := ImmediateMesh.new()
 var _matiere_ruban: StandardMaterial3D
@@ -20,9 +22,7 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 	_hostile = hostile
 	var tir: Tir = logique.get("tir")
 	if hostile:
-		_couleur = {"trait": Color("ff5848"), "aiguille": Color("ff697d"),
-			"eclat": Color("ffac56"), "lame": Color("f66aa9"),
-			"vrille": Color("ff725c")}.get(tir.silhouette, Color("ff5848"))
+		_couleur = RenduProjectile.profil(tir.silhouette)["couleur"]
 	_familier = "trait_familier" in tir.drapeaux
 	_aiguille = not hostile and tir.arme == "veloce"
 	if not hostile:
@@ -33,11 +33,11 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 			_couleur = Color("e6b3ff")
 	var cle := _couleur.to_html()+str(hostile)+tir.arme
 	if not _matieres.has(cle):
-		var mat := ShaderMaterial.new()
-		mat.shader = preload("res://shaders/trait_magique.gdshader") if hostile else preload("res://shaders/perle_magique.gdshader")
-		mat.set_shader_parameter("teinte",_couleur)
-		if hostile:
-			mat.set_shader_parameter("hostile",true)
+		var mat: ShaderMaterial
+		if not hostile:
+			mat = ShaderMaterial.new()
+			mat.shader = preload("res://shaders/perle_magique.gdshader")
+			mat.set_shader_parameter("teinte",_couleur)
 		var ruban := StandardMaterial3D.new()
 		ruban.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		ruban.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -48,21 +48,14 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 	_matiere_ruban = _matieres[cle][1]
 	modele = Node3D.new()
 	add_child(modele)
-	var coeur := MeshInstance3D.new()
 	if hostile:
-		var plan := QuadMesh.new()
-		plan.size = Vector2(0.52,0.62)
-		coeur.mesh = plan
-		coeur.rotation.x = -PI/2
-	coeur.position.y = 0.10
-	coeur.material_override = _matiere_coeur
-	coeur.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	modele.add_child(coeur)
-	if hostile and tir.silhouette != "trait":
-		coeur.visible = false
 		_tourbillon = preload("res://scripts/presentation/formes_projectiles_hostiles.gd").construire(tir.silhouette, _couleur)
 		modele.add_child(_tourbillon)
-	if not hostile:
+	else:
+		var coeur := MeshInstance3D.new()
+		coeur.material_override = _matiere_coeur
+		coeur.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		modele.add_child(coeur)
 		# Une vraie silhouette volumique evite de voir le support rectangulaire
 		# des anciens quads depuis la camera plongeante du telephone.
 		if _perle == null:
@@ -124,8 +117,8 @@ func mettre_a_jour(_delta: float) -> void:
 	modele.rotation.y = atan2(direction.x,direction.y)
 	if _tourbillon != null:
 		if not ReglagesJoueur.effets_reduits:
-			_rotation_tourbillon += _delta * (9.0 if str(logique.tir.silhouette) == "vrille" else 4.0)
-		_tourbillon.rotation.y = _rotation_tourbillon if str(logique.tir.silhouette) in ["vrille", "lame", "eclat"] else 0.0
+			_rotation_tourbillon += _delta * float(RenduProjectile.profil(str(logique.tir.silhouette))["rotation"])
+		_tourbillon.rotation.y = _rotation_tourbillon
 	_ruban.clear_surfaces()
 	if not _hostile:
 		for index in range(1, modele.get_child_count()):
@@ -133,7 +126,9 @@ func mettre_a_jour(_delta: float) -> void:
 		if not _aiguille:
 			return
 	else:
-		_matiere_coeur.set_shader_parameter("reduit",ReglagesJoueur.effets_reduits)
+		RubanProjectile.remplir(_ruban, _matiere_ruban, points, position, _couleur,
+			str(logique.tir.silhouette), ReglagesJoueur.effets_reduits)
+		return
 	# Le ruban continu garde l'aiguille lisible entre deux positions rapides.
 	var nombre := mini(points.size(),3 if ReglagesJoueur.effets_reduits else 8)
 	if nombre < 2: return
@@ -144,7 +139,7 @@ func mettre_a_jour(_delta: float) -> void:
 		var cote := (b-a).cross(Vector3.UP).normalized()
 		var debut := 1.0-float(i)/float(nombre-1)
 		var fin := 1.0-float(i+1)/float(nombre-1)
-		var largeur := 0.11 if _hostile and str(logique.tir.silhouette) in ["eclat", "vrille"] else 0.075
+		var largeur := 0.075
 		var sommets := [a+cote*largeur*debut,a-cote*largeur*debut,b+cote*largeur*fin,
 			b+cote*largeur*fin,a-cote*largeur*debut,b-cote*largeur*fin]
 		for j in 6:

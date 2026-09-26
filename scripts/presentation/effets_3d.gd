@@ -98,8 +98,9 @@ func _dessiner_sorts() -> void:
 		if segment.has("points"):
 			var points: Array = segment["points"]
 			var hauteurs: Array = segment["hauteurs"]
-			_sorts.surface_set_color(couleur)
+			var couleurs: Array = segment.get("couleurs", [])
 			for i in 3:
+				_sorts.surface_set_color(couleurs[i] if not couleurs.is_empty() else couleur)
 				_sorts.surface_add_vertex(Pont3D.vers_monde(points[i], float(hauteurs[i])))
 			continue
 		var debut := Pont3D.vers_monde(segment["depart"], float(segment["hauteur"]))

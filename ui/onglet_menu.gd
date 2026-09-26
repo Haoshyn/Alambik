@@ -44,7 +44,7 @@ func configurer(symbole_: String, libelle_ := "", index_icone_ := 0) -> void:
 	add_child(_illustration)
 	_texte = StyleAzur.texte(libelle, 25, StyleAzur.ACCENTS_MENU[index_icone])
 	_texte.name = "Libelle"
-	_texte.add_theme_font_override("font", Polices.TITRE)
+	_texte.add_theme_font_override("font", Polices.GRIMOIRE)
 	_texte.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_texte.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_texte.add_theme_constant_override("outline_size", 3)
@@ -82,19 +82,19 @@ func _process(delta: float) -> void:
 
 func _replacer() -> void:
 	if _illustration == null or size.x <= 0.0: return
-	var cote := minf(88.0, size.y * 0.59) * (1.0 + _selection * 0.15 - _pression * 0.05)
-	_illustration.position = Vector2((size.x - cote) * 0.5, 9.0 - _selection * 7.0 + _pression * 3.0)
+	var cote := minf(76.0, size.y * 0.51) * (1.0 + _selection * 0.10 - _pression * 0.05)
+	_illustration.position = Vector2((size.x - cote) * 0.5, 10.0 - _selection * 3.0 + _pression * 3.0)
 	_illustration.size = Vector2.ONE * cote
 	_illustration.modulate = Color("d6d3e5").lerp(Color.WHITE, 0.25 + _selection * 0.75)
-	var taille := 25 if actif else 21
-	while taille > 13 and Polices.TITRE.get_string_size(libelle, HORIZONTAL_ALIGNMENT_LEFT, -1, taille).x > size.x - 12:
+	var taille := 32 if actif else 28
+	while taille > 22 and Polices.GRIMOIRE.get_string_size(libelle, HORIZONTAL_ALIGNMENT_LEFT, -1, taille).x > size.x - 12:
 		taille -= 1
 	_texte.add_theme_font_size_override("font_size", taille)
 	_texte.add_theme_color_override("font_color", StyleAzur.ACCENTS_MENU[index_icone])
-	_texte.modulate.a = 0.75 + _selection * 0.25
+	_texte.modulate.a = 0.92 + _selection * 0.08
 	_texte.visible = size.x >= 105.0 or actif
-	_texte.position = Vector2(0, size.y - 48)
-	_texte.size = Vector2(size.x, 35)
+	_texte.position = Vector2(0, size.y - 63)
+	_texte.size = Vector2(size.x, 46)
 	_accent.position = Vector2(8, size.y - 11)
 	_accent.size = Vector2(maxf(0.0, size.x - 16.0), 9)
 	_accent.modulate = StyleAzur.ACCENTS_MENU[index_icone]

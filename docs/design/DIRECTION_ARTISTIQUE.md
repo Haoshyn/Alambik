@@ -19,10 +19,11 @@ elles conservent les idées historiques sans définir le rendu actuel.
 ## Interface — Émail arcanique (A)
 
 - Composer la silhouette globale avant les composants : pas de succession de
-  cartes uniformes ni de présentation dashboard. Héros autour du personnage,
+  cartes uniformes ni de présentation dashboard. Héros autour de grandes jauges colorées,
   maîtrises en chemins de constellation, sorts en cartes régulières avec glyphes
   et fiches contextuelles à la demande,
-  parure en trois sceaux décalés. Titres et ressources restent hors des cadres.
+  parure en trois sceaux décalés. Les titres de page ont un cartouche en émail
+  à bord champagne et coins enluminés ; les ressources gardent leur espace propre.
 - Réserver les cadres aux actions et aux lectures détaillées. Les légers
   chevauchements concernent les illustrations, jamais le texte ou les commandes.
   Les surfaces courantes à coins de 40 px réservent au moins 44 px
@@ -50,8 +51,8 @@ elles conservent les idées historiques sans définir le rendu actuel.
   principales du menu prennent l'accent de leur page et Jouer utilise un dégradé
   orange et braise adoucie, bordé de cuivre, avec texte crème calligraphié.
   Les signes magiques utilisent le cyan par touches. Les nœuds de maîtrise
-  utilisent des sceaux circulaires ; les attributs du héros partagent une seule
-  colonne et des boutons ronds à flèches SVG pour répartir les points. L'onglet actif agrandit
+  utilisent des sceaux circulaires ; les attributs du héros associent un glyphe,
+  une jauge graduée animée et des commandes en émail +/− pour répartir les points. L'onglet actif agrandit
   son emblème ; chaque onglet garde son libellé et son accent. Les séparateurs
   et les filets de navigation sont des SVG autonomes, sans halo de sélection.
 - `tools/refonte_svg.py` dessine les SVG natifs actifs : navigation, ressources,
@@ -83,11 +84,14 @@ elles conservent les idées historiques sans définir le rendu actuel.
 - L'accueil utilise la clairière sans personnage comme fond animé et une
   illustration PNG transparente distincte pour chacun des cinq mondes. Seule
   l'illustration du monde choisi apparaît au centre, sans carte rectangulaire ;
-  la toucher ouvre la sélection de campagne. Mine, Jouer élargi et Épreuves
-  partagent une rangée dessous. Jouer lance directement le chapitre choisi.
+  la toucher ouvre la sélection de campagne. Mine, le cartouche du monde et
+  Épreuves partagent une rangée juste au-dessus de Jouer, plus large et centré.
+  Jouer lance directement le chapitre choisi.
   Le niveau et l'XP occupent le haut gauche ; les monnaies ont chacune leur
   symbole et un petit cadre à droite. Le menu ne montre ni logo ni héros.
-  L'onglet Héros conserve son illustration dédiée.
+  L'onglet Héros ne montre plus de portrait. Classe et réinitialisation gratuite
+  sont regroupées à gauche du compteur de points, au-dessus de cinq grandes
+  jauges colorées. La fiche de classe remplace temporairement les attributs.
 - La clairière est composée de couches indépendantes dans
   `assets/visual/interface/clairiere_vivante/` : paysage sans ciel, végétation
   proche avec quatre rameaux découpés, reflets du lac, cascade et nuages/brumes.
@@ -108,10 +112,21 @@ elles conservent les idées historiques sans définir le rendu actuel.
   nœuds. Chaque sceau rond reçoit une teinte rouge, verte ou violette légère,
   un glyphe SVG illustré unique, plus vif et plus grand, puis une capsule de
   rang séparée juste en dessous. Les tracés entre sceaux restent champagne.
-- Sorts reprend le bandeau de niveau, un titre calligraphié, trois catégories,
-  quatre médaillons équipés sur une ligne dès que la largeur le permet et des
-  cartes de collection à deux colonnes. Ses cadres sont argentés et lilas ; les
-  glyphes, cadres, textes, boutons et filtres restent des éléments indépendants.
+  Les branches portent seulement Offensif, Défensif et Utilitaire. La fiche
+  affiche le bonus actuel, le rang suivant et le prérequis utile ; la
+  réinitialisation reste accessible dans un bouton compact centré en haut.
+- Sorts commence directement par ses trois catégories et quatre médaillons
+  équipés sur une ligne dès que la largeur le permet, sans bandeau de niveau
+  ni slogan. Seule la collection défile sous ces commandes fixes. Les cartes
+  ont un fond peint élémentaire : braise, givre, foudre, acide, onde ou vortex,
+  associé à leur effet. Un voile local protège les textes et un seul bord
+  métallique à coins enluminés apporte du relief, sans coins de viseur ni cadre
+  autour du glyphe. Toute la carte ouvre les détails ; les commandes d'équipement
+  sont dans la fiche. Le glissement continue à faire défiler la collection.
+  Les glyphes, cadres, textes, boutons et filtres restent des éléments indépendants.
+  Les catégories et les emplacements occupent un bandeau plus généreux, avec
+  des légendes colorées lisibles et des mipmaps pour les icônes réduites.
+  La mention « Maîtrise requise » est supprimée et ne réserve plus de hauteur.
   Les rangs et états affichés proviennent des données réelles du jeu.
 - Les îles gardent leur silhouette fixe ; leurs matières s'animent dans des zones
   définies par `data/animations_decors.gd` : encre et eau coulantes, sable,
@@ -121,12 +136,13 @@ elles conservent les idées historiques sans définir le rendu actuel.
   animations s'arrêtent aussi lorsque la page est cachée.
 - L'accueil reste `ui/accueil_clairiere.tscn` pour conserver les références.
   Le bas contient les cinq onglets Héros, Équipement, Aventure, Maîtrises et
-  Sorts : seule l'icône est visible au repos ; l'onglet actif grandit légèrement
-  et révèle son titre.
-- Typographie : DM Sans gras pour la lecture et extra-gras pour les commandes ;
-  Fondamento pour les grands titres des pages. Les textes sur illustration ont
+  Sorts : les libellés colorés restent visibles ; l'onglet actif grandit légèrement.
+- Typographie : DM Sans gras pour la lecture, extra-gras pour les chiffres et
+  les bonus ; Grenze à graisse native 750 pour les titres, attributs, noms de
+  sorts et onglets. Fondamento reste disponible pour les anciens éléments.
+  Les textes sur illustration ont
   une ombre nette ou un voile indigo discret ; les petites légendes ne reposent
-  jamais sur un contour épais. Garder les textes longs en DM Sans. Les deux
+  jamais sur un contour épais. Garder les textes longs en DM Sans. Les trois
   familles sont fournies avec leur licence OFL dans `assets/fonts/`.
 - Les zones sûres sont prises en compte sur les quatre côtés. La largeur de
   lecture est plafonnée ; grilles et groupes d'actions se recomposent. L'accueil
@@ -134,9 +150,12 @@ elles conservent les idées historiques sans définir le rendu actuel.
   les commandes ni réduire leurs cibles tactiles.
 - Les Sorts alignent les emplacements équipés et présentent chaque catégorie
   dans une grille de deux colonnes qui défile sans pagination. Actifs, Passifs
-  et Ultimes prennent respectivement un accent bleu vif, mauve et or. Les
-  fiches Sorts et Maîtrises s'ouvrent au centre, au-dessus de la page courante ;
-  toucher le voile ou Fermer les referme sans réinitialiser la liste.
+  et Ultimes prennent respectivement un accent mauve, jade et corail. Les
+  fiches Sorts s'ouvrent au centre avec un seul cadre ; toucher le voile ou
+  Fermer les referme sans réinitialiser la liste. Dans Maîtrises, une fiche de
+  hauteur fixe au-dessus de la constellation montre la sélection, ses effets,
+  ses rangs et son amélioration. Toucher un autre sceau remplace directement
+  son contenu, sans fenêtre superposée.
   Les transitions entre onglets restent courtes et disparaissent avec les
   effets réduits.
 - Héros, Équipement et Sorts regroupent leurs informations de progression dans
@@ -178,8 +197,10 @@ elles conservent les idées historiques sans définir le rendu actuel.
 - Le socle de navigation prend un émail indigo sombre et un filet cuivre ;
   les accès Mine et Épreuves gardent des sceaux séparés, bronze et améthyste.
   Leurs actions reprennent ces accents, tandis que les compteurs distinguent
-  les gouttes cyan des pierres violettes. La légende de campagne reprend
-  discrètement la couleur du monde sans concurrencer son illustration.
+  les gouttes cyan des pierres violettes. La légende de campagne reste près des
+  commandes de départ ; elle partage
+  avec le panneau de niveau un émail indigo nuancé et un filet champagne.
+  La couleur du monde teinte légèrement ce fond sans concurrencer l’illustration.
 - Sur une illustration claire, un texte clair reçoit une ombre indigo ou un voile ;
   dans un panneau clair, le texte passe en encre indigo. Pour les contrôles et le
   texte, viser les contrastes WCAG 2.2 : 4,5:1 pour le texte courant, 3:1 pour le

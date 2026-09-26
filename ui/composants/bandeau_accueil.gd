@@ -44,6 +44,8 @@ func _ready() -> void:
 	_medaillon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_medaillon)
 	_niveau = StyleAzur.texte("", 48, Color("ffe8b0"))
+	_niveau.add_theme_font_override("font", Polices.CHIFFRES)
+	_niveau.add_theme_font_size_override("font_size", 46)
 	_niveau.name = "Niveau"
 	_niveau.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_niveau.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -51,7 +53,8 @@ func _ready() -> void:
 	add_child(_niveau)
 	_titre_niveau = StyleAzur.texte("NIVEAU", 27, Color("f7d6a0"))
 	_titre_niveau.name = "TitreNiveau"
-	_titre_niveau.add_theme_font_override("font", Polices.TITRE)
+	_titre_niveau.add_theme_font_override("font", Polices.GRIMOIRE)
+	_titre_niveau.add_theme_font_size_override("font_size", 28)
 	_titre_niveau.autowrap_mode = TextServer.AUTOWRAP_OFF
 	add_child(_titre_niveau)
 	_experience_libelle = StyleAzur.texte("", 21, Color("b9edf2"))
@@ -108,20 +111,20 @@ func _replacer() -> void:
 		return
 	var largeur_profil := minf(400.0, size.x * 0.4)
 	var hauteur_profil := 136.0
-	_profil_fond.position = Vector2(0, 2)
+	_profil_fond.position = Vector2(0, 8)
 	_profil_fond.size = Vector2(largeur_profil, hauteur_profil)
 	_profil.position = _profil_fond.position
 	_profil.size = _profil_fond.size
-	_medaillon.position = Vector2(0, 6)
-	_medaillon.size = Vector2(124, 124)
-	_niveau.position = Vector2(22, 37)
-	_niveau.size = Vector2(80, 62)
-	_titre_niveau.position = Vector2(132, 13)
+	_medaillon.position = Vector2(8, 14)
+	_medaillon.size = Vector2(108, 108)
+	_niveau.position = Vector2(22, 38)
+	_niveau.size = Vector2(80, 60)
+	_titre_niveau.position = Vector2(132, 22)
 	_titre_niveau.size = Vector2(largeur_profil - 148, 38)
-	_experience.position = Vector2(132, 57)
-	_experience.size = Vector2(largeur_profil - 152, 25)
-	_experience_libelle.position = Vector2(134, 85)
-	_experience_libelle.size = Vector2(largeur_profil - 154, 33)
+	_experience.position = Vector2(132, 72)
+	_experience.size = Vector2(largeur_profil - 158, 18)
+	_experience_libelle.position = Vector2(134, 96)
+	_experience_libelle.size = Vector2(largeur_profil - 158, 29)
 	if size.x >= 880.0:
 		custom_minimum_size.y = 142.0
 		_reglages.position = Vector2(size.x - 112, 12)
@@ -135,8 +138,8 @@ func _replacer() -> void:
 		_profil_fond.size.x = size.x - 126.0
 		_profil.size.x = _profil_fond.size.x
 		_titre_niveau.size.x = _profil.size.x - 148.0
-		_experience_libelle.size.x = _profil.size.x - 154.0
-		_experience.size.x = _profil.size.x - 152.0
+		_experience_libelle.size.x = _profil.size.x - 158.0
+		_experience.size.x = _profil.size.x - 158.0
 		_reglages.position = Vector2(size.x - 112, 12)
 		_reglages.size = Vector2(112, 112)
 		var largeur_compteur := (size.x - 14.0) * 0.5

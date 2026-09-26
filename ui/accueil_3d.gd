@@ -24,6 +24,7 @@ func _ready() -> void:
 	_scene.campagne_demandee.connect(func(): campagne.emit())
 	_depart.mine_demandee.connect(func(): mine.emit())
 	_depart.epreuve_demandee.connect(func(): epreuve.emit())
+	_depart.campagne_demandee.connect(func(): campagne.emit())
 	_depart.depart_demande.connect(func(): jouer.emit())
 	ReglagesJoueur.maitrise_changee.connect(rafraichir)
 	resized.connect(_cadrer)
@@ -40,7 +41,7 @@ func _cadrer() -> void:
 	_marges.add_theme_constant_override("margin_top", int(Ecran.marge_haute()))
 	_marges.add_theme_constant_override("margin_bottom", int(Ecran.marge_basse() + StyleAzur.HAUTEUR_NAVIGATION + StyleAzur.MARGE_NAVIGATION_BAS + 20))
 	var largeur := maxf(0.0, size.x - maxf(lateral, Ecran.marge_gauche()) - maxf(lateral, Ecran.marge_droite()))
-	_depart.custom_minimum_size.x = minf(850.0, largeur)
+	_depart.custom_minimum_size.x = minf(1000.0, largeur)
 
 func rafraichir() -> void:
 	_bandeau.afficher(ReglagesJoueur.niveau_compte_effectif(), ReglagesJoueur.experience_compte,
@@ -50,6 +51,7 @@ func rafraichir() -> void:
 	var chapitre: Dictionary = Chapitres.par_index(ReglagesJoueur.chapitre_choisi)
 	var monde: Dictionary = Chapitres.MONDES[int(chapitre["monde"])]
 	_scene.afficher_campagne(int(chapitre["monde"]), int(chapitre["chapitre_monde"]), str(monde["nom"]))
+	_depart.afficher_campagne(int(chapitre["monde"]), int(chapitre["chapitre_monde"]), str(monde["nom"]))
 
 func _adapter_hauteur() -> void:
 	_composition.custom_minimum_size.y = _defilement.size.y
