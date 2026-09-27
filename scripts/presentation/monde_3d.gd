@@ -13,7 +13,7 @@ var _limites := Rect2()
 var _portail: Node3D
 var _obstacles: Node3D
 var _lumiere: DirectionalLight3D
-var _phenomenes: Node3D
+var _familier: Node3D
 var _terrain: Node3D
 
 func _ready() -> void:
@@ -47,15 +47,15 @@ func charger(chemin: String) -> PackedScene:
 		_scenes[chemin] = load(chemin)
 	return _scenes[chemin]
 
-func relier(salle_: Node2D, heros_: Node2D, fond: Node2D) -> void:
+func relier(salle_: Node2D, heros_: Node2D, fond: Node2D, familier: Node2D) -> void:
 	salle = salle_
 	heros = heros_
 	_terrain = preload("res://scripts/presentation/terrain_elementaire_3d.gd").new()
 	_terrain.salle = salle
 	add_child(_terrain)
-	_phenomenes = preload("res://scripts/presentation/phenomenes_3d.gd").new()
-	_phenomenes.heros = heros
-	add_child(_phenomenes)
+	_familier = preload("res://scripts/presentation/suivi_familier_3d.gd").new()
+	_familier.logique = familier
+	add_child(_familier)
 	fond.set_meta("visuel_3d", true)
 	fond.queue_redraw()
 	salle.set_meta("visuel_3d", true)
@@ -71,7 +71,7 @@ func relier(salle_: Node2D, heros_: Node2D, fond: Node2D) -> void:
 		_inscrire(enfant)
 
 func _noeud_ajoute(noeud: Node) -> void:
-	if noeud is Node2D and (noeud.get_parent() == salle or noeud is Gardien):
+	if noeud is Node2D and (noeud.get_parent() == salle):
 		call_deferred("_inscrire_identifiant", noeud.get_instance_id())
 
 func _inscrire_identifiant(identifiant: int) -> void:
@@ -90,11 +90,8 @@ func _inscrire(noeud: Node) -> void:
 	elif noeud.is_in_group("ennemis"):
 		chemin = Visuels3D.chemin_ennemi(noeud.get("donnees"))
 		genre = "ennemi"
-	elif noeud is Area2D and noeud.get_script() != null and noeud.get_script().resource_path == "res://scripts/projectile.gd":
+	elif noeud is Area2D and noeud.get_script() != null and noeud.get_script().resource_path == "res://scripts/combat/projectile.gd":
 		genre = "projectile"
-	elif noeud is Gardien:
-		chemin = "res://assets/3d/characters/gardien.glb"
-		genre = "gardien"
 	if genre.is_empty():
 		return
 	var proxy := Node3D.new()
@@ -111,7 +108,7 @@ func _inscrire(noeud: Node) -> void:
 func _process(delta: float) -> void:
 	if not is_instance_valid(salle):
 		return
-	if is_instance_valid(_phenomenes): _phenomenes.mettre_a_jour(delta)
+	if is_instance_valid(_familier): _familier.mettre_a_jour(delta)
 	if is_instance_valid(_terrain): _terrain.mettre_a_jour(delta)
 	Pont3D.cadrer(camera,get_viewport().get_visible_rect().size,get_viewport().canvas_transform)
 	_lumiere.shadow_enabled = not ReglagesJoueur.effets_reduits and (OS.get_name() != "Android" or Visuels3D.OMBRES_ANDROID)

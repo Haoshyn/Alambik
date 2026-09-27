@@ -47,7 +47,7 @@ func rafraichir() -> void:
 	_bandeau.afficher(ReglagesJoueur.niveau_compte_effectif(), ReglagesJoueur.experience_compte,
 		ReglagesJoueur.experience_compte_requise(), ReglagesJoueur.gouttes_affichees(), str(ReglagesJoueur.pierres_forge))
 	_depart.definir_acces(ReglagesJoueur.mode_debloque("mine"), Reglages.MINE_NIVEAU_DEBLOCAGE,
-		ReglagesJoueur.mode_debloque("epreuve_sorts"), Reglages.EPREUVE_NIVEAU_DEBLOCAGE)
+		ReglagesJoueur.mode_debloque("epreuves"), Reglages.EPREUVE_NIVEAU_DEBLOCAGE)
 	var chapitre: Dictionary = Chapitres.par_index(ReglagesJoueur.chapitre_choisi)
 	var monde: Dictionary = Chapitres.MONDES[int(chapitre["monde"])]
 	_scene.afficher_campagne(int(chapitre["monde"]), int(chapitre["chapitre_monde"]), str(monde["nom"]))

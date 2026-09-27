@@ -7,18 +7,16 @@ var niveau_mine := 1
 
 func _ready() -> void:
 	var col := StyleAzur.defilement(StyleAzur.page(self, "Récompenses possibles"))
-	var salles := Reglages.SALLES_PAR_RUN if mode == "grimoire" else 5 if mode == "epreuve_sorts" else 1
-	var boss := 4 if mode == "grimoire" else 5 if mode == "epreuve_sorts" else 1
+	var salles := Reglages.SALLES_PAR_RUN if mode == "grimoire" else 5 if mode == "epreuves" else 1
+	var boss := 4 if mode == "grimoire" else 5 if mode == "epreuves" else 1
 	var offre := ButinsRun.offre(mode, chapitre, salles, boss, true, niveau_epreuve,
-		ReglagesJoueur.rangs_sorts, ReglagesJoueur.objets, ReglagesJoueur.grands_coffres_rates(chapitre),
+		ReglagesJoueur.rangs_passifs, ReglagesJoueur.objets, ReglagesJoueur.grands_coffres_rates(chapitre),
 		ReglagesJoueur.epreuves_ratees(niveau_epreuve), Mine.palier(niveau_mine), 0.0,
 		ReglagesJoueur.coeur_mana_obtenu(niveau_epreuve),
 		ReglagesJoueur.epreuves_sans_coeur_mana(niveau_epreuve))
-	var titre := str(Chapitres.par_index(chapitre)["nom"]) if mode == "grimoire" else "Épreuve de magie · niveau %d" % niveau_epreuve if mode == "epreuve_sorts" else "La Mine · niveau %d" % niveau_mine
-	StyleAzur.banniere(col, titre, "Le trésor d’une aventure menée à son terme.", "couronne")
+	var titre := str(Chapitres.par_index(chapitre)["nom"]) if mode == "grimoire" else "Épreuve · niveau %d" % niveau_epreuve if mode == "epreuves" else "La Mine · niveau %d" % niveau_mine
+	StyleAzur.banniere(col, titre, "", "couronne")
 	col.add_child(StyleAzur.texte("DANS VOTRE COFFRE", 24, StyleAzur.CUIVRE))
-	for cadeau in offre["cadeaux"]:
-		_ajouter_carte(col, str(cadeau), "sort", 1.0)
 	var ressources := StyleAzur.plaque(col, true)
 	var ligne := HBoxContainer.new()
 	ligne.add_theme_constant_override("separation", 24)
@@ -31,7 +29,7 @@ func _ready() -> void:
 	if pierres > 0:
 		ressources.add_child(StyleAzur.texte("%d pierres de forge · garanties" % pierres, 29, StyleAzur.CUIVRE))
 	StyleAzur.separateur(col)
-	for type in ["objet", "sort"]:
+	for type in ["objet", "passif"]:
 		var candidats: Array = offre[type + "s"]
 		if candidats.is_empty(): continue
 		var chance := float(offre["chance_" + type])
@@ -39,10 +37,10 @@ func _ready() -> void:
 			_ajouter_carte(col, str(id), type, chance / float(candidats.size()))
 	var precisions := StyleAzur.plaque(col, true)
 	precisions.add_child(StyleAzur.texte("À savoir", 29, StyleAzur.ENCRE))
-	if mode == "epreuve_sorts":
-		if not (offre["sorts"] as Array).is_empty():
-			precisions.add_child(StyleAzur.texte("Garantie de ce niveau : un sort sous %d victoire(s) maximum. Le compteur repart après chaque sort obtenu." % maxi(1,Reglages.EPREUVE_GARANTIE_CAPACITE-ReglagesJoueur.epreuves_ratees(niveau_epreuve)),27,StyleAzur.ATTENUE))
-		precisions.add_child(StyleAzur.texte("Un sort au maximum. Les sorts au rang maximal sortent du tirage.\nSans sort : %.0f %%" % [(1.0 - float(offre["chance_sort"])) * 100.0], 27, StyleAzur.ATTENUE))
+	if mode == "epreuves":
+		if not (offre["passifs"] as Array).is_empty():
+			precisions.add_child(StyleAzur.texte("Garantie de ce niveau : un passif sous %d victoire(s) maximum. Le compteur repart après chaque passif obtenu." % maxi(1,Reglages.EPREUVE_GARANTIE_CAPACITE-ReglagesJoueur.epreuves_ratees(niveau_epreuve)),27,StyleAzur.ATTENUE))
+		precisions.add_child(StyleAzur.texte("Un passif au maximum. Les passifs au rang maximal sortent du tirage.\nSans passif : %.0f %%" % [(1.0 - float(offre["chance_passif"])) * 100.0], 27, StyleAzur.ATTENUE))
 		if ReglagesJoueur.coeur_mana_obtenu(niveau_epreuve):
 			precisions.add_child(StyleAzur.texte("Cœur de mana déjà obtenu dans ce niveau.", 27, StyleAzur.CUIVRE))
 		else:
@@ -58,12 +56,12 @@ func _ready() -> void:
 				paliers.append("%d salles terminées : %.1f %%" % [palier, float(coffre["chance_objet"]) * 100.0])
 		precisions.add_child(StyleAzur.texte("Même en cas de défaite, le coffre peut donner un bijou manquant :\n" + " · ".join(paliers)
 			+ ".\nLes défaites ne font pas avancer le compteur des trois victoires.", 27, StyleAzur.ATTENUE))
-	precisions.add_child(StyleAzur.texte("Chaque salle remplit le coffre ; chaque boss augmente son rang. Abandon ou défaite : les gains des salles terminées restent acquis. Les sorts et les Cœurs de mana exigent la victoire en Épreuve.\nMontants avec vos bonus actuels, hors augmentations de l’aventure. Aucune salle terminée : coffre vide.", 27, StyleAzur.ATTENUE))
+	precisions.add_child(StyleAzur.texte("Gains conservés après chaque salle. Les boss améliorent le coffre.\nPassifs et Cœurs de mana : victoire en Épreuve.\nMontants avec vos bonus, hors augments.", 27, StyleAzur.ATTENUE))
 
 var _detail: Control
 
 func _ajouter_carte(col: VBoxContainer, id: String, type: String, chance: float) -> void:
-	var d: Dictionary = CatalogueObjets.OBJETS[id] if type == "objet" else Sorts.donnees(id)
+	var d: Dictionary = CatalogueObjets.OBJETS[id] if type == "objet" else Passifs.donnees(id)
 	var carte := StyleAzur.bouton("", func(): _ouvrir_detail(id, type))
 	carte.name = "Carte_" + id
 	carte.custom_minimum_size.y = 204
@@ -107,20 +105,20 @@ func _ouvrir_detail(id: String, type: String) -> void:
 	_detail.add_user_signal("ferme")
 	add_child(_detail)
 	_detail.connect("ferme", func(): _detail.queue_free())
-	var d: Dictionary = CatalogueObjets.OBJETS[id] if type == "objet" else Sorts.donnees(id)
+	var d: Dictionary = CatalogueObjets.OBJETS[id] if type == "objet" else Passifs.donnees(id)
 	var col := StyleAzur.defilement(StyleAzur.page(_detail, str(d["nom"])))
 	var presentation := StyleAzur.plaque(col, true)
 	presentation.add_child(StyleAzur.image(StyleAzur.icone_objet(id), 240) if type == "objet" else StyleAzur.vignette(id, 240))
-	presentation.add_child(StyleAzur.texte("RELIQUE DE L’ATELIER" if type == "objet" else "PAGE DU GRIMOIRE", 24, StyleAzur.CUIVRE))
+	presentation.add_child(StyleAzur.texte("RELIQUE DE L’ATELIER" if type == "objet" else "PASSIF PERMANENT", 24, StyleAzur.CUIVRE))
 	StyleAzur.separateur(col)
 	if type == "objet":
 		col.add_child(StyleAzur.texte("À l’obtention\n" + _resume_objet(id, 0), 30))
 		col.add_child(StyleAzur.texte("Forge 10\n" + _resume_objet(id, 10), 30))
 		col.add_child(StyleAzur.texte(CatalogueObjets.description_effets(id, 10), 28))
-		col.add_child(StyleAzur.texte("Un pouvoir fixe au niveau 10. La forge augmente l’Attaque brute et la statistique principale : PV de l’anneau, Défense du bracelet ou dégâts des sorts du collier. Les bijoux des mondes avancés apportent davantage de statistiques brutes.", 26, StyleAzur.ATTENUE))
+		col.add_child(StyleAzur.texte("Pouvoir spécial au niveau 10.\nForge : Attaque et statistique principale améliorées.", 26, StyleAzur.ATTENUE))
 	else:
 		col.add_child(StyleAzur.texte(str(d["description"]), 30))
-		var rang_max := Sorts.rang_max(id)
-		col.add_child(StyleAzur.texte("Rang 1 : %s\nRang %d : %s" % [Sorts.resume_rang(id, 1), rang_max, Sorts.resume_rang(id, rang_max)], 28))
-		col.add_child(StyleAzur.texte("Les doublons améliorent cette capacité, jusqu’au rang %d. %s" % [rang_max, Sorts.progression_rang(id)], 26, StyleAzur.ATTENUE))
-		col.add_child(StyleAzur.texte("Découvrir un sort ouvre son utilisation. Les dégâts finaux permanents viennent désormais des Cœurs de mana.", 26, StyleAzur.ATTENUE))
+		var rang_max := Passifs.rang_max(id)
+		col.add_child(StyleAzur.texte("Rang 1 : %s\nRang %d : %s" % [Passifs.resume_rang(id, 1), rang_max, Passifs.resume_rang(id, rang_max)], 28))
+		col.add_child(StyleAzur.texte("Les doublons améliorent ce passif, jusqu’au rang %d. %s" % [rang_max, Passifs.progression_rang(id)], 26, StyleAzur.ATTENUE))
+		col.add_child(StyleAzur.texte("Cœurs de mana : +%d %% de dégâts chacun, au maximum %d (+%d %%)." % [roundi(Reglages.COEUR_MANA_BONUS_FINAL * 100.0), Epreuves.nombre(), roundi(Reglages.COEUR_MANA_BONUS_FINAL * Epreuves.nombre() * 100.0)], 26, StyleAzur.ATTENUE))

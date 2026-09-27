@@ -82,17 +82,17 @@ func _construire() -> void:
 		etiquette += "  ·  Rang %d / %d" % [possedees + 1, reactif.copies_permises()]
 	elif not pour_choix and possedees > 0:
 		etiquette += "  ·  Acquis ×%d" % possedees
-	textes.add_child(StyleAzur.texte(etiquette, 22, reactif.couleur_rarete()))
+	textes.add_child(StyleAzur.texte(etiquette, 28, reactif.couleur_rarete()))
 	var filet := ColorRect.new()
 	filet.color = Color(reactif.couleur_rarete(), 0.82)
 	filet.custom_minimum_size = Vector2(90, 3)
 	filet.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	filet.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	textes.add_child(filet)
-	textes.add_child(StyleAzur.texte(reactif.nom, 35, StyleAzur.IVOIRE))
-	textes.add_child(StyleAzur.texte(reactif.description, 27, StyleAzur.ATTENUE))
-	if pour_choix and reactif.rarete != Reactif.COMMUN:
-		textes.add_child(StyleAzur.texte(DetailsReactif.texte(reactif), 24, reactif.couleur_rarete()))
+	textes.add_child(StyleAzur.texte(reactif.nom, 38, StyleAzur.IVOIRE))
+	var details := DetailsReactif.texte(reactif, 1 if pour_choix else maxi(1, possedees))
+	tooltip_text = "%s\n%s" % [reactif.nom, details]
+	textes.add_child(StyleAzur.texte(details, 30, StyleAzur.IVOIRE))
 	# Les descriptions longues agrandissent la carte au lieu de chevaucher la suivante.
 	_contenu.minimum_size_changed.connect(_adapter_hauteur)
 	_adapter_hauteur.call_deferred()
@@ -105,10 +105,10 @@ func _appliquer_cadre() -> void:
 	if reactif == null:
 		return
 	var accent := reactif.couleur_rarete()
-	add_theme_stylebox_override("normal", StyleAzur.carte_augment(accent, selectionnee))
-	add_theme_stylebox_override("hover", StyleAzur.carte_augment(accent, true))
-	add_theme_stylebox_override("pressed", StyleAzur.carte_augment(StyleAzur.IVOIRE, true))
-	add_theme_stylebox_override("disabled", StyleAzur.carte_augment(accent if selectionnee else accent.darkened(0.5), selectionnee))
+	add_theme_stylebox_override("normal", StyleAzur.cadre_grimoire(accent, selectionnee))
+	add_theme_stylebox_override("hover", StyleAzur.cadre_grimoire(accent, true))
+	add_theme_stylebox_override("pressed", StyleAzur.cadre_grimoire(StyleAzur.IVOIRE, true))
+	add_theme_stylebox_override("disabled", StyleAzur.cadre_grimoire(accent if selectionnee else accent.darkened(0.5), selectionnee))
 	add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 
 func _sur_appui() -> void:

@@ -1,8 +1,9 @@
 extends Control
 
-const DONNEES := preload("res://data/animations_decors.gd")
+const DONNEES := preload("res://data/presentation/animations_decors.gd")
 const MOUVEMENT_EAU := preload("res://shaders/eau_clairiere.gdshader")
 const BOUCLE_CASCADE := preload("res://shaders/cascade_boucle.gdshader")
+const MOUVEMENT_VEGETATION := preload("res://shaders/vegetation_clairiere.gdshader")
 
 var fond_externe := false
 var _plateau: Control
@@ -28,25 +29,39 @@ func _ready() -> void:
 	_construire_ciel()
 	for donnees: Dictionary in DONNEES.NUAGES:
 		var image: Texture2D = donnees["image"]
+		if donnees.has("region"):
+			var region: Rect2 = donnees["region"]
+			var decoupe := AtlasTexture.new()
+			decoupe.atlas = image
+			decoupe.region = Rect2(region.position * image.get_size(), region.size * image.get_size())
+			decoupe.filter_clip = true
+			image = decoupe
 		var nuage := _ajouter_plan("Nuage", image)
 		nuage.position = donnees["position"]
-		var echelle: float = donnees["echelle"]
-		nuage.size = Vector2(image.get_size()) * echelle
+		var largeur: float = donnees["largeur"]
+		nuage.size = image.get_size() * (largeur / image.get_width())
 		var opacite: float = donnees["opacite"]
 		nuage.modulate.a = opacite
 		_nuages.append(nuage)
 
 	var paysage := _ajouter_plan("PaysageFixe", DONNEES.PAYSAGE)
 	paysage.size = DONNEES.TAILLE_ACCUEIL
+	_ajouter_vent(paysage, DONNEES.VENT_PAYSAGE)
 	var lac := _ajouter_plan("RefletsDuLac", DONNEES.REFLETS_LAC)
 	lac.position = DONNEES.POSITION_LAC
 	var matiere_lac := _ajouter_matiere(lac, MOUVEMENT_EAU)
 	matiere_lac.set_shader_parameter("masque_eau", DONNEES.MASQUE_LAC)
+	matiere_lac.set_shader_parameter("amplitude_px", DONNEES.EAU["amplitude_px"])
+	matiere_lac.set_shader_parameter("vitesse_eau", DONNEES.EAU["vitesse"])
+	matiere_lac.set_shader_parameter("force_reflets", DONNEES.EAU["reflets"])
 
 	var cascade := _ajouter_plan("CascadeInterieure", DONNEES.CASCADE_BOUCLE)
 	cascade.position = DONNEES.POSITION_CASCADE
 	cascade.size = DONNEES.TAILLE_CASCADE
-	_ajouter_matiere(cascade, BOUCLE_CASCADE)
+	var matiere_cascade := _ajouter_matiere(cascade, BOUCLE_CASCADE)
+	matiere_cascade.set_shader_parameter("vitesse_boucle", DONNEES.CASCADE["vitesse"])
+	matiere_cascade.set_shader_parameter("ecoulement_px", DONNEES.CASCADE["ecoulement_px"])
+	matiere_cascade.set_shader_parameter("vitesse_ecoulement", DONNEES.CASCADE["vitesse_ecoulement"])
 
 	_brume = _ajouter_plan("BrumeDuLac", DONNEES.BRUME_LAC)
 	_brume.position = DONNEES.BRUME["position"]
@@ -60,6 +75,7 @@ func _ready() -> void:
 		var image: Texture2D = donnees["image"]
 		var vegetation := _ajouter_plan("VegetationFixe%d" % index, image)
 		vegetation.position = donnees["position"]
+		_ajouter_vent(vegetation, DONNEES.VENT_VEGETATION[index])
 	for donnees: Dictionary in DONNEES.RAMEAUX:
 		var image: Texture2D = donnees["image"]
 		var rameau := _ajouter_plan("RameauMobile", image)
@@ -106,6 +122,13 @@ func _ajouter_matiere(plan: TextureRect, shader: Shader) -> ShaderMaterial:
 	_matieres.append(matiere)
 	return matiere
 
+func _ajouter_vent(plan: TextureRect, masque: Texture2D) -> void:
+	var matiere := _ajouter_matiere(plan, MOUVEMENT_VEGETATION)
+	matiere.set_shader_parameter("masque_vent", masque)
+	matiere.set_shader_parameter("origine_peinture", plan.position)
+	matiere.set_shader_parameter("amplitude_px", DONNEES.VENT["amplitude_px"])
+	matiere.set_shader_parameter("vitesse_vent", DONNEES.VENT["vitesse"])
+
 func _cadrer() -> void:
 	if not is_instance_valid(_plateau):
 		return
@@ -126,9 +149,8 @@ func _animer() -> void:
 	for index in _nuages.size():
 		var donnees: Dictionary = DONNEES.NUAGES[index]
 		var position: Vector2 = donnees["position"]
-		var vitesse: float = donnees["vitesse_px"]
 		var nuage := _nuages[index]
-		nuage.position = Vector2(_position_passage(position.x, nuage.size.x, vitesse), position.y)
+		nuage.position = Vector2(_position_nuage(position.x), position.y)
 	var position_brume: Vector2 = DONNEES.BRUME["position"]
 	var vitesse_brume: float = DONNEES.BRUME["vitesse_px"]
 	_brume.position = Vector2(_position_passage(position_brume.x, _brume.size.x, vitesse_brume), position_brume.y)
@@ -143,3 +165,9 @@ func _animer() -> void:
 func _position_passage(depart: float, largeur: float, vitesse: float) -> float:
 	var trajet := DONNEES.TAILLE_ACCUEIL.x + largeur
 	return fposmod(depart + _temps * vitesse + largeur, trajet) - largeur
+
+func _position_nuage(depart: float) -> float:
+	# La gauche du nuage atteint le bord droit avant tout retour derriere la file.
+	var bord_droit: float = DONNEES.TAILLE_ACCUEIL.x
+	return fposmod(depart + _temps * DONNEES.VITESSE_NUAGES - bord_droit,
+		DONNEES.PARCOURS_NUAGES) + bord_droit - DONNEES.PARCOURS_NUAGES

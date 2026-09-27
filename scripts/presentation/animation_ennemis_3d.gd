@@ -1,6 +1,6 @@
 extends Node3D
 
-const Rendu = preload("res://data/animations_combat.gd")
+const Rendu = preload("res://data/presentation/animations_combat.gd")
 
 var _profil: Dictionary
 var _boss := false
@@ -38,6 +38,7 @@ func mettre_a_jour(ennemi: Node2D, delta: float, orientation: float, vitesse: fl
 	var donnees: Dictionary = ennemi.get("donnees")
 	var etat := str(ennemi.get("_motif" if _boss else "_etat"))
 	var charge: bool = etat == "charger" or (_boss and etat == "charge" and not ennemi._annonce_charge())
+	if _boss and etat == "assaut_contact": charge = str(ennemi._contact.etat) == "frappe"
 	if charge and not _charge_precedente: projeter()
 	_charge_precedente = charge
 	var armer := _progression_preparation(ennemi, donnees, etat)
@@ -62,6 +63,12 @@ func mettre_a_jour(ennemi: Node2D, delta: float, orientation: float, vitesse: fl
 	_hauteur = rebond * (1.0 - _preparation) + sin(clampf(phase, 0.0, 1.0) * PI) * Rendu.PHASE_HAUTEUR
 	var apparition := smoothstep(0.0, 1.0, float(ennemi.get("_apparition")))
 	var entree := lerpf(0.72, 1.0, apparition)
+	if not _boss and etat == "phase":
+		var progression := clampf(1.0 - float(ennemi._minuterie) / Reglages.PHASE_ANNONCE, 0.0, 1.0)
+		entree *= lerpf(1.0, Rendu.PHASE_ECHELLE_MIN, smoothstep(0.0, 1.0, progression))
+	elif not _boss and etat == "vise_phase":
+		var progression := clampf((1.0 - float(ennemi._minuterie) / Reglages.PHASE_PREPARATION_TIR) / Rendu.PHASE_RETOUR_PART, 0.0, 1.0)
+		entree *= lerpf(Rendu.PHASE_ECHELLE_MIN, 1.0, smoothstep(0.0, 1.0, progression))
 	# Ce pivot enveloppe le GLB : les proportions du monde et ses pistes restent intactes.
 	var axe := Basis(Vector3.UP, orientation)
 	basis = axe * Basis.from_euler(Vector3(_inclinaison, 0, _roulis)) * axe.inverse()
@@ -70,13 +77,22 @@ func mettre_a_jour(ennemi: Node2D, delta: float, orientation: float, vitesse: fl
 
 func _progression_preparation(ennemi: Node2D, donnees: Dictionary, etat: String) -> float:
 	if _boss:
+		if etat == "assaut_contact" and str(ennemi._contact.etat) == "annonce":
+			return 1.0 - float(ennemi._contact.reste) / float(ennemi._contact.profil["annonce"])
 		if ennemi._annonce_charge():
 			return clampf((float(ennemi._duree_du_motif("charge")) - float(ennemi._minuterie)) / BestiaireMondes.BOSS_CHARGE_ANNONCE, 0.0, 1.0)
 		var annonce := float(ennemi._motifs_mondes.annonce)
 		if annonce > 0.0: return 1.0 - annonce / BestiaireMondes.BOSS_ANNONCE_TIR
 		var signature := float(ennemi._telegraphe_signature)
 		return 1.0 - signature / Reglages.BOSS_TELEGRAPHE_SIGNATURE if signature > 0.0 else 0.0
-	if etat not in ["preparer", "vise", "vise_orbite", "tisser", "crache", "pulse", "invoque", "phase", "bombarde"]:
+	var salves: Array = ennemi._salves
+	if not salves.is_empty():
+		var prochaine: Dictionary = salves[0]
+		return clampf(1.0 - float(prochaine["delai"]) / EvolutionEnnemis.INTERVALLE_SALVES, 0.0, 1.0)
+	if etat not in ["preparer", "vise", "vise_orbite", "tisser", "crache", "pulse", "invoque", "phase", "vise_phase", "bombarde", "frappe", "gonfler"]:
 		return 0.0
-	var duree := float(donnees.get("preparation" if etat == "preparer" else "telegraphe", 1.0))
+	var duree := float(donnees.get("preparation" if etat in ["preparer", "gonfler"] else "telegraphe", 1.0))
+	if etat == "phase": duree = Reglages.PHASE_ANNONCE
+	elif etat == "vise_phase": duree = Reglages.PHASE_PREPARATION_TIR
+	elif etat == "frappe": duree = Reglages.ENNEMI_CONTACT_ANNONCE
 	return clampf(1.0 - float(ennemi.get("_minuterie")) / maxf(duree, 0.01), 0.0, 1.0)

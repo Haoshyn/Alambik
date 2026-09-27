@@ -1,35 +1,84 @@
-# Alambik — guide des agents
+# Alambik — travailler dans le projet
 
-Roguelite de tir portrait Android, Godot 4.7.1, GDScript.
+Roguelite de tir portrait Android, Godot 4.7.1 et GDScript. Simulation 2D,
+présentation 3D. Les demandes du propriétaire définissent le travail à réaliser.
 
-## Lecture ciblée
+## Trouver la bonne source
 
-1. Utiliser `docs/INDEX.md` pour trouver le point d'entrée si le fichier n'est pas déjà connu.
-2. Lire les `AGENTS.md` applicables sur le chemin du dossier modifié ; les règles racine valent aussi pour les sous-agents.
-3. Chercher avec `rg` avant d'ouvrir un gros fichier : `rg -n '^func|^class_name|^const' chemin`. Lire ensuite la plage utile.
-4. Ne pas charger tous les catalogues, écrans ou documents pour une retouche locale.
+- Si le fichier est connu, aller directement à ce fichier. Sinon, choisir
+  une ligne dans `docs/INDEX.md`, puis le seul index de domaine utile.
+- Pour les chiffres lisibles par le propriétaire : `statistiques_jeu/INDEX.md`.
+- Pour les règles du jeu : `docs/design/GAME_DESIGN.md` ; pour son état :
+  `docs/CURRENT.md` ; pour son style : `docs/design/DIRECTION_ARTISTIQUE.md`.
+- Lire les `AGENTS.md` du chemin modifié. Chercher un symbole avec `rg` avant
+  d'ouvrir un gros fichier ; ne lire que les dépendances utiles à la tâche.
+- Les index servent au routage des agents : ne pas les charger tous.
+  Ne pas lire les listes générées ou tous les catalogues pour retrouver une
+  fonction. Pour les statistiques, `tools/statistiques/INDEX.md` donne la
+  chaîne de calcul et le fichier responsable de chaque partie.
 
-Sources uniques : `data/` pour les valeurs, `docs/design/GAME_DESIGN.md` pour le périmètre du jeu, `docs/CURRENT.md` pour l'état court, `docs/design/DIRECTION_ARTISTIQUE.md` pour les décisions visuelles.
+## Responsabilités
 
-Ne pas lire par défaut les archives `../OldAlambik/`, caches `.godot/`, sorties `tmp/` et `build/`, `.uid`, `.import` ou binaires. Les ouvrir seulement si la tâche les concerne. L'ancien `human/` et les diagnostics sont archivés ; voir `docs/INDEX.md` uniquement si leur restauration est demandée.
+- `data/` définit les catalogues et les nombres ; aucune valeur d'équilibrage
+  ne doit être dupliquée dans la logique ou dans une description manuelle.
+- `scripts/` applique les règles ; `scripts/presentation/` les représente.
+- `autoload/` porte la session et la sauvegarde ; `ui/` présente les choix.
+- Les listes de `statistiques_jeu/` sont générées depuis les mêmes fonctions
+  que le jeu. Après un changement de chiffres, les régénérer et les vérifier.
+- Un fichier porte un concept. Extraire une responsabilité lorsqu'elle est
+  autonome ; ne pas ajouter des couches qui ne font que relayer un appel.
 
 ## Invariants
 
-- Identifiants et commentaires en français sans accents ; textes joueur avec accents.
-- Les commentaires expliquent pourquoi, pas ce que le code dit déjà.
-- Aucune valeur d'équilibrage en dur dans la logique : utiliser `data/reglages.gd` ou les catalogues de `data/`.
-- Ne reprendre aucun nom, texte, icône, sprite ou son d'un autre jeu.
-- Avec `:=`, préférer `lerpf`, `clampf`, `maxf`, `maxi`, `absf` aux fonctions renvoyant un `Variant`.
-- Typer les valeurs provenant des clés de `Dictionary`.
+### Ecrans figes par le proprietaire (27 septembre 2026)
+
+- Les cinq menus **Heros**, **Equipement**, **Aventure**, **Maitrises** et
+  **Passifs** sont figes dans leur etat actuel. Ne plus modifier leur
+  presentation, leurs commandes ou leur agencement sans demande explicite
+  du proprietaire concernant le menu ou l'element vise.
+- Ce gel concerne uniquement les menus, pas les systemes de jeu correspondants.
+  Il ne fige ni l'equilibrage ni la progression : ces sujets peuvent evoluer
+  selon les demandes du proprietaire sans retoucher les menus.
+- Cela couvre aussi les effets indirects d'un changement de theme, police,
+  composant partage ou ressource. Une demande sur un menu n'autorise pas une
+  retouche des autres menus. Les details visuels proteges sont dans
+  `ui/AGENTS.md`.
+- Ne plus ajouter de petits rectangles sombres derriere les titres, noms,
+  rangs, descriptions ou indications des Passifs. Garder les textes libres
+  sur des nuances calmes, avec un contraste assure par la typographie.
+- Musiques conservees : First Arcade, Dynamic Arcade et Accueil originale.
+  Les autres anciennes compositions sont retirees ; seules les deux nouvelles
+  bases Aventure et Atelier restent ouvertes aux retouches avec le proprietaire.
+
+### Regles de code
+
+- Identifiants et commentaires français sans accents ; textes joueur avec accents.
+- Les commentaires expliquent une intention ou une contrainte.
+- Typer les valeurs issues de `Dictionary` ; avec `:=`, préférer `lerpf`,
+  `clampf`, `maxf`, `maxi`, `absf` aux variantes renvoyant un `Variant`.
 - Ne pas modifier un tableau pendant son itération.
-- Pour les blocs de salle, utiliser `Geometrie.ligne_libre` plutôt qu'un rayon lancé depuis `_process`.
+- Utiliser `Geometrie.ligne_libre` pour les obstacles, pas un rayon par image.
+- Préserver les identifiants sauvegardés ou écrire une migration explicite.
+- Préserver les `.uid` lors d'un déplacement et mettre à jour les chemins
+  `res://`, les chargements dynamiques, les scènes, les outils et les index.
+- Aucune reprise de contenu d'un autre jeu. Conserver l'origine des ressources.
 
-## Vérification
+## Vérifier et préserver
 
-Vérifier chaque modification avec un contrôle adapté à sa portée. Pour une petite retouche, privilégier la relecture du diff et un test ciblé rapide. Pour un changement plus large, vérifier les scènes ou comportements touchés et lire les erreurs détaillées. Éviter les batteries de tests sans rapport avec la modification.
+Vérifier chaque changement avec un contrôle proportionné : diff et scénario
+ciblé pour une retouche ; import Godot, contrôles de progression et scènes
+touchées pour une refonte. Lire les erreurs, pas seulement le code de sortie.
+Exécuter Godot avec `--headless`, Blender avec `--background`, et les processus
+Windows lancés en arrière-plan avec `-WindowStyle Hidden`. Isoler `APPDATA`
+pour les runs de vérification afin de protéger la vraie sauvegarde.
 
-Garder les exécutions sans fenêtre ni prise de focus : Godot `--headless`, Blender `--background`, processus Windows `-WindowStyle Hidden`. Pour les runs du jeu, isoler le profil de la sauvegarde réelle.
+Ne pas écraser des changements existants. Un nettoyage déplace ce qui est
+prouvé obsolète vers une sauvegarde hors dépôt, avec inventaire. Les caches
+`.godot/`, sorties `tmp/`, `build/`, binaires et archives ne sont pas des
+sources à explorer par défaut. Les sources artistiques encore utilisées
+restent conservées même si leurs noms sont anciens.
 
-Une demande d'APK autorise export et contrôles de version, paquet et signature. Produire un seul fichier `Alambic.apk` à la racine du projet ; conserver journaux et métadonnées dans `build/android/`.
-
-Ne pas créer de guide ou rapport pour une petite retouche ; corriger brièvement une information devenue fausse suffit.
+Une demande d'APK autorise l'export et les contrôles de version, paquet et
+signature : un seul `Alambic.apk` à la racine, journaux dans `build/android/`.
+Ne pas exporter un APK à chaque modification. Ne pas créer de rapport pour
+une petite retouche ; actualiser le document devenu faux.

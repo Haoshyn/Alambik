@@ -1,52 +1,56 @@
 # Compositions originales
 
-## Collection de vingt choix
+Le catalogue `data/audio/musiques.gd` propose cinq morceaux : les trois
+originaux conservés et deux esquisses à retravailler avec le propriétaire.
 
-Le catalogue `data/musiques.gd` propose **10 musiques en jeu et 10 pour le menu**.
-Les identifiants et les choix sauvegardés sont conservés. Les deux premières
-pistes de run et `Accueil.ogg` gardent leur composition originale ; leurs sources
-intactes se trouvent dans `tools/audio/sources/`. Les 17 autres pistes sont
-synthétisées sans samples externes.
+| Morceau | Contexte | Source |
+|---|---|---|
+| First Arcade | Aventure | Composition fournie par le propriétaire |
+| Dynamic Arcade | Aventure | Composition fournie par le propriétaire |
+| Accueil — originale | Atelier / menu | Composition fournie par le propriétaire |
+| Aventure · Esquisse 1 | Aventure | Synthèse originale, `tools/audio/composer.py` |
+| Atelier · Esquisse 1 | Atelier / menu | Synthèse originale, `tools/audio/composer.py` |
 
-| Nouvelle piste | Usage | BPM | Timbre principal |
-|---|---|---|---|
-| Étincelles | Run | 146 | Célesta |
-| Ronde des automates | Run | 118 | Cordes pincées |
-| Course en canopée | Run | 132 | Flûte |
-| Fournaise de cuivre | Run | 104 | Cordes pincées |
-| Marées arcanes | Run | 126 | Clochettes |
-| Matin à l’atelier | Menu | 88 | Cordes pincées |
-| Jardin de verre | Menu | 76 | Célesta |
-| Bibliothèque secrète | Menu | 72 | Clochettes |
-| Le thé de l’alchimiste | Menu | 94 | Cordes pincées |
-| Serre à l’aube | Menu | 80 | Flûte |
-| Poussière d’étoiles | Menu | 68 | Célesta |
-| Comptoir de cuivre | Menu | 102 | Cordes pincées |
-| Carnet de voyage | Menu | 86 | Flûte |
+Les trois fichiers joués du propriétaire ne sont pas modifiés. Leurs sources
+intactes restent dans `tools/audio/sources/`. First Arcade et Accueil restent
+les choix par défaut. Les deux nouvelles pistes se choisissent dans
+**Paramètres → Ambiance sonore**, sous **Pendant l’aventure** et **Dans l’atelier**.
 
-Chaque piste possède son motif, sa progression et sa tonalité ; gammes majeure,
-mineure et dorienne. Les pistes de run ont des pulsations propres, une respiration
-centrale et une reprise plus dense. Les pistes de menu sont plus aériennes, avec
-quelques percussions légères. Export Ogg stéréo 44,1 kHz, 32 mesures, queues
-repliées pour la boucle. La transition de boucle et le rendu sur téléphone restent
-à apprécier à l'écoute.
+## Deux bases modifiables
 
-Génération sur demande : `python3 tools/audio/collection.py` avec numpy et ffmpeg
-(variable `FFMPEG` facultative). Les anciens rapports de mesure, APK et outils
-de diagnostic sont archivés dans `../OldAlambik/2026-09-20/organisation/`
-(chemin depuis la racine du projet).
+- **Aventure** : 120 BPM, 4/4, 64 secondes. Cordes pincées, mélodie de flûte,
+  basse et tambour synthétiques ; introduction, thème, réponse, respiration
+  et reprise.
+- **Atelier** : 80 BPM, 3/4, 72 secondes. Piano doux et notes de verre
+  synthétiques, avec une basse discrète et des souffles tenus, sans batterie.
 
-## Première collection
+Ces deux compositions n'utilisent aucun sample, enregistrement ou mélodie
+externe. Le dictionnaire `PISTES` du générateur contient séparément tempo,
+accords et notes ; les timbres et niveaux sont également éditables.
+Les graines fixes rendent la synthèse reproductible.
 
-Quatre compositions instrumentales originales, synthétisées sans samples ni mélodies externes. Les fichiers existants `firstarcade.ogg`, `dynamic_arcade.ogg` et `Accueil.ogg` restent disponibles ; `firstarcade.ogg` et `Accueil.ogg` sont les choix par défaut. Leur version jouée est égalisée et alignée en niveau sur les nouveaux morceaux ; `tools/audio/masteriser_originaux.py` repart toujours des fichiers sources intacts.
+Reproduction avec Python, NumPy et FFmpeg (variable `FFMPEG`, exécutable du
+PATH ou paquet `imageio-ffmpeg`) :
 
-| Piste | Usage | Tempo | Durée | Couleur |
-|---|---|---|---|---|
-| Cuivre vif | Run | 124 BPM | 61,94 s | Basse pulsée, clochettes et rythme régulier |
-| Vortex d’azur | Run | 138 BPM | 55,65 s | Arpèges rapides et mélodie aérienne |
-| Braise volatile | Run | 112 BPM | 68,57 s | Grave plus profond et percussion syncopée |
-| Atelier lunaire | Menu | 82 BPM | 93,66 s | Nappes et mélodie cristalline sans batterie |
+```text
+python tools/audio/composer.py --piste aventure
+python tools/audio/composer.py --piste atelier
+```
 
-Chaque morceau comporte 32 mesures, des variations mélodiques et une respiration avant la reprise. Les queues de notes et les échos sont repliés sur le début pour boucler sans silence ajouté. Export Ogg Vorbis stéréo 44,1 kHz, qualité 5.
+Omettre `--piste` génère les deux esquisses. Le générateur n'ouvre jamais les
+trois originaux. Export Ogg Vorbis stéréo, 44,1 kHz, qualité 6 ; les queues
+de notes et de réverbération traversent la jonction de boucle.
+Le rendu musical et le confort sur téléphone restent à apprécier à l'écoute.
 
-Reproduction : installer `numpy` pour Python 3 et `ffmpeg`, puis lancer `python3 tools/audio/composer.py`, `python3 tools/audio/collection.py` et `python3 tools/audio/masteriser_originaux.py` depuis la racine. Les générateurs conservent une graine fixe. Le catalogue `data/musiques.gd` alimente les deux sélecteurs des paramètres et valide les choix sauvegardés. Un changement remplace immédiatement la piste de son contexte ; une piste de run choisie depuis le menu s'entend au démarrage de la run.
+## Anciens morceaux retirés
+
+Les dix-sept anciennes compositions synthétisées, leurs fichiers d'import
+et l'ancien `collection.py` ont été retirés du dépôt à la demande du
+propriétaire. Copie de récupération hors dépôt, depuis la racine du projet :
+
+`../Alambik_sauvegardes/menu_audio_2026-09-27_122711/retires/`
+
+L'inventaire `inventaire_retires.json` voisin donne les chemins et empreintes.
+L'ancien générateur est conservé dans `avant/tools/audio/composer.py`.
+Les identifiants retirés sont explicitement redirigés vers First Arcade
+ou Accueil dans `Musiques.PISTES_RETIREES` lors de la lecture de la sauvegarde.

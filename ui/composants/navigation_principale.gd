@@ -5,8 +5,8 @@ signal page_demandee(index: int)
 
 const ONGLET := preload("res://ui/onglet_menu.gd")
 const FOND := preload("res://assets/visual/interface/menu/navigation_braise.svg")
-const LIBELLES := ["Héros", "Équipement", "Aventure", "Maîtrises", "Sorts"]
-const SYMBOLES := ["heros", "equipement", "aventure", "maitrises", "sorts"]
+const LIBELLES := ["Héros", "Équipement", "Aventure", "Maîtrises", "Passifs"]
+const SYMBOLES := ["heros", "equipement", "aventure", "maitrises", "passifs"]
 var _socle: Panel
 var _barre: HBoxContainer
 var _onglets: Array[OngletMenu] = []

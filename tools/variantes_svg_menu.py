@@ -69,7 +69,7 @@ def _noeud(destination: Path, palette: tuple[str, ...]) -> None:
 
 
 def generer() -> None:
-    arbre = (RACINE / "data/arbre_competences.gd").read_text(encoding="utf-8")
+    arbre = (RACINE / "data/progression/arbre_competences.gd").read_text(encoding="utf-8")
     branches = arbre.split("const BRANCHES := {", 1)[1].split("}\n", 1)[0]
     for libelle, _liste in re.findall(r'"([^\"]+)":\s*(\[[^\]]+\])', branches):
         nom = {"Offensif": "offensif", "Défensif": "defensif", "Utilitaire": "utilitaire"}[libelle]

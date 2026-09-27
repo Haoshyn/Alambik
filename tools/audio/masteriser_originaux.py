@@ -17,7 +17,7 @@ PISTES = [
      'highpass=f=35,equalizer=f=3100:width_type=o:width=1.3:g=-1.2,lowpass=f=15000'),
     ('dynamic_arcade', DESTINATION / 'dynamic_arcade.ogg', '-15.5',
      'highpass=f=35,equalizer=f=120:width_type=o:width=1.2:g=-1,equalizer=f=3600:width_type=o:width=1.3:g=-1.5,lowpass=f=15000'),
-    ('Accueil', RACINE / 'Accueil.ogg', '-18.5',
+    ('Accueil', DESTINATION / 'Accueil.ogg', '-18.5',
      'highpass=f=35,equalizer=f=3100:width_type=o:width=1.3:g=-1,lowpass=f=15000'),
 ]
 

@@ -216,8 +216,8 @@ static func habiller_mode(b: Button, mode: String) -> void:
 static func texte(contenu: String, taille := 30, couleur := TEXTE) -> Label:
 	var l := Label.new()
 	l.text = contenu
-	l.add_theme_font_override("font",Polices.LOGO if taille >= 40 else (Polices.TITRE if taille >= 34 else Polices.CORPS))
-	l.add_theme_font_size_override("font_size",taille)
+	l.add_theme_font_override("font", Polices.TITRE if taille >= 34 else Polices.CORPS)
+	l.add_theme_font_size_override("font_size", maxi(28, taille))
 	l.add_theme_color_override("font_color",couleur)
 	l.add_theme_color_override("font_outline_color", Color("1a2644e8"))
 	l.add_theme_constant_override("outline_size", 1)
@@ -235,6 +235,7 @@ static func texte(contenu: String, taille := 30, couleur := TEXTE) -> Label:
 static func _adapter_encre(label: Label, couleur: Color) -> void:
 	label.add_theme_color_override("font_color", couleur)
 	label.add_theme_color_override("font_shadow_color", Color("17233bd9"))
+	label.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
 	var ancetre := label.get_parent()
 	while ancetre != null:
 		if ancetre.has_meta("surface_lecture"):
@@ -249,6 +250,13 @@ static func _adapter_encre(label: Label, couleur: Color) -> void:
 		if ancetre is BaseButton:
 			return
 		ancetre = ancetre.get_parent()
+	# Les legendes hors panneau gardent un support stable sur les decors animes.
+	var support := fond_legende(0.94, 8)
+	if couleur in [ENCRE, ENCRE_ATTENUE]:
+		support.bg_color = IVOIRE
+		label.add_theme_constant_override("outline_size", 0)
+		label.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
+	label.add_theme_stylebox_override("normal", support)
 
 static func fond_legende(opacite := 0.78, rayon := 18) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
@@ -355,17 +363,18 @@ static func page(parent: Control, titre: String, integre := false) -> VBoxContai
 	entete.add_theme_constant_override("h_separation",16)
 	entete.add_theme_constant_override("v_separation",12)
 	contenu_entete.add_child(entete)
-	var id_entete: String = {"Maîtrises":"astrolabe", "Sorts":"grimoire", "Équipement":"forge", "Héros":"heros", "Paramètres":"parametres", "Campagne":"portail", "La Mine":"mine", "Épreuves":"epreuves"}.get(titre, "grimoire")
+	var id_entete: String = {"Maîtrises":"astrolabe", "Passifs":"grimoire", "Équipement":"forge", "Héros":"heros", "Paramètres":"parametres", "Campagne":"portail", "La Mine":"mine", "Épreuves":"epreuves"}.get(titre, "grimoire")
 	var accent_entete: Color = {
 		"Héros": BLEU_VIF,
 		"Équipement": OR_VIF,
 		"Maîtrises": OR_VIF,
-		"Sorts": MAUVE_VIF,
+		"Passifs": MAUVE_VIF,
 		"Campagne": LILAS,
 		"La Mine": Color("ed9857"),
 		"Épreuves": MAGIE,
 	}.get(titre, IVOIRE)
 	var cartouche_titre := PanelContainer.new()
+	cartouche_titre.set_meta("surface_lecture", false)
 	cartouche_titre.name = "CartoucheTitre"
 	cartouche_titre.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var style_titre := cadre_enlumine(accent_entete)
@@ -432,11 +441,12 @@ static func defilement(col: VBoxContainer) -> VBoxContainer:
 
 static func plaque(parent: Node, claire := false) -> VBoxContainer:
 	var panneau := PanelContainer.new()
+	panneau.set_meta("surface_lecture", claire)
 	HabillagePeint.appliquer(panneau)
 	if claire:
 		habiller_lecture(panneau)
 	else:
-		panneau.add_theme_stylebox_override("panel", texture_etirable("panneau", 24, 32, 28))
+		panneau.add_theme_stylebox_override("panel", cadre_grimoire(CUIVRE))
 	parent.add_child(panneau)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation",18)
@@ -445,6 +455,7 @@ static func plaque(parent: Node, claire := false) -> VBoxContainer:
 
 static func cartouche_infos(parent: Node, accent: Color) -> VBoxContainer:
 	var panneau := PanelContainer.new()
+	panneau.set_meta("surface_lecture", false)
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color("253459d8").lerp(Color(accent, 0.88), 0.15)
 	style.border_color = Color(accent, 0.96)
@@ -627,6 +638,7 @@ static func illustration(nom: String, cote := 128.0) -> TextureRect:
 
 static func banniere(parent: Node, titre: String, sous_titre: String, embleme := "grimoire") -> VBoxContainer:
 	var panneau := PanelContainer.new()
+	panneau.set_meta("surface_lecture", false)
 	HabillagePeint.appliquer(panneau)
 	var fond := fond_legende(0.72, 18)
 	fond.content_margin_left = 14

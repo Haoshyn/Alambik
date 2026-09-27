@@ -1,11 +1,12 @@
 extends RefCounted
 
-const Rendu = preload("res://data/animations_projectiles.gd")
+const Rendu = preload("res://data/presentation/animations_projectiles.gd")
+const Formes = preload("res://data/presentation/formes_tirs.gd")
 static var _formes: Dictionary = {}
 static var _matiere: StandardMaterial3D
 static var _matiere_halo: StandardMaterial3D
 
-static func construire(silhouette: String, teinte: Color) -> Node3D:
+static func construire(silhouette: String, teinte: Color, allongement := 1.0, monde := -1) -> Node3D:
 	if _matiere == null:
 		_matiere = StandardMaterial3D.new()
 		_matiere.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -13,27 +14,40 @@ static func construire(silhouette: String, teinte: Color) -> Node3D:
 		_matiere.cull_mode = BaseMaterial3D.CULL_DISABLED
 		_matiere_halo = _matiere.duplicate() as StandardMaterial3D
 		_matiere_halo.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	var cle := silhouette + teinte.to_html()
+	var cle := silhouette + teinte.to_html() + str(allongement) + str(monde)
 	if not _formes.has(cle):
 		var mesh := ImmediateMesh.new()
 		mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _matiere)
-		match silhouette:
-			"eclat": _gemme(mesh, teinte)
-			"lame":
-				for i in 2: _volute(mesh, teinte, PI * i, false)
-				_amande(mesh, Vector3(0, .18, 0), .065, .19, .045, teinte.lightened(.3), 6, 10)
-			"vrille":
-				for i in 3: _volute(mesh, teinte, TAU * i / 3.0, true)
-				_amande(mesh, Vector3(0, .19, 0), .085, .20, .075, teinte.lightened(.4), 6, 10)
-			_:
-				_amande(mesh, Vector3(0, .16, 0), .13, .57 if silhouette == "aiguille" else .36, .105, teinte, 9, 14)
+		if silhouette in Formes.BOULES:
+			if monde >= 0: _face(mesh, Formes.contour(silhouette), Rendu.CONTOUR_HOSTILE, .02)
+			_amande(mesh, Vector3(0, .24, 0), .87, 1.74, .65, teinte.darkened(.55) if silhouette == "devoreur_neant" else teinte, 10, 16)
+			match silhouette:
+				"roi_braises": _relief(mesh, Formes.contour(silhouette), teinte, .08, monde >= 0)
+				"archiscribe_encres":
+					_cercler(mesh, teinte.lightened(.5), .92, .10, .34)
+					_cercler(mesh, teinte.lightened(.3), .72, .07, .69)
+				"devoreur_neant": _cercler(mesh, teinte.lightened(.4), .95, .14, .20)
+				"grand_alambic":
+					for i in 3:
+						var angle := i * TAU / 3.0
+						_amande(mesh, Vector3(cos(angle) * .72, .60, sin(angle) * .72), .25, .50, .22, Rendu.REFLET, 5, 8)
+				"salamandre": _cercler(mesh, teinte.lightened(.45), .95, .08, .2)
+		else:
+			_relief(mesh, Formes.contour(silhouette), teinte, .28, monde >= 0)
+		if monde >= 0:
+			for i in monde + 1:
+				var angle := TAU * i / float(monde + 1)
+				_amande(mesh, Vector3(cos(angle) * .33, .92, sin(angle) * .33), .075, .15, .04, Rendu.REFLET, 3, 5)
 		mesh.surface_end()
 		var halo := ImmediateMesh.new()
 		halo.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _matiere_halo)
 		for i in 28:
-			var a := Vector3(cos(TAU * i / 28.0) * .29, .035, sin(TAU * i / 28.0) * .32)
-			var b := Vector3(cos(TAU * (i + 1) / 28.0) * .29, .035, sin(TAU * (i + 1) / 28.0) * .32)
-			_triangle(halo, Vector3(0, .035, 0), a, b, Color(teinte, .22), Color(teinte, 0), Color(teinte, 0))
+			var a := Vector3(cos(TAU * i / 28.0), .015, sin(TAU * i / 28.0))
+			var b := Vector3(cos(TAU * (i + 1) / 28.0), .015, sin(TAU * (i + 1) / 28.0))
+			# La lueur couvre la capsule, y compris les coins hors du motif decoupe.
+			a.z = (a.z + signf(a.z) * (allongement - 1.0)) / allongement
+			b.z = (b.z + signf(b.z) * (allongement - 1.0)) / allongement
+			_triangle(halo, Vector3(0, .015, 0), a, b, Color(teinte, .32), Color(teinte, .08), Color(teinte, .08))
 		halo.surface_end()
 		_formes[cle] = [mesh, halo]
 	var racine := Node3D.new()
@@ -43,6 +57,42 @@ static func construire(silhouette: String, teinte: Color) -> Node3D:
 		piece.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		racine.add_child(piece)
 	return racine
+
+static func _face(mesh: ImmediateMesh, contour: PackedVector2Array, couleur: Color, hauteur: float) -> void:
+	var indices := Geometry2D.triangulate_polygon(contour)
+	for i in range(0, indices.size(), 3):
+		var a := contour[indices[i]]
+		var b := contour[indices[i + 1]]
+		var c := contour[indices[i + 2]]
+		_triangle(mesh, Vector3(a.x, hauteur, a.y), Vector3(b.x, hauteur, b.y), Vector3(c.x, hauteur, c.y), couleur, couleur, couleur)
+
+static func _relief(mesh: ImmediateMesh, contour: PackedVector2Array, teinte: Color, hauteur: float, hostile := false) -> void:
+	var dessus := contour.duplicate()
+	if hostile:
+		# Le liseret opaque reste dans le volume dangereux, meme sans les effets.
+		_face(mesh, contour, Rendu.CONTOUR_HOSTILE, hauteur)
+		for i in dessus.size(): dessus[i] *= Rendu.INTERIEUR_HOSTILE
+	var indices := Geometry2D.triangulate_polygon(contour)
+	for i in range(0, indices.size(), 3):
+		var a: Vector2 = dessus[indices[i]]
+		var b: Vector2 = dessus[indices[i + 1]]
+		var c: Vector2 = dessus[indices[i + 2]]
+		var plan := hauteur + (.01 if hostile else 0.0)
+		_triangle(mesh, Vector3(a.x, plan, a.y), Vector3(b.x, plan, b.y), Vector3(c.x, plan, c.y),
+			teinte if hostile else teinte.lightened(.3), teinte, teinte.lerp(Rendu.REFLET, Rendu.REFLET_HOSTILE if hostile else .5))
+	for i in contour.size():
+		var a := Vector3(contour[i].x, 0, contour[i].y)
+		var b := Vector3(contour[(i + 1) % contour.size()].x, 0, contour[(i + 1) % contour.size()].y)
+		_triangle(mesh, a, b, a + Vector3.UP * hauteur, teinte.darkened(.65), teinte.darkened(.4), teinte)
+		_triangle(mesh, b, b + Vector3.UP * hauteur, a + Vector3.UP * hauteur, teinte.darkened(.4), teinte.lightened(.15), teinte)
+
+static func _cercler(mesh: ImmediateMesh, teinte: Color, rayon: float, epaisseur: float, hauteur: float) -> void:
+	for i in 32:
+		var a := Vector3(cos(TAU * i / 32.0), 0, sin(TAU * i / 32.0))
+		var b := Vector3(cos(TAU * (i + 1) / 32.0), 0, sin(TAU * (i + 1) / 32.0))
+		var haut := Vector3.UP * hauteur
+		_triangle(mesh, a * rayon + haut, b * rayon + haut, a * (rayon - epaisseur) + haut, teinte, teinte, Rendu.REFLET)
+		_triangle(mesh, b * rayon + haut, b * (rayon - epaisseur) + haut, a * (rayon - epaisseur) + haut, teinte, Rendu.REFLET, Rendu.REFLET)
 
 static func _triangle(mesh: ImmediateMesh, a: Vector3, b: Vector3, c: Vector3,
 		ca: Color, cb: Color, cc: Color) -> void:
@@ -76,38 +126,3 @@ static func _amande(mesh: ImmediateMesh, centre: Vector3, largeur: float,
 				couleurs.append(_vernis(Vector3(cos(angle) * sin(v * PI), sin(angle) * sin(v * PI), cos(v * PI)), teinte))
 			_triangle(mesh, points[0], points[1], points[2], couleurs[0], couleurs[1], couleurs[2])
 			_triangle(mesh, points[1], points[3], points[2], couleurs[1], couleurs[3], couleurs[2])
-
-static func _gemme(mesh: ImmediateMesh, teinte: Color) -> void:
-	var centre := Vector3(0, .18, 0)
-	for i in 7:
-		var a := TAU * i / 7.0
-		var b := TAU * (i + 1) / 7.0
-		var pied_a := centre + Vector3(cos(a) * .105, sin(a) * .10, -.19)
-		var pied_b := centre + Vector3(cos(b) * .105, sin(b) * .10, -.19)
-		var epaule_a := centre + Vector3(cos(a + .08) * .17, sin(a + .08) * .15, .015)
-		var epaule_b := centre + Vector3(cos(b + .08) * .17, sin(b + .08) * .15, .015)
-		var couleur := _vernis(Vector3(cos((a + b) * .5), sin((a + b) * .5), .22).normalized(), teinte, true)
-		_triangle(mesh, pied_a, pied_b, centre + Vector3(0, 0, -.32), couleur.darkened(.16), couleur.darkened(.16), teinte.darkened(.6))
-		_triangle(mesh, pied_a, epaule_a, epaule_b, couleur.darkened(.18), couleur, couleur.lightened(.1))
-		_triangle(mesh, pied_a, epaule_b, pied_b, couleur.darkened(.18), couleur.lightened(.1), couleur.darkened(.18))
-		_triangle(mesh, epaule_a, centre + Vector3(0, .025, .30), epaule_b, couleur, couleur.lerp(Rendu.REFLET, .6), couleur.lightened(.1))
-
-static func _volute(mesh: ImmediateMesh, teinte: Color, orientation: float, spirale: bool) -> void:
-	var nombre := 18
-	for i in nombre:
-		var points: Array[Vector3] = []
-		var couleurs: Array[Color] = []
-		for j in 2:
-			var t := float(i + j) / nombre
-			var angle := orientation + t * PI * (1.25 if spirale else 1.18)
-			var rayon := lerpf(.075, .30, t) if spirale else .235
-			var largeur := pow(maxf(0.0, sin(t * PI)), .75) * (.065 if spirale else .055)
-			var hauteur := .115 + sin(t * PI) * .09
-			var radial := Vector3(cos(angle), 0, sin(angle))
-			var point := radial * rayon + Vector3.UP * hauteur
-			points.append_array([point - radial * largeur, point + Vector3.UP * .026, point + radial * largeur])
-			couleurs.append_array([teinte.darkened(.46), teinte.lerp(Rendu.REFLET, .68 + .20 * sin(t * PI)), teinte])
-		_triangle(mesh, points[0], points[3], points[1], couleurs[0], couleurs[3], couleurs[1])
-		_triangle(mesh, points[1], points[3], points[4], couleurs[1], couleurs[3], couleurs[4])
-		_triangle(mesh, points[1], points[4], points[2], couleurs[1], couleurs[4], couleurs[2])
-		_triangle(mesh, points[2], points[4], points[5], couleurs[2], couleurs[4], couleurs[5])

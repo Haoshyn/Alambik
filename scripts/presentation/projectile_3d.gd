@@ -1,6 +1,6 @@
 extends "res://scripts/presentation/proxy_3d.gd"
 
-const RenduProjectile = preload("res://data/animations_projectiles.gd")
+const RenduProjectile = preload("res://data/presentation/animations_projectiles.gd")
 const RubanProjectile = preload("res://scripts/presentation/ruban_projectile.gd")
 static var _matieres := {}
 var _ruban := ImmediateMesh.new()
@@ -21,16 +21,17 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 	var hostile: bool = logique.get("hostile")
 	_hostile = hostile
 	var tir: Tir = logique.get("tir")
-	if hostile:
+	if hostile or "trait_familier" in tir.drapeaux:
 		_couleur = RenduProjectile.profil(tir.silhouette)["couleur"]
 	_familier = "trait_familier" in tir.drapeaux
 	_aiguille = not hostile and tir.arme == "veloce"
 	if not hostile:
 		_couleur = {"standard": Color("c5a1ff"), "veloce": Color("e6ff9c"), "lourd": Color("ffbf74"), "chercheur": Color("c2a5ff"), "explosif": Color("ff8b60")}.get(tir.arme, _couleur)
 		if _familier:
-			_couleur = Color("66dfd3")
-		if "trait_orbe" in tir.drapeaux:
-			_couleur = Color("e6b3ff")
+			_couleur = RenduProjectile.profil(tir.silhouette)["couleur"]
+	if hostile:
+		# La variation de monde reste secondaire a la silhouette du tireur.
+		_couleur = RenduProjectile.couleur_hostile(tir.silhouette, tir.variante_visuelle)
 	var cle := _couleur.to_html()+str(hostile)+tir.arme
 	if not _matieres.has(cle):
 		var mat: ShaderMaterial
@@ -48,8 +49,10 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 	_matiere_ruban = _matieres[cle][1]
 	modele = Node3D.new()
 	add_child(modele)
-	if hostile:
-		_tourbillon = preload("res://scripts/presentation/formes_projectiles_hostiles.gd").construire(tir.silhouette, _couleur)
+	if hostile or _familier:
+		_tourbillon = preload("res://scripts/presentation/formes_projectiles_hostiles.gd").construire(tir.silhouette, _couleur,
+			tir.longueur / (tir.rayon * 2.0), tir.variante_visuelle if hostile else -1)
+		_tourbillon.scale = Vector3(tir.rayon, tir.rayon, tir.longueur * .5) * Pont3D.ECHELLE
 		modele.add_child(_tourbillon)
 	else:
 		var coeur := MeshInstance3D.new()
@@ -68,34 +71,15 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 		coeur.rotation = Vector3.ZERO
 		coeur.scale = {"standard":Vector3(.14,.14,.20),"veloce":Vector3(.13,.13,.36),"lourd":Vector3(.19,.17,.26),"chercheur":Vector3(.17,.17,.17),"explosif":Vector3(.22,.22,.22)}.get(tir.arme,Vector3.ONE*.14)
 		coeur.position.y = coeur.scale.y + .025
-		if _familier:
-			coeur.scale = Vector3.ONE * .115
-			coeur.position.y = .14
-		if "trait_orbe" in tir.drapeaux:
-			coeur.scale = Vector3.ONE * 0.19
-			coeur.position.y = 0.24
-		if _familier:
-			var anneau := TorusMesh.new()
-			anneau.inner_radius = .14
-			anneau.outer_radius = .18
-			anneau.rings = 16
-			anneau.ring_segments = 6
-			var halo := MeshInstance3D.new()
-			halo.mesh = anneau
-			halo.material_override = _matiere_coeur
-			halo.position.y = .14
-			halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			modele.add_child(halo)
-		else:
-			for i in 2:
-				var perle := MeshInstance3D.new()
-				perle.mesh = _perle
-				perle.material_override = _matiere_coeur
-				perle.scale = coeur.scale * (0.48 if i == 0 else 0.24)
-				perle.position = Vector3(0,coeur.position.y,-coeur.scale.z*(1.25+i*.7))
-				perle.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-				modele.add_child(perle)
-	if hostile or _aiguille:
+		for i in 2:
+			var perle := MeshInstance3D.new()
+			perle.mesh = _perle
+			perle.material_override = _matiere_coeur
+			perle.scale = coeur.scale * (0.48 if i == 0 else 0.24)
+			perle.position = Vector3(0,coeur.position.y,-coeur.scale.z*(1.25+i*.7))
+			perle.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			modele.add_child(perle)
+	if hostile or _familier or _aiguille:
 		var trainee := MeshInstance3D.new()
 		trainee.mesh = _ruban
 		trainee.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -116,18 +100,21 @@ func mettre_a_jour(_delta: float) -> void:
 		direction = points[1].direction_to(points[0])
 	modele.rotation.y = atan2(direction.x,direction.y)
 	if _tourbillon != null:
-		if not ReglagesJoueur.effets_reduits:
+		if not ReglagesJoueur.effets_reduits and logique.tir.longueur <= logique.tir.rayon * 2.0:
 			_rotation_tourbillon += _delta * float(RenduProjectile.profil(str(logique.tir.silhouette))["rotation"])
-		_tourbillon.rotation.y = _rotation_tourbillon
+		# L'anamorphose s'applique apres l'orientation : l'encombrement suit la 2D.
+		modele.rotation.y = 0.0
+		modele.scale.z = 1.0 / sin(deg_to_rad(Pont3D.INCLINAISON))
+		_tourbillon.rotation.y = atan2(direction.x, direction.y) + _rotation_tourbillon
 	_ruban.clear_surfaces()
-	if not _hostile:
+	if not _hostile and not _familier:
 		for index in range(1, modele.get_child_count()):
 			modele.get_child(index).visible = not ReglagesJoueur.effets_reduits
 		if not _aiguille:
 			return
 	else:
 		RubanProjectile.remplir(_ruban, _matiere_ruban, points, position, _couleur,
-			str(logique.tir.silhouette), ReglagesJoueur.effets_reduits)
+			str(logique.tir.silhouette), ReglagesJoueur.effets_reduits, _hostile)
 		return
 	# Le ruban continu garde l'aiguille lisible entre deux positions rapides.
 	var nombre := mini(points.size(),3 if ReglagesJoueur.effets_reduits else 8)

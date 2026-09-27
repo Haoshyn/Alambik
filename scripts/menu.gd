@@ -1,7 +1,7 @@
 extends Control
 
 const ARBRE := preload("res://ui/arbre_competences.tscn")
-const MENU_SORTS := preload("res://ui/sorts.tscn")
+const MENU_PASSIFS := preload("res://ui/passifs.tscn")
 const SELECTION_GRIMOIRE := preload("res://ui/selection_grimoire.tscn")
 const SELECTION_MODE := preload("res://ui/selection_mode.gd")
 const REGLAGES := preload("res://ui/reglages.tscn")
@@ -10,7 +10,7 @@ const TRANSITION := preload("res://ui/transition_grimoire.tscn")
 const ACCUEIL := preload("res://ui/accueil_clairiere.tscn")
 const FOND_MENU := preload("res://ui/composants/fond_menu_vivant.gd")
 const NAVIGATION := preload("res://ui/composants/navigation_principale.tscn")
-const PAGES := ["heros", "equipement", "aventure", "maitrises", "sorts"]
+const PAGES := ["heros", "equipement", "aventure", "maitrises", "passifs"]
 
 var _fond_menu: FondMenuVivant
 var _chapitre_fond := -1
@@ -54,9 +54,6 @@ func _ready() -> void:
 	if "--ouvrir-reglages" in OS.get_cmdline_user_args():
 		call_deferred("_ouvrir_reglages")
 	Capture.programmer(self)
-	if OS.get_cmdline_user_args().is_empty() \
-			and ReglagesJoueur.specialisation_effective().is_empty() and not ReglagesJoueur.tutoriel_vu:
-		_demarrer_premiers_pas.call_deferred()
 
 func _configurer_rendu_lisse() -> void:
 	var vue := get_viewport()
@@ -104,12 +101,6 @@ func _reprendre_apres_classe() -> void:
 	_destination_apres_classe = {}
 	_lancer_mode.call_deferred(mode, destination)
 
-func _demarrer_premiers_pas() -> void:
-	if ReglagesJoueur.tutoriel_vu or not ReglagesJoueur.specialisation_effective().is_empty():
-		return
-	ReglagesJoueur.choisir_chapitre(0)
-	_lancer_mode("grimoire", Chapitres.par_index(0), true)
-
 func _construire_structure() -> void:
 	_fond_menu = FOND_MENU.new()
 	_fond_menu.name = "FondPartage"
@@ -139,12 +130,12 @@ func _creer_page(index: int) -> Control:
 			return arbre
 		"heros":
 			return preload("res://ui/heros.gd").new()
-		"sorts":
-			var sorts := MENU_SORTS.instantiate()
-			sorts.integre_menu = true
-			sorts.page_demandee.connect(_afficher_page)
-			sorts.reglages.connect(_ouvrir_reglages)
-			return sorts
+		"passifs":
+			var passifs := MENU_PASSIFS.instantiate()
+			passifs.integre_menu = true
+			passifs.page_demandee.connect(_afficher_page)
+			passifs.reglages.connect(_ouvrir_reglages)
+			return passifs
 	return _creer_aventure()
 
 func _afficher_page(index: int, anime := true) -> void:
@@ -215,10 +206,10 @@ func _jouer_immediatement() -> void:
 	var chapitre := Chapitres.par_index(ReglagesJoueur.chapitre_choisi)
 	_lancer_mode("grimoire", chapitre)
 
-func _lancer_mode(mode: String, destination: Dictionary, apprentissage_initial := false) -> void:
+func _lancer_mode(mode: String, destination: Dictionary) -> void:
 	if _lancement or not ReglagesJoueur.mode_debloque(mode):
 		return
-	if ReglagesJoueur.specialisation_effective().is_empty() and not apprentissage_initial:
+	if ReglagesJoueur.specialisation_effective().is_empty():
 		_ouvrir_classes_initiales(mode, destination)
 		return
 	_lancement = true
@@ -248,13 +239,13 @@ func _ouvrir_mine() -> void:
 	_ouvrir_superposition(selection)
 
 func _ouvrir_epreuves() -> void:
-	if not ReglagesJoueur.mode_debloque("epreuve_sorts"):
+	if not ReglagesJoueur.mode_debloque("epreuves"):
 		return
 	var selection := SELECTION_MODE.new()
-	selection.mode = "epreuve_sorts"
+	selection.mode = "epreuves"
 	selection.lancement_demande.connect(func() -> void:
 		_fermer_superposition(selection)
-		_lancer_mode("epreuve_sorts", {"nom": "Épreuve de magie · niveau %d" % ReglagesJoueur.niveau_epreuve_choisi}))
+		_lancer_mode("epreuves", {"nom": "Épreuve · niveau %d" % ReglagesJoueur.niveau_epreuve_choisi}))
 	_ouvrir_superposition(selection)
 
 func _ouvrir_reglages() -> void:

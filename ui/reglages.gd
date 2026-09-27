@@ -7,7 +7,6 @@ var _bouton_reset: Button
 func _ready() -> void:
 	var col := StyleAzur.page(self,"Paramètres")
 	var contenu := StyleAzur.defilement(col)
-	StyleAzur.banniere(contenu, "À votre mesure", "L’ambiance et le confort de votre atelier.", "astrolabe")
 	var audio := StyleAzur.plaque(contenu)
 	audio.add_child(StyleAzur.texte("AMBIANCE SONORE", 25, StyleAzur.CUIVRE))
 	_volume(audio,"Musique",ReglagesJoueur.volume_musique,func(v): ReglagesJoueur.definir_reglages_audio(v,ReglagesJoueur.volume_effets))
@@ -35,16 +34,7 @@ func _ready() -> void:
 	_option(confort,"Animations et flashes réduits",ReglagesJoueur.effets_reduits,func(v): ReglagesJoueur.definir_accessibilite(ReglagesJoueur.secousses_ecran,v))
 	if OS.has_feature("android"):
 		_option(confort,"Vibrations",ReglagesJoueur.vibrations,func(v): ReglagesJoueur.definir_vibrations(v))
-		confort.add_child(StyleAzur.texte("Un retour bref lors des dégâts et des récompenses importantes.",24,StyleAzur.ATTENUE))
-	confort.add_child(StyleAzur.texte("Raccourci du sort actif",27,StyleAzur.ATTENUE))
-	var raccourci := _selecteur(confort)
-	for mode in RaccourciTactile.MODES:
-		raccourci.add_item(RaccourciTactile.nom_mode(mode))
-		var index := raccourci.item_count-1
-		raccourci.set_item_metadata(index,mode)
-		if mode == ReglagesJoueur.raccourci_sort: raccourci.selected = index
-	raccourci.item_selected.connect(func(i): ReglagesJoueur.definir_raccourci_sort(str(raccourci.get_item_metadata(i))))
-	confort.add_child(StyleAzur.texte("Visée libre après l’icône, cible la plus proche par l’icône, ou tape courte n’importe où dans l’arène.",24,StyleAzur.ATTENUE))
+		confort.add_child(StyleAzur.texte("Dégâts et récompenses.",24,StyleAzur.ATTENUE))
 	StyleAzur.separateur(contenu)
 	var progression := StyleAzur.plaque(contenu)
 	var panneau_progression := progression.get_parent() as Control

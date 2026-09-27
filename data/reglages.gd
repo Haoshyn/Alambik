@@ -8,13 +8,12 @@ extends RefCounted
 # qu'autoload. Un autoload n'existe que dans une SceneTree ; les suites de
 # tests headless doivent pouvoir lire l'equilibrage sans en monter une.
 
-# Le niveau de compte mesure l'avancement sans ajouter de statistiques.
-# Equipement, maitrises et capacites debloquees portent la puissance permanente.
-const NIVEAU_DEGATS_PAR_NIVEAU := 0.0
-const NIVEAU_PV_PAR_NIVEAU := 0.0
+# Le niveau apporte un petit socle ; les points repartis portent l'essentiel
+# de sa progression et restent distincts des multiplicateurs permanents.
+const NIVEAU_DEGATS_PAR_NIVEAU := 0.01
+const NIVEAU_PV_PAR_NIVEAU := 0.005
 const NIVEAU_CADENCE_PAR_NIVEAU := 0.0
-# Hypothese non mesuree : niveau 30 vers la fin des 35 chapitres,
-# avec 3 a 5 tentatives par chapitre, farm compris.
+# Plafond commun au bareme d'XP et aux outils de dotation complete.
 const NIVEAU_REFERENCE_FIN := 30
 const XP_COMPTE_BASE := 10.0
 const XP_COMPTE_PENTE := 4.0
@@ -23,6 +22,8 @@ const XP_COMPTE_QUADRATIQUE := 0.35
 # Bases lisibles du premier chapitre, avant equipement et maitrises.
 const HEROS_PV := 100.0
 const HEROS_DEFENSE := 10.0
+const DEFENSE_REFERENCE := 100.0
+const CRITIQUE_MULT_BASE := 1.50
 const HEROS_VITESSE := 728.0
 const HEROS_ACCELERATION := 3100.0
 const HEROS_FREINAGE := 4200.0
@@ -30,39 +31,36 @@ const HEROS_CADENCE := 1.6          # tirs par seconde
 const HEROS_INVULNERABILITE := 0.6  # secondes apres un coup recu
 const HEROS_RAYON := 20.0
 const HEROS_ECHELLE := 0.78
-const APPRENTISSAGE_DISTANCE_DEPLACEMENT := 96.0
-const APPRENTISSAGE_GRACE_FIN := 1.2
 # Repere conserve pour les outils historiques, jamais un plancher de combat.
-const DEGATS_COUP_REFERENCE := 15.0
 const SOIN_COMBAT_PAR_SALLE := 0.05
 const INVOCATION_BOSS_INTERVALLE := 18.0
 const INVOCATION_BOSS_SALVE := 2
 const INVOCATION_BOSS_PLAFOND := 3
 const INVOCATION_PV_MULT := 0.25
 const INVOCATION_DEGATS_MULT := 0.50
-const RECHARGE_PLANCHER := 0.45
-const GEL_SORT_DUREE := 1.5
-const GEL_ULTIME_DUREE := 3.0
-const SORT_REPOUSSEE := 120.0
 const GOUTTES_PAR_SALLE := 3
 const ENNEMI_VITESSE_MULT := 1.288
 # La densite ne suffit pas si chaque creature laisse trop de temps au joueur.
-# Ces trois multiplicateurs renforcent la menace sans gonfler leurs PV : coups
-# un peu plus lourds, projectiles plus difficiles a distancer et attaques plus
-# frequentes. Les telegraphes restent inchanges, donc le danger reste lisible.
+# Les projectiles et les recharges portent le rythme ; EvolutionEnnemis
+# le fait progresser tout en preservant une duree minimale d'annonce.
 const ENNEMI_DEGATS_MULT := 1.00
-const ENNEMI_PROJECTILE_VITESSE_MULT := 1.08
+const ENNEMI_PROJECTILE_VITESSE_MULT := 1.50
 const ENNEMI_RECHARGE_MULT := 0.92
 const ENNEMI_HITBOX_MULT := 0.72
 const BOSS_HITBOX_MULT := 0.74
+const ENNEMI_APPARITION_DUREE := 0.35
+const ENNEMI_TELEGRAPHE_MIN := 0.60
+const ENNEMI_CONTACT_ANNONCE := 0.48
+const ENNEMI_CONTACT_MARGE := 24.0
+const PHASE_ANNONCE := 0.85
+const PHASE_PREPARATION_TIR := 0.70
 
 const TIR_DEGATS := 10.0
 const MODS_PLANCHER := 0.05
-const PROJECTILE_SUPPLEMENTAIRE_PART := 0.45
 # Mesure : la creature la plus rapide file a 704 px/s. A 900, le projectile
 # n'allait qu'a 1,28 fois sa vitesse et se faisait esquiver systematiquement ;
 # un tir doit devancer sa cible d'un facteur deux au minimum.
-const TIR_VITESSE := 1550.0
+const TIR_VITESSE := 1937.5
 const TIR_RAYON := 10.0
 # Reference utilisee seulement lorsqu'un effet reduit explicitement la portee.
 # Sans reduction, un projectile vit jusqu'a un mur, une limite ou une cible.
@@ -73,97 +71,21 @@ const TIR_PREPARATION := 0.05      # anticipation du bras avant la projection
 const BRAISE_PART_DEGATS_PAR_SECONDE := 0.10
 const BRAISE_DUREE := 4.0
 const GIVRE_RALENTISSEMENT := 0.45  # facteur de vitesse applique
-const GIVRE_DUREE := 2.0
+const GIVRE_DUREE := 2.5
 const ACIDE_VULNERABILITE := 1.25   # multiplicateur de degats subis
 const ACIDE_DUREE := 4.0
-const REGENERATION_PART := 0.05
-const AVIDITE_XP_MULT := 1.30
-const AVIDITE_GOUTTES_MULT := 1.30
-const COURAGEUX_RETOUR_PV := 1.0
-const MANNEQUIN_DEBUT := 0.5
-const MANNEQUIN_FIN := 1.5
-const MANNEQUIN_BONUS_MAX := 0.50
-const RETARDEMENT_DELAI := 2.0
-const EGIDE_REDUCTION := 0.50
-const FAMILIER_TIREUR_ATTAQUE_MULT := 1.30
-const FAMILIER_TIREUR_CADENCE_MULT := 1.20
-const FAMILIER_DEGATS_MAX_PART_HEROS := 0.60
-const FAMILIER_PROJECTILE_VITESSE_MULT := 0.72
-const FAMILIER_PROJECTILE_PORTEE_MULT := 0.75
-# Le familier tire depuis ce decalage, pas depuis le heros. Sa visee doit donc
-# partir de la aussi : calculee depuis le heros, elle ratait de tout l'angle
-# separant les deux points, d'autant plus visiblement que la cible etait proche.
-const FAMILIER_DECALAGE := Vector2(72.0, -36.0)
-
+const FAMILIER_DEGATS_MAX_PART_HEROS := 1.0
 # Viser ou la cible sera, pas ou elle est. Partage par le heros et le familier :
 # une cible qui recule en ligne droite n'etait presque jamais touchee.
 const ANTICIPATION_DUREE_MAX := 0.8
 const ANTICIPATION_PART := 0.9
-const METEORE_INTERVALLE := 3.0
-const METEORE_PART_DEGATS := 3.0
-const METEORE_RAYON := 220.0
-const ZONE_HEROS_INTERVALLE := 0.50
-const ZONE_HEROS_PART_DEGATS := 0.45
-const ZONE_HEROS_RAYON := 210.0
-const GARDIEN_INTERVALLE := 0.80
-const GARDIEN_PART_DEGATS := 0.60
-const GARDIEN_PV := 55.0
-const GARDIEN_REAPPARITION := 5.0
-const ORBE_RAYON := 150.0
-const ORBE_PART_DEGATS := 1.0
-# Un eclat qui frappe presque aussi fort que le tir d'origine transforme
-# Eclat de verre en multiplicateur : c'etait la moitie des mains cassees.
-const FRAGMENT_PART_DEGATS := 0.30
-const FRAGMENT_PORTEE := 260.0
-# Un trait qui traverse quatre ennemis en frappant chacun a pleine puissance
-# est un multiplicateur deguise : il perd de la force a chaque cible, et a
-# chaque rebond. C'est ce qui separe une bonne main d'une main cassee.
-# Perforation et Ricochet sont des choix de trajectoire : ils doivent rester
-# interessants dans les vagues denses au lieu de perdre un tiers de leur force
-# des la premiere cible secondaire.
+# Un projectile traversant plusieurs cibles perd une part fixe de puissance.
 const PERFORATION_PERTE := 0.20
-const REBOND_PERTE := 0.20
-const HOMING_ROTATION_PAR_SECONDE := 8.0
+const REBOND_PERTE := 0.10
+const HOMING_ROTATION_PAR_SECONDE := 10.0
 
-# Ameliorations ajoutees au pool. Leurs valeurs pures vivent dans le catalogue ;
-# seules celles que la logique doit lire sont ici.
-const PEAU_DE_PIERRE_REDUCTION := 0.20
-const SOIF_DE_SANG_PART := 0.01       # part des PV max rendue par elimination
-const CHAINE_INTERVALLE := 1.4
-const CHAINE_PART_DEGATS := 2.0
-const CHAINE_CIBLES := 5
-const CHAINE_PORTEE := 460.0          # distance maximale entre deux maillons
-
-# Passifs. Une decouverte puis un doublon : le rang 2 double exactement l'effet.
-const PASSIF_RANG_MAX := 2
-const MOISSON_SEUIL := 6
-const MOISSON_PART := 0.025
-const REPRISE_DELAI := 10.0
-const REPRISE_DEGATS := 0.15
-const HERITAGE_AUGMENTS_RARES := 1
 const RELANCES_MAX_PAR_RUN := 3
-const CONTRAT_PART_DEGATS := 0.10
-const CONTRAT_DUREE := 2.0
-const CONTRAT_INTERVALLE := 1.0
-const CONTRAT_RAYON := 64.0
-const SORT_IMPRECATEUR_DEGATS := 0.15
-const SORT_IMPRECATEUR_DUREE := 5.0
-const SANG_FROID_RALENTISSEMENT := 0.10
-const SANG_FROID_DUREE := 2.0
-const AUDACE_BONUS := 0.20
 
-const SCEAU_GARDE_REDUCTION := 0.15
-const SCEAU_RUINE_VULNERABILITE := 1.15
-
-const ONDE_CHOC_INTERVALLE := 3.0
-const ONDE_CHOC_RAYON := 330.0
-const ONDE_CHOC_PART_DEGATS := 2.0
-const ONDE_CHOC_REPOUSSEE := 300.0
-
-const ELAN_VITAL_CHARGE := 1.0
-const ELAN_VITAL_PORTEE := 2400.0
-
-const RAFALE_NOMBRE := 3
 const RAFALE_INTERVALLE := 0.07
 
 # La zone praticable suit le bord interieur de la peinture. L'ancienne limite
@@ -172,8 +94,8 @@ const ARENE_MARGE_LATERALE := 78.0
 const ARENE_HAUT := 244.0
 const ARENE_BAS := 220.0
 const ARENE_MUR_EPAISSEUR := 72.0
-const ARENE_TAILLE := Vector2(1260.0,1900.0)
-const ARENE_CAMERA_ZOOM := 1.05
+const ARENE_TAILLE := Vector2(1197.0,1995.0)
+const ARENE_CAMERA_ZOOM := 0.9975
 const ARENE_PASSAGE_MIN := 240.0
 const ARENE_COMPOSITIONS := [
 	[Rect2(0.32,0.42,0.36,0.07)],
@@ -198,52 +120,51 @@ const ARENE_RETRAITS := [
 ]
 const ECHELLE_VISUELLE_COMBAT := 1.08
 
-# La longueur d'un chapitre et la place de ses alambics vivent dans
-# data/chapitres.gd : ces constantes ne servent plus qu'au repli, quand aucun
-# chapitre n'est charge.
+# Chaque chapitre garde le meme nombre de salles ; les boss et les choix
+# occupent les emplacements definis dans Chapitres.
 const SALLES_PAR_RUN := 20
 
-# La courbe entre chapitres vit dans data/progression_statistiques.gd.
-
-# Les premiers choix doivent rester accessibles avec un build encore incomplet.
-# La pression monte apres eux, meme si le legendaire ne tombe qu'avant la salle 15.
-const CAMPAGNE_SALLES_COURBE := [1, 4, 5, 10, 15, 20]
-const CAMPAGNE_COURBE_PV := [0.55, 0.72, 0.88, 1.28, 1.78, 2.35]
-const CAMPAGNE_COURBE_DEGATS := [0.58, 0.70, 0.86, 1.12, 1.38, 1.65]
+# Les ennemis suivent une courbe fixe ; les ressources annexes permettent
+# de prendre de l'avance sans adapter la difficulte au joueur.
+const CAMPAGNE_PV_PAR_CHAPITRE := 1.095
+const CAMPAGNE_PV_CHAPITRES_INITIAUX := 7
+const CAMPAGNE_PV_PAR_CHAPITRE_TARDIF := 1.02
+const CAMPAGNE_PV_ACCELERATION := 1.0
+# Les premiers achats et passifs arrivent vite apres la premiere victoire.
+# Le renfort rejoint un plafond pour garder la fin accessible au build complet.
+const CAMPAGNE_PV_RENFORT_INITIAL := 2.3
+const CAMPAGNE_PV_TRANSITION := 0.45
+const CAMPAGNE_DEGATS_PAR_CHAPITRE := 1.04
+const CAMPAGNE_DEGATS_ACCELERATION := 1.0002
+const CAMPAGNE_PV_PAR_SALLE := 1.045
+const CAMPAGNE_DEGATS_PAR_SALLE := 1.02
+# Les choix majeurs sont proposes avant le combat de ces salles.
+const CAMPAGNE_PV_PALIERS := {5: 1.10, 10: 1.50, 15: 1.20}
+const CAMPAGNE_DEGATS_PALIERS := {5: 1.05, 10: 1.05, 15: 1.05}
+# Les premiers choix restent accessibles avant le crescendo geometrique.
 const DEFI_MONTEE_PV := 1.0       # x2 entre la premiere et la derniere rencontre
 const DEFI_MONTEE_DEGATS := 0.45  # x1,45 : la densite porte deja la pression
-const DEFI_PV_BASE := 1.25
-const DEFI_DEGATS_BASE := 0.75
+const DEFI_PV_BASE := 2.50
+const DEFI_DEGATS_BASE := 1.00
 
-# Un Amélioration se reprend, mais pas indefiniment : six choix doivent construire
-# un build, pas empiler automatiquement la meme carte.
-const COPIES_MAX := 3
-const SOIN_AVANT_BOSS := 0.30
-const VISEE_VITESSE_TEMPS := 0.10
-
-# Avec ~154 ennemis communs par chapitre, l'ancien bareme donnait les six choix
-# beaucoup trop tot. Ces seuils replacent approximativement les choix 2/4/5/6
-# avant les salles 5/10/15/20, meme avec les nouvelles vagues plus denses.
+# Les choix de Mine suivent les eliminations pendant la survie.
+# La campagne emploie son propre calendrier dans ProgressionAugments.
 const XP_RUN_SEUILS := [10, 26, 55, 80, 145, 220]
 
-# Les budgets des tentatives et du farm sont chiffres dans ProfilsProgression.
-const MAITRISE_COUTS := [10, 15, 25, 40, 60, 100, 150, 250, 400, 600]
+# Le prix d'un rang augmente lineairement ; aucune sequence d'achats n'est imposee.
+const MAITRISE_COUTS := [10, 15, 25, 30, 40, 50, 60, 80, 100, 120]
 const MAITRISE_VERSION := 3
 const MAITRISE_COUT_MAJEUR := 4
 const MAITRISE_RANG_MAX := 10
 const MAITRISE_COUT_AJOUT_PAR_RANG := 0.25
 const COUT_PAS_ARRONDI := 5
 const GOUTTES_MULT_PAR_CHAPITRE := 1.055
-const EQUIPEMENT_CROISSANCE_PAR_PALIER := 1.065
+const EQUIPEMENT_CROISSANCE_PAR_PALIER := 1.008
 
-# L'ATK equipee porte la courbe de campagne ; les rangs renforcent les sorts
-# sans ajouter une seconde croissance automatique avec le chapitre.
-const CAPACITE_RANG_MAX := 10
-const CAPACITE_BONUS_PAR_RANG := 0.10
-# Une premiere capacite manquante est garantie ; cette limite porte les doublons.
-const EPREUVE_GARANTIE_CAPACITE := 5
-const EPREUVE_GARANTIE_COEUR := 10
-const COEUR_MANA_BONUS_FINAL := 0.10
+# Un court lot de victoires donne une amelioration certaine, meme sans chance.
+const EPREUVE_GARANTIE_CAPACITE := 2
+const EPREUVE_GARANTIE_COEUR := 3
+const COEUR_MANA_BONUS_FINAL := 0.02
 const EPREUVE_NIVEAU_DEBLOCAGE := 2
 const MINE_NIVEAU_DEBLOCAGE := 4
 
@@ -256,15 +177,23 @@ const FORGE_NIVEAU_MAX_AVANT_COMPRESSION := 100
 const FORGE_COMPRESSION := 5
 const FORGE_NIVEAU_MAX := 20
 const FORGE_COUT_BASE := 30
-const FORGE_COUT_PAR_NIVEAU := 20
-const FORGE_COUT_QUADRATIQUE := 3
+const FORGE_COUT_PAR_NIVEAU := 10
+const FORGE_COUT_QUADRATIQUE := 1
 const PIERRES_CAMPAGNE_PAR_SALLE := 2.0
 const PIERRES_CAMPAGNE_VICTOIRE := 10.0
-const PIERRES_CAMPAGNE_CROISSANCE := 0.12
-const MINE_PIERRES_RECOMPENSE := 80
-const MINE_PIERRES_PAR_PALIER := 6
+const PIERRES_CAMPAGNE_CROISSANCE := 0.04
+const MINE_PIERRES_RECOMPENSE := 140
+# Le rendement tardif doit financer un remplacement forge en quelques runs.
+const MINE_PIERRES_PAR_PALIER := 60
 # Le boss complete la recompense ; une defaite finance deja la reprise.
 const MINE_PIERRES_PART_SURVIE := 0.65
+
+static func experience_compte_requise(niveau: int) -> int:
+	if niveau >= NIVEAU_REFERENCE_FIN:
+		return 0
+	var profondeur := maxi(0, niveau - 1)
+	return maxi(1, roundi(XP_COMPTE_BASE + float(profondeur) * XP_COMPTE_PENTE
+		+ float(profondeur * profondeur) * XP_COMPTE_QUADRATIQUE))
 
 static func cout_maitrise(cout_base: int, rang_acquis: int) -> int:
 	var brut := float(cout_base) * (1.0 + MAITRISE_COUT_AJOUT_PAR_RANG * float(maxi(0, rang_acquis)))
@@ -296,12 +225,12 @@ const MINE_INTERVALLE_FIN := 0.45
 const MINE_PLAFOND_DEBUT := 4
 const MINE_PLAFOND_FIN := 14
 const MINE_PV_MULT := 0.75
-const MINE_DEGATS_MULT := 0.30
+const MINE_DEGATS_MULT := 0.60
 const MINE_MONTEE_PV := 2.0
 const MINE_MONTEE_DEGATS := 1.0
 const MINE_BOSS_PV_MULT := 2.00
 const MINE_BOSS_DEGATS_MULT := 0.80
-const MINE_SOIN_NIVEAU := 0.30
+# Demande de soin soumise au budget de combat unique de cette rencontre.
 const MINE_CAMERA_ZOOM := 0.74
 const MINE_XP_RAYON_RAMASSAGE := 70.0
 
@@ -312,6 +241,9 @@ const DELAI_VAGUE_FORCE := 12.0
 const DELAI_VAGUE_PAR_RENFORT := 0.8
 const DELAI_VAGUE_NETTOYEE := 0.85
 const DELAI_VAGUE_SATUREE := 1.0
+const APPARITION_ANNONCE := 1.0
+const APPARITION_BOSS_ANNONCE := 1.30
+const APPARITION_DISTANCE_HEROS := 320.0
 const XP_RAMASSAGE_DUREE := 0.55
 # Un invocateur qui produit plus vite qu'on ne tue rend la salle infinie : la
 # sonde a bloque deux fois dessus. Le plafond est une regle de jeu, pas un
@@ -323,10 +255,10 @@ const PLAFOND_ENNEMIS := 10
 const MINIBOSS_PV_MULT := 2.28
 const BOSS_SIGNATURE_PV_MULT := 2.50
 # Reserve supplementaire commune a la campagne, la Mine et les Epreuves.
-const BOSS_ENDURANCE_MULT := 1.25
+const BOSS_ENDURANCE_MULT := 0.70
 const MINIBOSS_DEGATS_MULT := 1.00
 const BOSS_SIGNATURE_DEGATS_MULT := 1.10
-const BOSS_PROJECTILE_VITESSE_MULT := 1.20
+const BOSS_PROJECTILE_VITESSE_MULT := 2.625
 const BOSS_CADENCE_MOTIF_MULT := 0.90
 const BOSS_APPARITION_DUREE := 0.85
 const BOSS_TELEGRAPHE_SIGNATURE := 0.72

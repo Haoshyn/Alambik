@@ -3,6 +3,9 @@ render_mode unshaded;
 
 uniform sampler2D masque_eau : filter_linear_mipmap, repeat_disable;
 uniform float temps_animation = 0.0;
+uniform vec2 amplitude_px = vec2(6.5, 2.6);
+uniform float vitesse_eau = 2.4;
+uniform float force_reflets = 0.10;
 varying vec4 teinte;
 
 void vertex() {
@@ -13,17 +16,21 @@ void fragment() {
 	vec4 fixe = texture(TEXTURE, UV);
 	float masque = texture(masque_eau, UV).r;
 	float interieur = smoothstep(0.18, 0.82, masque);
-	float phase_x = UV.y * 112.0 + UV.x * 17.0;
-	float phase_y = UV.x * 48.0 + UV.y * 71.0;
+	float temps = temps_animation * vitesse_eau;
+	// Des ondes larges restent lisibles dans la petite surface du lac sur mobile.
+	float phase_x = UV.y * 42.0 + UV.x * 12.0;
+	float phase_y = UV.x * 30.0 + UV.y * 18.0;
 	vec2 decalage = vec2(
-		(sin(phase_x + temps_animation * 0.95) - sin(phase_x)) * 0.0025,
-		(sin(phase_y + temps_animation * 0.73) - sin(phase_y)) * 0.0065
-	) * interieur;
+		(sin(phase_x + temps * 0.95) - sin(phase_x)),
+		(sin(phase_y - temps * 0.73) - sin(phase_y))
+	) * amplitude_px * TEXTURE_PIXEL_SIZE * interieur;
 	vec3 reflet = texture(TEXTURE, clamp(UV + decalage, vec2(0.0), vec2(1.0))).rgb;
-	float phase_large = UV.y * 135.0 + UV.x * 11.0;
-	float phase_fine = UV.y * 260.0 - UV.x * 9.0;
-	float ridules = (sin(phase_large + temps_animation * 1.25) - sin(phase_large)) * 0.025
-		+ (sin(phase_fine - temps_animation * 0.86) - sin(phase_fine)) * 0.015;
+	float phase_large = UV.y * 64.0 + sin(UV.x * 18.0) * 0.65;
+	float phase_fine = UV.y * 114.0 - UV.x * 7.0;
+	float crete = smoothstep(0.35, 1.0, sin(phase_large - temps * 1.4));
+	float crete_repos = smoothstep(0.35, 1.0, sin(phase_large));
+	float ridules = ((crete - crete_repos) * 0.7
+		+ (sin(phase_fine - temps * 0.95) - sin(phase_fine)) * 0.3) * force_reflets;
 	reflet += vec3(0.8, 0.91, 1.0) * ridules * interieur;
 	COLOR = vec4(reflet, fixe.a * masque) * teinte;
 }

@@ -404,11 +404,11 @@ func _exit_tree() -> void:
 func _resume_heros() -> String:
 	var stats := Stats.depuis_reglages(ReglagesJoueur.rangs_competences_effectifs(),
 		ReglagesJoueur.passifs_equipes_effectifs(), ReglagesJoueur.bonus_objets_effectifs(),
-		ReglagesJoueur.niveau_compte_effectif(), ReglagesJoueur.attributs)
-	return "Attaque %s · Défense %s · PV %d\nCritique %s %% · dégâts critiques +%s %% · sorts +%s %%\nCadence %.2f /s · Cœurs %d/%d · %d pierres" % [
+		ReglagesJoueur.niveau_compte_effectif(), ReglagesJoueur.attributs, ReglagesJoueur.specialisation_effective())
+	return "Attaque %s · Défense %s · PV %d\nCritique %s %% · dégâts critiques +%s %%\nCadence %.2f /s · Cœurs %d/%d · %d pierres" % [
 		_nombre(stats.degats), _nombre(stats.defense), roundi(stats.pv_max),
 		_pourcentage(stats.critique), _pourcentage(stats.degats_critiques),
-		_pourcentage(stats.degats_sorts), stats.cadence, ReglagesJoueur.nombre_coeurs_mana(),
+		stats.cadence, ReglagesJoueur.nombre_coeurs_mana(),
 		Epreuves.nombre(), ReglagesJoueur.pierres_forge]
 
 func _selectionner_arme(id: String) -> void:

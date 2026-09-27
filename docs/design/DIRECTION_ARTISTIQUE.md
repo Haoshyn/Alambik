@@ -13,6 +13,31 @@ elles conservent les idées historiques sans définir le rendu actuel.
   et une arme tenue séparée qui suit l'équipement.
 - Les silhouettes, impacts et télégraphes doivent rester distincts. Les effets
   décoratifs ne masquent pas les dangers et ne rendent pas les hitbox ambiguës.
+- Les dégâts infligés s'affichent en petits nombres crème au-dessus de la
+  cible : impulsion brève, légère montée, puis fondu. La braise est dorée.
+  Les grands nombres sont abrégés, les impacts proches regroupés, avec un
+  contour fin pour le contraste. Les effets réduits gardent un seul nombre
+  sobre par cible, sans rebond ni dérive latérale ; impacts et braise s'y additionnent.
+- Chaque tireur possède un contour de projectile original, partagé par ses
+  rendus 2D et 3D. Le volume et sa lueur suivent les dimensions de collision ;
+  les grosses boules, les traits et les lames revenantes se distinguent par
+  leur contour, leur mouvement et leur rythme. Teinte et petits sceaux gardent
+  la variante du monde lisible. Les tirs des familiers portent des accents froids.
+- Les traits ennemis fins ont un volume épaissi, une teinte saturée et un bord
+  sombre opaque. Le reflet reste localisé ; leur lisibilité ne dépend pas du
+  halo ni des effets complets. Le sillage des tirs rapides est court et effilé
+  pour distinguer le corps dangereux de sa traînée.
+- Les boomerangs de boss ont un corps épais et coloré, lisible pendant leur
+  rotation et leur retour. L’éventail part du lanceur ; les boss mobiles
+  gardent leur position pendant l’annonce des trajectoires.
+- Les attaques au contact des boss montrent le secteur ou le cercle complet
+  de la frappe. Le corps s'arme, frappe puis récupère à l'arrêt ; la direction
+  annoncée ne se retourne pas vers le joueur au dernier instant.
+- Les apparitions, frappes instantanées et tirs rapides sont annoncés en rouge contrasté, commun aux
+  cinq mondes : cercle au point d’arrivée ou d’impact, traits dans les directions
+  de tir et couloir pour les charges. Le danger attend la fin de son annonce.
+  Les tirs lents peuvent se lire en mouvement sans annonce ; le corps des
+  poursuivants et chargeurs reste dangereux au contact.
 - Le centre de l'arène reste calme ; le décor plus riche se place en bordure.
   Les couleurs des mondes distinguent leur ambiance sans brouiller les attaques.
 
@@ -20,7 +45,7 @@ elles conservent les idées historiques sans définir le rendu actuel.
 
 - Composer la silhouette globale avant les composants : pas de succession de
   cartes uniformes ni de présentation dashboard. Héros autour de grandes jauges colorées,
-  maîtrises en chemins de constellation, sorts en cartes régulières avec glyphes
+  maîtrises en chemins de constellation, passifs en entrées ouvertes avec glyphes
   et fiches contextuelles à la demande,
   parure en trois sceaux décalés. Les titres de page ont un cartouche en émail
   à bord champagne et coins enluminés ; les ressources gardent leur espace propre.
@@ -65,13 +90,13 @@ elles conservent les idées historiques sans définir le rendu actuel.
   `tools/design_svg/`. Chaque icône et chaque cadre reste un
   fichier autonome, repositionnable dans Godot. Le générateur historique
   `tools/generer_email_arcanique.py` reste un point d’entrée compatible ;
-  Les sources de `SVG/` restent intactes ; les glyphes de menu en réemploient
+  Les sources de `tools/sources_svg/` restent intactes ; les glyphes de menu en réemploient
   les silhouettes avec de nouvelles matières et lumières.
   `tools/variantes_svg_menu.py` crée des variantes colorées du menu dans
   `assets/visual/interface/menu/` sans modifier les SVG sources.
-  `tools/generer_glyphes_menus.py` compose les 30 glyphes de maîtrise et les 18
-  glyphes de sorts depuis ces silhouettes SVG, chacun dans son fichier sans
-  motif secondaire superposé.
+  `tools/generer_glyphes_menus.py` compose les 30 glyphes de maîtrise et les cinq
+  familiers depuis ces silhouettes SVG. Les passifs réemploient les glyphes
+  existants de `assets/visual/azur/glyphes/`.
 - Les cadres de `interface/cadres/` s'étirent en neuf zones avec coins fixes.
   Les cases, cartes et actions secondaires ont des angles coupés et un filet
   léger ; les compteurs sont arrondis, Jouer prend une forme de capsule et les
@@ -88,9 +113,11 @@ elles conservent les idées historiques sans définir le rendu actuel.
   Épreuves partagent une rangée juste au-dessus de Jouer, plus large et centré.
   Jouer lance directement le chapitre choisi.
   Le niveau et l'XP occupent le haut gauche ; les monnaies ont chacune leur
-  symbole et un petit cadre à droite. Le menu ne montre ni logo ni héros.
+  symbole et des chiffres colorés, agrandis en Grenze gras, sans petit fond noir
+  sous le nombre. Le menu ne montre ni logo ni héros.
   L'onglet Héros ne montre plus de portrait. Classe et réinitialisation gratuite
-  sont regroupées à gauche du compteur de points, au-dessus de cinq grandes
+  sont centrées et agrandies à gauche du cartouche dédié aux points à répartir,
+  au-dessus de cinq grandes
   jauges colorées. La fiche de classe remplace temporairement les attributs.
 - La clairière est composée de couches indépendantes dans
   `assets/visual/interface/clairiere_vivante/` : paysage sans ciel, végétation
@@ -98,10 +125,19 @@ elles conservent les idées historiques sans définir le rendu actuel.
   Le ciel en dégradé et les nuages sont derrière la silhouette des montagnes ;
   les branches passent devant.
   Quatre rameaux détachés oscillent autour de leurs attaches ; les troncs,
-  montagnes, rives et pierres restent fixes. Les reflets du lac bougent dans
-  un masque intérieur, la cascade boucle sur quatre images fondues, et les
+  montagnes, rives et pierres restent fixes. Des masques SVG localisent aussi
+  le frémissement des feuilles et des touffes d'herbe dans les peintures :
+  un même vent irrégulier traverse les plans, avec des amplitudes en pixels
+  calibrées pour rester visibles sur téléphone. Les ondes du lac sont larges,
+  les reflets bien mobiles et la cascade soutenue ; les feuilles et l'herbe
+  oscillent franchement sans déplacer les troncs ni les rochers.
+  Les reflets du lac bougent dans un masque intérieur ; la cascade associe
+  quatre images fondues à un courant descendant limité à son intérieur, et les
   nuages et brumes traversent lentement le cadre dans un seul sens, avec un
-  retour hors champ. La clairière reste visible sous les cinq onglets ;
+  retour hors champ. Six silhouettes de nuages se suivent à vitesse commune :
+  cinq autres passent avant qu'une silhouette revienne, environ 3 min 38 s
+  plus tard. La clairière reste visible sous les onglets sauf Passifs, dont
+  le fond est un dégradé indigo et prune discret ;
   l'illustration du monde choisi apparaît seulement dans Aventure. Les autres
   pages gardent un voile de lecture léger, plus sombre dans Maîtrises pour
   laisser lire sa constellation. La sélection de campagne garde la clairière,
@@ -114,14 +150,18 @@ elles conservent les idées historiques sans définir le rendu actuel.
   rang séparée juste en dessous. Les tracés entre sceaux restent champagne.
   Les branches portent seulement Offensif, Défensif et Utilitaire. La fiche
   affiche le bonus actuel, le rang suivant et le prérequis utile ; la
-  réinitialisation reste accessible dans un bouton compact centré en haut.
-- Sorts commence directement par ses trois catégories et quatre médaillons
+  réinitialisation reste accessible dans un bouton plus ample, centré en haut,
+  avec une police extra-grasse et une couleur claire contrastée.
+- Passifs commence directement par ses filtres Tous, Offensif, Défensif et
+  Utilitaire, puis quatre médaillons
   équipés sur une ligne dès que la largeur le permet, sans bandeau de niveau
-  ni slogan. Seule la collection défile sous ces commandes fixes. Les cartes
-  ont un fond peint élémentaire : braise, givre, foudre, acide, onde ou vortex,
-  associé à leur effet. Un voile local protège les textes et un seul bord
-  métallique à coins enluminés apporte du relief, sans coins de viseur ni cadre
-  autour du glyphe. Toute la carte ouvre les détails ; les commandes d'équipement
+  ni slogan. Seule la collection défile sous ces commandes fixes. Le fond
+  reste une nuance calme, sans peinture élémentaire. Chaque entrée garde une
+  légère couleur autour du glyphe et un filet inférieur, sans cadre fermé.
+  Les titres, indications, noms, rangs et descriptions sont posés directement
+  sur ce fond : aucun petit rectangle sombre sous le texte, y compris dans
+  les fiches. Les cadres enluminés des filtres et les médaillons sont conservés.
+  Toute l'entrée ouvre les détails ; les commandes d'équipement
   sont dans la fiche. Le glissement continue à faire défiler la collection.
   Les glyphes, cadres, textes, boutons et filtres restent des éléments indépendants.
   Les catégories et les emplacements occupent un bandeau plus généreux, avec
@@ -129,17 +169,17 @@ elles conservent les idées historiques sans définir le rendu actuel.
   La mention « Maîtrise requise » est supprimée et ne réserve plus de hauteur.
   Les rangs et états affichés proviennent des données réelles du jeu.
 - Les îles gardent leur silhouette fixe ; leurs matières s'animent dans des zones
-  définies par `data/animations_decors.gd` : encre et eau coulantes, sable,
+  définies par `data/presentation/animations_decors.gd` : encre et eau coulantes, sable,
   lave, feuillage, bannières et portails. Brumes, nuages et fumées utilisent des
   sprites distincts. La pierre et les silhouettes restent stables.
   L'option d'effets réduits fige les horloges sans masquer de couche ; les
   animations s'arrêtent aussi lorsque la page est cachée.
 - L'accueil reste `ui/accueil_clairiere.tscn` pour conserver les références.
   Le bas contient les cinq onglets Héros, Équipement, Aventure, Maîtrises et
-  Sorts : les libellés colorés restent visibles ; l'onglet actif grandit légèrement.
+  Passifs : les libellés colorés restent visibles ; l'onglet actif grandit légèrement.
 - Typographie : DM Sans gras pour la lecture, extra-gras pour les chiffres et
   les bonus ; Grenze à graisse native 750 pour les titres, attributs, noms de
-  sorts et onglets. Fondamento reste disponible pour les anciens éléments.
+  passifs et onglets. Fondamento reste disponible pour les anciens éléments.
   Les textes sur illustration ont
   une ombre nette ou un voile indigo discret ; les petites légendes ne reposent
   jamais sur un contour épais. Garder les textes longs en DM Sans. Les trois
@@ -148,17 +188,17 @@ elles conservent les idées historiques sans définir le rendu actuel.
   lecture est plafonnée ; grilles et groupes d'actions se recomposent. L'accueil
   peut défiler si sa hauteur minimale dépasse la place disponible, sans rogner
   les commandes ni réduire leurs cibles tactiles.
-- Les Sorts alignent les emplacements équipés et présentent chaque catégorie
-  dans une grille de deux colonnes qui défile sans pagination. Actifs, Passifs
-  et Ultimes prennent respectivement un accent mauve, jade et corail. Les
-  fiches Sorts s'ouvrent au centre avec un seul cadre ; toucher le voile ou
+- Les Passifs alignent les emplacements équipés et présentent chaque catégorie
+  dans une grille de deux colonnes qui défile sans pagination. Les accents
+  distinguent les fonctions offensives, défensives et utilitaires. Les
+  fiches Passifs s'ouvrent au centre avec un seul cadre ; toucher le voile ou
   Fermer les referme sans réinitialiser la liste. Dans Maîtrises, une fiche de
   hauteur fixe au-dessus de la constellation montre la sélection, ses effets,
   ses rangs et son amélioration. Toucher un autre sceau remplace directement
   son contenu, sans fenêtre superposée.
   Les transitions entre onglets restent courtes et disparaissent avec les
   effets réduits.
-- Héros, Équipement et Sorts regroupent leurs informations de progression dans
+- Héros et Équipement regroupent leurs informations de progression dans
   un cartouche fin ; les attributs et les branches de Maîtrises gardent leurs
   accents propres. Les sceaux Offensif, Défensif et Utilitaire prennent chacun
   une teinte rouge corail, vert jade ou mauve. Les augments ont une plaque
@@ -169,7 +209,8 @@ elles conservent les idées historiques sans définir le rendu actuel.
   les familles d'armes et de familiers ont des accents distincts.
 - Menus, cartes, paramètres, pause, récompenses et HUD partagent le même kit.
   Dans le HUD, le temps de salle reste en bandeau, les ressources sont en deux
-  compteurs et les commandes de pause et de sorts sont rondes. La transition
+  compteurs et une commande de pause ronde. Aucun bouton de sort n'est affiché.
+  La transition
   d'entrée reprend le portail sur un halo discret et un cartouche de monde.
   La simulation, les silhouettes de combat et les couleurs de danger gardent
   leurs règles de lisibilité ; cette refonte concerne l'habillage d'interface.
@@ -215,7 +256,7 @@ Références pour les rôles et les contrastes :
 
 ## Fichiers de référence
 
-- Modèle et rendu : `data/visuels_3d.gd`, `scripts/presentation/monde_3d.gd`,
+- Modèle et rendu : `data/presentation/visuels_3d.gd`, `scripts/presentation/monde_3d.gd`,
   `scripts/presentation/materiaux_apprenti.gd`, `scripts/presentation/arme_tenue_3d.gd`.
 - Interface : `scripts/presentation/style_azur.gd`, `ui/`,
   `assets/visual/interface/ORIGINE.md`, `assets/visual/arcane/ORIGINE.md`.

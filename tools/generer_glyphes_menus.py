@@ -7,7 +7,7 @@ from xml.etree import ElementTree
 
 
 RACINE = Path(__file__).resolve().parent.parent
-SOURCES = RACINE / "SVG"
+SOURCES = RACINE / "tools/sources_svg"
 SORTIE = RACINE / "assets/visual/interface/menu"
 ESPACE_SVG = "{http://www.w3.org/2000/svg}"
 
@@ -32,27 +32,6 @@ MAITRISES = {
         "savoir": "Inkwell with pen", "elan": "Feather",
         "prescience": "Palm of Hand", "philosophe": "Paper",
     },
-}
-
-SORTS = {
-    "onde_alchimique": ("Battle magic", "arcane"),
-    "nova_de_givre": ("Winter", "givre"),
-    "barrage_de_braise": ("Fire 1", "feu"),
-    "impulsion_foudroyante": ("Lightning", "foudre"),
-    "explosion_corrosive": ("Potion", "acide"),
-    "vortex_alchimique": ("Spiritual magic", "vortex"),
-    "moisson_vitale": ("Healing magic", "vie"),
-    "sang_froid": ("Water", "givre"),
-    "riposte_alchimique": ("Hand Gesture of Power", "acide"),
-    "reserve_ultime": ("Special magic", "arcane"),
-    "rempart_initial": ("Shield", "protection"),
-    "heritage_reactif": ("Resources", "cristal"),
-    "audace": ("Preparing for an attack", "feu"),
-    "echo_alchimique": ("Earh magic", "vortex"),
-    "grand_oeuvre": ("Fire 2", "solaire"),
-    "temps_suspendu": ("Ring", "temps"),
-    "transmutation_totale": ("Drop Water or Blood", "cristal"),
-    "purification_totale": ("Torch", "solaire"),
 }
 
 FAMILIERS = {
@@ -143,13 +122,13 @@ def mouvement(effet: str, couleur: str) -> str:
             f'<circle cx="128" cy="128" r="103" fill="none" stroke="{couleur}" stroke-width="1.8" opacity=".3"/>')
 
 
-def composer(nom_source: str, palette: tuple[str, str, str, str], effet: str, est_sort: bool) -> str:
+def composer(nom_source: str, palette: tuple[str, str, str, str], effet: str, avec_mouvement: bool) -> str:
     clair, moyen, ombre, lueur = palette
     trace = silhouette(nom_source)
     contour = "#fff2d8" if effet in ("feu", "solaire", "offensif") else "#ebf7ff"
-    decorations = mouvement(effet, lueur) if est_sort else poussiere(lueur, len(nom_source) % 2 == 0)
+    decorations = mouvement(effet, lueur) if avec_mouvement else poussiere(lueur, len(nom_source) % 2 == 0)
     anneau = (f'<circle cx="128" cy="128" r="108" fill="none" stroke="{lueur}" stroke-width="2" opacity=".28"/>'
-              if est_sort else "")
+              if avec_mouvement else "")
     echelle = "translate(23 23) scale(.82)"
     return f'''<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 256 256">
 <defs>
@@ -176,9 +155,6 @@ def generer() -> None:
                             composer(source, PALETTES[branche], branche, False)))
     if len(set(sources_maitrises)) != 30:
         raise ValueError("Chaque maîtrise doit garder une silhouette distincte")
-    for identifiant, (source, effet) in SORTS.items():
-        sorties.append((SORTIE / "sorts/icones" / f"{identifiant}.svg",
-                        composer(source, PALETTES[effet], effet, True)))
     for identifiant, (source, effet) in FAMILIERS.items():
         sorties.append((SORTIE / "familiers" / f"{identifiant}.svg",
                         composer(source, PALETTES[effet], effet, True)))

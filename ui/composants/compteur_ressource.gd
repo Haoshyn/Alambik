@@ -13,6 +13,8 @@ var _libelle := ""
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Le chiffre se lit sur le compteur, sans rectangle ajoute derriere la legende.
+	set_meta("surface_lecture", false)
 	HabillagePeint.appliquer(self)
 	_cadre = StyleBoxTexture.new()
 	_cadre.texture = HabillagePeint.texture("compteur")
@@ -28,7 +30,9 @@ func _ready() -> void:
 	add_child(ligne)
 	_icone = StyleAzur.illustration("gouttes", LARGEUR_ICONE)
 	ligne.add_child(_icone)
-	_valeur = StyleAzur.texte("", 36, StyleAzur.IVOIRE)
+	_valeur = StyleAzur.texte("", 46, StyleAzur.IVOIRE)
+	_valeur.name = "Valeur"
+	_valeur.add_theme_font_override("font", Polices.GRIMOIRE)
 	_valeur.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_valeur.clip_text = true
 	_valeur.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -39,6 +43,7 @@ func _ready() -> void:
 func configurer(icone: String, libelle: String) -> void:
 	_icone.texture = StyleAzur.texture_interface(icone)
 	_cadre.texture = HabillagePeint.texture("compteur_" + icone) if icone in ["gouttes", "pierres"] else HabillagePeint.texture("compteur")
+	_valeur.add_theme_color_override("font_color", Color("a4edff") if icone == "gouttes" else Color("e8c1ff") if icone == "pierres" else StyleAzur.IVOIRE)
 	_libelle = libelle
 	tooltip_text = libelle
 
@@ -51,7 +56,7 @@ func _ajuster_valeur() -> void:
 	if _valeur == null:
 		return
 	var largeur := maxf(0.0, size.x - MARGE_GAUCHE - MARGE_DROITE - LARGEUR_ICONE - ESPACE_ICONE)
-	var taille := 36
-	while taille > 22 and Polices.TITRE.get_string_size(_valeur.text, HORIZONTAL_ALIGNMENT_LEFT, -1, taille).x > largeur:
+	var taille := 46
+	while taille > 28 and Polices.GRIMOIRE.get_string_size(_valeur.text, HORIZONTAL_ALIGNMENT_LEFT, -1, taille).x > largeur:
 		taille -= 1
 	_valeur.add_theme_font_size_override("font_size", taille)

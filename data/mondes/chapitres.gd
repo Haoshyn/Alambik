@@ -1,0 +1,107 @@
+class_name Chapitres
+extends RefCounted
+
+# Les cinq mondes actifs sont declines en sept niveaux. Les
+# contenus sont reutilises entre les sept, tandis que densite et statistiques
+# montent. Le septieme porte le boss signature du monde.
+#
+# Les statistiques suivent deux courbes fixes, independantes de la sauvegarde.
+
+const CHAPITRES_PAR_MONDE := 7
+
+const MONDES := [
+	{"id":"encre", "numero":"I", "nom":"Encre", "sous_titre":"Les pages débordent de magie.", "boss_signature":"archiscribe_encres", "teinte":Color("aa8dc7")},
+	{"id":"terre", "numero":"II", "nom":"Terre", "sous_titre":"Les sables mouvants gagnent les vieux jardins.", "boss_signature":"gardien_runes", "teinte":Color("b4bd78")},
+	{"id":"eau", "numero":"III", "nom":"Eau", "sous_titre":"Les marées ont gagné le sanctuaire.", "boss_signature":"reine_givre", "teinte":Color("4dbac4")},
+	{"id":"air", "numero":"IV", "nom":"Air", "sous_titre":"Les souffles traversent les terrasses.", "boss_signature":"maitre_orages", "teinte":Color("79c9b7")},
+	{"id":"feu", "numero":"V", "nom":"Feu", "sous_titre":"La lave affleure au bord des forges.", "boss_signature":"roi_braises", "teinte":Color("ed9857")},
+]
+
+# Garder les identites retirees pour les bijoux des anciennes sauvegardes.
+const MONDES_RETIRES := [
+	{"nom": "Échos", "teinte": Color(0.70, 0.56, 0.98)},
+	{"nom": "Ombres", "teinte": Color(0.46, 0.42, 0.68)},
+	{"nom": "Runes", "teinte": Color(0.35, 0.92, 0.76)},
+	{"nom": "Néant", "teinte": Color(0.82, 0.38, 0.82)},
+	{"nom": "Alambic", "teinte": Color(1.00, 0.74, 0.24)},
+]
+
+const MINIBOSS_FINAUX := ["la_rature", "l_errata", "le_correcteur", "reliure_affamee",
+	"virgule_noire", "index_brise", "marge_hurlante", "enlumineur_fou",
+	"signet_sanglant", "copiste_aveugle"]
+
+static var TOUS: Array[Dictionary] = _construire_chapitres()
+
+static func _construire_chapitres() -> Array[Dictionary]:
+	var resultat: Array[Dictionary] = []
+	for index_monde in MONDES.size():
+		var monde: Dictionary = MONDES[index_monde]
+		for index_chapitre in CHAPITRES_PAR_MONDE:
+			var chapitre_monde := index_chapitre + 1
+			var est_signature := chapitre_monde == CHAPITRES_PAR_MONDE
+			var palier := index_monde * CHAPITRES_PAR_MONDE + index_chapitre
+			var boss_final: String = str(monde["boss_signature"]) if est_signature \
+				else MINIBOSS_FINAUX[(index_monde * (CHAPITRES_PAR_MONDE - 1) + index_chapitre) % MINIBOSS_FINAUX.size()]
+			resultat.append({
+				"id": "%s_%d" % [monde["id"], chapitre_monde],
+				"nom": "Monde %d · Niveau %d — %s" % [index_monde + 1, chapitre_monde, monde["nom"]],
+				"sous_titre": monde["sous_titre"],
+				"monde": index_monde,
+				"chapitre_monde": chapitre_monde,
+				"salles": Reglages.SALLES_PAR_RUN,
+				"alambics": [4, 9, 14],
+				"bosses": [5, 10, 15, 20],
+				"boss": boss_final,
+				"boss_signature": est_signature,
+				"palier": palier,
+				"pv_mult": pv_du_palier(palier),
+				"degats_mult": degats_du_palier(palier),
+				"teinte": monde["teinte"],
+			})
+	return resultat
+
+# Un palier hors campagne conserve le dernier coefficient de campagne.
+static func pv_du_palier(palier: int) -> float:
+	var p := maxi(0, palier)
+	return ProgressionStatistiques.facteur_pv(p)
+
+static func degats_du_palier(palier: int) -> float:
+	var p := maxi(0, palier)
+	return ProgressionStatistiques.facteur_degats(p)
+
+static func palier(index: int) -> int:
+	return int(par_index(index)["palier"])
+
+static func nombre() -> int:
+	return TOUS.size()
+
+static func par_index(index: int) -> Dictionary:
+	return TOUS[clampi(index, 0, TOUS.size() - 1)]
+
+static func libelle_court(index: int) -> String:
+	var chapitre: Dictionary = par_index(index)
+	return "Monde %d · Niveau %d" % [int(chapitre["monde"]) + 1, int(chapitre["chapitre_monde"])]
+
+static func par_id(id: String) -> Dictionary:
+	for chapitre in TOUS:
+		if chapitre["id"] == id:
+			return chapitre
+	return TOUS[0]
+
+static func salles(index: int) -> int:
+	return par_index(index)["salles"]
+
+static func est_boss(index: int, salle: int) -> bool:
+	return salle in par_index(index)["bosses"]
+
+static func progression(index: int, salle: int) -> float:
+	var chapitre := par_index(index)
+	return clampf(float(salle - 1) / maxf(1.0, float(chapitre["salles"] - 1)), 0.0, 1.0)
+
+static func facteur_pv(index: int, salle: int) -> float:
+	return float(par_index(index)["pv_mult"]) * ProgressionStatistiques.facteur_salle(salle,
+		Reglages.CAMPAGNE_PV_PAR_SALLE, Reglages.CAMPAGNE_PV_PALIERS)
+
+static func facteur_degats(index: int, salle: int) -> float:
+	return float(par_index(index)["degats_mult"]) * ProgressionStatistiques.facteur_salle(salle,
+		Reglages.CAMPAGNE_DEGATS_PAR_SALLE, Reglages.CAMPAGNE_DEGATS_PALIERS)

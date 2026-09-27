@@ -22,7 +22,7 @@ var _apercu: Control
 
 func _ready() -> void:
 	_niveau = ReglagesJoueur.niveau_mine_choisi if mode == "mine" else ReglagesJoueur.niveau_epreuve_choisi
-	_niveau = clampi(_niveau, 1, _nombre())
+	_niveau = clampi(_niveau, 1, maxi(1, _nombre_debloque()))
 	_page = (_niveau - 1) / NIVEAUX_PAR_PAGE
 	var titre := "La Mine" if mode == "mine" else "Épreuves"
 	var col := StyleAzur.page(self, titre)
@@ -38,11 +38,11 @@ func _ready() -> void:
 	textes.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	textes.add_theme_constant_override("separation", 8)
 	presentation.add_child(textes)
-	textes.add_child(StyleAzur.texte("EXPÉDITION ANNEXE" if mode == "mine" else "RITUELS DE MAGIE", 25, StyleAzur.CUIVRE))
+	textes.add_child(StyleAzur.texte("EXPÉDITION ANNEXE" if mode == "mine" else "PASSIFS PERMANENTS", 25, StyleAzur.CUIVRE))
 	textes.add_child(StyleAzur.texte("Choisissez votre veine" if mode == "mine" else "Choisissez votre épreuve", 43))
 	textes.add_child(StyleAzur.texte(
-		"Survivez cinq minutes, affrontez le gardien et rapportez des pierres de forge." if mode == "mine"
-		else "Affrontez cinq boss. Chaque niveau cache ses sorts et un Cœur de mana unique.",
+		"5 minutes · 1 boss · Pierres de forge" if mode == "mine"
+		else "5 boss · Passifs · Cœur de mana",
 		27, StyleAzur.ATTENUE))
 	_progression = StyleAzur.texte("", 25, StyleAzur.MAGIE)
 	textes.add_child(_progression)
@@ -72,7 +72,7 @@ func _ready() -> void:
 	var fiche := StyleAzur.plaque(contenu)
 	_selection_titre = StyleAzur.texte("", 23, StyleAzur.MAGIE)
 	fiche.add_child(_selection_titre)
-	if mode == "epreuve_sorts":
+	if mode == "epreuves":
 		_symboles = HBoxContainer.new()
 		_symboles.add_theme_constant_override("separation", 12)
 		fiche.add_child(_symboles)
@@ -96,8 +96,7 @@ func _nombre() -> int:
 	return Mine.nombre() if mode == "mine" else Epreuves.nombre()
 
 func _nombre_debloque() -> int:
-	return ReglagesJoueur.niveau_mine_debloque() if mode == "mine" else (
-		Epreuves.nombre() if ReglagesJoueur.mode_dev else ReglagesJoueur.niveau_epreuve_debloque)
+	return ReglagesJoueur.niveau_mine_debloque() if mode == "mine" else ReglagesJoueur.niveau_epreuve_accessible()
 
 func _rafraichir() -> void:
 	var total := _nombre()
@@ -116,10 +115,10 @@ func _rafraichir() -> void:
 			continue
 		var accessible := niveau <= debloque
 		var statut := "Verrouillé" if not accessible else "Sélectionné" if niveau == _niveau else "Disponible"
-		if mode == "epreuve_sorts" and accessible and ReglagesJoueur.coeur_mana_obtenu(niveau) and niveau != _niveau:
+		if mode == "epreuves" and accessible and ReglagesJoueur.coeur_mana_obtenu(niveau) and niveau != _niveau:
 			statut = "Cœur trouvé"
 		etape.afficher(niveau, niveau == _niveau, accessible, statut, false, "mine" if mode == "mine" else "epreuves")
-	_selection_titre.text = "NIVEAU %02d · %s" % [_niveau, "LA MINE" if mode == "mine" else "ÉPREUVE DE MAGIE"]
+	_selection_titre.text = "NIVEAU %02d · %s" % [_niveau, "LA MINE" if mode == "mine" else "ÉPREUVE"]
 	if mode == "mine":
 		var pierres := Reglages.pierres_mine(Mine.palier(_niveau))
 		_details.text = "Niveau de campagne %d requis · %d min de survie\n%d pierres de forge à la victoire, avant vos bonus." % [
@@ -128,12 +127,12 @@ func _rafraichir() -> void:
 		var noms: Array[String] = []
 		for enfant in _symboles.get_children():
 			enfant.queue_free()
-		for id in Epreuves.sorts(_niveau):
-			var donnees: Dictionary = Sorts.donnees(str(id))
+		for id in Epreuves.passifs(_niveau):
+			var donnees: Dictionary = Passifs.donnees(str(id))
 			noms.append(str(donnees["nom"]))
 			_symboles.add_child(StyleAzur.vignette(str(id), 76))
-		_details.text = "Sorts possibles : %s\nCœur de mana : %s" % [
-			" · ".join(noms), "obtenu" if ReglagesJoueur.coeur_mana_obtenu(_niveau) else "à trouver"]
+		_details.text = "Passifs possibles : %s\nCœur de mana : %s · +%d %% de dégâts\nUn cœur par niveau, %d au maximum." % [
+			" · ".join(noms), "obtenu" if ReglagesJoueur.coeur_mana_obtenu(_niveau) else "à trouver", roundi(Reglages.COEUR_MANA_BONUS_FINAL * 100.0), Epreuves.nombre()]
 	if _niveau > debloque:
 		_details.text += "\n%s" % (
 			"Terminez le chapitre de campagne requis." if mode == "mine"

@@ -3,10 +3,7 @@ signal termine
 
 var campagne := false
 var etage_recompense := 1
-var soin_choisi := 0.0
 var rarete_imposee := ""
-var palier_epique := 0
-var _contexte: Dictionary = {}
 var _choisi := false
 var _rarete := ""
 var _propositions: Array[String] = []
@@ -16,33 +13,24 @@ var _consigne: Label
 var _bouton_reroll: Button
 
 func _ready() -> void:
-	var arme: Dictionary = CatalogueProjectiles.TYPES.get(ReglagesJoueur.projectile_equipe_effectif(), {})
-	_contexte = {
-		"drapeaux_arme": arme.get("drapeaux", []),
-		"avec_sorts": Sorts.ACTIFS.has(ReglagesJoueur.sort_actif_effectif()) or Sorts.ULTIMES.has(ReglagesJoueur.ultime_effectif()),
-	}
 	_rarete = rarete_imposee
 	if campagne and _rarete.is_empty():
-		_rarete = ProgressionAugments.rarete_niveau(etage_recompense, Jeu.niveaux_rares)
-	var titre := "Choisissez une augmentation"
-	var sous_titre := "Une nouvelle magie pour cette aventure"
-	if palier_epique > 0:
-		titre = "Étage %d · Augmentation %s" % [palier_epique,
-			"légendaire" if _rarete == Reactif.LEGENDAIRE else "épique"]
-		sous_titre = "Choisissez un pouvoir · Soin garanti : %d %% des PV max" % roundi(ProgressionAugments.SOIN_EPIQUE * 100.0)
-		if _rarete == Reactif.LEGENDAIRE:
-			sous_titre += "\nUnique dans cette aventure · Aucune relance"
-	elif campagne:
+		_rarete = ProgressionAugments.rarete_niveau(etage_recompense, Jeu.raretes_niveaux)
+	var titre := "Choisissez un augment"
+	var sous_titre := ""
+	if campagne:
 		titre = "Niveau %d / %d · %s" % [etage_recompense, ProgressionAugments.niveau_max(),
-			"Rare" if _rarete == Reactif.RARE else "Commun"]
-		sous_titre = "Quatre rares garantis entre les niveaux 1 et 10" if _rarete == Reactif.RARE else "Soin, attaque ou PV maximum · Bonus cumulables sans diminution"
+			str({Reactif.RARE: "Rare", Reactif.EPIQUE: "Épique", Reactif.LEGENDAIRE: "Légendaire"}.get(_rarete, "Rare"))]
+		if _rarete == Reactif.LEGENDAIRE:
+			sous_titre = "Sans relance"
 	var col := StyleAzur.page(self, "Augmentations")
 	StyleAzur.banniere(col, titre, sous_titre, "fiole")
 	_cartes = StyleAzur.defilement(col)
 	_cartes.add_theme_constant_override("separation", 28)
 	_espace_haut = Control.new()
 	_cartes.add_child(_espace_haut)
-	_consigne = StyleAzur.texte("Touchez le pouvoir à emporter", 26, StyleAzur.MENTHE)
+	_consigne = StyleAzur.texte("", 28, StyleAzur.MENTHE)
+	_consigne.hide()
 	_consigne.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_cartes.add_child(_consigne)
 	_cartes.get_parent().resized.connect(_recentrer_cartes)
@@ -60,7 +48,7 @@ func _nouveau_tirage() -> void:
 		return
 	var anciennes := _propositions.duplicate()
 	_propositions = DraftLogique.proposer(Jeu.ameliorations_effectives(), Jeu.rng,
-		ProgressionAugments.NOMBRE_CHOIX, _rarete, etage_recompense if campagne else 0, anciennes, _contexte)
+		ProgressionAugments.NOMBRE_CHOIX, _rarete, etage_recompense if campagne else 0, anciennes)
 	for enfant in _cartes.get_children():
 		if enfant == _espace_haut or enfant == _consigne:
 			continue
@@ -78,12 +66,12 @@ func _nouveau_tirage() -> void:
 		_cartes.add_child(carte)
 	_recentrer_cartes.call_deferred()
 	var disponibles := DraftLogique.candidats(Jeu.ameliorations_effectives(),
-		_rarete, etage_recompense if campagne else 0, _contexte)
+		_rarete, etage_recompense if campagne else 0)
 	var peut_changer := false
 	for id in disponibles:
 		if id not in _propositions:
 			peut_changer = true
-	_bouton_reroll.text = "Renouveler les cartes · %d relance%s" % [Jeu.rerolls_restants,
+	_bouton_reroll.text = "Relancer · %d relance%s" % [Jeu.rerolls_restants,
 		"s" if Jeu.rerolls_restants > 1 else ""]
 	_bouton_reroll.visible = ProgressionAugments.relance_autorisee(_rarete) and Jeu.rerolls_restants > 0 and peut_changer
 	_bouton_reroll.disabled = not _bouton_reroll.visible
@@ -117,12 +105,7 @@ func _sur_choix(id: String) -> void:
 		if carte is CarteReactif:
 			carte.selectionnee = carte.reactif.id == id
 			carte.disabled = true
-	var reactif := CatalogueReactifs.par_id(id)
-	soin_choisi = float(reactif.mods.get("soin_part", 0.0))
-	if reactif.rarete in [Reactif.EPIQUE, Reactif.LEGENDAIRE]:
-		soin_choisi += ProgressionAugments.SOIN_EPIQUE
-	if not reactif.mods.has("soin_part"):
-		Jeu.ajouter_reactif(id)
+	Jeu.ajouter_reactif(id)
 	Sons.jouer("choix", -10.0)
 	StyleInterface.sortir_puis(self, func() -> void: termine.emit())
 

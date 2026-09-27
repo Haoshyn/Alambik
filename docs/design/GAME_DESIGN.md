@@ -1,175 +1,210 @@
-# Alambik — jeu actuellement implémenté
+# Alambik — périmètre actif
 
-Ce document décrit le périmètre actif. Les chiffres et catalogues de `data/`
-font foi pour l'équilibrage. L'ancienne specification, qui mêlait le jeu et des
-projets futurs, est conservée dans `../OldAlambik/2026-09-20/retires/docs/design/`
-(chemin depuis la racine du projet).
+## Boucle
 
-## Boucle de jeu
+Roguelite de tir portrait à une main. Le héros se déplace au joystick et tire
+automatiquement lorsqu'il s'arrête. Le combat repose sur les tirs du héros,
+son familier, l'esquive et les attaques annoncées des ennemis.
 
-Roguelite de tir portrait Android, à une main. Le héros se déplace au joystick,
-tire automatiquement selon son état et utilise les sorts équipés. Les salles
-combinent vagues, obstacles, boss et récompenses. Une tentative développe ses
-améliorations propres ; l'équipement, les maîtrises et les sorts persistent.
+Le familier entre dans chaque salle, patrouille et s'arrête pour viser puis
+tirer. Sa position et son cycle sont indépendants des déplacements du héros.
+Ses projectiles traversent les murs ; leurs dégâts gardent les règles de
+progression et de forge du familier.
 
-Sources : `scripts/run.gd`, `scripts/heros.gd`, `scripts/tir.gd`,
-`autoload/jeu.gd`, `autoload/reglages_joueur.gd`.
+Chaque tireur possède sa silhouette de projectile et ses dimensions de
+collision : traits étroits, boules, trajectoires ondulantes, allers-retours
+avec un arrêt avant le retour et ricochets lents en nombre limité. Les tirs
+revenants suivent leur axe initial sans poursuivre le héros. Certains boss
+avancent au contact pour un balayage, une morsure ou un choc circulaire.
+L'approche est limitée ; la frappe est annoncée et verrouillée, suivie d'une
+récupération immobile. Ils ne tirent pas pendant cet assaut.
 
-## Campagne et modes annexes
+Les augments sont des choix temporaires de run. L'équipement, les maîtrises,
+les attributs, les passifs et les Cœurs de mana sont permanents.
+La répartition des sources permanentes se lit avant les augments. Les choix
+de run démultiplient ce socle et doivent expliquer la majeure partie du DPS
+de fin de tentative ; ils ne sont pas une sixième tranche à ramener à 20 %.
+
+Les gains offensifs et défensifs doivent rester comparables. Attributs,
+maîtrises, équipement, passifs, Cœurs et augments apportent des gains modestes,
+avec des PV et dégâts ennemis recalibrés sur ce niveau de puissance.
+Une progression ordinaire doit garder plusieurs attaques par monstre intact,
+même en se spécialisant en dégâts. Les critiques et circonstances favorables
+peuvent exceptionnellement le tuer en une attaque. Un fort sur-farm peut
+dépasser le chapitre suivant ; le chapitre d'après doit reprendre une marge.
+Le jeu ne force jamais un nombre minimum de coups, ne plafonne pas les dégâts
+et n'adapte pas les ennemis au build.
+
+Les dégâts infligés apparaissent brièvement près de l'ennemi, boss compris.
+Le nombre vient du montant appliqué, critiques et vulnérabilité inclus,
+même si le coup dépasse les PV restants. Les impacts très proches sont
+additionnés par cible ; les dégâts continus sont regroupés séparément.
+
+## Campagne, Mine et Épreuves
 
 La campagne comprend cinq mondes — Encre, Terre, Eau, Air et Feu — de sept
-niveaux chacun. Un niveau parcourt vingt salles ; le septième niveau de
-chaque monde porte son boss signature. Les salles et obstacles suivent un
-parcours fixe par niveau. Le centre et les accès restent praticables.
+niveaux chacun. Chaque tentative comprend vingt salles. Les boss occupent
+les salles 5, 10, 15 et 20 ; le dernier niveau de chaque monde se termine
+par son boss signature.
 
-La Mine et les Épreuves de sorts sont accessibles depuis l'accueil. Leurs
-récompenses et difficultés viennent des mêmes catalogues que l'aperçu de butin.
+Les formes des salles, obstacles, terrains, rencontres et variantes de monde
+sont définis dans leurs catalogues. La croissance des PV et des dégâts est
+composée. Les PV reçoivent un renfort après le premier chapitre pour suivre
+les premiers achats et passifs ; ce renfort plafonne progressivement, puis
+la croissance des PV ralentit après les premiers chapitres pour suivre les
+gains permanents plus espacés. Les dégâts suivent leur courbe distincte. Dans
+une run, la hausse par salle conserve des paliers de difficulté en salles
+5, 10 et 15, indépendamment des offres d'augments. Elle est fixe : le build et les
+échecs du joueur ne la modifient pas.
 
-Sources : `data/chapitres.gd`, `data/vagues.gd`, `data/formes_salles.gd`,
-`data/epreuves.gd`, `data/butins_run.gd`, `scripts/bilan_run.gd`.
+Les premières tentatives gardent des vagues moins longues et des annonces
+lisibles. Les tirs lents se lisent en mouvement, sans tracé préalable. Les tirs
+rapides, ou trop proches pour laisser réagir, annoncent leur trajectoire avec
+une visée verrouillée jusqu’au départ. Les frappes instantanées gardent leur
+avertissement. La vitesse et le rythme montent progressivement avec le niveau, puis
+modérément au cours de chaque tentative, avec des plafonds pour les trajectoires
+complexes. Le tisseur lance des rubans plus larges sans annonce ni anticipation :
+leur écart et leur oscillation permettent une traversée au bon moment.
+Les boss gardent des ouvertures dans leurs barrages ; les départs des tirs
+respectent le contour réel de la salle et leurs annonces. Le tutoriel est retiré.
 
-## Combat et terrains
+La sentinelle anticipe une course régulière puis lance un trait très rapide
+après sa visée verrouillée. À mi-distance, continuer tout droit expose au coup :
+il faut changer de direction ou se couvrir. Au fond de la salle, le temps de vol
+supplémentaire laisse une marge pour esquiver latéralement. Les poursuivants et
+chargeurs blessent dès le contact réel de leurs corps, même pendant la
+préparation de leur attaque, avec un délai entre deux coups. Un obstacle
+empêche cette frappe et l’invulnérabilité normale après dégât reste active.
 
-Les ennemis fragiles, moyens, costauds, élites, miniboss et boss ont des comportements
-et motifs propres. Leur progression suit 35 profils fixes, construits depuis
-les ressources des échecs et les achats accessibles sans jamais lire le build réel.
-La cible passe de 3–4 tentatives sans farm obligatoire au début à dix échecs
-et cinq ou six victoires sur le niveau précédent à la fin. Ce sont des cibles
-de conception, sans victoire automatique après un nombre d’essais. Les premières
-salles laissent acquérir les augments avant une montée plus forte de la pression.
-Le héros se déplace à 728 px/s, soit 30 % plus vite. Le coefficient global de
-déplacement ennemi augmente de 15 %, en plus des vitesses propres à chaque rôle.
-Le poursuivant fragile court sans s’arrêter ; les chargeurs annoncent leur couloir,
-les harceleurs esquivent avec une recharge, et les artilleurs lancent un projectile
-en cloche sur une position verrouillée. Son cercle rouge explose après 1,5 seconde.
-Les projectiles peuvent onduler ou rebondir sur les murs ; les boss utilisent
-également ces motifs et des impacts ciblés. Chaque famille possède une identité
-par monde, avec nom, couleurs, proportions et ornements 3D spécifiques.
-Terre introduit les éclats rebondissants, Eau les lames ondulantes, Air les vrilles,
-et Feu les traces brûlantes de certaines charges.
+Les boss arrivent près du milieu de la salle. Selon leur identité, ils avancent
+directement, prennent un flanc ou orbitent autour du joueur ; leurs annonces
+de tir gardent une origine fixe. Leurs projectiles couvrent la salle et les
+boomerangs partent en éventail dirigé, avec retour sur le premier mur rencontré.
+Les monstres se rapprochent de leur distance d’attaque, sauf les tireurs fuyards
+qui conservent leur recul. Les dashs parcourent une grande distance mais ne se
+déclenchent que si la cible est atteignable, sans obstacle sur le trajet. Un
+ralentissement ou une cible sortie de portée pendant la préparation annule
+le départ ; une direction annoncée ne se réoriente pas en secret.
 
-Les boss conservent leur attaque propre et leurs charges ou invocations ; le
-motif du monde complète leur cycle et alterne les ouvertures de ses salves.
-Leur réserve de PV est augmentée de 25 % en campagne, Mine et Épreuves,
-sans adaptation au build du joueur. Les poses de préparation, recul et impact
-restent visuelles ; les annonces au sol donnent les repères d’esquive.
+Les monstres prévus par une salle peuvent déposer des cœurs de soin, avec
+un quota de zéro, un ou deux pour toute la rencontre. Les invocations ne
+renouvellent pas ce budget. Les cœurs non ramassés sont recueillis avant de
+quitter la salle ; ils ne se transportent pas comme une réserve de potions.
 
-Une vague compte généralement 3–5 ennemis, jusqu’à 7 dans les grandes salles.
-Les quatre premières salles restent limitées à 4 ennemis simultanés. Une seule
-famille costaude occupe chaque vague conçue. La suivante attend 12–14,4 secondes
-et suffisamment de places, ou 0,85 seconde après un nettoyage complet.
-À partir du deuxième niveau et de la salle 3, une vague ordinaire a 10 % de
-chance de proposer un élite de n’importe quelle famille, avec un seul élite actif.
-Ses PV et dégâts doublent, sa vitesse gagne 12 % et sa recharge baisse de 10 %.
-Certains élites laissent des traces brûlantes annoncées lorsqu’ils se déplacent.
-Les renforts supplémentaires partagent l’XP de la composition d’origine ; les
-récompenses de salle et de coffre n’augmentent pas avec les effectifs.
+La Mine est une survie avec ramassage de cristaux d'XP au sol. Les augments
+arrivent pendant la survie ; le boss apparaît après cinq minutes et sa mort
+termine la tentative. La Mine finance la forge et les niveaux du compte,
+y compris partiellement lorsqu'une tentative échoue. L'XP de compte de
+survie est distincte des cristaux donnant les augments de cette tentative.
 
-Les projectiles,
-collisions, protections et états restent gérés par la simulation 2D ; la
-présentation de combat utilise des modèles et effets 3D.
+Les Épreuves proposent onze niveaux de rencontres. Elles donnent les
+passifs et leurs doublons, ainsi qu'un Cœur de mana unique par niveau.
+Une garantie borne le nombre de victoires sans récompense.
+La première s'ouvre après le premier chapitre de campagne. Les suivantes
+exigent à la fois la victoire de l'Épreuve précédente et l'avancement de
+campagne correspondant à leur palier. Le niveau accessible reste rejouable.
+Les anciennes acquisitions et records sont conservés ; leur accès respecte
+désormais aussi la campagne, y compris depuis une ancienne sélection ou Rejouer.
 
-Les terrains de campagne ajoutent sables mouvants, flaques, vent ou lave selon
-le monde. Encre ne possède pas d'effet de terrain. Les boss et modes annexes
-n'utilisent pas ces zones.
+La campagne seule, sans répétitions ni modes annexes, donne un budget limité.
+La Mine et les Épreuves permettent de renforcer le compte lorsqu'un chapitre
+résiste, sans rendre les éliminations en une attaque ordinaires. Le farm n'est
+pas une interdiction de lancer une tentative. Les comparaisons et leurs
+hypothèses sont dans `statistiques_jeu/liste_mathematique.md`.
 
-Sources : `data/catalogue_ennemis.gd`, `data/bestiaire_mondes.gd`, `data/evolution_ennemis.gd`,
-`data/terrains_mondes.gd`, `scripts/terrain_elementaire.gd`,
-`scripts/ennemi.gd`, `scripts/boss.gd`, `scripts/projectile.gd`.
+## Personnage et équipement
 
-## Améliorations de run et sorts
+Sorcier et Moine restent sélectionnables. Leurs bonus sont temporairement
+neutres ; aucun build ne reçoit d'avantage de classe.
 
-En campagne, l’XP des éliminations reste sous forme de petits cristaux au sol, sans ramassage
-au contact. Après nettoyage complet de la salle, les dangers restants disparaissent
-et les cristaux rejoignent le héros avant les choix de niveau. Les soins sur
-élimination restent immédiats.
+Le niveau de compte augmente légèrement le socle d'attaque et de PV, puis
+donne des points à répartir. Force, Vitalité, Agilité, Intelligence et Sagesse
+ont chacune un effet actuel ; Intelligence n'est plus liée à des sorts.
 
-La Mine suit une boucle survivor : la horde apparaît continuellement et le joueur
-doit approcher des cristaux laissés à la mort des ennemis pour gagner leur XP.
-Les montées de niveau ouvrent immédiatement un choix d’augment, avec pause du
-combat pendant le choix. Aucun répit ni ramassage global n’interrompt la horde.
-Le boss apparaît à cinq minutes même si des ennemis sont encore présents ; les
-apparitions continuent pendant ce combat et sa mort termine la run sans exiger
-de nettoyer les survivants. Les invocations ne produisent pas d’XP supplémentaire.
+Un équipement complet comprend une arme, un familier, un anneau, un bracelet
+et un collier. Chaque modèle possède une identité et des chiffres fixes.
+La forge augmente les statistiques du modèle ; sa provenance renforce ses
+valeurs brutes. Les pourcentages s'additionnent dans chaque source ; les
+étages équipement, maîtrises et passifs se multiplient. Les augments agissent
+ensuite sur les tirs et statistiques de run ; les Cœurs sont le dernier facteur
+de dégâts. Ils font partie de la progression permanente.
 
-La campagne propose dix niveaux de run, dont quatre choix rares tirés sans
-remise. Les autres choix de niveau proposent soin, attaque ou PV max. Les
-paliers précédant les salles 5, 10 et 15 proposent trois pouvoirs et rendent
-30 % des PV maximum après le choix. Un de ces trois paliers, tiré au hasard
-au début du run, propose des légendaires ; les deux autres proposent des
-épiques. Le choix légendaire ne peut jamais être relancé et les légendaires
-sont exclus des tirages ordinaires des modes annexes.
+Les bijoux gagnent un effet passif au palier de forge prévu. Aucun de ces
+effets ne lance de sort. Les anciens modèles restent utilisables dans les
+sauvegardes, sans réapparaître dans les butins actuels.
 
-Le catalogue propose 22 rares, 14 épiques majeures et 7 légendaires, en plus
-des trois communs. Les maîtrises accordent au maximum 3 relances par run,
-partagées entre les choix qui autorisent une relance. Héritage réactif ajoute
-séparément un ou deux augments rares au début de l’aventure.
+## Maîtrises et passifs
 
-Battement triple ouvre les rafales successives et Couronne incisive les builds
-critiques. Les nouveaux pouvoirs couvrent aussi bouclier renouvelé par salle,
-corrosion, sorts élargis, attaque lourde, défense, mobilité, soins et tirs
-élémentaires. Les boucliers inutilisés ne se cumulent pas entre les salles ;
-recalculer le build ne recharge pas un bouclier consommé. La chance critique
-reste plafonnée à 100 % et les soins de combat gardent leur budget partagé.
+Les trois branches de maîtrises sont Offensif, Défensif et Utilitaire.
+Les nœuds ordinaires ont plusieurs rangs ; les pouvoirs majeurs s'achètent
+une fois. Les coûts, prérequis et effets sont détaillés par rang dans les listes.
 
-Les augments couvrent tirs, protections, récupération et phénomènes comme les
-familiers, météores ou orbes. Leur Attaque de run multiplie la progression
-permanente séparément. Le premier trait simultané reste entier et chaque trait
-supplémentaire suit désormais la règle de son augment : Tir multiple et Salve
-réduisent de 20 % les dégâts finaux de tous leurs traits, après les autres calculs.
-Les sorts actifs, passifs et ultimes sont équipés depuis le menu. Un passif se
-découvre au rang 1 et un seul doublon double son effet au rang 2. Les dégâts
-partent de l'attaque cumulée du héros. Les onze Épreuves donnent chacune un
-Cœur de mana unique à 1 chance sur 10, garanti au dixième succès du niveau ;
-chaque Cœur ajoute 10 % de dégâts finaux. Les sorts tombent à 1 chance sur 5,
-garantis au cinquième succès. Découvrir un sort ne donne plus de dégâts finaux.
+Seize passifs remplacent les sorts actifs et ultimes. Quatre peuvent être
+équipés simultanément, chacun sur deux rangs. Ils renforcent les statistiques,
+les soins, l'économie ou un comportement simple du tir ; certains imposent
+un compromis comme Audace.
 
-Sources : `data/catalogue_reactifs.gd`, `data/progression_augments.gd`,
-`data/sorts.gd`, `scripts/mods.gd`, `scripts/draft_logique.gd`,
-`scripts/bonus_sorts.gd`, `data/animations_sorts.gd`.
+Un passif possédé mais non équipé ne donne aucun bonus. Les nouveaux passifs
+viennent exclusivement des Épreuves. Les anciennes capacités sont converties
+lors du chargement d'une sauvegarde ; les rangs excédentaires sont compensés.
+La migration conserve le reste de la progression.
 
-## Progression persistante
+## Augments
 
-Le héros commence avec 10 Attaque, 100 PV et 10 Défense. Chaque niveau de
-compte donne cinq points à répartir entre Force, Vitalité, Agilité,
-Intelligence et Sagesse. Mage, Sorcier et Moine apportent une spécialisation
-finale changeable gratuitement à tout moment depuis l’onglet Héros. Ce même
-onglet permet de réinitialiser gratuitement tous les points de statistiques
-pour les redistribuer, sans limite.
+Les vingt-six augments modifient les statistiques ou les tirs existants.
+Ils ne créent plus de météores, zones de dégâts, gardiens, flaques ni attaques
+autonomes. Les légendaires donnent une orientation au build et un gain mesuré
+de puissance. Aucun augment ordinaire ne retire d'attaque, de cadence, de PV
+ou de mobilité en échange d'un autre bonus.
 
-Les récompenses financent l'équipement, la forge et les maîtrises. La forge
-compte vingt niveaux par objet, avec un premier achat accessible après deux
-échecs à cinq puis dix salles et un coût croissant. Les dix armes,
-anneaux, bracelets et colliers possèdent une statistique principale, un bonus
-fixe et un passif. Les bijoux donnent aussi de l’Attaque brute. Les statistiques
-brutes et leurs gains de forge augmentent avec la provenance de l’équipement ;
-changer de modèle conserve un coût de forge propre, sans transfert gratuit.
-Les familiers sont autonomes, ont leur propre Attaque et
-accordent un petit passif au héros. Les pouvoirs de bijoux débloqués par la forge
-restent passifs : cumul de dégâts, cinquième attaque, sursis ou incantation. Les
-doublons et butins de sorts suivent les garanties des catalogues. Une défaite
-conserve les ressources des salles terminées et permet un bijou manquant à
-1/30 après cinq salles, 1/20 après dix, 1/10 après quinze. Chaque niveau
-garantit son bijou manquant au plus tard à la troisième victoire complète ;
-les défaites ne font pas avancer ce compteur. Les Cœurs de mana renforcent les
-dégâts finaux sans être requis par le budget minimal de campagne.
+Salve est un choix rare unique. Tir double ajoute des projectiles parallèles
+et peut être acquis deux fois. Chaque acquisition réduit de 20 % les dégâts de tous
+les projectiles après le coefficient de l'arme. Battement triple ajoute deux
+salves, reste légendaire et applique aussi une réduction de 20 % à tous les
+projectiles ; il conserve les réductions des autres choix.
 
-Les identifiants historiques d'équipement et migrations de sauvegarde restent
-pris en charge afin de conserver les objets et rangs déjà acquis.
+Les bonus positifs de même famille s'additionnent. Les réductions des tirs
+multiples se multiplient et restent applicables aux légendaires. Choisir
+l'offensive laisse passer une occasion de renforcer sa survie ; une défense
+renforcée ne réduit jamais les dégâts déjà acquis. Les gains des sources
+permanentes et des augments, les PV ennemis et leurs dégâts sont ajustés
+ensemble pour éviter une succession de multiplicateurs excessifs.
 
-Sources : `data/personnage.gd`, `data/catalogue_objets.gd`, `data/catalogue_familiers.gd`, `data/effets_bijoux.gd`,
-`data/arbre_competences.gd`, `data/progression_statistiques.gd`,
-`data/recompenses.gd`, `autoload/reglages_joueur.gd`.
+Les pourcentages des augments sont des multiples de cinq ou de dix. Les
+gains de PV effectifs et de DPS de même rareté restent du même ordre, sans
+prime systématique à la défense. Ajouter deux augments défensifs à un build
+offensif améliore sa survie au prix de deux choix offensifs ; cela ne doit
+pas lui permettre de rester très résistant tout en éliminant les rencontres
+en une attaque. Soins, boucliers et seconde vie sont présentés séparément
+de la résistance permanente. Le déblocage progressif des augments est reporté.
 
-## Présentation et commandes
+En campagne et en Mine, dix niveaux donnent dix augments : trois épiques,
+une légendaire garantie au niveau 5, et les autres en rares. Aucun commun,
+aucun choix supplémentaire aux salles 5, 10 et 15. Le planning des autres
+raretés est aléatoire et fixé avant les offres ; une relance ne le change pas.
+Une run sur dix en moyenne reçoit une seconde légendaire, qui remplace une
+rare ou une épique à un autre niveau, y compris le premier. Le total reste
+dix : si le bonus remplace une épique, il en reste deux. Les comparaisons
+d'équilibrage excluent cette seconde légendaire ; une combinaison chanceuse
+doit pouvoir simplifier fortement le combat.
 
-L'accueil affiche l'illustration d'arcane. Le menu regroupe équipement,
-aventure, maîtrises et sorts ; les paramètres règlent commandes, musique et
-effets. L'interface s'adapte au portrait et aux zones sûres du téléphone.
+Un choix ne soigne plus automatiquement. Les cœurs au sol soignent à leur
+ramassage si le héros est blessé ; à PV pleins ils restent au sol. En fin de
+salle, chaque cœur restant soigne ou, si la vie est déjà pleine, donne une
+Goutte fixe versée avec le bilan de run, sans multiplicateur de butin. Les
+effets de soin propres aux passifs, objets et à Égide restent actifs.
 
-Le héros de combat est le mage sculpté, avec ses textures, animations et arme
-tenue. Les sources Blender nécessaires à ce modèle sont conservées. Le rendu
-2D de secours et les outils de développement restent disponibles sur demande.
+## Présentation et persistance
 
-Sources : `scripts/menu.gd`, `ui/`, `scripts/presentation/`,
-`data/visuels_3d.gd`, `autoload/ecran.gd`, `autoload/sons.gd`.
+Simulation 2D et présentation 3D, avec rendu 2D de secours. La direction
+artistique, le héros animé, les décors, les attaques ennemies annoncées et
+les musiques restent ceux de la version active.
+
+L'interface comporte Héros, Équipement, Aventure, Maîtrises et Passifs.
+Les commandes de sorts et d'ultimes ont été retirées du HUD.
+
+La sauvegarde reste locale. Aucun compte en ligne, SDK publicitaire ou achat
+intégré. Les migrations préservent les identifiants et la progression utile.
+
+Les chiffres font foi dans `data/`. Les fichiers de `statistiques_jeu/`
+sont leur traduction générée pour le propriétaire, pas une seconde source.

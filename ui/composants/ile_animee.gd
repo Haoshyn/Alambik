@@ -1,7 +1,7 @@
 class_name IleAnimee
 extends Control
 
-const DONNEES := preload("res://data/animations_decors.gd")
+const DONNEES := preload("res://data/presentation/animations_decors.gd")
 const MOUVEMENT := preload("res://shaders/ile_vivante.gdshader")
 const ATMOSPHERE := preload("res://shaders/atmosphere_peinte.gdshader")
 

@@ -2,7 +2,7 @@ extends Node
 
 # Les effets sont synthetises ; les compositions sont lues en boucle depuis Ogg.
 
-const EFFETS := preload("res://data/effets_sonores.gd")
+const EFFETS := preload("res://data/audio/effets_sonores.gd")
 const SYNTHESE := preload("res://scripts/audio/synthese_effets.gd")
 const DUREE_FONDU := 2.2
 const DUREE_BLANC_COMBAT := 0.14

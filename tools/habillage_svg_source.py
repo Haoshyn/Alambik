@@ -1,4 +1,4 @@
-"""Surfaces modulaires et adaptation des SVG fournis dans SVG/."""
+"""Surfaces modulaires et adaptation des SVG fournis dans tools/sources_svg/."""
 from pathlib import Path
 import json
 import hashlib
@@ -36,7 +36,7 @@ def generer(ecrire):
     }
 
     def icone(destination, source, matiere='ivoire', indice=0):
-        racine = ET.parse(RACINE / 'SVG' / f'Wenrexa {source}.svg').getroot()
+        racine = ET.parse(RACINE / 'tools/sources_svg' / f'Wenrexa {source}.svg').getroot()
         vue = cadrages[source]
         facteur = 98 / max(vue[2:])
         x = 60 - vue[2] * facteur / 2 - vue[0] * facteur

@@ -1,117 +1,117 @@
-# État courant — 26 septembre 2026
+# État courant — 27 septembre 2026
 
-- Godot 4.7.1, Android portrait ; simulation 2D, combat présenté en 3D.
-- Héros unique : `assets/3d/characters/mage_sculpte.glb`, matériaux standard,
-  six animations et armes séparées. Sources et générateurs actifs conservés.
-- Accueil : `ui/accueil_clairiere.tscn`, composé de scènes indépendantes dans
-  `ui/composants/`. Une illustration indépendante du monde choisi occupe le
-  centre ; la toucher ouvre le choix des campagnes. Mine, Monde et Épreuves
-  partagent une rangée juste au-dessus de Jouer élargi. Jouer lance le chapitre
-  choisi. Niveau et XP en haut à gauche, monnaies encadrées à droite ; en bas,
-  icônes et titres des onglets restent visibles avec des séparateurs SVG ;
-  l'onglet actif agrandit son icône. La clairière utilise des couches peintes séparées
-  (paysage, végétation, eau, nuages/brumes), avec vent et parallaxe. Les matières
-  des cinq îles sont animées ; les effets réduits figent l'ensemble.
-- Kit A « Émail arcanique » : pervenche, violet, indigo, ivoire lavande,
-  avec accents corail, jade, bleu vif, or et mauve. Les cinq onglets montrent la
-  même clairière animée ; seul Aventure montre l'illustration du monde choisi.
-  Jouer porte un émail orange dans un cadre cuivre, sans flammes décoratives.
-  Les maîtrises
-  assombrissent la clairière et colorent
-  légèrement chaque sceau de branche, avec glyphes SVG lumineux et rangs séparés.
-  La sélection de campagne conserve la clairière, le niveau et les cinq onglets.
-  Elle montre la seule île de la carte avec flèches latérales et balayage ; charte
-  dans `docs/design/DIRECTION_ARTISTIQUE.md`.
-  Cadres en émail redessinés, emplacements et commandes circulaires ; onglet
-  actif agrandi sans second cercle. Lecture en DM Sans gras, grands titres en
-  Grenze épais, chiffres en DM Sans extra-gras ; onglets Héros, Équipement,
-  Aventure, Maîtrises, Sorts. Héros :
-  sans portrait, classe et réinitialisation gratuite à gauche du compteur de
-  points ; cinq grandes jauges colorées animées, glyphes et commandes +/−.
-  Équipement : vingt petites cases d'inventaire par page, cartes colorées avec
-  statistiques intégrées pour les armes et les familiers, et fiches contextuelles.
-  Le premier lancement sans classe ouvre
-  l’aventure guidée ; le choix de voie intervient après le premier portail.
-  Composition : Héros autour des caractéristiques, maîtrises en constellation
-  avec détails courts et reset compact en haut ; sorts avec catégories,
-  quatre médaillons équipés plus lisibles et grille de cartes
-  entièrement tactiles à deux colonnes, adaptative sur écran étroit ; fiches contextuelles,
-  parure en sceaux décalés. Les fiches Sorts se ferment aussi en touchant à
-  côté ; les détails de Maîtrises restent dans leur panneau fixe. Titres en
-  cartouches enluminés et marges intérieures protégées sous les ornements.
-  SVG natifs légers (icônes, cadres, équipements, capacités et contrôles),
-  filtrage avec mipmaps et sans ancien détourage alpha. Fonds élémentaires
-  peints des sorts ; niveau sélectionné et meilleur étage regroupés dans le
-  cartouche du monde. Générateur du kit SVG :
-  `tools/generer_email_arcanique.py`. Zones sûres latérales, grilles adaptatives
-  et accueil défilable ; menus, HUD, augments et récompenses partagent le kit.
-  Les 30 glyphes de maîtrise et les 18 glyphes de sorts sont des SVG distincts
-  composés depuis les silhouettes du dossier `SVG/` par
-  `tools/generer_glyphes_menus.py` ; les sources restent intactes.
-- Cinq mondes, sept niveaux de vingt salles chacun ; Mine et Épreuves de sorts.
-  Contours et obstacles fixes par niveau, terrains élémentaires en campagne.
-- Déplacement du héros à 728 px/s (+30 %), coefficient de vitesse ennemi +15 %.
-  Familles fragiles/moyennes/costaudes et 55 identités de monde avec habillages 3D.
-  Charges, esquives, tirs ondulants, rebonds et impacts ciblés annoncés actifs.
-  Élites : PV/dégâts doublés ; certaines laissent des traces brûlantes.
-- Animation de combat : préparations, recul et mouvements par famille en 3D,
-  impacts et dissipation des sorts, tirs en cloche annoncés et vrilles en rubans.
-  Les réactions aux coups préservent la lecture des attaques. Boss : +25 % de PV
-  dans les trois modes ; attaques propres conservées et salves de monde alternées.
-- Vagues de 3–5 ennemis, jusqu’à 7 dans les grandes salles, départ limité à 4.
-  Espacement accru, plafond simultané appliqué aussi aux invocations et XP conservée.
-  En campagne, l’XP reste au sol jusqu’au nettoyage ; les choix arrivent hors combat.
-- Mine survivor : horde continue, cristaux d’XP à ramasser près des ennemis abattus,
-  augments obtenus pendant la survie. Boss à cinq minutes sans nettoyage préalable ;
-  les apparitions continuent jusqu’à sa mort, qui termine immédiatement la run.
-- Attributs de compte, trois spécialisations, familiers autonomes, Cœurs de
-  mana, augments, équipement, forge, maîtrises et garanties de butin actifs.
-  Le détail est dans `docs/design/GAME_DESIGN.md` et les valeurs dans `data/`.
-- Huit passifs à deux rangs : un seul doublon double leur effet. Les bijoux de
-  forge 10 utilisent seulement des bonus passifs courts, sans attaque automatique.
-- Augments : 22 rares, 14 épiques et 7 légendaires, plus les trois communs.
-  Rafales, critiques de run, bouclier par salle et tirs élémentaires disponibles.
-- Forge sur 20 niveaux : premier achat à 30 Pierres, coût croissant. Les bases
-  des armes, bijoux et familiers augmentent avec leur provenance ; les bijoux
-  donnent aussi de l’Attaque brute. Aucun bonus final caché sur les armes.
-- Équilibrage fixe sur 35 budgets d’achats : cible 3–4 tentatives au début,
-  6–7 au milieu, jusqu’à 10 échecs et 5–6 victoires de farm en fin de campagne.
-  Premières salles adoucies puis montée accentuée ; légendaire toujours aléatoire.
-  Calculs et hypothèses dans `plan_eq.txt`, sans validation par parties.
-- Bijou possible dès 5/10/15 salles terminées à 1/30, 1/20 et 1/10 ; garantie
-  au troisième succès complet du même niveau, y compris au premier niveau.
-- Les tirs du héros n’ont pas de portée maximale par défaut ; les tirs hostiles
-  ont une distance maximale, y compris après rebond. Les augments utilisent
-  leurs mécaniques révisées, détaillées dans `statistiques_jeu/liste_augments.txt`.
-- Bilan : nouvelle tentative directe et raccourcis vers la maîtrise ou le bijou
-  améliorable. Effets sonores distincts avec variantes et priorités ; vibrations
-  Android désactivables. Outils développeur réservés aux versions de debug.
-- Premiers pas progressifs : premier niveau sans classe, déplacement et tir
-  avec ennemis suspendus, repères fléchés pendant le combat et vers le portail,
-  puis choix de voie expliqué avant la salle suivante. Pause lors du passage
-  en arrière-plan.
-- Identifiants historiques et migrations de sauvegarde conservés ; rendu 2D
-  de secours et outils de capture toujours disponibles sur demande.
+Alambik est un roguelite de tir portrait Android sous Godot 4.7.1 : simulation
+2D, présentation 3D. Le héros sculpté, la clairière animée, les cinq mondes,
+les annonces de danger et le kit d'interface Émail arcanique restent actifs.
 
-## Organisation
+## Jeu et progression
 
-`docs/INDEX.md` est la carte unique. `human/`, anciennes cartes redondantes,
-tests, diagnostics et composants sans appel sont dans
-`../OldAlambik/2026-09-20/organisation/`. Les diagnostics se restaurent à leurs
-chemins d'origine si demandés ; le bot PC `--auto` reste dans `sondes/`.
-Les six shaders restants et les générateurs Blender/audio sont utilisés.
-Les sources 3D, outils et docs sont exclus de l'import Godot par `.gdignore`.
+- Campagne : cinq mondes de sept niveaux, vingt salles par tentative.
+  Après une victoire, l'accueil sélectionne le chapitre suivant, y compris
+  au passage au monde suivant. Le dernier chapitre reste sélectionné en fin
+  de campagne ; Rejouer relance toujours le chapitre qui vient d'être terminé.
+  Mine de survie pour les Pierres et l'XP ; Épreuves pour les passifs et les Cœurs.
+  Les Épreuves suivent maintenant la campagne : seule la première s'ouvre
+  après le chapitre initial. Les suivantes exigent aussi leur palier de
+  campagne ; les répétitions restent possibles et les acquisitions conservées.
+- Seize passifs à deux rangs, quatre emplacements équipés. Les sorts actifs,
+  ultimes, commandes associées et anciennes animations autonomes sont retirés.
+- Vingt-six augments : douze rares, neuf épiques et cinq
+  légendaires. Ils modifient les statistiques ou les tirs ordinaires.
+  Les gains de dégâts et de résistance sont resserrés, avec leurs effets conservés.
+  Aucun malus ordinaire d'attaque, de PV, de cadence ou de mobilité.
+  Salve est rare et unique ; Tir double est rare et cumulable deux fois.
+  Salve, Tir double et Battement triple appliquent chacun −20 % aux projectiles,
+  par multiplication. Battement triple reste légendaire et ajoute deux salves.
+  Les pourcentages restent arrondis ; les gains de résistance effective et
+  de DPS de même rareté sont comparables. La défense n'a plus de prime systématique.
+  Dix niveaux donnent dix choix, sans communs ni choix bonus de salle :
+  légendaire garantie au niveau 5, trois épiques et autres rares. Dans 10 %
+  des runs, une seconde légendaire remplace une rare ou une épique hors niveau 5.
+- Sorcier et Moine restent sélectionnables, avec des bonus actuellement nuls.
+- Attributs, trois branches de maîtrises, armes, bijoux, familiers et forge
+  portent une progression permanente plus mesurée. Leurs gains, ceux des
+  passifs et des Cœurs ont été réduits avec les courbes ennemies. La forge du familier conserve un effet
+  utile avec les bonus permanents du héros.
+- Le familier patrouille dans la salle et alterne déplacement, visée et tir
+  depuis sa propre position. Ses tirs traversent les murs, avec une forme
+  propre à chaque familier et une durée de vie bornée par la portée.
+- Les dégâts infligés sont affichés par de petits nombres animés près des
+  monstres et boss, avec regroupement des impacts proches et de la braise.
+  Les effets réduits conservent une valeur sobre par cible. Les contrôles
+  couvrent les montants appliqués, le dernier coup et la durée des textes.
+- Chaque tireur ennemi conserve sa silhouette de projectile dans ses motifs.
+  Les traits fins sont épaissis, saturés et bordés d’un contour sombre ;
+  la traînée reste visible en effets réduits, avec une longueur bornée.
+  Disques et capsules ont des dimensions distinctes, balayées entre deux
+  ticks physiques. Certains tirs reviennent après un arrêt ou rebondissent
+  lentement sur un nombre limité de murs. Les boss de contact approchent,
+  annoncent une frappe à direction fixe, puis récupèrent sans attaquer.
+- La croissance des monstres est fixe et composée par niveau et salle,
+  avec renfort des PV après le chapitre initial, puis plafonnement de ce
+  renfort et croissance plus lente après les premiers chapitres. Les dégâts gardent leur courbe
+  distincte et les marches en salles 5, 10 et 15 restent en place.
+  Les contrôles recherchent des éliminations en une attaque exceptionnelles
+  sur les parcours ordinaires, équilibrés comme offensifs, et comparent le
+  sur-farm ainsi que le remplacement de deux choix par de fortes défenses.
+  Les ennemis ne dépendent jamais du build ; aucun plancher de coups n'est ajouté.
+  Les premières vagues sont allégées et leurs attaques plus lisibles.
+  Les PV des boss suivent la réduction des gains du joueur ; les dégâts
+  des premières annexes sont contrôlés à leur déblocage.
+- Les tirs lents partent sans annonce. Les tirs rapides, ou trop proches
+  pour laisser réagir, annoncent leur visée. Vitesse et rythme progressent
+  avec le niveau et l'avancée de la tentative ; les annonces gardent un plancher.
+  Le tisseur tire sans annonce ni prédiction, avec un passage entre ses rubans.
+  Les tirs de boss utilisent le contour réel de la salle dès leur annonce.
+  Les salles sont légèrement plus étroites et longues, la caméra plus reculée.
+- Les sentinelles anticipent une course régulière puis verrouillent leur visée.
+  Les contrôles sur les cinq mondes et les élites vérifient l’impact à mi-distance,
+  l’esquive par changement de direction et la marge latérale au fond de salle.
+  Les tirs du héros, des familiers et des ennemis ont été accélérés.
+  Les poursuivants et chargeurs sont légèrement ralentis et blessent au contact
+  réel, même pendant la préparation d’une attaque. Le délai entre deux coups
+  et l’invulnérabilité normale du héros empêchent les dégâts par image.
+- Les boss apparaissent près du milieu et avancent vers le joueur, prennent
+  un flanc ou orbitent selon leur identité. Une fenêtre de déplacement entre
+  motifs évite leur immobilisation par les annonces successives. Leurs tirs
+  couvrent la salle ; les boomerangs épais partent par trois en éventail et
+  reviennent aussi au contact d’un mur. Les dashs sont allongés et vérifient
+  leur portée réelle, les ralentissements et les obstacles avant le départ.
+  Ces comportements sont contrôlés en simulation ; le ressenti reste à jouer
+  sur appareil.
+- Les sources permanentes se combinent par étages. Leur répartition est
+  mesurée avant les augments, qui démultiplient ensuite le DPS de la run.
+  Les simulations utilisent les vraies offres et séparent les hypothèses
+  de choix, de durée et de parcours avec achats et retries.
+- Des cœurs de soin tombent sur les ennemis prévus : quota par rencontre,
+  au plus deux. À PV pleins, ils restent au sol ; à la transition, chaque
+  cœur soigne ou donne une Goutte fixe si la vie est déjà pleine. Aucun soin
+  automatique aux choix d'augments. Les
+  invocations ne produisent pas de nouveaux soins. Le tutoriel est retiré.
+- Les sauvegardes anciennes sont migrées : sorts convertis en passifs,
+  surplus compensés, autres possessions et progression conservées.
 
-Le nettoyage précédent (fusions, anciens modèles et prototypes) est dans
-`../OldAlambik/2026-09-20/retires/` ; les copies avant chaque passe sont dans
-leurs dossiers d'archive respectifs. Les prochaines sorties vont dans `tmp/`
-et `build/`.
+Les valeurs exactes, niveaux, prix et calculs sont dans
+[Statistiques jeu](../statistiques_jeu/INDEX.md). Les six listes se régénèrent
+depuis les catalogues et fonctions du jeu ; elles ne se corrigent pas à la main.
+Elles sont en Markdown. La liste mathématique commence par la puissance
+permanente au plafond, puis montre le gain des augments et la fiche finale.
+Le [game design](design/GAME_DESIGN.md) décrit le périmètre et la
+[direction artistique](design/DIRECTION_ARTISTIQUE.md) décrit la présentation.
 
-La version précédant la composition modulaire est conservée dans
-`../OldAlambik/2026-09-22/interface-avant-composition-161302/`.
+## Organisation et vérification
 
-Les cinq onglets et la sélection de campagne ont été vérifiés sans fenêtre avec
-Godot 4.7.1 sur quatre formats, avec profil isolé : centrage des chiffres,
-répartition des points, réinitialisations, fiches et défilement tactile des sorts. Contrôle visuel sur
-appareil à poursuivre.
-Le propriétaire teste le jeu ; les règles de travail restent dans `AGENTS.md`.
+[L'index du projet](INDEX.md) mène aux dossiers par domaine et à leurs index.
+Les instructions `AGENTS.md` ont été réécrites. La copie avant refonte, les
+systèmes retirés et les inventaires se trouvent hors dépôt dans
+`../Alambik_sauvegardes/refonte_2026-09-26_233554/`.
+
+`tools/verifier.ps1` contrôle l'import Godot, la concordance des listes,
+les courbes et achats, les augments, les parcours équilibrés et le retour
+offensif après cinq ou six Épreuves, l'affichage des dégâts, les soins, les migrations et les scènes. Les runs
+utilisent un profil isolé : cinq onglets sur deux formats portrait et les
+trois modes. Les journaux restent dans `tmp/verification_*/`.
+
+Ces contrôles vérifient les calculs et le fonctionnement des scénarios
+automatisés. Le rythme réel de progression, le ressenti des combats et le
+rendu sur téléphone restent à éprouver par des parties.

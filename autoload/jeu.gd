@@ -19,8 +19,8 @@ var chapitre := 0
 var inventaire: Array[String] = []
 var experience_run := 0
 var niveau_run := 0
-var niveaux_rares: Array[int] = []
-var etage_legendaire := 0
+var raretes_niveaux: Array[String] = []
+var gouttes_coeurs := 0
 var _relances_utilisees := 0
 var rerolls_restants := 0:
 	set(valeur):
@@ -48,21 +48,21 @@ func chapitre_courant() -> Dictionary:
 	return Chapitres.par_index(chapitre)
 
 func salles_du_chapitre() -> int:
-	if mode_run == "epreuve_sorts":
+	if mode_run == "epreuves":
 		return 5
 	if mode_run == "mine":
 		return 1
 	return int(chapitre_courant()["salles"])
 
 func nom_run() -> String:
-	if mode_run == "epreuve_sorts":
-		return "Épreuve de magie · niveau %d" % niveau_epreuve
+	if mode_run == "epreuves":
+		return "Épreuve · niveau %d" % niveau_epreuve
 	if mode_run == "mine":
 		return "Mine · niveau %d" % niveau_mine
 	return str(chapitre_courant()["nom"])
 
 func est_boss_courant() -> bool:
-	if mode_run == "epreuve_sorts":
+	if mode_run == "epreuves":
 		return true
 	if mode_run == "mine":
 		return get_tree().get_first_node_in_group("boss") != null
@@ -90,10 +90,11 @@ func demarrer_run(graine_demandee: int = 0, salle_de_depart: int = 1, chapitre_d
 	graine = graine_demandee if graine_demandee != 0 else randi()
 	rng = RandomNumberGenerator.new()
 	rng.seed = graine
-	mode_run = mode_demande if mode_demande in ["grimoire", "epreuve_sorts", "mine"] else "grimoire"
+	mode_run = mode_demande if mode_demande in ["grimoire", "epreuves", "mine"] else "grimoire"
 	# Le defi a sa propre courbe : il ne depend jamais du dernier livre consulte.
 	chapitre = 0 if mode_run != "grimoire" else clampi(chapitre_demande, 0, Chapitres.nombre() - 1)
-	niveau_epreuve = clampi(epreuve_demandee, 1, Epreuves.nombre())
+	# Une ancienne selection ou Rejouer respecte aussi la progression de campagne.
+	niveau_epreuve = clampi(epreuve_demandee, 1, maxi(1, ReglagesJoueur.niveau_epreuve_accessible()))
 	niveau_mine = clampi(mine_demandee, 1, maxi(1, ReglagesJoueur.niveau_mine_debloque()))
 	salles_terminees.clear()
 	boss_vaincus.clear()
@@ -102,14 +103,10 @@ func demarrer_run(graine_demandee: int = 0, salle_de_depart: int = 1, chapitre_d
 	inventaire = []
 	experience_run = 0
 	niveau_run = 0
-	niveaux_rares.clear()
-	if mode_run == "grimoire":
-		niveaux_rares = ProgressionAugments.tirer_niveaux_rares(rng)
-	# Fixer le palier avant toute offre empeche une relance de changer sa rarete.
-	etage_legendaire = ProgressionAugments.tirer_etage_legendaire(rng) if mode_run == "grimoire" else 0
+	raretes_niveaux = ProgressionAugments.tirer_raretes_niveaux(rng)
+	gouttes_coeurs = 0
 	_relances_utilisees = 0
 	rerolls_restants = ArbreCompetences.nombre_rerolls(ReglagesJoueur.rangs_competences_effectifs())
-	_ajouter_heritage_reactif()
 	ennemis_abattus = 0
 	elites_par_salle.clear()
 	temps_mine_restant = Reglages.MINE_DUREE if mode_run == "mine" else 0.0
@@ -119,20 +116,6 @@ func demarrer_run(graine_demandee: int = 0, salle_de_depart: int = 1, chapitre_d
 	tirs_perdus = 0
 	debut_run = Time.get_ticks_msec() / 1000.0
 	images_de_jeu = 0
-
-func _ajouter_heritage_reactif() -> void:
-	var nombre := Sorts.augments_heritage(ReglagesJoueur.passifs_equipes_effectifs())
-	if nombre <= 0:
-		return
-	var rares: Array[String] = []
-	for id in CatalogueReactifs.ids():
-		var reactif := CatalogueReactifs.par_id(id)
-		if reactif != null and reactif.rarete == Reactif.RARE:
-			rares.append(id)
-	for i in mini(nombre, rares.size()):
-		var index := rng.randi_range(0, rares.size() - 1)
-		inventaire.append(rares[index])
-		rares.remove_at(index)
 
 func consommer_relance(rarete: String) -> bool:
 	if not ProgressionAugments.relance_autorisee(rarete) or rerolls_restants <= 0:
@@ -146,13 +129,13 @@ func ajouter_reactif(id: String) -> void:
 	inventaire_change.emit()
 
 func seuils_experience_run() -> Array:
-	return ProgressionAugments.XP_SEUILS if mode_run == "grimoire" else Reglages.XP_RUN_SEUILS
+	return ProgressionAugments.XP_SEUILS if mode_run in ["grimoire", "mine"] else Reglages.XP_RUN_SEUILS
 
 func gagner_experience_run(nombre: int) -> int:
 	var seuils := seuils_experience_run()
 	if niveau_run >= seuils.size() or nombre <= 0:
 		return 0
-	var multiplicateur := Reglages.AVIDITE_XP_MULT if "avidite" in inventaire else 1.0
+	var multiplicateur := Mods.facteur_heros(mods(), "experience_mult")
 	experience_run += maxi(1, roundi(float(nombre) * multiplicateur))
 	var plafond := ProgressionAugments.plafond_salle(salle_courante, salles_du_chapitre()) \
 		if mode_run == "grimoire" else seuils.size()

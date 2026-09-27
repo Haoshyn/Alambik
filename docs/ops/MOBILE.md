@@ -43,7 +43,7 @@ Après installation par l'outil de mise à jour :
 
 ## Observations sur appareil
 
-- Confort du pouce : `scripts/joystick_logique.gd`.
+- Confort du pouce : `scripts/interface/joystick_logique.gd`.
 - Lisibilité des silhouettes et télégraphes en mouvement.
 - Marges pour les encoches : `autoload/ecran.gd`.
 - Performances mesurées sur le téléphone concerné.

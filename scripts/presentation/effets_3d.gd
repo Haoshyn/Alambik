@@ -3,9 +3,9 @@ extends Node3D
 var source: Node2D
 var _particules: MultiMesh
 var _lignes := ImmediateMesh.new()
-var _sorts := ImmediateMesh.new()
+var _impacts := ImmediateMesh.new()
 var _mat := StandardMaterial3D.new()
-var _mat_sorts: StandardMaterial3D
+var _mat_impacts: StandardMaterial3D
 
 func _ready() -> void:
 	_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -13,9 +13,9 @@ func _ready() -> void:
 	_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_mat.no_depth_test = true
 	_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	# Le relief magique passe derriere les acteurs et les obstacles.
-	_mat_sorts = _mat.duplicate() as StandardMaterial3D
-	_mat_sorts.no_depth_test = false
+	# Les impacts passent derriere les acteurs et les obstacles.
+	_mat_impacts = _mat.duplicate() as StandardMaterial3D
+	_mat_impacts.no_depth_test = false
 	var mesh := SphereMesh.new()
 	mesh.radius = 1.0
 	mesh.height = 2.0
@@ -36,10 +36,10 @@ func _ready() -> void:
 	lignes.mesh = _lignes
 	lignes.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(lignes)
-	var sorts := MeshInstance3D.new()
-	sorts.mesh = _sorts
-	sorts.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(sorts)
+	var impacts := MeshInstance3D.new()
+	impacts.mesh = _impacts
+	impacts.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(impacts)
 
 func relier(noeud: Node2D) -> void:
 	source = noeud
@@ -48,7 +48,7 @@ func relier(noeud: Node2D) -> void:
 func _process(_delta: float) -> void:
 	if not is_instance_valid(source):
 		return
-	_dessiner_sorts()
+	_dessiner_impacts()
 	var particules: Array = source.get("_particules")
 	var nombre := mini(particules.size(),Visuels3D.PARTICULES_REDUITES if ReglagesJoueur.effets_reduits else Visuels3D.PARTICULES_MAX)
 	_particules.visible_instance_count = nombre
@@ -67,8 +67,7 @@ func _process(_delta: float) -> void:
 		_particules.set_instance_color(i,Color(couleur,fraction))
 	_lignes.clear_surfaces()
 	var ondes: Array = source.get("_ondes")
-	var arcs: Array = source.get("_arcs")
-	if ondes.is_empty() and arcs.is_empty():
+	if ondes.is_empty():
 		return
 	_lignes.surface_begin(Mesh.PRIMITIVE_LINES,_mat)
 	for onde in ondes:
@@ -80,19 +79,14 @@ func _process(_delta: float) -> void:
 		for i in 32:
 			_lignes.surface_add_vertex(Pont3D.vers_monde(centre+Vector2.RIGHT.rotated(TAU*i/32)*rayon))
 			_lignes.surface_add_vertex(Pont3D.vers_monde(centre+Vector2.RIGHT.rotated(TAU*(i+1)/32)*rayon))
-	for arc in arcs:
-		var couleur: Color = arc["couleur"]
-		_lignes.surface_set_color(Color(couleur,float(arc["vie"])/float(arc["vie_max"])))
-		_lignes.surface_add_vertex(Pont3D.vers_monde(arc["depart"]))
-		_lignes.surface_add_vertex(Pont3D.vers_monde(arc["arrivee"]))
 	_lignes.surface_end()
 
-func _dessiner_sorts() -> void:
-	_sorts.clear_surfaces()
-	var segments: Array = source.get("_segments_sorts")
+func _dessiner_impacts() -> void:
+	_impacts.clear_surfaces()
+	var segments: Array = source.get("_segments_impacts")
 	if segments.is_empty():
 		return
-	_sorts.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _mat_sorts)
+	_impacts.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _mat_impacts)
 	for segment in segments:
 		var couleur: Color = segment["couleur"]
 		if segment.has("points"):
@@ -100,8 +94,8 @@ func _dessiner_sorts() -> void:
 			var hauteurs: Array = segment["hauteurs"]
 			var couleurs: Array = segment.get("couleurs", [])
 			for i in 3:
-				_sorts.surface_set_color(couleurs[i] if not couleurs.is_empty() else couleur)
-				_sorts.surface_add_vertex(Pont3D.vers_monde(points[i], float(hauteurs[i])))
+				_impacts.surface_set_color(couleurs[i] if not couleurs.is_empty() else couleur)
+				_impacts.surface_add_vertex(Pont3D.vers_monde(points[i], float(hauteurs[i])))
 			continue
 		var debut := Pont3D.vers_monde(segment["depart"], float(segment["hauteur"]))
 		var fin := Pont3D.vers_monde(segment["arrivee"], float(segment["hauteur_fin"]))
@@ -114,17 +108,17 @@ func _dessiner_sorts() -> void:
 		var transparent := Color(couleur, 0.0)
 		_bande_sort(debut - cote * 2.6, debut - cote, fin - cote * 2.6, fin - cote, transparent, couleur)
 		_bande_sort(debut + cote, debut + cote * 2.6, fin + cote, fin + cote * 2.6, couleur, transparent)
-	_sorts.surface_end()
+	_impacts.surface_end()
 
 func _bande_sort(a: Vector3, b: Vector3, c: Vector3, d: Vector3, gauche: Color, droite: Color) -> void:
-	_sorts.surface_set_color(gauche)
-	_sorts.surface_add_vertex(a)
-	_sorts.surface_set_color(droite)
-	_sorts.surface_add_vertex(b)
-	_sorts.surface_add_vertex(d)
-	_sorts.surface_set_color(gauche)
-	_sorts.surface_add_vertex(a)
-	_sorts.surface_set_color(droite)
-	_sorts.surface_add_vertex(d)
-	_sorts.surface_set_color(gauche)
-	_sorts.surface_add_vertex(c)
+	_impacts.surface_set_color(gauche)
+	_impacts.surface_add_vertex(a)
+	_impacts.surface_set_color(droite)
+	_impacts.surface_add_vertex(b)
+	_impacts.surface_add_vertex(d)
+	_impacts.surface_set_color(gauche)
+	_impacts.surface_add_vertex(a)
+	_impacts.surface_set_color(droite)
+	_impacts.surface_add_vertex(d)
+	_impacts.surface_set_color(gauche)
+	_impacts.surface_add_vertex(c)

@@ -7,7 +7,7 @@ var _reglages: Control
 func _ready() -> void:
 	var col := StyleAzur.page(self, "Pause")
 	var contenu := StyleAzur.defilement(col)
-	StyleAzur.banniere(contenu, "Une halte dans l’aventure", Jeu.nom_run(), "portail")
+	StyleAzur.banniere(contenu, "Pause", Jeu.nom_run(), "portail")
 	var carnet := StyleAzur.plaque(contenu)
 	var titre := StyleAzur.texte("VOTRE EXPÉDITION", 23, StyleAzur.CUIVRE)
 	titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -19,7 +19,7 @@ func _ready() -> void:
 	_statistique(chiffres, str(Jeu.niveau_run), "Niveau")
 	_statistique(chiffres, str(Jeu.inventaire.size()), "Augmentations")
 	StyleAzur.separateur(contenu)
-	contenu.add_child(_action("Mes améliorations", "navigation_sorts", _ouvrir_ameliorations))
+	contenu.add_child(_action("Mes améliorations", "navigation_passifs", _ouvrir_ameliorations))
 	contenu.add_child(_action("Paramètres", "parametres", _ouvrir_reglages))
 	var quitter := StyleAzur.bouton("Quitter l’aventure", _quitter_run)
 	quitter.add_theme_color_override("font_color", StyleAzur.CORAIL)
@@ -87,9 +87,9 @@ class _VueAmeliorations:
 	func _ready() -> void:
 		var col := StyleAzur.page(self,"Mes améliorations")
 		var liste := StyleAzur.defilement(col)
-		StyleAzur.banniere(liste, "Le grimoire de cette aventure", "%d augmentations recueillies" % Jeu.inventaire.size(), "grimoire")
+		StyleAzur.banniere(liste, "Augments", "%d augmentations recueillies" % Jeu.inventaire.size(), "grimoire")
 		if Jeu.inventaire.is_empty():
-			var vide := StyleAzur.texte("Votre grimoire attend son premier pouvoir.\nGagnez un niveau pour choisir une augmentation.", 29, StyleAzur.ATTENUE)
+			var vide := StyleAzur.texte("Aucun augment obtenu.", 29, StyleAzur.ATTENUE)
 			vide.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			liste.add_child(vide)
 		for entree in Jeu.inventaire_groupe():

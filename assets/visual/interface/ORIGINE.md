@@ -9,9 +9,10 @@ dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.
   gravures propres aux capacités et `tools/design_svg/` les exemples
   dessinés à la main qui définissent cette construction.
   `tools/generer_email_arcanique.py` reste un point d’entrée compatible vers
-  cette refonte. Les SVG Wenrexa fournis dans `SVG/` restent intacts ;
+  cette refonte. Les SVG Wenrexa fournis dans `tools/sources_svg/` restent intacts ;
   `tools/generer_glyphes_menus.py` compose leurs silhouettes en glyphes colorés
-  indépendants pour Sorts et Maîtrises.
+  indépendants pour les maîtrises et familiers. Les passifs utilisent les
+  glyphes existants de `../azur/glyphes/`.
 - `cadres/` : surfaces séparées pour cases, cartes, boutons, compteurs, panneaux,
   navigation et zones de texte, avec variantes sélectionnées, pressées et focus.
   Les surfaces de 128 px logiques s'étirent en neuf zones avec coins de
@@ -54,9 +55,19 @@ dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.
   variantes peintes depuis `tools/sources_clairiere/cascade_etude.png` ;
   `tools/sources_clairiere/clairiere_vivante.ora` conserve la composition
   éditable par calques. Le ciel est un dégradé Godot ; les mouvements et le
-  cadrage de l'accueil sont définis dans `data/animations_decors.gd` et
+  cadrage de l'accueil sont définis dans `data/presentation/animations_decors.gd` et
   `ui/composants/illustration_accueil.gd`. Les îles utilisent toujours
   `ui/composants/ile_animee.gd` et l'atlas `atmosphere.png`.
+  `nuages_varies.png` : atlas transparent de quatre silhouettes supplémentaires
+  (cirrus courbe, cumulus compact, train de petits nuages et voile effilé),
+  créé avec ImageGen le 26 septembre 2026 à partir des deux nuages existants.
+  Source : `exec-aeb726d3-ffae-47b3-8a2b-6ee132a74d37.png`. Les régions sont
+  normalisées dans `data/presentation/animations_decors.gd` pour conserver leur cadrage
+  avec l'atlas importé à 768 px de large pour mobile.
+  Les quatre `vent_*.svg` sont des masques vectoriels originaux ajoutés le
+  26 septembre 2026 : rouge pour les feuilles, vert pour l'herbe, noir pour
+  les zones immobiles. Ils pilotent `vegetation_clairiere.gdshader` sans
+  retoucher les peintures PNG.
 - `campagne_encre.png`, `campagne_terre.png`, `campagne_eau.png`,
   `campagne_air.png` et `campagne_feu.png` : cinq illustrations transparentes
   et indépendantes pour le choix du monde. Sources ImageGen respectives :
@@ -65,10 +76,10 @@ dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.
   `exec-0c067fcf-ed60-4c21-8677-60bcf7185c42.png`,
   `exec-fef64f02-8c24-4b99-94b4-410b427f9f59.png`,
   `exec-c67b0d30-4995-4931-ad85-03e998004266.png`.
-- `accueil_mage_detoure.png` : mage isolé avec transparence, source ImageGen
+- `accueil_mage_detoure.png` : ancien mage isolé avec transparence, source ImageGen
   `exec-467be333-9b5e-4a17-9ab1-4802ae8c0c6e.png`. Leurs dimensions et leur
-  recadrage communs sont conservés dans leurs sources. Le mage détouré reste
-  utilisé dans l'onglet Héros.
+  recadrage communs sont conservés dans leurs sources. Le portrait et son
+  ancien composant sont archivés hors dépôt ; l'onglet Héros n'en utilise plus.
 - `chargement_clairiere.png` : écran de lancement à fiole alchimique et vapeurs
   lavande sur fond indigo, distinct du menu et dans sa palette bleu-violet/cyan.
   Créé avec ImageGen, ancien écran utilisé comme référence de palette ; source
@@ -89,13 +100,20 @@ dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.
 
 Les SVG actifs sont autonomes sans image incorporée.
 
-- `menu/sorts/fonds_elementaires.png` : atlas original de six ambiances peintes
+- `menu/passifs/fonds_elementaires.png` : atlas original de six ambiances peintes
   (onde, givre, braise, foudre, acide, vortex), créé avec ImageGen le 26 septembre
   2026. Source `exec-e3d26700-adb9-4a22-a9dd-d983b6fb9bbe.png`. Le shader
-  `carte_sort_peinte.gdshader` choisit la région et protège la lecture.
+  `carte_passif_peinte.gdshader` choisit la région et protège la lecture.
 - `menu/cadre_enlumine.svg` et `menu/contour_enlumine.svg` : cadres vectoriels
   originaux, bord métallique champagne, relief violet et feuilles gravées aux coins.
 - Police Grenze : famille variable d’Omnibus-Type, provenant du
   [dépôt Google Fonts](https://github.com/google/fonts/tree/main/ofl/grenze).
   Fichier original conservé dans `assets/fonts/Grenze-Variable.ttf`, avec sa
   licence SIL OFL dans `Grenze-OFL.txt` ; graisse 750 utilisée sans modifier la police.
+
+- `classes/mage.png`, `classes/sorcier.png`, `classes/moine.png` : emblèmes
+  originaux créés avec ImageGen le 26 septembre 2026, transparents, importés
+  à 512 px avec mipmaps. Livre et cristal lilas, baguettes corail, lotus de jade.
+  Sources : `exec-a4add857-5d03-45a4-9b5e-d94f6f4fa746.png`,
+  `exec-4ee9cd9d-2fb9-457a-a6af-f9ebad294978.png`,
+  `exec-8705feb8-49bf-4469-99e3-f7550e65f5e5.png`.

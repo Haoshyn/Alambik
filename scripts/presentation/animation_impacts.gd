@@ -1,6 +1,6 @@
 extends RefCounted
 
-const Rendu = preload("res://data/animations_combat.gd")
+const Rendu = preload("res://data/presentation/animations_combat.gd")
 
 static func creer(centre: Vector2, couleur: Color, ampleur: float, mort: bool) -> Dictionary:
 	return {"centre": centre, "couleur": couleur, "age": 0.0, "mort": mort,

@@ -38,12 +38,14 @@ func _ready() -> void:
 	var reset := StyleAzur.bouton("Réinitialiser les maîtrises", _reinitialiser)
 	reset.name = "ReinitialiserMaitrises"
 	reset.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	reset.custom_minimum_size = Vector2(440, 68)
-	reset.add_theme_font_size_override("font_size", 30)
-	StyleAzur.texte_bouton_colore(reset, StyleAzur.CUIVRE)
-	for etat in ["normal", "hover", "pressed"]:
+	reset.custom_minimum_size = Vector2(620, 104)
+	reset.add_theme_font_override("font", Polices.TITRE)
+	reset.add_theme_font_size_override("font_size", 38)
+	StyleAzur.texte_bouton_colore(reset, Color("fff0c9"))
+	for etat in ["normal", "hover", "pressed", "focus"]:
 		var style_reset := StyleAzur.sceau(false, Color.WHITE, etat == "pressed")
-		for cote in [SIDE_TOP, SIDE_BOTTOM]: style_reset.set_content_margin(cote, 10)
+		for cote in [SIDE_TOP, SIDE_BOTTOM]: style_reset.set_content_margin(cote, 20)
+		for cote in [SIDE_LEFT, SIDE_RIGHT]: style_reset.set_content_margin(cote, 36)
 		reset.add_theme_stylebox_override(etat, style_reset)
 	col.add_child(reset)
 	var fiche := StyleAzur.plaque(col, true)

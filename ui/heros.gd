@@ -33,45 +33,43 @@ func _ready() -> void:
 	var gauche := VBoxContainer.new()
 	gauche.name = "Identite"
 	gauche.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gauche.size_flags_stretch_ratio = 1.7
 	gauche.add_theme_constant_override("separation", 14)
 	entete.add_child(gauche)
 	_classe = StyleAzur.bouton("", _ouvrir_classes, true)
 	_classe.name = "Classe"
-	_classe.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_classe.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_classe.custom_minimum_size.y = 96
-	StyleAzur.bouton_enlumine(_classe, StyleAzur.LILAS, 40)
+	StyleAzur.bouton_enlumine(_classe, StyleAzur.LILAS, 44)
 	gauche.add_child(_classe)
 	var reset := StyleAzur.bouton("Réinitialiser · Gratuit", _reinitialiser_attributs)
 	reset.name = "ReinitialiserAttributs"
-	reset.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	reset.custom_minimum_size.y = 80
-	StyleAzur.bouton_enlumine(reset, StyleAzur.MENTHE, 34)
+	reset.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	reset.custom_minimum_size.y = 88
+	StyleAzur.bouton_enlumine(reset, StyleAzur.MENTHE, 40)
 	gauche.add_child(reset)
-	var points := HBoxContainer.new()
+	var points := PanelContainer.new()
 	points.name = "ReservePoints"
+	points.set_meta("surface_lecture", false)
+	points.custom_minimum_size = Vector2(296, 198)
 	points.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	points.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	points.add_theme_constant_override("separation", 20)
+	points.add_theme_stylebox_override("panel", StyleAzur.cadre_enlumine(StyleAzur.OR_VIF))
 	entete.add_child(points)
-	var sceau := PanelContainer.new()
-	sceau.name = "SceauPoints"
-	sceau.custom_minimum_size = Vector2(144, 144)
-	sceau.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var fond_points := StyleAzur.cercle(true)
-	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]: fond_points.set_content_margin(cote, 0)
-	sceau.add_theme_stylebox_override("panel", fond_points)
-	points.add_child(sceau)
-	_resume = StyleAzur.texte("", 58, StyleAzur.OR_VIF)
+	var reserve := VBoxContainer.new()
+	reserve.alignment = BoxContainer.ALIGNMENT_CENTER
+	reserve.add_theme_constant_override("separation", 2)
+	points.add_child(reserve)
+	_resume = StyleAzur.texte("", 64, StyleAzur.OR_VIF.lightened(0.18))
 	_resume.name = "PointsDisponibles"
 	_resume.add_theme_font_override("font", Polices.CHIFFRES)
 	_resume.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_resume.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_resume.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_resume.autowrap_mode = TextServer.AUTOWRAP_OFF
-	sceau.add_child(_resume)
-	var titre_points := StyleAzur.calligraphie("Points à\nrépartir", 38, StyleAzur.OR_VIF)
+	reserve.add_child(_resume)
+	var titre_points := StyleAzur.calligraphie("Points à répartir", 36, StyleAzur.OR_VIF)
 	titre_points.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	points.add_child(titre_points)
+	titre_points.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	reserve.add_child(titre_points)
 	var accents := {"force": StyleAzur.ROUGE_VIF, "vitalite": StyleAzur.VERT_VIF,
 		"agilite": StyleAzur.BLEU_VIF, "intelligence": StyleAzur.MAUVE_VIF, "sagesse": StyleAzur.OR_VIF}
 	for valeur in Personnage.ATTRIBUTS:
@@ -136,7 +134,7 @@ func _ready() -> void:
 	_message = StyleAzur.texte("", 26, StyleAzur.MENTHE)
 	_contenu.add_child(_message)
 	var adapter := func() -> void:
-		entete.vertical = _contenu.size.x < 760
+		entete.vertical = _contenu.size.x < 800
 		var hauteur := (_contenu.get_parent() as Control).size.y - entete.size.y - 150.0
 		for ligne_attribut in _lignes_attributs:
 			ligne_attribut.custom_minimum_size.y = clampf(hauteur / 5.0, 190.0, 300.0)

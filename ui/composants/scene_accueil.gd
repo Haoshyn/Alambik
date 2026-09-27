@@ -4,7 +4,7 @@ extends Control
 signal campagne_demandee
 
 const ILE_ANIMEE := preload("res://ui/composants/ile_animee.gd")
-const DONNEES := preload("res://data/animations_decors.gd")
+const DONNEES := preload("res://data/presentation/animations_decors.gd")
 
 var ile_externe := false
 var _ile: Control

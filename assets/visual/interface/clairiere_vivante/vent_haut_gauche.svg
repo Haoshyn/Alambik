@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="580" height="630" viewBox="0 0 580 630">
+  <defs>
+    <radialGradient id="feuilles"><stop offset="0" stop-color="#ff0000"/><stop offset="0.48" stop-color="#eb0000"/><stop offset="1" stop-color="#000000"/></radialGradient>
+  </defs>
+  <rect width="580" height="630" fill="#000000"/>
+  <g fill="url(#feuilles)">
+    <ellipse cx="53" cy="27" rx="88" ry="57"/>
+    <ellipse cx="32" cy="167" rx="59" ry="45"/>
+    <ellipse cx="47" cy="207" rx="37" ry="46"/>
+    <ellipse cx="149" cy="219" rx="38" ry="50"/>
+    <ellipse cx="266" cy="113" rx="57" ry="31"/>
+    <ellipse cx="210" cy="153" rx="55" ry="36"/>
+    <ellipse cx="320" cy="207" rx="36" ry="28"/>
+    <ellipse cx="344" cy="85" rx="55" ry="49"/>
+    <ellipse cx="447" cy="56" rx="60" ry="59"/>
+    <ellipse cx="509" cy="72" rx="43" ry="52"/>
+    <ellipse cx="556" cy="22" rx="39" ry="29"/>
+    <ellipse cx="34" cy="359" rx="63" ry="38"/>
+    <ellipse cx="102" cy="434" rx="38" ry="50"/>
+    <ellipse cx="19" cy="563" rx="43" ry="44"/>
+  </g>
+</svg>

@@ -1,6 +1,6 @@
 extends RefCounted
 
-const CATALOGUE := preload("res://data/effets_sonores.gd")
+const CATALOGUE := preload("res://data/audio/effets_sonores.gd")
 
 static func creer_banque() -> Dictionary:
 	var banque: Dictionary = {}

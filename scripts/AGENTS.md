@@ -1,13 +1,14 @@
-# scripts/
+# Logique du jeu
 
-Le routage est dans `docs/INDEX.md`. Chercher les symboles avant d'ouvrir les gros fichiers ; pour le rendu, lire aussi `presentation/AGENTS.md`.
+Utiliser `INDEX.md` pour choisir la responsabilité concernée. `run.gd` et
+`menu.gd` coordonnent ; les calculs de combat, les augments et la géométrie
+vivent dans leurs modules. Ne pas charger tous les acteurs pour une retouche.
 
-La logique consomme `data/`. Éviter d'ajouter une responsabilité à `run.gd`, aux gros acteurs ou au menu lorsqu'un module local suffit.
+La logique lit `data/`. Un même calcul doit servir au gameplay et à son
+affichage. Les fonctions de calcul restent indépendantes de l'arbre des
+scènes quand c'est possible ; les acteurs gèrent le temps et les événements.
 
-Les acteurs, entrées, scripts de combat et de salle sont directement dans `scripts/` ; le rendu est dans `presentation/`.
-
-`run.gd` coordonne les systèmes. `menu.gd` coordonne la navigation ; la construction visuelle réutilisable appartient à `ui/` ou `presentation/`. Les calculs de combat partagés restent indépendants des acteurs quand c'est possible.
-
-Les rencontres viennent de `data/vagues.gd`. Pour les contraintes tactiles sur appareil, voir `docs/ops/MOBILE.md` seulement lorsque cela est demandé.
-
-Les outils de capture et de développement ne doivent pas être nécessaires à une partie normale. Leur présence n'autorise pas une exécution automatique.
+Un dégât suit une source explicite ; ne pas multiplier deux fois une même
+famille de bonus. Les effets visuels appartiennent à `presentation/`, les
+écrans à `ui/`. Les outils de capture ne sont pas une dépendance obligatoire
+d'une partie normale.

@@ -1,0 +1,573 @@
+extends SceneTree
+
+class CibleTest extends CharacterBody2D:
+	func recevoir_degats(_montant: float, _effets: Array = []) -> void: pass
+
+var _erreurs: Array[String] = []
+var _controles := 0
+var _jeu: Node
+var _salle: Node2D
+var _cible: CibleTest
+
+func _init() -> void:
+	call_deferred("_executer")
+
+func _verifier(condition: bool, message: String) -> void:
+	_controles += 1
+	if not condition and message not in _erreurs: _erreurs.append(message)
+
+func _executer() -> void:
+	if "verification" not in OS.get_user_data_dir().to_lower():
+		push_error("Profil APPDATA isole requis pour verifier les patterns")
+		quit(1)
+		return
+	root.get_node("ReglagesJoueur").sauvegarde_active = false
+	_jeu = root.get_node("Jeu")
+	_salle = load("res://scenes/salle.tscn").instantiate()
+	root.add_child(_salle)
+	_salle.set_process(false)
+	_cible = CibleTest.new()
+	_cible.add_to_group("cibles_ennemis")
+	root.add_child(_cible)
+	_verifier_progression()
+	_verifier_tisseur()
+	_verifier_annonces_monstres()
+	_verifier_esquive_tirs_rapides()
+	_verifier_charges()
+	_verifier_charges_boss()
+	_verifier_mobilite_boss()
+	_verifier_eventails_retour()
+	_verifier_geometrie()
+	await _verifier_tirs_de_bord()
+	await _verifier_boss()
+	await _verifier_annonces_boss()
+	_cible.free()
+	_salle.free()
+	for erreur in _erreurs: push_error(erreur)
+	print("Verification patterns : %d controles, %d erreurs." % [_controles, _erreurs.size()])
+	quit(0 if _erreurs.is_empty() else 1)
+
+func _profil(id: String, chapitre: int, salle := 1) -> Dictionary:
+	_jeu.mode_run = "grimoire"
+	_jeu.chapitre = chapitre
+	_salle.numero = salle
+	return _salle._mis_a_l_echelle(CatalogueEnnemis.par_id(id), id)
+
+func _verifier_progression() -> void:
+	for id: String in CatalogueEnnemis.TOUS:
+		var source := CatalogueEnnemis.par_id(id).duplicate(true)
+		var precedent := 0.0
+		var vitesse_reelle_precedente := 0.0
+		for chapitre in Chapitres.nombre():
+			var d := _profil(id, chapitre)
+			if d.has("vitesse_projectile"):
+				var vitesse := float(d["vitesse_projectile"])
+				_verifier(vitesse >= precedent and is_finite(vitesse), "Vitesse croissante : " + id)
+				precedent = vitesse
+				var tir := Tir.new()
+				tir.vitesse = vitesse * (Reglages.BOSS_PROJECTILE_VITESSE_MULT if str(d["cerveau"]) == "boss" else 1.0)
+				ProjectilesEnnemis.appliquer(tir, d)
+				_verifier(tir.vitesse >= vitesse_reelle_precedente, "Vitesse reelle croissante apres plafonds : " + id)
+				vitesse_reelle_precedente = tir.vitesse
+			for cle: String in ["telegraphe", "preparation"]:
+				if d.has(cle): _verifier(float(d[cle]) >= Reglages.ENNEMI_TELEGRAPHE_MIN, "Annonce lisible : " + id)
+		var debut := _profil(id, 0)
+		var fin := _profil(id, Chapitres.nombre() - 1, Reglages.SALLES_PAR_RUN)
+		if debut.has("vitesse_projectile"):
+			_verifier(float(fin["vitesse_projectile"]) > float(debut["vitesse_projectile"]) * 1.4,
+				"Hausse sensible en fin de campagne : " + id)
+		_verifier(source == CatalogueEnnemis.par_id(id), "Catalogue preserve : " + id)
+	var premier := _profil("plume_sentinelle", 0)
+	var dernier := _profil("plume_sentinelle", 0, Reglages.SALLES_PAR_RUN)
+	_verifier(float(dernier["vitesse_projectile"]) > float(premier["vitesse_projectile"]), "Rythme croissant dans une tentative")
+	var hors_limites := EvolutionEnnemis.facteurs_rythme(1000, 1000.0)
+	_verifier(hors_limites == EvolutionEnnemis.facteurs_rythme(Chapitres.nombre() - 1, 1.0), "Rythme plafonne hors campagne")
+	for mode: String in ["mine", "epreuves"]:
+		_jeu.mode_run = mode
+		_jeu.niveau_mine = 0
+		_jeu.niveau_epreuve = 0
+		_salle.numero = 1
+		_salle._mine_temps = 0.0
+		var debut: Dictionary = _salle._mis_a_l_echelle(CatalogueEnnemis.par_id("plume_sentinelle"), "plume_sentinelle")
+		_salle.numero = 5
+		_salle._mine_temps = Reglages.MINE_DUREE
+		var fin: Dictionary = _salle._mis_a_l_echelle(CatalogueEnnemis.par_id("plume_sentinelle"), "plume_sentinelle")
+		_verifier(float(fin["vitesse_projectile"]) > float(debut["vitesse_projectile"]), "Progression du rythme : " + mode)
+
+func _verifier_tisseur() -> void:
+	for chapitre in [0, 17, 34]:
+		var d := _profil("fuseau_tisseur", chapitre, Reglages.SALLES_PAR_RUN if chapitre == 34 else 1)
+		if chapitre == 34: d = RangsEnnemis.renforcer(d)
+		var ennemi: CharacterBody2D = load("res://scenes/ennemi.tscn").instantiate()
+		ennemi.configurer(d)
+		_salle.add_child(ennemi)
+		ennemi.set_physics_process(false)
+		ennemi.position = Vector2(600, 400)
+		_cible.position = ennemi.position + Vector2(0, 600)
+		_cible.velocity = Vector2(300, 0)
+		ennemi._cible = _cible
+		ennemi._recharge = 0.0
+		var tirs: Array[Dictionary] = []
+		ennemi.tir_demande.connect(func(tir: Tir, origine: Vector2, direction: Vector2) -> void:
+			tirs.append({"tir": tir, "origine": origine, "direction": direction}))
+		ennemi._agir_tisseur(0.0)
+		_verifier(tirs.size() == 1, "Tisseur declenche sans attendre une annonce")
+		_verifier(str(ennemi._etat) == "repos" and ennemi._salves.is_empty(), "Tisseur sans annonce ni relance cachee")
+		if not tirs.is_empty():
+			var tir: Tir = tirs[0]["tir"]
+			_verifier((tirs[0]["direction"] as Vector2).is_equal_approx(Vector2.DOWN), "Tisseur sans prediction")
+			_verifier(tir.nb_projectiles == 2 and is_zero_approx(tir.angle_eventail), "Deux rubans paralleles a tous les niveaux")
+			_verifier(tir.ecart_lateral - maxf(tir.rayon * 2.0, tir.longueur) > Reglages.HEROS_RAYON * 2.0,
+				"Passage physique entre les rubans")
+			_verifier_passage_droit(tir, chapitre)
+		var distance_minimale := float(d["vitesse_projectile"]) * BestiaireMondes.TISSEUR_REACTION_MIN
+		_verifier(Cerveaux.tisseur(distance_minimale - 1.0, float(d["portee"]), 0.0, distance_minimale) == "reculer",
+			"Tisseur ne tire pas a bout portant")
+		ennemi.free()
+
+func _verifier_annonces_monstres() -> void:
+	for chapitre in [0, 17, 34]:
+		for id: String in ["plume_sentinelle", "folio_orbiteur", "miroir_encre", "cachet_phaseur"]:
+			var d := _profil(id, chapitre)
+			var ennemi: CharacterBody2D = load("res://scenes/ennemi.tscn").instantiate()
+			ennemi.configurer(d)
+			_salle.add_child(ennemi)
+			ennemi.set_physics_process(false)
+			ennemi.position = Vector2(600, 400)
+			_cible.position = ennemi.position + Vector2(0, float(d["portee"]))
+			_cible.velocity = Vector2.ZERO
+			ennemi._cible = _cible
+			ennemi._recharge = 0.0
+			var tirs: Array[Dictionary] = []
+			ennemi.tir_demande.connect(func(tir: Tir, origine: Vector2, direction: Vector2) -> void:
+				tirs.append({"tir": tir, "origine": origine, "direction": direction}))
+			var methode := "_agir_" + str(d["cerveau"])
+			if id == "cachet_phaseur":
+				ennemi._etat = "phase"
+				ennemi._destination_phase = ennemi.position
+			if id == "plume_sentinelle": ennemi.call(methode)
+			else: ennemi.call(methode, 0.0)
+			var annonce_attendue: bool = id in ["plume_sentinelle", "cachet_phaseur"]
+			var contexte := "%s niveau %d" % [id, chapitre + 1]
+			_verifier(bool(ennemi._annonce_projectile) == annonce_attendue, "Annonce selon la vitesse reelle : " + contexte)
+			if annonce_attendue:
+				_verifier(tirs.is_empty() and float(ennemi._minuterie) >= Reglages.ENNEMI_TELEGRAPHE_MIN, "Tir rapide attend la fin de son annonce : " + contexte)
+				var visee: Vector2 = ennemi._point_vise
+				_cible.position.x += 120.0
+				ennemi._minuterie = 0.0
+				if id == "plume_sentinelle": ennemi.call(methode)
+				else: ennemi.call(methode, 0.0)
+				_verifier(not tirs.is_empty(), "Annonce suivie d'un tir : " + contexte)
+				if not tirs.is_empty():
+					_verifier((tirs[-1]["direction"] as Vector2).is_equal_approx(ennemi.global_position.direction_to(visee)), "Visee verrouillee malgre le mouvement : " + contexte)
+			else:
+				_verifier(not tirs.is_empty() and str(ennemi._etat) == "repos", "Tir lent immediat sans etat d'annonce : " + contexte)
+			for salve: Dictionary in ennemi._salves:
+				_verifier(bool(salve["annonce"]) == annonce_attendue, "Relance avec la meme lisibilite : " + contexte)
+			if id == "miroir_encre":
+				ennemi._salves.clear()
+				ennemi._recharge = 0.0
+				_cible.position = ennemi.position + Vector2(0, 60)
+				ennemi._agir_miroir(0.0)
+				_verifier(str(ennemi._etat) == "pulse" and float(ennemi._minuterie) > 0.0, "Depart proche protege le temps de reaction")
+			ennemi.free()
+
+func _verifier_esquive_tirs_rapides() -> void:
+	var marge_minimale := INF
+	for chapitre: int in [0, 6, 17, 27, 34]:
+		for elite: bool in [false, true]:
+			for salle: int in [1, Reglages.SALLES_PAR_RUN]:
+				var d := _profil("plume_sentinelle", chapitre, salle)
+				if elite: d = RangsEnnemis.renforcer(d)
+				var ennemi: CharacterBody2D = load("res://scenes/ennemi.tscn").instantiate()
+				ennemi.configurer(d)
+				ennemi._cible = _cible
+				var tir: Tir = ennemi._creer_tir()
+				_verifier(tir.vitesse > Reglages.HEROS_VITESSE * 8.0, "Sentinelle au moins huit fois plus rapide que la course")
+				for distance: float in [500.0, 800.0, 1000.0, 2000.0]:
+					for sens: float in [-1.0, 1.0]:
+						var course := Vector2(sens * Reglages.HEROS_VITESSE, 0)
+						var debut := Vector2(0, distance)
+						_cible.position = debut
+						_cible.velocity = course
+						ennemi._preparer_tir("vise", float(d["telegraphe"]))
+						var visee: Vector2 = ennemi._point_vise.normalized()
+						var marge := _marge_course(tir, visee, debut, course, float(d["telegraphe"]))
+						var contexte := "niveau %d, salle %d, elite %s, distance %d" % [chapitre + 1, salle, elite, distance]
+						if distance < 1500.0:
+							_verifier(marge <= 0.0, "Course constante touchee a mi-distance : " + contexte)
+							_verifier(_marge_course(tir, visee, debut, course, float(d["telegraphe"]), true) > 0.0,
+								"Changement de direction avec acceleration permet l'esquive : " + contexte)
+						else:
+							marge_minimale = minf(marge_minimale, marge)
+							_verifier(marge >= Reglages.HEROS_RAYON, "Course laterale garde une marge au fond de salle : " + contexte)
+				ennemi.free()
+	print("Sentinelle : course constante touchee a mi-distance, marge au loin %.1f px apres hitboxes." % marge_minimale)
+
+func _marge_course(tir: Tir, visee: Vector2, debut: Vector2, course: Vector2,
+		preparation: float, changer := false) -> float:
+	var marge := INF
+	var heros := debut
+	var vitesse := course
+	var pas_temps := 1.0 / 1200.0
+	for pas in ceili((preparation + 1.0) / pas_temps):
+		var temps := float(pas) * pas_temps
+		if changer and temps >= .25:
+			vitesse = vitesse.move_toward(-course, Reglages.HEROS_ACCELERATION * pas_temps)
+		heros += vitesse * pas_temps
+		if temps < preparation: continue
+		for angle: float in tir.angles():
+			var axe := visee.rotated(angle)
+			var projectile := axe * tir.vitesse * (temps - preparation)
+			var demi_segment := axe * maxf(0.0, tir.longueur * .5 - tir.rayon)
+			var proche := Geometry2D.get_closest_point_to_segment(heros, projectile - demi_segment, projectile + demi_segment)
+			marge = minf(marge, heros.distance_to(proche) - tir.rayon - Reglages.HEROS_RAYON)
+	return marge
+
+func _verifier_charges() -> void:
+	_salle.limites = Rect2(Vector2.ZERO, Reglages.ARENE_TAILLE)
+	_salle._contour = FormesSalles.contour(_salle.limites, 0)
+	for chapitre: int in [0, 17, 34]:
+		for id: String in ["tache_veloce", "sceau_belier"]:
+			var ennemi: CharacterBody2D = load("res://scenes/ennemi.tscn").instantiate()
+			ennemi.configurer(_profil(id, chapitre))
+			ennemi.limites = _salle.limites
+			_salle.add_child(ennemi)
+			ennemi.set_physics_process(false)
+			ennemi._cible = _cible
+			ennemi.position = Vector2(600, 200)
+			var portee: float = ennemi.portee_charge()
+			_verifier(portee >= 900.0, "Charge longue des le debut : " + id)
+			_cible.position = ennemi.position + Vector2(0, portee + 100)
+			ennemi._agir_veloce(.016)
+			_verifier(ennemi._etat != "preparer" and ennemi.velocity.y > 0, "Charge hors portee remplacee par approche : " + id)
+			_cible.position = ennemi.position + Vector2(0, portee - 60)
+			ennemi._agir_veloce(.016)
+			_verifier(ennemi._etat == "preparer", "Charge preparee quand elle peut atteindre : " + id)
+			_cible.position = ennemi.position + Vector2(0, portee + 100)
+			ennemi._minuterie = 0.0
+			ennemi._agir_veloce(.016)
+			_verifier(ennemi._etat != "charger", "Pas d'elan si la cible sort de portee pendant l'annonce : " + id)
+			ennemi._givre = 2.0
+			_verifier(float(ennemi.portee_charge()) < portee, "Portee recalculee sous ralentissement : " + id)
+			ennemi._etat = "charger"
+			ennemi._minuterie = 0.0
+			ennemi._charges_effectuees = 1
+			ennemi.donnees["charges"] = 2
+			ennemi._agir_veloce(.016)
+			_verifier(ennemi._etat == "repos", "Enchainement abandonne hors portee : " + id)
+			ennemi._givre = 0.0
+			ennemi._minuterie = 0.0
+			_cible.position = ennemi.position + Vector2(0, 450)
+			_salle._obstacles.assign([Rect2(500, 350, 200, 100)])
+			ennemi._agir_veloce(.016)
+			_verifier(ennemi._etat != "preparer", "Pas de charge preparee a travers un obstacle : " + id)
+			_salle._obstacles.clear()
+			ennemi.free()
+
+func _verifier_charges_boss() -> void:
+	var boss: CharacterBody2D = load("res://scenes/boss.tscn").instantiate()
+	boss.configurer(_profil("le_correcteur", 0))
+	boss.limites = _salle.limites
+	boss.position = Vector2(600, 200)
+	_salle.add_child(boss)
+	boss.set_physics_process(false)
+	boss._cible = _cible
+	boss._motif = "charge"
+	boss._minuterie = boss._duree_du_motif("charge")
+	_cible.position = Vector2(600, 1900)
+	boss._commencer_motif("charge")
+	_verifier(boss._charge_approche and not boss._annonce_charge(), "Boss approche sans annoncer une charge hors portee")
+	var avant := boss.position
+	boss._executer_motif("charge", 1.0 / 60.0)
+	_verifier(boss.position.y > avant.y and not boss._charge_debutee, "Approche normale avant le dash du boss")
+	_cible.position = Vector2(600, 10000)
+	for image in 125: boss._executer_motif("charge", 1.0 / 60.0)
+	_verifier(float(boss._minuterie) <= 0.0, "Cible inaccessible ne bloque pas le cycle des boss")
+	boss.position = Vector2(600, 200)
+	_cible.position = Vector2(600, 950)
+	boss._minuterie = boss._duree_du_motif("charge")
+	boss._commencer_motif("charge")
+	_verifier(boss._annonce_charge(), "Boss annonce une cible a portee")
+	_cible.position = Vector2(600, 1900)
+	boss._minuterie = float(boss._duree_du_motif("charge")) - BestiaireMondes.BOSS_CHARGE_ANNONCE - .01
+	boss._executer_motif("charge", 1.0 / 60.0)
+	_verifier(not boss._charge_debutee and boss.position.is_equal_approx(Vector2(600, 200)), "Boss annule le depart lorsque la cible sort de portee")
+	_cible.position = Vector2(600, 950)
+	boss._commencer_motif("charge")
+	boss._minuterie = float(boss._duree_du_motif("charge")) - BestiaireMondes.BOSS_CHARGE_ANNONCE - .01
+	for image in 120: boss._executer_motif("charge", 1.0 / 60.0)
+	_verifier(boss._charge_terminee and boss.position.y >= 1300.0, "Dash de boss depasse nettement l'ancienne portee")
+	boss.free()
+
+func _verifier_mobilite_boss() -> void:
+	_salle.limites = Rect2(Vector2.ZERO, Reglages.ARENE_TAILLE)
+	for forme in FormesSalles.PROFILS.size():
+		_salle._contour = FormesSalles.contour(_salle.limites, forme)
+		var d := _profil("grand_alambic", 34)
+		var apparition: Vector2 = _salle._position_boss(d)
+		_verifier(apparition.is_finite() and apparition.distance_to(_salle.limites.get_center()) < 120.0, "Boss apparait au milieu : forme %d" % forme)
+		_verifier(FormesSalles.contient_disque(apparition, _salle._contour, float(d["rayon"])), "Boss entier dans le sol a l'arrivee")
+	_salle._contour = FormesSalles.contour(_salle.limites, 0)
+	_salle._obstacles.assign([Rect2(450, 800, 300, 400)])
+	var repli: Vector2 = _salle._position_boss(_profil("grand_alambic", 34))
+	_verifier(repli.is_finite() and _salle._place_libre(repli, 114.0), "Apparition contourne les blocs au milieu de la Mine")
+	_salle._obstacles.clear()
+	for id: String in DeplacementsBoss.IDENTITES:
+		var boss: CharacterBody2D = load("res://scenes/boss.tscn").instantiate()
+		boss.configurer(_profil(id, 0))
+		boss.limites = _salle.limites
+		boss.position = _salle._position_boss(boss.donnees)
+		_salle.add_child(boss)
+		boss.set_physics_process(false)
+		boss._cible = _cible
+		_cible.position = Vector2(600, 1850)
+		var depart := boss.position
+		for image in 120: boss._flotter(1.0 / 60.0)
+		_verifier(boss.position.y > depart.y + 180.0, "Boss gagne de la profondeur vers le joueur : " + id)
+		_verifier(boss.position.distance_to(_cible.position) < depart.distance_to(_cible.position), "Boss reduit la distance : " + id)
+		_cible.position = Vector2(600, 200)
+		depart = boss.position
+		for image in 120: boss._flotter(1.0 / 60.0)
+		_verifier(boss.position.y < depart.y - 180.0, "Boss suit aussi un joueur passe derriere : " + id)
+		boss._apparition = 1.0
+		_cible.position = Vector2(600, 1850)
+		var tirs: Array[Tir] = []
+		boss.tir_demande.connect(func(tir: Tir, _origine: Vector2, _direction: Vector2): tirs.append(tir))
+		for image in 720: boss._physics_process(1.0 / 60.0)
+		_verifier(not tirs.is_empty(), "Cycle mobile conserve les attaques : " + id)
+		for tir: Tir in tirs:
+			_verifier(tir.portee >= _salle.limites.size.length() * 2.0, "Projectile de boss couvre la salle et le retour : " + id)
+		boss.free()
+	print("Boss : vingt identites avancees dans les deux sens et cycles de combat exerces.")
+
+func _verifier_eventails_retour() -> void:
+	for chapitre: int in [0, 7, 14, 21, 34]:
+		for id: String in ["l_errata", "virgule_noire", "souverain_ombres"]:
+			var boss: CharacterBody2D = load("res://scenes/boss.tscn").instantiate()
+			boss.configurer(_profil(id, chapitre))
+			boss.limites = _salle.limites
+			boss.position = Vector2(600, 800)
+			_cible.position = Vector2(600, 1650)
+			_salle.add_child(boss)
+			boss.set_physics_process(false)
+			boss._cible = _cible
+			boss._motif = "calligraphie"
+			boss._minuterie = 3.0
+			boss._executer_motif("calligraphie", 1.0 / 60.0)
+			var attentes: Array = boss._tirs_annonces.attentes
+			_verifier(attentes.size() == 3, "Boss boomerang annonce exactement trois branches : " + id)
+			if attentes.size() == 3:
+				var origine: Vector2 = attentes[1]["origine"]
+				var direction: Vector2 = attentes[1]["direction"]
+				for i in 3:
+					var tir: Tir = attentes[i]["tir"]
+					var branche: Vector2 = attentes[i]["direction"]
+					_verifier((attentes[i]["origine"] as Vector2).is_equal_approx(origine), "Les trois boomerangs partent du boss")
+					_verifier(is_equal_approx(direction.angle_to(branche), ProjectilesEnnemis.RETOUR_BOSS_ANGLES[i]), "Eventail symetrique autour de la cible")
+					_verifier(tir.distance_retour >= 2000.0 and tir.vitesse >= 1200.0, "Boomerang rapide et long depuis le premier niveau")
+				var avant := boss.position
+				boss._flotter(.1)
+				_verifier(boss.position.is_equal_approx(avant), "Boss garde le depart annonce de ses boomerangs")
+			boss._tirs_annonces.annuler()
+			boss._cadence_motif = 0.0
+			boss._motifs_mondes.avancer(boss, "lames_ondulees", .016)
+			_verifier(boss._motifs_mondes.angles.size() == 3, "Motif de monde conserve trois branches de retour")
+			boss.free()
+
+func _verifier_passage_droit(tir: Tir, chapitre: int) -> void:
+	# Une traversee rectiligne doit reussir sur une plage de timings, mais pas tous.
+	var reussites := 0
+	var suite := 0
+	var suite_max := 0
+	for choix in 101:
+		var attente := float(choix) * .01
+		var touche := false
+		for pas in 480:
+			var temps := float(pas) / 240.0
+			var marche := maxf(0.0, temps - attente)
+			var acceleration := minf(marche, Reglages.HEROS_VITESSE / Reglages.HEROS_ACCELERATION)
+			var distance := .5 * Reglages.HEROS_ACCELERATION * acceleration * acceleration + (marche - acceleration) * Reglages.HEROS_VITESSE
+			var heros := Vector2(0, 600.0 - distance)
+			if heros.y < 0.0: break
+			var oscillation := tir.amplitude * sin(temps * TAU * tir.frequence)
+			var tangente := Vector2(tir.amplitude * TAU * tir.frequence * cos(temps * TAU * tir.frequence), tir.vitesse).normalized()
+			var demi_segment := maxf(0.0, tir.longueur * .5 - tir.rayon)
+			for cote in [-1.0, 1.0]:
+				var projectile := Vector2(float(cote) * tir.ecart_lateral * .5 + oscillation, temps * tir.vitesse)
+				var proche := Geometry2D.get_closest_point_to_segment(heros,
+					projectile - tangente * demi_segment, projectile + tangente * demi_segment)
+				if proche.distance_to(heros) <= Reglages.HEROS_RAYON + tir.rayon:
+					touche = true
+					break
+			if touche: break
+		if touche: suite = 0
+		else:
+			reussites += 1
+			suite += 1
+			suite_max = maxi(suite_max, suite)
+	_verifier(reussites > 0 and reussites < 101, "Zigzag evitable mais dangereux au niveau %d" % (chapitre + 1))
+	_verifier(suite_max >= 10, "Fenetre humaine de traversee au niveau %d" % (chapitre + 1))
+	print("Zigzag niveau %d : %d timings sur 101 passent, plage continue %.2f s." % [chapitre + 1, reussites, suite_max * .01])
+
+func _verifier_geometrie() -> void:
+	var limites := Rect2(Vector2(78, 244), Reglages.ARENE_TAILLE)
+	for profil in FormesSalles.PROFILS.size():
+		var contour := FormesSalles.contour(limites, profil)
+		for taille: float in [10.0, 24.0, 38.0]:
+			var marge := taille + BestiaireMondes.PROJECTILE_MARGE_DEPART
+			for bord in 4:
+				for voie in range(1, 20):
+					var fraction := float(voie) / 20.0
+					var direction := [Vector2.DOWN, Vector2.LEFT, Vector2.UP, Vector2.RIGHT][bord] as Vector2
+					var origine := limites.position + Vector2(limites.size.x * fraction, 0)
+					if bord == 1: origine = limites.position + Vector2(limites.size.x, limites.size.y * fraction)
+					elif bord == 2: origine.y = limites.end.y
+					elif bord == 3: origine = limites.position + Vector2(0, limites.size.y * fraction)
+					var depart := Geometrie.origine_projectile(origine, direction, limites, contour, [], marge, BestiaireMondes.PROJECTILE_DEGAGEMENT)
+					_verifier(depart.is_finite(), "Voie de bord accessible dans le profil %d" % profil)
+					if not depart.is_finite(): continue
+					_verifier(FormesSalles.contient_disque(depart, contour, marge), "Projectile entier dans le contour")
+					_verifier(absf((depart - origine).cross(direction)) < .1, "Recalage conserve la voie annoncee")
+					_verifier(depart.is_equal_approx(Geometrie.origine_projectile(depart, direction, limites, contour, [], marge, BestiaireMondes.PROJECTILE_DEGAGEMENT)),
+						"Origine identique entre annonce et depart")
+	var contour := FormesSalles.contour(limites, 0)
+	var bloc := Rect2(limites.get_center() - Vector2(60, 60), Vector2(120, 120))
+	_verifier(not Geometrie.origine_projectile(bloc.get_center(), Vector2.DOWN, limites, contour, [bloc], 14.0, 60.0).is_finite(), "Aucun tir teleporte a travers un bloc")
+	_verifier(not Geometrie.origine_projectile(limites.position, Vector2.UP, limites, contour, [], 14.0, 60.0).is_finite(), "Tir sortant omis avant son annonce")
+
+func _verifier_tirs_de_bord() -> void:
+	_salle.limites = Rect2(Vector2(78, 244), Reglages.ARENE_TAILLE)
+	for profil in [0, 7, 8]:
+		_salle._contour = FormesSalles.contour(_salle.limites, profil)
+		_salle._construire_murs_perimetre()
+		await physics_frame
+		await physics_frame
+		var tirs: Array[Node] = []
+		for cote in [0.05, 0.5, 0.95]:
+			for taille in [10.0, 38.0]:
+				var tir := Tir.new()
+				tir.vitesse = 1200.0
+				tir.portee = 2600.0
+				tir.rayon = taille
+				tir.longueur = taille * 2.0
+				var origine: Vector2 = _salle.limites.position + Vector2(_salle.limites.size.x * float(cote), 8.0)
+				_salle.tirer(tir, origine, Vector2.DOWN, true)
+		for projectile: Node in get_nodes_in_group("tirs_ennemis"): tirs.append(projectile)
+		_verifier(tirs.size() == 6, "Six tirs de bord materialises dans le profil %d" % profil)
+		for image in 4: await physics_frame
+		for projectile in tirs:
+			_verifier(is_instance_valid(projectile) and not projectile.is_queued_for_deletion(), "Tir de bord survit au depart, profil %d" % profil)
+		for enfant in _salle.get_children(): enfant.queue_free()
+		await process_frame
+	_salle._contour = FormesSalles.contour(_salle.limites, 0)
+	var ruban := Tir.new()
+	ruban.vitesse = 900.0
+	ruban.trajectoire = "sinus"
+	ruban.amplitude = 96.0
+	ruban.frequence = 1.0
+	var bord: Vector2 = Vector2(_salle.limites.end.x - 15.0, _salle.limites.get_center().y)
+	_verifier(not _salle._origine_projectile_hostile(bord, Vector2.DOWN, ruban.rayon, ruban).is_finite(),
+		"Ondulation vers le mur omise avant le depart")
+	_salle.tirer(ruban, bord, Vector2.DOWN, true)
+	_verifier(get_nodes_in_group("tirs_ennemis").is_empty(), "Aucun projectile voue a casser des sa premiere ondulation")
+
+func _verifier_boss() -> void:
+	_salle._contour = FormesSalles.contour(_salle.limites, 7)
+	_salle._construire_murs_perimetre()
+	var boss: CharacterBody2D = load("res://scenes/boss.tscn").instantiate()
+	boss.configurer(_profil("copiste_aveugle", 17))
+	boss.limites = _salle.limites
+	boss.position = _salle.limites.position + Vector2(_salle.limites.size.x * .5, 240)
+	_cible.position = _salle.limites.get_center()
+	_salle.add_child(boss)
+	boss.set_physics_process(false)
+	boss._cible = _cible
+	var tirs_emis: Array[Dictionary] = []
+	boss.tir_demande.connect(func(tir: Tir, origine: Vector2, direction: Vector2) -> void:
+		tirs_emis.append({"tir": tir, "origine": origine, "direction": direction}))
+	for motif: String in ["griffure", "frontieres_encre", "remparts_terre", "marees_eau", "quadrillage", "machoire", "pluie", "onde_marge"]:
+		boss._motif = motif
+		boss._minuterie = 3.0
+		boss._cadence_motif = 0.0
+		boss._telegraphe_signature = 0.0
+		boss._tirs_annonces.annuler()
+		tirs_emis.clear()
+		boss._executer_motif(motif, .016)
+		var tirs_du_motif: Array = tirs_emis + boss._tirs_annonces.attentes
+		_verifier(not tirs_du_motif.is_empty(), "Motif de boss actif : " + motif)
+		for attente: Dictionary in tirs_du_motif:
+			var tir: Tir = attente["tir"]
+			var origine: Vector2 = attente["origine"]
+			var rayon := maxf(tir.rayon, tir.longueur * .5)
+			_verifier(FormesSalles.contient_disque(origine, _salle._contour, rayon), "Annonce du boss hors des murs : " + motif)
+			_verifier(origine.is_equal_approx(_salle._origine_projectile_hostile(origine, attente["direction"], rayon)), "Annonce et depart concordent : " + motif)
+	var mondes: RefCounted = boss._motifs_mondes
+	boss._motif = "lames_ondulees"
+	boss._cadence_motif = 0.0
+	boss._minuterie = 3.0
+	mondes.reinitialiser()
+	mondes.avancer(boss, boss._motif, .016)
+	var origine := boss.position
+	mondes.avancer(boss, boss._motif, .2)
+	_verifier(boss.position.is_equal_approx(origine), "Origine du boss figee pendant l'annonce du monde")
+	boss.free()
+	await process_frame
+
+func _verifier_annonces_boss() -> void:
+	for cas: Array in [["copiste_aveugle", 0, true], ["copiste_aveugle", 17, true], ["la_rature", 0, false], ["l_errata", 34, true], ["gardien_runes", 34, false]]:
+		var boss: CharacterBody2D = load("res://scenes/boss.tscn").instantiate()
+		boss.configurer(_profil(str(cas[0]), int(cas[1])))
+		boss.limites = _salle.limites
+		boss.position = _salle.limites.get_center() - Vector2(0, 400)
+		_cible.position = _salle.limites.get_center() + Vector2(0, 400)
+		_salle.add_child(boss)
+		boss.set_physics_process(false)
+		boss._cible = _cible
+		boss._apparition = 1.0
+		boss._minuterie = 3.0
+		var tirs: Array[Dictionary] = []
+		boss.tir_demande.connect(func(tir: Tir, origine: Vector2, direction: Vector2) -> void:
+			tirs.append({"tir": tir, "origine": origine, "direction": direction}))
+		var annonce_attendue := bool(cas[2])
+		var contexte := "%s niveau %d" % [str(cas[0]), int(cas[1]) + 1]
+		boss._lancer(boss.global_position, Vector2.DOWN, 1.0)
+		_verifier((not boss._tirs_annonces.attentes.is_empty()) == annonce_attendue, "Boss annonce selon vitesse apres plafonds : " + contexte)
+		_verifier(tirs.is_empty() == annonce_attendue, "Boss lent tire sans attendre : " + contexte)
+		if annonce_attendue:
+			_cible.position.x += 150.0
+			boss._physics_process(BestiaireMondes.BOSS_ANNONCE_TIR)
+			_verifier(tirs.size() == 1 and boss._tirs_annonces.attentes.is_empty(), "Boss libere le tir apres l'annonce")
+			if not tirs.is_empty():
+				_verifier((tirs[0]["direction"] as Vector2).is_equal_approx(Vector2.DOWN), "Direction du boss verrouillee pendant l'annonce")
+		tirs.clear()
+		boss._minuterie = .1
+		boss._lancer(boss.global_position, Vector2.DOWN, 1.0)
+		_verifier(tirs.is_empty() == annonce_attendue and boss._tirs_annonces.attentes.is_empty(), "Fin de motif ne supprime que les annonces inachevables : " + contexte)
+		tirs.clear()
+		boss._minuterie = 3.0
+		boss._lancer(_cible.global_position - Vector2(0, 60), Vector2.DOWN, 1.0)
+		_verifier(tirs.is_empty() and boss._tirs_annonces.attentes.size() == 1, "Tir de bord proche garde un avertissement : " + contexte)
+		boss._tirs_annonces.annuler()
+		boss._motif = "lames_ondulees"
+		boss._cadence_motif = 0.0
+		var mondes: RefCounted = boss._motifs_mondes
+		mondes.reinitialiser()
+		mondes.avancer(boss, boss._motif, .016)
+		_verifier((float(mondes.annonce) > 0.0) == annonce_attendue, "Motif de monde suit la meme regle : " + contexte)
+		_verifier(tirs.is_empty() == annonce_attendue, "Salve de monde lente part immediatement : " + contexte)
+		if annonce_attendue:
+			var origine := boss.global_position
+			var visee: Vector2 = mondes.cible
+			_cible.position.x += 100.0
+			mondes.avancer(boss, boss._motif, BestiaireMondes.BOSS_ANNONCE_TIR)
+			_verifier(tirs.size() == mondes.angles.size() and boss.global_position.is_equal_approx(origine), "Salve de monde rapide conserve son origine")
+			if not tirs.is_empty():
+				_verifier((tirs[0]["direction"] as Vector2).is_equal_approx(origine.direction_to(visee).rotated(mondes.angles[0])), "Salve de monde conserve sa visee")
+		boss._motif = "encrage_cible"
+		boss._cadence_motif = 0.0
+		mondes.reinitialiser()
+		mondes.avancer(boss, boss._motif, .016)
+		_verifier(float(mondes.annonce) > 0.0, "Impact de zone annonce meme pour un boss aux projectiles lents")
+		boss.free()
+	await process_frame

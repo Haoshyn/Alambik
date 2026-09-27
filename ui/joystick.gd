@@ -5,12 +5,7 @@ extends Control
 # regarder ses doigts.
 
 signal intention_changee(direction: Vector2, intensite: float)
-# Une tape courte peut venir d'un autre doigt pendant le deplacement. Le combat
-# decide de son effet : l'ecran de reglages choisit le mode, pas le joystick.
-signal tape_rapide(nombre: int)
-
 var _logique := JoystickLogique.new()
-var _raccourcis := {}
 var _doigt := -1
 
 func _ready() -> void:
@@ -25,50 +20,27 @@ func _zone_valide(position: Vector2) -> bool:
 func annuler() -> void:
 	_doigt = -1
 	_logique.relacher()
-	for valeur in _raccourcis.values():
-		var raccourci: RaccourciTactile = valeur
-		raccourci.annuler()
-	_raccourcis.clear()
 	intention_changee.emit(Vector2.ZERO, 0.0)
 	queue_redraw()
-
-func consommer_raccourci() -> void:
-	for valeur in _raccourcis.values():
-		var raccourci: RaccourciTactile = valeur
-		raccourci.consommer()
 
 func _notification(quoi: int) -> void:
 	if quoi in [NOTIFICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT]:
 		annuler()
 
-func _temps() -> float:
-	return float(Time.get_ticks_msec()) / 1000.0
-
 func _input(evenement: InputEvent) -> void:
-	var tapes := 0
 	var mouvement_change := false
 	if evenement is InputEventScreenTouch:
 		if evenement.pressed:
-			var raccourci_nouveau := RaccourciTactile.new()
-			_raccourcis[evenement.index] = raccourci_nouveau
-			raccourci_nouveau.appuyer(evenement.position, _temps())
 			if _doigt == -1 and _zone_valide(evenement.position):
 				_doigt = evenement.index
 				_logique.appuyer(evenement.position)
 				mouvement_change = true
 		else:
-			var raccourci_relache: RaccourciTactile = _raccourcis.get(evenement.index)
-			if raccourci_relache != null:
-				tapes = raccourci_relache.relacher(_temps())
-				_raccourcis.erase(evenement.index)
 			if evenement.index == _doigt:
 				_doigt = -1
 				_logique.relacher()
 				mouvement_change = true
 	elif evenement is InputEventScreenDrag:
-		var raccourci_deplace: RaccourciTactile = _raccourcis.get(evenement.index)
-		if raccourci_deplace != null:
-			raccourci_deplace.deplacer(evenement.position)
 		if evenement.index == _doigt:
 			_logique.deplacer(evenement.position)
 			mouvement_change = true
@@ -76,8 +48,6 @@ func _input(evenement: InputEvent) -> void:
 		return
 	if mouvement_change:
 		intention_changee.emit(_logique.direction(), _logique.intensite())
-	if tapes > 0:
-		tape_rapide.emit(tapes)
 	queue_redraw()
 
 func _draw() -> void:

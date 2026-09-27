@@ -1,50 +1,59 @@
-# Index de travail
+# Index du projet
 
-Chemins relatifs à la racine. Choisir une ligne, puis chercher le symbole utile ;
-il n'est pas nécessaire de lire tous les fichiers d'une ligne.
+Carte de routage pour les agents : choisir la ligne correspondant au travail,
+puis chercher le symbole dans les fichiers indiqués. Les index de domaine
+précisent les dépendances utiles ; leur lecture complète n'est pas nécessaire.
 
-| Besoin | Point d'entrée | Dépendances utiles |
+## Références
+
+- [Statistiques jeu](../statistiques_jeu/INDEX.md) : toutes les listes chiffrées, une catégorie par fichier.
+- [État actuel](CURRENT.md) : ce qui est implémenté et vérifié.
+- [Périmètre du jeu](design/GAME_DESIGN.md) et [direction artistique](design/DIRECTION_ARTISTIQUE.md).
+
+## Pour modifier le jeu
+
+| Besoin | Source des valeurs | Logique ou écran |
 |---|---|---|
-| Boucle, salles, transitions et récompenses | `scripts/run.gd`, `scripts/bilan_run.gd` | `autoload/jeu.gd`, `data/butins_run.gd`, `data/recompenses.gd` |
-| XP au sol et ramassage en Mine | `scripts/collecte_experience.gd`, `scripts/salle.gd` | `scripts/presentation/experience_sol.gd`, `data/reglages.gd` |
-| Campagne, rencontres et difficulté | `data/chapitres.gd`, `data/vagues.gd` | `data/catalogue_ennemis.gd`, `data/bestiaire_mondes.gd`, `data/progression_statistiques.gd`, `data/profils_progression.gd`, `data/evolution_ennemis.gd` |
-| Épreuves et butins de sorts | `data/epreuves.gd`, `data/sorts.gd` | `ui/selection_grimoire.gd`, `ui/apercu_butin.gd` |
-| Sorts et leurs animations | `scripts/bonus_sorts.gd`, `data/animations_sorts.gd` | `scripts/presentation/animation_sorts.gd`, `scripts/effets.gd`, `scripts/presentation/effets_3d.gd` |
-| Augments et phénomènes de combat | `data/catalogue_reactifs.gd`, `scripts/mods.gd` | `scripts/draft_logique.gd`, `scripts/reactif.gd`, `scripts/details_reactif.gd`, `data/progression_augments.gd` |
-| Héros, déplacement et dégâts reçus | `scripts/heros.gd`, `scripts/stats.gd` | `data/reglages.gd`, `scripts/joystick_logique.gd`, `ui/joystick.gd` |
-| Premiers pas et apprentissage | `scripts/apprentissage.gd`, `ui/conseils_debut.gd` | `scripts/run.gd`, `scripts/heros.gd`, `data/reglages.gd` |
-| Ennemis et boss | `scripts/ennemi.gd`, `scripts/boss.gd` | `scripts/cerveaux.gd`, `scripts/capacites_ennemis.gd`, `scripts/motifs_boss_mondes.gd`, `scripts/zone_hostile.gd`, `scripts/salle.gd` |
-| Tirs, ciblage et impacts | `scripts/tir.gd`, `scripts/projectile.gd`, `scripts/ciblage.gd` | `scripts/priorite_projectile.gd`, `data/catalogue_projectiles.gd` |
-| Formes, obstacles et terrains | `scripts/salle.gd`, `scripts/geometrie.gd` | `data/formes_salles.gd`, `data/terrains_mondes.gd`, `scripts/terrain_elementaire.gd` |
-| Onglet Héros, classe et points de statistiques | `ui/heros.gd`, `data/personnage.gd` | `autoload/reglages_joueur.gd`, `scripts/menu.gd` |
-| Statistiques, spécialisations, équipement et forge | `data/personnage.gd`, `data/catalogue_objets.gd` | `data/catalogue_familiers.gd`, `data/catalogue_projectiles.gd`, `ui/equipement.gd` |
-| Listes lisibles des capacités, maîtrises, items et augments | `statistiques_jeu/` | `data/sorts.gd`, `data/arbre_competences.gd`, catalogues de `data/` |
-| Maîtrises, sauvegarde et migrations | `autoload/reglages_joueur.gd`, `data/arbre_competences.gd` | `ui/arbre_competences.gd`, `autoload/jeu.gd` |
-| Accueil et navigation | `scripts/menu.gd`, `ui/accueil_clairiere.tscn`, `ui/accueil_3d.gd` | `ui/composants/`, `ui/onglet_menu.gd`, `ui/selection_grimoire.gd` |
-| Écran ou panneau particulier | chercher son nom dans `ui/` avec `rg --files ui` | `ui/hud.gd`, `ui/draft.gd`, `ui/pause.gd`, `ui/sorts.gd`, `ui/fin_de_run.gd` |
-| Style commun de l'interface | `scripts/presentation/style_azur.gd`, `scripts/style_interface.gd` | `scripts/palette.gd`, `scripts/polices.gd`, `assets/visual/interface/ORIGINE.md` |
-| Rendu 3D et décor | `scripts/presentation/monde_3d.gd`, `data/visuels_3d.gd` | `scripts/presentation/arene_3d.gd`, `scripts/presentation/proxy_3d.gd`, `data/decors_mondes.gd` |
-| Héros 3D, matières, animations et armes | `scripts/presentation/materiaux_apprenti.gd`, `scripts/presentation/animation_heros_3d.gd` | `scripts/presentation/suivi_visuel_2d.gd`, `scripts/presentation/arme_tenue_3d.gd` |
-| Animation des monstres et percussions | `scripts/presentation/animation_ennemis_3d.gd`, `scripts/presentation/animation_impacts.gd` | `data/animations_combat.gd`, `scripts/presentation/proxy_3d.gd`, `scripts/effets.gd` |
-| Effets et shaders | `scripts/presentation/effets_3d.gd`, `scripts/presentation/phenomenes_3d.gd` | `scripts/presentation/projectile_3d.gd`, `scripts/presentation/portail_3d.gd`, `shaders/` |
-| Présentation 2D de secours | `scripts/dessin.gd`, `scripts/retro16.gd` | `scripts/fond.gd`, `scripts/fond_adaptatif.gd`, `scripts/cadre_retro.gd` |
-| Transitions et raccourcis tactiles | `scripts/voile_transition.gd`, `scripts/raccourci_tactile.gd` | `ui/transition_grimoire.gd`, `scripts/presentation/passage_manga.gd` |
-| Audio, vibrations et choix de musique | `autoload/sons.gd`, `data/effets_sonores.gd`, `data/musiques.gd` | `scripts/audio/synthese_effets.gd`, `ui/reglages.gd`, `assets/audio/COMPOSITIONS.md` |
-| Génération de modèles, images ou audio | `tools/AGENTS.md` | ouvrir seulement le générateur indiqué et ses dépendances |
-| Mobile et zones sûres | `autoload/ecran.gd` | `docs/ops/MOBILE.md` |
-| Export ou installation Android demandés | `tools/android_mises_a_jour.py` | `docs/ops/MISES_A_JOUR_ANDROID.md`, `export_presets.cfg` |
-| Capture ou mode automatique demandé | `scripts/capture.gd`, `sondes/bot.gd` | `sondes/navigation_bot.gd` |
-| Périmètre, état ou direction artistique | `docs/design/GAME_DESIGN.md`, `docs/CURRENT.md` | `docs/design/DIRECTION_ARTISTIQUE.md` pour le visuel |
+| Courbes des ennemis et difficulté | `data/reglages.gd`, `data/progression/progression_statistiques.gd` | `data/mondes/chapitres.gd`, `scripts/monde/salle.gd` |
+| Augments de run | `data/augments/` | `scripts/augments/`, `ui/draft.gd`, `ui/carte_reactif.gd` |
+| Passifs et Épreuves | `data/progression/passifs.gd`, `data/mondes/epreuves.gd` | `ui/passifs.gd`, `scripts/combat/heros.gd` |
+| Armes, familiers, bijoux et forge | `data/equipement/` | `ui/equipement.gd`, `autoload/reglages_joueur.gd` |
+| Maîtrises et attributs | `data/progression/arbre_competences.gd`, `personnage.gd` | `scripts/combat/stats.gd`, `ui/heros.gd`, `ui/arbre_competences.gd` |
+| Dégâts, tirs, acteurs | [index des scripts](../scripts/INDEX.md) | `scripts/combat/` |
+| Salles, obstacles, terrains, XP au sol | `data/mondes/` | `scripts/monde/` |
+| Butin et bilan | `data/progression/butins_run.gd`, `recompenses.gd` | `scripts/progression/bilan_run.gd`, `ui/fin_de_run.gd` |
+| Cœurs de soin déposés par les ennemis | `data/progression/soins_run.gd` | `scripts/monde/collecte_soins.gd`, `scripts/presentation/coeurs_sol.gd` |
+| Sauvegarde et migrations | `data/progression/migration_passifs.gd` | `autoload/reglages_joueur.gd` |
+| Navigation et interface | [index UI](../ui/INDEX.md) | `scripts/menu.gd`, `ui/composants/` |
+| Rendu, animations, matières | `data/presentation/` | `scripts/presentation/`, `shaders/` |
+| Audio | `data/audio/` | `autoload/sons.gd`, `scripts/audio/` |
+| Vérifications, statistiques, ressources | [index des outils](../tools/INDEX.md) | `tools/verifier.ps1` |
+| Synthèse, pourcentages par source et listes Markdown | [circuit des statistiques](../tools/statistiques/INDEX.md) | `synthese.gd`, `attribution.gd`, `listes.gd` dans `tools/statistiques/` |
+| Android demandé | [mise à jour Android](ops/MISES_A_JOUR_ANDROID.md) | `tools/android_mises_a_jour.py` |
+| Zones sûres et mobile | [guide mobile](ops/MOBILE.md) | `autoload/ecran.gd` |
 
-## Archives et diagnostics sur demande
+Les index [data](../data/INDEX.md), [scripts](../scripts/INDEX.md),
+[ui](../ui/INDEX.md) et [tools](../tools/INDEX.md) précisent les points d'entrée.
+La racine des scripts ne garde que les orchestrateurs et l'entrée de capture.
+Les valeurs sont définies une fois dans `data/` ; les listes sont générées.
 
-`../OldAlambik/2026-09-20/organisation/` conserve `human/`, tests, diagnostics,
-anciens composants et documents remplacés, avec inventaire et copies avant modification.
-Le nettoyage précédent est dans `../OldAlambik/2026-09-20/retires/`.
+## Archives
 
-Les tests et sondes archivés ne s'exécutent pas directement depuis OldAlambik :
-leurs chemins `res://` nécessitent une restauration dans Alambik. Pour une
-vérification demandée, consulter le `LIRE_MOI.md` de l'archive et restaurer le
-périmètre nécessaire avec ses dépendances, sans écraser le travail actuel.
-Leur archivage ne signifie pas qu'ils sont tous obsolètes ; leur exécution reste
-sur demande selon `AGENTS.md`.
+La refonte du 26–27 septembre 2026 est sauvegardée dans
+`../Alambik_sauvegardes/refonte_2026-09-26_233554/`.
+
+- `avant_refonte/` : copie des sources et ressources, y compris les changements non commis.
+- `retires/` : anciens systèmes, propositions, versions, APK, captures et sorties temporaires.
+- `etat_git_avant.txt` et `deplacements_internes.json` : état initial et nouveaux chemins.
+- `inventaire_retires_complet.json` : tous les fichiers archivés ; `inventaire_nettoyage.json` détaille la première passe.
+- `LIRE_MOI.md` : contenu de la sauvegarde et précautions de restauration.
+
+Ne pas restaurer en bloc par-dessus le jeu courant. Choisir les fichiers utiles
+et comparer avant restauration. Les caches Godot et dépendances exécutables
+encore utilisées restent dans les répertoires de travail ignorés par Git.
+
+Les six anciennes listes `.txt`, remplacées par le Markdown, sont dans
+`../Alambik_sauvegardes/statistiques_avant_markdown_2026-09-27/`, avec inventaire.
+
+Le tutoriel retiré est conservé dans
+`../Alambik_sauvegardes/tutoriel_retiré_2026-09-27/`, avec `INVENTAIRE.md`.

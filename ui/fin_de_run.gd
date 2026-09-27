@@ -56,15 +56,12 @@ func afficher(victoire: bool, salle_atteinte: int) -> void:
 	if not objet.is_empty():
 		var donnees_objet: Dictionary = CatalogueObjets.OBJETS[objet]
 		_ajouter_gain(StyleAzur.image(StyleAzur.icone_objet(objet), 76), str(donnees_objet["nom"]), "Équipement obtenu")
-	var sort_ := str(gains["sort"])
-	for cadeau in gains["cadeaux"]:
-		var id_cadeau := str(cadeau)
-		_ajouter_gain(StyleAzur.vignette(id_cadeau, 76), str(Sorts.donnees(id_cadeau)["nom"]), "Cadeau de campagne")
-	if not sort_.is_empty():
-		_ajouter_gain(StyleAzur.vignette(sort_, 76), str(Sorts.donnees(sort_)["nom"]), "Sort obtenu · Rang %d" % ReglagesJoueur.rang_sort(sort_))
+	var passif := str(gains["passif"])
+	if not passif.is_empty():
+		_ajouter_gain(StyleAzur.vignette(passif, 76), str(Passifs.donnees(passif)["nom"]), "Passif obtenu · Rang %d / %d" % [ReglagesJoueur.rang_passif(passif), Passifs.RANG_MAX])
 	if bool(gains.get("coeur_mana", false)):
 		_ajouter_gain(StyleAzur.illustration("astrolabe", 76), "Cœur de mana obtenu",
-			"+10 % de dégâts finaux · %d / %d" % [ReglagesJoueur.nombre_coeurs_mana(), Epreuves.nombre()])
+			"+%d %% de dégâts finaux · %d / %d" % [roundi(Reglages.COEUR_MANA_BONUS_FINAL * 100.0), ReglagesJoueur.nombre_coeurs_mana(), Epreuves.nombre()])
 	if _recompenses.get_child_count() == 0:
 		_recompenses.add_child(StyleAzur.texte("Le coffre est vide.\nTerminez une salle pour commencer à le remplir.", 30, StyleAzur.ENCRE))
 	_afficher_ameliorations_disponibles()

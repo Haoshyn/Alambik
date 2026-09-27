@@ -14,7 +14,7 @@ var _derniere_animation := ""
 var _orientation := Vector2.DOWN
 var _arme_tenue: Node3D
 var _animation_ennemi: Node3D
-const RenduCombat = preload("res://data/animations_combat.gd")
+const RenduCombat = preload("res://data/presentation/animations_combat.gd")
 
 func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 	logique = cible
@@ -55,15 +55,13 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 				animation_heros.toucher())
 		logique.connect("morte", func(): _mort = true)
 	elif genre == "ennemi":
+		if str(logique.donnees["cerveau"]) != "boss":
+			logique.attaque_contact.connect(_projeter_ennemi)
 		logique.connect("tir_demande", func(_tir, _origine, _direction): _projeter_ennemi())
 		logique.connect("zone_demandee", func(_point, _origine, profil: Dictionary, _degats):
 			if bool(profil.get("lob", false)): _projeter_ennemi())
 		logique.connect("invocation_demandee", func(_id, _position): _projeter_ennemi())
 		logique.connect("touche", func(_position, _couleur): _animation_ennemi.toucher())
-	elif genre == "gardien":
-		logique.connect("attaque_portee", func(origine: Vector2, cible_attaque: Vector2):
-			_orientation = origine.direction_to(cible_attaque)
-			_temps_attaque = 0.22)
 	logique.set_meta("visuel_3d", true)
 	logique.queue_redraw()
 	mettre_a_jour(0.0)
@@ -117,14 +115,14 @@ func mettre_a_jour(delta: float) -> void:
 		var donnees: Dictionary = logique.get("donnees")
 		var boss := str(donnees["cerveau"]) == "boss"
 		var etat := str(logique.get("_motif" if boss else "_etat"))
-		if etat in ["preparer", "charger", "charge"]:
+		if etat in ["preparer", "charger", "charge", "frappe"]:
 			direction = logique.get("_direction_charge")
-		elif not boss and etat in ["vise", "vise_orbite", "tisser", "crache", "bombarde", "phase"]:
+		elif boss and etat == "assaut_contact" and str(logique._contact.etat) in ["annonce", "frappe"]:
+			direction = logique._contact.direction
+		elif not boss and etat in ["vise", "vise_orbite", "tisser", "crache", "bombarde", "phase", "vise_phase"]:
 			direction = logique.global_position.direction_to(logique.get("_point_vise"))
 		elif boss and float(logique._motifs_mondes.annonce) > 0.0:
 			direction = logique.global_position.direction_to(logique._motifs_mondes.cible)
-	elif genre == "gardien" and _temps_attaque > 0.0:
-		direction = _orientation
 	elif genre == "projectile":
 		direction = logique.get("direction")
 	# Les GLB regardent +Z (Blender -Y). La rotation ne touche que le modele.

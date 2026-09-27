@@ -31,17 +31,12 @@ var piste_menu := "accueil"
 var secousses_ecran := true
 var effets_reduits := false
 var vibrations := true
-# Comment le Sort actif part : visee manuelle apres l'icone, cible proche apres
-# l'icone, ou tape courte sur l'ecran vers la cible proche.
-var raccourci_sort := RaccourciTactile.MODE_DEFAUT
-var sort_actif_equipe := ""
-var ultime_equipe := ""
 var passifs_equipes: Array[String] = []
-var rangs_sorts := {}
+var rangs_passifs := {}
 var objets: Array[String] = []
 var dernier_objet_obtenu := ""
 var grands_coffres_sans_objet := {}
-var epreuves_sans_sort := {}
+var epreuves_sans_passif := {}
 var epreuves_sans_coeur := {}
 var coeurs_mana := {}
 var equipements := {"anneau": "", "bracelet": "", "collier": ""}
@@ -100,24 +95,7 @@ func charger() -> void:
 	secousses_ecran = bool(config.get_value("accessibilite", "secousses", true))
 	effets_reduits = bool(config.get_value("accessibilite", "effets_reduits", false))
 	vibrations = bool(config.get_value("accessibilite", "vibrations", true))
-	raccourci_sort = RaccourciTactile.mode_valide(str(config.get_value("commandes", "raccourci_sort",
-		RaccourciTactile.MODE_DEFAUT)))
-	sort_actif_equipe = str(config.get_value("sorts", "actif", ""))
-	ultime_equipe = str(config.get_value("sorts", "ultime", ""))
-	passifs_equipes.clear()
-	for id in config.get_value("sorts", "passifs", []):
-		var passif := str(id)
-		if Sorts.PASSIFS.has(passif) and passifs_equipes.size() < nombre_slots_passifs():
-			passifs_equipes.append(passif)
-	var anciens_sorts_debloques: Array[String] = []
-	for id in config.get_value("sorts", "debloques", []):
-		var sort_id := str(id)
-		if Sorts.contient(sort_id):
-			anciens_sorts_debloques.append(sort_id)
-	rangs_sorts = config.get_value("sorts", "rangs", {})
-	# Migration : un sort utilisable dans une ancienne sauvegarde devient rang 1.
-	for id in anciens_sorts_debloques:
-		rangs_sorts[id] = maxi(1, int(rangs_sorts.get(id, 0)))
+	var migration_passifs := _charger_passifs(config)
 	objets.clear()
 	for id in config.get_value("stuff", "objets", []):
 		var objet := str(id)
@@ -125,7 +103,7 @@ func charger() -> void:
 			objets.append(objet)
 	dernier_objet_obtenu = str(config.get_value("stuff", "dernier", ""))
 	grands_coffres_sans_objet = config.get_value("stuff", "pities", {})
-	epreuves_sans_sort = config.get_value("epreuves", "pities", {})
+	epreuves_sans_passif = config.get_value("epreuves", "pities", {})
 	epreuves_sans_coeur = config.get_value("epreuves", "pities_coeur", {})
 	coeurs_mana = config.get_value("epreuves", "coeurs_mana", {})
 	equipements = config.get_value("stuff", "equipements", equipements)
@@ -144,15 +122,45 @@ func charger() -> void:
 	niveau_mine_choisi = clampi(int(config.get_value("mine", "choisi", maxi(1, niveau_mine_debloque()))),
 		1, maxi(1, niveau_mine_debloque()))
 	mode_run_choisi = str(config.get_value("options", "mode_run", "grimoire"))
+	if mode_run_choisi == "epreuve_sorts": mode_run_choisi = "epreuves"
 	# Les anciens modes retires reviennent en campagne.
-	if mode_run_choisi not in ["grimoire", "epreuve_sorts", "mine"] \
+	if mode_run_choisi not in ["grimoire", "epreuves", "mine"] \
 			or not mode_debloque(mode_run_choisi):
 		mode_run_choisi = "grimoire"
 	_valider_chapitre_choisi()
-	# Les anciennes sauvegardes qui avaient deja passe les premiers chapitres
-	# recoivent les deux cadeaux de campagne sans devoir les rejouer.
-	if _synchroniser_recompenses_campagne():
+	if migration_passifs:
 		sauvegarder()
+
+func _charger_passifs(config: ConfigFile) -> bool:
+	var migration := int(config.get_value("passifs", "version", 0)) < MigrationPassifs.VERSION
+	var selection: Array = config.get_value("passifs", "equipes", [])
+	var rangs: Dictionary = config.get_value("passifs", "rangs", {})
+	if migration:
+		var anciens: Dictionary = config.get_value("sorts", "rangs", {})
+		for valeur in config.get_value("sorts", "debloques", []):
+			var id := str(valeur)
+			anciens[id] = maxi(1, int(anciens.get(id, 0)))
+		var anciens_equipes: Array = config.get_value("sorts", "passifs", [])
+		for cle in ["actif", "ultime"]:
+			var id := str(config.get_value("sorts", cle, ""))
+			if not id.is_empty():
+				anciens[id] = maxi(1, int(anciens.get(id, 0)))
+				anciens_equipes.append(id)
+		var conversion := MigrationPassifs.convertir(anciens, anciens_equipes)
+		rangs = conversion["rangs"]
+		selection = conversion["equipes"]
+		gouttes += int(conversion["gouttes"])
+	rangs_passifs.clear()
+	for id: String in rangs:
+		if Passifs.contient(id):
+			rangs_passifs[id] = clampi(int(rangs[id]), 0, Passifs.RANG_MAX)
+	passifs_equipes.clear()
+	for valeur in selection:
+		var id := str(valeur)
+		if Passifs.contient(id) and int(rangs_passifs.get(id, 0)) > 0 \
+				and id not in passifs_equipes and passifs_equipes.size() < Passifs.EMPLACEMENTS:
+			passifs_equipes.append(id)
+	return migration
 
 func sauvegarder() -> void:
 	if not sauvegarde_active:
@@ -181,15 +189,13 @@ func sauvegarder() -> void:
 	config.set_value("accessibilite", "secousses", secousses_ecran)
 	config.set_value("accessibilite", "effets_reduits", effets_reduits)
 	config.set_value("accessibilite", "vibrations", vibrations)
-	config.set_value("commandes", "raccourci_sort", raccourci_sort)
-	config.set_value("sorts", "actif", sort_actif_equipe)
-	config.set_value("sorts", "ultime", ultime_equipe)
-	config.set_value("sorts", "passifs", passifs_equipes)
-	config.set_value("sorts", "rangs", rangs_sorts)
+	config.set_value("passifs", "version", MigrationPassifs.VERSION)
+	config.set_value("passifs", "equipes", passifs_equipes)
+	config.set_value("passifs", "rangs", rangs_passifs)
 	config.set_value("stuff", "objets", objets)
 	config.set_value("stuff", "dernier", dernier_objet_obtenu)
 	config.set_value("stuff", "pities", grands_coffres_sans_objet)
-	config.set_value("epreuves", "pities", epreuves_sans_sort)
+	config.set_value("epreuves", "pities", epreuves_sans_passif)
 	config.set_value("epreuves", "pities_coeur", epreuves_sans_coeur)
 	config.set_value("epreuves", "coeurs_mana", coeurs_mana)
 	config.set_value("stuff", "equipements", equipements)
@@ -408,10 +414,10 @@ func enregistrer_grand_coffre(chapitre: int, objet_obtenu: bool) -> void:
 	sauvegarder()
 
 func epreuves_ratees(niveau: int) -> int:
-	return maxi(0,int(epreuves_sans_sort.get(str(niveau),0)))
+	return maxi(0,int(epreuves_sans_passif.get(str(niveau),0)))
 
-func enregistrer_coffre_epreuve(niveau: int, sort_obtenu: bool) -> void:
-	epreuves_sans_sort[str(niveau)] = 0 if sort_obtenu else mini(Reglages.EPREUVE_GARANTIE_CAPACITE-1,epreuves_ratees(niveau)+1)
+func enregistrer_coffre_epreuve(niveau: int, passif_obtenu: bool) -> void:
+	epreuves_sans_passif[str(niveau)] = 0 if passif_obtenu else mini(Reglages.EPREUVE_GARANTIE_CAPACITE-1,epreuves_ratees(niveau)+1)
 	sauvegarder()
 
 func coeur_mana_obtenu(niveau: int) -> bool:
@@ -421,6 +427,7 @@ func epreuves_sans_coeur_mana(niveau: int) -> int:
 	return maxi(0, int(epreuves_sans_coeur.get(str(niveau), 0)))
 
 func enregistrer_coeur_mana(niveau: int, obtenu: bool) -> void:
+	if niveau < 1 or niveau > Epreuves.nombre(): return
 	var cle := str(niveau)
 	if coeur_mana_obtenu(niveau):
 		return
@@ -434,9 +441,8 @@ func enregistrer_coeur_mana(niveau: int, obtenu: bool) -> void:
 
 func nombre_coeurs_mana() -> int:
 	var total := 0
-	for niveau in coeurs_mana:
-		if bool(coeurs_mana[niveau]):
-			total += 1
+	for niveau in range(1, Epreuves.nombre() + 1):
+		if coeur_mana_obtenu(niveau): total += 1
 	return total
 
 func multiplicateur_coeurs_mana() -> float:
@@ -465,14 +471,6 @@ func definir_piste_menu(id: String) -> void:
 	sauvegarder()
 	reglages_changes.emit()
 
-func definir_raccourci_sort(mode: String) -> void:
-	var demande := RaccourciTactile.mode_valide(mode)
-	if demande == raccourci_sort:
-		return
-	raccourci_sort = demande
-	sauvegarder()
-	reglages_changes.emit()
-
 func definir_accessibilite(secousses: bool, reduire_effets: bool) -> void:
 	secousses_ecran = secousses
 	effets_reduits = reduire_effets
@@ -486,22 +484,18 @@ func definir_vibrations(actives: bool) -> void:
 	sauvegarder()
 	reglages_changes.emit()
 
-func ajouter_gouttes(nombre: int) -> void:
+func ajouter_gouttes(nombre: int, bonus_fixe := 0) -> void:
 	if mode_dev:
 		return
-	if nombre <= 0:
+	if nombre <= 0 and bonus_fixe <= 0:
 		return
-	gouttes += gain_gouttes(nombre)
+	# Les coeurs inutilises donnent un petit montant fixe, hors multiplicateurs.
+	gouttes += gain_gouttes(nombre) + maxi(0, bonus_fixe)
 	sauvegarder()
 	maitrise_changee.emit()
 
 func experience_compte_requise() -> int:
-	if niveau_compte >= Personnage.NIVEAU_MAX:
-		return 0
-	var profondeur := maxi(0, niveau_compte - 1)
-	return maxi(1, roundi(Reglages.XP_COMPTE_BASE \
-		+ float(profondeur) * Reglages.XP_COMPTE_PENTE \
-		+ float(profondeur * profondeur) * Reglages.XP_COMPTE_QUADRATIQUE))
+	return Reglages.experience_compte_requise(niveau_compte)
 
 func ajouter_experience_compte(nombre: int) -> void:
 	if nombre <= 0 or niveau_compte >= Personnage.NIVEAU_MAX:
@@ -625,8 +619,8 @@ func bonus_objets_effectifs() -> Dictionary:
 func passifs_equipes_effectifs() -> Dictionary:
 	var resultat := {}
 	for id in passifs_equipes:
-		if Sorts.PASSIFS.has(id) and sort_debloque(id):
-			resultat[id] = rang_sort(id)
+		if Passifs.CATALOGUE.has(id) and passif_debloque(id):
+			resultat[id] = rang_passif(id)
 	return resultat
 
 func effets_objets_effectifs() -> Array[String]:
@@ -652,29 +646,8 @@ func acheter_competence(id: String) -> bool:
 	maitrise_changee.emit()
 	return true
 
-func equiper_sort(id: String, type: String) -> void:
-	if not sort_debloque(id):
-		return
-	if type == "actif" and Sorts.ACTIFS.has(id):
-		sort_actif_equipe = id
-	elif type == "ultime" and Sorts.ULTIMES.has(id):
-		ultime_equipe = id
-	sauvegarder()
-	maitrise_changee.emit()
-
-func retirer_sort(type: String) -> bool:
-	if type == "actif" and not sort_actif_equipe.is_empty():
-		sort_actif_equipe = ""
-	elif type == "ultime" and not ultime_equipe.is_empty():
-		ultime_equipe = ""
-	else:
-		return false
-	sauvegarder()
-	maitrise_changee.emit()
-	return true
-
 func basculer_passif(id: String) -> String:
-	if not Sorts.PASSIFS.has(id) or not sort_debloque(id):
+	if not Passifs.CATALOGUE.has(id) or not passif_debloque(id):
 		return "verrouille"
 	if id in passifs_equipes:
 		passifs_equipes.erase(id)
@@ -689,41 +662,26 @@ func basculer_passif(id: String) -> String:
 	return "equipe"
 
 func nombre_slots_passifs() -> int:
-	return 2 if ArbreCompetences.donne_second_passif(rangs_competences_effectifs()) else 1
+	return Passifs.EMPLACEMENTS
 
-func sort_actif_effectif() -> String:
-	return sort_actif_equipe if sort_debloque(sort_actif_equipe) else ""
+func passif_debloque(id: String) -> bool:
+	return Passifs.contient(id) and (mode_dev or rang_passif(id) > 0)
 
-func ultime_effectif() -> String:
-	return ultime_equipe if sort_debloque(ultime_equipe) else ""
+func nombre_passifs_debloques() -> int:
+	return Passifs.nombre_debloques(rangs_passifs, mode_dev)
 
-func sort_debloque(id: String) -> bool:
-	return Sorts.contient(id) and (mode_dev or rang_sort(id) > 0)
-
-func nombre_capacites_debloquees() -> int:
-	return Sorts.nombre_capacites_debloquees(rangs_sorts, mode_dev)
-
-func multiplicateur_degats_deblocages() -> float:
-	return 1.0
-
-func sort_decouvert(id: String) -> bool:
-	return Sorts.contient(id) and (mode_dev or rang_sort(id) > 0 \
+func passif_decouvert(id: String) -> bool:
+	return Passifs.contient(id) and (mode_dev or rang_passif(id) > 0 \
 		or Epreuves.niveau_pour(id) <= niveau_epreuve_debloque)
 
-func rang_sort(id: String) -> int:
-	return Sorts.rang_max(id) if mode_dev and Sorts.contient(id) \
-		else clampi(int(rangs_sorts.get(id, 0)), 0, Sorts.rang_max(id))
+func rang_passif(id: String) -> int:
+	return Passifs.rang_max(id) if mode_dev and Passifs.contient(id) \
+		else clampi(int(rangs_passifs.get(id, 0)), 0, Passifs.rang_max(id))
 
-func efficacite_sort(id: String) -> float:
-	var rang := rang_sort(id)
-	if Sorts.PASSIFS.has(id):
-		return float(rang)
-	return 0.0 if rang <= 0 else 1.0 + float(rang - 1) * Reglages.CAPACITE_BONUS_PAR_RANG
-
-func debloquer_sort(id: String) -> bool:
-	if not Sorts.contient(id) or not sort_decouvert(id) or rang_sort(id) >= Sorts.rang_max(id):
+func debloquer_passif(id: String) -> bool:
+	if not Passifs.contient(id) or not passif_decouvert(id) or rang_passif(id) >= Passifs.rang_max(id):
 		return false
-	rangs_sorts[id] = rang_sort(id) + 1
+	rangs_passifs[id] = rang_passif(id) + 1
 	sauvegarder()
 	maitrise_changee.emit()
 	return true
@@ -759,7 +717,7 @@ func definir_mode_dev(actif: bool) -> void:
 		_valider_chapitre_choisi()
 		if not mode_debloque(mode_run_choisi):
 			mode_run_choisi = "grimoire"
-		niveau_epreuve_choisi = clampi(niveau_epreuve_choisi, 1, niveau_epreuve_debloque)
+		niveau_epreuve_choisi = clampi(niveau_epreuve_choisi, 1, maxi(1, niveau_epreuve_accessible()))
 	sauvegarder()
 	maitrise_changee.emit()
 	reglages_changes.emit()
@@ -778,14 +736,12 @@ func reinitialiser_progression() -> void:
 	experience_compte = 0
 	attributs = {"force": 0, "vitalite": 0, "agilite": 0, "intelligence": 0, "sagesse": 0}
 	specialisation = ""
-	sort_actif_equipe = ""
-	ultime_equipe = ""
 	passifs_equipes.clear()
-	rangs_sorts.clear()
+	rangs_passifs.clear()
 	objets.clear()
 	dernier_objet_obtenu = ""
 	grands_coffres_sans_objet.clear()
-	epreuves_sans_sort.clear()
+	epreuves_sans_passif.clear()
 	epreuves_sans_coeur.clear()
 	coeurs_mana.clear()
 	equipements = {"anneau": "", "bracelet": "", "collier": ""}
@@ -805,27 +761,10 @@ func enregistrer_resultat(salle: int, victoire: bool, chapitre := 0) -> void:
 	var cle := str(chapitre)
 	if salle > int(meilleures_par_chapitre.get(cle, 0)):
 		meilleures_par_chapitre[cle] = salle
-	var capacite_offerte := _synchroniser_recompenses_campagne()
+	if victoire:
+		# Le menu prepare la suite ; Rejouer garde la destination de la run terminee.
+		chapitre_choisi = clampi(chapitre + 1, 0, Chapitres.nombre() - 1)
 	sauvegarder()
-	if capacite_offerte:
-		maitrise_changee.emit()
-
-func _synchroniser_recompenses_campagne() -> bool:
-	var change := false
-	var niveau := niveau_campagne_atteint()
-	for cle_niveau in Sorts.RECOMPENSES_CAMPAGNE:
-		if niveau < int(cle_niveau):
-			continue
-		var id := Sorts.recompense_campagne(int(cle_niveau))
-		if id.is_empty() or rang_sort(id) > 0:
-			continue
-		rangs_sorts[id] = 1
-		if Sorts.ACTIFS.has(id) and sort_actif_equipe.is_empty():
-			sort_actif_equipe = id
-		elif Sorts.ULTIMES.has(id) and ultime_equipe.is_empty():
-			ultime_equipe = id
-		change = true
-	return change
 
 func enregistrer_resultat_annexe(victoire: bool) -> void:
 	runs += 1
@@ -855,6 +794,11 @@ func palier_atteint() -> int:
 func niveau_mine_debloque() -> int:
 	return clampi(niveau_campagne_atteint() - Reglages.MINE_NIVEAU_DEBLOCAGE + 1, 0, Mine.nombre())
 
+func niveau_epreuve_accessible() -> int:
+	# Conserver le record sauvegarde permet de retrouver les niveaux deja gagnes
+	# lorsque la campagne les rejoint, sans retirer les passifs ni les coeurs.
+	return Epreuves.nombre() if mode_dev else Epreuves.niveau_accessible(niveau_campagne_atteint(), niveau_epreuve_debloque)
+
 func choisir_mine(niveau: int) -> bool:
 	if not mode_debloque("mine") or niveau < 1 or niveau > niveau_mine_debloque():
 		return false
@@ -865,7 +809,7 @@ func choisir_mine(niveau: int) -> bool:
 func mode_debloque(mode: String) -> bool:
 	if mode_dev or mode == "grimoire":
 		return true
-	if mode == "epreuve_sorts":
+	if mode == "epreuves":
 		return niveau_campagne_atteint() >= Reglages.EPREUVE_NIVEAU_DEBLOCAGE
 	if mode == "mine":
 		return niveau_campagne_atteint() >= Reglages.MINE_NIVEAU_DEBLOCAGE
@@ -902,24 +846,15 @@ func choisir_chapitre(chapitre: int) -> void:
 	sauvegarder()
 
 func choisir_mode_run(mode: String) -> void:
-	if mode not in ["grimoire", "epreuve_sorts", "mine"] or not mode_debloque(mode):
+	if mode not in ["grimoire", "epreuves", "mine"] or not mode_debloque(mode):
 		return
 	mode_run_choisi = mode
 	sauvegarder()
 
-func recharge_sort(id: String, mods_liste: Array = []) -> float:
-	var base := float(Sorts.donnees(id).get("recharge", 0.0))
-	var intelligence := float(bonus_attributs().get("recuperation_sorts", 0.0))
-	var recharge := Sorts.recharge(id, passifs_equipes_effectifs(), rangs_competences_effectifs(),
-		projectile_equipe_effectif(), Mods.facteur_heros(mods_liste, "recharge_sorts_mult"))
-	recharge *= maxf(0.05, 1.0 - intelligence) \
-		* Personnage.multiplicateur_recharge(specialisation_effective())
-	return maxf(base * Reglages.RECHARGE_PLANCHER, recharge)
-
 func choisir_epreuve(niveau: int) -> bool:
-	if not mode_debloque("epreuve_sorts") or niveau < 1 or niveau > (Epreuves.nombre() if mode_dev else niveau_epreuve_debloque): return false
+	if not mode_debloque("epreuves") or niveau < 1 or niveau > niveau_epreuve_accessible(): return false
 	niveau_epreuve_choisi = niveau
-	choisir_mode_run("epreuve_sorts")
+	choisir_mode_run("epreuves")
 	return true
 
 func gain_gouttes(nombre: int) -> int:
@@ -927,10 +862,11 @@ func gain_gouttes(nombre: int) -> int:
 	var bonus_butin := float(bonus_attributs().get("butin", 0.0)) \
 		+ float(bonus_objets_effectifs().get("butin", 0.0))
 	return maxi(1, roundi(float(nombre) * ArbreCompetences.multiplicateur_collecte(
-		rangs_competences_effectifs()) * (1.0 + bonus_butin)))
+		rangs_competences_effectifs()) * (1.0 + bonus_butin)
+		* Passifs.multiplicateur_gouttes(passifs_equipes_effectifs())))
 
 func gain_experience_compte(nombre: int) -> int:
 	if nombre <= 0 or niveau_compte >= Personnage.NIVEAU_MAX:
 		return 0
 	return maxi(1, roundi(float(nombre) * ArbreCompetences.multiplicateur_experience(
-		rangs_competences_effectifs())))
+		rangs_competences_effectifs()) * Passifs.multiplicateur_experience(passifs_equipes_effectifs())))

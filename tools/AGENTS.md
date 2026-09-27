@@ -1,31 +1,25 @@
-# tools/
+# Outils
 
-Outils de maintenance des ressources actives et de publication Android.
-Ils ne font pas partie du jeu exporté. Les règles de `../AGENTS.md` s'appliquent :
-vérifier les changements avec des contrôles proportionnés à leur portée.
+Consulter `INDEX.md` pour choisir l'entrée utile. Ce dossier est exclu de
+l'import et de l'export du jeu ; les scripts Godot s'exécutent explicitement.
 
-## Entrées utiles
+`verifier.ps1` utilise un profil temporaire et exécute les contrôles de données,
+de migration et de scènes. `statistiques/exporter.gd` produit les listes du
+propriétaire ; `--verifier` contrôle leur fraîcheur sans les écrire.
+Les modèles de comparaison appartiennent à l'outillage et n'équilibrent jamais
+les ennemis en fonction du joueur.
+Pour modifier les listes Markdown, suivre `statistiques/INDEX.md` : il sépare
+mise en forme, profil d'exemple, mesures du build et attribution des synergies.
+Une proportion de contribution ne doit pas être présentée comme un effet
+de nerf ; préciser le build, les conditions et la convention de répartition.
+Les 100 % des sources permanentes excluent les augments. Présenter ensuite
+leur multiplicateur de run et le gain de DPS par rapport au même build de
+départ ; ils doivent pouvoir représenter la majorité des dégâts finaux.
 
-| Besoin | Point d'entrée |
-|---|---|
-| APK, signature, version et installation demandés | `android_mises_a_jour.py`, `../docs/ops/MISES_A_JOUR_ANDROID.md` |
-| Héros actuel | `blender/mage_sculpte.py` |
-| Bestiaire, gardien et portail | `blender/build_all.py`, `blender/portail_azur.py` |
-| Armes tenues | `blender/armes_tenues.py` |
-| Kit actif Émail arcanique, SVG natifs | `generer_email_arcanique.py`, `refonte_svg.py`, `signatures_svg.py` et `design_svg/` |
-| Anciennes icônes peintes en SVG | `vectoriser_icones.py` (Python avec Pillow et NumPy) |
-| Anciens contrôles SVG du kit B | `generer_controles_grimoire.py` |
-| Anciens glyphes filaires de secours | `generer_icones.py` (écrase les glyphes actifs ; ne pas utiliser pour le kit peint) |
-| Musiques originales | `audio/composer.py`, `audio/collection.py` |
-| Icônes de l'application | `preparer_identite.gd` |
+Les générateurs artistiques peuvent écraser des ressources actives : ne les
+lancer que si le travail exige leur régénération. Garder leurs sources
+éditables, y compris les modules Blender aux anciens noms encore importés.
+Godot s'exécute en `--headless`, Blender en `--background`.
 
-Lire l'entrée concernée puis seulement les imports ou fonctions nécessaires.
-Les modules `variantes_mage.py`, `animer_mage_v2.py` et le dossier source
-`assets/3d/sources/characters/mage_v2/` participent encore au mage actuel.
-Ne pas les considérer comme obsolètes à partir de leur nom.
-
-Les générateurs écrasent des ressources actives : les lancer seulement si le
-travail demandé exige leur régénération, avec Blender en `--background` et
-Godot en `--headless`. Le dossier est exclu de l'import Godot par `.gdignore` ;
-ses scripts GDScript se lancent explicitement avec `--script`, sur demande.
-Les sorties temporaires vont dans `tmp/`, les exports Android dans `build/`.
+Les sorties vont dans `tmp/`, les journaux Android dans `build/android/`.
+Un outil temporaire doit être archivé hors dépôt lorsqu'il n'a plus d'usage.

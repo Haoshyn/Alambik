@@ -1,5 +1,8 @@
-# sondes/
+# Sondes de développement
 
-Seuls `bot.gd` et `navigation_bot.gd` restent actifs pour l'option PC `--auto` de `scripts/run.gd`. Ils sont exclus des exports Android. Ne pas les déplacer sans adapter ce consommateur.
+`bot.gd` et `navigation_bot.gd` servent au mode PC `--auto`. Ils restent hors
+de l'export Android. Ne pas transformer une sonde en dépendance du gameplay.
 
-Les autres diagnostics sont archivés, voir `docs/INDEX.md`. Pour toute simulation demandée, utiliser un profil isolé et lire les résultats détaillés : une fin de processus ne prouve pas la progression d'une run.
+Les scénarios automatisés utilisent un profil isolé et une graine connue.
+Vérifier les événements et résultats détaillés : la seule fin du processus
+ne prouve ni une victoire ni le bon équilibrage d'une partie.

@@ -1,6 +1,6 @@
 """Illustrations SVG originales du kit, gardees en fichiers independants.
 
-Les formes des pictogrammes sont construites ici ; SVG/ reste une reference
+Les formes des pictogrammes sont construites ici ; tools/sources_svg/ reste une reference
 historique et n'est pas insere dans les ressources actives.
 """
 from pathlib import Path

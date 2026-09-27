@@ -1,45 +1,35 @@
 # Alambik
 
-Roguelite de tir portrait Android, jouable à une main, sous Godot 4.7.1 / GDScript.
-Simulation 2D, combat présenté en 3D et interface de scriptorium alchimique.
+Roguelite de tir portrait Android, Godot 4.7.1 / GDScript.
 
-## Repères
+Pour lire les statistiques du jeu, commencer par **[Liste mathématique](statistiques_jeu/liste_mathematique.md)** :
+fiche au plafond de progression, contributions par source, puis formules détaillées.
+Les autres listes Markdown de `statistiques_jeu/` couvrent les
+augments, items à tous les niveaux, maîtrises, passifs, monstres et logique mathématique.
 
-- `AGENTS.md` : règles de travail, dont tests et exports uniquement sur demande.
-- `docs/INDEX.md` : carte unique pour trouver le code et les outils.
-- `docs/CURRENT.md` : état court du projet.
-- `docs/design/GAME_DESIGN.md` : périmètre du jeu ; les chiffres restent dans `data/`.
-- `docs/design/DIRECTION_ARTISTIQUE.md` : repères visuels actuels.
+Pour travailler sur le projet : [index technique](docs/INDEX.md),
+[règles des agents](AGENTS.md), [état actuel](docs/CURRENT.md),
+[périmètre du jeu](docs/design/GAME_DESIGN.md).
 
-## Organisation
-
-| Dossier | Rôle |
+| Dossier | Contenu |
 |---|---|
-| `autoload/` | État global, sauvegarde, audio et écran |
-| `data/` | Catalogues et équilibrage, source unique des valeurs |
-| `scripts/` | Logique ; `presentation/` contient le rendu sans règles de gameplay |
-| `scenes/`, `ui/` | Assemblage Godot, écrans et commandes |
-| `assets/`, `shaders/` | Ressources et six shaders utilisés ; sources 3D éditables dans `assets/3d/sources/` |
-| `tools/` | Générateurs des ressources actives et export Android |
-| `sondes/` | Deux scripts nécessaires au mode PC `--auto` |
+| `statistiques_jeu/` | Listes lisibles, calculées depuis les données |
+| `data/` | Chiffres et catalogues par catégorie |
+| `scripts/` | Combat, monde, augments, interface et rendu |
+| `autoload/` | Session, sauvegarde, audio et écran |
+| `scenes/`, `ui/` | Assemblage Godot et écrans |
+| `assets/`, `shaders/` | Ressources jouées et effets visuels |
+| `tools/` | Vérification, statistiques, générateurs et export Android |
+| `sondes/` | Bot de développement PC |
 | `docs/` | Index, état, design et guides Android |
-| `tmp/`, `build/` | Sorties de travail et exports, hors import et hors Git |
 
-`Accueil.ogg` est la musique originale utilisée par le catalogue à la racine.
-Les sources 3D, `tools/` et `docs/` sont hors import grâce à `.gdignore`.
-Les anciens fichiers, `human/`, tests et diagnostics sont dans
-`../OldAlambik/2026-09-20/organisation/` ; son `LIRE_MOI.md` explique la restauration.
-Les archives sont à côté du dépôt, pas dans le jeu.
+Sous Windows : `./tools/verifier.ps1 -ActualiserStatistiques` importe le projet,
+actualise les listes et vérifie les comportements touchés avec une sauvegarde isolée.
+Sans ce paramètre, la commande vérifie que les listes sont déjà à jour.
+Le chemin du moteur peut être fourni par `-Godot CHEMIN` ou `GODOT`.
 
-## Commandes sur demande
+`Mettre_a_jour_Android.cmd` sert aux exports Android demandés. Les scripts
+`lancer.sh`, `publier.sh` et `deploy.sh` restent disponibles sous Linux.
 
-| Commande | Usage |
-|---|---|
-| `./lancer.sh` | Ouvrir le jeu sur PC |
-| `Mettre_a_jour_Android.cmd` | Exporter un APK de test sous Windows |
-| `./publier.sh` | Exporter un APK signé et versionné |
-| `./deploy.sh` | Exporter, installer et lancer sur téléphone |
-
-Arguments de développement après `--` : `--salle=N`, `--chapitre=N`,
-`--graine=N`, `--dote=N`, `--auto`, `--bavard`, `--mode=mine`, `--mode=epreuve_sorts`.
-Guides : `docs/ops/MISES_A_JOUR_ANDROID.md` et `docs/ops/MOBILE.md`.
+Les anciennes versions et sorties sont sauvegardées hors dépôt ; voir
+[les repères d'archives](docs/INDEX.md#archives).
