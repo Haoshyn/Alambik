@@ -6,9 +6,11 @@ dedie dans mage_sculpte.py.
 import bpy
 import math
 import json
+import sys
 from pathlib import Path
 from mathutils import Vector
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 RACINE = Path(__file__).resolve().parents[2]
 SORTIE = RACINE / 'assets/3d'
 MAT = {}
@@ -357,14 +359,14 @@ def exporter(nom, dossier, construire, anime=False):
 
 
 def main():
+    import bestiaire_sculpte
+    # La regeneration globale utilise les memes sources que le bestiaire actif.
+    rapport_bestiaire = bestiaire_sculpte.main()
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.context.preferences.filepaths.save_version=0
     bpy.context.preferences.filepaths.file_preview_type='NONE'
     materiaux()
-    communs=['encrier_rampant','plume_sentinelle','tache_veloce','scribe_essaimeur','folio_orbiteur','sceau_belier','marge_harceleuse','miroir_encre','cachet_phaseur','fuseau_tisseur','fiole_volatile']
-    for nom in communs: exporter(nom,'enemies',lambda n=nom:commun(n),True)
-    for i in range(10): exporter('miniboss_'+str(i),'bosses',lambda n=i:majeur(n,True),True)
-    for i in range(10): exporter('boss_'+str(i),'bosses',lambda n=i:majeur(n),True)
+    RAPPORT.extend(rapport_bestiaire)
     exporter('gardien','characters',livre,True)
     exporter('portail','environment',portail)
     (SORTIE/'rapport.json').write_text(json.dumps({'blender':bpy.app.version_string,'assets':RAPPORT},indent=2),encoding='utf-8')

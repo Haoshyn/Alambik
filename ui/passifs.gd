@@ -59,17 +59,22 @@ func _ready() -> void:
 	Capture.programmer(self)
 
 func _construire_fond() -> void:
+	if not integre_menu:
+		var clairiere := preload("res://ui/composants/illustration_accueil.gd").new()
+		add_child(clairiere)
+		clairiere.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var nuance := Gradient.new()
-	nuance.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
-	nuance.colors = PackedColorArray([Color("292d48"), Color("22283e"), Color("302b43")])
+	nuance.offsets = PackedFloat32Array([0.0, 0.38, 1.0])
+	# La clairiere reste perceptible ; la collection repose sur la partie la plus calme.
+	nuance.colors = PackedColorArray([Color("343c685c"), Color("25314acc"), Color("302e50b8")])
 	var texture := GradientTexture2D.new()
 	texture.gradient = nuance
-	texture.width = 64
-	texture.height = 128
-	texture.fill_from = Vector2.ZERO
-	texture.fill_to = Vector2.ONE
+	texture.width = 4
+	texture.height = 256
+	texture.fill_from = Vector2(0.5, 0.0)
+	texture.fill_to = Vector2(0.5, 1.0)
 	var fond := TextureRect.new()
-	fond.name = "NuancePassifs"
+	fond.name = "VoilePassifs"
 	fond.texture = texture
 	fond.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	fond.mouse_filter = Control.MOUSE_FILTER_IGNORE

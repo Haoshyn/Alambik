@@ -1,7 +1,8 @@
 extends SceneTree
 
 class CibleTest extends CharacterBody2D:
-	func recevoir_degats(_montant: float, _effets: Array = []) -> void: pass
+	var coups := 0
+	func recevoir_degats(_montant: float, _effets: Array = []) -> void: coups += 1
 
 var _erreurs: Array[String] = []
 var _controles := 0
@@ -26,15 +27,23 @@ func _executer() -> void:
 	_salle = load("res://scenes/salle.tscn").instantiate()
 	root.add_child(_salle)
 	_salle.set_process(false)
+	_salle.limites = Rect2(Vector2.ZERO, Reglages.ARENE_TAILLE)
+	_salle._contour = FormesSalles.contour(_salle.limites, 0)
 	_cible = CibleTest.new()
 	_cible.add_to_group("cibles_ennemis")
 	root.add_child(_cible)
+	seed(28092026)
 	_verifier_progression()
 	_verifier_tisseur()
 	_verifier_annonces_monstres()
 	_verifier_esquive_tirs_rapides()
 	_verifier_charges()
 	_verifier_charges_boss()
+	await _verifier_trajets_charges()
+	_verifier_teleportations()
+	_verifier_portees_attaques()
+	_verifier_choix_boss()
+	_verifier_contact_boss()
 	_verifier_mobilite_boss()
 	_verifier_eventails_retour()
 	_verifier_geometrie()
@@ -145,6 +154,7 @@ func _verifier_annonces_monstres() -> void:
 			if id == "cachet_phaseur":
 				ennemi._etat = "phase"
 				ennemi._destination_phase = ennemi.position
+				ennemi.position.x -= 300.0
 			if id == "plume_sentinelle": ennemi.call(methode)
 			else: ennemi.call(methode, 0.0)
 			var annonce_attendue: bool = id in ["plume_sentinelle", "cachet_phaseur"]
@@ -251,6 +261,7 @@ func _verifier_charges() -> void:
 			ennemi._givre = 2.0
 			_verifier(float(ennemi.portee_charge()) < portee, "Portee recalculee sous ralentissement : " + id)
 			ennemi._etat = "charger"
+			ennemi._charge.terminee = true
 			ennemi._minuterie = 0.0
 			ennemi._charges_effectuees = 1
 			ennemi.donnees["charges"] = 2
@@ -300,6 +311,230 @@ func _verifier_charges_boss() -> void:
 	_verifier(boss._charge_terminee and boss.position.y >= 1300.0, "Dash de boss depasse nettement l'ancienne portee")
 	boss.free()
 
+func _acteur_test(id: String, chapitre: int, point: Vector2) -> CharacterBody2D:
+	var d := _profil(id, chapitre)
+	var scene := "boss" if str(d["cerveau"]) == "boss" else "ennemi"
+	var acteur: CharacterBody2D = load("res://scenes/%s.tscn" % scene).instantiate()
+	acteur.configurer(d)
+	acteur.position = point
+	acteur.limites = _salle.limites
+	_salle.add_child(acteur)
+	acteur.set_physics_process(false)
+	acteur._cible = _cible
+	acteur._apparition = 1.0
+	return acteur
+
+func _verifier_trajets_charges() -> void:
+	for forme in FormesSalles.PROFILS.size():
+		_salle._contour = FormesSalles.contour(_salle.limites, forme)
+		_salle._construire_murs_perimetre()
+		await physics_frame
+		for frequence: int in [30, 60, 120]:
+			for id: String in ["tache_veloce", "sceau_belier", "le_correcteur"]:
+				var acteur := _acteur_test(id, 0, _salle.limites.get_center())
+				var debut := acteur.position
+				_cible.position = debut + Vector2(200, -500)
+				var boss := id == "le_correcteur"
+				if boss:
+					acteur._motif = "charge"
+					acteur._minuterie = acteur._duree_du_motif("charge")
+					acteur._commencer_motif("charge")
+				else:
+					acteur._agir_veloce(0.0)
+				var fin: Vector2 = acteur._charge.fin
+				var rayon: float = acteur.get_node("CollisionShape2D").shape.radius
+				var contexte := "%s forme %d a %d Hz" % [id, forme, frequence]
+				_verifier(debut.distance_to(fin) > 600.0, "Dash conserve sa longueur : " + contexte)
+				_verifier(FormesSalles.contient_disque(fin, _salle._contour, rayon), "Annonce arretee au vrai mur : " + contexte)
+				# Esquiver lateralement ne deplace jamais la destination annoncee.
+				_cible.position += Vector2(200, 0)
+				var coups := _cible.coups
+				var ralenti := false
+				for image in frequence * 8:
+					acteur._physics_process(1.0 / frequence)
+					if frequence == 60 and not ralenti and acteur.position.distance_to(debut) > 80.0:
+						ralenti = true
+						acteur._givre = 3.0
+						if boss: acteur.pv = acteur.pv_max * .4
+					if acteur._charge.terminee: break
+				_verifier(acteur._charge.terminee and acteur.position.distance_to(fin) < .2, "Dash rejoint le bout de son annonce : " + contexte)
+				_verifier(_cible.coups == coups, "Esquive laterale conservee : " + contexte)
+				_verifier((acteur._charge.fin as Vector2).is_equal_approx(fin), "Pas de correction cachee de trajectoire : " + contexte)
+				acteur.free()
+		for enfant in _salle.get_children():
+			if enfant is StaticBody2D: enfant.free()
+	_salle._contour = FormesSalles.contour(_salle.limites, 0)
+	var chargeur := _acteur_test("tache_veloce", 0, Vector2(600, 250))
+	_salle._obstacles.assign([Rect2(400, 1050, 400, 100)])
+	_cible.position = Vector2(600, 750)
+	chargeur._agir_veloce(0.0)
+	var fin: Vector2 = chargeur._charge.fin
+	_verifier(fin.y < 1050 and fin.y > 1000, "Le bloc raccourcit le trace avant le depart")
+	for image in 240:
+		chargeur._physics_process(1.0 / 60.0)
+		if chargeur._charge.terminee: break
+	_verifier(chargeur.position.distance_to(fin) < .2, "Dash et annonce s'arretent devant le meme bloc")
+	chargeur.free()
+	_salle._obstacles.clear()
+	print("Charges : trajets annonces et parcourus concordants, neuf contours, 30/60/120 Hz et ralentissements.")
+
+func _verifier_teleportations() -> void:
+	for chapitre: int in [0, 7, 14, 21, 34]:
+		for position_cible: Vector2 in [Vector2(600, 1500), Vector2(100, 1750)]:
+			var phaseur := _acteur_test("cachet_phaseur", chapitre, Vector2(600, 250))
+			_cible.position = position_cible
+			phaseur._recharge = 0.0
+			_salle._obstacles.assign([Rect2(300, 850, 600, 100)])
+			phaseur._agir_phaseur(0.0)
+			var destination: Vector2 = phaseur._destination_phase
+			_verifier(phaseur._etat == "phase" and destination.is_finite(), "Teleportation engagee de loin et derriere un obstacle")
+			_verifier(phaseur.position.is_equal_approx(Vector2(600, 250)), "Depart attend son annonce de teleportation")
+			_verifier(_salle._place_libre(destination, float(phaseur.donnees["rayon"])), "Arrivee du phaseur dans une place libre")
+			_cible.position.x += 60.0
+			phaseur._minuterie = 0.0
+			phaseur._agir_phaseur(0.0)
+			_verifier(phaseur.position.is_equal_approx(destination), "Teleportation vers la destination annoncee malgre le mouvement du joueur")
+			phaseur.free()
+			_salle._obstacles.clear()
+	var phaseur := _acteur_test("cachet_phaseur", 0, Vector2(600, 250))
+	_cible.position = Vector2(600, 1500)
+	phaseur._recharge = 0.0
+	phaseur._agir_phaseur(0.0)
+	var destination: Vector2 = phaseur._destination_phase
+	_salle._obstacles.assign([Rect2(destination - Vector2(50, 50), Vector2(100, 100))])
+	phaseur._minuterie = 0.0
+	phaseur._agir_phaseur(0.0)
+	_verifier(phaseur.position.is_equal_approx(Vector2(600, 250)) and phaseur._etat == "repos", "Arrivee devenue occupee annule le saut")
+	_salle._obstacles.assign([_salle.limites])
+	phaseur._recharge = 0.0
+	phaseur._agir_phaseur(0.0)
+	_verifier(phaseur._etat != "phase" and phaseur.position.is_finite(), "Pas de fausse teleportation quand toutes les arrivees sont bloquees")
+	phaseur.free()
+	_salle._obstacles.clear()
+
+func _verifier_portees_attaques() -> void:
+	for chapitre: int in [0, 17, 34]:
+		for id: String in ["plume_sentinelle", "folio_orbiteur", "marge_harceleuse", "miroir_encre", "fuseau_tisseur"]:
+			var ennemi := _acteur_test(id, chapitre, Vector2(600, 250))
+			var tirs: Array[Tir] = []
+			ennemi.tir_demande.connect(func(tir: Tir, _origine: Vector2, _direction: Vector2): tirs.append(tir))
+			var tir: Tir = ennemi._creer_tir()
+			var portee := minf(tir.portee, tir.distance_retour) if tir.trajectoire == "aller_retour" else tir.portee
+			var methode := "_agir_" + str(ennemi.donnees["cerveau"])
+			_cible.position = ennemi.position + Vector2(0, portee - 100.0)
+			ennemi._recharge = 0.0
+			if id == "plume_sentinelle": ennemi.call(methode)
+			else: ennemi.call(methode, 0.0)
+			_verifier(not tirs.is_empty() or ennemi._etat != "repos", "Tireur actif au-dela de sa distance de placement : " + id)
+			ennemi._etat = "repos"
+			ennemi._recharge = 0.0
+			tirs.clear()
+			_cible.position = ennemi.position + Vector2(0, portee + 100.0)
+			if id == "plume_sentinelle": ennemi.call(methode)
+			else: ennemi.call(methode, 0.0)
+			_verifier(tirs.is_empty() and ennemi._etat == "repos", "Pas de cast hors portee physique : " + id)
+			_cible.position = ennemi.position + Vector2(0, portee - 100.0)
+			_salle._obstacles.assign([Rect2(450, 450, 300, 100)])
+			if id == "plume_sentinelle": ennemi.call(methode)
+			else: ennemi.call(methode, 0.0)
+			_verifier(tirs.is_empty() and ennemi._etat == "repos", "Pas de cast dans un obstacle : " + id)
+			_salle._obstacles.clear()
+			ennemi.free()
+	var scribe := _acteur_test("scribe_essaimeur", 0, Vector2(600, 250))
+	_cible.position = Vector2(600, 1700)
+	scribe._recharge = 0.0
+	scribe._agir_essaimeur(0.0)
+	_verifier(scribe._etat == "invoque", "Invocateur actif meme avec un joueur lointain")
+	var tirs: Array[Tir] = []
+	scribe.tir_demande.connect(func(tir: Tir, _origine: Vector2, _direction: Vector2): tirs.append(tir))
+	scribe._invocations = int(scribe.donnees["max_invocations"])
+	scribe._etat = "repos"
+	scribe._recharge = 0.0
+	scribe._agir_essaimeur(0.0)
+	_verifier(scribe._etat == "repos", "Invocateur epuise approche avant sa salve hors portee")
+	_cible.position = scribe.position + Vector2(0, 800)
+	scribe._agir_essaimeur(0.0)
+	scribe._minuterie = 0.0
+	scribe._agir_essaimeur(0.0)
+	_verifier(not tirs.is_empty(), "Invocateur reste dangereux quand sa reserve est epuisee")
+	scribe.free()
+
+func _verifier_choix_boss() -> void:
+	for id: String in DeplacementsBoss.IDENTITES:
+		for phase in [1, 2]:
+			var boss := _acteur_test(id, 0, Vector2(600, 250))
+			boss._phase = phase
+			_cible.position = Vector2(600, 1900)
+			var vus: Array[String] = []
+			var precedent := ""
+			for choix in 18:
+				var motif: String = boss._choisir_motif()
+				boss._motif = motif
+				_verifier(motif not in ["assaut_contact", "charge"], "Boss lointain choisit un motif atteignable : " + id)
+				if motif == "pause": continue
+				_verifier(motif != precedent, "Pas de repetition immediate du meme motif : " + id)
+				precedent = motif
+				if motif not in vus: vus.append(motif)
+			_verifier(vus.size() >= 2, "Repertoire a distance conserve plusieurs attaques : " + id)
+			boss.free()
+	# A mi-distance, charges, frappes et tirs restent dans le repertoire.
+	var boss := _acteur_test("la_rature", 0, Vector2(600, 700))
+	_cible.position = Vector2(600, 1000)
+	var cycles: Array[String] = []
+	for cycle in 5:
+		var vus: Array[String] = []
+		for choix in 8:
+			var motif: String = boss._choisir_motif()
+			boss._motif = motif
+			if motif == "pause": break
+			_verifier(motif not in vus, "Un repertoire entier avant de rejouer le meme motif")
+			vus.append(motif)
+		_verifier("charge" in vus and "assaut_contact" in vus and "griffure" in vus and "encrage_cible" in vus,
+			"La Rature conserve ses quatre attaques distinctes")
+		var ordre := ",".join(vus)
+		if ordre not in cycles: cycles.append(ordre)
+	_verifier(cycles.size() > 1, "L'ordre des cycles du boss varie")
+	boss.free()
+	boss = _acteur_test("choeur_infini", 0, _salle.limites.get_center())
+	_cible.position = boss.position + Vector2(0, -500)
+	var directions: Array[Vector2] = []
+	boss.tir_demande.connect(func(_tir: Tir, _origine: Vector2, direction: Vector2): directions.append(direction))
+	boss._motif = "barrage_horizontal"
+	boss._minuterie = boss._duree_du_motif("barrage_horizontal")
+	boss._executer_motif("barrage_horizontal", .016)
+	for attente: Dictionary in boss._tirs_annonces.attentes: directions.append(attente["direction"])
+	_verifier(not directions.is_empty(), "Barrage actif avec un joueur derriere le boss")
+	for direction: Vector2 in directions:
+		_verifier(direction.y < 0.0, "Barrage dirige vers le joueur au lieu de tirer dans son dos")
+	boss.free()
+
+func _verifier_contact_boss() -> void:
+	for id: String in AttaquesContactBoss.PROFILS:
+		var boss := _acteur_test(id, 0, Vector2(600, 500))
+		boss._motif = "assaut_contact"
+		_cible.position = Vector2(600, 1900)
+		boss._commencer_motif("assaut_contact")
+		boss._contact.reste = 0.0
+		boss._executer_motif("assaut_contact", .016)
+		_verifier(boss._contact.etat == "repos" and boss._minuterie == 0.0, "Approche expiree sans frappe hors de portee : " + id)
+		_cible.position = Vector2(600, 650)
+		boss._commencer_motif("assaut_contact")
+		boss._executer_motif("assaut_contact", .016)
+		_verifier(boss._contact.etat == "annonce", "Frappe annoncee seulement au contact : " + id)
+		var direction: Vector2 = boss._contact.direction
+		_cible.position = Vector2(600, 1800)
+		var coups := _cible.coups
+		boss._executer_motif("assaut_contact", 2.0)
+		_verifier(_cible.coups == coups and boss._contact.direction == direction, "Fuite apres le cast reste une esquive valide : " + id)
+		boss._commencer_motif("assaut_contact")
+		_cible.position = Vector2(600, 650)
+		_salle._obstacles.assign([Rect2(450, 570, 300, 20)])
+		boss._contact.reste = 0.0
+		boss._executer_motif("assaut_contact", .016)
+		_verifier(boss._contact.etat == "repos", "Aucune melee annoncee a travers un obstacle : " + id)
+		_salle._obstacles.clear()
+		boss.free()
+
 func _verifier_mobilite_boss() -> void:
 	_salle.limites = Rect2(Vector2.ZERO, Reglages.ARENE_TAILLE)
 	for forme in FormesSalles.PROFILS.size():
@@ -334,7 +569,11 @@ func _verifier_mobilite_boss() -> void:
 		_cible.position = Vector2(600, 1850)
 		var tirs: Array[Tir] = []
 		boss.tir_demande.connect(func(tir: Tir, _origine: Vector2, _direction: Vector2): tirs.append(tir))
-		for image in 720: boss._physics_process(1.0 / 60.0)
+		# Le repertoire inclut des charges et des frappes sans projectiles.
+		var duree_cycle := 0.0
+		for motif: String in boss.donnees["motifs_phase_1"]:
+			duree_cycle += float(boss._duree_du_motif(motif)) + float(DeplacementsBoss.profil(boss.donnees)["repositionnement"])
+		for image in ceili(duree_cycle * 60.0): boss._physics_process(1.0 / 60.0)
 		_verifier(not tirs.is_empty(), "Cycle mobile conserve les attaques : " + id)
 		for tir: Tir in tirs:
 			_verifier(tir.portee >= _salle.limites.size.length() * 2.0, "Projectile de boss couvre la salle et le retour : " + id)

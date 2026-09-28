@@ -31,7 +31,8 @@ des systemes de jeu correspondants.
   centre, cadre plus grand et caracteres plus grands, gras et contrastes.
 - Passifs : presentation actuelle entierement conservee, dont les filtres
   Tous, Offensif, Defensif, Utilitaire
-  et les quatre emplacements Passif 1 a 4. Le fond reste une nuance discrete.
+  et les quatre emplacements Passif 1 a 4. Le fond reprend la clairiere sous
+  un voile indigo progressif, plus calme derriere la collection.
   Aucun rectangle sombre sous Collection des passifs, les indications de
   limite/rangs/provenance, les noms, A decouvrir ou les descriptions. Aucun
   empilement de cadres de texte dans les fiches. Les glyphes et accents de

@@ -43,7 +43,8 @@ var limites := Rect2(Vector2(80, 300), Vector2(920, 1400))
 
 var _cible: Node2D
 var _phase := 1
-var _index_motif := 0
+var _motifs_joues: Array[String] = []
+var _dernier_motif_actif := ""
 var _motif := "pause"
 var _minuterie := 0.0
 var _cadence_motif := 0.0
@@ -61,6 +62,7 @@ var _gel := 0.0
 var _deplacement := preload("res://scripts/combat/deplacement_boss.gd").new()
 var _repositionnement := 0.0
 var _direction_charge := Vector2.ZERO
+var _charge := preload("res://scripts/combat/trajet_charge.gd").new()
 var _tirs_annonces := preload("res://scripts/combat/tirs_annonces.gd").new()
 var _apparition := 0.0
 var _eclat_phase := 0.0
@@ -71,7 +73,6 @@ var _invocation_motif_effectuee := false
 var _motifs_mondes := preload("res://scripts/combat/motifs_boss_mondes.gd").new()
 var _contact_restant := 0.0
 var _contact := preload("res://scripts/combat/contact_boss.gd").new()
-var _depart_charge := Vector2.ZERO
 var _charge_terminee := false
 var _charge_debutee := false
 var _charge_approche := false
@@ -130,9 +131,11 @@ func _physics_process(delta: float) -> void:
 		return
 
 	var phase := phase_pour(pv, pv_max)
-	if phase != _phase and not (_motif == "assaut_contact" and _contact.etat != "repos"):
+	var attaque_engagee := (_motif == "assaut_contact" and _contact.etat != "repos") \
+		or (_motif == "charge" and _minuterie > 0.0)
+	if phase != _phase and not attaque_engagee:
 		_phase = phase
-		_index_motif = 0
+		_motifs_joues.clear()
 		_minuterie = 0.0
 		_eclat_phase = 1.0
 		phase_changee.emit(_phase)
@@ -141,9 +144,7 @@ func _physics_process(delta: float) -> void:
 	_minuterie -= delta
 	if _minuterie <= 0.0:
 		_tirs_annonces.annuler()
-		var motifs: Array = donnees["motifs_phase_1" if _phase == 1 else "motifs_phase_2"]
-		_motif = str(motifs[_index_motif % motifs.size()])
-		_index_motif += 1
+		_motif = _choisir_motif()
 		_minuterie = _duree_du_motif(_motif)
 		_cadence_motif = 0.0
 		_invocation_motif_effectuee = false
@@ -167,6 +168,37 @@ func _physics_process(delta: float) -> void:
 	global_position = Geometrie.contraindre_dans_rect(global_position, limites,
 		($CollisionShape2D.shape as CircleShape2D).radius)
 
+func _choisir_motif() -> String:
+	var motifs: Array = donnees["motifs_phase_1" if _phase == 1 else "motifs_phase_2"]
+	var possibles: Array[String] = []
+	var inedits: Array[String] = []
+	for motif: String in motifs:
+		if motif == "pause": continue
+		if motif == "assaut_contact" and not _contact.peut_commencer(self): continue
+		if motif == "charge" and not _peut_charger(): continue
+		if motif == "invocation" and (_recharge_invocation > 0.0 \
+				or get_tree().get_nodes_in_group("invocations_boss").size() >= Reglages.INVOCATION_BOSS_PLAFOND \
+				or int(get_parent().effectif_ennemis()) >= Reglages.PLAFOND_ENNEMIS): continue
+		if motif in possibles: continue
+		possibles.append(motif)
+		if motif not in _motifs_joues: inedits.append(motif)
+	if possibles.is_empty(): return "pause"
+	if inedits.is_empty():
+		_motifs_joues.clear()
+		if "pause" in motifs and _motif != "pause": return "pause"
+		inedits.assign(possibles)
+	# Le repertoire de l'identite est parcouru sans ordre fixe, avec une
+	# respiration apres les attaques disponibles et sans repetition immediate.
+	if inedits.size() > 1: inedits.erase(_dernier_motif_actif)
+	var choix := str(inedits.pick_random())
+	if "assaut_contact" in inedits:
+		var contact: Dictionary = AttaquesContactBoss.PROFILS[str(donnees["contact_boss"])]
+		if global_position.distance_to(_cible.global_position) <= float(contact["portee"]) * AttaquesContactBoss.DISTANCE_ARRET:
+			choix = "assaut_contact"
+	_motifs_joues.append(choix)
+	_dernier_motif_actif = choix
+	return choix
+
 func _duree_du_motif(motif: String) -> float:
 	if motif == "assaut_contact":
 		return AttaquesContactBoss.duree(AttaquesContactBoss.PROFILS[str(donnees["contact_boss"])])
@@ -185,11 +217,11 @@ func _commencer_motif(motif: String) -> void:
 		return
 	elif motif == "charge":
 		_direction_charge = global_position.direction_to(_cible.global_position)
-		_depart_charge = global_position
 		_charge_terminee = false
 		_charge_debutee = false
 		_charge_approche = not _peut_charger()
 		_charge_approche_restante = DeplacementsBoss.APPROCHE_CHARGE_DUREE_MAX
+		if not _charge_approche: _preparer_trajet_charge()
 
 func _invoquer_renforts() -> void:
 	if _recharge_invocation > 0.0:
@@ -238,11 +270,12 @@ func _executer_motif(motif: String, delta: float) -> void:
 				_cadence_motif = 0.55
 				# Un mur de traits avec une breche : lisible, evitable en marchant.
 				var breche := randi_range(0, 6)
+				var vers := global_position.direction_to(_cible.global_position)
 				for i in 7:
 					if i == breche:
 						continue
-					var origine := global_position + Vector2((float(i) - 3.0) * 90.0, 60.0)
-					_lancer(origine, Vector2.DOWN, 1.0)
+					var origine := global_position + vers.orthogonal() * (float(i) - 3.0) * 90.0 + vers * 60.0
+					_lancer(origine, vers, 1.0)
 		"eventail_lent":
 			_flotter(delta)
 			if _cadence_motif <= 0.0:
@@ -453,31 +486,30 @@ func _executer_motif(motif: String, delta: float) -> void:
 				if _peut_charger():
 					_charge_approche = false
 					_direction_charge = global_position.direction_to(_cible.global_position)
-					_depart_charge = global_position
+					_preparer_trajet_charge()
 				elif _charge_approche_restante <= 0.0:
 					# Un joueur inaccessible ne doit pas bloquer tous les motifs suivants.
 					_minuterie = 0.0
 			elif _annonce_charge() or _charge_terminee:
 				velocity = Vector2.ZERO
 			else:
-				if not _charge_debutee and not _peut_charger():
+				if not _charge_debutee and (not _peut_charger() or _charge.longueur > _longueur_charge()):
 					_minuterie = 0.0
 					return
 				_charge_debutee = true
 				var avant := global_position
-				velocity = _direction_charge * donnees["vitesse"] * BestiaireMondes.BOSS_CHARGE_VITESSE \
-					* Reglages.ENNEMI_VITESSE_MULT * _facteur_ralentissement()
-				move_and_slide()
-				global_position = Geometrie.contraindre_dans_rect(global_position, limites,
-					($CollisionShape2D.shape as CircleShape2D).radius)
+				_charge.avancer(self, _vitesse_charge(), delta)
 				var proche := Geometry2D.get_closest_point_to_segment(_cible.global_position, avant, global_position)
-				if proche.distance_to(_cible.global_position) < ($CollisionShape2D.shape as CircleShape2D).radius + Reglages.HEROS_RAYON and _contact_restant <= 0.0:
+				if proche.distance_to(_cible.global_position) < ($CollisionShape2D.shape as CircleShape2D).radius + Reglages.HEROS_RAYON and _contact_restant <= 0.0 \
+						and Geometrie.ligne_libre(proche, _cible.global_position, get_parent().obstacles()):
 					_cible.recevoir_degats(donnees["degats"])
 					_contact_restant = BestiaireMondes.BOSS_DEGATS_CONTACT_RECHARGE
 				# L'impact termine l'elan : pas de retour imprevisible sans annonce.
-				if get_slide_collision_count() > 0 or avant.is_equal_approx(global_position) or global_position.distance_to(_depart_charge) >= AttaquesContactBoss.CHARGE_DISTANCE_MAX:
+				if _charge.terminee:
 					_charge_terminee = true
 					_minuterie = AttaquesContactBoss.CHARGE_RECUPERATION
+				else:
+					_minuterie = maxf(_minuterie, delta * 2.0)
 		_:
 			_flotter(delta)
 
@@ -491,14 +523,24 @@ func _annonce_charge() -> bool:
 	return _motif == "charge" and _repositionnement <= 0.0 and not _charge_approche and _minuterie > _duree_du_motif("charge") - BestiaireMondes.BOSS_CHARGE_ANNONCE
 
 func portee_charge() -> float:
-	var vitesse := float(donnees["vitesse"]) * BestiaireMondes.BOSS_CHARGE_VITESSE * Reglages.ENNEMI_VITESSE_MULT * _facteur_ralentissement()
-	var trajet := minf(AttaquesContactBoss.CHARGE_DISTANCE_MAX, vitesse * (_duree_du_motif("charge") - BestiaireMondes.BOSS_CHARGE_ANNONCE))
-	return trajet + float(donnees["rayon"]) * Reglages.BOSS_HITBOX_MULT + Reglages.HEROS_RAYON
+	return _longueur_charge() + float(donnees["rayon"]) * Reglages.BOSS_HITBOX_MULT + Reglages.HEROS_RAYON
+
+func _vitesse_charge() -> float:
+	return float(donnees["vitesse"]) * BestiaireMondes.BOSS_CHARGE_VITESSE * Reglages.ENNEMI_VITESSE_MULT * _facteur_ralentissement()
+
+func _longueur_charge() -> float:
+	return minf(AttaquesContactBoss.CHARGE_DISTANCE_MAX, _vitesse_charge() * (_duree_du_motif("charge") - BestiaireMondes.BOSS_CHARGE_ANNONCE))
+
+func _preparer_trajet_charge() -> void:
+	_charge.preparer(self, _direction_charge, _longueur_charge(), float(donnees["rayon"]) * Reglages.BOSS_HITBOX_MULT)
 
 func _peut_charger() -> bool:
-	return global_position.distance_to(_cible.global_position) <= portee_charge() \
-		and Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(),
-			float(donnees["rayon"]) * Reglages.BOSS_HITBOX_MULT)
+	if global_position.distance_to(_cible.global_position) > portee_charge(): return false
+	var rayon := float(donnees["rayon"]) * Reglages.BOSS_HITBOX_MULT
+	if not Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), rayon): return false
+	var trajet := preload("res://scripts/combat/trajet_charge.gd").new()
+	trajet.preparer(self, global_position.direction_to(_cible.global_position), _longueur_charge(), rayon)
+	return trajet.contient_cible(_cible.global_position, rayon + Reglages.HEROS_RAYON)
 
 func _flotter(_delta: float) -> void:
 	_deplacement.avancer(self)

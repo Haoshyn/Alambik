@@ -12,6 +12,9 @@ var _aiguille := false
 var _familier := false
 var _tourbillon: Node3D
 var _rotation_tourbillon := 0.0
+var _coeur_hostile: Node3D
+var _halo_hostile: Node3D
+var _temps_visuel := 0.0
 static var _perle: SphereMesh
 
 func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
@@ -54,6 +57,8 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 			tir.longueur / (tir.rayon * 2.0), tir.variante_visuelle if hostile else -1)
 		_tourbillon.scale = Vector3(tir.rayon, tir.rayon, tir.longueur * .5) * Pont3D.ECHELLE
 		modele.add_child(_tourbillon)
+		_coeur_hostile = _tourbillon.get_node("Coeur")
+		_halo_hostile = _tourbillon.get_node("Halo")
 	else:
 		var coeur := MeshInstance3D.new()
 		coeur.material_override = _matiere_coeur
@@ -100,6 +105,12 @@ func mettre_a_jour(_delta: float) -> void:
 		direction = points[1].direction_to(points[0])
 	modele.rotation.y = atan2(direction.x,direction.y)
 	if _tourbillon != null:
+		_temps_visuel += _delta
+		_halo_hostile.visible = not ReglagesJoueur.effets_reduits
+		var pulsation := 1.0 if ReglagesJoueur.effets_reduits else 1.0 + sin(_temps_visuel * 11.0) * .055
+		_coeur_hostile.scale = Vector3.ONE * pulsation
+		if str(logique.tir.silhouette) in preload("res://data/presentation/formes_tirs.gd").BOULES:
+			_coeur_hostile.rotation.y = 0.0 if ReglagesJoueur.effets_reduits else -_temps_visuel * 1.8
 		if not ReglagesJoueur.effets_reduits and logique.tir.longueur <= logique.tir.rayon * 2.0:
 			_rotation_tourbillon += _delta * float(RenduProjectile.profil(str(logique.tir.silhouette))["rotation"])
 		# L'anamorphose s'applique apres l'orientation : l'encombrement suit la 2D.

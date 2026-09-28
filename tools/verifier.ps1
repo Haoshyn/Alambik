@@ -44,6 +44,8 @@ try {
     $env:APPDATA = $profilControle
     $env:LOCALAPPDATA = $profilControle
     Executer-Controle -Nom 'import' -ArgumentsGodot @('--editor', '--import')
+    Executer-Controle -Nom 'decors' -ArgumentsGodot @('res://tools/verifier_decors.tscn')
+    Executer-Controle -Nom 'terrains' -ArgumentsGodot @('res://tools/verifier_terrains.tscn')
     $argumentsStatistiques = @('--script', 'res://tools/statistiques/exporter.gd')
     if (-not $ActualiserStatistiques) { $argumentsStatistiques += @('--', '--verifier') }
     Executer-Controle -Nom 'statistiques' -ArgumentsGodot $argumentsStatistiques
@@ -53,6 +55,7 @@ try {
     Executer-Controle -Nom 'augments' -ArgumentsGodot @('--script', 'res://tools/verifier_augments.gd')
     Executer-Controle -Nom 'niveaux_augments' -ArgumentsGodot @('--script', 'res://tools/verifier_niveaux_augments.gd')
     Executer-Controle -Nom 'projectiles' -ArgumentsGodot @('--script', 'res://tools/verifier_projectiles.gd')
+    Executer-Controle -Nom 'bestiaire' -ArgumentsGodot @('--script', 'res://tools/verifier_bestiaire.gd')
     Executer-Controle -Nom 'degats_affiches' -ArgumentsGodot @('--script', 'res://tools/verifier_degats_affiches.gd')
     Executer-Controle -Nom 'simulation_augments' -ArgumentsGodot @('--script', 'res://tools/verifier_simulation_augments.gd')
     Executer-Controle -Nom 'parcours' -ArgumentsGodot @('--script', 'res://tools/verifier_parcours.gd')

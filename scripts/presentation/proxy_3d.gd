@@ -25,7 +25,7 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 		preload("res://scripts/presentation/habillage_ennemis_3d.gd").appliquer(modele, donnees)
 		_animation_ennemi = preload("res://scripts/presentation/animation_ennemis_3d.gd").new()
 		add_child(_animation_ennemi)
-		_animation_ennemi.preparer(donnees)
+		_animation_ennemi.preparer(donnees, modele)
 		modele.reparent(_animation_ennemi, false)
 		facteur = float(donnees["rayon"]) / (65.0 if donnees.get("cerveau", "") == "boss" else 30.0)
 		if bool(donnees.get("elite", false)):
@@ -62,6 +62,8 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 			if bool(profil.get("lob", false)): _projeter_ennemi())
 		logique.connect("invocation_demandee", func(_id, _position): _projeter_ennemi())
 		logique.connect("touche", func(_position, _couleur): _animation_ennemi.toucher())
+		logique.connect("mort", func(_qui, _position, _couleur):
+			preload("res://scripts/presentation/dissipation_ennemi_3d.gd").creer(self, _animation_ennemi))
 	logique.set_meta("visuel_3d", true)
 	logique.queue_redraw()
 	mettre_a_jour(0.0)

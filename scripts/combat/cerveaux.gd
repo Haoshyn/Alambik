@@ -25,8 +25,13 @@ static func veloce(distance: float, etat: String, minuterie: float,
 	return "preparer" if distance <= distance_charge else "avancer"
 
 static func portee_charge(donnees: Dictionary, facteur_vitesse: float) -> float:
-	return float(donnees["vitesse"]) * facteur_vitesse * float(donnees["duree_charge"]) \
+	return longueur_charge(donnees, facteur_vitesse) \
 		+ float(donnees["rayon"]) * Reglages.ENNEMI_HITBOX_MULT + Reglages.HEROS_RAYON
+
+static func longueur_charge(donnees: Dictionary, facteur_vitesse: float) -> float:
+	var duree := float(donnees.get("duree_charge", EvolutionEnnemis.ELAN_DUREE))
+	var elan := EvolutionEnnemis.ELAN_VITESSE if str(donnees["cerveau"]) == "rampant" else 1.0
+	return float(donnees["vitesse"]) * facteur_vitesse * duree * elan
 
 static func visee_rapide(origine: Vector2, cible: Vector2, course: Vector2,
 		preparation: float, vitesse_tir: float) -> Vector2:
@@ -43,46 +48,55 @@ static func visee_rapide(origine: Vector2, cible: Vector2, course: Vector2,
 	return decoche + course * vol
 
 static func essaimeur(distance: float, distance_voulue: float, recharge: float) -> String:
+	if recharge <= 0.0: return "invoquer"
 	if distance < distance_voulue * 0.6:
 		return "reculer"
 	if distance > distance_voulue:
 		return "avancer"
-	return "invoquer" if recharge <= 0.0 else "attendre"
+	return "attendre"
 
-static func harceleur(distance: float, distance_voulue: float, recharge: float) -> String:
+static func harceleur(distance: float, distance_voulue: float, recharge: float,
+		peut_tirer := true) -> String:
 	if distance < distance_voulue * 0.72:
 		return "reculer"
+	if recharge <= 0.0 and peut_tirer: return "tirer"
 	if distance > distance_voulue * 1.28:
 		return "avancer"
-	return "tirer" if recharge <= 0.0 else "tourner"
+	return "tourner" if peut_tirer else "avancer"
 
-static func orbiteur(distance: float, distance_voulue: float, recharge: float) -> String:
+static func orbiteur(distance: float, distance_voulue: float, recharge: float,
+		peut_tirer := true) -> String:
 	if distance < distance_voulue * 0.70:
 		return "reculer"
+	if recharge <= 0.0 and peut_tirer: return "tirer"
 	if distance > distance_voulue:
 		return "avancer"
-	return "tirer" if recharge <= 0.0 else "orbiter"
+	return "orbiter" if peut_tirer else "avancer"
 
-static func miroir(distance: float, distance_voulue: float, recharge: float) -> String:
+static func miroir(distance: float, distance_voulue: float, recharge: float,
+		peut_tirer := true) -> String:
+	if recharge <= 0.0 and peut_tirer: return "pulser"
 	if distance > distance_voulue:
 		return "avancer"
-	return "pulser" if recharge <= 0.0 else "attendre"
+	return "attendre" if peut_tirer else "avancer"
 
 static func phaseur(distance: float, distance_voulue: float, recharge: float,
 		etat: String, minuterie: float) -> String:
 	if etat == "phase":
 		return "disparaitre" if minuterie > 0.0 else "reapparaitre"
+	if recharge <= 0.0: return "phase"
 	if distance > distance_voulue:
 		return "avancer"
-	return "phase" if recharge <= 0.0 else "tourner"
+	return "tourner"
 
 static func tisseur(distance: float, distance_voulue: float, recharge: float,
-		distance_minimale := 0.0) -> String:
+		distance_minimale := 0.0, peut_tirer := true) -> String:
 	if distance < maxf(distance_voulue * 0.62, distance_minimale):
 		return "reculer"
+	if recharge <= 0.0 and peut_tirer: return "tisser"
 	if distance > distance_voulue * 1.38:
 		return "avancer"
-	return "tisser" if recharge <= 0.0 else "croiser"
+	return "croiser" if peut_tirer else "avancer"
 
 static func volatile(distance: float, distance_explosion: float, etat: String,
 		minuterie: float) -> String:

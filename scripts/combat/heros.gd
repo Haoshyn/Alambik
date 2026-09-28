@@ -110,16 +110,18 @@ func preparer_nouvelle_salle() -> void:
 func _physics_process(delta: float) -> void:
 	var terrain := Vector3(0, 0, 1)
 	var salle := get_tree().get_first_node_in_group("salle")
-	if is_instance_valid(salle): terrain = salle.mouvement_terrain(global_position, _intention)
-	var vise := _intention * stats.vitesse * _intensite * terrain.z + Vector2(terrain.x, terrain.y)
+	if is_instance_valid(salle): terrain = salle.mouvement_terrain(global_position)
+	# Meme une commande legere au joystick permet de remonter le vent. Sans
+	# commande, la rafale peut faire deriver le heros sans interrompre son tir.
+	var influence_vent := clampf(_intensite,0.0,1.0) if _intention != Vector2.ZERO else 1.0
+	var vise := (_intention * _intensite * terrain.z + Vector2(terrain.x, terrain.y) * influence_vent) * stats.vitesse
 	var reponse := Reglages.HEROS_ACCELERATION if vise != Vector2.ZERO else Reglages.HEROS_FREINAGE
 	velocity = velocity.move_toward(vise, reponse * delta)
 	move_and_slide()
 	global_position = Geometrie.contraindre_dans_rect(global_position, limites, Reglages.HEROS_RAYON)
 
 func peut_tirer() -> bool:
-	var salle := get_tree().get_first_node_in_group("salle")
-	return not is_instance_valid(salle) or not salle.tir_bloque_par_terrain(global_position)
+	return not stats.est_mort()
 
 func _process(delta: float) -> void:
 	if not peut_tirer():

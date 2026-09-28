@@ -44,11 +44,9 @@ static func dessiner(ennemi: Node2D, rayon: float) -> bool:
 		_trait(ennemi, Vector2.ZERO, destination)
 		return true
 	if etat == "preparer":
-		var longueur := float(d["vitesse"]) * float(d.get("duree_charge", EvolutionEnnemis.ELAN_DUREE)) * float(ennemi._facteur_vitesse())
-		if str(d["cerveau"]) == "rampant": longueur *= EvolutionEnnemis.ELAN_VITESSE
 		var direction: Vector2 = ennemi._direction_charge
 		var largeur := rayon * Reglages.ENNEMI_HITBOX_MULT
-		var fin := direction * longueur
+		var fin: Vector2 = ennemi._charge.fin - ennemi.global_position
 		ennemi.draw_line(Vector2.ZERO, fin, Color(danger,.22), largeur * 2.0, true)
 		for cote in [-1.0, 1.0]:
 			var decalage := direction.orthogonal() * largeur * float(cote)
@@ -171,11 +169,9 @@ static func _contact_boss(boss: Node2D) -> void:
 	boss.draw_arc(Vector2.ZERO, rayon * progression, debut, debut + arc, 48, Rendu.ANNONCE_COULEUR, 3.0, true)
 
 static func dessiner_charge_boss(boss: Node2D) -> void:
-	var duree := float(Reglages.BOSS_DUREES_MOTIFS["charge"]) - BestiaireMondes.BOSS_CHARGE_ANNONCE
-	var longueur := minf(AttaquesContactBoss.CHARGE_DISTANCE_MAX, float(boss.donnees["vitesse"]) * BestiaireMondes.BOSS_CHARGE_VITESSE * Reglages.ENNEMI_VITESSE_MULT * float(boss._facteur_ralentissement()) * duree)
 	var direction: Vector2 = boss._direction_charge
 	var largeur := float(boss.donnees["rayon"]) * Reglages.BOSS_HITBOX_MULT
-	var fin := direction * longueur
+	var fin: Vector2 = boss._charge.fin - boss.global_position
 	boss.draw_line(Vector2.ZERO, fin, Color(Rendu.ANNONCE_COULEUR, .22), largeur * 2.0, true)
 	for cote in [-1.0, 1.0]:
 		var decalage := direction.orthogonal() * largeur * float(cote)

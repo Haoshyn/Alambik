@@ -18,6 +18,7 @@ var _conteneur_pages: Control
 var _page_actuelle: Control
 var _navigation: NavigationPrincipale
 var _superposition: Control
+var _campagne_suspendue: Control
 var _transition_page := false
 var _page := 2
 var _lancement := false
@@ -54,6 +55,10 @@ func _ready() -> void:
 	if "--ouvrir-reglages" in OS.get_cmdline_user_args():
 		call_deferred("_ouvrir_reglages")
 	Capture.programmer(self)
+	# Point d'entree amovible : aucun systeme du jeu ne depend de cet outil.
+	var outil_temporaire := "res://dev_temporaire/entree.gd"
+	if ResourceLoader.exists(outil_temporaire):
+		add_child((load(outil_temporaire) as GDScript).new())
 
 func _configurer_rendu_lisse() -> void:
 	var vue := get_viewport()
@@ -226,6 +231,8 @@ func _ouvrir_campagne() -> void:
 	var selection := SELECTION_GRIMOIRE.instantiate()
 	selection.selection_seulement = true
 	selection.set_meta("carte_campagne", true)
+	selection.reglages.connect(_ouvrir_reglages)
+	selection.page_demandee.connect(_afficher_page)
 	_ouvrir_superposition(selection)
 
 func _ouvrir_mine() -> void:
@@ -249,6 +256,14 @@ func _ouvrir_epreuves() -> void:
 	_ouvrir_superposition(selection)
 
 func _ouvrir_reglages() -> void:
+	if _lancement or _transition_page:
+		return
+	if is_instance_valid(_superposition) and bool(_superposition.get_meta("carte_campagne", false)):
+		# Conserver le monde consulte et le defilement au retour des parametres.
+		_campagne_suspendue = _superposition
+		_campagne_suspendue.hide()
+		_campagne_suspendue.process_mode = Node.PROCESS_MODE_DISABLED
+		_superposition = null
 	_ouvrir_superposition(REGLAGES.instantiate())
 
 func _ouvrir_superposition(panneau: Control) -> void:
@@ -275,6 +290,16 @@ func _fermer_superposition(panneau: Control) -> void:
 		return
 	_superposition = null
 	panneau.queue_free()
+	if is_instance_valid(_campagne_suspendue):
+		_superposition = _campagne_suspendue
+		_campagne_suspendue = null
+		_superposition.show()
+		_superposition.process_mode = Node.PROCESS_MODE_INHERIT
+		_superposition.call("rafraichir")
+		_navigation.process_mode = Node.PROCESS_MODE_INHERIT
+		move_child(_navigation, get_child_count() - 1)
+		_fond_menu.presenter_superposition(true, true)
+		return
 	if bool(panneau.get_meta("carte_campagne", false)) and _page_actuelle is AccueilClairiere:
 		(_page_actuelle as AccueilClairiere).presenter_campagne(false)
 	_fond_menu.presenter_superposition(false)
@@ -290,7 +315,7 @@ func _notification(quoi: int) -> void:
 	if is_instance_valid(_page_actuelle) and _page_actuelle.has_method("fermer_fiche") and bool(_page_actuelle.call("fermer_fiche")):
 		return
 	if _superposition != null and is_instance_valid(_superposition):
-		if bool(_superposition.get("obligatoire")): return
+		if _superposition.get("obligatoire") == true: return
 		var cible := _superposition
 		StyleInterface.sortir_puis(cible, _fermer_superposition.bind(cible))
 	elif _page != 2:

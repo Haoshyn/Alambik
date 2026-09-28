@@ -31,7 +31,8 @@ func _poursuivre(ennemi: CharacterBody2D) -> void:
 	if str(ennemi._etat) == "repos_contact":
 		if float(ennemi._minuterie) <= 0.0: ennemi._etat = "repos"
 		return
-	if distance <= portee and float(ennemi._recharge_contact) <= 0.0:
+	if distance <= portee and float(ennemi._recharge_contact) <= 0.0 \
+			and Geometrie.ligne_libre(ennemi.global_position, ennemi._cible.global_position, ennemi.get_parent().obstacles()):
 		ennemi._etat = "frappe"
 		ennemi._minuterie = float(ennemi.donnees.get("telegraphe_contact", Reglages.ENNEMI_CONTACT_ANNONCE))
 		ennemi._direction_charge = ennemi.global_position.direction_to(ennemi._cible.global_position)
@@ -115,8 +116,12 @@ static func configurer_tir(tir: Tir, d: Dictionary) -> void:
 func destination_phase(ennemi: CharacterBody2D) -> Vector2:
 	var cible: Vector2 = ennemi._cible.global_position
 	var radial := cible.direction_to(ennemi.global_position)
+	if radial.is_zero_approx(): radial = Vector2.UP
 	var salle := ennemi.get_parent()
-	for angle: float in BestiaireMondes.ANGLES_PHASE:
-		var point := cible + radial.rotated(angle) * float(ennemi.donnees["portee"])
-		if salle._place_libre(point): return point
-	return ennemi.global_position
+	var rayon := float(ennemi.donnees["rayon"])
+	for distance: float in BestiaireMondes.DISTANCES_PHASE:
+		for angle: float in BestiaireMondes.ANGLES_PHASE:
+			var point := cible + radial.rotated(angle) * float(ennemi.donnees["portee"]) * distance
+			if point.distance_to(ennemi.global_position) < BestiaireMondes.PHASE_DEPLACEMENT_MIN: continue
+			if salle._place_libre(point, rayon) and Geometrie.ligne_libre(point, cible, salle.obstacles()): return point
+	return Vector2.INF

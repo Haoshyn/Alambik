@@ -203,6 +203,22 @@ Les cœurs et Moisson vitale utilisent le soin garanti, distinct du plafond des 
 
 En Mine aussi, les niveaux ne donnent aucun soin automatique. Les cœurs convertis donnent un montant fixe de Gouttes, sans multiplicateur d’équipement ni d’augment ; ces recettes ne sont pas incluses dans le parcours économique, qui ne simule pas les blessures ni les trajets.
 
+## Terrains des cinq mondes
+
+Ces terrains apparaissent dans certaines salles ordinaires de campagne. Ils laissent libres l’entrée, la sortie et le passage central ; les salles de boss et les modes annexes gardent leur configuration. Les flaques ont des contours et des tailles variables, identiques entre deux visites de la même salle.
+
+| Monde | Effet sur le héros |
+| --- | --- |
+| Encre | Vitesse à 70 % dans la flaque ; tirs conservés |
+| Terre | Vitesse de 80 % à 60 % en 2,5 s ; retour à la normale en sortant |
+| Eau | Vitesse à 70 % dans la flaque ; tirs conservés |
+| Air | Poussée jusqu’à 30 % de la vitesse : 70 % face au vent, 130 % vent dans le dos, à pleine commande |
+| Feu | 6 % des PV maximum en dégâts bruts toutes les 1,2 s ; défense, bouclier et invulnérabilité habituels |
+
+Délai d’entrée en salle : 1,5 s. Les effets cessent à l’ouverture du portail. Les ralentissements ne s’additionnent pas entre flaques.
+
+Vent : 7 s de calme puis 4 s de rafale, avec une indication de direction 0,8 s avant. La poussée monte en 0,6 s et retombe en 0,8 s. La direction change entre les rafales ; le vent déplace aussi un héros à l’arrêt, sans annuler son tir automatique ni traverser les obstacles. Les effets réduits figent seulement le déplacement des traits visuels.
+
 ## Retour offensif après les premières Épreuves
 
 24 comptes avec graines fixes : échec imposé en salle 9 du chapitre 1, puis victoire au même chapitre, suivie de zéro, cinq ou six victoires dans l’Épreuve 1. Ces victoires sont les hypothèses du scénario demandé ; aucun taux de réussite humain n’est déduit.
@@ -217,18 +233,18 @@ Un projectile désigne un seul impact. Une attaque complète additionne les salv
 
 | Victoires Épreuve 1 | Chapitre | DPS permanent | Projectiles à l’entrée | Monstres en 1 projectile | Monstres en 1 attaque | Boss final, s | Contacts minimum |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 0 | 2 | 33,8 | 5 | 0 % | 0 % | 22,5 | 2,1 |
-| 0 | 3 | 33,8 | 7 | 0 % | 0 % | 33,1 | 2 |
-| 0 | 4 | 33,8 | 8 | 0 % | 0 % | 37,5 | 1,9 |
-| 0 | 7 | 33,8 | 11 | 0 % | 0 % | 72,4 | 1,7 |
-| 5 | 2 | 42,3 | 4 | 0 % | 0 % | 18,2 | 2,1 |
-| 5 | 3 | 42,3 | 6 | 0 % | 0 % | 26,7 | 2 |
-| 5 | 4 | 42,3 | 7 | 0 % | 0 % | 30,2 | 1,9 |
-| 5 | 7 | 42,3 | 9 | 0 % | 0 % | 58,4 | 1,7 |
-| 6 | 2 | 42,8 | 4 | 0 % | 0 % | 18 | 2,1 |
-| 6 | 3 | 42,8 | 6 | 0 % | 0 % | 26,5 | 2 |
-| 6 | 4 | 42,8 | 7 | 0 % | 0 % | 30 | 1,9 |
-| 6 | 7 | 42,8 | 9 | 0 % | 0 % | 58 | 1,7 |
+| 0 | 2 | 33,8 | 5 | 0 % | 0 % | 45 | 2,1 |
+| 0 | 3 | 33,8 | 7 | 0 % | 0 % | 66,1 | 2 |
+| 0 | 4 | 33,8 | 8 | 0 % | 0 % | 75 | 1,9 |
+| 0 | 7 | 33,8 | 11 | 0 % | 0 % | 144,8 | 1,7 |
+| 5 | 2 | 42,3 | 4 | 0 % | 0 % | 36,3 | 2,1 |
+| 5 | 3 | 42,3 | 6 | 0 % | 0 % | 53,3 | 2 |
+| 5 | 4 | 42,3 | 7 | 0 % | 0 % | 60,5 | 1,9 |
+| 5 | 7 | 42,3 | 9 | 0 % | 0 % | 116,8 | 1,7 |
+| 6 | 2 | 42,8 | 4 | 0 % | 0 % | 36,1 | 2,1 |
+| 6 | 3 | 42,8 | 6 | 0 % | 0 % | 53 | 2 |
+| 6 | 4 | 42,8 | 7 | 0 % | 0 % | 60,1 | 1,9 |
+| 6 | 7 | 42,8 | 9 | 0 % | 0 % | 116 | 1,7 |
 
 ### Enchaîner réellement les chapitres après six Épreuves
 
@@ -236,15 +252,17 @@ Cette fois, les achats et récompenses sont conservés entre deux chapitres. Le 
 
 | Chapitre | Monstres en 1 attaque | Boss final, s | Contacts minimum |
 | --- | --- | --- | --- |
-| 2 | 0 % | 18 | 2,1 |
-| 3 | 0 % | 26,3 | 2,1 |
-| 4 | 0 % | 25,5 | 2,1 |
-| 5 | 0 % | 24,9 | 2 |
-| 6 | 0 % | 30,4 | 1,9 |
-| 7 | 0 % | 36,7 | 1,9 |
-| 8 | 0 % | 27,8 | 1,8 |
+| 2 | 0 % | 36,1 | 2,1 |
+| 3 | 0 % | 52,6 | 2,1 |
+| 4 | 0 % | 51 | 2,1 |
+| 5 | 0 % | 49,9 | 2 |
+| 6 | 0 % | 60,9 | 1,9 |
+| 7 | 0 % | 73,2 | 1,9 |
+| 8 | 0 % | 54,1 | 1,8 |
 
-Sans autre farm après les six Épreuves, **24 comptes sur 24** ne rencontrent aucun boss dépassant 120 secondes sur les 35 chapitres. Cela mesure uniquement leur puissance de tir, en supposant qu’ils survivent.
+Sans autre farm après les six Épreuves, **14 comptes sur 24** ne rencontrent aucun boss dépassant 120 secondes sur les 35 chapitres. Cela mesure uniquement leur puissance de tir, en supposant qu’ils survivent.
+
+Parmi les comptes qui rencontrent ce seuil de durée, le premier apparaît au chapitre médian **8,5 [P10 6,9 ; P90 14,7]**.
 
 Ce parcours offensif ignore volontairement le seuil de trois contacts pour isoler la puissance de tir. Les contacts minimum ci-dessus retiennent le monstre ordinaire le plus dangereux rencontré, hors élites. Les soins, esquives et blessures ne sont pas simulés.
 
@@ -264,31 +282,31 @@ Les lignes donnent des médianes de comptes, plus le P90 du taux avec critiques 
 
 | Parcours | Chapitre | Attaques par monstre | En 1 attaque normale | Avec critiques : médiane / P90 | Contacts équivalents | Boss final, s |
 | --- | --- | --- | --- | --- | --- | --- |
-| Équilibré | 2 | 4 | 0 % | 0 % / 0 % | 6,8 | 28,7 |
-| Équilibré | 3 | 5 | 0 % | 0 % / 0 % | 7,5 | 41,6 |
-| Équilibré | 7 | 4,3 | 0 % | 0 % / 0 % | 7,7 | 62,3 |
-| Équilibré | 14 | 7 | 0 % | 0 % / 0 % | 8,1 | 86,3 |
-| Équilibré | 35 | 6 | 0 % | 0 % / 0 % | 5,7 | 58,1 |
-| Offensif | 2 | 3 | 0 % | 0 % / 0,1 % | 4,6 | 22,5 |
-| Offensif | 3 | 4 | 0 % | 0 % / 0 % | 4,8 | 31,2 |
-| Offensif | 7 | 4 | 0 % | 0 % / 2,4 % | 4,2 | 46,2 |
-| Offensif | 14 | 4 | 0 % | 0 % / 0 % | 3,4 | 48,9 |
-| Offensif | 35 | 3 | 0 % | 0,1 % / 3,3 % | 1,5 | 25,7 |
-| Offensif + deux défenses | 2 | 6 | 0 % | 0 % / 0 % | 8 | 46,1 |
-| Offensif + deux défenses | 3 | 7 | 0 % | 0 % / 0 % | 7,7 | 57,9 |
-| Offensif + deux défenses | 7 | 5 | 0 % | 0 % / 0 % | 7 | 98 |
-| Offensif + deux défenses | 14 | 6,8 | 0 % | 0 % / 0 % | 5,4 | 93,6 |
-| Offensif + deux défenses | 35 | 5 | 0 % | 0 % / 0 % | 2,4 | 42,4 |
-| Retour Épreuves | 2 | 3 | 0 % | 0,2 % / 7,3 % | 4,7 | 18 |
-| Retour Épreuves | 3 | 3,5 | 0 % | 0 % / 0,1 % | 4,9 | 26,3 |
-| Retour Épreuves | 7 | 3 | 0 % | 0 % / 7,3 % | 4,3 | 36,7 |
-| Retour Épreuves | 14 | 4 | 0 % | 0 % / 0,4 % | 3,4 | 43,4 |
-| Retour Épreuves | 35 | 3 | 0 % | 0,3 % / 11,4 % | 1,5 | 22,2 |
-| Sur-farm offensif | 2 | 2 | 7,2 % | 7,7 % / 35,2 % | 5,2 | 12,3 |
-| Sur-farm offensif | 3 | 3 | 0 % | 0,4 % / 4 % | 5,5 | 19,5 |
-| Sur-farm offensif | 7 | 3 | 0 % | 1 % / 11,3 % | 4,5 | 28,5 |
-| Sur-farm offensif | 14 | 3 | 0 % | 0 % / 1,1 % | 3,6 | 38,1 |
-| Sur-farm offensif | 35 | 3 | 0 % | 0,8 % / 13,2 % | 1,5 | 20,8 |
+| Équilibré | 2 | 4 | 0 % | 0 % / 0 % | 6,8 | 57,5 |
+| Équilibré | 3 | 5 | 0 % | 0 % / 0 % | 7,5 | 83,2 |
+| Équilibré | 7 | 4,3 | 0 % | 0 % / 0 % | 7,7 | 124,6 |
+| Équilibré | 14 | 7 | 0 % | 0 % / 0 % | 8,1 | 172,6 |
+| Équilibré | 35 | 6 | 0 % | 0 % / 0 % | 5,7 | 116,2 |
+| Offensif | 2 | 3 | 0 % | 0 % / 0,1 % | 4,6 | 45 |
+| Offensif | 3 | 4 | 0 % | 0 % / 0 % | 4,8 | 62,4 |
+| Offensif | 7 | 4 | 0 % | 0 % / 2,4 % | 4,2 | 92,4 |
+| Offensif | 14 | 4 | 0 % | 0 % / 0 % | 3,4 | 97,8 |
+| Offensif | 35 | 3 | 0 % | 0,1 % / 3,3 % | 1,5 | 51,4 |
+| Offensif + deux défenses | 2 | 6 | 0 % | 0 % / 0 % | 8 | 92,3 |
+| Offensif + deux défenses | 3 | 7 | 0 % | 0 % / 0 % | 7,7 | 115,7 |
+| Offensif + deux défenses | 7 | 5 | 0 % | 0 % / 0 % | 7 | 196 |
+| Offensif + deux défenses | 14 | 6,8 | 0 % | 0 % / 0 % | 5,4 | 187,2 |
+| Offensif + deux défenses | 35 | 5 | 0 % | 0 % / 0 % | 2,4 | 84,8 |
+| Retour Épreuves | 2 | 3 | 0 % | 0,2 % / 7,3 % | 4,7 | 36,1 |
+| Retour Épreuves | 3 | 3,5 | 0 % | 0 % / 0,1 % | 4,9 | 52,6 |
+| Retour Épreuves | 7 | 3 | 0 % | 0 % / 7,3 % | 4,3 | 73,3 |
+| Retour Épreuves | 14 | 4 | 0 % | 0 % / 0,4 % | 3,4 | 86,8 |
+| Retour Épreuves | 35 | 3 | 0 % | 0,3 % / 11,4 % | 1,5 | 44,3 |
+| Sur-farm offensif | 2 | 2 | 7,2 % | 7,7 % / 35,2 % | 5,2 | 24,5 |
+| Sur-farm offensif | 3 | 3 | 0 % | 0,4 % / 4 % | 5,5 | 39 |
+| Sur-farm offensif | 7 | 3 | 0 % | 1 % / 11,3 % | 4,5 | 57,1 |
+| Sur-farm offensif | 14 | 3 | 0 % | 0 % / 1,1 % | 3,6 | 76,2 |
+| Sur-farm offensif | 35 | 3 | 0 % | 0,8 % / 13,2 % | 1,5 | 41,5 |
 
 ### Annexes à leur premier déblocage
 
@@ -325,37 +343,37 @@ Huit graines fixes servent à décrire la dispersion des offres. Le compte du re
 
 | Situation | Run : médiane [P10–P90], min | Boss final : secondes | Contacts minimum équivalents |
 | --- | --- | --- | --- |
-| Compte neuf, chapitre 1 | 7,4 [6,8–9,2] | 18 [13,3–24,9] | 6,7 [6,3–7] |
-| Même chapitre après la première défaite | 7,2 [6,6–8,9] | 17,3 [12,8–23,9] | 7 [6,5–7,2] |
-| Permanent maximum, chapitre 35 | 7,4 [6,9–9] | 16,9 [12,5–22,8] | 9,9 [9,1–10,2] |
+| Compte neuf, chapitre 1 | 8,6 [7,9–10,8] | 36,1 [26,7–49,8] | 6,7 [6,3–7] |
+| Même chapitre après la première défaite | 8,3 [7,7–10,5] | 34,6 [25,6–47,8] | 7 [6,5–7,2] |
+| Permanent maximum, chapitre 35 | 8,2 [7,7–10,2] | 33,7 [24,9–45,7] | 9,9 [9,1–10,2] |
 
-Avec le panier classique fixe au maximum, le boss final du chapitre 35 représente **21,5 secondes** à 70 % de tir utile, pour 2 142,6 DPS théoriques. La cohorte ci-dessus utilise les vrais choix proposés au fil des runs, donc peut obtenir d’autres résultats.
+Avec le panier classique fixe au maximum, le boss final du chapitre 35 représente **43,1 secondes** à 70 % de tir utile, pour 2 142,6 DPS théoriques. La cohorte ci-dessus utilise les vrais choix proposés au fil des runs, donc peut obtenir d’autres résultats.
 
 | Tir utile, vagues et boss | Compte neuf, min | Retry, min | Maximum chapitre 35, min |
 | --- | --- | --- | --- |
-| 50 % | 9,1 [8,3–11,4] | 8,8 [8,1–11,1] | 8,9 [8,3–11,1] |
-| 80 % | 6,5 [6–8] | 6,3 [5,9–7,7] | 6,5 [6,2–7,9] |
+| 50 % | 10,8 [9,9–13,7] | 10,4 [9,5–13,2] | 10 [9,4–12,7] |
+| 80 % | 7,6 [7–9,4] | 7,3 [6,8–9,1] | 7,2 [6,8–8,9] |
 
 ### Parcours et premier besoin de renforcement
 
-Sans annexe ni replay volontaire après la première défaite, huit comptes rencontrent leur premier seuil de confort au chapitre médian **17,5 [P10 7 ; P90 36]**. Ces rangs de chapitre décrivent les huit exemples ; ils ne sont pas une probabilité de défaite.
+Sans annexe ni replay volontaire après la première défaite, huit comptes rencontrent leur premier seuil de confort au chapitre médian **3 [P10 2 ; P90 5,6]**. Ces rangs de chapitre décrivent les huit exemples ; ils ne sont pas une probabilité de défaite.
 
 | Méthode | Chapitres validés par le modèle | Niveau du compte | Runs campagne / Mine / Épreuve | Temps total, min | Plus long farm, min | Plus long farm + échecs, min |
 | --- | --- | --- | --- | --- | --- | --- |
-| Sans farm | 35 | 20 | 36 / 0 / 0 | 870,4 | 0 | 0 |
-| Lots selon le gain attendu, choix équilibrés | 35 | 20 | 36 / 0 / 0 | 870,4 | 0 | 0 |
-| Choix défensifs après un manque de survie | 35 | 20 | 36 / 0 / 0 | 870,4 | 0 | 0 |
-| Comparatif imposé : 3 replays + 3 Mines + 3 Épreuves | 35 | 20 | 36 / 0 / 0 | 870,4 | 0 | 0 |
+| Sans farm | 3 | 7 | 5 / 0 / 0 | 66,7 | 0 | 0 |
+| Lots selon le gain attendu, choix équilibrés | 35 | 24 | 46 / 18 / 12 | 847,1 | 44,3 | 73,8 |
+| Choix défensifs après un manque de survie | 35 | 24 | 46 / 18 / 12 | 847,1 | 44,3 | 73,8 |
+| Comparatif imposé : 3 replays + 3 Mines + 3 Épreuves | 35 | 25 | 52 / 12 / 12 | 985,6 | 91,2 | 95,7 |
 
 Le comparatif de neuf runs impose volontairement un gros lot : il ne constitue pas une obligation de jeu. La politique équilibrée reste la référence ; toutes les victoires et défaites du tableau pilotent réellement les coffres reçus.
 
 | Graine du compte équilibré | Chapitres | Niveau final | Farm maximum, min | Farm + échecs maximum, min |
 | --- | --- | --- | --- | --- |
-| 20260927 | 35 | 20 | 0 | 0 |
-| 20261936 | 35 | 21 | 19,3 | 38,2 |
-| 20262945 | 35 | 21 | 17,8 | 49,2 |
+| 20260927 | 35 | 24 | 44,3 | 73,8 |
+| 20261936 | 35 | 25 | 35,1 | 72,5 |
+| 20262945 | 35 | 25 | 21,2 | 86,1 |
 
-Avec un seuil de boss abaissé de 120 à 90 secondes, le compte de référence sans farm rencontre ce critère dès le chapitre 10. Le choix du seuil change donc le diagnostic ; aucune formule ne garantit une réussite en deux essais.
+Avec un seuil de boss abaissé de 120 à 90 secondes, le compte de référence sans farm rencontre ce critère dès le chapitre 2. Le choix du seuil change donc le diagnostic ; aucune formule ne garantit une réussite en deux essais.
 
 ### Compte de référence : ce qui finance chaque chapitre
 
@@ -363,41 +381,41 @@ Les achats indiquent des rangs de maîtrise / forge effectivement payés pendant
 
 | Chapitre | Niveau | Achats M / F | Mines / Épreuves / replays | Farm, min | Tentatives, min | Boss final, s | Contacts minimum |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 1 → 4 | 7 / 2 | 0 / 0 / 0 | 0 | 9,8 | 13,4 | 6,8 |
-| 2 | 4 → 6 | 4 / 1 | 0 / 0 / 0 | 0 | 24 | 54,2 | 7,6 |
-| 3 | 6 → 7 | 3 / 1 | 0 / 0 / 0 | 0 | 20,6 | 52,3 | 6,8 |
-| 4 | 7 → 8 | 3 / 2 | 0 / 0 / 0 | 0 | 33,9 | 77,6 | 7,7 |
-| 5 | 8 → 9 | 4 / 1 | 0 / 0 / 0 | 0 | 29,5 | 58,8 | 8,5 |
-| 6 | 9 → 9 | 5 / 2 | 0 / 0 / 0 | 0 | 26,4 | 45,1 | 8,4 |
-| 7 | 9 → 10 | 2 / 2 | 0 / 0 / 0 | 0 | 29,1 | 88,9 | 7,7 |
-| 8 | 10 → 11 | 4 / 1 | 0 / 0 / 0 | 0 | 25 | 52,3 | 7,9 |
-| 9 | 11 → 11 | 2 / 1 | 0 / 0 / 0 | 0 | 39,2 | 83,3 | 9,2 |
-| 10 | 11 → 12 | 3 / 1 | 0 / 0 / 0 | 0 | 37,9 | 82,1 | 7,4 |
-| 11 | 12 → 12 | 2 / 1 | 0 / 0 / 0 | 0 | 26,9 | 62,4 | 8,4 |
-| 12 | 12 → 13 | 3 / 2 | 0 / 0 / 0 | 0 | 22,9 | 38 | 6,1 |
-| 13 | 13 → 13 | 3 / 1 | 0 / 0 / 0 | 0 | 22,4 | 41 | 8,1 |
-| 14 | 13 → 14 | 3 / 1 | 0 / 0 / 0 | 0 | 28,3 | 92,8 | 7 |
-| 15 | 14 → 14 | 3 / 3 | 0 / 0 / 0 | 0 | 33,2 | 76,5 | 8 |
-| 16 | 14 → 14 | 4 / 1 | 0 / 0 / 0 | 0 | 24,6 | 45,3 | 7,4 |
-| 17 | 14 → 15 | 4 / 1 | 0 / 0 / 0 | 0 | 29,6 | 60 | 7,8 |
-| 18 | 15 → 15 | 4 / 1 | 0 / 0 / 0 | 0 | 26,3 | 59 | 7 |
-| 19 | 15 → 16 | 2 / 2 | 0 / 0 / 0 | 0 | 22,4 | 44,8 | 5,2 |
-| 20 | 16 → 16 | 4 / 1 | 0 / 0 / 0 | 0 | 22,7 | 45,1 | 6,8 |
-| 21 | 16 → 16 | 7 / 2 | 0 / 0 / 0 | 0 | 22,1 | 77,3 | 5,8 |
-| 22 | 16 → 17 | 6 / 1 | 0 / 0 / 0 | 0 | 32,7 | 75,5 | 5,8 |
-| 23 | 17 → 17 | 3 / 1 | 0 / 0 / 0 | 0 | 29,9 | 75,5 | 6,4 |
-| 24 | 17 → 17 | 3 / 3 | 0 / 0 / 0 | 0 | 31,9 | 77 | 6,6 |
-| 25 | 17 → 18 | 4 / 1 | 0 / 0 / 0 | 0 | 18,1 | 37,9 | 5,5 |
-| 26 | 18 → 18 | 4 / 3 | 0 / 0 / 0 | 0 | 18,2 | 31,7 | 5,9 |
-| 27 | 18 → 18 | 4 / 2 | 0 / 0 / 0 | 0 | 18,4 | 37,2 | 6 |
-| 28 | 18 → 19 | 7 / 3 | 0 / 0 / 0 | 0 | 20,4 | 60,7 | 6,3 |
-| 29 | 19 → 19 | 2 / 2 | 0 / 0 / 0 | 0 | 31,1 | 63,8 | 6,4 |
-| 30 | 19 → 19 | 5 / 1 | 0 / 0 / 0 | 0 | 17,1 | 31,5 | 5,1 |
-| 31 | 19 → 19 | 3 / 3 | 0 / 0 / 0 | 0 | 22,8 | 48,1 | 4,6 |
-| 32 | 19 → 20 | 5 / 1 | 0 / 0 / 0 | 0 | 20,9 | 59,4 | 5,4 |
-| 33 | 20 → 20 | 3 / 2 | 0 / 0 / 0 | 0 | 12,9 | 22,2 | 4,4 |
-| 34 | 20 → 20 | 4 / 1 | 0 / 0 / 0 | 0 | 17,2 | 31,8 | 4,5 |
-| 35 | 20 → 20 | 7 / 1 | 0 / 0 / 0 | 0 | 21,8 | 40,6 | 5,8 |
+| 1 | 1 → 4 | 7 / 2 | 0 / 0 / 0 | 0 | 11,3 | 26,7 | 6,8 |
+| 2 | 4 → 6 | 4 / 1 | 0 / 0 / 0 | 0 | 27,3 | 108,4 | 7,6 |
+| 3 | 6 → 7 | 3 / 1 | 0 / 0 / 0 | 0 | 23,6 | 104,7 | 6,8 |
+| 4 | 7 → 9 | 6 / 1 | 0 / 3 / 0 | 4,4 | 25,9 | 79,9 | 7,6 |
+| 5 | 9 → 10 | 5 / 1 | 0 / 3 / 0 | 4,4 | 25,5 | 61,6 | 8,4 |
+| 6 | 10 → 13 | 7 / 17 | 6 / 3 / 0 | 44,3 | 47,6 | 61,1 | 8,3 |
+| 7 | 13 → 14 | 3 / 1 | 0 / 0 / 0 | 0 | 21,3 | 103,4 | 8,8 |
+| 8 | 14 → 14 | 1 / 2 | 0 / 0 / 0 | 0 | 25,4 | 86,4 | 9,4 |
+| 9 | 14 → 15 | 3 / 11 | 3 / 0 / 0 | 17,7 | 20,8 | 51,1 | 8,8 |
+| 10 | 15 → 16 | 2 / 5 | 0 / 0 / 0 | 0 | 21,5 | 63,9 | 9,2 |
+| 11 | 16 → 16 | 3 / 0 | 0 / 0 / 0 | 0 | 23,4 | 62,6 | 12 |
+| 12 | 16 → 16 | 2 / 3 | 0 / 0 / 0 | 0 | 16,4 | 48,3 | 9,7 |
+| 13 | 16 → 17 | 3 / 1 | 0 / 0 / 0 | 0 | 24,8 | 100,2 | 11,6 |
+| 14 | 17 → 18 | 6 / 20 | 3 / 0 / 0 | 17,1 | 32,4 | 68,1 | 9 |
+| 15 | 18 → 18 | 2 / 0 | 0 / 0 / 0 | 0 | 20,1 | 104,4 | 10,2 |
+| 16 | 18 → 18 | 2 / 3 | 0 / 0 / 0 | 0 | 12,9 | 41,5 | 9,2 |
+| 17 | 18 → 18 | 1 / 1 | 0 / 0 / 0 | 0 | 17,5 | 60,9 | 9,9 |
+| 18 | 18 → 19 | 5 / 1 | 0 / 0 / 0 | 0 | 18,6 | 77,4 | 9,9 |
+| 19 | 19 → 19 | 5 / 1 | 0 / 0 / 0 | 0 | 16,2 | 57,6 | 8,5 |
+| 20 | 19 → 19 | 7 / 1 | 0 / 0 / 0 | 0 | 18,8 | 75,8 | 8,2 |
+| 21 | 19 → 20 | 6 / 0 | 0 / 0 / 0 | 0 | 17,9 | 91,7 | 8,1 |
+| 22 | 20 → 20 | 3 / 1 | 0 / 0 / 0 | 0 | 20 | 71,8 | 9,3 |
+| 23 | 20 → 21 | 5 / 24 | 3 / 0 / 0 | 16,8 | 24,9 | 73,2 | 8,9 |
+| 24 | 21 → 21 | 3 / 1 | 0 / 0 / 0 | 0 | 16,5 | 47,3 | 9,7 |
+| 25 | 21 → 21 | 2 / 0 | 0 / 0 / 0 | 0 | 13,4 | 43,7 | 7,3 |
+| 26 | 21 → 21 | 4 / 1 | 0 / 0 / 0 | 0 | 15,1 | 57,6 | 9,1 |
+| 27 | 21 → 22 | 6 / 0 | 0 / 0 / 0 | 0 | 22,4 | 64,3 | 9,1 |
+| 28 | 22 → 22 | 7 / 23 | 3 / 0 / 0 | 16,9 | 34,6 | 62,7 | 8,3 |
+| 29 | 22 → 23 | 5 / 1 | 0 / 0 / 0 | 0 | 9,2 | 22 | 5,5 |
+| 30 | 23 → 23 | 2 / 1 | 0 / 0 / 0 | 0 | 11,7 | 26,9 | 8,1 |
+| 31 | 23 → 23 | 4 / 0 | 0 / 0 / 0 | 0 | 9,6 | 23,6 | 6,7 |
+| 32 | 23 → 23 | 3 / 1 | 0 / 0 / 0 | 0 | 10,1 | 31,6 | 6,6 |
+| 33 | 23 → 24 | 6 / 0 | 0 / 0 / 0 | 0 | 12,5 | 42,5 | 7,6 |
+| 34 | 24 → 24 | 4 / 1 | 0 / 0 / 0 | 0 | 10,7 | 40,4 | 6,3 |
+| 35 | 24 → 24 | 10 / 1 | 0 / 3 / 0 | 4,4 | 41,5 | 63,3 | 8 |
 
 ### Temps supplémentaire aux seuils de confort
 
@@ -405,6 +423,14 @@ Le farm inclut les replays terminés ou ratés du chapitre précédent. Les éch
 
 | Chapitre | Mines / Épreuves / replays | Farm, min | Échecs, min | Somme avant succès, min | Gain DPS / PV effectifs |
 | --- | --- | --- | --- | --- | --- |
+| 4 | 0 / 3 / 0 | 4,4 | 4,5 | 8,9 | ×1,11 / ×1,07 |
+| 5 | 0 / 3 / 0 | 4,4 | 4,7 | 9,1 | ×1,05 / ×1,05 |
+| 6 | 6 / 3 / 0 | 44,3 | 29,5 | 73,8 | ×1,34 / ×1,07 |
+| 9 | 3 / 0 / 0 | 17,7 | 4,3 | 22 | ×1,09 / ×1,18 |
+| 14 | 3 / 0 / 0 | 17,1 | 18,3 | 35,5 | ×1,17 / ×1 |
+| 23 | 3 / 0 / 0 | 16,8 | 8,3 | 25,1 | ×1,16 / ×1,04 |
+| 28 | 3 / 0 / 0 | 16,9 | 22 | 38,8 | ×1,22 / ×1,02 |
+| 35 | 0 / 3 / 0 | 4,4 | 24,4 | 28,8 | ×1,06 / ×1 |
 
 ### Hypothèses et limites
 
@@ -570,7 +596,7 @@ Les facteurs sont bornés à la dernière campagne. Ils ne lisent jamais les ach
 
 ### Élites, boss et modes annexes
 
-- **Élite** : PV ×2 ; dégâts ×2. **Miniboss** : PV ×1,6 ; dégâts ×1. **Boss signature** : PV ×1,75 ; dégâts ×1,1.
+- **Élite** : PV ×2 ; dégâts ×2. **Miniboss** : PV ×3,19 ; dégâts ×1. **Boss signature** : PV ×3,5 ; dégâts ×1,1.
 - **Épreuve** : même facteur de niveau, PV ×2,5 × (1 + 1)^t, dégâts ×1 × (1 + 0,45)^t. t va de 0 à 1 pendant les rencontres.
 - **Mine** : même facteur de niveau, PV ×0,75 × (1 + 2)^t, dégâts ×0,6 × (1 + 1)^t, t = temps / 300 s borné entre 0 et 1.
 - **Boss de Mine** : facteur supplémentaire PV ×2 et dégâts ×0,8. En Mine et Épreuve, tous les boss appliquent aussi ×0,45 PV ; pas les coefficients de rang de la campagne.
@@ -651,12 +677,12 @@ Cette comparaison accorde hypothétiquement toutes les victoires jusqu’au dern
 - **Attributs** : 25 Force, 35 Vitalité, 15 Agilité, 20 Intelligence. Aucun passif et aucun Cœur. Tous les achats sont finançables même avec les coffres minimum.
 - **Profil développé** : l’ensemble fixe du dernier monde présenté plus haut, avec effet d’anneau à son maximum. Les deux profils restent sans augment pour comparer leurs fondations.
 
-Dernière salle du dernier niveau : fragile 1 749,02 PV / 107,38 dégâts bruts ; boss 32 308,27 PV / 173,24 dégâts bruts.
+Dernière salle du dernier niveau : fragile 1 749,02 PV / 107,38 dégâts bruts ; boss 64 616,55 PV / 173,24 dégâts bruts.
 
 | Profil | DPS | PV effectifs | Impacts pour tuer le fragile | Contacts de fragile supportés | Coups de boss supportés | Secondes de tir idéal sur le boss |
 | --- | --- | --- | --- | --- | --- | --- |
-| Campagne seule, achats ci-dessus | 139,5 | 357,22 | 25,88 | 3,33 | 2,06 | 231,6 |
-| Profil développé par le farm | 470,6 | 682,82 | 9,05 | 6,36 | 3,94 | 68,65 |
+| Campagne seule, achats ci-dessus | 139,5 | 357,22 | 25,88 | 3,33 | 2,06 | 463,2 |
+| Profil développé par le farm | 470,6 | 682,82 | 9,05 | 6,36 | 3,94 | 137,31 |
 
 Moins de 1 coup supporté signifie qu’un seul coup tue, hors Sursis. Le temps sur le boss est théorique, avant augments et temps d’esquive.
 

@@ -120,6 +120,7 @@ func _process(delta: float) -> void:
 		var chapitre := Jeu.chapitre_courant()
 		_arene.construire(limites,charger,int(chapitre["monde"]),salle.contour_sol(), TerrainsMondes.variante(numero, Jeu.chapitre, Jeu.graine))
 		_reconstruire_obstacles()
+	_arene.avancer_ambiance(delta, ReglagesJoueur.effets_reduits)
 	for proxy in _proxies.values():
 		if is_instance_valid(proxy):
 			proxy.mettre_a_jour(delta)

@@ -24,7 +24,11 @@ La vitesse des tirs et la recharge progressent avec le niveau et l’avancée de
 
 La sentinelle tire à 4 500 px/s avant coefficients. Dès le début de l’annonce, elle fixe une visée anticipant la course pendant sa préparation et un vol plafonné à 1 100 px. Une course régulière est menacée à mi-distance ; changer de direction ou se couvrir permet l’esquive. À l’autre bout de la salle, le temps de vol laisse une marge latérale. Chaque éventail garde un trait central.
 
-Les boss apparaissent près du milieu, sur une place libre. Ils avancent, prennent un flanc ou tournent autour du joueur selon leur identité. Les monstres se rapprochent de leur distance d’attaque ; les tireurs fuyards gardent leur recul. Une charge exige une cible atteignable et une voie libre, y compris après la préparation et avant un enchaînement.
+Les boss apparaissent près du milieu, sur une place libre. Ils avancent, prennent un flanc ou tournent autour du joueur selon leur identité. Leurs motifs disponibles varient dans l’ordre selon la distance et les obstacles, sans répétition immédiate. Les mêlées ne s’arment qu’à portée et les approches ratées sont abandonnées.
+
+Les tireurs utilisent la portée réelle de leurs projectiles sans attendre leur distance de placement ; les tireurs fuyards gardent leur recul. Les phaseurs se téléportent aussi de loin, vers une place libre annoncée. Les invocateurs appellent à distance et restent capables de tirer une fois leurs renforts épuisés.
+
+Une charge exige une cible atteignable et une voie libre, y compris après la préparation et avant un enchaînement. Le déplacement suit exactement le segment annoncé, limité par les murs et obstacles. Un ralentissement empêchant de couvrir ce segment avant le départ annule la charge ; après le départ, il allonge le trajet dans le temps sans raccourcir sa distance.
 
 Les boomerangs des boss sont plus épais, saturés et bordés de sombre. Leur éventail compte 3 branches ; leur plafond de vitesse est 1 500 px/s avant progression, contre 625 px/s pour les monstres ordinaires. La portée totale couvre les deux trajets ; un mur provoque le retour.
 
@@ -96,7 +100,7 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 | Dégâts | 17 dégâts |
 | Vitesse | 684 px/s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
-| Durée de charge | 1,25 s |
+| Durée de charge en terrain libre | 1,25 s ; trajet annoncé arrêté au premier mur ou obstacle |
 | Portée de déclenchement | 1 139,96 px avant coefficients de niveau et ralentissements, hitboxes comprises |
 
 ### Variantes par monde
@@ -176,7 +180,7 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 | Dégâts | 33 dégâts |
 | Vitesse | 627 px/s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
-| Durée de charge | 1,6 s |
+| Durée de charge en terrain libre | 1,6 s ; trajet annoncé arrêté au premier mur ou obstacle |
 | Portée de déclenchement | 1 340,92 px avant coefficients de niveau et ralentissements, hitboxes comprises |
 
 ### Variantes par monde
@@ -346,15 +350,15 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 
 ### Attaque au contact : Balayage de griffes
 
-Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
+Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce commence à portée, avec une visée verrouillée et une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
 
 | Paramètre | Valeur |
 | --- | --- |
 | Approche maximale | 1,35 s |
-| Annonce | 0,85 s |
+| Annonce | 0,6 s |
 | Portée depuis le centre | 215 px |
 | Angle de frappe | 153° |
-| Récupération immobile | 1,65 s |
+| Récupération immobile | 1,1 s |
 
 ## La Faute vive
 
@@ -423,15 +427,15 @@ Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le
 
 ### Attaque au contact : Morsure de reliure
 
-Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
+Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce commence à portée, avec une visée verrouillée et une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
 
 | Paramètre | Valeur |
 | --- | --- |
 | Approche maximale | 1,65 s |
-| Annonce | 0,95 s |
+| Annonce | 0,65 s |
 | Portée depuis le centre | 245 px |
 | Angle de frappe | 108° |
-| Récupération immobile | 1,9 s |
+| Récupération immobile | 1,2 s |
 
 ## La Virgule noire
 
@@ -542,15 +546,15 @@ Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le
 
 ### Attaque au contact : Entaille du signet
 
-Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
+Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce commence à portée, avec une visée verrouillée et une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
 
 | Paramètre | Valeur |
 | --- | --- |
 | Approche maximale | 1,3 s |
-| Annonce | 0,8 s |
+| Annonce | 0,55 s |
 | Portée depuis le centre | 230 px |
 | Angle de frappe | 117° |
-| Récupération immobile | 1,8 s |
+| Récupération immobile | 1,15 s |
 
 ## Le Copiste aveugle
 
@@ -617,15 +621,15 @@ Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le
 
 ### Attaque au contact : Marteau de braise
 
-Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
+Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce commence à portée, avec une visée verrouillée et une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
 
 | Paramètre | Valeur |
 | --- | --- |
 | Approche maximale | 1,6 s |
-| Annonce | 1,1 s |
+| Annonce | 0,8 s |
 | Portée depuis le centre | 255 px |
 | Angle de frappe | 360° |
-| Récupération immobile | 2,1 s |
+| Récupération immobile | 1,4 s |
 
 ## La Reine du Givre
 
@@ -736,15 +740,15 @@ Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le
 
 ### Attaque au contact : Fauchage d’ombre
 
-Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
+Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce commence à portée, avec une visée verrouillée et une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
 
 | Paramètre | Valeur |
 | --- | --- |
 | Approche maximale | 1,35 s |
-| Annonce | 0,9 s |
+| Annonce | 0,65 s |
 | Portée depuis le centre | 255 px |
 | Angle de frappe | 162° |
-| Récupération immobile | 1,9 s |
+| Récupération immobile | 1,25 s |
 
 ## Le Gardien des Runes
 
@@ -769,15 +773,15 @@ Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le
 
 ### Attaque au contact : Poing de schiste
 
-Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
+Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce commence à portée, avec une visée verrouillée et une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
 
 | Paramètre | Valeur |
 | --- | --- |
 | Approche maximale | 2 s |
-| Annonce | 1,15 s |
+| Annonce | 0,8 s |
 | Portée depuis le centre | 285 px |
 | Angle de frappe | 144° |
-| Récupération immobile | 2,2 s |
+| Récupération immobile | 1,5 s |
 
 ## Le Dévoreur du Néant
 
@@ -802,15 +806,15 @@ Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le
 
 ### Attaque au contact : Morsure du néant
 
-Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
+Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce commence à portée, avec une visée verrouillée et une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
 
 | Paramètre | Valeur |
 | --- | --- |
 | Approche maximale | 1,65 s |
-| Annonce | 1,05 s |
+| Annonce | 0,75 s |
 | Portée depuis le centre | 275 px |
 | Angle de frappe | 126° |
-| Récupération immobile | 2,1 s |
+| Récupération immobile | 1,4 s |
 
 ## Le Grand Alambic
 
@@ -835,12 +839,12 @@ Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le
 
 ### Attaque au contact : Choc du creuset
 
-Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
+Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce commence à portée, avec une visée verrouillée et une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.
 
 | Paramètre | Valeur |
 | --- | --- |
 | Approche maximale | 1,8 s |
-| Annonce | 1,2 s |
+| Annonce | 0,85 s |
 | Portée depuis le centre | 280 px |
 | Angle de frappe | 360° |
-| Récupération immobile | 2,2 s |
+| Récupération immobile | 1,5 s |

@@ -252,8 +252,8 @@ const PLAFOND_ENNEMIS := 10
 
 # La courbe de chapitre porte la progression ; aucun second crescendo de PV.
 # Ces coefficients de campagne precedent la reserve d'endurance commune.
-const MINIBOSS_PV_MULT := 2.28
-const BOSS_SIGNATURE_PV_MULT := 2.50
+const MINIBOSS_PV_MULT := 4.56
+const BOSS_SIGNATURE_PV_MULT := 5.00
 # Reserve supplementaire commune a la campagne, la Mine et les Epreuves.
 const BOSS_ENDURANCE_MULT := 0.70
 const MINIBOSS_DEGATS_MULT := 1.00

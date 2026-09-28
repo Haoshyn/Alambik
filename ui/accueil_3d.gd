@@ -63,6 +63,8 @@ func presenter_campagne(ouverte: bool) -> void:
 	if ouverte:
 		_defilement_avant_campagne = _defilement.scroll_vertical
 		_defilement.scroll_vertical = 0
+	# La selection possede son bandeau interactif au-dessus de la page suspendue.
+	_bandeau.visible = not ouverte
 	_scene.visible = not ouverte
 	_depart.visible = not ouverte
 	if not ouverte:

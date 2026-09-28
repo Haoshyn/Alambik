@@ -1,97 +1,79 @@
 extends Node3D
 
+const SOL := preload("res://scripts/presentation/sol_alchimique.gd")
+const STATIQUE := preload("res://scripts/presentation/decor_statique.gd")
 var salle: Node2D
 var _source: Node2D
 var _visuels: Array[Node3D] = []
-
-func _materiau(teinte: Color, lumineux := false) -> StandardMaterial3D:
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = teinte
-	mat.roughness = .55
-	if teinte.a < 1.0: mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	if lumineux:
-		mat.emission_enabled = true
-		mat.emission = teinte
-		mat.emission_energy_multiplier = .45
-	return mat
-
-func _disque(parent: Node3D, rayon: float, teinte: Color, lumineux := false) -> void:
-	var instance := MeshInstance3D.new()
-	var forme := CylinderMesh.new()
-	forme.top_radius = rayon
-	forme.bottom_radius = rayon
-	forme.height = .025
-	forme.radial_segments = 24
-	instance.mesh = forme
-	instance.material_override = _materiau(teinte, lumineux)
-	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	parent.add_child(instance)
-
-func _anneau(parent: Node3D, rayon: float, epaisseur: float, hauteur: float, teinte: Color) -> MeshInstance3D:
-	var instance := MeshInstance3D.new()
-	var forme := TorusMesh.new()
-	forme.inner_radius = maxf(.01, rayon - epaisseur)
-	forme.outer_radius = rayon
-	forme.rings = 24
-	forme.ring_segments = 6
-	instance.mesh = forme
-	instance.position.y = hauteur
-	instance.material_override = _materiau(teinte)
-	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	parent.add_child(instance)
-	return instance
+var _matiere_vent: StandardMaterial3D
 
 func _construire() -> void:
-	for visuel in _visuels: visuel.queue_free()
+	for visuel in _visuels:
+		remove_child(visuel)
+		visuel.queue_free()
 	_visuels.clear()
+	_matiere_vent = null
 	if _source == null: return
 	for zone: Dictionary in _source.zones:
 		var ensemble := Node3D.new()
 		add_child(ensemble)
-		# Le dessin couvre le meme disque que la logique, malgre la camera inclinee.
-		ensemble.scale.z = 1.0 / sin(deg_to_rad(Pont3D.INCLINAISON))
-		var rayon := float(zone["rayon"]) * Pont3D.ECHELLE
-		var teinte: Color = zone["couleur"]
-		var type := str(zone["type"])
-		if type == "vent":
+		if str(zone["type"]) == "vent":
 			_construire_vent(ensemble, zone)
 		else:
-			_disque(ensemble, rayon, teinte.darkened(.2), type == "lave")
-			_anneau(ensemble, rayon, .035, .035, teinte.lightened(.15))
-			for i in 5:
-				var tache := Node3D.new()
-				var angle := i * TAU / 5.0
-				tache.position = Vector3(cos(angle) * rayon * .46, .026, sin(angle) * rayon * .46)
-				ensemble.add_child(tache)
-				_disque(tache, rayon * .27, teinte.lightened(.12 if i % 2 == 0 else -.05), type == "lave")
-			if type in ["eau", "sable"]:
-				var reflet := Color("a6e0e6") if type == "eau" else Color("b29360")
-				for i in 3: _anneau(ensemble, rayon * (.28 + i * .21), .016, .06, reflet)
+			_construire_flaque(ensemble, zone)
+			STATIQUE.regrouper(ensemble)
 		_visuels.append(ensemble)
 
-func _construire_vent(ensemble: Node3D, zone: Dictionary) -> void:
-	var direction: Vector2 = zone["direction"]
+func _construire_flaque(parent: Node3D, zone: Dictionary) -> void:
+	# La silhouette vient de la collision logique, sans disque plus large ni
+	# halo trompeur. Le relief reste sous les ombres au pied des personnages.
+	var contour := PackedVector2Array()
+	for point: Vector2 in zone["contour"]:
+		var p := Pont3D.vers_monde(point)
+		contour.append(Vector2(p.x,p.z))
 	var teinte: Color = zone["couleur"]
+	var type := str(zone["type"])
+	SOL.surface(parent, contour, -.003, teinte.darkened(.45 if type == "lave" else .30))
+	var interieur := PackedVector2Array()
+	for point in contour: interieur.append(point * .94)
+	var fond := SOL.surface(parent, interieur, -.0015, teinte)
+	var mat := fond.material_override as StandardMaterial3D
+	mat.roughness = .95 if type == "sable" else .34
+	if type == "lave":
+		mat.emission_enabled = true
+		mat.emission = teinte
+		mat.emission_energy_multiplier = .18
+	var rayon := float(zone["rayon"]) * Pont3D.ECHELLE
+	if type == "lave":
+		for i in 3:
+			var lignes := PackedVector2Array()
+			for j in 7:
+				lignes.append(Vector2(-.70 + j * .23,(i-1)*.35 + sin(j*1.4+i)*.11) * rayon)
+			SOL._ruban(parent, lignes, .045, interieur, 0, Color("ffc96e"))
+	else:
+		var reflet := teinte.lightened(.40) if type != "sable" else teinte.darkened(.16)
+		for i in 3:
+			var lignes := PackedVector2Array()
+			for j in 14:
+				var angle := j * .14 + i * 1.8
+				lignes.append(Vector2(cos(angle),sin(angle) / sin(deg_to_rad(Pont3D.INCLINAISON))) * rayon * (.26 + i * .19))
+			SOL._ruban(parent, lignes, .015 if type == "sable" else .026, interieur, 0, reflet)
+
+func _construire_vent(ensemble: Node3D, zone: Dictionary) -> void:
+	_matiere_vent = StandardMaterial3D.new()
+	_matiere_vent.albedo_color = zone["couleur"]
+	_matiere_vent.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_matiere_vent.roughness = .7
 	for i in 9:
 		var trace_vent := Node3D.new()
-		var origine := Vector3((.18 + (i % 3) * .32 - .5) * salle.limites.size.x * Pont3D.ECHELLE, .16,
-			(.22 + (i / 3) * .27 - .5) * salle.limites.size.y * Pont3D.ECHELLE)
+		var relatif := Vector2(.18 + (i % 3) * .32 - .5, .22 + floori(i / 3.0) * .27 - .5)
+		var origine := Pont3D.vers_monde(relatif * salle.limites.size, .002)
 		trace_vent.position = origine
-		trace_vent.rotation.y = -direction.angle()
 		trace_vent.set_meta("origine", origine)
 		ensemble.add_child(trace_vent)
-		for morceau in 3:
-			var barre := MeshInstance3D.new()
-			var forme := BoxMesh.new()
-			forme.size = Vector3(.46 if morceau == 0 else .16, .012, .018)
-			barre.mesh = forme
-			barre.material_override = _materiau(Color(teinte, .55))
-			barre.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			if morceau > 0:
-				var cote := -1.0 if morceau == 1 else 1.0
-				barre.position = Vector3(.18, 0, cote * .05)
-				barre.rotation.y = cote * .6
-			trace_vent.add_child(barre)
+		var forme := PackedVector2Array([Vector2(-.40,-.023),Vector2(.13,-.023),Vector2(.04,-.14),Vector2(.32,0),Vector2(.04,.14),Vector2(.13,.023),Vector2(-.40,.023)])
+		var objet := SOL.surface(trace_vent, forme, 0, Color.WHITE)
+		objet.material_override = _matiere_vent
 
 func mettre_a_jour(_delta: float) -> void:
 	if not is_instance_valid(salle): return
@@ -104,12 +86,20 @@ func mettre_a_jour(_delta: float) -> void:
 		var zone: Dictionary = _source.zones[i]
 		var position_zone: Vector2 = zone["position"]
 		var visuel := _visuels[i]
-		visuel.position = Pont3D.vers_monde(position_zone, .04)
-		if str(zone["type"]) == "vent":
-			var direction: Vector2 = zone["direction"]
-			var index := 0
-			for trace_vent in visuel.get_children():
-				var origine: Vector3 = trace_vent.get_meta("origine")
-				var avance := 0.0 if ReglagesJoueur.effets_reduits else fposmod(float(_source.temps) * .38 + index * .17, .60) - .30
-				trace_vent.position = origine + Vector3(direction.x, 0, direction.y) * avance
-				index += 1
+		visuel.position = Pont3D.vers_monde(position_zone)
+		if str(zone["type"]) != "vent": continue
+		var vent: Dictionary = _source.etat_vent()
+		var force := float(vent["force"])
+		visuel.visible = force > 0.0 or bool(vent["annonce"])
+		var teinte: Color = zone["couleur"]
+		teinte.a = .25 if bool(vent["annonce"]) else lerpf(.25,.75,force)
+		_matiere_vent.albedo_color = teinte
+		var direction: Vector2 = vent["direction"]
+		var direction_monde := Pont3D.vers_monde(direction).normalized()
+		var index := 0
+		for trace_vent: Node3D in visuel.get_children():
+			var origine: Vector3 = trace_vent.get_meta("origine")
+			var avance := 0.0 if ReglagesJoueur.effets_reduits or bool(vent["annonce"]) else fposmod(float(_source.temps) * .65 + index * .17, 1.0) - .5
+			trace_vent.position = origine + direction_monde * avance
+			trace_vent.rotation.y = -atan2(direction_monde.z,direction_monde.x)
+			index += 1

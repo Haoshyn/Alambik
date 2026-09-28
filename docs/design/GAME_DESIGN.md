@@ -16,8 +16,11 @@ collision : traits étroits, boules, trajectoires ondulantes, allers-retours
 avec un arrêt avant le retour et ricochets lents en nombre limité. Les tirs
 revenants suivent leur axe initial sans poursuivre le héros. Certains boss
 avancent au contact pour un balayage, une morsure ou un choc circulaire.
-L'approche est limitée ; la frappe est annoncée et verrouillée, suivie d'une
-récupération immobile. Ils ne tirent pas pendant cet assaut.
+L'approche est limitée et abandonnée si le joueur reste inaccessible. La frappe
+ne s'annonce qu'à portée, avec une direction verrouillée, puis une récupération
+immobile. Ils ne tirent pas pendant cet assaut. Leurs attaques disponibles
+alternent dans un ordre variable selon la distance et les obstacles ; les motifs
+de tir propres à chaque identité restent disponibles avec les attaques de monde.
 
 Les augments sont des choix temporaires de run. L'équipement, les maîtrises,
 les attributs, les passifs et les Cœurs de mana sont permanents.
@@ -57,6 +60,25 @@ une run, la hausse par salle conserve des paliers de difficulté en salles
 5, 10 et 15, indépendamment des offres d'augments. Elle est fixe : le build et les
 échecs du joueur ne la modifient pas.
 
+Certaines salles ordinaires portent un effet propre au monde : flaques
+d'encre et d'eau ralentissantes, sables mouvants à ralentissement progressif,
+ou flaques de lave infligeant des dégâts périodiques. Les silhouettes et les
+tailles varient ; le dessin est exactement la zone affectant le héros.
+Les effets commencent après le délai d'entrée et cessent à l'ouverture du
+portail. Le passage central, l'entrée et la sortie restent libres. Les
+terrains n'empêchent pas de tirer ; seuls les pieds du héros dans la flaque
+déclenchent son effet. Les salles de boss et les modes annexes restent sans
+ces terrains de campagne.
+
+Dans Air, des rafales alternent avec des accalmies. La direction apparaît
+avant la poussée, reste fixe pendant la rafale et change entre deux rafales.
+Le vent accélère la course dans son sens, ralentit la course opposée sans
+l'empêcher et déplace légèrement le héros à l'arrêt. Cette dérive respecte
+les collisions et conserve le tir automatique si le joueur ne commande pas
+de déplacement. Les effets réduits figent les traits visuels, sans modifier
+la force ou le calendrier. Les chiffres des terrains sont générés dans
+`statistiques_jeu/liste_mathematique.md` depuis `TerrainsMondes`.
+
 Les premières tentatives gardent des vagues moins longues et des annonces
 lisibles. Les tirs lents se lisent en mouvement, sans tracé préalable. Les tirs
 rapides, ou trop proches pour laisser réagir, annoncent leur trajectoire avec
@@ -80,11 +102,15 @@ Les boss arrivent près du milieu de la salle. Selon leur identité, ils avancen
 directement, prennent un flanc ou orbitent autour du joueur ; leurs annonces
 de tir gardent une origine fixe. Leurs projectiles couvrent la salle et les
 boomerangs partent en éventail dirigé, avec retour sur le premier mur rencontré.
-Les monstres se rapprochent de leur distance d’attaque, sauf les tireurs fuyards
-qui conservent leur recul. Les dashs parcourent une grande distance mais ne se
-déclenchent que si la cible est atteignable, sans obstacle sur le trajet. Un
-ralentissement ou une cible sortie de portée pendant la préparation annule
-le départ ; une direction annoncée ne se réoriente pas en secret.
+Les tireurs peuvent attaquer dès leur portée réelle, sans attendre leur distance
+de placement ; les tireurs fuyards conservent leur recul. Les phaseurs se
+téléportent aussi depuis le fond de la salle, vers une place libre annoncée près
+du joueur. Les invocateurs appellent leurs renforts à distance et continuent à
+tirer après épuisement de leur réserve.
+Les dashs parcourent le segment affiché, limité par les murs et obstacles.
+Une cible hors de portée ou un ralentissement empêchant de couvrir le trajet
+pendant la préparation annule le départ. Une fois lancé, le dash garde son
+extrémité et sa direction, même sous ralentissement ou changement de phase.
 
 Les monstres prévus par une salle peuvent déposer des cœurs de soin, avec
 un quota de zéro, un ou deux pour toute la rencontre. Les invocations ne

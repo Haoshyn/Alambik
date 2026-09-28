@@ -13,6 +13,8 @@
 | Contrôles des choix et cumuls de run | [verifier_augments.gd](verifier_augments.gd) |
 | Dix niveaux, écrans de choix et paiement des cœurs inutilisés | [verifier_niveaux_augments.gd](verifier_niveaux_augments.gd) |
 | Projectiles, collisions, familiers autonomes et contact des boss | [verifier_projectiles.gd](verifier_projectiles.gd) |
+| Modeles ennemis, articulations, gel, disparition et budgets 3D | [verifier_bestiaire.gd](verifier_bestiaire.gd) ; planches via [blender/apercu_bestiaire.py](blender/apercu_bestiaire.py) |
+| Apercu anime des poses reelles du bestiaire | [apercu_mouvements_bestiaire.gd](apercu_mouvements_bestiaire.gd), puis [rendu Blender](blender/apercu_mouvements_bestiaire.py) |
 | Nombres de dégâts réels, regroupement des salves et effets réduits | [verifier_degats_affiches.gd](verifier_degats_affiches.gd) |
 | Distribution des choix mixtes et courbes de run | [verifier_simulation_augments.gd](verifier_simulation_augments.gd) |
 | Parcours de compte, durées et achats avec retries | [verifier_parcours.gd](verifier_parcours.gd) |
@@ -20,9 +22,12 @@
 | Cœurs au sol, fins de rencontre et retrait du tutoriel | [verifier_soins_run.gd](verifier_soins_run.gd) |
 | Contrôles de sauvegarde ancienne et passifs | [verifier_migrations.gd](verifier_migrations.gd) |
 | Instanciation des écrans et des trois modes | [verifier_scenes.gd](verifier_scenes.gd) |
+| Décors des cinq mondes : contours, matières, variantes, budget et effets réduits | [verifier_decors.tscn](verifier_decors.tscn) ; `-- --exporter=DOSSIER` produit les GLB pour [blender/apercu_decors.py](blender/apercu_decors.py). Transitions 3D dans `verifier_scenes.gd`. |
+| Flaques et rafales : placement, collisions, ralentissement, lave et rendu | [verifier_terrains.tscn](verifier_terrains.tscn) ; utilise un profil de vérification isolé. |
 | Export, signature, version et installation Android | [android_mises_a_jour.py](android_mises_a_jour.py), [guide](../docs/ops/MISES_A_JOUR_ANDROID.md) |
 | Héros 3D actuel | [blender/mage_sculpte.py](blender/mage_sculpte.py) |
-| Ennemis et portail | [blender/build_all.py](blender/build_all.py), [blender/portail_azur.py](blender/portail_azur.py) |
+| Bestiaire 3D, sources articulees et matieres peintes | [blender/bestiaire_sculpte.py](blender/bestiaire_sculpte.py), [creatures](blender/creatures_bestiaire.py), [boss](blender/souverains_bestiaire.py), [matieres](blender/matieres_bestiaire.py) |
+| Portail et regeneration 3D globale | [blender/build_all.py](blender/build_all.py), [blender/portail_azur.py](blender/portail_azur.py) |
 | Armes tenues | [blender/armes_tenues.py](blender/armes_tenues.py) |
 | Kit d'interface | [generer_email_arcanique.py](generer_email_arcanique.py), [refonte_svg.py](refonte_svg.py), [signatures_svg.py](signatures_svg.py) |
 | Glyphes des menus | [generer_glyphes_menus.py](generer_glyphes_menus.py) |

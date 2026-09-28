@@ -1,100 +1,48 @@
 extends RefCounted
 
+# L'atlas reste partage ; UV2 conserve le role et le modelage peint des volumes.
+const ATLAS := preload("res://assets/3d/textures/bestiaire_matieres_peintes.png")
+static var _maillages: Dictionary = {}
+static var _matiere: StandardMaterial3D
+
 static func appliquer(modele: Node3D, donnees: Dictionary) -> void:
-	if str(donnees.get("cerveau", "")) == "boss": return
-	var monde := int(donnees.get("monde_visuel", 0))
-	var teinte: Color = BestiaireMondes.COULEURS[monde]
-	_teinter(modele, teinte)
-	modele.scale *= BestiaireMondes.ECHELLES[monde]
-	var accent := StandardMaterial3D.new()
-	accent.albedo_color = BestiaireMondes.ACCENTS[monde]
-	accent.metallic = .30
-	accent.roughness = .45
-	var corps := StandardMaterial3D.new()
-	corps.albedo_color = teinte
-	corps.roughness = .65
-	var parure := Node3D.new()
-	parure.name = "IdentiteDuMonde"
-	modele.add_child(parure)
-	var costaud := str(donnees.get("categorie", "")) == "costaud"
-	var hauteur := .85 if costaud else .60
-	match monde:
-		0:
-			# Une collerette de feuillets et une pointe d'encre : silhouette etroite.
-			for cote in [-1.0, 1.0]:
-				_piece(parure, _prisme(Vector3(.30,.65,.08)), accent, Vector3(cote*.30,hauteur,0), Vector3(0,0,cote*.40))
-			_piece(parure, _pointe(.20,.60), corps, Vector3(0,hauteur+.35,0))
-		1:
-			# Plaques basses, larges et deux cornes : creatures minerales.
-			for cote in [-1.0, 1.0]:
-				_piece(parure, _boite(Vector3(.42,.34,.48)), corps, Vector3(cote*.33,hauteur-.12,0), Vector3(0,cote*.25,cote*.15))
-				_piece(parure, _pointe(.14,.40), accent, Vector3(cote*.29,hauteur+.25,0), Vector3(0,0,-cote*.30))
-		2:
-			# Deux nageoires et une crete dorsale, avec un volume plus allonge.
-			for cote in [-1.0, 1.0]:
-				_piece(parure, _prisme(Vector3(.48,.48,.06)), accent, Vector3(cote*.34,hauteur,-.10), Vector3(.20,0,cote*1.0))
-			_piece(parure, _prisme(Vector3(.09,.55,.65)), corps, Vector3(0,hauteur+.20,-.22))
-		3:
-			# Ailes ajourees et anneau suspendu : le contour reste ouvert.
-			for cote in [-1.0, 1.0]:
-				for plume in 2:
-					_piece(parure, _prisme(Vector3(.16,.72,.07)), accent, Vector3(cote*(.34+plume*.16),hauteur,-plume*.14), Vector3(0,0,-cote*.85))
-			_piece(parure, _anneau(.24,.30), corps, Vector3(0,hauteur+.45,0))
-		4:
-			# Colonne de scories et trois flammes solides, lisibles sans particules.
-			for i in 3:
-				var cote := float(i-1)
-				_piece(parure, _pointe(.14,.62-absf(cote)*.16), accent, Vector3(cote*.23,hauteur+.23,0), Vector3(0,0,-cote*.25))
-			_piece(parure, _anneau(.27,.37), corps, Vector3(0,hauteur-.16,0))
-	# La capacite se reconnait aussi a son accessoire, independamment du monde.
-	if str(donnees["cerveau"]) == "artilleur":
-		_piece(parure, _anneau(.15,.23), accent, Vector3(0,hauteur+.48,.12), Vector3(.35,0,0))
-	elif str(donnees["cerveau"]) in ["sentinelle", "harceleur"]:
-		_piece(parure, _prisme(Vector3(.12,.15,.65)), accent, Vector3(0,hauteur,.42), Vector3(PI/2,0,0))
+	var boss := str(donnees.get("cerveau", "")) == "boss"
+	var monde := clampi(int(donnees.get("monde_visuel", 0)), 0, BestiaireMondes.COULEURS.size() - 1)
+	if _matiere == null:
+		_matiere = StandardMaterial3D.new()
+		_matiere.vertex_color_use_as_albedo = true
+		_matiere.albedo_texture = ATLAS
+		_matiere.roughness = .84
+		_matiere.metallic_specular = .22
+		_matiere.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	for objet: MeshInstance3D in modele.find_children("Email_*", "MeshInstance3D", true, false):
+		if not boss:
+			var cle := "%s/%s/%d" % [modele.scene_file_path, modele.get_path_to(objet), monde]
+			objet.mesh = _teinter(objet.mesh, monde, cle)
+		objet.material_override = _matiere
+	if not boss:
+		modele.scale *= BestiaireMondes.ECHELLES[monde]
+		if monde > 0:
+			modele.add_child(preload("res://scripts/presentation/ornements_bestiaire_3d.gd").construire(str(donnees["forme"]), monde, _matiere))
 
-static func _teinter(noeud: Node, couleur: Color) -> void:
-	if noeud is MeshInstance3D:
-		var instance := noeud as MeshInstance3D
-		if instance.mesh != null:
-			for surface in instance.mesh.get_surface_count():
-				var original := instance.get_active_material(surface) as BaseMaterial3D
-				if original != null:
-					var matiere := original.duplicate() as BaseMaterial3D
-					matiere.albedo_color = matiere.albedo_color.lerp(couleur, .72)
-					instance.set_surface_override_material(surface, matiere)
-	for enfant in noeud.get_children(): _teinter(enfant, couleur)
-
-static func _piece(parent: Node3D, forme: Mesh, matiere: Material, point: Vector3, orientation := Vector3.ZERO) -> void:
-	var piece := MeshInstance3D.new()
-	piece.mesh = forme
-	piece.material_override = matiere
-	piece.position = point
-	piece.rotation = orientation
-	piece.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	parent.add_child(piece)
-
-static func _prisme(taille: Vector3) -> PrismMesh:
-	var forme := PrismMesh.new()
-	forme.size = taille
-	return forme
-
-static func _boite(taille: Vector3) -> BoxMesh:
-	var forme := BoxMesh.new()
-	forme.size = taille
-	return forme
-
-static func _pointe(rayon: float, hauteur: float) -> CylinderMesh:
-	var forme := CylinderMesh.new()
-	forme.top_radius = 0.0
-	forme.bottom_radius = rayon
-	forme.height = hauteur
-	forme.radial_segments = 6
-	return forme
-
-static func _anneau(interieur: float, exterieur: float) -> TorusMesh:
-	var forme := TorusMesh.new()
-	forme.inner_radius = interieur
-	forme.outer_radius = exterieur
-	forme.rings = 16
-	forme.ring_segments = 6
-	return forme
+static func _teinter(source: Mesh, monde: int, cle: String) -> ArrayMesh:
+	# Un chemin stable reutilise la variante meme apres dechargement de la salle.
+	if _maillages.has(cle): return _maillages[cle]
+	var teinte: Color = BestiaireMondes.COULEURS[monde].srgb_to_linear()
+	var accent: Color = BestiaireMondes.ACCENTS[monde].srgb_to_linear()
+	var mesh := ArrayMesh.new()
+	for index in source.get_surface_count():
+		var tableaux := source.surface_get_arrays(index)
+		var couleurs: PackedColorArray = tableaux[Mesh.ARRAY_COLOR]
+		var roles: PackedVector2Array = tableaux[Mesh.ARRAY_TEX_UV2]
+		for i in mini(couleurs.size(), roles.size()):
+			if monde == 0: continue
+			var modelage := maxf(roles[i].y, .4)
+			if roles[i].x > .7:
+				couleurs[i] = couleurs[i].lerp(Color(accent.r * modelage, accent.g * modelage, accent.b * modelage), .55)
+			elif roles[i].x > .1:
+				couleurs[i] = couleurs[i].lerp(Color(teinte.r * modelage, teinte.g * modelage, teinte.b * modelage), .55)
+		tableaux[Mesh.ARRAY_COLOR] = couleurs
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, tableaux)
+	_maillages[cle] = mesh
+	return mesh

@@ -68,7 +68,10 @@ const BOSS_ANNONCE_TIR := .65
 const BOSS_MAREE_VITESSE := .92
 const BOSS_FOYER_VITESSE := .85
 const BOSS_DEGATS_CONTACT_RECHARGE := 1.0
-const ANGLES_PHASE := [PI, PI*.75, -PI*.75, PI*.5, -PI*.5]
+const ANGLES_PHASE := [PI, PI*.75, -PI*.75, PI*.5, -PI*.5, PI*.25, -PI*.25, 0.0]
+const DISTANCES_PHASE := [1.0, .75, 1.25]
+const PHASE_DEPLACEMENT_MIN := 180.0
+const PHASE_REESSAI := .40
 
 static func appliquer(source: Dictionary, id: String, chapitre: int) -> Dictionary:
 	var d := source.duplicate(true)
@@ -77,14 +80,17 @@ static func appliquer(source: Dictionary, id: String, chapitre: int) -> Dictiona
 	if str(d["cerveau"]) == "boss":
 		for cle in ["motifs_phase_1", "motifs_phase_2"]:
 			var motifs: Array = d[cle].duplicate()
-			# L'assaut peut preceder la signature du boss : conserver les deux.
-			# Le monde remplace uniquement un tir secondaire.
+			# Charges et melee peuvent preceder la signature : preserver le premier
+			# motif de tir et remplacer seulement un tir secondaire.
 			var index := -1
-			var debut_secondaire := 2 if str(motifs[0]) == "assaut_contact" else 1
-			for i in range(debut_secondaire, motifs.size()):
-				if str(motifs[i]) not in ["charge", "assaut_contact", "invocation", "pause"]:
-					index = i
-					break
+			var signature_conservee := false
+			for i in motifs.size():
+				if str(motifs[i]) in ["charge", "assaut_contact", "invocation", "pause"]: continue
+				if not signature_conservee:
+					signature_conservee = true
+					continue
+				index = i
+				break
 			if index >= 0:
 				motifs[index] = BOSS_MOTIF_PAR_MONDE[monde]
 			else:

@@ -12,6 +12,7 @@ valeurs ; les six `../../statistiques_jeu/liste_*.md` sont des sorties généré
 | ATK, critique, PV, défense et DPS d'un build | [modeles.gd](modeles.gd), `mesurer`, `bonus_equipement` | `Stats`, `Mods`, `Tir`, catalogues d'équipement et passifs |
 | Répartition des sources permanentes, interactions comprises | [attribution.gd](attribution.gd), `calculer_permanent` | `modeles.gd` ; cinq familles, 32 combinaisons ; augments mesurés ensuite |
 | Formules, courbes et comparaisons détaillées | [mathematiques.gd](mathematiques.gd), `_formules`, `_tirs_multiples`, `_ennemis` | `Reglages`, `Chapitres`, `ProgressionStatistiques` |
+| Effets des terrains des mondes | [mathematiques.gd](mathematiques.gd), `_terrains` | `TerrainsMondes` ; contrôle `../verifier_terrains.tscn` |
 | Budget du scénario sans farm | [profil_campagne.gd](profil_campagne.gd), `budget`, `construire` | `ButinsRun`, coûts de forge et maîtrises |
 | Trois orientations d'augments comparables | [profils_augments.gd](profils_augments.gd), `PROFILS` | `CatalogueReactifs` ; budget commun de raretés |
 | Vraies offres et distributions par salle | [simulation_augments.gd](simulation_augments.gd), `simuler`, `une_run`, `calendrier` | `DraftLogique`, `ProgressionAugments`, `Modeles` |

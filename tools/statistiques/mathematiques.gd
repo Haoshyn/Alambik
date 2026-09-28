@@ -19,6 +19,7 @@ static func generer() -> String:
 	Synthese.ajouter(lignes)
 	_simulation_augments(lignes)
 	_soins(lignes)
+	_terrains(lignes)
 	_retour_campagne(lignes)
 	_equilibrage_progression(lignes)
 	SyntheseProgression.ajouter(lignes)
@@ -88,6 +89,23 @@ static func _soins(lignes: Array[String]) -> void:
 		"En Mine, un quota est ouvert toutes les %s s, sur les %d premières morts admissibles de cette tranche. Les quotas inutilisés ne s’accumulent pas ; après le chronomètre, aucun nouveau quota n’apparaît." % [n(Soins.MINE_INTERVALLE_QUOTA), Soins.MINE_MORTS_CANDIDATES], "",
 		"Les cœurs et Moisson vitale utilisent le soin garanti, distinct du plafond des soins de combat par salle. Récupération d’entrée reste dans le budget des soins de combat.", "",
 		"En Mine aussi, les niveaux ne donnent aucun soin automatique. Les cœurs convertis donnent un montant fixe de Gouttes, sans multiplicateur d’équipement ni d’augment ; ces recettes ne sont pas incluses dans le parcours économique, qui ne simule pas les blessures ni les trajets.", ""])
+
+static func _terrains(lignes: Array[String]) -> void:
+	lignes.append_array(["## Terrains des cinq mondes", "",
+		"Ces terrains apparaissent dans certaines salles ordinaires de campagne. Ils laissent libres l’entrée, la sortie et le passage central ; les salles de boss et les modes annexes gardent leur configuration. Les flaques ont des contours et des tailles variables, identiques entre deux visites de la même salle.", ""])
+	var lignes_terrains: Array = []
+	for monde in TerrainsMondes.PROFILS.size():
+		var profil: Dictionary = TerrainsMondes.PROFILS[monde]
+		var effet := ""
+		match str(profil["type"]):
+			"encre", "eau": effet = "Vitesse à %s %% dans la flaque ; tirs conservés" % n(float(profil["vitesse"]) * 100.0)
+			"sable": effet = "Vitesse de %s %% à %s %% en %s s ; retour à la normale en sortant" % [n(TerrainsMondes.SABLE_VITESSE_INITIALE * 100.0),n(TerrainsMondes.SABLE_VITESSE_MINIMALE * 100.0),n(TerrainsMondes.SABLE_DUREE_ENFONCEMENT)]
+			"vent": effet = "Poussée jusqu’à %s %% de la vitesse : %s %% face au vent, %s %% vent dans le dos, à pleine commande" % [n(TerrainsMondes.VENT_VARIATION_VITESSE * 100.0),n((1.0-TerrainsMondes.VENT_VARIATION_VITESSE)*100.0),n((1.0+TerrainsMondes.VENT_VARIATION_VITESSE)*100.0)]
+			"lave": effet = "%s %% des PV maximum en dégâts bruts toutes les %s s ; défense, bouclier et invulnérabilité habituels" % [n(float(profil["degats"])*100.0),n(TerrainsMondes.INTERVALLE_DEGATS)]
+		lignes_terrains.append([str(Chapitres.MONDES[monde]["nom"]),effet])
+	Listes.tableau(lignes,["Monde","Effet sur le héros"],lignes_terrains)
+	lignes.append_array(["Délai d’entrée en salle : %s s. Les effets cessent à l’ouverture du portail. Les ralentissements ne s’additionnent pas entre flaques." % n(TerrainsMondes.DELAI_ACTIVATION), "",
+		"Vent : %s s de calme puis %s s de rafale, avec une indication de direction %s s avant. La poussée monte en %s s et retombe en %s s. La direction change entre les rafales ; le vent déplace aussi un héros à l’arrêt, sans annuler son tir automatique ni traverser les obstacles. Les effets réduits figent seulement le déplacement des traits visuels." % [n(TerrainsMondes.VENT_REPOS),n(TerrainsMondes.VENT_DUREE),n(TerrainsMondes.VENT_ANNONCE),n(TerrainsMondes.VENT_MONTEE),n(TerrainsMondes.VENT_DESCENTE)], ""])
 
 static func _methode(lignes: Array[String]) -> void:
 	lignes.append_array(["## Méthode et références consultées", "",

@@ -146,13 +146,9 @@ func _construire_obstacles() -> void:
 func terrain_elementaire() -> Node2D:
 	return _terrain if is_instance_valid(_terrain) and not _terrain.is_queued_for_deletion() else null
 
-func mouvement_terrain(position_heros: Vector2, direction_voulue := Vector2.ZERO) -> Vector3:
+func mouvement_terrain(position_heros: Vector2) -> Vector3:
 	var terrain := terrain_elementaire()
-	return terrain.mouvement(position_heros, direction_voulue) if terrain != null else Vector3(0, 0, 1)
-
-func tir_bloque_par_terrain(position_heros: Vector2) -> bool:
-	var terrain := terrain_elementaire()
-	return terrain != null and terrain.tir_bloque(position_heros)
+	return terrain.mouvement(position_heros) if terrain != null else Vector3(0, 0, 1)
 
 func retraits() -> Array[Rect2]:
 	return _retraits

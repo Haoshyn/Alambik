@@ -321,12 +321,14 @@ func _familier() -> void:
 
 func _boss() -> void:
 	for id: String in AttaquesContactBoss.PROFILS:
+		var salle := SalleTest.new()
+		_scene.add_child(salle)
 		var cible := _cible(Vector2(600, 650), 1, Reglages.HEROS_RAYON)
 		cible.add_to_group("cibles_ennemis")
 		var boss: CharacterBody2D = load("res://scenes/boss.tscn").instantiate()
 		boss.configurer(CatalogueEnnemis.par_id(id).duplicate(true))
 		boss.position = Vector2(600, 500)
-		_scene.add_child(boss)
+		salle.add_child(boss)
 		boss.set_physics_process(false)
 		boss._motif = "assaut_contact"
 		boss._commencer_motif("assaut_contact")

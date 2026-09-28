@@ -11,6 +11,23 @@ elles conservent les idées historiques sans définir le rendu actuel.
 - Le combat utilise des modèles et effets 3D sur une simulation 2D.
 - Le héros est le mage sculpté, avec son chapeau, ses textures, ses animations
   et une arme tenue séparée qui suit l'équipement.
+- Les onze monstres communs et les vingt boss sont des objets alchimiques
+  vivants : encriers à pattes, plumes, grimoires ouverts, masques et fioles.
+  Leurs volumes distinguent l'encre sombre, la céramique mate, le tissu,
+  le parchemin ivoire et les montures patinées. Un atlas peint partagé,
+  des ombres de creux et des lumières par sommet remplacent les surfaces
+  uniformément brillantes. Plis souples, pans fins, paupières sculptées et
+  pierres taillées précisent les silhouettes. Les variantes changent les teintes, les proportions
+  et de courts appendices minéraux, aquatiques, aériens ou ardents.
+- Pattes, bras, couvertures, ailes, têtes et bouchons sont articulés séparément.
+  Les pattes plient sur deux segments ; leurs appuis restent dans le monde
+  pendant la marche, puis se reposent à l'arrêt. Les êtres flottants inclinent
+  leur corps dans le déplacement ; pages et pans suivent avec du retard.
+  Préparation, frappe et recul gardent les volumes rigides, sans pulsation
+  permanente du corps. Le gel immobilise aussi les membres.
+  La dernière pose se contracte brièvement à la mort,
+  après retrait de la collision. Les effets réduits conservent les gestes
+  utiles, retirent l'oscillation de repos et raccourcissent la disparition.
 - Les silhouettes, impacts et télégraphes doivent rester distincts. Les effets
   décoratifs ne masquent pas les dangers et ne rendent pas les hitbox ambiguës.
 - Les dégâts infligés s'affichent en petits nombres crème au-dessus de la
@@ -27,6 +44,10 @@ elles conservent les idées historiques sans définir le rendu actuel.
   sombre opaque. Le reflet reste localisé ; leur lisibilité ne dépend pas du
   halo ni des effets complets. Le sillage des tirs rapides est court et effilé
   pour distinguer le corps dangereux de sa traînée.
+- Les tirs ont des biseaux en relief et une signature lumineuse intérieure :
+  nervure, goutte, découpe de lame ou couronne d'orbe. Le cœur s'anime doucement
+  sans agrandir le corps dangereux. Les effets réduits figent ce mouvement et
+  masquent le halo ; le corps opaque et le sillage restent présents.
 - Les boomerangs de boss ont un corps épais et coloré, lisible pendant leur
   rotation et leur retour. L’éventail part du lanceur ; les boss mobiles
   gardent leur position pendant l’annonce des trajectoires.
@@ -40,6 +61,41 @@ elles conservent les idées historiques sans définir le rendu actuel.
   poursuivants et chargeurs reste dangereux au contact.
 - Le centre de l'arène reste calme ; le décor plus riche se place en bordure.
   Les couleurs des mondes distinguent leur ambiance sans brouiller les attaques.
+- Les salles prennent la forme d'ateliers alchimiques : encriers à plume et
+  grimoires ouverts pour Encre, distillateurs et herbes pour Terre, fontaines
+  à coquille et fioles pour Eau, moulins et tuyaux d'orgue pour Air, creusets
+  et fourneaux pour Feu. Cuivre, céramique et verrerie opaque les relient.
+  Ces volumes sont construits dans `scripts/presentation/ornements_monde.gd` ;
+  leurs silhouettes sont originales et leurs palettes viennent de
+  `data/presentation/decors_mondes.gd`.
+- Le fond de salle est une matière minérale continue et mate, avec des
+  nuances fondues et quelques veines courtes ; aucun quadrillage ne recouvre
+  toute l'arène. Sa couleur suit le monde : lavande, sable, turquoise pâle,
+  gris perle ou cendre. Les couleurs des sommets gardent ce fond dans un
+  seul maillage, sans texture répétée.
+  Deux matières secondaires complètent chaque monde : parquet et mosaïque
+  pour Encre ; terre battue et pavés moussus pour Terre ; calcaire et petits
+  émaux pour Eau ; pierre érodée et ardoises pour Air ; briques et plaques
+  pour Feu.
+  Chaque monde possède une composition différente. Les proportions et les
+  contours des zones sont déformés selon la salle, avec des raccords en
+  gradins ou érodés selon la matière. Le résultat reste stable entre deux
+  constructions de la même salle.
+  Grain du parquet, fissures, rivets et quelques pages, feuilles, plumes ou
+  éclats restent mats et discrets. La marque centrale reste sans halo.
+  Le tout est découpé sur le contour physique, avec une frise d'émail incrustée.
+  Les appareils hauts restent sur les côtés et au fond. Les couverts portent
+  des reliures, fioles, plantes ou creusets en gardant leur emprise de collision.
+  Les courants des canaux extérieurs et les moulins s'arrêtent en effets réduits.
+  Le sol reste sous les ombres des acteurs ; les éléments immobiles sont
+  regroupés pour limiter les appels de dessin sur téléphone.
+- Les zones de terrain actives sont des flaques petites ou moyennes aux
+  contours organiques, distinctes des grandes zones de matériaux du sol.
+  Encre violette, sables ocres, eau turquoise et lave orangée ont un liseré
+  irrégulier et des reflets, stries ou veines propres à leur matière. La
+  silhouette 3D reprend le polygone de la simulation, sous les ombres des
+  acteurs. Les rafales d'Air sont indiquées par des flèches pâles, visibles
+  avant et pendant la poussée ; elles disparaissent pendant l'accalmie.
 
 ## Interface — Émail arcanique (A)
 
@@ -136,14 +192,18 @@ elles conservent les idées historiques sans définir le rendu actuel.
   nuages et brumes traversent lentement le cadre dans un seul sens, avec un
   retour hors champ. Six silhouettes de nuages se suivent à vitesse commune :
   cinq autres passent avant qu'une silhouette revienne, environ 3 min 38 s
-  plus tard. La clairière reste visible sous les onglets sauf Passifs, dont
-  le fond est un dégradé indigo et prune discret ;
+  plus tard. La clairière reste visible sous les onglets. Dans Passifs, un
+  voile indigo progressif l'atténue davantage derrière la collection ;
   l'illustration du monde choisi apparaît seulement dans Aventure. Les autres
   pages gardent un voile de lecture léger, plus sombre dans Maîtrises pour
   laisser lire sa constellation. La sélection de campagne garde la clairière,
   le bandeau de niveau et les cinq onglets, mais masque les commandes d'Aventure
-  et l'île de fond, déjà représentée sur sa carte. Le fond couvre l'écran à
-  échelle uniforme.
+  et l'île de fond, déjà représentée sur sa carte. Son titre de monde reste
+  libre au-dessus d'une grande île ; les détails du niveau et les commandes
+  sont réunis dans un seul panneau fixe en bas. Les textes n'ont pas de petits
+  fonds sombres individuels. Le bandeau appartient à la sélection : ses
+  réglages restent accessibles et leur fermeture retrouve le monde consulté.
+  Le fond couvre l'écran à échelle uniforme.
 - Les maîtrises n'ont aucun grand fond de colonne ni anneau coloré autour des
   nœuds. Chaque sceau rond reçoit une teinte rouge, verte ou violette légère,
   un glyphe SVG illustré unique, plus vif et plus grand, puis une capsule de
@@ -156,7 +216,7 @@ elles conservent les idées historiques sans définir le rendu actuel.
   Utilitaire, puis quatre médaillons
   équipés sur une ligne dès que la largeur le permet, sans bandeau de niveau
   ni slogan. Seule la collection défile sous ces commandes fixes. Le fond
-  reste une nuance calme, sans peinture élémentaire. Chaque entrée garde une
+  reprend la clairière sous un voile indigo calme, sans peinture élémentaire. Chaque entrée garde une
   légère couleur autour du glyphe et un filet inférieur, sans cadre fermé.
   Les titres, indications, noms, rangs et descriptions sont posés directement
   sur ce fond : aucun petit rectangle sombre sous le texte, y compris dans
@@ -261,3 +321,6 @@ Références pour les rôles et les contrastes :
 - Interface : `scripts/presentation/style_azur.gd`, `ui/`,
   `assets/visual/interface/ORIGINE.md`, `assets/visual/arcane/ORIGINE.md`.
 - Génération du héros : `tools/blender/mage_sculpte.py` et ses modules.
+- Génération du bestiaire : `tools/blender/bestiaire_sculpte.py`,
+  `creatures_bestiaire.py`, `souverains_bestiaire.py` et `sculpture_bestiaire.py`.
+  Origine : `assets/3d/ORIGINE_BESTIAIRE.md`.

@@ -33,12 +33,12 @@ static func construire(silhouette: String, teinte: Color, allongement := 1.0, mo
 						_amande(mesh, Vector3(cos(angle) * .72, .60, sin(angle) * .72), .25, .50, .22, Rendu.REFLET, 5, 8)
 				"salamandre": _cercler(mesh, teinte.lightened(.45), .95, .08, .2)
 		else:
-			_relief(mesh, Formes.contour(silhouette), teinte, .28, monde >= 0)
-		if monde >= 0:
-			for i in monde + 1:
-				var angle := TAU * i / float(monde + 1)
-				_amande(mesh, Vector3(cos(angle) * .33, .92, sin(angle) * .33), .075, .15, .04, Rendu.REFLET, 3, 5)
+			_relief(mesh, Formes.contour(silhouette), teinte, .44, monde >= 0)
 		mesh.surface_end()
+		var coeur := ImmediateMesh.new()
+		coeur.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _matiere)
+		_signature(coeur, silhouette, teinte, monde)
+		coeur.surface_end()
 		var halo := ImmediateMesh.new()
 		halo.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _matiere_halo)
 		for i in 28:
@@ -49,13 +49,16 @@ static func construire(silhouette: String, teinte: Color, allongement := 1.0, mo
 			b.z = (b.z + signf(b.z) * (allongement - 1.0)) / allongement
 			_triangle(halo, Vector3(0, .015, 0), a, b, Color(teinte, .32), Color(teinte, .08), Color(teinte, .08))
 		halo.surface_end()
-		_formes[cle] = [mesh, halo]
+		_formes[cle] = [mesh, halo, coeur]
 	var racine := Node3D.new()
+	var index := 0
 	for mesh: Mesh in _formes[cle]:
 		var piece := MeshInstance3D.new()
+		piece.name = ["Corps", "Halo", "Coeur"][index]
 		piece.mesh = mesh
 		piece.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		racine.add_child(piece)
+		index += 1
 	return racine
 
 static func _face(mesh: ImmediateMesh, contour: PackedVector2Array, couleur: Color, hauteur: float) -> void:
@@ -68,23 +71,56 @@ static func _face(mesh: ImmediateMesh, contour: PackedVector2Array, couleur: Col
 
 static func _relief(mesh: ImmediateMesh, contour: PackedVector2Array, teinte: Color, hauteur: float, hostile := false) -> void:
 	var dessus := contour.duplicate()
-	if hostile:
-		# Le liseret opaque reste dans le volume dangereux, meme sans les effets.
-		_face(mesh, contour, Rendu.CONTOUR_HOSTILE, hauteur)
-		for i in dessus.size(): dessus[i] *= Rendu.INTERIEUR_HOSTILE
-	var indices := Geometry2D.triangulate_polygon(contour)
+	for i in dessus.size(): dessus[i] *= Rendu.INTERIEUR_HOSTILE
+	# Le biseau relie de vrais etages ; le lisere sombre appartient au corps.
+	_face(mesh, contour, Rendu.CONTOUR_HOSTILE if hostile else teinte.darkened(.6), .035)
+	var indices := Geometry2D.triangulate_polygon(dessus)
 	for i in range(0, indices.size(), 3):
 		var a: Vector2 = dessus[indices[i]]
 		var b: Vector2 = dessus[indices[i + 1]]
 		var c: Vector2 = dessus[indices[i + 2]]
-		var plan := hauteur + (.01 if hostile else 0.0)
-		_triangle(mesh, Vector3(a.x, plan, a.y), Vector3(b.x, plan, b.y), Vector3(c.x, plan, c.y),
-			teinte if hostile else teinte.lightened(.3), teinte, teinte.lerp(Rendu.REFLET, Rendu.REFLET_HOSTILE if hostile else .5))
+		_triangle(mesh, Vector3(a.x, hauteur, a.y), Vector3(b.x, hauteur, b.y), Vector3(c.x, hauteur, c.y),
+			_email(a, teinte), _email(b, teinte), _email(c, teinte))
 	for i in contour.size():
-		var a := Vector3(contour[i].x, 0, contour[i].y)
-		var b := Vector3(contour[(i + 1) % contour.size()].x, 0, contour[(i + 1) % contour.size()].y)
-		_triangle(mesh, a, b, a + Vector3.UP * hauteur, teinte.darkened(.65), teinte.darkened(.4), teinte)
-		_triangle(mesh, b, b + Vector3.UP * hauteur, a + Vector3.UP * hauteur, teinte.darkened(.4), teinte.lightened(.15), teinte)
+		var j := (i + 1) % contour.size()
+		var a := Vector3(contour[i].x, .035, contour[i].y)
+		var b := Vector3(contour[j].x, .035, contour[j].y)
+		var haut_a := Vector3(dessus[i].x, hauteur, dessus[i].y)
+		var haut_b := Vector3(dessus[j].x, hauteur, dessus[j].y)
+		var bord := Rendu.CONTOUR_HOSTILE if hostile else teinte.darkened(.60)
+		var reflet := teinte.lerp(Rendu.REFLET, .44 if (contour[j] - contour[i]).x < 0.0 else .12)
+		_triangle(mesh, a, b, haut_a, bord, bord, reflet)
+		_triangle(mesh, b, haut_b, haut_a, bord, reflet, reflet)
+
+static func _email(point: Vector2, teinte: Color) -> Color:
+	# Une lumiere continue evite les triangles clairs arbitraires sur les faces.
+	var lumiere := clampf(.50 - point.x * .24 + point.y * .20, 0.0, 1.0)
+	return teinte.darkened(.32).lerp(teinte.lerp(Rendu.REFLET, .22), lumiere)
+
+static func _signature(mesh: ImmediateMesh, silhouette: String, teinte: Color, monde: int) -> void:
+	var clair := teinte.lerp(Rendu.REFLET, .72)
+	var hauteur := .47
+	if silhouette in Formes.BOULES:
+		# La couronne tourne au-dessus du noyau, a l'interieur du contour dangereux.
+		_cercler(mesh, clair, .46, .055, .83)
+		for i in 3:
+			var angle := i * TAU / 3.0
+			_amande(mesh, Vector3(cos(angle) * .46, .84, sin(angle) * .46), .08, .16, .04, clair, 3, 6)
+	elif silhouette in ["plume_sentinelle", "marge_harceleuse", "index_brise", "maitre_orages", "cachet_phaseur"]:
+		_amande(mesh, Vector3(0, hauteur, .03), .10, 1.20, .11, clair, 5, 8)
+	elif silhouette in ["fiole_volatile", "encrier_rampant", "hydre_venins"]:
+		_amande(mesh, Vector3(0, hauteur, -.18), .29, .63, .25, clair, 6, 10)
+	elif silhouette in ["folio_orbiteur", "reliure_affamee", "l_errata", "virgule_noire", "souverain_ombres"]:
+		# Le reflet suit la decoupe des lames, sans remplir leur echancrure.
+		var trace := Formes.contour(silhouette)
+		for i in trace.size(): trace[i] *= .54
+		_face(mesh, trace, clair, hauteur + .015)
+	else:
+		_cercler(mesh, clair, .24, .07, hauteur + .02)
+		_amande(mesh, Vector3(0, hauteur + .015, 0), .095, .19, .10, clair, 4, 8)
+	if monde >= 0:
+		_amande(mesh, Vector3(-.20, hauteur + .05, -.22), .043, .12, .025,
+			BestiaireMondes.ACCENTS[monde], 3, 5)
 
 static func _cercler(mesh: ImmediateMesh, teinte: Color, rayon: float, epaisseur: float, hauteur: float) -> void:
 	for i in 32:

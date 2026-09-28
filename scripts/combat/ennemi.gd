@@ -33,6 +33,7 @@ var _point_vise := Vector2.ZERO
 var _minuterie := 0.0
 var _annonce_projectile := false
 var _direction_charge := Vector2.ZERO
+var _charge := preload("res://scripts/combat/trajet_charge.gd").new()
 var _anim := 0.0
 var _flash := 0.0
 var _apparition := 0.0
@@ -142,7 +143,7 @@ func _avancer_vers(cible: Vector2, vitesse: float) -> void:
 		_contournement = 0.8
 		_sens_contournement = 1.0 if randf() < 0.5 else -1.0
 
-func _agir_rampant(_delta: float) -> void:
+func _agir_rampant(delta: float) -> void:
 	var distance := global_position.distance_to(_cible.global_position)
 	if _etat == "frappe":
 		if _minuterie <= 0.0:
@@ -163,22 +164,26 @@ func _agir_rampant(_delta: float) -> void:
 		return
 	if _etat == "preparer":
 		if _minuterie <= 0.0:
+			if distance > portee_charge() or _charge.longueur > _longueur_charge():
+				_etat = "repos"
+				return
 			_etat = "charger"
 			_minuterie = EvolutionEnnemis.ELAN_DUREE
 		return
 	if _etat == "charger":
 		var avant := global_position
-		velocity = _direction_charge*float(donnees["vitesse"])*EvolutionEnnemis.ELAN_VITESSE*_facteur_vitesse()
-		move_and_slide()
+		_charge.avancer(self, float(donnees["vitesse"]) * EvolutionEnnemis.ELAN_VITESSE * _facteur_vitesse(), delta)
 		CapacitesEnnemis.frapper_sur_segment(self, avant)
-		if _minuterie <= 0.0:
+		if _charge.terminee:
 			_etat = "repos"
 			_recharge = float(donnees["recharge"])
 		return
-	if distance > _distance_contact() and distance <= float(donnees.get("elan_distance",0.0)) and _recharge <= 0.0:
+	if distance > _distance_contact() and distance <= minf(float(donnees.get("elan_distance",0.0)), portee_charge()) \
+			and _recharge <= 0.0 and Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), _rayon_collision()):
 		_etat = "preparer"
 		_minuterie = float(donnees["preparation"])
 		_direction_charge = global_position.direction_to(_viser())
+		_preparer_trajet_charge()
 		return
 	if distance <= _distance_contact() and _recharge_contact <= 0.0:
 		_etat = "frappe"
@@ -202,7 +207,7 @@ func _agir_sentinelle() -> void:
 			_etat = "repos"
 			_tirer_vers(_point_vise)
 		return
-	if _recharge > 0.0: return
+	if _recharge > 0.0 or not _peut_tirer(): return
 	_recharge = float(donnees.get("recharge", 1.8))
 	if not _preparer_tir("vise", float(donnees.get("telegraphe", 0.6))):
 		_tirer_vers(_point_vise)
@@ -220,6 +225,12 @@ func _preparer_tir(etat: String, duree: float, cercle := false) -> bool:
 
 func _doit_annoncer_tir(cercle := false) -> bool:
 	return ProjectilesEnnemis.annonce_necessaire(_creer_tir(cercle), global_position.distance_to(_cible.global_position))
+
+func _peut_tirer(cercle := false) -> bool:
+	var tir := _creer_tir(cercle)
+	var portee := minf(tir.portee, tir.distance_retour) if tir.trajectoire == "aller_retour" else tir.portee
+	return global_position.distance_to(_cible.global_position) <= portee \
+		and Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), tir.rayon)
 
 func _viser() -> Vector2:
 	var point := _cible.global_position
@@ -277,10 +288,14 @@ func _tirer_cercle(nombre: int, relance := false) -> void:
 func decalage_anneau() -> float:
 	return _anneau_index * EvolutionEnnemis.DECALAGE_ANNEAU if int(donnees.get("evolution", 0)) > 0 else 0.0
 
-func _agir_veloce(_delta: float) -> void:
+func _agir_veloce(delta: float) -> void:
 	var distance := global_position.distance_to(_cible.global_position)
 	var decision := Cerveaux.veloce(distance, _etat, _minuterie,
 		portee_charge())
+	# Un trajet annonce se termine a son extremite, meme sous un ralentissement.
+	if _etat == "charger" and not _charge.terminee: decision = "charger"
+	if _etat == "preparer" and decision == "charger" and _charge.longueur > _longueur_charge():
+		decision = "avancer"
 	if decision in ["preparer", "charger"] and _etat != "charger" \
 			and not Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), float(donnees["rayon"])):
 		decision = "avancer"
@@ -296,17 +311,16 @@ func _agir_veloce(_delta: float) -> void:
 				_etat = "preparer"
 				_minuterie = donnees.get("preparation", 0.7)
 				_direction_charge = global_position.direction_to(_cible.global_position)
+				_preparer_trajet_charge()
 		"charger":
 			if _etat != "charger":
 				_etat = "charger"
 				_charges_effectuees += 1
 				_minuterie = donnees.get("duree_charge", 0.5)
 			var avant := global_position
-			velocity = _direction_charge * donnees["vitesse"] * _facteur_vitesse()
-			move_and_slide()
-			_contraindre_aux_murs()
+			_charge.avancer(self, float(donnees["vitesse"]) * _facteur_vitesse(), delta)
 			CapacitesEnnemis.frapper_sur_segment(self, avant)
-			if get_slide_collision_count() > 0 or avant.is_equal_approx(global_position):
+			if _charge.terminee:
 				_minuterie = 0.0
 		"repos":
 			if _etat != "repos":
@@ -314,14 +328,25 @@ func _agir_veloce(_delta: float) -> void:
 						and Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), float(donnees["rayon"])):
 					_etat = "preparer"
 					_minuterie = float(donnees["preparation"])
-					_direction_charge = global_position.direction_to(_viser())
+					_direction_charge = global_position.direction_to(_cible.global_position)
+					_preparer_trajet_charge()
 					return
 				_charges_effectuees = 0
 				_etat = "repos"
 				_minuterie = donnees.get("repos", 0.8)
 
 func portee_charge() -> float:
-	return Cerveaux.portee_charge(donnees, _facteur_vitesse())
+	return _longueur_charge() + _distance_contact()
+
+func _longueur_charge() -> float:
+	return Cerveaux.longueur_charge(donnees, _facteur_vitesse())
+
+func _preparer_trajet_charge() -> void:
+	_charge.preparer(self, _direction_charge, _longueur_charge(), _rayon_collision())
+	if not _charge.contient_cible(_cible.global_position, _distance_contact()):
+		_etat = "repos"
+		_minuterie = 0.0
+		_avancer_vers(_cible.global_position, float(donnees["vitesse"]) * float(donnees.get("vitesse_approche_mult", 1.0)))
 
 func _agir_essaimeur(_delta: float) -> void:
 	if _etat == "invoque":
@@ -330,6 +355,11 @@ func _agir_essaimeur(_delta: float) -> void:
 			_invoquer_essaimeur()
 		return
 	var distance := global_position.distance_to(_cible.global_position)
+	var peut_invoquer := _invocations < int(donnees.get("max_invocations", 6)) \
+		and int(get_parent().effectif_ennemis()) < Reglages.PLAFOND_ENNEMIS
+	if not peut_invoquer and not _peut_tirer(true):
+		_avancer_vers(_cible.global_position, float(donnees["vitesse"]))
+		return
 	match Cerveaux.essaimeur(distance, donnees["portee"], _recharge):
 		"reculer":
 			_avancer_vers(global_position * 2.0 - _cible.global_position, donnees["vitesse"])
@@ -345,10 +375,10 @@ func _invoquer_essaimeur() -> void:
 	# Reserve d'encre finie : sans ce plafond, un scribe qu'on ne prend jamais
 	# pour cible rend la salle litteralement infinie.
 	if _invocations >= int(donnees.get("max_invocations", 6)):
-		if int(donnees.get("evolution", 0)) > 0:
-			_tirer_cercle(int(donnees.get("projectiles_cercle", 0)))
+		_tirer_cercle(int(donnees.get("projectiles_cercle", 0)))
 		return
 	if int(get_parent().effectif_ennemis()) >= Reglages.PLAFOND_ENNEMIS:
+		_tirer_cercle(int(donnees.get("projectiles_cercle", 0)))
 		return
 	_invocations += int(donnees.get("nb_invoques", 2))
 	for i in int(donnees.get("nb_invoques", 2)):
@@ -364,7 +394,7 @@ func _agir_orbiteur(_delta: float) -> void:
 			_tirer_vers(_point_vise)
 		return
 	var distance := global_position.distance_to(_cible.global_position)
-	match Cerveaux.orbiteur(distance, donnees["portee"], _recharge):
+	match Cerveaux.orbiteur(distance, donnees["portee"], _recharge, _peut_tirer()):
 		"reculer": _avancer_vers(global_position * 2.0 - _cible.global_position, donnees["vitesse"])
 		"avancer": _avancer_vers(_cible.global_position, donnees["vitesse"])
 		"orbiter":
@@ -384,7 +414,7 @@ func _agir_harceleur(_delta: float) -> void:
 			_tirer_vers(_point_vise)
 		return
 	var distance := global_position.distance_to(_cible.global_position)
-	match Cerveaux.harceleur(distance, donnees["portee"], _recharge):
+	match Cerveaux.harceleur(distance, donnees["portee"], _recharge, _peut_tirer()):
 		"reculer": _avancer_vers(global_position * 2.0 - _cible.global_position, donnees["vitesse"])
 		"avancer": _avancer_vers(_cible.global_position, donnees["vitesse"])
 		"tourner":
@@ -403,7 +433,7 @@ func _agir_miroir(_delta: float) -> void:
 			_tirer_cercle(int(donnees.get("projectiles_cercle", 8)))
 		return
 	var distance := global_position.distance_to(_cible.global_position)
-	match Cerveaux.miroir(distance, donnees["portee"], _recharge):
+	match Cerveaux.miroir(distance, donnees["portee"], _recharge, _peut_tirer(true)):
 		"avancer": _avancer_vers(_cible.global_position, donnees["vitesse"])
 		"pulser":
 			_recharge = donnees.get("recharge", 2.35)
@@ -426,18 +456,30 @@ func _agir_phaseur(_delta: float) -> void:
 			velocity = radial.rotated(PI * 0.5 * _sens_contournement) * donnees["vitesse"] * 0.55 * _facteur_vitesse()
 			move_and_slide()
 		"phase":
-			_etat = "phase"
 			_destination_phase = _capacites.destination_phase(self)
+			if not _destination_phase.is_finite():
+				_recharge = BestiaireMondes.PHASE_REESSAI
+				_avancer_vers(_cible.global_position, float(donnees["vitesse"]))
+				return
+			_etat = "phase"
 			_point_vise = _viser()
 			_minuterie = Reglages.PHASE_ANNONCE
 			_recharge = donnees.get("recharge", 2.55)
 		"disparaitre":
 			velocity = Vector2.ZERO
 		"reapparaitre":
+			# Une place occupee pendant l'annonce annule le saut sans deplacer son repere.
+			if not get_parent()._place_libre(_destination_phase, float(donnees["rayon"])):
+				_etat = "repos"
+				_recharge = BestiaireMondes.PHASE_REESSAI
+				return
 			# La vitesse effective decide si le tir demande une annonce apres l'arrivee.
 			global_position = _destination_phase
 			reset_physics_interpolation()
 			_etat = "repos"
+			if not _peut_tirer():
+				_recharge = BestiaireMondes.PHASE_REESSAI
+				return
 			if not _preparer_tir("vise_phase", Reglages.PHASE_PREPARATION_TIR, true):
 				_tirer_cercle(int(donnees.get("projectiles_cercle", 6)))
 				_tirer_vers(_point_vise)
@@ -459,7 +501,7 @@ func _contraindre_aux_murs() -> void:
 func _agir_tisseur(_delta: float) -> void:
 	var distance := global_position.distance_to(_cible.global_position)
 	var distance_minimale := float(donnees["vitesse_projectile"]) * BestiaireMondes.TISSEUR_REACTION_MIN
-	match Cerveaux.tisseur(distance, donnees["portee"], _recharge, distance_minimale):
+	match Cerveaux.tisseur(distance, donnees["portee"], _recharge, distance_minimale, _peut_tirer()):
 		"reculer": _avancer_vers(global_position * 2.0 - _cible.global_position, donnees["vitesse"])
 		"avancer": _avancer_vers(_cible.global_position, donnees["vitesse"])
 		"croiser":

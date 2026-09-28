@@ -2,7 +2,6 @@ extends Node3D
 
 const Rendu = preload("res://data/presentation/animations_combat.gd")
 
-var _profil: Dictionary
 var _boss := false
 var _temps := 0.0
 var _attaque := 0.0
@@ -13,10 +12,14 @@ var _forme := Vector3.ONE
 var _inclinaison := 0.0
 var _roulis := 0.0
 var _hauteur := 0.0
+var _membres := preload("res://scripts/presentation/animation_membres_ennemis.gd").new()
+var _appuis := preload("res://scripts/presentation/appuis_bestiaire_3d.gd").new()
+var _elan := Vector2.ZERO
 
-func preparer(donnees: Dictionary) -> void:
-	_profil = Rendu.profil(donnees)
+func preparer(donnees: Dictionary, modele: Node3D) -> void:
 	_boss = str(donnees["cerveau"]) == "boss"
+	_membres.preparer(modele, donnees)
+	_appuis.preparer(modele)
 	# Des respirations decalees evitent une horde qui bouge a l'unisson.
 	_temps = float(get_instance_id() % 97) * 0.17
 
@@ -29,7 +32,7 @@ func toucher() -> void:
 	if _impact <= 0.0:
 		_impact = Rendu.IMPACT_DUREE
 
-func mettre_a_jour(ennemi: Node2D, delta: float, orientation: float, vitesse: float) -> void:
+func mettre_a_jour(ennemi: Node2D, delta: float, orientation: float, _vitesse: float) -> void:
 	if float(ennemi.get("_gel")) > 0.0:
 		return
 	_temps += delta
@@ -37,30 +40,35 @@ func mettre_a_jour(ennemi: Node2D, delta: float, orientation: float, vitesse: fl
 	_impact = maxf(0.0, _impact - delta)
 	var donnees: Dictionary = ennemi.get("donnees")
 	var etat := str(ennemi.get("_motif" if _boss else "_etat"))
-	var charge: bool = etat == "charger" or (_boss and etat == "charge" and not ennemi._annonce_charge())
+	var charge: bool = etat == "charger" or (_boss and etat == "charge" and ennemi._charge_debutee and not ennemi._charge_terminee)
 	if _boss and etat == "assaut_contact": charge = str(ennemi._contact.etat) == "frappe"
 	if charge and not _charge_precedente: projeter()
 	_charge_precedente = charge
 	var armer := _progression_preparation(ennemi, donnees, etat)
 	var lissage := 1.0 - exp(-Rendu.LISSAGE_POSE * delta)
 	_preparation = lerpf(_preparation, armer, lissage)
-	var mouvement := clampf(vitesse / maxf(float(donnees["vitesse"]) * Reglages.ENNEMI_VITESSE_MULT, 1.0), 0.0, 1.0)
-	var pas := _temps * float(_profil["cadence"])
-	var souffle := sin(_temps * 2.6) * float(_profil["souffle"])
-	var rebond := absf(sin(pas)) * float(_profil["pas"]) * mouvement
+	var trajet := _appuis.mesurer(delta)
+	var mouvement := clampf(_appuis.vitesse / 1.8, 0.0, 1.0)
+	var axe := Basis(Vector3.UP, orientation)
+	var local := axe.inverse() * trajet.normalized() * mouvement
+	_elan = _elan.lerp(Vector2(local.x, local.z), 1.0 - exp(-6.0 * delta))
+	var flottant := _appuis.pattes.is_empty()
+	var souffle := sin(_temps * 1.65) * (0.0 if ReglagesJoueur.effets_reduits else 1.0)
 	var t := 1.0 - _attaque / Rendu.ATTAQUE_DUREE
-	var frappe := sin(minf(t / 0.28, 1.0) * PI) if _attaque > 0.0 else 0.0
-	var retour := sin(clampf((t - 0.28) / 0.72, 0.0, 1.0) * PI) if _attaque > 0.0 else 0.0
+	# Le geste atteint sa cible vite puis absorbe le recul plus lentement.
+	var frappe := (smoothstep(0.0, .16, t) if t < .16 else 1.0 - smoothstep(.16, 1.0, t)) if _attaque > 0.0 else 0.0
 	var heurt := sin((1.0 - _impact / Rendu.IMPACT_DUREE) * TAU) * _impact / Rendu.IMPACT_DUREE
-	var compression := _preparation * Rendu.PREPARATION_COMPRESSION
-	var etirement := frappe * 0.10 - retour * 0.035
-	_forme = Vector3(1.0 + compression * 0.5 - etirement * 0.4,
-		1.0 - compression + etirement + souffle, 1.0 + compression * 0.5 - etirement * 0.4)
+	_membres.mettre_a_jour(delta, mouvement, _preparation, frappe, heurt, _elan, 0.0 if flottant else _appuis.phase)
+	_forme = Vector3.ONE
 	_inclinaison = lerpf(_inclinaison, -_preparation * Rendu.PREPARATION_INCLINAISON
-		+ frappe * 0.16 + (Rendu.CHARGE_INCLINAISON if charge else 0.0), lissage)
-	_roulis = sin(pas) * float(_profil["roulis"]) * mouvement + heurt * (0.015 if _boss else 0.05)
+		+ frappe * .09 + _elan.y * (.065 if flottant else .025)
+		+ (Rendu.CHARGE_INCLINAISON * .5 if charge else 0.0), lissage)
+	_roulis = -_elan.x * (.075 if flottant else .025) + heurt * (.015 if _boss else .035)
 	var phase := float(ennemi.get("_eclat_phase")) if _boss else 0.0
-	_hauteur = rebond * (1.0 - _preparation) + sin(clampf(phase, 0.0, 1.0) * PI) * Rendu.PHASE_HAUTEUR
+	_hauteur = .025 + souffle * .010 if flottant else -.018 - _preparation * .018
+	if not flottant and not ReglagesJoueur.effets_reduits:
+		_hauteur -= (1.0 - cos(_appuis.phase * TAU * 2.0)) * .004 * mouvement
+	_hauteur += sin(clampf(phase, 0.0, 1.0) * PI) * Rendu.PHASE_HAUTEUR
 	var apparition := smoothstep(0.0, 1.0, float(ennemi.get("_apparition")))
 	var entree := lerpf(0.72, 1.0, apparition)
 	if not _boss and etat == "phase":
@@ -70,10 +78,10 @@ func mettre_a_jour(ennemi: Node2D, delta: float, orientation: float, vitesse: fl
 		var progression := clampf((1.0 - float(ennemi._minuterie) / Reglages.PHASE_PREPARATION_TIR) / Rendu.PHASE_RETOUR_PART, 0.0, 1.0)
 		entree *= lerpf(Rendu.PHASE_ECHELLE_MIN, 1.0, smoothstep(0.0, 1.0, progression))
 	# Ce pivot enveloppe le GLB : les proportions du monde et ses pistes restent intactes.
-	var axe := Basis(Vector3.UP, orientation)
 	basis = axe * Basis.from_euler(Vector3(_inclinaison, 0, _roulis)) * axe.inverse()
 	scale = _forme * entree
-	position = axe * Vector3(0, _hauteur, -frappe * Rendu.RECUL)
+	position = axe * Vector3(0, _hauteur, -frappe * Rendu.RECUL * .45)
+	_appuis.poser(delta, trajet)
 
 func _progression_preparation(ennemi: Node2D, donnees: Dictionary, etat: String) -> float:
 	if _boss:

@@ -230,7 +230,7 @@ static func monstres() -> String:
 			statistiques.append(["Contact du corps", "Dégâts immédiats ; délai entre contacts %s s" % nombre(BestiaireMondes.POURSUITE_CONTACT_RECHARGE)])
 		if str(d["cerveau"]) == "veloce":
 			statistiques.append_array([
-				["Durée de charge", nombre(float(d["duree_charge"])) + " s"],
+				["Durée de charge en terrain libre", nombre(float(d["duree_charge"])) + " s ; trajet annoncé arrêté au premier mur ou obstacle"],
 				["Portée de déclenchement", nombre(Cerveaux.portee_charge(d, Reglages.ENNEMI_VITESSE_MULT)) + " px avant coefficients de niveau et ralentissements, hitboxes comprises"],
 			])
 		if str(d["cerveau"]) == "boss":
@@ -262,7 +262,7 @@ static func monstres() -> String:
 		if AttaquesContactBoss.PROFILS.has(id):
 			var contact: Dictionary = AttaquesContactBoss.PROFILS[id]
 			lignes.append_array(["### Attaque au contact : " + str(contact["nom"]), "",
-				"Approche limitée, visée verrouillée pendant l’annonce, une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.", ""])
+				"Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce commence à portée, avec une visée verrouillée et une seule frappe. Le boss reste immobile pendant sa récupération ; aucune salve simultanée.", ""])
 			tableau(lignes, ["Paramètre", "Valeur"], [
 				["Approche maximale", nombre(float(contact["approche"])) + " s"],
 				["Annonce", nombre(float(contact["annonce"])) + " s"],
@@ -293,7 +293,9 @@ static func _rythme_monstres(lignes: Array[String]) -> void:
 	var sentinelle := CatalogueEnnemis.par_id("plume_sentinelle")
 	lignes.append_array([
 		"La sentinelle tire à %s px/s avant coefficients. Dès le début de l’annonce, elle fixe une visée anticipant la course pendant sa préparation et un vol plafonné à %s px. Une course régulière est menacée à mi-distance ; changer de direction ou se couvrir permet l’esquive. À l’autre bout de la salle, le temps de vol laisse une marge latérale. Chaque éventail garde un trait central." % [nombre(float(sentinelle["vitesse_projectile"])), nombre(ProjectilesEnnemis.SENTINELLE_ANTICIPATION_PORTEE)], "",
-		"Les boss apparaissent près du milieu, sur une place libre. Ils avancent, prennent un flanc ou tournent autour du joueur selon leur identité. Les monstres se rapprochent de leur distance d’attaque ; les tireurs fuyards gardent leur recul. Une charge exige une cible atteignable et une voie libre, y compris après la préparation et avant un enchaînement.", "",
+		"Les boss apparaissent près du milieu, sur une place libre. Ils avancent, prennent un flanc ou tournent autour du joueur selon leur identité. Leurs motifs disponibles varient dans l’ordre selon la distance et les obstacles, sans répétition immédiate. Les mêlées ne s’arment qu’à portée et les approches ratées sont abandonnées.", "",
+		"Les tireurs utilisent la portée réelle de leurs projectiles sans attendre leur distance de placement ; les tireurs fuyards gardent leur recul. Les phaseurs se téléportent aussi de loin, vers une place libre annoncée. Les invocateurs appellent à distance et restent capables de tirer une fois leurs renforts épuisés.", "",
+		"Une charge exige une cible atteignable et une voie libre, y compris après la préparation et avant un enchaînement. Le déplacement suit exactement le segment annoncé, limité par les murs et obstacles. Un ralentissement empêchant de couvrir ce segment avant le départ annule la charge ; après le départ, il allonge le trajet dans le temps sans raccourcir sa distance.", "",
 		"Les boomerangs des boss sont plus épais, saturés et bordés de sombre. Leur éventail compte %d branches ; leur plafond de vitesse est %s px/s avant progression, contre %s px/s pour les monstres ordinaires. La portée totale couvre les deux trajets ; un mur provoque le retour." % [ProjectilesEnnemis.RETOUR_BOSS_ANGLES.size(), nombre(ProjectilesEnnemis.RETOUR_BOSS_VITESSE_MAX), nombre(ProjectilesEnnemis.RETOUR_VITESSE_MAX)], "",
 		"Les tirs lents partent sans tracé préalable. Une annonce est requise dès %s px/s de vitesse réelle, ou si le temps avant impact est inférieur à %s s après prise en compte des hitboxes. La règle suit la progression et les plafonds des trajectoires. Les impacts de zone et les frappes préparées gardent leur avertissement ; le corps des poursuivants et chargeurs blesse dès le contact." % [nombre(ProjectilesEnnemis.VITESSE_ANNONCE), nombre(ProjectilesEnnemis.REACTION_SANS_ANNONCE)], "",
 		"Quand elle est nécessaire, l’annonce ordinaire dure au moins %s s, celle d’une salve de boss %s s. La visée annoncée reste verrouillée jusqu’au départ." % [nombre(Reglages.ENNEMI_TELEGRAPHE_MIN), nombre(BestiaireMondes.BOSS_ANNONCE_TIR)], "",
