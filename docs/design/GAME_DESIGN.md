@@ -75,8 +75,9 @@ par son boss signature.
 
 Les formes des salles, obstacles, terrains, rencontres et variantes de monde
 sont définis dans leurs catalogues. Les salles de campagne varient entre
-galeries étroites, salles allongées, murs arrondis, renfoncements et alcôves,
-sans dépasser la largeur de référence. Leur géométrie reste stable par étage
+galeries étroites, salles allongées, murs arrondis, renfoncements et alcôves.
+La majorité offre davantage de largeur, tout en conservant quelques galeries
+étroites et les mêmes formes et longueurs. Leur géométrie reste stable par étage
 et conserve l'accès à l'entrée, au portail et aux différentes alcôves.
 Leurs murs arrêtent les déplacements, les contacts et les tirs ordinaires.
 La croissance des PV et des dégâts est
@@ -141,11 +142,19 @@ Les boss gardent des ouvertures dans leurs barrages ; les départs des tirs
 respectent le contour réel de la salle et leurs annonces. Le tutoriel est retiré.
 
 La sentinelle anticipe une course régulière puis lance un trait très rapide
-après sa visée verrouillée. À mi-distance, continuer tout droit expose au coup :
-il faut changer de direction ou se couvrir. Au fond de la salle, le temps de vol
-supplémentaire laisse une marge pour esquiver latéralement. Les poursuivants et
-chargeurs blessent dès le contact réel de leurs corps, même pendant la
-préparation de leur attaque, avec un délai entre deux coups. Un obstacle
+après sa visée verrouillée. Continuer tout droit expose au coup, même au fond
+de la salle : il faut changer de direction ou se couvrir. Les chargeurs
+anticipent aussi la course dès le début de leur préparation, puis conservent
+le trajet annoncé. Chaque visée doit permettre de croiser la course prévue
+sur ce trajet, après la préparation ; sinon, le chargeur se rapproche.
+Les poursuivants et les chargeurs sont ralentis, avec une durée de charge
+prolongée pour conserver la portée annoncée.
+Les monstres gagnent légèrement en déplacement et en cadence ; le Tison
+arbalétrier du monde Feu conserve une cadence réduite propre à sa variante.
+Le premier boss de chaque niveau de campagne a une endurance réduite pour
+alléger le combat avant le premier légendaire.
+Les poursuivants et chargeurs blessent dès le contact réel de leurs corps,
+même pendant la préparation de leur attaque, avec un délai entre deux coups. Un obstacle
 empêche cette frappe et l’invulnérabilité normale après dégât reste active.
 
 Les boss arrivent près du milieu de la salle. Selon leur identité, ils avancent
@@ -204,6 +213,21 @@ valeurs brutes. Les pourcentages s'additionnent dans chaque source ; les
 étages équipement, maîtrises et passifs se multiplient. Les augments agissent
 ensuite sur les tirs et statistiques de run ; les Cœurs sont le dernier facteur
 de dégâts. Ils font partie de la progression permanente.
+
+Le repère demandé est un impact normal d'environ mille dégâts sans augment
+sur un compte complet, pour dix dégâts au départ sans équipement. Ce sont
+des impacts, pas le DPS ni les critiques. Les bijoux et le familier doivent
+apporter un gain visible ; leur utilité offensive et défensive se lit objet
+par objet dans la liste mathématique. Chaque rang de forge du familier augmente
+ses dégâts, indépendamment de l'arme ; il partage les facteurs permanents
+et les augments d'attaque, sans recevoir les critiques ni les salves du héros.
+La forge d'arme ralentit après ses premiers achats, avec un gain continu
+plus sensible sur les rangs suivants. Les ennemis gardent des courbes fixes,
+recalibrées avec les achats et offres réels, sans lire les statistiques du joueur.
+
+Héros affiche le bonus total de chaque attribut et le gain du prochain point
+au niveau courant. Les chiffres viennent de la même fonction que le combat ;
+les valeurs brutes et les points de critique sont identifiés avant combinaison.
 
 Les bijoux gagnent un effet passif au palier de forge prévu. Aucun de ces
 effets ne lance de sort. Les anciens modèles restent utilisables dans les

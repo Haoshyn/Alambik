@@ -43,9 +43,23 @@ static func visee_rapide(origine: Vector2, cible: Vector2, course: Vector2,
 	var vol := 0.0
 	if a < 0.0:
 		vol = (-b - sqrt(maxf(0.0, b * b - 4.0 * a * c))) / (2.0 * a)
-	# La prediction couvre la mi-portee ; le trajet supplementaire laisse fuir au loin.
-	vol = clampf(vol, 0.0, ProjectilesEnnemis.SENTINELLE_ANTICIPATION_PORTEE / vitesse_tir)
+	# Le point est fixe au debut de l'annonce, y compris au fond de la salle.
+	# Une esquive change la course prevue, sans deplacer la trajectoire annoncee.
 	return decoche + course * vol
+
+static func charge_atteignable(debut: Vector2, fin: Vector2, cible: Vector2,
+		course: Vector2, preparation: float, vitesse: float, marge: float) -> bool:
+	if vitesse <= 0.0: return false
+	var trajet := fin - debut
+	var ecart := cible + course * preparation - debut
+	var vitesse_relative := course - trajet.normalized() * vitesse
+	var instant := 0.0
+	if not vitesse_relative.is_zero_approx():
+		instant = clampf(-ecart.dot(vitesse_relative) / vitesse_relative.length_squared(),
+			0.0, trajet.length() / vitesse)
+	# La proximite de la cible au debut ne suffit pas : les deux corps doivent
+	# pouvoir se croiser avant la fin du segment reel, apres la preparation.
+	return (ecart + vitesse_relative * instant).length_squared() <= marge * marge
 
 static func essaimeur(distance: float, distance_voulue: float, recharge: float) -> String:
 	if recharge <= 0.0: return "invoquer"

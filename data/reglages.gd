@@ -32,8 +32,9 @@ const HEROS_ACCELERATION := 3100.0
 const HEROS_FREINAGE := 4200.0
 const HEROS_CADENCE := 1.6          # tirs par seconde
 const HEROS_INVULNERABILITE := 0.6  # secondes apres un coup recu
-const HEROS_RAYON := 20.0
-const HEROS_ECHELLE := 0.78
+const HEROS_ECHELLE := 1.15
+# Le cercle suit le mage tout en gardant une marge d'esquive sous sa silhouette.
+const HEROS_RAYON := 22.0 * HEROS_ECHELLE
 # Repere conserve pour les outils historiques, jamais un plancher de combat.
 const SOIN_COMBAT_PAR_SALLE := 0.05
 const INVOCATION_BOSS_INTERVALLE := 18.0
@@ -77,7 +78,6 @@ const GIVRE_RALENTISSEMENT := 0.45  # facteur de vitesse applique
 const GIVRE_DUREE := 2.5
 const ACIDE_VULNERABILITE := 1.25   # multiplicateur de degats subis
 const ACIDE_DUREE := 4.0
-const FAMILIER_DEGATS_MAX_PART_HEROS := 1.0
 # Viser ou la cible sera, pas ou elle est. Partage par le heros et le familier :
 # une cible qui recule en ligne droite n'etait presque jamais touchee.
 const ANTICIPATION_DUREE_MAX := 0.8
@@ -129,7 +129,7 @@ const SALLES_PAR_RUN := 20
 
 # Les ennemis suivent une courbe fixe ; les ressources annexes permettent
 # de prendre de l'avance sans adapter la difficulte au joueur.
-const CAMPAGNE_PV_PAR_CHAPITRE := 1.08
+const CAMPAGNE_PV_PAR_CHAPITRE := 1.045
 const CAMPAGNE_PV_CHAPITRES_INITIAUX := 7
 const CAMPAGNE_PV_PAR_CHAPITRE_TARDIF := 1.11
 const CAMPAGNE_PV_BOSS_RENFORT_TARDIF := 1.10
@@ -151,11 +151,12 @@ const CAMPAGNE_DEGATS_RENFORT_TARDIF := 1.20
 const CAMPAGNE_DEGATS_TRANSITION_TARDIVE := 0.90
 # Les monstres ordinaires suivent la puissance des augments. Les boss gardent
 # leur propre rythme de PV pour eviter d'allonger tous leurs combats.
-const CAMPAGNE_PV_PAR_SALLE := 1.11
+const CAMPAGNE_PV_PAR_SALLE := 1.12
 const CAMPAGNE_PV_BOSS_PAR_SALLE := 1.045
-const CAMPAGNE_DEGATS_PAR_SALLE := 1.02
-# Les choix majeurs sont proposes avant le combat de ces salles.
-const CAMPAGNE_PV_PALIERS := {5: 1.10, 10: 1.50, 15: 1.20}
+const CAMPAGNE_DEGATS_PAR_SALLE := 1.023
+# Les paliers suivent les choix deja recus, sans lire l'inventaire du joueur.
+const CAMPAGNE_PV_PALIERS := {2: 1.08, 4: 1.45, 9: 1.70, 15: 1.20}
+const CAMPAGNE_PV_BOSS_PALIERS := {3: 1.08, 5: 1.15, 10: 1.70, 15: 1.20}
 const CAMPAGNE_DEGATS_PALIERS := {5: 1.05, 10: 1.05, 15: 1.05}
 # Les premiers choix restent accessibles avant le crescendo geometrique.
 const DEFI_MONTEE_PV := 1.0       # x2 entre la premiere et la derniere rencontre
@@ -180,7 +181,7 @@ const EQUIPEMENT_CROISSANCE_PAR_PALIER := 1.008
 # Un court lot de victoires donne une amelioration certaine, meme sans chance.
 const EPREUVE_GARANTIE_CAPACITE := 2
 const EPREUVE_GARANTIE_COEUR := 3
-const COEUR_MANA_BONUS_FINAL := 0.18
+const COEUR_MANA_BONUS_FINAL := 0.15
 const EPREUVE_NIVEAU_DEBLOCAGE := 2
 const MINE_NIVEAU_DEBLOCAGE := 4
 

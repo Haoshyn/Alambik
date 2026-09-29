@@ -29,8 +29,9 @@ plus claires et le polissage restent déterministes. Les nuances appartiennent
 et la bordure est regroupée dans un second, tous deux découpés sur les
 parois réelles et sous les acteurs. Les coins varient aussi
 en campagne, avec des galeries étroites, des salles allongées, des parois
-ondulées, des renfoncements et des alcôves arrondies ou angulaires. Aucune
-salle ne dépasse la largeur de référence. Dimensions et reliefs sont stables
+ondulées, des renfoncements et des alcôves arrondies ou angulaires. La galerie
+étroite conserve son gabarit ; la majorité des salles offre davantage de
+largeur, avec les mêmes formes et longueurs. Dimensions et reliefs sont stables
 par étage ; collisions et décor partagent le même contour. Le passage
 central reste dégagé.
 Frises d'émail et couverts peints complètent les ateliers.
@@ -87,7 +88,7 @@ viennent du catalogue et figurent dans les statistiques générées.
   sont vérifiés sans fenêtre ; le rendu sur appareil reste à vérifier.
 - Vingt-six augments : douze rares, neuf épiques et cinq
   légendaires. Ils modifient les statistiques ou les tirs ordinaires.
-  Les gains de dégâts et de résistance sont resserrés, avec leurs effets conservés.
+  Les gains trop faibles de dégâts et de résistance sont renforcés, avec leurs effets conservés.
   Aucun malus ordinaire d'attaque, de PV, de cadence ou de mobilité.
   Salve est rare et unique ; Tir double est rare et cumulable deux fois.
   Salve, Tir double et Battement triple appliquent chacun −20 % aux projectiles,
@@ -105,6 +106,15 @@ viennent du catalogue et figurent dans les statistiques générées.
   niveau ; leur répartition effective dépend des choix et des acquisitions.
   La forge d'arme démarre plus vite puis ralentit. La forge du familier conserve un effet
   utile avec les bonus permanents du héros.
+  Le rééquilibrage du 29 septembre renforce bijoux, familiers et rares faibles,
+  réduit les armes dominantes et conserve un gain de forge d'arme après les
+  premiers achats. Le familier partage aussi les augments d'attaque ; sa forge
+  n'est plus plafonnée par l'arme. Les Cœurs sont ajustés avec ce nouveau socle.
+  Le repère de fin est environ mille dégâts par impact normal sans augment,
+  face aux dix dégâts du héros nu. Les courbes fixes des ennemis sont recalibrées
+  en distinguant les entrées sans augment et la puissance acquise dans la run.
+  Héros affiche le bonus actuel de chaque attribut et le gain du prochain point
+  à son niveau, calculés par le runtime, sans modification des commandes.
   Un contrôle économique compare aussi les étapes à 50 %, 75 % et maximum
   sur deux parcours avec achats réels. Il recherche des temps de complétion
   proches, en particulier entre le héros et les dernières maîtrises.
@@ -171,11 +181,20 @@ viennent du catalogue et figurent dans les statistiques générées.
   Les salles varient en largeur et en longueur ; la caméra suit le héros
   dans leurs limites et garde son recul.
 - Les sentinelles anticipent une course régulière puis verrouillent leur visée.
-  Les contrôles sur les cinq mondes et les élites vérifient l’impact à mi-distance,
-  l’esquive par changement de direction et la marge latérale au fond de salle.
+  Leur anticipation couvre tout le vol, y compris au fond de salle.
+  Les chargeurs anticipent la course avant leur annonce fixe. Chaque trajet
+  doit pouvoir croiser la course prévue après la préparation ; sinon, ils
+  se rapprochent. Les poursuivants et chargeurs sont ralentis, avec une durée
+  de charge prolongée pour conserver la portée. Les contrôles sur les cinq
+  mondes et les élites vérifient l’impact en ligne droite et l’esquive par
+  changement de direction, ainsi que les trajets de charge annoncés.
+  Les monstres gagnent légèrement en déplacement et en cadence ; le Tison
+  arbalétrier du monde Feu conserve une cadence réduite propre à sa variante.
+  Le premier boss de chaque niveau de campagne a une endurance réduite avant
+  le premier légendaire ; les autres boss gardent leurs coefficients.
   Les tirs du héros, des familiers et des ennemis ont été accélérés.
-  Les poursuivants et chargeurs sont légèrement ralentis et blessent au contact
-  réel, même pendant la préparation d’une attaque. Le délai entre deux coups
+  Les poursuivants et chargeurs blessent au contact réel, même pendant la
+  préparation d’une attaque. Le délai entre deux coups
   et l’invulnérabilité normale du héros empêchent les dégâts par image.
 - Les boss apparaissent près du milieu et avancent vers le joueur, prennent
   un flanc ou orbitent selon leur identité. Une fenêtre de déplacement entre

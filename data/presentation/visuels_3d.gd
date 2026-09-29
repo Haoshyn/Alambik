@@ -3,6 +3,9 @@ extends RefCounted
 
 # Profil de rendu uniquement : aucune statistique de combat.
 const HEROS_MODELE := "res://scenes/3d/aster.tscn"
+# Hauteur projetee du modele natif ; la reserve de la barre reste fixe.
+const HEROS_BARRE_VIE_HAUTEUR := 156.0
+const HEROS_BARRE_VIE_MARGE := 30.0
 
 const HEROS_CADENCE_COURSE := 1.0
 const HEROS_TRANSITION_MOUVEMENT := 0.18

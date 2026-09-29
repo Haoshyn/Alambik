@@ -25,7 +25,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | XP de la partie +20 %<br>Gouttes +20 % |
+| 1 | XP de la partie +25 %<br>Gouttes +25 % |
 
 ### Baume profond
 
@@ -33,8 +33,8 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | PV max +10 %<br>Soins reçus +20 % |
-| 2 | PV max +20 %<br>Soins reçus +40 % |
+| 1 | PV max +15 %<br>Soins reçus +30 % |
+| 2 | PV max +30 %<br>Soins reçus +60 % |
 
 ### Cadence fébrile
 
@@ -42,8 +42,8 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Cadence +20 % |
-| 2 | Cadence +40 % |
+| 1 | Cadence +25 % |
+| 2 | Cadence +50 % |
 
 ### Encrage vif
 
@@ -51,8 +51,8 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Attaque +10 %<br>Vitesse des projectiles +20 % |
-| 2 | Attaque +20 %<br>Vitesse des projectiles +40 % |
+| 1 | Attaque +20 %<br>Vitesse des projectiles +25 % |
+| 2 | Attaque +40 %<br>Vitesse des projectiles +50 % |
 
 ### Traque alchimique
 
@@ -60,7 +60,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Projectiles guidés |
+| 1 | Dégâts des projectiles +10 %<br>Projectiles guidés |
 
 ### Pas de brume
 
@@ -68,8 +68,8 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Déplacement +20 %<br>Invulnérabilité après un coup +0,2 s |
-| 2 | Déplacement +40 %<br>Invulnérabilité après un coup +0,4 s |
+| 1 | Déplacement +25 %<br>Invulnérabilité après un coup +0,25 s |
+| 2 | Déplacement +50 %<br>Invulnérabilité après un coup +0,5 s |
 
 ### Peau de cuivre
 
@@ -77,8 +77,8 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | PV max +20 %<br>Défense +15 % |
-| 2 | PV max +40 %<br>Défense +30 % |
+| 1 | PV max +25 %<br>Défense +20 % |
+| 2 | PV max +50 %<br>Défense +40 % |
 
 ### Pointe lucide
 
@@ -86,8 +86,8 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Chance critique +10 points<br>Dégâts critiques +15 points |
-| 2 | Chance critique +20 points<br>Dégâts critiques +30 points |
+| 1 | Chance critique +20 points<br>Dégâts critiques +40 points |
+| 2 | Chance critique +40 points<br>Dégâts critiques +80 points |
 
 ### Salve
 
@@ -103,7 +103,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Dégâts subis −15 % |
+| 1 | Dégâts subis −20 % |
 
 ### Sceau de ruine
 
@@ -111,7 +111,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Attaque +20 % |
+| 1 | Attaque +25 % |
 
 ### Tir double
 
@@ -138,7 +138,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Attaque +30 % |
+| 1 | Dégâts des projectiles +35 % |
 
 ### Garde rémanente
 
@@ -146,7 +146,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | PV max +15 %<br>1 bouclier par salle · un coup bloqué chacun |
+| 1 | PV max +20 %<br>1 bouclier par salle · un coup bloqué chacun |
 
 ### Noyau pesant
 
@@ -154,8 +154,8 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Attaque +35 % |
-| 2 | Attaque +70 % |
+| 1 | Attaque +45 % |
+| 2 | Attaque +90 % |
 
 ### Peau de pierre
 
@@ -163,7 +163,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | PV max +25 %<br>Dégâts subis −5 % |
+| 1 | PV max +30 %<br>Dégâts subis −10 % |
 
 ### Perforation
 
@@ -222,7 +222,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Chance critique +35 points<br>Dégâts critiques +35 points<br>25 % de la chance critique au-delà de 100 % devient des dégâts critiques |
+| 1 | Chance critique +35 points<br>Dégâts critiques +50 points<br>50 % de la chance critique au-delà de 100 % devient des dégâts critiques |
 
 ### Égide souveraine
 
@@ -238,4 +238,4 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Attaque +75 % |
+| 1 | Attaque +65 % |

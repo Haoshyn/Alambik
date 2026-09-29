@@ -69,8 +69,8 @@ func _verifier_courbes() -> void:
 			Chapitres.facteur_degats(chapitre, Chapitres.salles(chapitre))), "Salle supérieure bornée")
 	_verifier(is_equal_approx(Chapitres.facteur_pv(0, 1), 1.0) and is_equal_approx(Chapitres.facteur_degats(0, 1), 1.0), "Salle initiale normalisee a un")
 	_verifier(Chapitres.facteur_pv(1, 1) > 1.0 and Chapitres.facteur_pv(1, 1) <= 1.3, "Le niveau deux reste accessible avant les augments")
-	_verifier(Chapitres.facteur_pv(0, 19) >= 12.0 and Chapitres.facteur_pv(0, 19) <= 14.0, "Les monstres suivent la montee des augments")
-	_verifier(Chapitres.facteur_pv(0, 19, true) >= 4.0 and Chapitres.facteur_pv(0, 19, true) <= 5.0, "Les boss conservent leur rythme de combat")
+	_verifier(Chapitres.facteur_pv(0, 19) >= 24.0 and Chapitres.facteur_pv(0, 19) <= 25.0, "Les monstres suivent les rares renforces")
+	_verifier(Chapitres.facteur_pv(0, 19, true) >= 5.5 and Chapitres.facteur_pv(0, 19, true) <= 6.0, "Les boss suivent la puissance de run renforcee")
 
 func _verifier_accueil() -> void:
 	var stats := Stats.depuis_reglages({}, {}, {"attaque_base": CatalogueProjectiles.attaque_base("standard", 0)})
@@ -229,22 +229,26 @@ func _verifier_progression_sources() -> void:
 
 func _verifier_familiers() -> void:
 	var attaque_depart := Reglages.TIR_DEGATS + CatalogueProjectiles.attaque_base("standard", 0)
-	var premier := CatalogueFamiliers.attaque_combat("homoncule_encre", 0, 0.0, attaque_depart)
-	var premiere_forge := CatalogueFamiliers.attaque_combat("homoncule_encre", 1, 0.0, attaque_depart)
+	var premier := CatalogueFamiliers.attaque_combat("homoncule_encre", 0, 0.0)
+	var premiere_forge := CatalogueFamiliers.attaque_combat("homoncule_encre", 1, 0.0)
 	_verifier(premiere_forge > premier and premiere_forge < attaque_depart,
 		"La première forge du familier apporte un gain sans dépasser le héros")
 	for id: String in CatalogueFamiliers.TYPES:
 		var donnees: Dictionary = CatalogueFamiliers.TYPES[id]
 		_verifier(float(donnees["intervalle"]) > 0.0, "Intervalle du familier positif : " + id)
-		var forge_complete := CatalogueFamiliers.attaque_combat(id, Reglages.FORGE_NIVEAU_MAX, 0.0, attaque_depart)
-		_verifier(forge_complete <= attaque_depart * Reglages.FAMILIER_DEGATS_MAX_PART_HEROS,
-			"La forge seule respecte le plafond du héros : " + id)
+		var precedent := 0.0
+		for forge in range(Reglages.FORGE_NIVEAU_MAX + 1):
+			var courant := CatalogueFamiliers.attaque_combat(id, forge, 0.0)
+			_verifier(courant > precedent, "Chaque rang de forge augmente les degats : " + id)
+			precedent = courant
 		var sans_bonus := CatalogueFamiliers.attaque(id, 0)
-		var partage := CatalogueFamiliers.attaque_combat(id, 0, 1.0, sans_bonus * 10.0)
+		var partage := CatalogueFamiliers.attaque_combat(id, 0, 1.0)
 		_verifier(is_equal_approx(partage, sans_bonus * 2.0),
 			"Les bonus permanents sont partagés une seule fois : " + id)
 		_verifier(is_zero_approx(CatalogueFamiliers.attaque_combat(id, 0, 1.0, 0.0)),
-			"Aucun dégât familier lorsque son plafond est nul : " + id)
+			"Un facteur de run nul ne produit aucun degat : " + id)
+		_verifier(is_equal_approx(CatalogueFamiliers.attaque_combat(id, 0, 1.0, 1.25), partage * 1.25),
+			"Les augments d'attaque renforcent aussi le familier une seule fois : " + id)
 
 func _verifier_campagne_fin() -> void:
 	var ressources := ProfilCampagne.budget()

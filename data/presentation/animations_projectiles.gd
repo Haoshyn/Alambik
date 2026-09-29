@@ -1,6 +1,7 @@
 extends RefCounted
 
 # Dimensions de presentation ; les collisions et les trajectoires restent dans Tir.
+const HEROS_ECHELLE := 0.80
 const PROFILS := {
 	"encrier_rampant": {"couleur": Color("e16685"), "rotation": 0.0, "trainee": .10},
 	"plume_sentinelle": {"couleur": Color("ffae75"), "rotation": 0.0, "trainee": .045},

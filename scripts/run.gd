@@ -531,7 +531,7 @@ func _tirer_familier(id: String, origine: Vector2, direction: Vector2) -> void:
 	var tir := Tir.new()
 	CatalogueFamiliers.configurer_tir(tir, id, _limites.size)
 	var attaque := CatalogueFamiliers.attaque_combat(id, ReglagesJoueur.niveau_familier(id),
-		_heros.stats.bonus_attaque, _heros.attaque_reelle())
+		_heros.stats.bonus_attaque, Mods.facteur_attaque_run(Jeu.mods()))
 	tir.degats = _heros.degats_finaux(attaque, "familier", false)
 	_salle.tirer(tir, origine, direction, false)
 	get_tree().call_group("familiers_visuels", "declencher_tir", direction)

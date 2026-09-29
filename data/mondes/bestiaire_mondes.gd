@@ -19,6 +19,10 @@ const NOMS := {
 const COULEURS := [Color("8764d9"), Color("a6ad56"), Color("39bcd7"), Color("9cdec9"), Color("f27836")]
 const ACCENTS := [Color("efb4ff"), Color("ecc586"), Color("a5f2ff"), Color("f4efb6"), Color("ffcf69")]
 const ECHELLES := [Vector3(.85,1.15,.90), Vector3(1.14,.88,1.08), Vector3(.86,1.02,1.20), Vector3(1.05,1.22,.76), Vector3(.95,1.12,1.02)]
+const MOUVEMENT_MONSTRES_MULT := 1.05
+const VITESSE_RUSH_MULT := 0.90
+const CADENCE_MONSTRES_MULT := 1.05
+const CADENCE_TISON_MULT := 0.90
 const VARIANTES := [
 	{"plume_sentinelle": {"projectiles": 1}, "fiole_volatile": {"zone": "impact"}},
 	{"plume_sentinelle": {"projectiles": 3}, "sceau_belier": {"zone_charge": "eboulis"}, "fiole_volatile": {"zone": "eboulis"}},
@@ -101,6 +105,18 @@ static func appliquer(source: Dictionary, id: String, chapitre: int) -> Dictiona
 	var variantes: Dictionary = VARIANTES[monde]
 	var variation: Dictionary = variantes.get(id, {})
 	d.merge(variation, true)
+	# Le tison garde une cadence propre ; les autres creatures gagnent un peu
+	# de pression sans modifier leur endurance ni les degats de leurs attaques.
+	var tison := id == "plume_sentinelle" and monde == COULEURS.size() - 1
+	var cadence := CADENCE_TISON_MULT if tison else CADENCE_MONSTRES_MULT
+	d["cadence_monstre_mult"] = cadence
+	if not tison: d["vitesse"] = float(d["vitesse"]) * MOUVEMENT_MONSTRES_MULT
+	if str(d["cerveau"]) in ["poursuivant", "rampant", "veloce"]:
+		d["vitesse"] = float(d["vitesse"]) * VITESSE_RUSH_MULT
+		# Le ralentissement prolonge l'elan sans raccourcir le trajet annonce.
+		if d.has("duree_charge"): d["duree_charge"] = float(d["duree_charge"]) / VITESSE_RUSH_MULT
+	for cle: String in ["recharge", "repos", "repos_contact"]:
+		if d.has(cle): d[cle] = float(d[cle]) / cadence
 	d["nom"] = str(NOMS[id][monde])
 	d["couleur"] = COULEURS[monde]
 	return d

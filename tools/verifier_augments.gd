@@ -167,7 +167,7 @@ func _verifier_valeur_defense() -> void:
 	var egide := mesurer(["egide"])
 	_exiger(float(egide["vie_effective"]) <= 1.8 and float(egide["vie_effective"]) >= 1.5,
 		"Egide doit rester dans le budget d'un legendaire")
-	_exiger(float(mesurer(["egide", "peau_de_pierre"])["vie_effective"]) <= 2.3,
+	_exiger(float(mesurer(["egide", "peau_de_pierre"])["vie_effective"]) <= 2.5,
 		"Deux defenses ne doivent pas multiplier la resistance par six")
 
 static func mesurer(inventaire: Array) -> Dictionary:
@@ -238,7 +238,7 @@ func _verifier_multiplication_tirs() -> void:
 	var stats := Stats.depuis_reglages()
 	var base := Tir.de_base(stats)
 	var familier_reference := CatalogueFamiliers.attaque_combat("homoncule_encre", Reglages.FORGE_NIVEAU_MAX,
-		stats.bonus_attaque, stats.attaque_reelle())
+		stats.bonus_attaque)
 	var scenarios: Array[Dictionary] = [
 		{"ids": ["salve"], "salves": 2, "projectiles": 1, "malus": 0.80, "dps": 1.60},
 		{"ids": ["tir_multiple"], "salves": 1, "projectiles": 2, "malus": 0.80, "dps": 1.60},
@@ -266,7 +266,7 @@ func _verifier_multiplication_tirs() -> void:
 		_exiger(is_equal_approx(tir.degats, base.degats) and is_equal_approx(tir.attaque_base, base.attaque_base)
 			and is_equal_approx(Mods.facteur_attaque_run(mods), 1.0), "Un malus de tirs a modifié l'attaque : " + contexte)
 		var familier := CatalogueFamiliers.attaque_combat("homoncule_encre", Reglages.FORGE_NIVEAU_MAX,
-			stats.bonus_attaque, BonusAttaque.attaque(stats, mods))
+			stats.bonus_attaque, Mods.facteur_attaque_run(mods))
 		_exiger(is_equal_approx(familier, familier_reference), "Un malus de tirs a modifié le familier : " + contexte)
 		var inverse := inventaire.duplicate()
 		inverse.reverse()

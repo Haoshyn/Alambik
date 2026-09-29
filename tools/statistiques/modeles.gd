@@ -76,7 +76,7 @@ static func mesurer(configuration: Dictionary) -> Dictionary:
 	if CatalogueFamiliers.contient(familier):
 		var d: Dictionary = CatalogueFamiliers.TYPES[familier]
 		var attaque := CatalogueFamiliers.attaque_combat(familier, int(configuration.get("forge_familier", 0)),
-			stats.bonus_attaque, stats.attaque_reelle() * Mods.facteur_attaque_run(mods))
+			stats.bonus_attaque, Mods.facteur_attaque_run(mods))
 		dps_familier = attaque * final / float(d["intervalle"])
 	var pv := stats.pv_max * Mods.facteur_heros(mods, "pv_max_mult")
 	var defense := stats.defense * Mods.facteur_heros(mods, "defense_mult")

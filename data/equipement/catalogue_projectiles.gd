@@ -4,21 +4,44 @@ extends RefCounted
 # Une arme forgeable apporte de l'attaque de base a toutes les attaques.
 # Son coefficient de tir ne concerne que sa forme de projectile.
 const ATTAQUE_BASE := 4.0
-const FORGE_ATTAQUE_PAR_NIVEAU := 1.25
-const FORGE_RANGS_INITIAUX := 6
-const FORGE_ATTAQUE_PAR_NIVEAU_TARDIF := 0.15
-const TYPES := {
-	"standard": {"nom": "Baguette d’acier", "description": "Un trait simple à 100 % de l’ATK.", "monde": 1, "niveau": 1, "coefficient_tir": 1.0},
-	"veloce": {"nom": "Aiguille vive", "description": "Tir 80 %, cadence +20 %, portée −10 %.", "monde": 2, "niveau": 4, "coefficient_tir": 0.80, "cadence_mult": 1.20, "portee_mult": 0.90},
-	"lourd": {"nom": "Sceptre de cuivre", "description": "Tir 150 %, cadence −30 %.", "monde": 3, "niveau": 7, "coefficient_tir": 1.50, "cadence_mult": 0.70},
-	"chercheur": {"nom": "Branche astrale", "description": "Tir 105 %, traverse un ennemi.", "monde": 4, "niveau": 10, "coefficient_tir": 1.05, "perforations": 1},
-	"explosif": {"nom": "Bâton à étincelles", "description": "Tir 110 %, chance critique +3 %.", "monde": 5, "niveau": 13, "coefficient_tir": 1.10, "critique": 0.03},
-	"prisme": {"nom": "Prisme jumeau", "description": "Deux traits parallèles de 65 %, soit 130 % au total, à cadence normale.", "monde": 6, "niveau": 16, "coefficient_tir": 0.65, "nb_projectiles": 1, "ecart_lateral": 30.0, "part_projectiles_supplementaires": 1.0},
-	"resonant": {"nom": "Diapason de verre", "description": "Tir 90 %, cadence +40 %.", "monde": 7, "niveau": 19, "coefficient_tir": 0.90, "cadence_mult": 1.40},
-	"draconique": {"nom": "Cornue draconique", "description": "Tir 110 %, cadence +10 %, attaque +5 %.", "monde": 8, "niveau": 22, "coefficient_tir": 1.10, "cadence_mult": 1.10, "attaque_mult": 0.05},
-	"neant": {"nom": "Aiguille du néant", "description": "Tir 125 %, cadence +10 %, traverse un ennemi.", "monde": 9, "niveau": 25, "coefficient_tir": 1.25, "cadence_mult": 1.10, "perforations": 1},
-	"royal": {"nom": "Alambic souverain", "description": "Tir 130 %, cadence +15 %.", "monde": 10, "niveau": 28, "coefficient_tir": 1.30, "cadence_mult": 1.15},
-}
+const FORGE_ATTAQUE_PAR_NIVEAU := 1.0
+const FORGE_RANGS_INITIAUX := 2
+const FORGE_ATTAQUE_PAR_NIVEAU_TARDIF := 0.35
+static var TYPES := _avec_descriptions({
+	"standard": {"nom": "Baguette d’acier", "monde": 1, "niveau": 1, "coefficient_tir": 1.0},
+	"veloce": {"nom": "Aiguille vive", "monde": 2, "niveau": 4, "coefficient_tir": 0.85, "cadence_mult": 1.20, "portee_mult": 0.90},
+	"lourd": {"nom": "Sceptre de cuivre", "monde": 3, "niveau": 7, "coefficient_tir": 1.50, "cadence_mult": 0.70},
+	"chercheur": {"nom": "Branche astrale", "monde": 4, "niveau": 10, "coefficient_tir": 1.05, "perforations": 1},
+	"explosif": {"nom": "Bâton à étincelles", "monde": 5, "niveau": 13, "coefficient_tir": 1.10, "critique": 0.03},
+	"prisme": {"nom": "Prisme jumeau", "monde": 6, "niveau": 16, "coefficient_tir": 0.60, "nb_projectiles": 1, "ecart_lateral": 30.0, "part_projectiles_supplementaires": 1.0},
+	"resonant": {"nom": "Diapason de verre", "monde": 7, "niveau": 19, "coefficient_tir": 0.90, "cadence_mult": 1.30},
+	"draconique": {"nom": "Cornue draconique", "monde": 8, "niveau": 22, "coefficient_tir": 1.10, "cadence_mult": 1.10, "attaque_mult": 0.05},
+	"neant": {"nom": "Aiguille du néant", "monde": 9, "niveau": 25, "coefficient_tir": 1.15, "cadence_mult": 1.10, "perforations": 1},
+	"royal": {"nom": "Alambic souverain", "monde": 10, "niveau": 28, "coefficient_tir": 1.15, "cadence_mult": 1.10},
+})
+
+static func _avec_descriptions(types: Dictionary) -> Dictionary:
+	for id: String in types:
+		var donnees: Dictionary = types[id]
+		var coefficient := float(donnees.get("coefficient_tir", 1.0))
+		var projectiles := 1 + int(donnees.get("nb_projectiles", 0))
+		var morceaux: Array[String] = ["Tir %s %%" % _nombre(coefficient * 100.0)]
+		if projectiles > 1:
+			morceaux[0] = "%d traits de %s %%, soit %s %% au total" % [projectiles, _nombre(coefficient * 100.0), _nombre(coefficient * projectiles * 100.0)]
+		for champ: String in ["cadence_mult", "portee_mult"]:
+			var bonus := (float(donnees.get(champ, 1.0)) - 1.0) * 100.0
+			if not is_zero_approx(bonus):
+				morceaux.append("%s %s%s %%" % ["cadence" if champ == "cadence_mult" else "portée", "+" if bonus > 0.0 else "−", _nombre(absf(bonus))])
+		for champ: String in ["critique", "attaque_mult"]:
+			if donnees.has(champ):
+				morceaux.append("%s +%s %%" % ["chance critique" if champ == "critique" else "attaque", _nombre(float(donnees[champ]) * 100.0)])
+		if int(donnees.get("perforations", 0)) > 0:
+			morceaux.append("traverse %d ennemi" % int(donnees["perforations"]))
+		donnees["description"] = ", ".join(morceaux) + "."
+	return types
+
+static func _nombre(valeur: float) -> String:
+	return String.num(valeur, 2).trim_suffix(".0").replace(".", ",")
 
 static func contient(id: String) -> bool:
 	return TYPES.has(id)

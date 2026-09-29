@@ -34,9 +34,13 @@ func _executer() -> void:
 	root.add_child(_cible)
 	seed(28092026)
 	_verifier_progression()
+	_verifier_ajustements_monstres()
+	_verifier_premier_boss()
+	_verifier_cadence_tison()
 	_verifier_tisseur()
 	_verifier_annonces_monstres()
 	_verifier_esquive_tirs_rapides()
+	_verifier_interceptions_charges()
 	_verifier_charges()
 	_verifier_charges_boss()
 	await _verifier_trajets_charges()
@@ -103,6 +107,96 @@ func _verifier_progression() -> void:
 		_salle._mine_temps = Reglages.MINE_DUREE
 		var fin: Dictionary = _salle._mis_a_l_echelle(CatalogueEnnemis.par_id("plume_sentinelle"), "plume_sentinelle")
 		_verifier(float(fin["vitesse_projectile"]) > float(debut["vitesse_projectile"]), "Progression du rythme : " + mode)
+
+func _verifier_ajustements_monstres() -> void:
+	for id: String in CatalogueEnnemis.TOUS:
+		var source := CatalogueEnnemis.par_id(id).duplicate(true)
+		for monde in Chapitres.MONDES.size():
+			var d := BestiaireMondes.appliquer(source, id, monde * Chapitres.CHAPITRES_PAR_MONDE)
+			var boss := str(source["cerveau"]) == "boss"
+			var tison := id == "plume_sentinelle" and monde == 4
+			var cadence := 1.0 if boss else (0.90 if tison else 1.05)
+			var mouvement := 1.0 if boss or tison else 1.05
+			var rush := str(source["cerveau"]) in ["poursuivant", "rampant", "veloce"]
+			if rush: mouvement *= 0.90
+			var contexte := "%s monde %d" % [id, monde + 1]
+			_verifier(is_equal_approx(float(d["vitesse"]), float(source["vitesse"]) * mouvement), "Renfort de mouvement mesure : " + contexte)
+			if rush and d.has("duree_charge"):
+				_verifier(is_equal_approx(Cerveaux.longueur_charge(d, Reglages.ENNEMI_VITESSE_MULT),
+					Cerveaux.longueur_charge(source, Reglages.ENNEMI_VITESSE_MULT) * 1.05), "Charge ralentit sans perdre sa portee : " + contexte)
+			for cle: String in ["recharge", "repos", "repos_contact"]:
+				if not source.has(cle): continue
+				_verifier(is_equal_approx(float(source[cle]) / float(d[cle]), cadence), "Cadence ajustee sans cumul : %s %s" % [contexte, cle])
+			for cle: String in ["pv", "degats", "telegraphe", "preparation"]:
+				if source.has(cle): _verifier(source[cle] == d[cle], "Statistique conservee : %s %s" % [contexte, cle])
+		_verifier(source == CatalogueEnnemis.par_id(id), "Ajustements sans mutation du catalogue : " + id)
+	for chapitre in range(28, Chapitres.nombre()):
+		for salle: int in [1, Reglages.SALLES_PAR_RUN]:
+			var d := _profil("plume_sentinelle", chapitre, salle)
+			var source := CatalogueEnnemis.par_id("plume_sentinelle")
+			var facteurs := EvolutionEnnemis.facteurs_rythme(chapitre, 0.0 if salle == 1 else 1.0)
+			var ancienne_recharge := float(source["recharge"]) * Reglages.ENNEMI_RECHARGE_MULT * float(facteurs["recharge"])
+			_verifier(is_equal_approx(ancienne_recharge / float(d["recharge"]), 0.90), "Tison cadence reduite exactement de 10 % en jeu")
+			_verifier(int(d["projectiles"]) == 5, "Tison conserve ses cinq projectiles")
+			var elite := RangsEnnemis.renforcer(d)
+			_verifier(is_equal_approx(ancienne_recharge * RangsEnnemis.ELITE_RECHARGE / float(elite["recharge"]), 0.90), "Tison elite conserve la baisse de cadence")
+
+func _verifier_premier_boss() -> void:
+	for chapitre in Chapitres.nombre():
+		for salle: int in [5, 10, 15, 20]:
+			var d := _profil("le_correcteur", chapitre, salle)
+			var renfort := ProgressionStatistiques.facteur_boss(Chapitres.palier(chapitre))
+			var ancienne_courbe := float(Chapitres.par_index(chapitre)["pv_mult"]) * renfort \
+				* ProgressionStatistiques.facteur_salle(salle, Reglages.CAMPAGNE_PV_BOSS_PAR_SALLE, Reglages.CAMPAGNE_PV_BOSS_PALIERS)
+			var ancien_pv := float(CatalogueEnnemis.par_id("le_correcteur")["pv"]) * ancienne_courbe \
+				* ProgressionStatistiques.facteur_miniboss(Chapitres.palier(chapitre)) * Reglages.BOSS_ENDURANCE_MULT
+			var attendu := 0.70 if salle == 5 else 1.0
+			_verifier(is_equal_approx(float(d["pv"]) / ancien_pv, attendu), "PV du premier boss reduits de 30 %% uniquement a l'etage 5 : %d/%d" % [chapitre, salle])
+			_verifier(is_equal_approx(Chapitres.facteur_pv(chapitre, salle), float(Chapitres.par_index(chapitre)["pv_mult"]) \
+				* ProgressionStatistiques.facteur_salle(salle, Reglages.CAMPAGNE_PV_PAR_SALLE, Reglages.CAMPAGNE_PV_PALIERS)), "PV ordinaires preserves a tous les etages")
+
+func _verifier_cadence_tison() -> void:
+	for chapitre: int in [28, 34]:
+		for salle: int in [1, Reglages.SALLES_PAR_RUN]:
+			for elite: bool in [false, true]:
+				var d := _profil("plume_sentinelle", chapitre, salle)
+				if elite: d = RangsEnnemis.renforcer(d)
+				var reference := d.duplicate(true)
+				reference["recharge"] = float(reference["recharge"]) * BestiaireMondes.CADENCE_TISON_MULT
+				reference["cadence_monstre_mult"] = 1.0
+				for frequence: int in [60, 120]:
+					var ancien_cycle := _mesurer_cycle_sentinelle(reference, frequence)
+					var nouveau_cycle := _mesurer_cycle_sentinelle(d, frequence)
+					var contexte := "niveau %d salle %d elite %s a %d Hz" % [chapitre + 1, salle, elite, frequence]
+					_verifier(absf(nouveau_cycle - ancien_cycle / .90) <= 2.0 / frequence, "Tison cycle reel ralenti de 10 % : " + contexte)
+	_cible.velocity = Vector2.ZERO
+	print("Tison : cadence reelle reduite de 10 %, avec relances et elites a 60/120 Hz.")
+
+func _mesurer_cycle_sentinelle(donnees: Dictionary, frequence: int) -> float:
+	var ennemi: CharacterBody2D = load("res://scenes/ennemi.tscn").instantiate()
+	ennemi.configurer(donnees)
+	ennemi.position = Vector2(300, 300)
+	ennemi.limites = _salle.limites
+	_salle.add_child(ennemi)
+	ennemi.set_physics_process(false)
+	ennemi._apparition = 1.0
+	ennemi._recharge = 0.0
+	_cible.position = Vector2(300, 850)
+	_cible.velocity = Vector2.ZERO
+	var temps: Array[float] = [0.0]
+	var salves: Array[int] = [0]
+	var cycles: Array[float] = []
+	var nombre_salves := int(donnees.get("salves", 1))
+	ennemi.tir_demande.connect(func(_tir: Tir, _origine: Vector2, _direction: Vector2) -> void:
+		if salves[0] % nombre_salves == 0: cycles.append(temps[0])
+		salves[0] += 1)
+	for image in frequence * 15:
+		temps[0] += 1.0 / frequence
+		ennemi._physics_process(1.0 / frequence)
+		if cycles.size() >= 4: break
+	ennemi.free()
+	_verifier(cycles.size() >= 4, "Sentinelle termine quatre cycles complets")
+	return (cycles[-1] - cycles[0]) / float(cycles.size() - 1) if cycles.size() >= 4 else INF
 
 func _verifier_tisseur() -> void:
 	for chapitre in [0, 17, 34]:
@@ -191,7 +285,6 @@ func _verifier_annonces_monstres() -> void:
 	_salle._contour = ancien_contour
 
 func _verifier_esquive_tirs_rapides() -> void:
-	var marge_minimale := INF
 	for chapitre: int in [0, 6, 17, 27, 34]:
 		for elite: bool in [false, true]:
 			for salle: int in [1, Reglages.SALLES_PAR_RUN]:
@@ -212,26 +305,81 @@ func _verifier_esquive_tirs_rapides() -> void:
 						var visee: Vector2 = ennemi._point_vise.normalized()
 						var marge := _marge_course(tir, visee, debut, course, float(d["telegraphe"]))
 						var contexte := "niveau %d, salle %d, elite %s, distance %d" % [chapitre + 1, salle, elite, distance]
-						if distance < 1500.0:
-							_verifier(marge <= 0.0, "Course constante touchee a mi-distance : " + contexte)
-							_verifier(_marge_course(tir, visee, debut, course, float(d["telegraphe"]), true) > 0.0,
-								"Changement de direction avec acceleration permet l'esquive : " + contexte)
-						else:
-							marge_minimale = minf(marge_minimale, marge)
-							_verifier(marge >= Reglages.HEROS_RAYON, "Course laterale garde une marge au fond de salle : " + contexte)
+						_verifier(marge <= 0.0, "Course constante touchee jusqu'au fond de salle : " + contexte)
+						# Une inversion peut croiser une branche de l'eventail ; une
+						# autre direction doit permettre de sortir des couloirs annonces.
+						var marge_esquive := maxf(
+							_marge_course(tir, visee, debut, course, float(d["telegraphe"]), -course),
+							_marge_course(tir, visee, debut, course, float(d["telegraphe"]), Vector2(0, -Reglages.HEROS_VITESSE)))
+						marge_esquive = maxf(marge_esquive,
+							_marge_course(tir, visee, debut, course, float(d["telegraphe"]), Vector2(0, Reglages.HEROS_VITESSE)))
+						_verifier(marge_esquive > 0.0,
+							"Changement de direction avec acceleration permet l'esquive : " + contexte)
 				ennemi.free()
-	print("Sentinelle : course constante touchee a mi-distance, marge au loin %.1f px apres hitboxes." % marge_minimale)
+	_cible.velocity = Vector2.ZERO
+	print("Sentinelle : course constante touchee jusqu'au fond de salle, esquive par changement de direction sur les cinq mondes et les elites.")
+
+func _verifier_interceptions_charges() -> void:
+	_verifier(not Cerveaux.charge_atteignable(Vector2.ZERO, Vector2(0, 500),
+		Vector2(0, 600), Vector2.ZERO, .6, 300.0, 40.0), "Aucune charge contre une cible statique au-dela du trait annonce")
+	_verifier(Cerveaux.charge_atteignable(Vector2.ZERO, Vector2(0, 500),
+		Vector2(0, 535), Vector2.ZERO, .6, 300.0, 40.0), "Le contact du corps au bout du trait compte dans la portee")
+	_verifier(not Cerveaux.charge_atteignable(Vector2.ZERO, Vector2(0, 500),
+		Vector2(0, 300), Vector2(0, 200), .6, 300.0, 40.0), "Cible proche qui fuit hors du trajet ne provoque pas une charge inutile")
+	_salle.limites = Rect2(Vector2.ZERO, Reglages.ARENE_TAILLE)
+	_salle._contour = FormesSalles.contour(_salle.limites, 0)
+	for chapitre: int in [0, 17, 34]:
+		for id: String in ["tache_veloce", "sceau_belier"]:
+			for sens: float in [-1.0, 1.0]:
+				for changer: bool in [false, true]:
+					var ennemi := _acteur_test(id, chapitre, Vector2(540, 300))
+					_cible.position = Vector2(540, 650)
+					var course := Vector2(sens * Reglages.HEROS_VITESSE * .30, 0)
+					_cible.velocity = course
+					ennemi._agir_veloce(0.0)
+					var fin: Vector2 = ennemi._charge.fin
+					var direction: Vector2 = ennemi._direction_charge
+					var contexte := "%s niveau %d sens %d" % [id, chapitre + 1, sens]
+					_verifier(str(ennemi._etat) == "preparer" and direction.x * sens > 0.0, "Charge anticipe une course laterale : " + contexte)
+					var coups := _cible.coups
+					var duree := float(ennemi.donnees["preparation"]) + float(ennemi.donnees["duree_charge"])
+					for image in ceili(duree * 120.0) + 10:
+						if changer and float(image) / 120.0 >= .25:
+							_cible.velocity = _cible.velocity.move_toward(-course, Reglages.HEROS_ACCELERATION / 120.0)
+						_cible.position += _cible.velocity / 120.0
+						ennemi._physics_process(1.0 / 120.0)
+						_verifier((ennemi._charge.fin as Vector2).is_equal_approx(fin), "Charge garde le trajet annonce : " + contexte)
+						if ennemi._charge.terminee: break
+					_verifier(_cible.coups == coups if changer else _cible.coups > coups, "Interception touche la course reguliere et laisse esquiver : " + contexte)
+					ennemi.free()
+	# Au debut de campagne, une course rapide peut depasser la portee d'interception.
+	var ennemi := _acteur_test("tache_veloce", 0, Vector2(300, 300))
+	_cible.position = Vector2(300, 650)
+	_cible.velocity = Vector2(Reglages.HEROS_VITESSE, 0)
+	ennemi._agir_veloce(0.0)
+	_verifier(str(ennemi._etat) != "preparer" and ennemi.velocity.y > 0.0, "Charge impossible contre une course rapide remplacee par approche")
+	ennemi.free()
+	# Le joueur reste visible ; seule sa destination anticipee est derriere un couvert.
+	ennemi = _acteur_test("tache_veloce", 0, Vector2(300, 300))
+	_cible.position = Vector2(300, 650)
+	_cible.velocity = Vector2(220, 0)
+	_salle._obstacles.assign([Rect2(365, 420, 260, 80)])
+	ennemi._agir_veloce(0.0)
+	_verifier(str(ennemi._etat) != "preparer" and ennemi.velocity.y > 0.0, "Interception bloquee ne declenche pas une charge directe qui raterait")
+	ennemi.free()
+	_salle._obstacles.clear()
+	_cible.velocity = Vector2.ZERO
 
 func _marge_course(tir: Tir, visee: Vector2, debut: Vector2, course: Vector2,
-		preparation: float, changer := false) -> float:
+		preparation: float, course_apres := Vector2.INF) -> float:
 	var marge := INF
 	var heros := debut
 	var vitesse := course
 	var pas_temps := 1.0 / 1200.0
 	for pas in ceili((preparation + 1.0) / pas_temps):
 		var temps := float(pas) * pas_temps
-		if changer and temps >= .25:
-			vitesse = vitesse.move_toward(-course, Reglages.HEROS_ACCELERATION * pas_temps)
+		if course_apres.is_finite() and temps >= .25:
+			vitesse = vitesse.move_toward(course_apres, Reglages.HEROS_ACCELERATION * pas_temps)
 		heros += vitesse * pas_temps
 		if temps < preparation: continue
 		for angle: float in tir.angles():
@@ -389,7 +537,11 @@ func _verifier_trajets_charges() -> void:
 func _verifier_alcoves() -> void:
 	var largeurs: Dictionary = {}
 	var longueurs: Dictionary = {}
+	for mode: String in ["mine", "epreuves"]:
+		_verifier(FormesSalles.taille(8, 0, 0, mode) == Reglages.ARENE_TAILLE, "Dimensions conservees hors campagne : " + mode)
 	for chapitre in Chapitres.nombre():
+		var salles_larges := 0
+		var salles_etroites := 0
 		for numero in range(1, Reglages.SALLES_PAR_RUN + 1):
 			var taille := FormesSalles.taille(numero, chapitre, 0, "grimoire")
 			var limites := Rect2(Vector2(-87, 231), taille)
@@ -397,7 +549,10 @@ func _verifier_alcoves() -> void:
 			var contexte := "%d/%d" % [chapitre, numero]
 			largeurs[roundi(taille.x)] = true
 			longueurs[roundi(taille.y)] = true
-			_verifier(taille.x <= Reglages.ARENE_TAILLE.x and taille.y >= Reglages.ARENE_TAILLE.y, "Salle jamais plus large ni plus courte : " + contexte)
+			if taille.x > Reglages.ARENE_TAILLE.x: salles_larges += 1
+			else: salles_etroites += 1
+			_verifier(taille.x >= Reglages.ARENE_TAILLE.x * FormesSalles.LARGEUR_MIN and taille.x <= Reglages.ARENE_TAILLE.x * FormesSalles.LARGEUR_MAX, "Largeur dans la plage prevue : " + contexte)
+			_verifier(taille.y >= Reglages.ARENE_TAILLE.y and taille.y <= Reglages.ARENE_TAILLE.y * FormesSalles.LONGUEUR_MAX, "Longueur dans la plage prevue : " + contexte)
 			_verifier(taille == FormesSalles.taille(numero, chapitre, 12345, "grimoire"), "Dimensions stables apres changement de graine")
 			_verifier(not Geometry2D.triangulate_polygon(contour).is_empty(), "Contour triangulable : " + contexte)
 			_verifier(Geometry2D.offset_polygon(contour, -Reglages.HEROS_RAYON - 2.0).size() == 1, "Toute la salle reste accessible au heros : " + contexte)
@@ -411,6 +566,7 @@ func _verifier_alcoves() -> void:
 				rect = Rect2(limites.position + rect.position * taille, rect.size * taille)
 				for point: Vector2 in [rect.position, rect.end, Vector2(rect.end.x, rect.position.y), Vector2(rect.position.x, rect.end.y)]:
 					_verifier(Geometry2D.is_point_in_polygon(point, contour), "Couvert entier dans les nouvelles parois : " + contexte)
+		_verifier(salles_larges > Reglages.SALLES_PAR_RUN / 2 and salles_etroites > 0, "Majorite de salles larges et quelques salles etroites : chapitre %d" % chapitre)
 	_verifier(largeurs.size() > 30 and longueurs.size() > 30, "Proportions variees sur le parcours")
 	# Deux baies sont reliees par le centre, avec un mur entre elles sur la gauche.
 	var ancien_contour: PackedVector2Array = _salle._contour

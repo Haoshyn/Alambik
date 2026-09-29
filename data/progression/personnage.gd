@@ -19,13 +19,13 @@ const ATTRIBUTS := {
 	"force": {"nom": "Force", "attaque_base": FORCE_ATTAQUE_PAR_POINT,
 		"description": "Attaque brute ; gains progressifs avec le niveau et les points."},
 	"vitalite": {"nom": "Vitalité", "pv_base": 1.0, "defense_base": 0.10,
-		"description": "+1 PV brut et +0,1 Défense brute par point"},
+		"description": "PV et Défense bruts ; gains constants par point."},
 	"agilite": {"nom": "Agilité", "critique": AGILITE_CRITIQUE_PAR_POINT, "degats_critiques": AGILITE_DEGATS_CRITIQUES_PAR_POINT,
 		"description": "Chance et dégâts critiques ; gains progressifs avec le niveau et les points."},
 	"intelligence": {"nom": "Intelligence", "attaque_base": INTELLIGENCE_ATTAQUE_PAR_POINT, "cadence": INTELLIGENCE_CADENCE_PAR_POINT,
 		"description": "Attaque brute et cadence ; gains progressifs avec le niveau et les points."},
 	"sagesse": {"nom": "Sagesse", "butin": 0.007,
-		"description": "+0,7 % de butin par point"},
+		"description": "Butin supplémentaire ; gains constants par point."},
 }
 
 const SPECIALISATIONS := {
@@ -84,6 +84,35 @@ static func bonus(attributs: Dictionary, niveau := NIVEAU_MAX) -> Dictionary:
 				poids = poids_points(rang) * facteur_progression(niveau, PUISSANCE_INITIALE)
 			resultat[champ] = float(resultat[champ]) + float(donnees.get(champ, 0.0)) * poids
 	return resultat
+
+static func gain_point(id: String, points: int, niveau: int) -> Dictionary:
+	var avant := bonus({id: points}, niveau)
+	var apres := bonus({id: points + 1}, niveau)
+	var gain := {}
+	for champ: String in avant:
+		gain[champ] = float(apres[champ]) - float(avant[champ])
+	return gain
+
+static func description_attribut(id: String, points: int, niveau: int) -> String:
+	if not ATTRIBUTS.has(id): return ""
+	var texte := "Total : " + _texte_bonus(bonus({id: points}, niveau))
+	if points < points_totaux(NIVEAU_MAX):
+		texte += "\nProchain point : " + _texte_bonus(gain_point(id, points, niveau))
+	return texte
+
+static func _texte_bonus(valeurs: Dictionary) -> String:
+	var libelles := {"attaque_base": ["ATK brute", 1.0], "pv_base": ["PV", 1.0],
+		"defense_base": ["Défense", 1.0], "critique": ["pts critique", 100.0],
+		"degats_critiques": ["pts dégâts critiques", 100.0], "cadence": ["% cadence", 100.0],
+		"butin": ["% butin", 100.0]}
+	var morceaux: Array[String] = []
+	for champ: String in libelles:
+		var valeur := float(valeurs.get(champ, 0.0))
+		if is_zero_approx(valeur): continue
+		var regle: Array = libelles[champ]
+		var nombre := String.num(valeur * float(regle[1]), 3).trim_suffix(".0").replace(".", ",")
+		morceaux.append("+%s %s" % [nombre, str(regle[0])])
+	return "aucun bonus" if morceaux.is_empty() else " · ".join(morceaux)
 
 static func specialisation_valide(id: String) -> String:
 	return id if SPECIALISATIONS.has(id) else SPECIALISATION_DEFAUT

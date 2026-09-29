@@ -2,26 +2,28 @@ class_name FormesSalles
 extends RefCounted
 
 # Ordre des coins : haut gauche, haut droit, bas droit, bas gauche.
-# Les alcoves restent dans la largeur d'origine ; le couloir central reste ouvert.
+# La galerie etroite garde son gabarit ; les autres profils gagnent de l'espace lateral.
+# Les alcoves restent dans l'enveloppe de la salle ; le couloir central reste ouvert.
 const PROFILS := [
-	{"nom":"Cour ouverte", "taille":Vector2.ONE, "coins":[Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO], "segments":1},
-	{"nom":"Mur en retrait", "taille":Vector2(.91,1.08), "coins":[Vector2(.06,.04),Vector2(.06,.04),Vector2(.06,.04),Vector2(.06,.04)], "segments":1,
+	{"nom":"Cour ouverte", "taille":Vector2(1.25,1.0), "coins":[Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO], "segments":1},
+	{"nom":"Mur en retrait", "taille":Vector2(.91 * 1.25,1.08), "coins":[Vector2(.06,.04),Vector2(.06,.04),Vector2(.06,.04),Vector2(.06,.04)], "segments":1,
 		"reliefs":[{"cote":0, "centre":.48, "ouverture":.18, "profondeur":.08, "arrondi":false}]},
-	{"nom":"Galerie ondulée", "taille":Vector2(.82,1.19), "coins":[Vector2(.10,.05),Vector2(.06,.03),Vector2(.06,.03),Vector2(.10,.05)], "segments":4,
+	{"nom":"Galerie ondulée", "taille":Vector2(.82 * 1.20,1.19), "coins":[Vector2(.10,.05),Vector2(.06,.03),Vector2(.06,.03),Vector2(.10,.05)], "segments":4,
 		"reliefs":[{"cote":0, "centre":.33, "ouverture":.23, "profondeur":.075, "arrondi":true}, {"cote":1, "centre":.66, "ouverture":.22, "profondeur":.075, "arrondi":true}]},
 	{"nom":"Galerie étroite", "taille":Vector2(.74,1.29), "coins":[Vector2(.15,.045),Vector2(.15,.045),Vector2(.15,.045),Vector2(.15,.045)], "segments":5},
-	{"nom":"Renfoncements décalés", "taille":Vector2(.90,1.14), "coins":[Vector2(.08,.04),Vector2(.03,.02),Vector2(.07,.05),Vector2.ZERO], "segments":2,
+	{"nom":"Renfoncements décalés", "taille":Vector2(.90 * 1.25,1.14), "coins":[Vector2(.08,.04),Vector2(.03,.02),Vector2(.07,.05),Vector2.ZERO], "segments":2,
 		"reliefs":[{"cote":0, "centre":.32, "ouverture":.16, "profondeur":.095, "arrondi":false}, {"cote":1, "centre":.65, "ouverture":.17, "profondeur":.095, "arrondi":false}]},
-	{"nom":"Alcôves arrondies", "taille":Vector2(.88,1.23), "coins":[Vector2(.06,.035),Vector2(.06,.035),Vector2(.06,.035),Vector2(.06,.035)], "segments":3, "retrait":.09,
+	{"nom":"Alcôves arrondies", "taille":Vector2(.88 * 1.25,1.23), "coins":[Vector2(.06,.035),Vector2(.06,.035),Vector2(.06,.035),Vector2(.06,.035)], "segments":3, "retrait":.09,
 		"reliefs":[{"cote":0, "centre":.34, "ouverture":.22, "profondeur":-.09, "arrondi":true}, {"cote":1, "centre":.69, "ouverture":.22, "profondeur":-.09, "arrondi":true}]},
-	{"nom":"Salle allongée", "taille":Vector2(.97,1.38), "coins":[Vector2(.08,.03),Vector2(.08,.03),Vector2(.08,.03),Vector2(.08,.03)], "segments":3,
+	{"nom":"Salle allongée", "taille":Vector2(.97 * 1.30,1.38), "coins":[Vector2(.08,.03),Vector2(.08,.03),Vector2(.08,.03),Vector2(.08,.03)], "segments":3,
 		"reliefs":[{"cote":0, "centre":.50, "ouverture":.24, "profondeur":.055, "arrondi":true}, {"cote":1, "centre":.50, "ouverture":.24, "profondeur":.055, "arrondi":true}]},
-	{"nom":"Cour arrondie", "taille":Vector2(.96,1.09), "coins":[Vector2(.20,.12),Vector2(.20,.12),Vector2(.20,.12),Vector2(.20,.12)], "segments":6},
-	{"nom":"Galerie à alcôves", "taille":Vector2(.86,1.25), "coins":[Vector2(.08,.04),Vector2(.08,.04),Vector2(.08,.04),Vector2(.08,.04)], "segments":4, "retrait":.09,
+	{"nom":"Cour arrondie", "taille":Vector2(.96 * 1.30,1.09), "coins":[Vector2(.20,.12),Vector2(.20,.12),Vector2(.20,.12),Vector2(.20,.12)], "segments":6},
+	{"nom":"Galerie à alcôves", "taille":Vector2(.86 * 1.25,1.25), "coins":[Vector2(.08,.04),Vector2(.08,.04),Vector2(.08,.04),Vector2(.08,.04)], "segments":4, "retrait":.09,
 		"reliefs":[{"cote":0, "centre":.29, "ouverture":.18, "profondeur":-.09, "arrondi":false}, {"cote":0, "centre":.71, "ouverture":.18, "profondeur":-.09, "arrondi":true}, {"cote":1, "centre":.49, "ouverture":.22, "profondeur":-.09, "arrondi":true}]},
 ]
 const MARGE_APPARITION := 70.0
 const LARGEUR_MIN := .70
+const LARGEUR_MAX := 1.30
 const LONGUEUR_MAX := 1.42
 const VARIATION_TAILLE := Vector2(.035, .035)
 const SEGMENTS_RELIEF := 10
@@ -35,12 +37,13 @@ static func indice(numero: int, chapitre: int, _graine: int, mode: String) -> in
 	return TerrainsMondes.forme(numero, chapitre)
 
 static func taille(numero: int, chapitre: int, graine: int, mode: String) -> Vector2:
+	if mode != "grimoire":
+		return Reglages.ARENE_TAILLE
 	var facteur: Vector2 = PROFILS[indice(numero, chapitre, graine, mode)]["taille"]
-	if mode == "grimoire":
-		var hasard := RandomNumberGenerator.new()
-		hasard.seed = _graine(numero, chapitre)
-		facteur.x = clampf(facteur.x + hasard.randf_range(-VARIATION_TAILLE.x, VARIATION_TAILLE.x), LARGEUR_MIN, 1.0)
-		facteur.y = clampf(facteur.y + hasard.randf_range(-VARIATION_TAILLE.y, VARIATION_TAILLE.y), 1.0, LONGUEUR_MAX)
+	var hasard := RandomNumberGenerator.new()
+	hasard.seed = _graine(numero, chapitre)
+	facteur.x = clampf(facteur.x + hasard.randf_range(-VARIATION_TAILLE.x, VARIATION_TAILLE.x), LARGEUR_MIN, LARGEUR_MAX)
+	facteur.y = clampf(facteur.y + hasard.randf_range(-VARIATION_TAILLE.y, VARIATION_TAILLE.y), 1.0, LONGUEUR_MAX)
 	return Reglages.ARENE_TAILLE * facteur
 
 static func contour_salle(limites: Rect2, numero: int, chapitre: int, graine: int, mode: String) -> PackedVector2Array:

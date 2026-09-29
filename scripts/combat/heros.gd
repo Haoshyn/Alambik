@@ -367,7 +367,9 @@ func _draw() -> void:
 
 func _dessiner_vie() -> void:
 	var part := clampf(stats.pv/maxf(1.0,stats.pv_max),0.0,1.0)
-	var hauteur := -136.0 if has_meta("visuel_3d") else -133.0
+	var hauteur := -133.0
+	if has_meta("visuel_3d"):
+		hauteur = -Visuels3D.HEROS_BARRE_VIE_HAUTEUR * Reglages.HEROS_ECHELLE - Visuels3D.HEROS_BARRE_VIE_MARGE
 	var barre := Rect2(-66,hauteur,132,15)
 	draw_rect(barre.grow(3),Color(0.08,0.04,0.14,0.65))
 	draw_rect(barre.grow(2),Color(0.94,0.91,1.0,0.9),false,1.5)

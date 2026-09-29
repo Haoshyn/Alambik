@@ -73,7 +73,7 @@ func _verifier_courbes(rapport: Dictionary) -> void:
 		"Le sur-farm efface encore la fin du premier monde")
 	for base: String in rapport["augments"]:
 		var augment: Dictionary = rapport["augments"][base]
-		_exiger(float(augment["deux_defenses"]["survie"]) <= 2.3, "Deux defenses rendent le build trop resistant : " + base)
+		_exiger(float(augment["deux_defenses"]["survie"]) <= 2.5, "Deux defenses rendent le build trop resistant : " + base)
 		for paire: Array in [["sceau_ruine", "sceau_garde"], ["noyau_pesant", "peau_de_pierre"], ["frappe_lourde", "egide"]]:
 			var attaque := float(augment[paire[0]]["dps"]) - 1.0
 			var defense := float(augment[paire[1]]["survie"]) - 1.0

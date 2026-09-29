@@ -7,21 +7,21 @@ extends RefCounted
 # La forge augmente la base avant les bonus en pourcentage du build.
 # La provenance renforce les bases, y compris la forge, avant les pourcentages.
 const PROFILS := [
-	{"pv_base": 10.0, "attaque_base": 0.5},
-	{"defense_base": 2.0, "attaque_base": 0.5},
-	{"attaque_mult": 0.04, "attaque_base": 1.0},
+	{"pv_base": 12.0, "attaque_base": 1.0},
+	{"defense_base": 3.0, "attaque_base": 1.0},
+	{"attaque_mult": 0.05, "attaque_base": 1.5},
 ]
-const FORGE_PAR_STAT := {"pv_base": 2.0, "defense_base": 0.20, "attaque_mult": 0.004, "attaque_base": 0.05}
+const FORGE_PAR_STAT := {"pv_base": 2.5, "defense_base": 0.30, "attaque_mult": 0.005, "attaque_base": 0.10}
 const STATS_BRUTES := ["pv_base", "defense_base", "attaque_base"]
 const STATS_PRINCIPALES := ["pv_base", "defense_base", "attaque_mult"]
 
 # Chaque modele garde le meme petit bonus, quel que soit l'exemplaire obtenu.
 const BONUS_SPECIAUX := [
-	[{"critique": 0.02}, {"vitesse": 0.03}, {"butin": 0.05}],
-	[{"degats_critiques": 0.05}, {"pv_base": 5.0}, {"attaque_mult": 0.03}],
-	[{"vitesse": 0.03}, {"soin": 0.04}, {"critique": 0.02}],
-	[{"cadence": 0.03}, {"critique": 0.02}, {"vitesse": 0.03}],
-	[{"butin": 0.04}, {"attaque_mult": 0.03}, {"degats_critiques": 0.05}],
+	[{"critique": 0.04}, {"vitesse": 0.05}, {"butin": 0.08}],
+	[{"degats_critiques": 0.10}, {"pv_base": 8.0}, {"attaque_mult": 0.05}],
+	[{"vitesse": 0.05}, {"soin": 0.08}, {"critique": 0.04}],
+	[{"cadence": 0.05}, {"critique": 0.04}, {"vitesse": 0.05}],
+	[{"butin": 0.08}, {"attaque_mult": 0.05}, {"degats_critiques": 0.10}],
 	[{"critique": 0.02}, {"cadence": 0.03}, {"butin": 0.05}],
 	[{"degats_critiques": 0.05}, {"vitesse": 0.03}, {"critique": 0.02}],
 	[{"pv_base": 5.0}, {"attaque_mult": 0.03}, {"soin": 0.04}],
@@ -179,4 +179,4 @@ static func description_effets(id: String, niveau: int) -> String:
 	return "\n\n".join(lignes)
 
 static func _nombre(valeur: float) -> String:
-	return String.num(valeur, 1).trim_suffix(".0").replace(".", ",")
+	return String.num(valeur, 2).trim_suffix(".0").replace(".", ",")

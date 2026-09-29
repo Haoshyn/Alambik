@@ -16,6 +16,7 @@ var _rangs: Dictionary = {}
 var _plus: Dictionary = {}
 var _moins: Dictionary = {}
 var _jauges: Dictionary = {}
+var _descriptions: Dictionary = {}
 var _lignes_attributs: Array[PanelContainer] = []
 var _contenu: VBoxContainer
 var _page_principale: Control
@@ -115,7 +116,10 @@ func _ready() -> void:
 		jauge.tooltip_text = "Part des points investis dans %s" % str(donnees["nom"])
 		lecture.add_child(jauge)
 		_jauges[id] = jauge
-		lecture.add_child(StyleAzur.texte(str(donnees["description"]), 30, accent.lightened(0.28)))
+		var description := StyleAzur.texte("", 30, accent.lightened(0.28))
+		description.name = "Description_" + id
+		lecture.add_child(description)
+		_descriptions[id] = description
 		var commandes := BoxContainer.new()
 		commandes.name = "Commandes"
 		commandes.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -181,13 +185,18 @@ func _ouvrir_classes() -> void:
 		rafraichir())
 
 func rafraichir() -> void:
+	var niveau := ReglagesJoueur.niveau_compte_effectif()
 	var classe := ReglagesJoueur.specialisation_effective()
 	_classe.text = "Classe · " + (str(Personnage.SPECIALISATIONS[classe]["nom"]) if not classe.is_empty() else "À choisir")
 	_resume.text = str(ReglagesJoueur.points_attributs_disponibles())
 	_message.visible = not _message.text.is_empty()
 	for id: String in _rangs:
 		var rang: Label = _rangs[id]
-		rang.text = "+%d" % ReglagesJoueur.rang_attribut(id)
+		var points := ReglagesJoueur.rang_attribut(id)
+		rang.text = "+%d" % points
+		var description: Label = _descriptions[id]
+		description.text = Personnage.description_attribut(id, points, niveau)
+		description.tooltip_text = str(Personnage.ATTRIBUTS[id]["description"])
 		var jauge: ProgressBar = _jauges[id]
 		jauge.afficher(ReglagesJoueur.rang_attribut(id), Personnage.points_totaux(ReglagesJoueur.niveau_compte_effectif()))
 		var plus: Button = _plus[id]

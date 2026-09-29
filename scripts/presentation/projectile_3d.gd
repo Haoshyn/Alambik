@@ -60,6 +60,7 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 		_coeur_hostile = _tourbillon.get_node("Coeur")
 		_halo_hostile = _tourbillon.get_node("Halo")
 	else:
+		modele.scale = Vector3.ONE * RenduProjectile.HEROS_ECHELLE
 		var coeur := MeshInstance3D.new()
 		coeur.material_override = _matiere_coeur
 		coeur.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -137,7 +138,7 @@ func mettre_a_jour(_delta: float) -> void:
 		var cote := (b-a).cross(Vector3.UP).normalized()
 		var debut := 1.0-float(i)/float(nombre-1)
 		var fin := 1.0-float(i+1)/float(nombre-1)
-		var largeur := 0.075
+		var largeur := 0.075 * RenduProjectile.HEROS_ECHELLE
 		var sommets := [a+cote*largeur*debut,a-cote*largeur*debut,b+cote*largeur*fin,
 			b+cote*largeur*fin,a-cote*largeur*debut,b-cote*largeur*fin]
 		for j in 6:

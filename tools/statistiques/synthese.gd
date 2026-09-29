@@ -34,7 +34,7 @@ static func ajouter(lignes: Array[String]) -> void:
 	lignes.append("**Compte au maximum, avant les augments : %s DPS permanents, %s PV et %s Défense.** Le matériel est celui optimisé pour le panier classique détaillé plus bas ; il reste identique pendant la comparaison." % [n(float(permanent["dps"])), n(float(permanent["pv"])), n(float(permanent["defense"]))])
 	lignes.append("")
 	lignes.append("**Répartition de 100 %% de ce DPS permanent :** %s. Les cinq sources et le socle de niveau partagent leurs synergies ; les augments sont exclus de cette répartition." % " ; ".join(repartition))
-	lignes.append("Cible : environ 20 % de DPS par source permanente sur ce compte complet, interactions comprises. Les proportions varient avec les achats, les passifs équipés et les attributs choisis ; les PV, la Défense et chaque statistique individuelle ne suivent pas ce partage de dégâts.")
+	lignes.append("Cible : environ 20 % de DPS par source permanente sur ce compte complet, interactions comprises ; le contrôle accepte 18 à 24 % pour conserver l’utilité des cinq objets. Les proportions varient avec les achats, les passifs équipés et les attributs choisis ; les PV, la Défense et chaque statistique individuelle ne suivent pas ce partage de dégâts.")
 	lignes.append("")
 	_gain_en_run(lignes, permanent, total)
 	lignes.append_array(["## Fiche : socle permanent puis augments", "",
@@ -109,7 +109,7 @@ static func _ordre_formules(lignes: Array[String], profil: Dictionary, total: Di
 	lignes.append("")
 	lignes.append("Un projectile normal suit ensuite **%s ATK de run × %s coefficient d’arme × %s malus de projectile × %s bonus conditionnels × %s Cœurs = %s dégâts**. Les Cœurs sont le dernier facteur de dégâts ; ils ne modifient ni l’ATK de run, ni les PV, ni la Défense, ni la cadence." % [n(float(total["attaque"])), n(float(total["coefficient_arme"])), n(float(total["degats_projectile_mult"]), 4), n(float(total["facteur_conditionnel"])), n(float(total["facteur_coeurs"])), n(float(total["tir_normal"]))])
 	lignes.append("")
-	lignes.append("Pour la moyenne, on applique la probabilité critique et l’effet moyen de l’anneau. Puis on multiplie par la cadence, les projectiles frontaux et les salves. Le familier utilise sa propre attaque de forge × le produit permanent des bonus d’attaque du héros, plafonné à %s %% de l’ATK de run ; ses tirs reçoivent les dégâts finaux et les Cœurs, sans critique ni salve du héros." % n(Reglages.FAMILIER_DEGATS_MAX_PART_HEROS * 100.0))
+	lignes.append("Pour la moyenne, on applique la probabilité critique et l’effet moyen de l’anneau. Puis on multiplie par la cadence, les projectiles frontaux et les salves. Le familier utilise sa propre attaque de forge × le produit permanent des bonus d’attaque du héros, × le facteur d’attaque des augments ; ses tirs reçoivent les dégâts finaux et les Cœurs, sans critique ni salve du héros. Sa forge ne dépend plus de l’attaque de l’arme équipée.")
 	lignes.append("")
 
 static func _sources_directes(lignes: Array[String], profil: Dictionary) -> void:
@@ -179,13 +179,18 @@ static func _attributs(lignes: Array[String], profil: Dictionary) -> void:
 		"Au niveau **%d**, le compte possède **%d points à répartir au total**. On peut tous les placer dans un attribut, mais les maxima de la dernière colonne ne sont pas cumulables. La fiche utilise tous les points ; leurs bonus bruts sont renforcés ensuite par les maîtrises et les passifs." % [Personnage.NIVEAU_MAX, points], ""])
 	lignes.append("Les attributs offensifs prennent progressivement leur puissance avec le niveau du héros. Leur rendement décroît quand on concentre davantage de points dans le même attribut ; la Vitalité et la Sagesse gardent leur calcul par point.")
 	lignes.append("")
+	lignes.append("Pour Force, Agilité et Intelligence, le poids de p points vaut **2 × %s × p / (%s + p)**. Au niveau n, on le multiplie par **%s + (1 − %s) × ((n − 1) / (%d − 1))²**, puis par le coefficient de l’attribut. Le gain d’un point est la différence entre p + 1 et p au même niveau, pas un bonus constant par point." % [n(Personnage.POINTS_RENDEMENT), n(Personnage.POINTS_RENDEMENT), n(Personnage.PUISSANCE_INITIALE), n(Personnage.PUISSANCE_INITIALE), Personnage.NIVEAU_MAX])
+	lignes.append("")
 	var attributs: Dictionary = profil["attributs"]
 	var donnees: Array = []
 	for id: String in Personnage.ATTRIBUTS:
 		var definition: Dictionary = Personnage.ATTRIBUTS[id]
 		var rang := int(attributs.get(id, 0))
-		donnees.append([str(definition["nom"]), rang, resume_bonus(Personnage.bonus({id: rang})), resume_bonus(Personnage.bonus({id: points}))])
-	Listes.tableau(lignes, ["Attribut", "Points du profil", "Bonus dans cette fiche", "Maximum individuel : %d points" % points], donnees)
+		donnees.append([str(definition["nom"]), rang, resume_bonus(Personnage.bonus({id: rang})),
+			resume_bonus(Personnage.gain_point(id, rang, int(profil["niveau"]))), resume_bonus(Personnage.bonus({id: points}))])
+	Listes.tableau(lignes, ["Attribut", "Points du profil", "Bonus dans cette fiche", "Gain du prochain point au même niveau", "Maximum individuel : %d points" % points], donnees)
+	lignes.append("Dans Héros, le total acquis et le gain du prochain point utilisent Personnage.bonus au niveau courant. Les valeurs affichées sont arrondies à trois décimales ; les calculs gardent leur précision. Les ATK, PV et Défense bruts sont renforcés ensuite par les autres sources. Les points de critique s’ajoutent avant le plafond de chance.")
+	lignes.append("")
 
 static func _sensibilite(lignes: Array[String], partage: Dictionary) -> void:
 	var total: Dictionary = partage["total"]

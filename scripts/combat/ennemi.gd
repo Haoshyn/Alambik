@@ -212,6 +212,13 @@ func _agir_sentinelle() -> void:
 		return
 	if _recharge > 0.0 or not _peut_tirer(): return
 	_recharge = float(donnees.get("recharge", 1.8))
+	var cadence := float(donnees.get("cadence_monstre_mult", 1.0))
+	if cadence < 1.0:
+		# Les relances peuvent durer plus longtemps que la recharge, surtout
+		# en elite : ralentir le cycle complet pour conserver la baisse annoncee.
+		var relances := maxi(0, int(donnees.get("salves", 1)) - 1)
+		var duree_salves := float(donnees.get("telegraphe", 0.6)) + relances * EvolutionEnnemis.INTERVALLE_SALVES
+		_recharge = maxf(_recharge, duree_salves / cadence)
 	if not _preparer_tir("vise", float(donnees.get("telegraphe", 0.6))):
 		_tirer_vers(_point_vise)
 
@@ -313,7 +320,6 @@ func _agir_veloce(delta: float) -> void:
 			if _etat != "preparer":
 				_etat = "preparer"
 				_minuterie = donnees.get("preparation", 0.7)
-				_direction_charge = global_position.direction_to(_cible.global_position)
 				_preparer_trajet_charge()
 		"charger":
 			if _etat != "charger":
@@ -331,7 +337,6 @@ func _agir_veloce(delta: float) -> void:
 						and Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), float(donnees["rayon"]), get_parent().contour_sol()):
 					_etat = "preparer"
 					_minuterie = float(donnees["preparation"])
-					_direction_charge = global_position.direction_to(_cible.global_position)
 					_preparer_trajet_charge()
 					return
 				_charges_effectuees = 0
@@ -345,11 +350,28 @@ func _longueur_charge() -> float:
 	return Cerveaux.longueur_charge(donnees, _facteur_vitesse())
 
 func _preparer_trajet_charge() -> void:
-	_charge.preparer(self, _direction_charge, _longueur_charge(), _rayon_collision())
-	if not _charge.contient_cible(_cible.global_position, _distance_contact()):
-		_etat = "repos"
-		_minuterie = 0.0
-		_avancer_vers(_cible.global_position, float(donnees["vitesse"]) * float(donnees.get("vitesse_approche_mult", 1.0)))
+	var cibles: Array[Vector2] = [_cible.global_position]
+	var veloce := str(donnees["cerveau"]) == "veloce"
+	var course := Vector2.ZERO
+	var vitesse := float(donnees["vitesse"]) * _facteur_vitesse()
+	if veloce and _cible is CharacterBody2D:
+		course = (_cible as CharacterBody2D).velocity
+		var preparation := float(donnees["preparation"])
+		cibles.push_front(_cible.global_position + course * preparation)
+		cibles.push_front(Cerveaux.visee_rapide(global_position, _cible.global_position,
+			course, preparation, vitesse))
+	# Si l'interception est inaccessible, anticiper au moins la preparation,
+	# puis revenir a la cible actuelle. Le trajet retenu reste annonce et fixe.
+	for cible_visee: Vector2 in cibles:
+		if veloce: _direction_charge = global_position.direction_to(cible_visee)
+		_charge.preparer(self, _direction_charge, _longueur_charge(), _rayon_collision())
+		if veloce:
+			if Cerveaux.charge_atteignable(_charge.debut, _charge.fin, _cible.global_position,
+				course, _minuterie, vitesse, _distance_contact()): return
+		elif _charge.contient_cible(cible_visee, _distance_contact()): return
+	_etat = "repos"
+	_minuterie = 0.0
+	_avancer_vers(_cible.global_position, float(donnees["vitesse"]) * float(donnees.get("vitesse_approche_mult", 1.0)))
 
 func _agir_essaimeur(_delta: float) -> void:
 	if _etat == "invoque":

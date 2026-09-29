@@ -10,6 +10,7 @@
 | Contrôles des catalogues, coûts et courbes | [verifier_progression.gd](verifier_progression.gd) |
 | Rythme des attaques, zigzags, tirs de boss, proportions des salles et charges dans les alcôves | [verifier_patterns.gd](verifier_patterns.gd) |
 | Profil maximal, équipement optimal et répartition des contributions | [verifier_reference.gd](verifier_reference.gd) |
+| Impact du début à la fin, objets utiles, rares et gains d’attribut | [verifier_sources.gd](verifier_sources.gd) |
 | Contrôles des choix et cumuls de run | [verifier_augments.gd](verifier_augments.gd) |
 | Dix niveaux, écrans de choix et paiement des cœurs inutilisés | [verifier_niveaux_augments.gd](verifier_niveaux_augments.gd) |
 | Projectiles, collisions, familiers autonomes et contact de tous les monstres et boss | [verifier_projectiles.gd](verifier_projectiles.gd) |

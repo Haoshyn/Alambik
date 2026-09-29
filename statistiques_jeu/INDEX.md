@@ -6,7 +6,7 @@ directement des données utilisées en jeu.
 
 | Fichier | Ce que tu y trouveras |
 |---|---|
-| [Liste mathématique](liste_mathematique.md) | Socle permanent, augments, courbes ennemies, premières salles, rendement des achats, cibles et dispersion des durées de boss, farm et temps jusqu'aux cinq plafonds |
+| [Liste mathématique](liste_mathematique.md) | Impacts du début à la fin, bonus et prochain point d’attribut, utilité de chaque objet et augment, socle permanent, courbes ennemies, achats, boss, farm et cinq plafonds |
 | [Augments](liste_augments.md) | Chaque choix de run, ses statistiques, ses cumuls et ses compromis |
 | [Items](liste_items.md) | Toutes les armes, familiers et bijoux, chaque niveau de forge et chaque prix |
 | [Maîtrises](liste_maitrises.md) | Chaque rang, ses effets, ses prérequis et son coût |

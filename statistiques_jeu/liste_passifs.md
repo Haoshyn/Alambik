@@ -217,7 +217,7 @@ Augmente l’XP de compte gagnée de 5 % par rang.
 
 Chaque niveau d’Épreuve possède un Cœur unique, garanti au plus tard après 3 victoires sans son Cœur.
 
-Chaque Cœur donne +18 % de dégâts finaux ; 11 Cœurs donnent au total +198 % (addition, sans exponentielle).
+Chaque Cœur donne +15 % de dégâts finaux ; 11 Cœurs donnent au total +165 % (addition, sans exponentielle).
 
 ## Anciennes sauvegardes
 

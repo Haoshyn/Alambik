@@ -22,13 +22,19 @@ La vitesse des tirs et la recharge progressent avec le niveau et l’avancée de
 | 28 | 1,3 | 1,38 | 0,89 | 0,85 | 0,94 |
 | 35 | 1,38 | 1,46 | 0,86 | 0,83 | 0,92 |
 
-La sentinelle tire à 4 500 px/s avant coefficients. Dès le début de l’annonce, elle fixe une visée anticipant la course pendant sa préparation et un vol plafonné à 1 100 px. Une course régulière est menacée à mi-distance ; changer de direction ou se couvrir permet l’esquive. À l’autre bout de la salle, le temps de vol laisse une marge latérale. Chaque éventail garde un trait central.
+Les monstres ordinaires ajoutent ×1,05 en vitesse de déplacement et ×1,05 en cadence d’attaque et de récupération. Le Tison arbalétrier du monde Feu applique à la place une cadence ×0,9 : son intervalle d’attaque est divisé par ce coefficient. Ces ajustements précèdent la progression de niveau et les bonus d’élite.
+
+Les poursuivants et les chargeurs appliquent ensuite ×0,9 à leur vitesse. La durée de leurs charges est divisée par ce coefficient pour conserver la même portée. Un chargeur annonce seulement un trajet capable de croiser la course prévue de sa cible après la préparation ; sinon, il se rapproche. Le déplacement rejoint le bout du segment réellement annoncé, sauf collision avec un obstacle.
+
+Le premier boss de chaque niveau de campagne, à l’étage 5, reçoit ×0,7 PV après les coefficients habituels, avant le premier légendaire. Les boss suivants conservent leurs coefficients.
+
+La sentinelle tire à 4 500 px/s avant coefficients. Dès le début de l’annonce, elle fixe une visée anticipant la course pendant sa préparation et tout le temps de vol, jusqu’à sa portée réelle. Une course régulière est menacée même au fond de la salle ; changer de direction ou se couvrir permet l’esquive. Chaque éventail garde un trait central.
 
 Les boss apparaissent près du milieu, sur une place libre. Ils avancent, prennent un flanc ou tournent autour du joueur selon leur identité. Leurs motifs disponibles varient dans l’ordre selon la distance et les obstacles, sans répétition immédiate. Les mêlées ne s’arment qu’à portée et les approches ratées sont abandonnées.
 
 Les tireurs utilisent la portée réelle de leurs projectiles sans attendre leur distance de placement ; les tireurs fuyards gardent leur recul. Les phaseurs se téléportent aussi de loin, vers une place libre annoncée. Les invocateurs appellent à distance et restent capables de tirer une fois leurs renforts épuisés.
 
-Une charge exige une cible atteignable et une voie libre, y compris après la préparation et avant un enchaînement. Le déplacement suit exactement le segment annoncé, limité par les murs et obstacles. Un ralentissement empêchant de couvrir ce segment avant le départ annule la charge ; après le départ, il allonge le trajet dans le temps sans raccourcir sa distance.
+Les chargeurs anticipent la course pendant la préparation et le trajet, dès le début de l’annonce et à chaque enchaînement. Les visées moins anticipées restent possibles si elles permettent réellement l’interception sur le segment libre. Une charge exige une cible atteignable et une voie libre, y compris après la préparation et avant un enchaînement. Le déplacement suit exactement le segment annoncé, limité par les murs et obstacles. Un ralentissement empêchant de couvrir ce segment avant le départ annule la charge ; après le départ, il allonge le trajet dans le temps sans raccourcir sa distance.
 
 Les boomerangs des boss sont plus épais, saturés et bordés de sombre. Leur éventail compte 3 branches ; leur plafond de vitesse est 1 500 px/s avant progression, contre 625 px/s pour les monstres ordinaires. La portée totale couvre les deux trajets ; un mur provoque le retour.
 
@@ -102,7 +108,7 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 | Vitesse | 684 px/s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Durée de charge en terrain libre | 1,25 s ; trajet annoncé arrêté au premier mur ou obstacle |
-| Portée de déclenchement | 1 139,96 px avant coefficients de niveau et ralentissements, hitboxes comprises |
+| Portée de déclenchement | 1 145,26 px avant coefficients de niveau et ralentissements, hitboxes comprises |
 
 ### Variantes par monde
 
@@ -184,7 +190,7 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 | Vitesse | 627 px/s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Durée de charge en terrain libre | 1,6 s ; trajet annoncé arrêté au premier mur ou obstacle |
-| Portée de déclenchement | 1 340,92 px avant coefficients de niveau et ralentissements, hitboxes comprises |
+| Portée de déclenchement | 1 346,22 px avant coefficients de niveau et ralentissements, hitboxes comprises |
 
 ### Variantes par monde
 

@@ -384,7 +384,7 @@ func _ouvrir_fiche_familier() -> void:
 	var lecture := StyleAzur.plaque(fiche.contenu)
 	lecture.add_child(StyleAzur.texte("Attaque %s · une attaque toutes les %s s" % [_nombre(CatalogueFamiliers.attaque(_familier_selectionne, niveau)), _nombre(float(familier["intervalle"]))], 27))
 	lecture.add_child(StyleAzur.texte(str(familier["description"]), 26))
-	lecture.add_child(StyleAzur.texte("Chaque perle inflige au plus %d %% des dégâts d’un tir du héros." % roundi(Reglages.FAMILIER_DEGATS_MAX_PART_HEROS * 100.0), 25))
+	lecture.add_child(StyleAzur.texte("Bonus d’attaque permanents et de run partagés, sans critique ni salve du héros.", 25))
 	if niveau < Reglages.FORGE_NIVEAU_MAX:
 		fiche.contenu.add_child(StyleAzur.texte("Forge : %d pierres" % Reglages.cout_forge(niveau), 25, StyleAzur.CUIVRE))
 	var ligne := _actions_fiche(fiche)

@@ -13,6 +13,7 @@ const EquilibrageProgression = preload("res://tools/statistiques/equilibrage_pro
 const RythmeProgression = preload("res://tools/statistiques/rythme_progression.gd")
 const MaturationProgression = preload("res://tools/statistiques/maturation_progression.gd")
 const RythmeBoss = preload("res://tools/statistiques/rythme_boss.gd")
+const ValeurSources = preload("res://tools/statistiques/valeur_sources.gd")
 
 static func n(valeur: float, decimales := 2) -> String:
 	return Listes.nombre(valeur, decimales)
@@ -20,6 +21,7 @@ static func n(valeur: float, decimales := 2) -> String:
 static func generer() -> String:
 	var lignes: Array[String] = ["# Liste mathématique", ""]
 	Synthese.ajouter(lignes)
+	ValeurSources.ajouter(lignes)
 	_simulation_augments(lignes)
 	_soins(lignes)
 	_terrains(lignes)
@@ -133,7 +135,7 @@ static func _formules(lignes: Array[String]) -> void:
 		"Critique moyen = 1 + chance critique × (coefficient critique − 1). Chance plafonnée à 100 %% ; critique de base ×%s. Couronne incisive convertit une part de la chance au-delà du plafond en dégâts critiques." % n(Reglages.CRITIQUE_MULT_BASE),
 		"Bonus finaux = (1 + %s × nombre de Cœurs) × (1 + Audace + Reprise de souffle active + Élan offensif actif)." % n(Reglages.COEUR_MANA_BONUS_FINAL),
 		"Cinquième impact est un facteur moyen supplémentaire de ×%s sur le héros quand l’anneau correspondant est équipé et forgé." % n(1.0 + (EffetsBijoux.IMPACT_MULTIPLICATEUR - 1.0) / float(EffetsBijoux.IMPACT_ATTAQUES)),
-		"DPS familier = min(attaque propre × (1 + bonus permanents d’attaque), %s %% de l’attaque de run du héros) × bonus finaux / intervalle. Pas de critique du familier." % n(Reglages.FAMILIER_DEGATS_MAX_PART_HEROS * 100.0),
+		"DPS familier = attaque propre × facteur permanent d’attaque × facteur d’attaque des augments × bonus finaux / intervalle. Chaque rang de forge reste utile. Pas de critique ni de salve du héros.",
 		"DPS total = DPS héros + DPS familier. Les classes ajoutent 0 % à toutes ces sources.", "",
 		"PV = (PV de base au niveau du héros + Vitalité + valeurs brutes des bijoux) × facteur d’équipement × facteur de maîtrises × facteur de passifs × facteur des augments. Égide multiplie le résultat après la somme des bonus de PV des autres augments.",
 		"Défense = (base + Vitalité + valeurs brutes des bijoux/familiers) × facteur d’équipement × facteur de maîtrises × facteur de passifs × facteur des augments.",
@@ -353,16 +355,24 @@ static func _ennemis(lignes: Array[String]) -> void:
 		"Le premier chapitre reste à ×1. Le renfort arrive progressivement, puis tend vers ×%s. La croissance composée des niveaux suivants laisse davantage de place au renforcement vers la fin de campagne. Les dégâts gardent leur courbe distincte. Un changement de monde n’ajoute pas une seconde hausse cachée." % n(1.0 + Reglages.CAMPAGNE_PV_RENFORT_INITIAL),
 		"", "Dans une tentative : facteur PV = %s^(salle − 1) × produit des paliers franchis ; facteur dégâts = %s^(salle − 1) × produit de leurs paliers. Les deux commencent à ×1." % [n(Reglages.CAMPAGNE_PV_PAR_SALLE, 4), n(Reglages.CAMPAGNE_DEGATS_PAR_SALLE, 4)],
 		"Entre deux salles : +%s %% de PV et +%s %% de dégâts, avec les hausses supplémentaires du tableau. Ces paliers s’appliquent à l’entrée des salles indiquées et ne donnent aucun choix d’augment supplémentaire." % [n((Reglages.CAMPAGNE_PV_PAR_SALLE - 1.0) * 100.0), n((Reglages.CAMPAGNE_DEGATS_PAR_SALLE - 1.0) * 100.0)],
-		"Les boss de campagne ajoutent un renfort de niveau [1 + %s × (1 − %s^b)], puis leur propre croissance de PV par salle : %s^(salle − 1), avec les mêmes paliers. Ils conservent ainsi des durées de combat distinctes de l’endurance des monstres ordinaires. Le renfort de dégâts après le premier monde rend les investissements en résistance utiles ; il tend vers ×%s sans s’emballer." % [n(Reglages.CAMPAGNE_PV_BOSS_RENFORT_TARDIF), n(Reglages.CAMPAGNE_PV_BOSS_TRANSITION_TARDIVE), n(Reglages.CAMPAGNE_PV_BOSS_PAR_SALLE, 4), n(1.0 + Reglages.CAMPAGNE_DEGATS_RENFORT_TARDIF)],
+		"Les boss de campagne ajoutent un renfort de niveau [1 + %s × (1 − %s^b)], puis leur propre croissance de PV par salle : %s^(salle − 1), avec leurs propres paliers dans le tableau. Ils conservent ainsi des durées de combat distinctes de l’endurance des monstres ordinaires. Le renfort de dégâts après le premier monde rend les investissements en résistance utiles ; il tend vers ×%s sans s’emballer." % [n(Reglages.CAMPAGNE_PV_BOSS_RENFORT_TARDIF), n(Reglages.CAMPAGNE_PV_BOSS_TRANSITION_TARDIVE), n(Reglages.CAMPAGNE_PV_BOSS_PAR_SALLE, 4), n(1.0 + Reglages.CAMPAGNE_DEGATS_RENFORT_TARDIF)],
+		"Le premier boss, à l’étage %d de chaque niveau, ajoute ×%s à ses PV pour alléger le combat avant le premier légendaire. Ce facteur concerne la campagne et figure dans les calculs de progression et les simulations ; les boss des autres étages et des annexes gardent leur endurance." % [int(Chapitres.par_index(0)["bosses"][0]), n(Chapitres.PV_PREMIER_BOSS_MULT)],
 		"", "Les facteurs sont bornés à la dernière campagne. Ils ne lisent jamais les achats, les morts ni le build du joueur.", "", "### Facteurs par niveau, avant la salle", ""])
 	var niveaux: Array = []
 	for chapitre in Chapitres.nombre():
 		niveaux.append([Chapitres.libelle_court(chapitre), "×" + n(ProgressionStatistiques.facteur_pv(chapitre)), "×" + n(ProgressionStatistiques.facteur_pv(chapitre) * ProgressionStatistiques.facteur_boss(chapitre)), "×" + n(ProgressionStatistiques.facteur_degats(chapitre))])
 	Listes.tableau(lignes, ["Niveau", "PV ordinaires", "PV boss", "Dégâts"], niveaux)
 	var paliers: Array = []
-	for salle: int in Reglages.CAMPAGNE_PV_PALIERS:
-		paliers.append([salle, "×" + n(float(Reglages.CAMPAGNE_PV_PALIERS[salle])), "×" + n(float(Reglages.CAMPAGNE_DEGATS_PALIERS[salle]))])
-	Listes.tableau(lignes, ["Salle", "Hausse PV supplémentaire", "Hausse dégâts supplémentaire"], paliers)
+	var salles_paliers: Array[int] = []
+	for courbe: Dictionary in [Reglages.CAMPAGNE_PV_PALIERS, Reglages.CAMPAGNE_PV_BOSS_PALIERS, Reglages.CAMPAGNE_DEGATS_PALIERS]:
+		for salle: int in courbe:
+			if salle not in salles_paliers: salles_paliers.append(salle)
+	salles_paliers.sort()
+	for salle: int in salles_paliers:
+		paliers.append([salle, "×" + n(float(Reglages.CAMPAGNE_PV_PALIERS.get(salle, 1.0))),
+			"×" + n(float(Reglages.CAMPAGNE_PV_BOSS_PALIERS.get(salle, 1.0))),
+			"×" + n(float(Reglages.CAMPAGNE_DEGATS_PALIERS.get(salle, 1.0)))])
+	Listes.tableau(lignes, ["Salle", "Hausse PV ordinaires", "Hausse PV boss", "Hausse dégâts supplémentaire"], paliers)
 	lignes.append_array(["### Facteurs par salle, à multiplier par ceux du niveau", ""])
 	var facteurs_salles: Array = []
 	for salle in range(1, salles + 1):

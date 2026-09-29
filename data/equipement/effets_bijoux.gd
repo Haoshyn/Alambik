@@ -2,13 +2,13 @@ class_name EffetsBijoux
 extends RefCounted
 
 const PALIERS := [10]
-const ELAN_BONUS_PAR_ATTAQUE := 0.005
+const ELAN_BONUS_PAR_ATTAQUE := 0.01
 const ELAN_CUMULS_MAX := 10
 const ELAN_DUREE := 5.0
 const IMPACT_ATTAQUES := 5
-const IMPACT_MULTIPLICATEUR := 1.30
+const IMPACT_MULTIPLICATEUR := 1.50
 const SURSIS_PV := 1.0
-const CONCENTRATION_ATTAQUE := 0.05
+const CONCENTRATION_ATTAQUE := 0.10
 # Pouvoirs volontairement courts : les bijoux renforcent le tir ou la survie
 # sans ajouter un second systeme d'attaques automatiques.
 const NOMS := {
@@ -16,12 +16,6 @@ const NOMS := {
 	"cinquieme_impact": "Cinquième impact",
 	"sursis": "Sursis",
 	"incantation": "Concentration",
-}
-const DESCRIPTIONS := {
-	"elan_offensif": "Chaque attaque donne +0,5 % de dégâts, cumulable 10 fois. Tous les cumuls disparaissent après 5 s sans attaquer.",
-	"cinquieme_impact": "Chaque cinquième attaque inflige 30 % de dégâts supplémentaires.",
-	"sursis": "La première blessure mortelle de l’aventure laisse le héros à 1 PV.",
-	"incantation": "Attaque +5 % tant que le collier est équipé.",
 }
 
 # Trois pouvoirs fixes par monde : anneau, bracelet, collier. Les anciens
@@ -46,4 +40,12 @@ static func nom(id: String) -> String:
 	return str(NOMS.get(id, id))
 
 static func description(id: String) -> String:
-	return str(DESCRIPTIONS.get(id, ""))
+	match id:
+		"elan_offensif": return "Chaque attaque donne +%s %% de dégâts, cumulable %d fois. Tous les cumuls disparaissent après %s s sans attaquer." % [_nombre(ELAN_BONUS_PAR_ATTAQUE * 100.0), ELAN_CUMULS_MAX, _nombre(ELAN_DUREE)]
+		"cinquieme_impact": return "Chaque attaque n° %d inflige %s %% de dégâts supplémentaires." % [IMPACT_ATTAQUES, _nombre((IMPACT_MULTIPLICATEUR - 1.0) * 100.0)]
+		"sursis": return "La première blessure mortelle de l’aventure laisse le héros à %s PV." % _nombre(SURSIS_PV)
+		"incantation": return "Attaque +%s %% tant que le collier est équipé." % _nombre(CONCENTRATION_ATTAQUE * 100.0)
+	return ""
+
+static func _nombre(valeur: float) -> String:
+	return String.num(valeur, 2).trim_suffix(".0").replace(".", ",")

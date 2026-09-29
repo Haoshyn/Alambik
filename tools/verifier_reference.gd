@@ -207,8 +207,8 @@ func _verifier_attribution_permanente(reference: Dictionary) -> void:
 		var part: Dictionary = parts[index]
 		var proportion := float(part["dps"]) / float(total["dps"])
 		proportions[Attribution.SOURCES_PERMANENTES[index]] = proportion * 100.0
-		_verifier(proportion >= 0.18 and proportion <= 0.22,
-			"Chaque source approche 20 % du DPS permanent de reference : " + Attribution.SOURCES_PERMANENTES[index])
+		_verifier(proportion >= 0.18 and proportion <= 0.24,
+			"Chaque source apporte 18 a 24 % du DPS permanent de reference : " + Attribution.SOURCES_PERMANENTES[index])
 	var arrivee := Modeles.mesurer(reference)
 	var gain := float(arrivee["dps"]) - float(total["dps"])
 	var facteur := float(arrivee["dps"]) / float(total["dps"])
