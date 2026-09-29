@@ -7,11 +7,11 @@ extends RefCounted
 # La forge augmente la base avant les bonus en pourcentage du build.
 # La provenance renforce les bases, y compris la forge, avant les pourcentages.
 const PROFILS := [
-	{"pv_base": 12.0, "attaque_base": 1.0},
-	{"defense_base": 3.0, "attaque_base": 1.0},
-	{"attaque_mult": 0.05, "attaque_base": 1.5},
+	{"pv_base": 12.0, "attaque_base": 2.0},
+	{"defense_base": 3.0, "attaque_base": 2.0},
+	{"attaque_mult": 0.05, "attaque_base": 2.0},
 ]
-const FORGE_PAR_STAT := {"pv_base": 2.5, "defense_base": 0.30, "attaque_mult": 0.005, "attaque_base": 0.10}
+const FORGE_PAR_STAT := {"pv_base": 2.5, "defense_base": 0.30, "attaque_mult": 0.005, "attaque_base": 0.15}
 const STATS_BRUTES := ["pv_base", "defense_base", "attaque_base"]
 const STATS_PRINCIPALES := ["pv_base", "defense_base", "attaque_mult"]
 

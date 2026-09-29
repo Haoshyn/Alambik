@@ -50,6 +50,7 @@ static func facteur_attaque_run(mods_liste: Array) -> float:
 
 static func appliquer(base: Tir, mods_liste: Array) -> Tir:
 	var tir := base.copie()
+	var reduction_salves := 1.0
 	tir.degats *= facteur_attaque_run(mods_liste)
 	for cle: String in CHAMPS_MULT:
 		var champ: String = CHAMPS_MULT[cle]
@@ -62,7 +63,9 @@ static func appliquer(base: Tir, mods_liste: Array) -> Tir:
 		tir.perforations += int(mod.get("perforations_add", 0))
 		tir.angle_eventail += float(mod.get("angle_eventail_add", 0.0))
 		tir.ecart_lateral_min = maxf(tir.ecart_lateral_min, float(mod.get("ecart_lateral_min", 0.0)))
-		tir.degats_finaux_projectile_mult *= float(mod.get("degats_salve_mult", 1.0))
+		# Salve garde un gain reel meme apres Battement triple ; leurs reductions
+		# appartiennent a la meme famille, contrairement aux tirs paralleles.
+		reduction_salves = minf(reduction_salves, float(mod.get("degats_salve_mult", 1.0)))
 		tir.degats_finaux_projectile_mult *= float(mod.get("degats_finaux_projectile_mult", 1.0))
 		if int(mod.get("projectiles_lateraux_add", 0)) > 0:
 			tir.degats_projectiles_lateraux = ReglagesAugments.PROJECTILE_LATERAL_PART
@@ -71,6 +74,5 @@ static func appliquer(base: Tir, mods_liste: Array) -> Tir:
 		for drapeau: String in mod.get("drapeaux", []):
 			if drapeau not in tir.drapeaux:
 				tir.drapeaux.append(drapeau)
-	if "perfore_tout" in tir.drapeaux and tir.rebonds > 0:
-		tir.drapeaux.append("ricochet_perforation_infinie")
+	tir.degats_finaux_projectile_mult *= reduction_salves
 	return tir

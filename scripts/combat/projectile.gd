@@ -161,9 +161,12 @@ func _sur_contact(corps: Node) -> void:
 	impact_visuel.emit(global_position, couleur, 1.0)
 	Sons.jouer("impact", -18.0, randf_range(0.9, 1.2))
 
-	if "ricochet_perforation_infinie" in tir.drapeaux:
+	if _rebonds_restants > 0:
+		_rebonds_restants -= 1
+		_facteur_degats *= 1.0 - Reglages.REBOND_PERTE
 		if not _rebondir_vers_une_autre_cible():
-			_finir()
+			if "perfore_tout" not in tir.drapeaux:
+				_finir()
 		return
 	if "perfore_tout" in tir.drapeaux:
 		return

@@ -27,7 +27,10 @@ static func lignes(reactif: Reactif, copies := 1) -> Array[String]:
 		resultat.append("+%d salve%s par attaque" % [salves, "s" if salves > 1 else ""])
 	for cle: String in ["degats_salve_mult", "degats_finaux_projectile_mult"]:
 		if mods.has(cle):
-			resultat.append("Dégâts de chaque projectile ×%s" % _nombre(pow(float(mods[cle]), nombre), 4))
+			var facteur := float(mods[cle]) if cle == "degats_salve_mult" else pow(float(mods[cle]), nombre)
+			resultat.append("Dégâts de chaque projectile ×%s" % _nombre(facteur, 4))
+			if cle == "degats_salve_mult":
+				resultat.append("Salve et Battement triple : seule la réduction la plus forte s'applique")
 	if mods.has("critique_add"):
 		resultat.append("Chance critique +%s points" % _nombre(float(mods["critique_add"]) * 100.0 * poids))
 	if mods.has("degats_critiques_add"):
@@ -55,7 +58,7 @@ static func lignes(reactif: Reactif, copies := 1) -> Array[String]:
 	if "homing" in mods.get("drapeaux", []):
 		resultat.append("Projectiles guidés")
 	if "perfore_tout" in mods.get("drapeaux", []):
-		resultat.append("Traverse tous les ennemis sans perte ; avec Ricochet, rebonds illimités sans perte. Un impact maximum par ennemi et projectile.")
+		resultat.append("Traverse les ennemis sans perte de traversée ; les rebonds restent limités et perdent leur puissance. Un impact maximum par ennemi et projectile.")
 	if "indelebile" in mods.get("drapeaux", []):
 		resultat.append("Poursuit la cible à travers les murs et les autres ennemis")
 	if "egide" in mods.get("drapeaux", []):
@@ -64,6 +67,9 @@ static func lignes(reactif: Reactif, copies := 1) -> Array[String]:
 		resultat.append("Une seconde vie à 100 % des PV, une seule fois par tentative")
 	if "elan_vital" in mods.get("drapeaux", []):
 		resultat.append("Après %s s de déplacement, la prochaine attaque gagne +%s %% de dégâts sur toutes ses salves" % [_nombre(ReglagesAugments.ELAN_VITAL_CHARGE), _nombre(ReglagesAugments.ELAN_VITAL_BONUS_DEGATS * 100.0)])
+	if "satellites_alchimiques" in mods.get("drapeaux", []):
+		resultat.append("%d satellites · %s %% de l'attaque par impact · au plus un impact par ennemi toutes les %s s" % [ReglagesAugments.SATELLITES_NOMBRE, _nombre(ReglagesAugments.SATELLITES_PART_ATTAQUE * 100.0), _nombre(ReglagesAugments.SATELLITES_INTERVALLE_IMPACT)])
+		resultat.append("Frappe au contact des cercles, même en mouvement ; sans critique, salve ou rebond")
 	return resultat
 
 static func texte(reactif: Reactif, copies := 1) -> String:
