@@ -34,6 +34,7 @@ static func ajouter(lignes: Array[String]) -> void:
 	lignes.append("**Compte au maximum, avant les augments : %s DPS permanents, %s PV et %s Défense.** Le matériel est celui optimisé pour le panier classique détaillé plus bas ; il reste identique pendant la comparaison." % [n(float(permanent["dps"])), n(float(permanent["pv"])), n(float(permanent["defense"]))])
 	lignes.append("")
 	lignes.append("**Répartition de 100 %% de ce DPS permanent :** %s. Les cinq sources et le socle de niveau partagent leurs synergies ; les augments sont exclus de cette répartition." % " ; ".join(repartition))
+	lignes.append("Cible : environ 20 % de DPS par source permanente sur ce compte complet, interactions comprises. Les proportions varient avec les achats, les passifs équipés et les attributs choisis ; les PV, la Défense et chaque statistique individuelle ne suivent pas ce partage de dégâts.")
 	lignes.append("")
 	_gain_en_run(lignes, permanent, total)
 	lignes.append_array(["## Fiche : socle permanent puis augments", "",
@@ -176,6 +177,8 @@ static func _attributs(lignes: Array[String], profil: Dictionary) -> void:
 	var points := Personnage.points_totaux(Personnage.NIVEAU_MAX)
 	lignes.append_array(["## Attributs : le vrai maximum disponible", "",
 		"Au niveau **%d**, le compte possède **%d points à répartir au total**. On peut tous les placer dans un attribut, mais les maxima de la dernière colonne ne sont pas cumulables. La fiche utilise tous les points ; leurs bonus bruts sont renforcés ensuite par les maîtrises et les passifs." % [Personnage.NIVEAU_MAX, points], ""])
+	lignes.append("Les attributs offensifs prennent progressivement leur puissance avec le niveau du héros. Leur rendement décroît quand on concentre davantage de points dans le même attribut ; la Vitalité et la Sagesse gardent leur calcul par point.")
+	lignes.append("")
 	var attributs: Dictionary = profil["attributs"]
 	var donnees: Array = []
 	for id: String in Personnage.ATTRIBUTS:

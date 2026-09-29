@@ -48,6 +48,7 @@ func _ready() -> void:
 			"La selection d'Epreuves ignore le palier de campagne")
 		selection.queue_free()
 		await get_tree().process_frame
+	await _verifier_chargements_mondes()
 	for scenario in 6:
 		var mode: String = ["grimoire", "mine", "epreuves"][scenario % 3]
 		get_tree().root.size = Vector2i(720,1280) if scenario < 3 else Vector2i(1080,2340)
@@ -67,13 +68,27 @@ func _ready() -> void:
 		_exiger(is_instance_valid(heros), "Heros absent : " + mode)
 		var hud: Control = aventure.get("_hud")
 		_exiger(is_instance_valid(hud), "HUD absent : " + mode)
+		var voile: Control = aventure.get("_voile_salle")
+		var chargement := voile.get_node_or_null("ChargementEtage") as Control
+		_exiger(is_instance_valid(chargement), "L'entree n'utilise pas le chargement illustre : " + mode)
+		if is_instance_valid(chargement):
+			_verifier_chargement(chargement, Jeu.salle_courante, mode)
 		if is_instance_valid(heros):
 			for id: String in ["salve", "pointe_lucide", "egide"]: Jeu.ajouter_reactif(id)
 			heros.call("recalculer")
 		for frame in 100:
 			await get_tree().physics_frame
 		var salle_suivante := Jeu.salle_courante + 1
-		await aventure.call("_avancer_salle")
+		aventure.call("_avancer_salle")
+		await get_tree().process_frame
+		_exiger(voile.visible and voile.mouse_filter == Control.MOUSE_FILTER_STOP and bool(aventure.get("_transition_salle")), "Le chargement ne bloque pas les commandes : " + mode)
+		_exiger(voile.get_node_or_null("ChargementEtage") == chargement, "Le chargement illustre est duplique entre etages : " + mode)
+		if is_instance_valid(chargement):
+			_verifier_chargement(chargement, salle_suivante, mode)
+		for frame in 180:
+			if not bool(aventure.get("_transition_salle")): break
+			await get_tree().physics_frame
+		_exiger(not voile.visible and not bool(aventure.get("_transition_salle")), "Le chargement ne se referme pas : " + mode)
 		_construire_decor(arene, aventure)
 		for frame in 3: await get_tree().process_frame
 		_exiger(arene.get_child_count() == 2, "Ancien decor conserve a la transition : " + mode)
@@ -85,10 +100,57 @@ func _ready() -> void:
 	if _erreurs.is_empty(): print("OK : cinq onglets, selection de campagne et reglages cliquables ; trois modes de combat et decors 3D avec transition sur deux formats.")
 	get_tree().quit(0 if _erreurs.is_empty() else 1)
 
+func _verifier_chargement(chargement: Control, etage: int, mode: String) -> void:
+	var numero := chargement.get_node("Etage") as Label
+	var attendu := "Étage %d / %d" % [etage, Jeu.salles_du_chapitre()] if Jeu.salles_du_chapitre() > 1 else "Étage %d" % etage
+	_exiger(numero.visible and numero.text == attendu, "Mauvais numero d'etage dans le chargement : " + mode)
+	_verifier_cadrage_chargement(chargement)
+	if mode == "grimoire":
+		_exiger(chargement.get_node("Destination") is IleAnimee, "L'ile du monde manque au chargement")
+		var titre := chargement.get_node("Titre") as Label
+		var monde := int(Jeu.chapitre_courant()["monde"])
+		_exiger(titre.text == str(Chapitres.MONDES[monde]["nom"]), "Mauvais monde dans le chargement")
+
+func _verifier_cadrage_chargement(chargement: Control) -> void:
+	var numero := chargement.get_node("Etage") as Label
+	var etape := chargement.get_node("Etape") as Label
+	var description := chargement.get_node("Description") as Label
+	var attente := chargement.get_node("Attente") as Label
+	if not (etape.get_global_rect().end.y <= numero.global_position.y and numero.get_global_rect().end.y <= description.global_position.y and description.get_global_rect().end.y <= attente.global_position.y):
+		print("Cadrage chargement : taille=%s, niveau=%s, etage=%s, description=%s, attente=%s" % [chargement.size,etape.get_global_rect(),numero.get_global_rect(),description.get_global_rect(),attente.get_global_rect()])
+	_exiger(etape.get_global_rect().end.y <= numero.global_position.y, "Le numero d'etage chevauche le niveau")
+	_exiger(numero.get_global_rect().end.y <= description.global_position.y, "Le numero d'etage chevauche la description")
+	_exiger(description.get_global_rect().end.y <= attente.global_position.y, "La description chevauche l'attente")
+	_exiger(numero.get_global_rect().position.x >= 0.0 and numero.get_global_rect().end.x <= chargement.size.x and attente.get_global_rect().end.y <= chargement.size.y, "Le chargement sort de l'ecran")
+	var titre := chargement.get_node("Titre") as Label
+	_exiger(titre.get_global_rect().end.y <= etape.global_position.y, "Le nom du monde chevauche le niveau")
+
+func _verifier_chargements_mondes() -> void:
+	for format: Vector2i in [Vector2i(720,1280),Vector2i(1080,2340)]:
+		get_tree().root.size = format
+		for monde in Chapitres.MONDES.size():
+			var livre := Chapitres.par_index(monde*Chapitres.CHAPITRES_PAR_MONDE+Chapitres.CHAPITRES_PAR_MONDE-1).duplicate()
+			livre["mode"] = "grimoire"
+			var chargement := preload("res://ui/composants/chargement_aventure.gd").new()
+			chargement.configurer(livre)
+			add_child(chargement)
+			await get_tree().process_frame
+			await get_tree().process_frame
+			_exiger(not (chargement.get_node("Etage") as Label).visible, "Le lancement ajoute un numero d'etage sans contexte")
+			livre["etage"] = int(livre["salles"])
+			livre["total_etages"] = int(livre["salles"])
+			chargement.configurer(livre)
+			await get_tree().process_frame
+			_verifier_cadrage_chargement(chargement)
+			_exiger((chargement.get_node("Titre") as Label).text == str(Chapitres.MONDES[monde]["nom"]), "L'illustration et le nom ne correspondent pas au monde")
+			_exiger((chargement.get_node("Etage") as Label).text == "Étage %d / %d" % [int(livre["salles"]),int(livre["salles"])], "Le dernier etage perd son total")
+			chargement.queue_free()
+			await get_tree().process_frame
+
 func _construire_decor(arene: Node3D, aventure: Node) -> void:
 	var salle: Node2D = aventure.get("_salle")
 	arene.construire(salle.limites,Callable(),int(Jeu.chapitre_courant()["monde"]),salle.contour_sol(),
-		TerrainsMondes.variante(salle.numero,Jeu.chapitre,Jeu.graine))
+		TerrainsMondes.variante(salle.numero,Jeu.chapitre,Jeu.graine), salle.numero)
 	arene.avancer_ambiance(.5,ReglagesJoueur.effets_reduits)
 
 func _verifier_campagne(menu: Control) -> void:

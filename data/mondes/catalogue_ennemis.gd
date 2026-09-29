@@ -11,7 +11,7 @@ static func _construire() -> Dictionary:
 	var tous := {
 		"encrier_rampant": {
 			"nom": "Encrier rampant",
-			"pv": 36.0, "vitesse": 446.5, "degats": 15.0, "portee": 60.0,
+			"pv": 36.0, "vitesse": 401.85, "degats": 15.0, "portee": 60.0,
 			"cerveau": "poursuivant", "couleur": Color(0.70, 0.62, 1.00), "rayon": 30.0,
 			"forme": "goutte", "experience": 1, "recharge": 2.10, "portee_tir": 650.0,
 			"telegraphe_contact": 0.48, "telegraphe": 0.62, "repos_contact": 0.72,

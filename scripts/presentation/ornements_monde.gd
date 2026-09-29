@@ -1,6 +1,7 @@
 extends RefCounted
 
 const DECOR := preload("res://scripts/presentation/decor_alchimique.gd")
+const RIVES := preload("res://scripts/presentation/decors_rives.gd")
 const BAIN := preload("res://shaders/bain_alchimique.gdshader")
 
 static func _ensemble(parent: Node3D, nom: String, position := Vector3.ZERO) -> Node3D:
@@ -10,31 +11,18 @@ static func _ensemble(parent: Node3D, nom: String, position := Vector3.ZERO) -> 
 	ensemble.position = position
 	return ensemble
 
-static func construire(parent: Node3D, centre: Vector3, taille: Vector3, monde: int, variante: int) -> void:
+static func construire(parent: Node3D, centre: Vector3, taille: Vector3, monde: int, variante: int, contour_logique: PackedVector2Array, etage: int) -> void:
 	var mur := DecorsMondes.couleur(monde, "mur")
-	var accent := DecorsMondes.couleur(monde, "accent")
+	var contour := PackedVector2Array()
+	for point in contour_logique:
+		var position := Pont3D.vers_monde(point)
+		contour.append(Vector2(position.x, position.z))
+	_construire_rives(parent, centre, taille, contour, monde, variante, etage)
+	_conduites(parent, contour)
 	# Rien de haut en aval : sa projection masquerait le heros et les tirs.
 	for cote: float in [-1.0, 1.0]:
-		var x := cote * (taille.x * .5 + 1.0)
-		for i in 3:
-			var p := centre + Vector3(x, -.12, (i - 1) * taille.z * .32)
-			var atelier := _ensemble(parent, "AtelierLateral", p)
-			atelier.scale = Vector3.ONE * .67
-			atelier.rotation.y = .12 * cote
-			if (i + variante + int(cote)) % 2 == 0:
-				_repere(atelier, monde)
-			else:
-				_accessoires(atelier, monde, variante + i)
-			DECOR.bloc(parent, p + Vector3(0,-.42,0), Vector3(1.7,.84,2.0), mur.darkened(.20))
-		var canal := centre + Vector3(cote * (taille.x * .5 + .37), -.24, 0)
-		DECOR.bloc(parent, canal, Vector3(.48,.16,taille.z*.96), mur.darkened(.30))
-		if monde in [0, 2, 4]:
-			var bain := DECOR.bloc(parent, canal + Vector3(0,.09,0), Vector3(.27,.025,taille.z*.94), accent)
-			_liquide(bain, monde)
-		else:
-			DECOR.tige(parent, canal + Vector3(0,.1,-taille.z*.47), canal + Vector3(0,.1,taille.z*.47), .075, DecorsMondes.CUIVRE)
 		for i in 4:
-			var p := centre + Vector3(cote * (taille.x * .5 + 2.3), -.55, (i - 1.5) * taille.z * .25)
+			var p := centre + Vector3(cote * (taille.x * .5 + 3.6), -.55, (i - 1.5) * taille.z * .25)
 			_abords(parent, p, monde, i + variante)
 	var signature := _ensemble(parent, "SignatureMonde", centre + Vector3(0,-.05,-taille.z*.5-2.1))
 	signature.set_meta("monde", monde)
@@ -44,6 +32,55 @@ static func construire(parent: Node3D, centre: Vector3, taille: Vector3, monde: 
 		var aile := _ensemble(parent, "AileAtelier", centre + Vector3(cote*3.1,0,-taille.z*.5-.85))
 		DECOR.bloc(aile, Vector3(0,.12,0), Vector3(1.7,.24,1.25), mur.darkened(.2))
 		_accessoires(aile, monde, variante)
+
+static func _construire_rives(parent: Node3D, centre: Vector3, taille: Vector3, contour: PackedVector2Array, monde: int, variante: int, etage: int) -> void:
+	var placements: Array[Dictionary] = []
+	for definition: Dictionary in DecorsMondes.composition_rives(monde, etage, variante):
+		var famille := int(definition["famille"])
+		var echelle := float(definition["echelle"])
+		var rayon := (1.40 if famille == 3 else 1.06) * echelle
+		var y := centre.z + (float(definition["hauteur"])-.5)*taille.z
+		var origine := _ancrer(contour, y, int(definition["cote"]), rayon)
+		var atelier := _ensemble(parent, "DecorRive", Vector3(origine.x,0,origine.y))
+		atelier.scale = Vector3.ONE * echelle
+		atelier.rotation.y = float(definition["angle"])
+		var socle := Vector3(1.70,.30,1.80) if famille == 3 else Vector3(1.25,.30,1.40)
+		DECOR.bloc(atelier, Vector3(0,-.16,0), socle, DecorsMondes.couleur(monde,"mur"))
+		DECOR.bloc(atelier, Vector3(0,.015,0), socle*Vector3(.96,.13,.96), DecorsMondes.CUIVRE)
+		if famille == 3:
+			var appareil := _ensemble(atelier, "AppareilAlchimique", Vector3(0,.04,0))
+			appareil.scale = Vector3.ONE*.67
+			_repere(appareil, monde)
+		else:
+			RIVES.construire(atelier, monde, famille)
+		placements.append({"position":origine, "rayon":rayon, "famille":famille, "angle":definition["angle"], "echelle":echelle})
+	parent.set_meta("decors_rives", placements)
+
+static func _ancrer(contour: PackedVector2Array, hauteur: float, cote: int, rayon: float) -> Vector2:
+	var section := FormesSalles.section_horizontale(contour, hauteur)
+	var sens := -1.0 if cote == 0 else 1.0
+	var origine := Vector2(section.x if cote == 0 else section.y, hauteur)
+	origine.x += sens*(rayon+.16)
+	# Toute l'emprise reste hors du passage, meme dans un coude ou une alcove.
+	for tentative in 24:
+		var distance := INF
+		for i in contour.size():
+			distance = minf(distance, origine.distance_to(Geometry2D.get_closest_point_to_segment(origine, contour[i], contour[(i+1)%contour.size()])))
+		if not Geometry2D.is_point_in_polygon(origine, contour) and distance >= rayon+.12:
+			break
+		origine.x += sens*.16
+	return origine
+
+static func _conduites(parent: Node3D, contour: PackedVector2Array) -> void:
+	var aire := 0.0
+	for i in contour.size(): aire += contour[i].cross(contour[(i+1)%contour.size()])
+	for i in contour.size():
+		var a := contour[i]
+		var b := contour[(i+1)%contour.size()]
+		var direction := (b-a).normalized()
+		if absf(direction.y) < .25: continue
+		var dehors := Vector2(direction.y,-direction.x)*(1.0 if aire > 0.0 else -1.0)*.40
+		DECOR.tige(parent, Vector3(a.x+dehors.x,-.18,a.y+dehors.y), Vector3(b.x+dehors.x,-.18,b.y+dehors.y), .045, DecorsMondes.CUIVRE)
 
 static func _liquide(objet: MeshInstance3D, monde: int) -> void:
 	var mat := ShaderMaterial.new()

@@ -74,7 +74,7 @@ func recevoir(mode: String, chapitre: int, salles: int, boss: int, victoire: boo
 	var butin := ButinsRun.tirer(offre, rng)
 	var config := configuration()
 	var bonus := Modeles.bonus_equipement(config)
-	var attrs := Personnage.bonus(config["attributs"])
+	var attrs := Personnage.bonus(config["attributs"], int(config["niveau"]))
 	var passifs: Dictionary = config["passifs"]
 	var brut := roundi(float(butin["gouttes"]) * ArbreCompetences.multiplicateur_coffre(maitrises)
 		* Mods.facteur_heros(Mods.depuis_l_inventaire(inventaire), "gouttes_mult"))

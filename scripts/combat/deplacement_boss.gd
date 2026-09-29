@@ -27,7 +27,7 @@ func avancer(boss: CharacterBody2D, distance_forcee := -1.0, vitesse_forcee := -
 		var candidate := direction.rotated(angle * sens)
 		var destination: Vector2 = boss.global_position + candidate * DeplacementsBoss.ANTICIPATION_OBSTACLE
 		if not FormesSalles.contient_disque(destination, contour, rayon): continue
-		if not Geometrie.ligne_libre(boss.global_position, destination, obstacles, rayon): continue
+		if not Geometrie.ligne_libre(boss.global_position, destination, obstacles, rayon, contour): continue
 		direction = candidate
 		libre = true
 		break

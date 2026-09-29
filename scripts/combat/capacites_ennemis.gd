@@ -1,6 +1,8 @@
 class_name CapacitesEnnemis
 extends RefCounted
 
+const ContactPhysique = preload("res://scripts/combat/contact_physique.gd")
+
 var _recharge_esquive := 0.0
 var _esquive_restante := 0.0
 var _direction_esquive := Vector2.ZERO
@@ -32,7 +34,7 @@ func _poursuivre(ennemi: CharacterBody2D) -> void:
 		if float(ennemi._minuterie) <= 0.0: ennemi._etat = "repos"
 		return
 	if distance <= portee and float(ennemi._recharge_contact) <= 0.0 \
-			and Geometrie.ligne_libre(ennemi.global_position, ennemi._cible.global_position, ennemi.get_parent().obstacles()):
+			and Geometrie.ligne_libre(ennemi.global_position, ennemi._cible.global_position, ennemi.get_parent().obstacles(), 0.0, ennemi.get_parent().contour_sol()):
 		ennemi._etat = "frappe"
 		ennemi._minuterie = float(ennemi.donnees.get("telegraphe_contact", Reglages.ENNEMI_CONTACT_ANNONCE))
 		ennemi._direction_charge = ennemi.global_position.direction_to(ennemi._cible.global_position)
@@ -43,11 +45,7 @@ func _poursuivre(ennemi: CharacterBody2D) -> void:
 
 static func frapper_sur_segment(ennemi: CharacterBody2D, avant: Vector2, marge := 0.0) -> bool:
 	if float(ennemi._recharge_contact) > 0.0: return false
-	var cible: Node2D = ennemi._cible
-	var proche := Geometry2D.get_closest_point_to_segment(cible.global_position, avant, ennemi.global_position)
-	if proche.distance_to(cible.global_position) > float(ennemi._distance_contact()) + marge: return false
-	if not Geometrie.ligne_libre(proche, cible.global_position, ennemi.get_parent().obstacles()): return false
-	cible.recevoir_degats(float(ennemi.donnees["degats"]))
+	if not ContactPhysique.frapper_sur_segment(ennemi, avant, float(ennemi.donnees["degats"]), marge): return false
 	ennemi.attaque_contact.emit()
 	ennemi._recharge_contact = BestiaireMondes.POURSUITE_CONTACT_RECHARGE
 	return true
@@ -72,7 +70,7 @@ func _esquiver(ennemi: CharacterBody2D, delta: float) -> bool:
 			var distance := float(ennemi.donnees["vitesse"]) * BestiaireMondes.ESQUIVE_VITESSE * BestiaireMondes.ESQUIVE_DUREE * float(ennemi._facteur_vitesse())
 			var destination := ennemi.global_position + lateral * distance
 			if not FormesSalles.contient_disque(destination, salle.contour_sol(), float(ennemi.donnees["rayon"])): continue
-			if not Geometrie.ligne_libre(ennemi.global_position, destination, salle.obstacles(), float(ennemi.donnees["rayon"])): continue
+			if not Geometrie.ligne_libre(ennemi.global_position, destination, salle.obstacles(), float(ennemi.donnees["rayon"]), salle.contour_sol()): continue
 			_direction_esquive = lateral
 			_esquive_restante = BestiaireMondes.ESQUIVE_DUREE
 			_recharge_esquive = BestiaireMondes.ESQUIVE_RECHARGE
@@ -123,5 +121,5 @@ func destination_phase(ennemi: CharacterBody2D) -> Vector2:
 		for angle: float in BestiaireMondes.ANGLES_PHASE:
 			var point := cible + radial.rotated(angle) * float(ennemi.donnees["portee"]) * distance
 			if point.distance_to(ennemi.global_position) < BestiaireMondes.PHASE_DEPLACEMENT_MIN: continue
-			if salle._place_libre(point, rayon) and Geometrie.ligne_libre(point, cible, salle.obstacles()): return point
+			if salle._place_libre(point, rayon) and Geometrie.ligne_libre(point, cible, salle.obstacles(), 0.0, salle.contour_sol()): return point
 	return Vector2.INF

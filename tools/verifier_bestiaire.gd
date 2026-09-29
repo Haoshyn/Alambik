@@ -184,11 +184,25 @@ func _verifier_budget(modele: Node3D, boss: bool, id: String) -> void:
 			var couleurs: PackedColorArray = tableaux[Mesh.ARRAY_COLOR]
 			var roles: PackedVector2Array = tableaux[Mesh.ARRAY_TEX_UV2]
 			var uv: PackedVector2Array = tableaux[Mesh.ARRAY_TEX_UV]
+			var normales: PackedVector3Array = tableaux[Mesh.ARRAY_NORMAL]
 			triangles += (indices.size() if not indices.is_empty() else sommets.size()) / 3
 			_exiger(couleurs.size() == sommets.size() and roles.size() == sommets.size(), "Palette ou roles de matiere perdus a l'import : " + id)
 			_exiger(uv.size() == sommets.size(), "UV de l'atlas absents : " + id)
+			var uv_valides := true
+			for point in uv:
+				if not point.is_finite() or point.x < 0.0 or point.x > 1.0 or point.y < 0.0 or point.y > 1.0:
+					uv_valides = false
+			var normales_valides := normales.size() == sommets.size()
+			for normale in normales:
+				if not normale.is_finite() or absf(normale.length_squared() - 1.0) > .05:
+					normales_valides = false
+			_exiger(uv_valides, "Coordonnees hors de l'atlas : " + id)
+			_exiger(normales_valides, "Normales de surface invalides : " + id)
 		var matiere := objet.get_active_material(0) as StandardMaterial3D
 		_exiger(matiere != null and matiere.albedo_texture == HABILLAGE.ATLAS, "L'atlas peint n'est pas partage : " + id)
+		if matiere != null:
+			_exiger(matiere.roughness_texture != null and matiere.metallic_texture == matiere.roughness_texture,
+				"Les reponses des matieres ne partagent pas leur carte : " + id)
 	_surfaces_max = maxi(_surfaces_max, surfaces)
 	_triangles_max = maxi(_triangles_max, triangles)
 	_exiger(surfaces <= 16, "Budget de surfaces depasse : " + id)

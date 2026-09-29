@@ -2,6 +2,7 @@ extends Node3D
 
 const PROXY := preload("res://scripts/presentation/proxy_3d.gd")
 const ARENE := preload("res://scripts/presentation/arene_3d.gd")
+const RIVES := preload("res://scripts/presentation/decors_rives.gd")
 var camera: Camera3D
 var salle: Node2D
 var heros: Node2D
@@ -118,7 +119,7 @@ func _process(delta: float) -> void:
 		_limites = limites
 		_numero = numero
 		var chapitre := Jeu.chapitre_courant()
-		_arene.construire(limites,charger,int(chapitre["monde"]),salle.contour_sol(), TerrainsMondes.variante(numero, Jeu.chapitre, Jeu.graine))
+		_arene.construire(limites,charger,int(chapitre["monde"]),salle.contour_sol(), TerrainsMondes.variante(numero, Jeu.chapitre, Jeu.graine), numero)
 		_reconstruire_obstacles()
 	_arene.avancer_ambiance(delta, ReglagesJoueur.effets_reduits)
 	for proxy in _proxies.values():
@@ -142,6 +143,7 @@ func _reconstruire_obstacles() -> void:
 		if rect in salle.retraits(): continue
 		var taille := Pont3D.vers_monde(rect.size)
 		var obstacle := preload("res://scripts/presentation/decor_alchimique.gd").obstacle(taille, (_numero+index)%3, int(Jeu.chapitre_courant()["monde"]), salle.type_obstacle(rect))
+		RIVES.habiller_couvert(obstacle, taille, int(Jeu.chapitre_courant()["monde"]), (_numero+index)%3, salle.type_obstacle(rect))
 		_obstacles.add_child(obstacle)
 		obstacle.position = Pont3D.vers_monde(rect.get_center())
 		# La base couvre exactement le rectangle physique de l'obstacle.

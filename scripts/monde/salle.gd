@@ -118,7 +118,7 @@ func _construire_obstacles() -> void:
 	_obstacles.clear()
 	_types_obstacles.clear()
 	_retraits.clear()
-	_contour = FormesSalles.contour(limites, FormesSalles.indice(numero, Jeu.chapitre, Jeu.graine, Jeu.mode_run))
+	_contour = FormesSalles.contour_salle(limites, numero, Jeu.chapitre, Jeu.graine, Jeu.mode_run)
 	var combat_de_boss := Jeu.mode_run == "grimoire" and Chapitres.est_boss(Jeu.chapitre, numero) \
 		or Jeu.mode_run == "epreuves"
 	if combat_de_boss or _vagues.is_empty() and Jeu.mode_run != "mine":
@@ -435,11 +435,11 @@ func _mis_a_l_echelle(donnees: Dictionary, id: String) -> Dictionary:
 			copie["pv"] *= Reglages.MINE_BOSS_PV_MULT
 			copie["degats"] *= Reglages.MINE_BOSS_DEGATS_MULT
 	else:
-		copie["pv"] = float(donnees["pv"]) * Chapitres.facteur_pv(Jeu.chapitre, numero)
+		copie["pv"] = float(donnees["pv"]) * Chapitres.facteur_pv(Jeu.chapitre, numero, str(donnees["cerveau"]) == "boss")
 		copie["degats"] = float(donnees["degats"]) * Chapitres.facteur_degats(Jeu.chapitre, numero)
 		if donnees["cerveau"] == "boss":
 			var signature := str(donnees.get("rang_boss", "miniboss")) == "signature"
-			copie["pv"] *= Reglages.BOSS_SIGNATURE_PV_MULT if signature \
+			copie["pv"] *= Chapitres.facteur_boss_signature(Jeu.chapitre) if signature \
 				else ProgressionStatistiques.facteur_miniboss(Chapitres.palier(Jeu.chapitre))
 			copie["degats"] *= Reglages.BOSS_SIGNATURE_DEGATS_MULT if signature else Reglages.MINIBOSS_DEGATS_MULT
 	# Les differences de robustesse viennent du catalogue, puis du palier fixe.
@@ -637,7 +637,7 @@ func _origine_projectile_hostile(origine: Vector2, direction: Vector2,
 		var temps := distance / maxf(tir.vitesse, 1.0)
 		var point := depart + direction * distance + direction.orthogonal() * tir.amplitude * sin(temps * TAU * tir.frequence)
 		if not FormesSalles.contient_disque(point, _contour, marge): return Vector2.INF
-		if not Geometrie.ligne_libre(precedent, point, _obstacles, marge): return Vector2.INF
+		if not Geometrie.ligne_libre(precedent, point, _obstacles, marge, _contour): return Vector2.INF
 		precedent = point
 	return depart
 

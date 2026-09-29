@@ -12,6 +12,9 @@ class SalleTest extends Node2D:
 	var limites := Rect2(0, 0, 1200, 1800)
 	var blocs: Array[Rect2] = []
 	func obstacles() -> Array[Rect2]: return blocs
+	func effectif_ennemis() -> int: return get_child_count()
+	func _place_libre(point: Vector2, rayon: float) -> bool:
+		return Geometrie.ligne_libre(point, point, blocs, rayon, contour_sol())
 	func contour_sol() -> PackedVector2Array:
 		return PackedVector2Array([limites.position, Vector2(limites.end.x, limites.position.y), limites.end, Vector2(limites.position.x, limites.end.y)])
 
@@ -33,6 +36,7 @@ func _executer() -> void:
 	_catalogues()
 	await _collisions()
 	await _contacts_monstres()
+	await _contacts_corps_boss()
 	await _trajectoires()
 	await _familier()
 	await _boss()
@@ -173,15 +177,17 @@ func _collisions() -> void:
 	await _vider()
 
 func _contacts_monstres() -> void:
-	for id: String in ["encrier_rampant", "tache_veloce", "sceau_belier"]:
+	for id: String in CatalogueEnnemis.TOUS:
+		if str(CatalogueEnnemis.par_id(id)["cerveau"]) == "boss": continue
 		var salle := SalleTest.new()
 		_scene.add_child(salle)
 		var cible := _cible(Vector2(600, 700), 1, Reglages.HEROS_RAYON)
 		cible.add_to_group("cibles_ennemis")
 		var ennemi: CharacterBody2D = load("res://scenes/ennemi.tscn").instantiate()
 		ennemi.configurer(CatalogueEnnemis.par_id(id))
-		ennemi.position = cible.position - Vector2(0, 35)
 		salle.add_child(ennemi)
+		var contact := float(ennemi._rayon_collision()) + Reglages.HEROS_RAYON - 1.0
+		ennemi.position = cible.position - Vector2(0, contact)
 		ennemi.set_physics_process(false)
 		ennemi._apparition = 1.0
 		ennemi._recharge = 10.0
@@ -202,6 +208,28 @@ func _contacts_monstres() -> void:
 		_exiger(not CapacitesEnnemis.frapper_sur_segment(ennemi, ennemi.position), "Obstacle protege du contact : " + id)
 		salle.blocs.clear()
 		_exiger(CapacitesEnnemis.frapper_sur_segment(ennemi, ennemi.position) and cible.coups == 3, "Contact redevient dangereux apres recharge : " + id)
+		ennemi._recharge_contact = 0.0
+		ennemi._gel = 1.0
+		ennemi._physics_process(.016)
+		_exiger(cible.coups == 4, "Corps gele toujours dangereux au toucher : " + id)
+		if id == "cachet_phaseur":
+			ennemi._gel = 0.0
+			ennemi._recharge_contact = 0.0
+			ennemi.position = cible.position - Vector2(100, 0)
+			ennemi._destination_phase = cible.position + Vector2(100, 0)
+			ennemi._etat = "phase"
+			ennemi._minuterie = 0.0
+			ennemi._physics_process(.016)
+			_exiger(ennemi.position.is_equal_approx(cible.position + Vector2(100, 0)), "Le saut du phaseur est effectue")
+			_exiger(cible.coups == 4, "Le phaseur ne blesse pas sur le trajet absent d'une teleportation")
+		ennemi._recharge_contact = 0.0
+		ennemi._apparition = 0.0
+		ennemi._physics_process(.016)
+		_exiger(cible.coups == 4, "Apparition annoncee sans degats de contact : " + id)
+		ennemi._apparition = 1.0
+		ennemi.pv = 0.0
+		ennemi._physics_process(.016)
+		_exiger(cible.coups == 4, "Cadavre sans degats de contact : " + id)
 		await _vider()
 	var salle := SalleTest.new()
 	_scene.add_child(salle)
@@ -225,6 +253,49 @@ func _contacts_monstres() -> void:
 	poursuivant._physics_process(.016)
 	_exiger(is_equal_approx(float(heros.stats.pv), pv_apres), "Invulnerabilite normale apres impact preservee")
 	await _vider()
+
+func _contacts_corps_boss() -> void:
+	for id: String in CatalogueEnnemis.TOUS:
+		if str(CatalogueEnnemis.par_id(id)["cerveau"]) != "boss": continue
+		var salle := SalleTest.new()
+		_scene.add_child(salle)
+		var cible := _cible(Vector2(600, 700), 1, Reglages.HEROS_RAYON)
+		cible.add_to_group("cibles_ennemis")
+		var boss: CharacterBody2D = load("res://scenes/boss.tscn").instantiate()
+		boss.configurer(CatalogueEnnemis.par_id(id))
+		salle.add_child(boss)
+		boss.set_physics_process(false)
+		var rayon := (boss.get_node("CollisionShape2D").shape as CircleShape2D).radius
+		boss.position = cible.position - Vector2(0, rayon + Reglages.HEROS_RAYON - 1.0)
+		boss._apparition = 1.0
+		boss._gel = 10.0
+		boss._physics_process(.016)
+		_exiger(cible.coups == 1, "Corps du boss dangereux sans charge ni attaque : " + id)
+		boss._physics_process(.016)
+		_exiger(cible.coups == 1, "Contact du boss soumis a sa recharge : " + id)
+		boss._contact_restant = 0.0
+		boss.position = cible.position + Vector2(300, 0)
+		boss._physics_process(.016)
+		_exiger(cible.coups == 1, "Boss ne touche pas a distance : " + id)
+		boss.position = cible.position + Vector2(100, 0)
+		_exiger(boss._frapper_contact(cible.position - Vector2(100, 0)) and cible.coups == 2, "Croisement du corps du boss detecte : " + id)
+		boss._contact_restant = 0.0
+		boss.position = cible.position - Vector2(35, 0)
+		salle.blocs.assign([Rect2(cible.position - Vector2(20, 50), Vector2(4, 100))])
+		boss._physics_process(.016)
+		_exiger(cible.coups == 2, "Obstacle protege du corps du boss : " + id)
+		salle.blocs.clear()
+		boss._physics_process(.016)
+		_exiger(cible.coups == 3, "Contact du boss repris apres obstacle : " + id)
+		boss._contact_restant = 0.0
+		boss._apparition = 0.0
+		boss._physics_process(.016)
+		_exiger(cible.coups == 3, "Boss en apparition sans contact : " + id)
+		boss._apparition = 1.0
+		boss.pv = 0.0
+		boss._physics_process(.016)
+		_exiger(cible.coups == 3, "Boss mort sans contact : " + id)
+		await _vider()
 
 func _trajectoires() -> void:
 	var p := _projectile(_tir("folio_orbiteur"), Vector2(100, 200))

@@ -121,7 +121,9 @@ func _physics_process(delta: float) -> void:
 	global_position = Geometrie.contraindre_dans_rect(global_position, limites, Reglages.HEROS_RAYON)
 
 func peut_tirer() -> bool:
-	return not stats.est_mort()
+	# Un ordre de marche interrompt aussi les salves deja preparees. Le vent
+	# reste une poussee subie et ne desarme pas un heros sans commande.
+	return not stats.est_mort() and (_intention == Vector2.ZERO or _intensite <= 0.0)
 
 func _process(delta: float) -> void:
 	if not peut_tirer():

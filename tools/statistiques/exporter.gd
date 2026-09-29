@@ -31,6 +31,10 @@ func _exporter() -> void:
 				erreurs += 1
 				continue
 			fichier.store_string(attendu)
+			fichier.close()
+			if FileAccess.get_file_as_string(chemin) != attendu:
+				push_error("Liste écrite incomplète : " + nom)
+				erreurs += 1
 	if erreurs == 0:
-		print("Listes %s : %d catégories." % ["vérifiées" if verifier else "actualisées", contenus.size()])
+		print("Listes %s : %d catégories." % ["vérifiées" if verifier else "actualisées et vérifiées", contenus.size()])
 	quit(1 if erreurs > 0 else 0)

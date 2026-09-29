@@ -9,7 +9,7 @@ var _bains: Array[ShaderMaterial] = []
 var _rotors: Array[Node3D] = []
 var _temps := 0.0
 
-func construire(limites: Rect2, _charger: Callable, monde := 0, contour := PackedVector2Array(), variante := 0) -> void:
+func construire(limites: Rect2, _charger: Callable, monde := 0, contour := PackedVector2Array(), variante := 0, etage := 0) -> void:
 	for enfant in get_children():
 		remove_child(enfant)
 		enfant.queue_free()
@@ -23,7 +23,7 @@ func construire(limites: Rect2, _charger: Callable, monde := 0, contour := Packe
 	var sol := Node3D.new()
 	sol.name = "SolJouable"
 	add_child(sol)
-	SOL.construire(sol, contour, limites, monde, variante)
+	SOL.construire(sol, contour, limites, monde, variante, etage)
 	STATIQUE.regrouper(sol)
 	var decor := Node3D.new()
 	decor.name = "AtelierDuMonde"
@@ -31,7 +31,7 @@ func construire(limites: Rect2, _charger: Callable, monde := 0, contour := Packe
 	var fond := DECOR.bloc(decor, centre + Vector3(0,-1.05,0), Vector3(taille.x+30,.1,taille.z+30), DecorsMondes.couleur(monde,"dehors"))
 	fond.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_bordure(decor, contour, monde, variante)
-	ORNEMENTS.construire(decor, centre, taille, monde, variante)
+	ORNEMENTS.construire(decor, centre, taille, monde, variante, contour, etage)
 	for noeud: Node in decor.find_children("*", "Node3D", true, false):
 		if noeud.has_meta("mobile_decor"):
 			_rotors.append(noeud as Node3D)
@@ -61,6 +61,8 @@ func _bordure(parent: Node3D, contour: PackedVector2Array, monde: int, variante:
 		email.rotation.y = angle
 		var filet := DECOR.bloc(parent,(a+b)*.5+dehors*.015+Vector3(0,.04,0),Vector3(longueur+.025,.025,.045),DecorsMondes.CUIVRE)
 		filet.rotation.y = angle
+		# Les petits arcs gardent une frise continue, sans couvert de largeur negative.
+		if longueur < .20: continue
 		var morceaux := maxi(1, ceili(longueur/1.8))
 		for j in morceaux:
 			var position_bord := a.lerp(b,(float(j)+.5)/morceaux)

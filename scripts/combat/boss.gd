@@ -1,6 +1,8 @@
 class_name Boss
 extends CharacterBody2D
 
+const ContactPhysique = preload("res://scripts/combat/contact_physique.gd")
+
 # Moteur commun des identites majeures. Chaque profil choisit ses motifs dans
 # le catalogue ; le moteur garantit les memes telegraphes et limites de densite.
 
@@ -127,6 +129,8 @@ func _physics_process(delta: float) -> void:
 	if _apparition < 1.0:
 		velocity = Vector2.ZERO
 		return
+	var avant := global_position
+	_frapper_contact(avant)
 	if _gel > 0.0:
 		return
 
@@ -157,6 +161,7 @@ func _physics_process(delta: float) -> void:
 		_repositionnement = maxf(0.0, _repositionnement - delta)
 		_minuterie += delta
 		_flotter(delta)
+		_frapper_contact(avant)
 		if _repositionnement <= 0.0: _commencer_motif(_motif)
 		return
 	for attente: Dictionary in _tirs_annonces.avancer(delta):
@@ -167,6 +172,13 @@ func _physics_process(delta: float) -> void:
 	_executer_motif(_motif, delta)
 	global_position = Geometrie.contraindre_dans_rect(global_position, limites,
 		($CollisionShape2D.shape as CircleShape2D).radius)
+	_frapper_contact(avant)
+
+func _frapper_contact(avant: Vector2) -> bool:
+	if _contact_restant > 0.0: return false
+	if not ContactPhysique.frapper_sur_segment(self, avant, float(donnees["degats"])): return false
+	_contact_restant = BestiaireMondes.BOSS_DEGATS_CONTACT_RECHARGE
+	return true
 
 func _choisir_motif() -> String:
 	var motifs: Array = donnees["motifs_phase_1" if _phase == 1 else "motifs_phase_2"]
@@ -499,11 +511,7 @@ func _executer_motif(motif: String, delta: float) -> void:
 				_charge_debutee = true
 				var avant := global_position
 				_charge.avancer(self, _vitesse_charge(), delta)
-				var proche := Geometry2D.get_closest_point_to_segment(_cible.global_position, avant, global_position)
-				if proche.distance_to(_cible.global_position) < ($CollisionShape2D.shape as CircleShape2D).radius + Reglages.HEROS_RAYON and _contact_restant <= 0.0 \
-						and Geometrie.ligne_libre(proche, _cible.global_position, get_parent().obstacles()):
-					_cible.recevoir_degats(donnees["degats"])
-					_contact_restant = BestiaireMondes.BOSS_DEGATS_CONTACT_RECHARGE
+				_frapper_contact(avant)
 				# L'impact termine l'elan : pas de retour imprevisible sans annonce.
 				if _charge.terminee:
 					_charge_terminee = true
@@ -537,7 +545,7 @@ func _preparer_trajet_charge() -> void:
 func _peut_charger() -> bool:
 	if global_position.distance_to(_cible.global_position) > portee_charge(): return false
 	var rayon := float(donnees["rayon"]) * Reglages.BOSS_HITBOX_MULT
-	if not Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), rayon): return false
+	if not Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), rayon, get_parent().contour_sol()): return false
 	var trajet := preload("res://scripts/combat/trajet_charge.gd").new()
 	trajet.preparer(self, global_position.direction_to(_cible.global_position), _longueur_charge(), rayon)
 	return trajet.contient_cible(_cible.global_position, rayon + Reglages.HEROS_RAYON)
@@ -695,4 +703,3 @@ func _draw() -> void:
 	draw_circle(centre_sigil, r * 0.25, Color(0.035, 0.018, 0.065, 0.78))
 	Dessin.glyphe(self, GLYPHES_ORNEMENTS[ornement], centre_sigil, r * 0.15,
 		couleur.lightened(0.42))
-

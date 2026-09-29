@@ -9,17 +9,21 @@ const MAX_RANG := Reglages.MAITRISE_RANG_MAX
 # Un remboursement historique ne doit pas changer avec les prix courants.
 const ANCIENS_COUTS := [8, 12, 20, 35, 60, 100, 170, 280, 460, 760]
 const ANCIEN_COUT_PAR_RANG := 1.35
-const NOEUDS := {
-	"force": {"nom": "Force maîtrisée", "description": "+1,5 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.015, "cout": Reglages.MAITRISE_COUTS[0]},
-	"cadence": {"nom": "Œil sûr", "description": "+0,3 point de chance critique par rang", "categorie": "Offensif", "critique": 0.003, "requis": "force", "cout": Reglages.MAITRISE_COUTS[1]},
+const ATTAQUE_PAR_RANG_INITIALE := 0.04
+const ATTAQUE_PAR_RANG_PUISSANCE := 0.025
+const ATTAQUE_PAR_RANG_AVANCEE := 0.04
+const CRITIQUE_PAR_RANG := 0.01
+static var NOEUDS := {
+	"force": {"nom": "Force maîtrisée", "description": "+%.0f %% d’attaque par rang" % (ATTAQUE_PAR_RANG_INITIALE * 100.0), "categorie": "Offensif", "attaque": ATTAQUE_PAR_RANG_INITIALE, "cout": Reglages.MAITRISE_COUTS[0]},
+	"cadence": {"nom": "Œil sûr", "description": "+%.0f point de chance critique par rang" % (CRITIQUE_PAR_RANG * 100.0), "categorie": "Offensif", "critique": CRITIQUE_PAR_RANG, "requis": "force", "cout": Reglages.MAITRISE_COUTS[1]},
 	"precision": {"nom": "Frappe souveraine", "description": "+2 points de chance critique.", "categorie": "Offensif", "critique": 0.020, "requis": "cadence", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[2] * Reglages.MAITRISE_COUT_MAJEUR},
-	"puissance": {"nom": "Puissance", "description": "+1,5 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.015, "requis": "precision", "cout": Reglages.MAITRISE_COUTS[3]},
+	"puissance": {"nom": "Puissance", "description": ("+%.1f %% d’attaque par rang" % (ATTAQUE_PAR_RANG_PUISSANCE * 100.0)).replace(".", ","), "categorie": "Offensif", "attaque": ATTAQUE_PAR_RANG_PUISSANCE, "requis": "precision", "cout": Reglages.MAITRISE_COUTS[3]},
 	"rythme": {"nom": "Impact critique", "description": "+1 point de dégâts critiques par rang", "categorie": "Offensif", "degats_critiques": 0.010, "requis": "puissance", "cout": Reglages.MAITRISE_COUTS[4]},
 	"catalyse": {"nom": "Catalyse absolue", "description": "+5 % d’attaque.", "categorie": "Offensif", "attaque": 0.050, "requis": "rythme", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[5] * Reglages.MAITRISE_COUT_MAJEUR},
-	"trajectoire": {"nom": "Maîtrise du trait", "description": "+2 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.020, "requis": "catalyse", "cout": Reglages.MAITRISE_COUTS[6]},
-	"tempete": {"nom": "Instinct critique", "description": "+0,3 point de chance critique par rang", "categorie": "Offensif", "critique": 0.003, "requis": "trajectoire", "cout": Reglages.MAITRISE_COUTS[7]},
+	"trajectoire": {"nom": "Maîtrise du trait", "description": "+%.0f %% d’attaque par rang" % (ATTAQUE_PAR_RANG_AVANCEE * 100.0), "categorie": "Offensif", "attaque": ATTAQUE_PAR_RANG_AVANCEE, "requis": "catalyse", "cout": Reglages.MAITRISE_COUTS[6]},
+	"tempete": {"nom": "Instinct critique", "description": "+%.0f point de chance critique par rang" % (CRITIQUE_PAR_RANG * 100.0), "categorie": "Offensif", "critique": CRITIQUE_PAR_RANG, "requis": "trajectoire", "cout": Reglages.MAITRISE_COUTS[7]},
 	"domination": {"nom": "Domination", "description": "+7,5 % d’attaque.", "categorie": "Offensif", "attaque": 0.075, "requis": "tempete", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[8] * Reglages.MAITRISE_COUT_MAJEUR},
-	"grand_oeuvre": {"nom": "Grand Œuvre", "description": "+2 % d’attaque par rang", "categorie": "Offensif", "attaque": 0.020, "requis": "domination", "cout": Reglages.MAITRISE_COUTS[9]},
+	"grand_oeuvre": {"nom": "Grand Œuvre", "description": "+%.0f %% d’attaque par rang" % (ATTAQUE_PAR_RANG_AVANCEE * 100.0), "categorie": "Offensif", "attaque": ATTAQUE_PAR_RANG_AVANCEE, "requis": "domination", "cout": Reglages.MAITRISE_COUTS[9]},
 	"constitution": {"nom": "Constitution", "description": "+1,5 % PV maximum par rang", "categorie": "Défensif", "pv_mult": 0.015, "cout": Reglages.MAITRISE_COUTS[0]},
 	"armure": {"nom": "Défense", "description": "+2 % de Défense par rang", "categorie": "Défensif", "defense": 0.020, "requis": "constitution", "cout": Reglages.MAITRISE_COUTS[1]},
 	"vitalite": {"nom": "Vitalité souveraine", "description": "+5 % PV maximum.", "categorie": "Défensif", "pv_mult": 0.050, "requis": "armure", "rangs": 1, "fort": true, "cout": Reglages.MAITRISE_COUTS[2] * Reglages.MAITRISE_COUT_MAJEUR},

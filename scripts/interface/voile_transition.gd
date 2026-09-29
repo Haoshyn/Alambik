@@ -1,25 +1,24 @@
 extends Control
 
-var titre := "Le passage s’ouvre"
-var sous_titre := "Un nouveau niveau vous attend…"
-var _anim := 0.0
+const CHARGEMENT_AVENTURE := preload("res://ui/composants/chargement_aventure.gd")
 
-func configurer(titre_: String, sous_titre_: String) -> void:
-	titre = titre_
-	sous_titre = sous_titre_
-	queue_redraw()
+var _chargement_entree: Control
+
+func presenter_etage(livre: Dictionary, etage: int, total_etages: int, mode: String) -> void:
+	var configuration := livre.duplicate()
+	configuration["etage"] = etage
+	configuration["total_etages"] = total_etages
+	configuration["mode"] = mode
+	if not is_instance_valid(_chargement_entree):
+		_chargement_entree = CHARGEMENT_AVENTURE.new()
+		_chargement_entree.name = "ChargementEtage"
+		_chargement_entree.configurer(configuration)
+		add_child(_chargement_entree)
+	else:
+		_chargement_entree.configurer(configuration)
+	_chargement_entree.show()
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	HabillagePeint.appliquer(self)
-	PassageManga.preparer(self)
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	visibility_changed.connect(func(): set_process(is_visible_in_tree()))
-
-func _process(delta: float) -> void:
-	_anim += delta * (0.0 if ReglagesJoueur.effets_reduits else 1.0)
-	queue_redraw()
-
-func _draw() -> void:
-	PassageManga.dessiner(self, size, _anim, titre, sous_titre)

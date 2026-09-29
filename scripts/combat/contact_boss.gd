@@ -11,7 +11,7 @@ func peut_commencer(boss: CharacterBody2D) -> bool:
 		* Reglages.ENNEMI_VITESSE_MULT * float(boss._facteur_ralentissement()) * float(attaque["approche"])
 	return boss.global_position.distance_to(boss._cible.global_position) <= float(attaque["portee"]) * AttaquesContactBoss.DISTANCE_ARRET + approche \
 		and Geometrie.ligne_libre(boss.global_position, boss._cible.global_position, boss.get_parent().obstacles(),
-			float(boss.donnees["rayon"]) * Reglages.BOSS_HITBOX_MULT)
+			float(boss.donnees["rayon"]) * Reglages.BOSS_HITBOX_MULT, boss.get_parent().contour_sol())
 
 func commencer(boss: CharacterBody2D) -> void:
 	profil = AttaquesContactBoss.PROFILS[str(boss.donnees["contact_boss"])]
@@ -25,7 +25,7 @@ func avancer(boss: CharacterBody2D, delta: float) -> void:
 		"approche":
 			var ecart: Vector2 = boss._cible.global_position - boss.global_position
 			if ecart.length() <= float(profil["portee"]) * AttaquesContactBoss.DISTANCE_ARRET \
-					and Geometrie.ligne_libre(boss.global_position, boss._cible.global_position, boss.get_parent().obstacles()):
+					and Geometrie.ligne_libre(boss.global_position, boss._cible.global_position, boss.get_parent().obstacles(), 0.0, boss.get_parent().contour_sol()):
 				etat = "annonce"
 				reste = float(profil["annonce"])
 				direction = ecart.normalized() if not ecart.is_zero_approx() else Vector2.DOWN
@@ -41,7 +41,7 @@ func avancer(boss: CharacterBody2D, delta: float) -> void:
 				etat = "frappe"
 				reste = AttaquesContactBoss.FRAPPE_DUREE
 				if AttaquesContactBoss.contient_cible(boss.global_position, direction, boss._cible.global_position, profil, Reglages.HEROS_RAYON) \
-						and Geometrie.ligne_libre(boss.global_position, boss._cible.global_position, boss.get_parent().obstacles()):
+						and Geometrie.ligne_libre(boss.global_position, boss._cible.global_position, boss.get_parent().obstacles(), 0.0, boss.get_parent().contour_sol()):
 					boss._cible.recevoir_degats(float(boss.donnees["degats"]))
 		"frappe":
 			if reste <= 0.0:

@@ -3,6 +3,7 @@ extends SceneTree
 const Parcours = preload("res://tools/statistiques/parcours_progression.gd")
 const Modeles = preload("res://tools/statistiques/modeles.gd")
 const Synthese = preload("res://tools/statistiques/synthese_progression.gd")
+const RythmeBoss = preload("res://tools/statistiques/rythme_boss.gd")
 
 var _erreurs: Array[String] = []
 var _controles := 0
@@ -15,6 +16,7 @@ func _verifier() -> void:
 	_verifier_annexes()
 	_verifier_garde_survie()
 	var rapport := Parcours.rapport()
+	_verifier_rythme_boss(rapport)
 	for nom: String in ["sans_annexes", "equilibre", "adaptatif", "mixte", "seuil_90"]:
 		var cas: Dictionary = rapport[nom]
 		_verifier_compte(cas)
@@ -58,6 +60,33 @@ func _verifier() -> void:
 func _exiger(condition: bool, message: String) -> void:
 	_controles += 1
 	if not condition: _erreurs.append(message)
+
+func _verifier_rythme_boss(parcours: Dictionary) -> void:
+	var rapport := RythmeBoss.rapport(parcours)
+	_exiger((rapport["cas"] as Array).size() == Chapitres.MONDES.size(), "Un boss de fin de monde manque a la mesure")
+	for cas: Dictionary in rapport["cas"]:
+		_exiger(int(cas["comptes"]) == int(rapport["comptes"]), "La mesure omet un compte devant un boss")
+		for salle: Dictionary in cas["salles"]:
+			var duree: Dictionary = salle["duree"]
+			var mediane := float(duree["mediane"])
+			var contexte := "C%d salle %d" % [int(cas["chapitre"]), int(salle["salle"])]
+			if bool(salle["signature"]):
+				_exiger(mediane >= float(salle["cible_min"]) and mediane <= float(salle["cible_max"]),
+					"Le boss signature median sort de la cible equilibree : " + contexte)
+				_exiger(float(duree["p75"]) >= float(duree["p25"]) * 1.15, "Les augments n'influencent plus assez la duree : " + contexte)
+			print("Rythme boss %s : %.1f s [P25 %.1f ; P75 %.1f], extremes P10 %.1f ; P90 %.1f." % [contexte,
+				mediane, float(duree["p25"]), float(duree["p75"]), float(duree["p10"]), float(duree["p90"])])
+	for chapitre in range(Chapitres.CHAPITRES_PAR_MONDE - 1, Chapitres.nombre(), Chapitres.CHAPITRES_PAR_MONDE):
+		var tentative := Parcours.campagne({}, chapitre)
+		var sensibilite := Parcours.campagne({}, chapitre, Parcours.GRAINE_BASE, {"boss_limite": 90.0})
+		for salle: Dictionary in tentative["salles"]:
+			if not bool(salle["boss"]): continue
+			var signature := int(salle["salle"]) == Reglages.SALLES_PAR_RUN
+			var limite := Reglages.CAMPAGNE_BOSS_DUREE_SIGNATURE.y if signature else Reglages.CAMPAGNE_BOSS_DUREE_NORMALE.y
+			_exiger(bool(salle["boss_signature"]) == signature and is_equal_approx(float(salle["limite_boss"]), limite), "Le modele applique la mauvaise cible de boss")
+			var autre: Dictionary = sensibilite["salles"][int(salle["salle"]) - 1]
+			_exiger(is_equal_approx(float(autre["limite_boss"]), 90.0), "Le scenario de sensibilite ne remplace pas le seuil de duree")
+			_exiger(is_equal_approx(float(salle["pv_ennemis"]), float(autre["pv_ennemis"])), "Le seuil de confort modifie les PV reels")
 
 func _verifier_annexes() -> void:
 	var compte := Parcours.Compte.new()

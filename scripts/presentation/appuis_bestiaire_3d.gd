@@ -1,7 +1,8 @@
 extends RefCounted
 
-# Les points d'appui restent dans le monde pendant que le corps avance.
+# Au pas, les points d'appui restent fixes ; la course absorbe l'exces de translation.
 # Deux segments resolvent la pose ; aucune collision ni sonde physique en 3D.
+const Rendu = preload("res://data/presentation/animations_combat.gd")
 const APPUI_PART := .64
 var pattes: Array[Dictionary] = []
 var phase := 0.0
@@ -12,6 +13,7 @@ var _precedente := Vector3.ZERO
 var _initialise := false
 var _avancait := false
 var _foulee := .30
+var _decalage_appuis := Vector3.ZERO
 
 func preparer(modele: Node3D) -> void:
 	_modele = modele
@@ -45,7 +47,11 @@ func mesurer(delta: float) -> Vector3:
 		for patte: Dictionary in pattes:
 			patte["cycle"] = phase + float(patte["groupe"]) * .5
 	_avancait = avance
-	phase += trajet.length() / (echelle * _foulee)
+	# La course reste lisible meme quand le corps traverse plusieurs foulees par seconde.
+	var progression := minf(trajet.length() / (echelle * _foulee), Rendu.PATTES_CADENCE_MAX * maxf(delta, 0.0))
+	phase += progression
+	# L'exces de vitesse accompagne les appuis au lieu de forcer des replacements secs.
+	_decalage_appuis = trajet - trajet.limit_length(progression * echelle * _foulee)
 	return trajet
 
 func poser(delta: float, trajet: Vector3) -> void:
@@ -60,6 +66,10 @@ func poser(delta: float, trajet: Vector3) -> void:
 			patte["ancre"] = maison
 			patte["depart"] = maison
 			patte["cible"] = maison
+		else:
+			for cle in ["ancre", "depart", "cible"]:
+				var point: Vector3 = patte[cle]
+				patte[cle] = point + _decalage_appuis
 		var cycle_total := phase + float(patte["groupe"]) * .5
 		var cycle := fposmod(cycle_total, 1.0)
 		var nouveau_pas := floorf(cycle_total) > floorf(float(patte["cycle"]))
@@ -94,10 +104,10 @@ func poser(delta: float, trajet: Vector3) -> void:
 		var repere := hanche.get_parent() as Node3D
 		var extension := repere.to_local(ancre).distance_to(repos.origin)
 		if marche and extension > (tibia.origin.length() + bout.position.length()) * .98:
-			# Un virage serre libere l'ancien appui et replace le pied sous le corps.
-			ancre = maison + (ancre - maison).limit_length(.065 * echelle)
-			patte["depart"] = ancre
-			patte["cible"] = maison + foulee * .12
+			# La limite de portee reste continue, meme en virage ou en bout de pas.
+			var visee := repere.to_local(ancre) - repos.origin
+			var portee := (tibia.origin.length() + bout.position.length()) * .98
+			ancre = repere.to_global(repos.origin + visee.limit_length(portee))
 		patte["ancre"] = ancre
 		patte["vol"] = vol
 		patte["cycle"] = cycle_total
@@ -122,7 +132,10 @@ func _resoudre(patte: Dictionary, cible: Vector3) -> void:
 	var longueur := clampf(visee.length(), absf(cuisse.length() - jambe.length()) + .001, cuisse.length() + jambe.length() - .001)
 	var axe := visee.normalized()
 	if axe.is_zero_approx(): return
-	var pli := cuisse - axe * cuisse.dot(axe)
+	# Un pole de repos stable evite que le genou bascule quand le pied monte.
+	var axe_repos := (cuisse + repos_tibia.basis * jambe).normalized()
+	var pole := cuisse - axe_repos * cuisse.dot(axe_repos)
+	var pli := pole - axe * pole.dot(axe)
 	if pli.length_squared() < .00001: pli = axe.cross(Vector3.RIGHT)
 	pli = pli.normalized()
 	var avance := (cuisse.length_squared() - jambe.length_squared() + longueur * longueur) / (2.0 * longueur)

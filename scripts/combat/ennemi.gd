@@ -83,17 +83,17 @@ func _physics_process(delta: float) -> void:
 	_recharge = maxf(0.0, _recharge - delta)
 	_recharge_contact = maxf(0.0, _recharge_contact - delta)
 	if _gel <= 0.0: _minuterie = maxf(0.0, _minuterie - delta)
+	var avant := global_position
+	CapacitesEnnemis.frapper_sur_segment(self, avant)
 	if _gel > 0.0:
 		velocity = Vector2.ZERO
 		return
 	velocity = Vector2.ZERO
-	# Traverser le corps d'un poursuivant ou d'un chargeur est deja un contact.
-	if str(donnees["cerveau"]) in ["poursuivant", "rampant", "veloce"]:
-		CapacitesEnnemis.frapper_sur_segment(self, global_position)
 	# Les relances conservent leur origine et leur visee pendant l'annonce.
 	if _relancer_salves(delta): return
 	if _capacites.avancer(self, delta):
 		_contraindre_aux_murs()
+		CapacitesEnnemis.frapper_sur_segment(self, avant)
 		_capacites.laisser_trace(self, delta)
 		return
 	match donnees["cerveau"]:
@@ -104,10 +104,13 @@ func _physics_process(delta: float) -> void:
 		"orbiteur": _agir_orbiteur(delta)
 		"harceleur": _agir_harceleur(delta)
 		"miroir": _agir_miroir(delta)
-		"phaseur": _agir_phaseur(delta)
+		"phaseur":
+			# Le saut n'occupe pas le segment entre depart et arrivee.
+			if _agir_phaseur(delta): avant = global_position
 		"tisseur": _agir_tisseur(delta)
 		"volatile": _agir_volatile(delta)
 	_contraindre_aux_murs()
+	CapacitesEnnemis.frapper_sur_segment(self, avant)
 	_capacites.laisser_trace(self, delta)
 
 func _cible_la_plus_proche() -> Node2D:
@@ -179,7 +182,7 @@ func _agir_rampant(delta: float) -> void:
 			_recharge = float(donnees["recharge"])
 		return
 	if distance > _distance_contact() and distance <= minf(float(donnees.get("elan_distance",0.0)), portee_charge()) \
-			and _recharge <= 0.0 and Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), _rayon_collision()):
+			and _recharge <= 0.0 and Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), _rayon_collision(), get_parent().contour_sol()):
 		_etat = "preparer"
 		_minuterie = float(donnees["preparation"])
 		_direction_charge = global_position.direction_to(_viser())
@@ -230,7 +233,7 @@ func _peut_tirer(cercle := false) -> bool:
 	var tir := _creer_tir(cercle)
 	var portee := minf(tir.portee, tir.distance_retour) if tir.trajectoire == "aller_retour" else tir.portee
 	return global_position.distance_to(_cible.global_position) <= portee \
-		and Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), tir.rayon)
+		and Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), tir.rayon, get_parent().contour_sol())
 
 func _viser() -> Vector2:
 	var point := _cible.global_position
@@ -297,7 +300,7 @@ func _agir_veloce(delta: float) -> void:
 	if _etat == "preparer" and decision == "charger" and _charge.longueur > _longueur_charge():
 		decision = "avancer"
 	if decision in ["preparer", "charger"] and _etat != "charger" \
-			and not Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), float(donnees["rayon"])):
+			and not Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), float(donnees["rayon"]), get_parent().contour_sol()):
 		decision = "avancer"
 	match decision:
 		"avancer":
@@ -325,7 +328,7 @@ func _agir_veloce(delta: float) -> void:
 		"repos":
 			if _etat != "repos":
 				if _charges_effectuees < int(donnees.get("charges",1)) and distance <= portee_charge() \
-						and Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), float(donnees["rayon"])):
+						and Geometrie.ligne_libre(global_position, _cible.global_position, get_parent().obstacles(), float(donnees["rayon"]), get_parent().contour_sol()):
 					_etat = "preparer"
 					_minuterie = float(donnees["preparation"])
 					_direction_charge = global_position.direction_to(_cible.global_position)
@@ -440,14 +443,14 @@ func _agir_miroir(_delta: float) -> void:
 			if not _preparer_tir("pulse", float(donnees.get("telegraphe", 0.65)), true):
 				_tirer_cercle(int(donnees.get("projectiles_cercle", 8)))
 
-func _agir_phaseur(_delta: float) -> void:
+func _agir_phaseur(_delta: float) -> bool:
 	if _etat == "vise_phase":
 		if _minuterie <= 0.0:
 			_tirer_cercle(int(donnees.get("projectiles_cercle", 6)))
 			_tirer_vers(_point_vise)
 			_etat = "repos"
 			_recharge = float(donnees["recharge"])
-		return
+		return false
 	var distance := global_position.distance_to(_cible.global_position)
 	match Cerveaux.phaseur(distance, donnees["portee"], _recharge, _etat, _minuterie):
 		"avancer": _avancer_vers(_cible.global_position, donnees["vitesse"])
@@ -460,7 +463,7 @@ func _agir_phaseur(_delta: float) -> void:
 			if not _destination_phase.is_finite():
 				_recharge = BestiaireMondes.PHASE_REESSAI
 				_avancer_vers(_cible.global_position, float(donnees["vitesse"]))
-				return
+				return false
 			_etat = "phase"
 			_point_vise = _viser()
 			_minuterie = Reglages.PHASE_ANNONCE
@@ -472,18 +475,20 @@ func _agir_phaseur(_delta: float) -> void:
 			if not get_parent()._place_libre(_destination_phase, float(donnees["rayon"])):
 				_etat = "repos"
 				_recharge = BestiaireMondes.PHASE_REESSAI
-				return
+				return false
 			# La vitesse effective decide si le tir demande une annonce apres l'arrivee.
 			global_position = _destination_phase
 			reset_physics_interpolation()
 			_etat = "repos"
 			if not _peut_tirer():
 				_recharge = BestiaireMondes.PHASE_REESSAI
-				return
+				return true
 			if not _preparer_tir("vise_phase", Reglages.PHASE_PREPARATION_TIR, true):
 				_tirer_cercle(int(donnees.get("projectiles_cercle", 6)))
 				_tirer_vers(_point_vise)
 				_recharge = float(donnees["recharge"])
+			return true
+	return false
 
 func _rayon_collision() -> float:
 	return ($CollisionShape2D.shape as CircleShape2D).radius

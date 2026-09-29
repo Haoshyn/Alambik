@@ -12,7 +12,7 @@
 
 ## Rythme et esquive
 
-La vitesse des tirs et la recharge progressent avec le niveau et l’avancée de la tentative, indépendamment du build. Les multiplicateurs ci-dessous s’appliquent aux profils de base ; les tirs ordinaires ajoutent ×1,5 en vitesse, les boss ×2,63. Les plafonds des ricochets et des allers-retours suivent aussi la progression.
+La vitesse des tirs et la recharge progressent avec le niveau et l’avancée de la tentative, indépendamment du build. Les multiplicateurs ci-dessous s’appliquent aux profils de base ; les tirs ordinaires ajoutent ×1,5 en vitesse, les boss ×2,62. Les plafonds des ricochets et des allers-retours suivent aussi la progression.
 
 | Niveau | Vitesse début × | Vitesse fin × | Recharge début × | Recharge fin × | Annonce × |
 | --- | --- | --- | --- | --- | --- |
@@ -32,7 +32,7 @@ Une charge exige une cible atteignable et une voie libre, y compris après la pr
 
 Les boomerangs des boss sont plus épais, saturés et bordés de sombre. Leur éventail compte 3 branches ; leur plafond de vitesse est 1 500 px/s avant progression, contre 625 px/s pour les monstres ordinaires. La portée totale couvre les deux trajets ; un mur provoque le retour.
 
-Les tirs lents partent sans tracé préalable. Une annonce est requise dès 1 200 px/s de vitesse réelle, ou si le temps avant impact est inférieur à 0,4 s après prise en compte des hitboxes. La règle suit la progression et les plafonds des trajectoires. Les impacts de zone et les frappes préparées gardent leur avertissement ; le corps des poursuivants et chargeurs blesse dès le contact.
+Les tirs lents partent sans tracé préalable. Une annonce est requise dès 1 200 px/s de vitesse réelle, ou si le temps avant impact est inférieur à 0,4 s après prise en compte des hitboxes. La règle suit la progression et les plafonds des trajectoires. Les impacts de zone et les frappes préparées gardent leur avertissement ; tout monstre ou boss vivant blesse dès le contact physique, même gelé, après son apparition. Les murs protègent du contact et les cadavres ne blessent pas.
 
 Quand elle est nécessaire, l’annonce ordinaire dure au moins 0,6 s, celle d’une salve de boss 0,65 s. La visée annoncée reste verrouillée jusqu’au départ.
 
@@ -48,7 +48,7 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 | --- | --- |
 | Points de vie | 36 PV |
 | Dégâts | 15 dégâts |
-| Vitesse | 446,5 px/s |
+| Vitesse | 401,85 px/s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Dégâts du projectile | 60 % des dégâts de base |
 
@@ -72,6 +72,7 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 | Dégâts | 20 dégâts |
 | Vitesse | 0 px/s |
 | Intervalle d’attaque | 1,7 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Dégâts du projectile | 75 % des dégâts de base |
 | Projectile | Pointe de plume |
 | Vitesse du projectile | 4 500 px/s avant coefficients |
@@ -123,6 +124,7 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 | Dégâts | 22 dégâts |
 | Vitesse | 205 px/s |
 | Intervalle d’attaque | 2,95 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Dégâts du projectile | 45 % des dégâts de base |
 | Projectile | Graine de papier |
 | Vitesse du projectile | 520 px/s avant coefficients |
@@ -151,6 +153,7 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 | Dégâts | 27 dégâts |
 | Vitesse | 280 px/s |
 | Intervalle d’attaque | 1,55 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Dégâts du projectile | 62,5 % des dégâts de base |
 | Projectile | Feuillet boomerang |
 | Vitesse du projectile | 420 px/s avant coefficients |
@@ -203,6 +206,7 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 | Dégâts | 23 dégâts |
 | Vitesse | 340 px/s |
 | Intervalle d’attaque | 1,45 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Dégâts du projectile | 60 % des dégâts de base |
 | Projectile | Épine de ruban |
 | Vitesse du projectile | 1 150 px/s avant coefficients |
@@ -231,6 +235,7 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 | Dégâts | 30 dégâts |
 | Vitesse | 190 px/s |
 | Intervalle d’attaque | 2,35 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Dégâts du projectile | 50 % des dégâts de base |
 | Projectile | Carreau à ricochet |
 | Vitesse du projectile | 300 px/s avant coefficients |
@@ -259,6 +264,7 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 | Dégâts | 26 dégâts |
 | Vitesse | 255 px/s |
 | Intervalle d’attaque | 2,55 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Dégâts du projectile | 55 % des dégâts de base |
 | Projectile | Losange fendu |
 | Vitesse du projectile | 820 px/s avant coefficients |
@@ -287,6 +293,7 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 | Dégâts | 26 dégâts |
 | Vitesse | 260 px/s |
 | Intervalle d’attaque | 1,85 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Dégâts du projectile | 62,5 % des dégâts de base |
 | Projectile | Fil torsadé |
 | Vitesse du projectile | 600 px/s avant coefficients |
@@ -315,6 +322,7 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 | Dégâts | 28 dégâts |
 | Vitesse | 225 px/s |
 | Intervalle d’attaque | 3,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Dégâts du projectile | 45 % des dégâts de base |
 
 ### Variantes par monde
@@ -337,6 +345,7 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 | Dégâts | 18 dégâts |
 | Vitesse | 260 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche directe vers le joueur |
 | Distance recherchée | 290 px |
 | Déplacement entre motifs de tir | 1 s |
@@ -370,6 +379,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 19 dégâts |
 | Vitesse | 285 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche par le flanc vers le joueur |
 | Distance recherchée | 420 px |
 | Déplacement entre motifs de tir | 1,15 s |
@@ -393,6 +403,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 15 dégâts |
 | Vitesse | 220 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche directe vers le joueur |
 | Distance recherchée | 290 px |
 | Déplacement entre motifs de tir | 1 s |
@@ -414,6 +425,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 18 dégâts |
 | Vitesse | 245 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche directe vers le joueur |
 | Distance recherchée | 290 px |
 | Déplacement entre motifs de tir | 1 s |
@@ -447,6 +459,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 17 dégâts |
 | Vitesse | 300 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Cercle mobile vers le joueur |
 | Distance recherchée | 530 px |
 | Déplacement entre motifs de tir | 0,9 s |
@@ -470,6 +483,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 20 dégâts |
 | Vitesse | 235 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche par le flanc vers le joueur |
 | Distance recherchée | 420 px |
 | Déplacement entre motifs de tir | 1,15 s |
@@ -491,6 +505,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 18 dégâts |
 | Vitesse | 275 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche par le flanc vers le joueur |
 | Distance recherchée | 420 px |
 | Déplacement entre motifs de tir | 1,15 s |
@@ -512,6 +527,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 19 dégâts |
 | Vitesse | 230 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Cercle mobile vers le joueur |
 | Distance recherchée | 530 px |
 | Déplacement entre motifs de tir | 0,9 s |
@@ -533,6 +549,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 21 dégâts |
 | Vitesse | 310 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche directe vers le joueur |
 | Distance recherchée | 290 px |
 | Déplacement entre motifs de tir | 1 s |
@@ -566,6 +583,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 16 dégâts |
 | Vitesse | 210 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche par le flanc vers le joueur |
 | Distance recherchée | 420 px |
 | Déplacement entre motifs de tir | 1,15 s |
@@ -587,6 +605,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 18 dégâts |
 | Vitesse | 235 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche par le flanc vers le joueur |
 | Distance recherchée | 420 px |
 | Déplacement entre motifs de tir | 1,15 s |
@@ -608,6 +627,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 22 dégâts |
 | Vitesse | 295 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche directe vers le joueur |
 | Distance recherchée | 290 px |
 | Déplacement entre motifs de tir | 1 s |
@@ -641,6 +661,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 19 dégâts |
 | Vitesse | 215 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Cercle mobile vers le joueur |
 | Distance recherchée | 530 px |
 | Déplacement entre motifs de tir | 0,9 s |
@@ -662,6 +683,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 23 dégâts |
 | Vitesse | 270 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche par le flanc vers le joueur |
 | Distance recherchée | 420 px |
 | Déplacement entre motifs de tir | 1,15 s |
@@ -683,6 +705,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 21 dégâts |
 | Vitesse | 225 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche directe vers le joueur |
 | Distance recherchée | 290 px |
 | Déplacement entre motifs de tir | 1 s |
@@ -704,6 +727,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 22 dégâts |
 | Vitesse | 250 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Cercle mobile vers le joueur |
 | Distance recherchée | 530 px |
 | Déplacement entre motifs de tir | 0,9 s |
@@ -725,6 +749,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 24 dégâts |
 | Vitesse | 285 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche par le flanc vers le joueur |
 | Distance recherchée | 420 px |
 | Déplacement entre motifs de tir | 1,15 s |
@@ -760,6 +785,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 23 dégâts |
 | Vitesse | 205 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche directe vers le joueur |
 | Distance recherchée | 290 px |
 | Déplacement entre motifs de tir | 1 s |
@@ -793,6 +819,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 25 dégâts |
 | Vitesse | 275 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche directe vers le joueur |
 | Distance recherchée | 290 px |
 | Déplacement entre motifs de tir | 1 s |
@@ -826,6 +853,7 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 | Dégâts | 25 dégâts |
 | Vitesse | 240 px/s |
 | Intervalle d’attaque | 1,2 s |
+| Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Déplacement | Approche directe vers le joueur |
 | Distance recherchée | 290 px |
 | Déplacement entre motifs de tir | 1 s |

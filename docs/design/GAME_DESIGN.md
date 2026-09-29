@@ -25,12 +25,35 @@ de tir propres à chaque identité restent disponibles avec les attaques de mond
 Les augments sont des choix temporaires de run. L'équipement, les maîtrises,
 les attributs, les passifs et les Cœurs de mana sont permanents.
 La répartition des sources permanentes se lit avant les augments. Les choix
+permanents visent chacun environ un cinquième du DPS sur le compte complet
+de référence, synergies comprises. Cette cible concerne les dégâts ; les
+proportions varient pendant la progression et selon la spécialisation.
+Le temps nécessaire pour compléter ces familles doit aussi rester comparable.
+Les parcours économiques de référence contrôlent les étapes à 50 %, 75 % et
+maximum, avec des marges de temps définies dans `Reglages`, plus serrées
+entre le niveau maximum du héros et les dernières maîtrises. Ce sont des
+critères de simulation, sans verrouillage d'une progression par une autre.
+Le build complet comprend cinq objets équipés forgés, tous les arbres,
+tous les passifs et Cœurs ; forger toute la collection reste un objectif en plus.
+Les attributs offensifs et les statistiques de passifs gagnent progressivement
+en puissance avec le niveau du héros. Concentrer les points dans un seul
+attribut offensif réduit leur rendement ; répartir les points reste utile.
+Les premiers rangs de forge d'arme lancent le build, puis leur gain ralentit
+pour laisser les autres familles de progression prendre leur place. Les choix
 de run démultiplient ce socle et doivent expliquer la majeure partie du DPS
 de fin de tentative ; ils ne sont pas une sixième tranche à ramener à 20 %.
 
 Les gains offensifs et défensifs doivent rester comparables. Attributs,
 maîtrises, équipement, passifs, Cœurs et augments apportent des gains modestes,
 avec des PV et dégâts ennemis recalibrés sur ce niveau de puissance.
+Les cinq sources de dégâts donnent des gains permanents visibles.
+Une spécialisation offensive conserve son avantage de dégâts. Les PV, les
+soins et le rendement du butin dépendent des points, équipements, maîtrises
+et passifs réellement choisis ; concentrer ses investissements en dégâts
+laisse une faible marge aux blessures et finance moins de rangs par coffre.
+Le premier monde demande très peu de répétitions ; le besoin de
+renforcement augmente vers la fin de campagne. Les premières salles doivent
+rester accessibles avec l'équipement attendu, avant les augments aléatoires.
 Une progression ordinaire doit garder plusieurs attaques par monstre intact,
 même en se spécialisant en dégâts. Les critiques et circonstances favorables
 peuvent exceptionnellement le tuer en une attaque. Un fort sur-farm peut
@@ -51,19 +74,46 @@ les salles 5, 10, 15 et 20 ; le dernier niveau de chaque monde se termine
 par son boss signature.
 
 Les formes des salles, obstacles, terrains, rencontres et variantes de monde
-sont définis dans leurs catalogues. La croissance des PV et des dégâts est
-composée. Les PV reçoivent un renfort après le premier chapitre pour suivre
-les premiers achats et passifs ; ce renfort plafonne progressivement, puis
-la croissance des PV ralentit après les premiers chapitres pour suivre les
-gains permanents plus espacés. Les dégâts suivent leur courbe distincte. Dans
+sont définis dans leurs catalogues. Les salles de campagne varient entre
+galeries étroites, salles allongées, murs arrondis, renfoncements et alcôves,
+sans dépasser la largeur de référence. Leur géométrie reste stable par étage
+et conserve l'accès à l'entrée, au portail et aux différentes alcôves.
+Leurs murs arrêtent les déplacements, les contacts et les tirs ordinaires.
+La croissance des PV et des dégâts est
+composée. Les PV reçoivent un renfort progressif après le premier chapitre ;
+sa transition évite une marche brutale au deuxième niveau, puis plafonne.
+La croissance des niveaux suivants laisse une place au renforcement tardif.
+Après le premier monde, les dégâts ajoutent un renfort progressif borné :
+la résistance demande un investissement sans faire exploser les dégâts tardifs.
+Les boss ont un renfort de niveau borné et leur propre croissance de PV par
+salle, pour garder des durées distinctes des monstres ordinaires. Dans
 une run, la hausse par salle conserve des paliers de difficulté en salles
 5, 10 et 15, indépendamment des offres d'augments. Elle est fixe : le build et les
 échecs du joueur ne la modifient pas.
 
+Les durées de boss prennent comme référence un build équilibré, amélioré
+pour le niveau affronté. Les cibles des boss ordinaires et des signatures
+sont définies dans `Reglages` et présentées dans la
+[liste mathématique](../../statistiques_jeu/liste_mathematique.md).
+Les signatures ont un coefficient d'endurance propre au monde en campagne.
+Les augments favorables aux dégâts rapprochent de la borne basse, les
+défavorables de la haute, avec des exceptions possibles. Une spécialisation
+offensive ou un fort sur-farm peut écourter le combat. Ce sont des repères
+d'équilibrage : aucun chronomètre ni ajustement des PV au héros ne les impose.
+
+Le contact physique avec tout monstre ou boss vivant inflige ses dégâts au
+héros, y compris pour les tireurs et hors d'une attaque annoncée. Les
+croisements rapides sont pris en compte ; les murs protègent du contact.
+Le délai entre contacts et l'invulnérabilité normale évitent les dégâts par
+image. Le corps reste dangereux quand il est gelé, après son apparition.
+
 Certaines salles ordinaires portent un effet propre au monde : flaques
 d'encre et d'eau ralentissantes, sables mouvants à ralentissement progressif,
-ou flaques de lave infligeant des dégâts périodiques. Les silhouettes et les
+ou flaques de lave infligeant des dégâts périodiques. Ces nappes sont larges
+et allongées pour rendre leur traversée sensible. Les silhouettes et les
 tailles varient ; le dessin est exactement la zone affectant le héros.
+Encre et eau réduisent fortement la vitesse ; le sable enfonce progressivement
+le héros et atteint rapidement son ralentissement maximal.
 Les effets commencent après le délai d'entrée et cessent à l'ouverture du
 portail. Le passage central, l'entrée et la sortie restent libres. Les
 terrains n'empêchent pas de tirer ; seuls les pieds du héros dans la flaque

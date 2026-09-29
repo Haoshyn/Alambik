@@ -51,7 +51,7 @@ static func _comparaisons(lignes: Array[String], rapport: Dictionary) -> void:
 			str(cas["etat_final"]["niveau"]), n(_maximum(cas["blocs"], "farm") / 60.0), n(_maximum(cas["blocs"], "avant_succes") / 60.0)])
 	Listes.tableau(lignes, ["Graine du compte équilibré", "Chapitres", "Niveau final", "Farm maximum, min", "Farm + échecs maximum, min"], comptes)
 	var strict: Dictionary = rapport["seuil_90"]["premier_mur"]
-	lignes.append("Avec un seuil de boss abaissé de %s à 90 secondes, le compte de référence sans farm rencontre ce critère dès le chapitre %s. Le choix du seuil change donc le diagnostic ; aucune formule ne garantit une réussite en deux essais." % [n(Parcours.BOSS_LIMITE, 0), str(strict.get("chapitre", "aucun"))])
+	lignes.append("Avec le seuil fixe de sensibilité à 90 secondes, plus permissif que les cibles de campagne, le compte de référence sans farm rencontre ce critère dès le chapitre %s. Le choix du seuil change le diagnostic ; aucune formule ne garantit une réussite en deux essais." % str(strict.get("chapitre", "aucun")))
 	lignes.append("")
 
 static func _chapitres(lignes: Array[String], cas: Dictionary) -> void:

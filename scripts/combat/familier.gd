@@ -73,13 +73,13 @@ func _commencer_deplacement() -> void:
 	for essai in CatalogueFamiliers.DIRECTIONS_PATROUILLE:
 		var direction := Vector2.from_angle(angle + essai * TAU / CatalogueFamiliers.DIRECTIONS_PATROUILLE)
 		var point := global_position + direction * CatalogueFamiliers.PAS_PATROUILLE
-		if _point_valide(point) and Geometrie.ligne_libre(global_position, point, _salle.obstacles(), CatalogueFamiliers.RAYON):
+		if _point_valide(point) and Geometrie.ligne_libre(global_position, point, _salle.obstacles(), CatalogueFamiliers.RAYON, _salle.contour_sol()):
 			_destination = point
 			break
 
 func _point_valide(point: Vector2) -> bool:
 	if not FormesSalles.contient_disque(point, _salle.contour_sol(), CatalogueFamiliers.RAYON): return false
-	return Geometrie.ligne_libre(point, point, _salle.obstacles(), CatalogueFamiliers.RAYON)
+	return Geometrie.ligne_libre(point, point, _salle.obstacles(), CatalogueFamiliers.RAYON, _salle.contour_sol())
 
 func _cible_proche() -> Node2D:
 	var resultat: Node2D

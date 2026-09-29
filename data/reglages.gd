@@ -18,6 +18,9 @@ const NIVEAU_REFERENCE_FIN := 30
 const XP_COMPTE_BASE := 10.0
 const XP_COMPTE_PENTE := 4.0
 const XP_COMPTE_QUADRATIQUE := 0.35
+# Objectifs d'effort verifies hors ligne sur les parcours economiques.
+const PROGRESSION_ECART_PLAFONDS := 0.20
+const PROGRESSION_ECART_HEROS_MAITRISES := 0.10
 
 # Bases lisibles du premier chapitre, avant equipement et maitrises.
 const HEROS_PV := 100.0
@@ -126,17 +129,30 @@ const SALLES_PAR_RUN := 20
 
 # Les ennemis suivent une courbe fixe ; les ressources annexes permettent
 # de prendre de l'avance sans adapter la difficulte au joueur.
-const CAMPAGNE_PV_PAR_CHAPITRE := 1.095
+const CAMPAGNE_PV_PAR_CHAPITRE := 1.08
 const CAMPAGNE_PV_CHAPITRES_INITIAUX := 7
-const CAMPAGNE_PV_PAR_CHAPITRE_TARDIF := 1.02
+const CAMPAGNE_PV_PAR_CHAPITRE_TARDIF := 1.11
+const CAMPAGNE_PV_BOSS_RENFORT_TARDIF := 1.10
+const CAMPAGNE_PV_BOSS_TRANSITION_TARDIVE := 0.93
+# Cibles du build equilibre ; elles ne bornent jamais un combat joue.
+const CAMPAGNE_BOSS_DUREE_NORMALE := Vector2(30.0, 45.0)
+const CAMPAGNE_BOSS_DUREE_SIGNATURE := Vector2(45.0, 60.0)
 const CAMPAGNE_PV_ACCELERATION := 1.0
-# Les premiers achats et passifs arrivent vite apres la premiere victoire.
-# Le renfort rejoint un plafond pour garder la fin accessible au build complet.
-const CAMPAGNE_PV_RENFORT_INITIAL := 2.3
-const CAMPAGNE_PV_TRANSITION := 0.45
+# Le renfort arrive progressivement : les premieres salles restent accessibles
+# sans augment. La croissance composee reporte le besoin de farm vers la fin.
+const CAMPAGNE_PV_RENFORT_INITIAL := 1.9
+const CAMPAGNE_PV_TRANSITION := 0.94
+const CAMPAGNE_PV_TRANSITION_EXPOSANT := 1.5
 const CAMPAGNE_DEGATS_PAR_CHAPITRE := 1.04
 const CAMPAGNE_DEGATS_ACCELERATION := 1.0002
-const CAMPAGNE_PV_PAR_SALLE := 1.045
+# Apres le premier monde, le socle seul ne suffit plus a encaisser longtemps.
+# Le renfort borne preserve une marge pour les comptes qui investissent en PV.
+const CAMPAGNE_DEGATS_RENFORT_TARDIF := 1.20
+const CAMPAGNE_DEGATS_TRANSITION_TARDIVE := 0.90
+# Les monstres ordinaires suivent la puissance des augments. Les boss gardent
+# leur propre rythme de PV pour eviter d'allonger tous leurs combats.
+const CAMPAGNE_PV_PAR_SALLE := 1.11
+const CAMPAGNE_PV_BOSS_PAR_SALLE := 1.045
 const CAMPAGNE_DEGATS_PAR_SALLE := 1.02
 # Les choix majeurs sont proposes avant le combat de ces salles.
 const CAMPAGNE_PV_PALIERS := {5: 1.10, 10: 1.50, 15: 1.20}
@@ -164,7 +180,7 @@ const EQUIPEMENT_CROISSANCE_PAR_PALIER := 1.008
 # Un court lot de victoires donne une amelioration certaine, meme sans chance.
 const EPREUVE_GARANTIE_CAPACITE := 2
 const EPREUVE_GARANTIE_COEUR := 3
-const COEUR_MANA_BONUS_FINAL := 0.02
+const COEUR_MANA_BONUS_FINAL := 0.18
 const EPREUVE_NIVEAU_DEBLOCAGE := 2
 const MINE_NIVEAU_DEBLOCAGE := 4
 
@@ -228,7 +244,7 @@ const MINE_PV_MULT := 0.75
 const MINE_DEGATS_MULT := 0.60
 const MINE_MONTEE_PV := 2.0
 const MINE_MONTEE_DEGATS := 1.0
-const MINE_BOSS_PV_MULT := 2.00
+const MINE_BOSS_PV_MULT := 12.0
 const MINE_BOSS_DEGATS_MULT := 0.80
 # Demande de soin soumise au budget de combat unique de cette rencontre.
 const MINE_CAMERA_ZOOM := 0.74

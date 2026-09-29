@@ -13,16 +13,21 @@ const AUDACE_BONUS := 0.10
 const RECUPERATION_PART := 0.01
 const BUTIN_BONUS := 0.05
 const EXPERIENCE_BONUS := 0.05
+const STAT_PAR_RANG := 0.30
+const CADENCE_PAR_RANG := 0.24
+const CRITIQUE_PAR_RANG := 0.12
+const PUISSANCE_INITIALE := 1.0 / 6.0
+const CHAMPS_PROGRESSIFS := ["attaque_mult", "pv_mult", "defense_mult", "cadence", "critique", "degats_critiques"]
 
 # Chaque valeur est celle du rang 1 ; le second exemplaire double le bonus.
 const CATALOGUE := {
-	"vigueur": {"nom": "Vigueur", "description": "Augmente l’attaque de 5 % par rang, après les maîtrises.", "categorie": "Offensif", "icone": "puissance", "bonus": {"attaque_mult": 0.05}},
-	"vitalite": {"nom": "Vitalité", "description": "Augmente les PV maximum de 5 % par rang, après les maîtrises.", "categorie": "Défensif", "icone": "robustesse", "bonus": {"pv_mult": 0.05}},
-	"carapace": {"nom": "Carapace", "description": "Augmente la défense de 5 % par rang.", "categorie": "Défensif", "icone": "rempart", "bonus": {"defense_mult": 0.05}},
-	"celerite": {"nom": "Célérité", "description": "Augmente la cadence de tir de 4 % par rang, après les maîtrises.", "categorie": "Offensif", "icone": "celerite", "bonus": {"cadence": 0.04}},
+	"vigueur": {"nom": "Vigueur", "description": "Attaque +%.0f à %.0f %% par rang selon le niveau du héros." % [STAT_PAR_RANG * PUISSANCE_INITIALE * 100.0, STAT_PAR_RANG * 100.0], "categorie": "Offensif", "icone": "puissance", "bonus": {"attaque_mult": STAT_PAR_RANG}},
+	"vitalite": {"nom": "Vitalité", "description": "PV maximum +%.0f à %.0f %% par rang selon le niveau du héros." % [STAT_PAR_RANG * PUISSANCE_INITIALE * 100.0, STAT_PAR_RANG * 100.0], "categorie": "Défensif", "icone": "robustesse", "bonus": {"pv_mult": STAT_PAR_RANG}},
+	"carapace": {"nom": "Carapace", "description": "Défense +%.0f à %.0f %% par rang selon le niveau du héros." % [STAT_PAR_RANG * PUISSANCE_INITIALE * 100.0, STAT_PAR_RANG * 100.0], "categorie": "Défensif", "icone": "rempart", "bonus": {"defense_mult": STAT_PAR_RANG}},
+	"celerite": {"nom": "Célérité", "description": "Cadence +%.0f à %.0f %% par rang selon le niveau du héros." % [CADENCE_PAR_RANG * PUISSANCE_INITIALE * 100.0, CADENCE_PAR_RANG * 100.0], "categorie": "Offensif", "icone": "celerite", "bonus": {"cadence": CADENCE_PAR_RANG}},
 	"pas_leger": {"nom": "Pas léger", "description": "Augmente la vitesse de déplacement de 5 % par rang.", "categorie": "Utilitaire", "icone": "elan", "bonus": {"vitesse": 0.05}},
-	"oeil_precis": {"nom": "Œil précis", "description": "Ajoute 2 points de chance critique par rang.", "categorie": "Offensif", "icone": "precision", "bonus": {"critique": 0.02}},
-	"impact_critique": {"nom": "Impact critique", "description": "Ajoute 5 points de dégâts critiques par rang.", "categorie": "Offensif", "icone": "frappe_lourde", "bonus": {"degats_critiques": 0.05}},
+	"oeil_precis": {"nom": "Œil précis", "description": "Chance critique +%.0f à %.0f points par rang selon le niveau du héros." % [CRITIQUE_PAR_RANG * PUISSANCE_INITIALE * 100.0, CRITIQUE_PAR_RANG * 100.0], "categorie": "Offensif", "icone": "precision", "bonus": {"critique": CRITIQUE_PAR_RANG}},
+	"impact_critique": {"nom": "Impact critique", "description": "Dégâts critiques +%.0f à %.0f points par rang selon le niveau du héros." % [STAT_PAR_RANG * PUISSANCE_INITIALE * 100.0, STAT_PAR_RANG * 100.0], "categorie": "Offensif", "icone": "frappe_lourde", "bonus": {"degats_critiques": STAT_PAR_RANG}},
 	"projectiles_vifs": {"nom": "Projectiles vifs", "description": "Augmente la vitesse et la portée des tirs de 8 % par rang.", "categorie": "Offensif", "icone": "trajectoire", "bonus": {"projectile": 0.08}},
 	"soins_renforces": {"nom": "Soins renforcés", "description": "Augmente les soins reçus de 5 % par rang.", "categorie": "Défensif", "icone": "regeneration", "bonus": {"soin": 0.05}},
 	"recuperation": {"nom": "Récupération", "description": "Rend 1 % des PV maximum à l’entrée d’une salle par rang.", "categorie": "Défensif", "icone": "regeneration"},
@@ -46,28 +51,29 @@ static func rang_max(_id: String = "") -> int:
 static func rang_passif(passifs: Dictionary, id: String) -> int:
 	return clampi(int(passifs.get(id, 0)), 0, RANG_MAX)
 
-static func bonus_stats(passifs: Dictionary) -> Dictionary:
+static func bonus_stats(passifs: Dictionary, niveau := Personnage.NIVEAU_MAX) -> Dictionary:
 	var resultat := {}
 	for id: String in passifs:
 		var bonus: Dictionary = donnees(id).get("bonus", {})
 		for cle: String in bonus:
-			resultat[cle] = float(resultat.get(cle, 0.0)) + float(bonus[cle]) * rang_passif(passifs, id)
+			var croissance := Personnage.facteur_progression(niveau, PUISSANCE_INITIALE) if cle in CHAMPS_PROGRESSIFS else 1.0
+			resultat[cle] = float(resultat.get(cle, 0.0)) + float(bonus[cle]) * rang_passif(passifs, id) * croissance
 	return resultat
 
-static func _bonus(passifs: Dictionary, cle: String) -> float:
-	return float(bonus_stats(passifs).get(cle, 0.0))
+static func _bonus(passifs: Dictionary, cle: String, niveau := Personnage.NIVEAU_MAX) -> float:
+	return float(bonus_stats(passifs, niveau).get(cle, 0.0))
 
 static func multiplicateur_vitesse(passifs: Dictionary) -> float:
 	return 1.0 + _bonus(passifs, "vitesse")
 
-static func multiplicateur_cadence(passifs: Dictionary) -> float:
-	return 1.0 + _bonus(passifs, "cadence")
+static func multiplicateur_cadence(passifs: Dictionary, niveau := Personnage.NIVEAU_MAX) -> float:
+	return 1.0 + _bonus(passifs, "cadence", niveau)
 
 static func multiplicateur_projectile(passifs: Dictionary) -> float:
 	return 1.0 + _bonus(passifs, "projectile")
 
-static func multiplicateur_pv(passifs: Dictionary) -> float:
-	return 1.0 + _bonus(passifs, "pv_mult")
+static func multiplicateur_pv(passifs: Dictionary, niveau := Personnage.NIVEAU_MAX) -> float:
+	return 1.0 + _bonus(passifs, "pv_mult", niveau)
 
 static func soin_par_salle(passifs: Dictionary) -> float:
 	return RECUPERATION_PART * rang_passif(passifs, "recuperation")
@@ -103,13 +109,13 @@ static func nombre_debloques(rangs: Dictionary, tout_debloque := false) -> int:
 static func _pourcentage(valeur: float) -> String:
 	return String.num(valeur * 100.0, 1).trim_suffix(".0").replace(".", ",")
 
-static func resume_rang(id: String, rang: int) -> String:
+static func resume_rang(id: String, rang: int, niveau_heros := Personnage.NIVEAU_MAX) -> String:
 	var niveau := clampi(rang, 1, RANG_MAX)
 	var equipe := {id: niveau}
-	var bonus: Dictionary = donnees(id).get("bonus", {})
+	var bonus := bonus_stats(equipe, niveau_heros)
 	var libelles := {"attaque_mult": "attaque", "pv_mult": "PV maximum", "defense_mult": "défense", "cadence": "cadence", "vitesse": "vitesse", "projectile": "vitesse et portée des tirs", "soin": "soins reçus"}
 	for cle: String in bonus:
-		var valeur := _pourcentage(float(bonus[cle]) * niveau)
+		var valeur := _pourcentage(float(bonus[cle]))
 		if cle == "critique": return "+%s points de chance critique" % valeur
 		if cle == "degats_critiques": return "+%s points de dégâts critiques" % valeur
 		return "+%s %% %s" % [valeur, str(libelles.get(cle, cle))]

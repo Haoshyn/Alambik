@@ -2,7 +2,7 @@ class_name Visuels3D
 extends RefCounted
 
 # Profil de rendu uniquement : aucune statistique de combat.
-const HEROS_MODELE := "res://assets/3d/characters/mage_sculpte.glb"
+const HEROS_MODELE := "res://scenes/3d/aster.tscn"
 
 const HEROS_CADENCE_COURSE := 1.0
 const HEROS_TRANSITION_MOUVEMENT := 0.18
@@ -19,8 +19,8 @@ const HEROS_SEUIL_TELEPORTATION := 160.0
 const HEROS_LISSAGE_ORIENTATION := 14.0
 const HEROS_INCLINAISON_VIRAGE := 0.075
 const HEROS_OS_HAUT := [
-	"torse", "tete", "chapeau", "bras_droite", "avant_bras_droite", "main_droite",
-	"bras_gauche", "avant_bras_gauche", "main_gauche",
+	"Spine", "Chest", "UpperChest", "Neck", "Head", "Clavicle.R", "Clavicle.L",
+	"UpperArm.R", "Forearm.R", "Hand.R", "UpperArm.L", "Forearm.L", "Hand.L",
 ]
 const OMBRES_ANDROID := false
 const PARTICULES_MAX := 160

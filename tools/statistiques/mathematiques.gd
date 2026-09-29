@@ -10,6 +10,9 @@ const Simulation = preload("res://tools/statistiques/simulation_augments.gd")
 const Soins = preload("res://data/progression/soins_run.gd")
 const RetourCampagne = preload("res://tools/statistiques/retour_campagne.gd")
 const EquilibrageProgression = preload("res://tools/statistiques/equilibrage_progression.gd")
+const RythmeProgression = preload("res://tools/statistiques/rythme_progression.gd")
+const MaturationProgression = preload("res://tools/statistiques/maturation_progression.gd")
+const RythmeBoss = preload("res://tools/statistiques/rythme_boss.gd")
 
 static func n(valeur: float, decimales := 2) -> String:
 	return Listes.nombre(valeur, decimales)
@@ -22,6 +25,9 @@ static func generer() -> String:
 	_terrains(lignes)
 	_retour_campagne(lignes)
 	_equilibrage_progression(lignes)
+	_rythme_progression(lignes)
+	_rythme_boss(lignes)
+	_maturation_progression(lignes)
 	SyntheseProgression.ajouter(lignes)
 	lignes.append_array(["## Les formules, en détail", "",
 		"Les calculs suivants expliquent la fiche. Un **DPS** est une moyenne de dégâts par seconde, avec des tirs continus qui touchent. Les déplacements, obstacles, ratés et phases invulnérables réduisent le résultat réel. Les rebonds ne sont pas des dégâts gratuits sur la même cible.", "",
@@ -169,18 +175,20 @@ static func _heros(lignes: Array[String]) -> void:
 	lignes.append_array(["### Bases du héros et attributs", "",
 		"Au niveau 1 : %s PV ; %s Défense ; %s attaque ; %s tirs/s. Chaque niveau ajoute %s %% des PV initiaux et %s %% de l’attaque initiale, en plus des points à répartir. Au niveau maximal, le socle seul vaut %s PV et %s attaque." % [n(Reglages.HEROS_PV), n(Reglages.HEROS_DEFENSE), n(Reglages.TIR_DEGATS), n(Reglages.HEROS_CADENCE), n(Reglages.NIVEAU_PV_PAR_NIVEAU * 100.0), n(Reglages.NIVEAU_DEGATS_PAR_NIVEAU * 100.0), n(Stats.base_pv(Personnage.NIVEAU_MAX)), n(Stats.base_degats(Personnage.NIVEAU_MAX))],
 		"Chaque niveau après le premier donne %d points, jusqu’au niveau %d : %d points au total." % [Personnage.POINTS_PAR_NIVEAU, Personnage.NIVEAU_MAX, Personnage.points_totaux(Personnage.NIVEAU_MAX)]])
+	lignes.append("Pour un attribut offensif recevant p points : poids effectif = 2 × %s × p / (%s + p). Son bonus vaut coefficient du catalogue × poids effectif × croissance du héros. La Vitalité et la Sagesse conservent leur calcul linéaire." % [n(Personnage.POINTS_RENDEMENT), n(Personnage.POINTS_RENDEMENT)])
+	lignes.append("Avec t = (niveau − 1) / (%d − 1), la croissance des attributs offensifs vaut %s + (1 − %s) × t² ; celle des statistiques de passifs vaut %s + (1 − %s) × t². Les bonus de rang restent proportionnels au rang acquis ; les pouvoirs conditionnels et utilitaires des passifs conservent leurs règles." % [Personnage.NIVEAU_MAX, n(Personnage.PUISSANCE_INITIALE), n(Personnage.PUISSANCE_INITIALE), n(Passifs.PUISSANCE_INITIALE, 4), n(Passifs.PUISSANCE_INITIALE, 4)])
 	var attributs: Array = []
 	for id: String in Personnage.ATTRIBUTS:
 		var d: Dictionary = Personnage.ATTRIBUTS[id]
 		attributs.append([str(d["nom"]), str(d["description"])])
-	Listes.tableau(lignes, ["Attribut", "Effet par point"], attributs)
+	Listes.tableau(lignes, ["Attribut", "Effet des points"], attributs)
 
 static func _retour_campagne(lignes: Array[String]) -> void:
 	var rapport := RetourCampagne.rapport()
 	lignes.append_array(["## Retour offensif après les premières Épreuves", "",
 		"%d comptes avec graines fixes : échec imposé en salle 9 du chapitre 1, puis victoire au même chapitre, suivie de zéro, cinq ou six victoires dans l’Épreuve 1. Ces victoires sont les hypothèses du scénario demandé ; aucun taux de réussite humain n’est déduit." % int(rapport["nombre"]), "",
 		"Tous les points d’attribut vont en Force. Les achats maximisent le gain de DPS par coût, avec les seules ressources effectivement reçues ; l’équipement privilégie le DPS. Le compte repart sans augment à chaque tentative. Les offres d’augments suivent la politique tout offensive (%s %% dégâts, %s %% résistance), avec une seule légendaire garantie. Une offre sans gain offensif peut donner une défense incidente." % [n(float(Simulation.POLITIQUES["tout_offensif"]["poids_dps"]) * 100.0), n(float(Simulation.POLITIQUES["tout_offensif"]["poids_ehp"]) * 100.0)], "",
-		"Le build offensif doit gagner du temps de combat sans banaliser les éliminations en une attaque. Les gains permanents, les augments, les PV et les dégâts ennemis ont été réduits ensemble. Aucun nombre minimum de coups ni ajustement au build ne s'applique en jeu.", "",
+		"Le build offensif doit gagner du temps de combat sans banaliser les éliminations en une attaque. Les courbes fixes des ennemis sont recalibrées avec la puissance permanente et les augments. Aucun nombre minimum de coups ni ajustement au build ne s'applique en jeu.", "",
 		"Les chapitres du tableau sont testés séparément avec le même compte après le farm, sans ajouter les récompenses des chapitres intermédiaires. Les résultats sont des médianes. Le taux d’élimination concerne les formes ordinaires des monstres prévus par les vagues, sans transformation en élite, sans critique, sans rebond ni dégâts gratuits du familier.", "",
 		"Un projectile désigne un seul impact. Une attaque complète additionne les salves et projectiles frontaux qui touchent la même cible. Le temps du boss inclut le familier et les critiques moyens, à %s %% du DPS théorique ; il reste une estimation de débit." % n(RetourCampagne.Parcours.TIR_UTILE_BOSS * 100.0), ""])
 	var lignes_cas: Array = []
@@ -245,20 +253,112 @@ static func _equilibrage_progression(lignes: Array[String]) -> void:
 	Listes.tableau(lignes, ["Choix offensif", "DPS héros", "Choix défensif", "PV effectifs"], paires)
 	lignes.append_array(["Égide et Peau de pierre ensemble : **×%s PV effectifs**, en consommant un choix légendaire et un choix épique. Les deux effets ne donnent pas de DPS." % n(float(augment["deux_defenses"]["survie"])), ""])
 
+static func _rythme_progression(lignes: Array[String]) -> void:
+	var rapport := RythmeProgression.rapport()
+	var profil: Dictionary = rapport["profil"]
+	lignes.append_array(["## Entrée des niveaux et rendement des achats", "",
+		"Le cas de départ reprend un héros niveau 4, Baguette d’acier forge 1 et Force maîtrisée rang 6. Ses points d’attribut restent non dépensés ; il n’a ni bijou, passif, Cœur ni augment. Les attaques sont normales, sans critique ni contribution du familier. Les quatre premières salles sont aussi mesurées sans aucun augment pour vérifier leur accessibilité indépendamment du hasard.", ""])
+	var especes: Array = []
+	for id: String in profil["especes"]:
+		var espece: Dictionary = profil["especes"][id]
+		especes.append([str(CatalogueEnnemis.par_id(id)["nom"]), n(float(espece["pv"])), n(float(profil["attaque"])), int(espece["attaques"])])
+	Listes.tableau(lignes, ["Monstre du niveau 2, salle 1", "PV", "Dégâts par attaque", "Attaques nécessaires"], especes)
+	var achats: Array = []
+	for achat: Dictionary in rapport["achats"]:
+		achats.append([str(achat["nom"]), int(achat["prix"]), n(float(achat["tir"])), "+%s %%" % n(float(achat["gain_tir"]) * 100.0), "+%s %%" % n(float(achat["gain_dps"]) * 100.0)])
+	Listes.tableau(lignes, ["Achat depuis ce profil", "Coût dans sa monnaie", "Dégâts par tir", "Gain par tir", "Gain de DPS total"], achats)
+	lignes.append_array(["Le coût d’une arme est payé en Pierres, celui d’une maîtrise en Gouttes. Les autres statistiques et l’équipement restent identiques pendant ces comparaisons.", "",
+		"### Campagne seule avec quelques reprises", "",
+		"%d comptes équilibrés avec les mêmes graines de référence. Le premier monde ne contient aucune reprise ajoutée. Le scénario reprend ensuite des niveaux déjà terminés : %s. Ce calendrier est une hypothèse de mesure, jamais une obligation ni un nombre d’essais prédit pour le joueur." % [int(rapport["nombre"]), _calendrier_reprises()], "",
+		"Les victoires sont supposées pour isoler l’économie ; les butins, possessions, coûts et achats sont réels. Pendant une reprise destinée aux dégâts, les achats et augments privilégient l’attaque ; les attributs déjà répartis restent identiques. Les premières salles sont mesurées sans augment, les durées de boss utilisent ensuite les vrais tirages de run et les mêmes hypothèses de tir utile que les autres simulations.", ""])
+	var entrees: Array = []
+	for chapitre: int in [2, 7, 14, 21, 28, 35]:
+		var entree: Dictionary = rapport["entrees"][chapitre]
+		entrees.append([chapitre, n(float(entree["attaques"]["mediane"]), 1), n(float(entree["attaques"]["p90"]), 1), n(float(entree["dps"]["mediane"])), n(float(entree["boss"]["mediane"]), 1)])
+	Listes.tableau(lignes, ["Niveau", "Attaques d’entrée sans augment", "P90", "DPS permanent", "Boss final, s"], entrees)
+	lignes.append_array(["Ce stress n’effectue aucune Mine ni Épreuve : il ne reçoit aucun passif ni Cœur, et manque de budget de forge. Il montre le retard accumulé si ces sources sont omises ; ses victoires supposées ne signifient pas que ce compte peut terminer la campagne.", "",
+		"### Entrées après renforcement réellement financé", "",
+		"Les trois comptes du parcours conditionnel reçoivent uniquement les coffres des salles validées, puis financent les activités et achats choisis aux murs. Le tableau prend leur état avant la tentative victorieuse. Les quatre premières salles restent mesurées sans augment. Le temps par monstre tient compte de la cadence, des critiques et du familier, à la même activité de tir que les autres modèles ; les attaques normales les excluent.", ""])
+	var renforcees: Array = []
+	for chapitre: int in rapport["entrees_renforcees"]:
+		var entree: Dictionary = rapport["entrees_renforcees"][chapitre]
+		renforcees.append([chapitre, n(float(entree["attaques"]["mediane"]), 1), n(float(entree["secondes"]["mediane"]), 1), n(float(entree["dps"]["mediane"])), n(float(entree["boss"]["mediane"]), 1)])
+	Listes.tableau(lignes, ["Niveau", "Attaques normales à l’entrée", "Temps par monstre, s", "DPS permanent", "Boss final, s"], renforcees)
+	var farms: Array = []
+	for chapitre: int in rapport["farm"]:
+		var farm: Dictionary = rapport["farm"][chapitre]
+		farms.append([chapitre, int(RythmeProgression.REPRISES[chapitre - 1]), "+%s %%" % n(float(farm["gain_dps"]["mediane"]) * 100.0), "%s %%" % n(float(farm["gain_survie"]["mediane"]) * 100.0)])
+	Listes.tableau(lignes, ["Niveau rejoué", "Reprises", "Gain médian de DPS permanent", "Variation de PV effectifs"], farms)
+	lignes.append_array(["Ces gains comparent le compte juste avant et juste après les reprises, sans augment. Ils incluent uniquement les achats financés et le butin effectivement reçu. Une amélioration déjà acquise profite aussi aux anciennes armes et maîtrises sauvegardées. Le ressenti et le nombre de répétitions souhaitable restent à vérifier sur téléphone.", ""])
+
+static func _rythme_boss(lignes: Array[String]) -> void:
+	var rapport := RythmeBoss.rapport()
+	var normale := Reglages.CAMPAGNE_BOSS_DUREE_NORMALE
+	var signature := Reglages.CAMPAGNE_BOSS_DUREE_SIGNATURE
+	lignes.append_array(["## Durée des boss avec un build équilibré", "",
+		"**Cibles approximatives au niveau attendu : %s–%s secondes pour un boss ordinaire, %s–%s secondes pour le boss de fin de monde.** Des augments favorables aux dégâts rapprochent du bas, des tirages défavorables rapprochent du haut. Le full offensif et le sur-farm peuvent aller plus vite ; un compte sous-équipé peut dépasser ces repères." % [n(normale.x, 0), n(normale.y, 0), n(signature.x, 0), n(signature.y, 0)], "",
+		"Les PV sont fixes. Aucun chronomètre, plafond de dégâts ou ajustement au héros ne force un combat dans ces intervalles. Les critères de confort du parcours utilisent leur borne haute pour mesurer le renforcement nécessaire ; ce sont des règles du modèle hors jeu.", "",
+		"Pour chaque fin de monde, %d comptes ont réellement payé leur équipement et leurs améliorations avec les coffres du parcours conditionnel. Leur configuration précédant la première victoire est rejouée sur %d autres tirages équilibrés, sans filtrer les échecs et sans légendaire bonus. Les quatre boss sont mesurés, avec les augments disponibles avant leur salle." % [int(rapport["comptes"]), int(rapport["tirages"])], "",
+		"Le temps estimé = PV du boss / (DPS × %s %% de tir utile), familier et critiques moyens inclus. Il exclut annonces et menus. P25 et P75 décrivent des tirages assez favorables ou défavorables aux dégâts ; P10–P90 montre une dispersion plus large. Ces quantiles ne sont pas des durées garanties, ni une mesure en partie." % n(RythmeBoss.Parcours.TIR_UTILE_BOSS * 100.0, 0), ""])
+	var donnees: Array = []
+	for cas: Dictionary in rapport["cas"]:
+		var chapitre := int(cas["chapitre"]) - 1
+		for salle: Dictionary in cas["salles"]:
+			var duree: Dictionary = salle["duree"]
+			donnees.append([Chapitres.libelle_court(chapitre), int(salle["salle"]), "Fin de monde" if bool(salle["signature"]) else "Ordinaire",
+				"%s–%s" % [n(float(salle["cible_min"]), 0), n(float(salle["cible_max"]), 0)], n(float(duree["p25"]), 1),
+				n(float(duree["mediane"]), 1), n(float(duree["p75"]), 1), "%s–%s" % [n(float(duree["p10"]), 1), n(float(duree["p90"]), 1)]])
+	Listes.tableau(lignes, ["Niveau", "Salle", "Boss", "Cible, s", "P25, s", "Médiane, s", "P75, s", "P10–P90, s"], donnees)
+	lignes.append("")
+
+static func _calendrier_reprises() -> String:
+	var etapes: Array[String] = []
+	for chapitre: int in RythmeProgression.REPRISES:
+		etapes.append("%d reprise(s) du niveau %d" % [int(RythmeProgression.REPRISES[chapitre]), chapitre + 1])
+	return ", ".join(etapes)
+
+static func _maturation_progression(lignes: Array[String]) -> void:
+	var rapport := MaturationProgression.rapport()
+	var couts: Dictionary = rapport["couts"]
+	lignes.append_array(["## Effort pour atteindre les cinq plafonds", "",
+		"La cible porte aussi sur le temps de progression : les cinq plafonds doivent rester dans une même période, avec au plus %s %% d’écart de temps total dans les parcours de référence. Le niveau maximum du héros doit rester à moins de %s %% du temps nécessaire aux dernières maîtrises. Ces marges contrôlent un modèle de progression ; elles ne garantissent pas le temps d’un joueur." % [n(Reglages.PROGRESSION_ECART_PLAFONDS * 100.0, 0), n(Reglages.PROGRESSION_ECART_HEROS_MAITRISES * 100.0, 0)], "",
+		"Chaque compte part de zéro, paie tous ses achats et conserve les anciennes forges. Le scénario comprend l’échec initial en salle 9, puis les %d chapitres. Campagne prioritaire réserve les annexes à la fin ; Mixte ajoute une Mine et une Épreuve tous les trois chapitres quand elles sont accessibles. Les victoires sont supposées pour comparer l’économie, avec les vrais tirages, garanties, bonus économiques et durées de combat du modèle." % Chapitres.nombre(), "",
+		"Ensuite, chaque cycle peut contenir deux replays du dernier chapitre, une Mine et trois Épreuves. Une activité n’est répétée que si sa progression manque encore : continuer à récolter une monnaie après avoir tout acheté fausserait la comparaison. Ce calendrier est une hypothèse de farm, pas une obligation de jeu.", "",
+		"Le maximum signifie : niveau %d et tous ses points, les cinq emplacements équipés forge %d, les trois arbres complets, les %d passifs rang %d et leurs statistiques arrivées à maturité, puis les %d Cœurs. Forger toute la collection d’armes et de bijoux dépasse ce build complet et reste un objectif supplémentaire." % [Personnage.NIVEAU_MAX, Reglages.FORGE_NIVEAU_MAX, Passifs.CATALOGUE.size(), Passifs.RANG_MAX, Epreuves.nombre()], "",
+		"Les étapes 50 et 75 % comptent le budget d’XP consommé, le coût courant des rangs possédés en forge et maîtrises, ou les acquisitions pour passifs et Cœurs. Ce ne sont pas des pourcentages de DPS. Les statistiques des passifs continuent de croître avec le héros, même après l’obtention des cartes.", "",
+		"Budgets complets avant bonus de récompense : %d XP, %d Gouttes, %d Pierres pour cinq objets, %d acquisitions de passifs et %d Cœurs. Les Pierres investies dans les anciens objets ne sont jamais transférées ni remboursées par le scénario." % [int(couts["xp"]), int(couts["gouttes"]), int(couts["pierres"]), int(couts["rangs_passifs"]), int(couts["coeurs"])], ""])
+	var noms := {"attributs": "Héros / attributs", "equipement": "Équipement actif", "maitrises": "Trois arbres de maîtrises", "passifs": "Passifs complets", "coeurs": "Cœurs de mana"}
+	for strategie: String in MaturationProgression.STRATEGIES:
+		var titre := "Campagne prioritaire" if strategie == "campagne" else "Mixte"
+		lignes.append_array(["### " + titre, "",
+			"Médianes de %d comptes ; temps cumulé depuis le compte neuf, en heures. Tir utile, choix et transitions suivent les mêmes hypothèses que les autres parcours." % int(rapport["nombre"]), ""])
+		var tableau: Array = []
+		for famille: String in MaturationProgression.FAMILLES:
+			var etapes: Dictionary = rapport["strategies"][strategie][famille]
+			var ligne: Array = [str(noms[famille])]
+			for seuil: String in ["50", "75", "100"]:
+				var distribution: Dictionary = etapes[seuil]
+				ligne.append(n(float(distribution["mediane"]) / 3600.0)
+					if int(distribution["mesures"]) == int(rapport["nombre"]) else "Non atteint")
+			tableau.append(ligne)
+		Listes.tableau(lignes, ["Famille", "50 %", "75 %", "Maximum"], tableau)
+	lignes.append_array(["Le ressenti des premiers niveaux, la rentabilité du farm tardif et ces durées restent à confirmer sur téléphone. Un joueur privilégiant exclusivement un mode fera avancer les sources correspondantes plus vite ; les plafonds ne sont jamais verrouillés entre eux.", ""])
+
 static func _ennemis(lignes: Array[String]) -> void:
 	var salles := Reglages.SALLES_PAR_RUN
 	lignes.append_array(["## Croissance des monstres", "",
 		"Le niveau global va de 1 à %d : %d mondes × %d niveaux. Chaque tentative de campagne comporte %d salles." % [Chapitres.nombre(), Chapitres.MONDES.size(), Chapitres.CHAPITRES_PAR_MONDE, salles],
-		"", "Avec p = niveau global − 1 et a = min(p, %d) : **facteur PV de niveau = %s^a × %s^(a × (a − 1) / 2) × %s^(p − a) × [1 + %s × (1 − %s^p)]**." % [Reglages.CAMPAGNE_PV_CHAPITRES_INITIAUX, n(Reglages.CAMPAGNE_PV_PAR_CHAPITRE, 4), n(Reglages.CAMPAGNE_PV_ACCELERATION, 4), n(Reglages.CAMPAGNE_PV_PAR_CHAPITRE_TARDIF, 4), n(Reglages.CAMPAGNE_PV_RENFORT_INITIAL), n(Reglages.CAMPAGNE_PV_TRANSITION)],
-		"**Facteur dégâts de niveau = %s^p × %s^(p × (p − 1) / 2)**. Les non-boss appliquent aussi le coefficient global %s." % [n(Reglages.CAMPAGNE_DEGATS_PAR_CHAPITRE, 4), n(Reglages.CAMPAGNE_DEGATS_ACCELERATION, 4), n(Reglages.ENNEMI_DEGATS_MULT)], "",
-		"Le premier chapitre reste à ×1. Le renfort initial suit les premiers achats et passifs, puis tend vers ×%s. La croissance des PV ralentit après le chapitre %d pour suivre les rangs de progression plus espacés. Les dégâts gardent leur courbe distincte. Un changement de monde n’ajoute pas une seconde hausse cachée." % [n(1.0 + Reglages.CAMPAGNE_PV_RENFORT_INITIAL), Reglages.CAMPAGNE_PV_CHAPITRES_INITIAUX + 1],
+		"", "Avec p = niveau global − 1 et a = min(p, %d) : **facteur PV de niveau = %s^a × %s^(a × (a − 1) / 2) × %s^(p − a) × [1 + %s × (1 − %s^(p^%s))]**." % [Reglages.CAMPAGNE_PV_CHAPITRES_INITIAUX, n(Reglages.CAMPAGNE_PV_PAR_CHAPITRE, 4), n(Reglages.CAMPAGNE_PV_ACCELERATION, 4), n(Reglages.CAMPAGNE_PV_PAR_CHAPITRE_TARDIF, 4), n(Reglages.CAMPAGNE_PV_RENFORT_INITIAL), n(Reglages.CAMPAGNE_PV_TRANSITION), n(Reglages.CAMPAGNE_PV_TRANSITION_EXPOSANT)],
+		"Avec b = max(p − %d, 0), **facteur dégâts de niveau = %s^p × %s^(p × (p − 1) / 2) × [1 + %s × (1 − %s^b)]**. Les non-boss appliquent aussi le coefficient global %s." % [Reglages.CAMPAGNE_PV_CHAPITRES_INITIAUX, n(Reglages.CAMPAGNE_DEGATS_PAR_CHAPITRE, 4), n(Reglages.CAMPAGNE_DEGATS_ACCELERATION, 4), n(Reglages.CAMPAGNE_DEGATS_RENFORT_TARDIF), n(Reglages.CAMPAGNE_DEGATS_TRANSITION_TARDIVE), n(Reglages.ENNEMI_DEGATS_MULT)], "",
+		"Le premier chapitre reste à ×1. Le renfort arrive progressivement, puis tend vers ×%s. La croissance composée des niveaux suivants laisse davantage de place au renforcement vers la fin de campagne. Les dégâts gardent leur courbe distincte. Un changement de monde n’ajoute pas une seconde hausse cachée." % n(1.0 + Reglages.CAMPAGNE_PV_RENFORT_INITIAL),
 		"", "Dans une tentative : facteur PV = %s^(salle − 1) × produit des paliers franchis ; facteur dégâts = %s^(salle − 1) × produit de leurs paliers. Les deux commencent à ×1." % [n(Reglages.CAMPAGNE_PV_PAR_SALLE, 4), n(Reglages.CAMPAGNE_DEGATS_PAR_SALLE, 4)],
 		"Entre deux salles : +%s %% de PV et +%s %% de dégâts, avec les hausses supplémentaires du tableau. Ces paliers s’appliquent à l’entrée des salles indiquées et ne donnent aucun choix d’augment supplémentaire." % [n((Reglages.CAMPAGNE_PV_PAR_SALLE - 1.0) * 100.0), n((Reglages.CAMPAGNE_DEGATS_PAR_SALLE - 1.0) * 100.0)],
+		"Les boss de campagne ajoutent un renfort de niveau [1 + %s × (1 − %s^b)], puis leur propre croissance de PV par salle : %s^(salle − 1), avec les mêmes paliers. Ils conservent ainsi des durées de combat distinctes de l’endurance des monstres ordinaires. Le renfort de dégâts après le premier monde rend les investissements en résistance utiles ; il tend vers ×%s sans s’emballer." % [n(Reglages.CAMPAGNE_PV_BOSS_RENFORT_TARDIF), n(Reglages.CAMPAGNE_PV_BOSS_TRANSITION_TARDIVE), n(Reglages.CAMPAGNE_PV_BOSS_PAR_SALLE, 4), n(1.0 + Reglages.CAMPAGNE_DEGATS_RENFORT_TARDIF)],
 		"", "Les facteurs sont bornés à la dernière campagne. Ils ne lisent jamais les achats, les morts ni le build du joueur.", "", "### Facteurs par niveau, avant la salle", ""])
 	var niveaux: Array = []
 	for chapitre in Chapitres.nombre():
-		niveaux.append([Chapitres.libelle_court(chapitre), "×" + n(ProgressionStatistiques.facteur_pv(chapitre)), "×" + n(ProgressionStatistiques.facteur_degats(chapitre))])
-	Listes.tableau(lignes, ["Niveau", "PV", "Dégâts"], niveaux)
+		niveaux.append([Chapitres.libelle_court(chapitre), "×" + n(ProgressionStatistiques.facteur_pv(chapitre)), "×" + n(ProgressionStatistiques.facteur_pv(chapitre) * ProgressionStatistiques.facteur_boss(chapitre)), "×" + n(ProgressionStatistiques.facteur_degats(chapitre))])
+	Listes.tableau(lignes, ["Niveau", "PV ordinaires", "PV boss", "Dégâts"], niveaux)
 	var paliers: Array = []
 	for salle: int in Reglages.CAMPAGNE_PV_PALIERS:
 		paliers.append([salle, "×" + n(float(Reglages.CAMPAGNE_PV_PALIERS[salle])), "×" + n(float(Reglages.CAMPAGNE_DEGATS_PALIERS[salle]))])
@@ -266,14 +366,22 @@ static func _ennemis(lignes: Array[String]) -> void:
 	lignes.append_array(["### Facteurs par salle, à multiplier par ceux du niveau", ""])
 	var facteurs_salles: Array = []
 	for salle in range(1, salles + 1):
-		facteurs_salles.append([salle, "×" + n(Chapitres.facteur_pv(0, salle), 3), "×" + n(Chapitres.facteur_degats(0, salle), 3)])
-	Listes.tableau(lignes, ["Salle", "PV", "Dégâts"], facteurs_salles)
+		facteurs_salles.append([salle, "×" + n(Chapitres.facteur_pv(0, salle), 3), "×" + n(Chapitres.facteur_pv(0, salle, true), 3), "×" + n(Chapitres.facteur_degats(0, salle), 3)])
+	Listes.tableau(lignes, ["Salle", "PV ordinaires", "PV boss", "Dégâts"], facteurs_salles)
 	lignes.append_array(["### Élites, boss et modes annexes", "",
-		"- **Élite** : PV ×%s ; dégâts ×%s. **Miniboss** : PV ×%s ; dégâts ×%s. **Boss signature** : PV ×%s ; dégâts ×%s." % [n(RangsEnnemis.ELITE_PV), n(RangsEnnemis.ELITE_DEGATS), n(Reglages.MINIBOSS_PV_MULT * Reglages.BOSS_ENDURANCE_MULT), n(Reglages.MINIBOSS_DEGATS_MULT), n(Reglages.BOSS_SIGNATURE_PV_MULT * Reglages.BOSS_ENDURANCE_MULT), n(Reglages.BOSS_SIGNATURE_DEGATS_MULT)],
+		"- **Élite** : PV ×%s ; dégâts ×%s. **Miniboss** : PV ×%s ; dégâts ×%s. **Boss signature** : PV ×%s avant coefficient propre au monde ; dégâts ×%s." % [n(RangsEnnemis.ELITE_PV), n(RangsEnnemis.ELITE_DEGATS), n(Reglages.MINIBOSS_PV_MULT * Reglages.BOSS_ENDURANCE_MULT), n(Reglages.MINIBOSS_DEGATS_MULT), n(Reglages.BOSS_SIGNATURE_PV_MULT * Reglages.BOSS_ENDURANCE_MULT), n(Reglages.BOSS_SIGNATURE_DEGATS_MULT)],
 		"- **Épreuve** : même facteur de niveau, PV ×%s × (1 + %s)^t, dégâts ×%s × (1 + %s)^t. t va de 0 à 1 pendant les rencontres." % [n(Reglages.DEFI_PV_BASE), n(Reglages.DEFI_MONTEE_PV), n(Reglages.DEFI_DEGATS_BASE), n(Reglages.DEFI_MONTEE_DEGATS)],
 		"- **Mine** : même facteur de niveau, PV ×%s × (1 + %s)^t, dégâts ×%s × (1 + %s)^t, t = temps / %s s borné entre 0 et 1." % [n(Reglages.MINE_PV_MULT), n(Reglages.MINE_MONTEE_PV), n(Reglages.MINE_DEGATS_MULT), n(Reglages.MINE_MONTEE_DEGATS), n(Reglages.MINE_DUREE)],
 		"- **Boss de Mine** : facteur supplémentaire PV ×%s et dégâts ×%s. En Mine et Épreuve, tous les boss appliquent aussi ×%s PV ; pas les coefficients de rang de la campagne." % [n(Reglages.MINE_BOSS_PV_MULT), n(Reglages.MINE_BOSS_DEGATS_MULT), n(EvolutionEnnemis.ANNEXE_PV_BOSS * Reglages.BOSS_ENDURANCE_MULT)], "",
 		"Les évolutions de comportement accélèrent certains tirs/déplacements et ajoutent des salves à leurs seuils ; elles n’ajoutent pas une autre croissance des PV.", ""])
+	var signatures: Array = []
+	for monde in Chapitres.MONDES.size():
+		var chapitre := (monde + 1) * Chapitres.CHAPITRES_PAR_MONDE - 1
+		var id := str(Chapitres.MONDES[monde]["boss_signature"])
+		signatures.append([str(Chapitres.MONDES[monde]["nom"]), str(CatalogueEnnemis.par_id(id)["nom"]),
+			"×" + n(float(Chapitres.MONDES[monde]["pv_signature_mult"])), "×" + n(Chapitres.facteur_boss_signature(chapitre) * Reglages.BOSS_ENDURANCE_MULT)])
+	Listes.tableau(lignes, ["Monde", "Boss signature", "Coefficient propre de PV en campagne", "Facteur de rang final, hors niveau et salle"], signatures)
+	lignes.append("")
 
 static func _sources(lignes: Array[String]) -> void:
 	lignes.append_array(["## Progression d’un équipement de fin de campagne", "",
@@ -344,7 +452,7 @@ static func _comparer_farm(lignes: Array[String]) -> void:
 	var fragile: Dictionary = CatalogueEnnemis.par_id("encrier_rampant")
 	var facteur_pv := Chapitres.facteur_pv(chapitre, salle)
 	var facteur_degats := Chapitres.facteur_degats(chapitre, salle)
-	var boss_pv := float(boss["pv"]) * facteur_pv * Reglages.BOSS_SIGNATURE_PV_MULT * Reglages.BOSS_ENDURANCE_MULT
+	var boss_pv := float(boss["pv"]) * Chapitres.facteur_pv(chapitre, salle, true) * Chapitres.facteur_boss_signature(chapitre) * Reglages.BOSS_ENDURANCE_MULT
 	var boss_degats := float(boss["degats"]) * facteur_degats * Reglages.BOSS_SIGNATURE_DEGATS_MULT
 	var fragile_pv := float(fragile["pv"]) * facteur_pv
 	var fragile_degats := float(fragile["degats"]) * facteur_degats * Reglages.ENNEMI_DEGATS_MULT

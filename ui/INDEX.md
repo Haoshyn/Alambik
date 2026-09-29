@@ -12,7 +12,7 @@
 | Choix d'augments | `draft.gd`, `carte_reactif.gd` |
 | Pause et réglages | `pause.gd`, `reglages.gd` |
 | Résultat de la tentative | `fin_de_run.gd`, `coffre_anime.gd` |
-| Entrée en campagne | `transition_grimoire.gd` |
+| Démarrage, entrée en partie et chargements entre étages | `demarrage.gd`, `demarrage.tscn`, `transition_grimoire.gd`, `composants/chargement_aventure.gd` ; voile de run dans `../scripts/interface/voile_transition.gd`, cadrage du démarrage dans `../shaders/chargement_adaptatif.gdshader` |
 | Éléments réutilisables | `composants/` : navigation, compteurs, cartes, fiches, défilement et clairière |
 
 La navigation des cinq onglets est coordonnée par `../scripts/menu.gd`.

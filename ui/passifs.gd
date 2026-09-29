@@ -396,7 +396,7 @@ func _ouvrir_fiche(index: int) -> void:
 	contenu.add_child(lecture)
 	lecture.add_child(StyleAzur.texte(str(donnees["description"]), 30, StyleAzur.LILAS))
 	var rang := ReglagesJoueur.rang_passif(id)
-	lecture.add_child(StyleAzur.texte("Rang %d / %d · %s" % [rang, Passifs.rang_max(id), Passifs.resume_rang(id, rang)], 28, StyleAzur.CUIVRE))
+	lecture.add_child(StyleAzur.texte("Rang %d / %d · %s" % [rang, Passifs.rang_max(id), Passifs.resume_rang(id, rang, ReglagesJoueur.niveau_compte_effectif())], 28, StyleAzur.CUIVRE))
 	lecture.add_child(StyleAzur.texte(Passifs.progression_rang(id), 26, StyleAzur.MENTHE))
 	var equipe := id in ReglagesJoueur.passifs_equipes
 	if ReglagesJoueur.passif_debloque(id):

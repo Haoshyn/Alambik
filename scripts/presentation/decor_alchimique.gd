@@ -1,5 +1,7 @@
 extends RefCounted
 
+const ATLAS := preload("res://assets/3d/textures/bestiaire_matieres_peintes.png")
+
 static func pierre(taille: Vector3) -> ArrayMesh:
 	var b := minf(0.09, minf(taille.x, minf(taille.y, taille.z)) * 0.18)
 	var anneaux: Array[PackedVector3Array] = []
@@ -17,22 +19,42 @@ static func pierre(taille: Vector3) -> ArrayMesh:
 		for i in 8:
 			var k := (i+1)%8
 			for point: Vector3 in [anneaux[j][i],anneaux[j+1][k],anneaux[j+1][i],anneaux[j][i],anneaux[j][k],anneaux[j+1][k]]:
-				surface.add_vertex(point)
+				var normale := Vector3(anneaux[j][i].x, 0, anneaux[j][i].z).normalized()
+				_sommet_pierre(surface, point, taille, normale)
 	for i in range(1,7):
 		for point: Vector3 in [anneaux[3][0],anneaux[3][i],anneaux[3][i+1],anneaux[0][0],anneaux[0][i+1],anneaux[0][i]]:
-			surface.add_vertex(point)
+			_sommet_pierre(surface, point, taille, Vector3.UP)
 	surface.generate_normals()
 	return surface.commit()
+
+static func _sommet_pierre(surface: SurfaceTool, point: Vector3, taille: Vector3, normale: Vector3) -> void:
+	var uv := Vector2(point.x / taille.x, point.z / taille.z) + Vector2.ONE * .5
+	if absf(normale.y) < .5:
+		uv = Vector2(point.z / taille.z if absf(normale.x) > .5 else point.x / taille.x, point.y / taille.y) + Vector2.ONE * .5
+	surface.set_uv(uv)
+	# Le modelage reste visible sur Android lorsque les ombres sont reduites.
+	var valeur := lerpf(.72, 1.04, clampf(point.y / taille.y + .5, 0.0, 1.0))
+	surface.set_color(Color(valeur, valeur, valeur))
+	surface.add_vertex(point)
 
 static func bloc(parent: Node3D, centre: Vector3, taille: Vector3, couleur: Color) -> MeshInstance3D:
 	return piece(parent, pierre(taille), centre, couleur)
 
-static func piece(parent: Node3D, forme: Mesh, position: Vector3, teinte: Color, rugosite := .82) -> MeshInstance3D:
+static func piece(parent: Node3D, forme: Mesh, position: Vector3, teinte: Color, rugosite := .82, peint := true) -> MeshInstance3D:
 	var objet := MeshInstance3D.new()
 	objet.mesh = forme
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = teinte
 	mat.roughness = rugosite
+	mat.metallic_specular = .22
+	if peint:
+		# L'atelier reprend l'atlas original du bestiaire, sans nouvelle texture par objet.
+		mat.albedo_texture = ATLAS
+		mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		mat.texture_repeat = false
+		mat.uv1_scale = Vector3(.46, .46, 1)
+		mat.uv1_offset = Vector3(.02, .02, 0)
+		mat.vertex_color_use_as_albedo = true
 	objet.material_override = mat
 	objet.position = position
 	parent.add_child(objet)
@@ -90,6 +112,9 @@ static func vasque(parent: Node3D, position: Vector3, profil: PackedVector2Array
 			for coin: Vector2 in [Vector2(a,0),Vector2(b,1),Vector2(a,1),Vector2(a,0),Vector2(b,0),Vector2(b,1)]:
 				var point := bas if coin.y == 0.0 else haut
 				surface.set_normal(Vector3(cos(coin.x) * pente.y, -pente.x, sin(coin.x) * pente.y))
+				surface.set_uv(Vector2(coin.x / TAU, point.y / maxf(profil[-1].y, .01)))
+				var valeur := lerpf(.78, 1.02, clampf(point.y / maxf(profil[-1].y, .01), 0.0, 1.0))
+				surface.set_color(Color(valeur, valeur, valeur))
 				surface.add_vertex(Vector3(cos(coin.x) * point.x, point.y, sin(coin.x) * point.x))
 	return piece(parent, surface.commit(), position, teinte, .45)
 
@@ -100,6 +125,9 @@ static func feuille(parent: Node3D, position: Vector3, taille: Vector3, teinte: 
 	surface.set_smooth_group(-1)
 	var points := PackedVector3Array([Vector3.ZERO, Vector3(-.45,.40,.05), Vector3(0,.48,-.14), Vector3(.45,.40,.05), Vector3(0,1,.28)])
 	for indice: int in [0,2,1,0,3,2,1,2,4,2,3,4,1,2,0,2,3,0,4,2,1,4,3,2]:
+		surface.set_uv(Vector2(points[indice].x + .5, points[indice].y))
+		var valeur := 1.08 if indice == 2 else .87
+		surface.set_color(Color(valeur, valeur, valeur))
 		surface.add_vertex(points[indice] * taille)
 	surface.generate_normals()
 	return piece(parent, surface.commit(), position, teinte)

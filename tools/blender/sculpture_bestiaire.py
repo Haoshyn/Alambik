@@ -9,9 +9,9 @@ import build_all as b
 
 def palette():
     b.materiaux()
-    couleurs = {'encre': '303241', 'violet': '746698', 'papier': 'eee0be',
-                'cuivre': 'c79d69', 'metal': '526270', 'bois': '71534c',
-                'cuir': '78505b', 'magie': 'e7b9f0', 'cristal': '88dfdb',
+    couleurs = {'encre': '33364b', 'violet': '806bab', 'papier': 'f0e3c5',
+                'cuivre': 'd2a365', 'metal': '647582', 'bois': '7e6155',
+                'cuir': '805962', 'magie': 'e7b9f0', 'cristal': '88dfdb',
                 'feu': 'ff953f', 'givre': 'a4e9f5', 'venin': 'b9e16d',
                 'sang': 'b54165', 'pierre': '69958c', 'pierre_claire': 'c5dbb4'}
     for nom, hexad in couleurs.items():
@@ -39,18 +39,25 @@ def articulation(nom, point):
         b.ACTEUR = parent
 
 
-def courbe(nom, points, rayons, mat, faces=8):
+def courbe(nom, points, rayons, mat, faces=8, aplatissement=1.0):
     sommets, polygones = [], []
+    distances = [0.0]
+    for debut, fin in zip(points, points[1:]):
+        distances.append(distances[-1] + (Vector(fin)-Vector(debut)).length)
+    precedent = None
     for i, p in enumerate(points):
         tangente = Vector(points[min(i+1, len(points)-1)]) - Vector(points[max(0, i-1)])
         axe = tangente.normalized()
-        u = axe.cross(Vector((0, 1, 0))).normalized()
+        u = precedent - axe * precedent.dot(axe) if precedent is not None else axe.cross(Vector((0, 1, 0)))
         if u.length < .01:
-            u = axe.cross(Vector((1, 0, 0))).normalized()
+            repere = min((Vector((1,0,0)), Vector((0,1,0)), Vector((0,0,1))), key=lambda v:abs(axe.dot(v)))
+            u = axe.cross(repere)
+        u.normalize()
         v = axe.cross(u).normalized()
+        precedent = u
         for j in range(faces):
             a = math.tau * j / faces
-            sommets.append(Vector(p) + rayons[i] * (u * math.cos(a) + v * math.sin(a)))
+            sommets.append(Vector(p) + rayons[i] * (u * math.cos(a) + v * math.sin(a) * aplatissement))
     for i in range(len(points)-1):
         for j in range(faces):
             a, c = i*faces+j, i*faces+(j+1) % faces
@@ -59,6 +66,17 @@ def courbe(nom, points, rayons, mat, faces=8):
     mesh = bpy.data.meshes.new(nom)
     mesh.from_pydata(sommets, [], polygones)
     mesh.update()
+    uv = mesh.uv_layers.new(name='UVMap')
+    for face in mesh.polygons:
+        couture = len(face.vertices) == 4 and any(v % faces == faces-1 for v in face.vertices)
+        for boucle in face.loop_indices:
+            numero = mesh.loops[boucle].vertex_index
+            angle = numero % faces
+            if len(face.vertices) == 4:
+                u = 1.0 if couture and angle == 0 else angle / faces
+                uv.data[boucle].uv = (u, distances[numero // faces] / max(distances[-1], .001))
+            else:
+                uv.data[boucle].uv = (.5+.45*math.cos(math.tau*angle/faces), .5+.45*math.sin(math.tau*angle/faces))
     obj = bpy.data.objects.new(nom, mesh)
     bpy.context.collection.objects.link(obj)
     for p in mesh.polygons:
@@ -73,6 +91,8 @@ def regard(y, z, ecart=.11, taille=.055, mat='magie'):
         iris = b.boule('Iris', (c*ecart, y-.020, z), (taille*1.05, taille*.27, taille*.51), mat, 12)
         iris.rotation_euler.y = -c*.16
         b.boule('Pupille', (c*ecart, y-.035, z-.004), (taille*.20, taille*.12, taille*.42), 'encre', 8)
+        b.boule('Reflet_oeil', (c*ecart-taille*.28, y-.037, z+taille*.16),
+                (taille*.18, taille*.055, taille*.13), 'papier', 8)
         courbe('Paupiere', [(c*(ecart-taille*1.18),y-.012,z+taille*.21),
                            (c*ecart,y-.022,z+taille*.70),
                            (c*(ecart+taille*1.20),y,z+taille*.91)],
@@ -101,6 +121,10 @@ def pan_tissu(nom, points, largeurs, mat='papier'):
     mesh.update()
     objet = bpy.data.objects.new(nom,mesh)
     bpy.context.collection.objects.link(objet)
+    uv = mesh.uv_layers.new(name='UVMap')
+    for boucle in mesh.loops:
+        uv.data[boucle.index].uv = ((boucle.vertex_index % 3) * .5, (boucle.vertex_index // 3) / (len(points)-1))
+    bpy.ops.object.select_all(action='DESELECT')
     bpy.context.view_layer.objects.active = objet
     objet.select_set(True)
     lissage = objet.modifiers.new('Drape','SUBSURF')
@@ -116,8 +140,8 @@ def pan_tissu(nom, points, largeurs, mat='papier'):
 def plume(nom, debut, fin, largeur, mat='papier'):
     d, f = Vector(debut), Vector(fin)
     points = [d.lerp(f, t) + Vector((0, -.045*math.sin(t*math.pi), 0)) for t in (0, .28, .58, .82, 1)]
-    obj = courbe(nom, points, [.014, largeur*.75, largeur, largeur*.64, .002], mat, 6)
-    obj.scale.y = .32
+    # Aplatir la section autour de sa nervure, sans deplacer l'attache de la plume.
+    courbe(nom, points, [.014, largeur*.75, largeur, largeur*.64, .002], mat, 8, aplatissement=.22)
     b.tige('Nervure', debut, fin, .012, 'cuivre')
 
 
@@ -129,6 +153,7 @@ def pattes(nombre=6, largeur=.38, hauteur=.29, mat='encre'):
             genou = (c*largeur,y*1.25,hauteur*.8)
             pied = (c*(largeur+.055),y*1.45-.05,.055)
             with articulation('patte_%s_%d' % (cote, i), (c*.19, y, hauteur)):
+                b.boule('Joint_hanche', (c*.19,y,hauteur), (.046,.044,.045), 'cuivre', 8)
                 courbe('Cuisse', [(c*.18,y,hauteur), genou], [.046,.035], mat)
                 with articulation('tibia_%s_%d' % (cote, i), genou):
                     courbe('Tibia', [genou, pied], [.033,.017], mat)

@@ -8,16 +8,25 @@ static func palier_borne(palier: int) -> int:
 
 static func facteur_pv(palier: int) -> float:
 	var p := float(palier_borne(palier))
-	var renfort := 1.0 + Reglages.CAMPAGNE_PV_RENFORT_INITIAL * (1.0 - pow(Reglages.CAMPAGNE_PV_TRANSITION, p))
-	# Les premiers achats arrivent vite ; ensuite, les rangs coutent davantage
-	# et les bonus se tassent. La courbe fixe des monstres suit ces deux rythmes.
+	var transition := pow(p, Reglages.CAMPAGNE_PV_TRANSITION_EXPOSANT)
+	var renfort := 1.0 + Reglages.CAMPAGNE_PV_RENFORT_INITIAL * (1.0 - pow(Reglages.CAMPAGNE_PV_TRANSITION, transition))
+	# Le premier monde demande peu de repetitions. Les achats et le farm
+	# prennent davantage de place ensuite, sans lire le build du joueur.
 	var debut := mini(int(p), Reglages.CAMPAGNE_PV_CHAPITRES_INITIAUX)
 	var suite := maxi(0, int(p) - debut)
 	return _courbe_chapitre(debut, Reglages.CAMPAGNE_PV_PAR_CHAPITRE, Reglages.CAMPAGNE_PV_ACCELERATION) \
 		* pow(Reglages.CAMPAGNE_PV_PAR_CHAPITRE_TARDIF, suite) * renfort
 
 static func facteur_degats(palier: int) -> float:
-	return _courbe_chapitre(palier, Reglages.CAMPAGNE_DEGATS_PAR_CHAPITRE, Reglages.CAMPAGNE_DEGATS_ACCELERATION)
+	var suite := maxi(0, palier_borne(palier) - Reglages.CAMPAGNE_PV_CHAPITRES_INITIAUX)
+	var renfort := 1.0 + Reglages.CAMPAGNE_DEGATS_RENFORT_TARDIF \
+		* (1.0 - pow(Reglages.CAMPAGNE_DEGATS_TRANSITION_TARDIVE, suite))
+	return _courbe_chapitre(palier, Reglages.CAMPAGNE_DEGATS_PAR_CHAPITRE, Reglages.CAMPAGNE_DEGATS_ACCELERATION) * renfort
+
+static func facteur_boss(palier: int) -> float:
+	var suite := maxi(0, palier_borne(palier) - Reglages.CAMPAGNE_PV_CHAPITRES_INITIAUX)
+	return 1.0 + Reglages.CAMPAGNE_PV_BOSS_RENFORT_TARDIF \
+		* (1.0 - pow(Reglages.CAMPAGNE_PV_BOSS_TRANSITION_TARDIVE, suite))
 
 static func _courbe_chapitre(palier: int, croissance: float, acceleration: float) -> float:
 	var p := float(palier_borne(palier))

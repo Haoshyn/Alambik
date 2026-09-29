@@ -10,11 +10,11 @@ extends RefCounted
 const CHAPITRES_PAR_MONDE := 7
 
 const MONDES := [
-	{"id":"encre", "numero":"I", "nom":"Encre", "sous_titre":"Les pages débordent de magie.", "boss_signature":"archiscribe_encres", "teinte":Color("aa8dc7")},
-	{"id":"terre", "numero":"II", "nom":"Terre", "sous_titre":"Les sables mouvants gagnent les vieux jardins.", "boss_signature":"gardien_runes", "teinte":Color("b4bd78")},
-	{"id":"eau", "numero":"III", "nom":"Eau", "sous_titre":"Les marées ont gagné le sanctuaire.", "boss_signature":"reine_givre", "teinte":Color("4dbac4")},
-	{"id":"air", "numero":"IV", "nom":"Air", "sous_titre":"Les souffles traversent les terrasses.", "boss_signature":"maitre_orages", "teinte":Color("79c9b7")},
-	{"id":"feu", "numero":"V", "nom":"Feu", "sous_titre":"La lave affleure au bord des forges.", "boss_signature":"roi_braises", "teinte":Color("ed9857")},
+	{"id":"encre", "numero":"I", "nom":"Encre", "sous_titre":"Les pages débordent de magie.", "boss_signature":"archiscribe_encres", "pv_signature_mult":1.35, "teinte":Color("aa8dc7")},
+	{"id":"terre", "numero":"II", "nom":"Terre", "sous_titre":"Les sables mouvants gagnent les vieux jardins.", "boss_signature":"gardien_runes", "pv_signature_mult":1.0, "teinte":Color("b4bd78")},
+	{"id":"eau", "numero":"III", "nom":"Eau", "sous_titre":"Les marées ont gagné le sanctuaire.", "boss_signature":"reine_givre", "pv_signature_mult":0.95, "teinte":Color("4dbac4")},
+	{"id":"air", "numero":"IV", "nom":"Air", "sous_titre":"Les souffles traversent les terrasses.", "boss_signature":"maitre_orages", "pv_signature_mult":1.30, "teinte":Color("79c9b7")},
+	{"id":"feu", "numero":"V", "nom":"Feu", "sous_titre":"La lave affleure au bord des forges.", "boss_signature":"roi_braises", "pv_signature_mult":1.25, "teinte":Color("ed9857")},
 ]
 
 # Garder les identites retirees pour les bijoux des anciennes sauvegardes.
@@ -98,10 +98,16 @@ static func progression(index: int, salle: int) -> float:
 	var chapitre := par_index(index)
 	return clampf(float(salle - 1) / maxf(1.0, float(chapitre["salles"] - 1)), 0.0, 1.0)
 
-static func facteur_pv(index: int, salle: int) -> float:
-	return float(par_index(index)["pv_mult"]) * ProgressionStatistiques.facteur_salle(salle,
-		Reglages.CAMPAGNE_PV_PAR_SALLE, Reglages.CAMPAGNE_PV_PALIERS)
+static func facteur_pv(index: int, salle: int, boss := false) -> float:
+	var renfort := ProgressionStatistiques.facteur_boss(palier(index)) if boss else 1.0
+	return float(par_index(index)["pv_mult"]) * renfort * ProgressionStatistiques.facteur_salle(salle,
+		Reglages.CAMPAGNE_PV_BOSS_PAR_SALLE if boss else Reglages.CAMPAGNE_PV_PAR_SALLE, Reglages.CAMPAGNE_PV_PALIERS)
 
 static func facteur_degats(index: int, salle: int) -> float:
 	return float(par_index(index)["degats_mult"]) * ProgressionStatistiques.facteur_salle(salle,
 		Reglages.CAMPAGNE_DEGATS_PAR_SALLE, Reglages.CAMPAGNE_DEGATS_PALIERS)
+
+static func facteur_boss_signature(index: int) -> float:
+	# L'endurance propre au monde concerne la campagne, sans changer les annexes.
+	var monde: Dictionary = MONDES[int(par_index(index)["monde"])]
+	return Reglages.BOSS_SIGNATURE_PV_MULT * float(monde["pv_signature_mult"])

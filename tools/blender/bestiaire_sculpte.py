@@ -43,6 +43,13 @@ def exporter(nom, dossier, construire):
             couleur = next(n for n in noeuds if n.bl_idname == 'ShaderNodeVertexColor')
             mat.node_tree.links.new(couleur.outputs['Color'],
                                     noeuds.get('Principled BSDF').inputs['Base Color'])
+            # Godot installe aussi une seule carte de reflets partagee par la horde.
+            bsdf = noeuds.get('Principled BSDF')
+            for entree in ('Metallic', 'Roughness'):
+                for lien in list(bsdf.inputs[entree].links):
+                    mat.node_tree.links.remove(lien)
+            bsdf.inputs['Metallic'].default_value = 0.0
+            bsdf.inputs['Roughness'].default_value = .78
     temporaire = b.RACINE / 'tmp/verification_matieres' / (nom + '.glb')
     temporaire.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.export_scene.gltf(filepath=str(temporaire), export_format='GLB', export_yup=True,

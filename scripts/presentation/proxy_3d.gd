@@ -146,7 +146,8 @@ func mettre_a_jour(delta: float) -> void:
 	if animation_heros != null:
 		var inclinaison := -clampf(ecart, -1.0, 1.0) * Visuels3D.HEROS_INCLINAISON_VIRAGE * minf(vitesse / Reglages.HEROS_VITESSE, 1.0) if not _mort else 0.0
 		modele.rotation.z = lerpf(modele.rotation.z, inclinaison, 1.0-exp(-Visuels3D.HEROS_LISSAGE_MOUVEMENT*delta))
-		animation_heros.mettre_a_jour(delta, vitesse, _mort)
+		var deplacement_commande: bool = logique.get("_intention") != Vector2.ZERO and float(logique.get("_intensite")) > 0.0
+		animation_heros.mettre_a_jour(delta, vitesse, _mort, deplacement_commande)
 		return
 	var animation := "course" if vitesse > 4.0 else "repos"
 	if _temps_attaque > 0.0 and (genre != "heros" or vitesse <= 4.0):
@@ -186,4 +187,3 @@ func _exit_tree() -> void:
 	if is_instance_valid(logique):
 		logique.remove_meta("visuel_3d")
 		logique.queue_redraw()
-

@@ -6,6 +6,7 @@ var salle: Node2D
 var _source: Node2D
 var _visuels: Array[Node3D] = []
 var _matiere_vent: StandardMaterial3D
+var _temps_surface := 0.0
 
 func _construire() -> void:
 	for visuel in _visuels:
@@ -13,6 +14,7 @@ func _construire() -> void:
 		visuel.queue_free()
 	_visuels.clear()
 	_matiere_vent = null
+	_temps_surface = 0.0
 	if _source == null: return
 	for zone: Dictionary in _source.zones:
 		var ensemble := Node3D.new()
@@ -25,39 +27,50 @@ func _construire() -> void:
 		_visuels.append(ensemble)
 
 func _construire_flaque(parent: Node3D, zone: Dictionary) -> void:
-	# La silhouette vient de la collision logique, sans disque plus large ni
-	# halo trompeur. Le relief reste sous les ombres au pied des personnages.
+	# La rive et les nuances restent dans la zone d'effet et sous les ombres.
 	var contour := PackedVector2Array()
 	for point: Vector2 in zone["contour"]:
 		var p := Pont3D.vers_monde(point)
 		contour.append(Vector2(p.x,p.z))
-	var teinte: Color = zone["couleur"]
 	var type := str(zone["type"])
-	SOL.surface(parent, contour, -.003, teinte.darkened(.45 if type == "lave" else .30))
-	var interieur := PackedVector2Array()
-	for point in contour: interieur.append(point * .94)
-	var fond := SOL.surface(parent, interieur, -.0015, teinte)
-	var mat := fond.material_override as StandardMaterial3D
-	mat.roughness = .95 if type == "sable" else .34
-	if type == "lave":
-		mat.emission_enabled = true
-		mat.emission = teinte
-		mat.emission_energy_multiplier = .18
-	var rayon := float(zone["rayon"]) * Pont3D.ECHELLE
-	if type == "lave":
-		for i in 3:
-			var lignes := PackedVector2Array()
-			for j in 7:
-				lignes.append(Vector2(-.70 + j * .23,(i-1)*.35 + sin(j*1.4+i)*.11) * rayon)
-			SOL._ruban(parent, lignes, .045, interieur, 0, Color("ffc96e"))
-	else:
-		var reflet := teinte.lightened(.40) if type != "sable" else teinte.darkened(.16)
-		for i in 3:
-			var lignes := PackedVector2Array()
-			for j in 14:
-				var angle := j * .14 + i * 1.8
-				lignes.append(Vector2(cos(angle),sin(angle) / sin(deg_to_rad(Pont3D.INCLINAISON))) * rayon * (.26 + i * .19))
-			SOL._ruban(parent, lignes, .015 if type == "sable" else .026, interieur, 0, reflet)
+	var rive := SOL.surface(parent, contour, -.005, Color.WHITE)
+	rive.name = "RiveNappe"
+	rive.material_override = DecorsTerrains.matiere(type, true)
+	var cadre := Rect2(contour[0], Vector2.ZERO)
+	for point in contour: cadre = cadre.expand(point)
+	var maillage := SurfaceTool.new()
+	maillage.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var anneaux := [0.0, .22, .50, .76, .92, .985]
+	for bande in range(1, anneaux.size()):
+		var debut: float = anneaux[bande - 1]
+		var fin: float = anneaux[bande]
+		for i in contour.size():
+			var a := contour[i]
+			var b := contour[(i + 1) % contour.size()]
+			var triangles := [[Vector3(a.x * debut, debut, a.y * debut), Vector3(b.x * fin, fin, b.y * fin), Vector3(a.x * fin, fin, a.y * fin)]]
+			if debut > 0.0:
+				triangles.append([Vector3(a.x * debut, debut, a.y * debut), Vector3(b.x * debut, debut, b.y * debut), Vector3(b.x * fin, fin, b.y * fin)])
+			for triangle: Array in triangles:
+				var p: Vector3 = triangle[0]
+				var q: Vector3 = triangle[1]
+				var r: Vector3 = triangle[2]
+				if Vector2(q.x - p.x, q.z - p.z).cross(Vector2(r.x - p.x, r.z - p.z)) < 0.0: triangle.reverse()
+				for point: Vector3 in triangle:
+					var menisque := smoothstep(.76, .985, point.y) * (.0 if type == "sable" else .24)
+					var vers_rive := Vector2(point.x, point.z).normalized() * menisque
+					maillage.set_normal(Vector3(-vers_rive.x, 1.0, -vers_rive.y).normalized())
+					maillage.set_uv((Vector2(point.x, point.z) - cadre.position) / cadre.size)
+					# Le centre plus profond rejoint progressivement une rive fine.
+					var nuance := lerpf(.80, 1.0, smoothstep(.12, .96, point.y))
+					maillage.set_color(Color(nuance, nuance, nuance))
+					maillage.add_vertex(Vector3(point.x, -.002, point.z))
+	maillage.generate_tangents()
+	var fond := MeshInstance3D.new()
+	fond.name = "SurfaceNappe"
+	fond.mesh = maillage.commit()
+	fond.material_override = DecorsTerrains.matiere(type)
+	fond.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(fond)
 
 func _construire_vent(ensemble: Node3D, zone: Dictionary) -> void:
 	_matiere_vent = StandardMaterial3D.new()
@@ -75,19 +88,25 @@ func _construire_vent(ensemble: Node3D, zone: Dictionary) -> void:
 		var objet := SOL.surface(trace_vent, forme, 0, Color.WHITE)
 		objet.material_override = _matiere_vent
 
-func mettre_a_jour(_delta: float) -> void:
+func mettre_a_jour(delta: float) -> void:
 	if not is_instance_valid(salle): return
 	var source: Node2D = salle.terrain_elementaire()
 	if not is_instance_valid(_source) or source != _source:
 		_source = source
 		_construire()
 	if _source == null: return
+	if not ReglagesJoueur.effets_reduits: _temps_surface += delta
 	for i in _visuels.size():
 		var zone: Dictionary = _source.zones[i]
 		var position_zone: Vector2 = zone["position"]
 		var visuel := _visuels[i]
 		visuel.position = Pont3D.vers_monde(position_zone)
-		if str(zone["type"]) != "vent": continue
+		var type := str(zone["type"])
+		if type != "vent":
+			if type in ["encre", "eau"]:
+				var matiere := DecorsTerrains.matiere(type)
+				matiere.uv1_offset = Vector3(sin(_temps_surface * .28) * .003, cos(_temps_surface * .23) * .003, 0)
+			continue
 		var vent: Dictionary = _source.etat_vent()
 		var force := float(vent["force"])
 		visuel.visible = force > 0.0 or bool(vent["annonce"])

@@ -378,7 +378,7 @@ func _avancer_salle() -> void:
 	_joystick.annuler()
 	_voile_salle.visible = true
 	_voile_salle.mouse_filter = Control.MOUSE_FILTER_STOP
-	_voile_salle.configurer("SALLE %02d" % (Jeu.salle_courante + 1), Jeu.nom_run().to_upper())
+	_voile_salle.presenter_etage(Jeu.chapitre_courant(), Jeu.salle_courante + 1, Jeu.salles_du_chapitre(), Jeu.mode_run)
 	var fermeture := create_tween()
 	fermeture.set_trans(Tween.TRANS_QUINT)
 	fermeture.set_ease(Tween.EASE_IN)
@@ -387,7 +387,7 @@ func _avancer_salle() -> void:
 	await fermeture.finished
 	Jeu.salle_courante += 1
 	_entrer_dans_la_salle()
-	await get_tree().create_timer(0.04 if ReglagesJoueur.effets_reduits else 0.16).timeout
+	await get_tree().create_timer(0.10 if ReglagesJoueur.effets_reduits else 0.32).timeout
 	var ouverture := create_tween()
 	ouverture.set_trans(Tween.TRANS_QUINT)
 	ouverture.set_ease(Tween.EASE_OUT)
@@ -406,12 +406,7 @@ func _construire_voile_salle() -> void:
 	_voile_salle.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 func _animer_entree_salle() -> void:
-	var titre := "SALLE %02d" % Jeu.salle_courante if Jeu.mode_run == "grimoire" else Jeu.nom_run().to_upper()
-	var sous_titre := Jeu.nom_run().to_upper() if Jeu.mode_run == "grimoire" else (
-			"SURVIVEZ 5 MINUTES" if Jeu.mode_run == "mine" else "CINQ RITUELS")
-	if Jeu.mode_run == "epreuves":
-		sous_titre = "Choisissez une augmentation après chaque boss"
-	_voile_salle.configurer(titre, sous_titre)
+	_voile_salle.presenter_etage(Jeu.chapitre_courant(), Jeu.salle_courante, Jeu.salles_du_chapitre(), Jeu.mode_run)
 	_voile_salle.visible = true
 	_voile_salle.modulate.a = 1.0
 	await get_tree().create_timer(0.10 if ReglagesJoueur.effets_reduits else 0.38).timeout

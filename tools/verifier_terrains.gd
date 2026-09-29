@@ -12,7 +12,7 @@ class SalleTest extends Node2D:
 	var sortie := false
 	var terrain: Node2D
 	func obstacles() -> Array[Rect2]: return blocs
-	func contour_sol() -> PackedVector2Array: return FormesSalles.contour(limites, forme)
+	func contour_sol() -> PackedVector2Array: return FormesSalles.contour_salle(limites, numero, Jeu.chapitre, Jeu.graine, Jeu.mode_run)
 	func portail_ouvert() -> bool: return sortie
 	func mouvement_terrain(point: Vector2) -> Vector3: return terrain.mouvement(point)
 	func terrain_elementaire() -> Node2D: return terrain
@@ -85,6 +85,9 @@ func _verifier_implantations() -> void:
 				if str(zone["type"]) == "vent": continue
 				var centre: Vector2 = zone["position"]
 				var contour: PackedVector2Array = zone["contour"]
+				var emprise := Rect2(contour[0], Vector2.ZERO)
+				for point in contour: emprise = emprise.expand(point)
+				_exiger(emprise.size.y > Reglages.HEROS_RAYON * 8.0, "Nappe trop courte pour etre sensible en traversant")
 				formes[hash(contour)] = true
 				tailles[roundi(float(zone["rayon"]))] = true
 				_exiger(_terrain._contient(zone,centre), "Centre de flaque non affecte")
@@ -102,6 +105,7 @@ func _verifier_flaques() -> void:
 		_configurer(monde * Chapitres.CHAPITRES_PAR_MONDE,2)
 		if _terrain.zones.is_empty(): continue
 		var zone: Dictionary = _terrain.zones[0]
+		_heros.limites = _salle.limites
 		_heros.global_position = zone["position"]
 		_heros.stats.pv = _heros.stats.pv_max
 		_heros.set("_invulnerable",0.0)
@@ -111,6 +115,12 @@ func _verifier_flaques() -> void:
 		var facteur := float(TerrainsMondes.PROFILS[monde]["vitesse"])
 		if monde == 1: facteur = TerrainsMondes.SABLE_VITESSE_INITIALE
 		_exiger(is_equal_approx(_terrain.mouvement(_heros.global_position).z,facteur), "Ralentissement incorrect")
+		_heros.velocity = Vector2.ZERO
+		_heros.definir_intention(Vector2.DOWN)
+		for image in 18: _heros._physics_process(1.0 / 60.0)
+		_exiger(absf(_heros.velocity.y - _heros.stats.vitesse * facteur) < .1, "Le vrai deplacement du heros ne suit pas le ralentissement")
+		_heros.definir_intention(Vector2.ZERO)
+		_heros.global_position = zone["position"]
 		if monde == 1:
 			_terrain._physics_process(TerrainsMondes.SABLE_DUREE_ENFONCEMENT)
 			_exiger(is_equal_approx(_terrain.mouvement(_heros.global_position).z,TerrainsMondes.SABLE_VITESSE_MINIMALE), "Enfoncement du sable incorrect")
@@ -234,12 +244,32 @@ func _verifier_visuels() -> void:
 			continue
 		for i in _terrain.zones.size():
 			var zone: Dictionary = _terrain.zones[i]
-			for objet: MeshInstance3D in visuel.get_child(i).find_children("*","MeshInstance3D",true,false):
+			var objets := visuel.get_child(i).find_children("*", "MeshInstance3D", true, false)
+			_exiger(objets.size() <= 2, "Trop de surfaces par nappe sur mobile")
+			for objet: MeshInstance3D in objets:
+				var matiere := objet.material_override as StandardMaterial3D
+				_exiger(objet.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "Nappe projettant une ombre")
+				if matiere.normal_enabled:
+					_exiger(matiere.albedo_texture != null and matiere.normal_texture != null, "Peinture ou normales de nappe absentes")
+					_exiger(matiere.albedo_texture.get_image().has_mipmaps(), "Peinture de nappe sans mipmaps")
 				for s in objet.mesh.get_surface_count():
 					var tableaux := objet.mesh.surface_get_arrays(s)
 					var sommets: PackedVector3Array = tableaux[Mesh.ARRAY_VERTEX]
+					if matiere.normal_enabled:
+						var uv: PackedVector2Array = tableaux[Mesh.ARRAY_TEX_UV]
+						var tangentes: PackedFloat32Array = tableaux[Mesh.ARRAY_TANGENT]
+						_exiger(uv.size() == sommets.size() and tangentes.size() == sommets.size() * 4, "Repere des normales perdu au regroupement")
 					for sommet in sommets:
 						_exiger(sommet.y <= 0, "Flaque au-dessus des ombres du heros")
 						var p := Pont3D.vers_logique(sommet) * .9999
 						_exiger(Geometry2D.is_point_in_polygon(p,zone["contour"]), "Dessin de flaque hors de sa zone d'effet")
+		if monde in [0, 2]:
+			var matiere := DecorsTerrains.matiere(str(_terrain.zones[0]["type"]))
+			ReglagesJoueur.effets_reduits = false
+			visuel.mettre_a_jour(.5)
+			var decalage := matiere.uv1_offset
+			ReglagesJoueur.effets_reduits = true
+			visuel.mettre_a_jour(.5)
+			_exiger(matiere.uv1_offset.is_equal_approx(decalage), "Reflets de nappe mobiles en effets reduits")
+			ReglagesJoueur.effets_reduits = false
 	visuel.free()

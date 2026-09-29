@@ -20,16 +20,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +1,5 % d’attaque | 10 | 10 |
-| 2 | +3 % d’attaque | 15 | 25 |
-| 3 | +4,5 % d’attaque | 15 | 40 |
-| 4 | +6 % d’attaque | 20 | 60 |
-| 5 | +7,5 % d’attaque | 20 | 80 |
-| 6 | +9 % d’attaque | 25 | 105 |
-| 7 | +10,5 % d’attaque | 25 | 130 |
-| 8 | +12 % d’attaque | 30 | 160 |
-| 9 | +13,5 % d’attaque | 30 | 190 |
-| 10 | +15 % d’attaque | 35 | 225 |
+| 1 | +4 % d’attaque | 10 | 10 |
+| 2 | +8 % d’attaque | 15 | 25 |
+| 3 | +12 % d’attaque | 15 | 40 |
+| 4 | +16 % d’attaque | 20 | 60 |
+| 5 | +20 % d’attaque | 20 | 80 |
+| 6 | +24 % d’attaque | 25 | 105 |
+| 7 | +28 % d’attaque | 25 | 130 |
+| 8 | +32 % d’attaque | 30 | 160 |
+| 9 | +36 % d’attaque | 30 | 190 |
+| 10 | +40 % d’attaque | 35 | 225 |
 
 ### Œil sûr
 
@@ -37,16 +37,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +0,3 % de chance critique | 15 | 15 |
-| 2 | +0,6 % de chance critique | 20 | 35 |
-| 3 | +0,9 % de chance critique | 25 | 60 |
-| 4 | +1,2 % de chance critique | 25 | 85 |
-| 5 | +1,5 % de chance critique | 30 | 115 |
-| 6 | +1,8 % de chance critique | 35 | 150 |
-| 7 | +2,1 % de chance critique | 40 | 190 |
-| 8 | +2,4 % de chance critique | 40 | 230 |
-| 9 | +2,7 % de chance critique | 45 | 275 |
-| 10 | +3 % de chance critique | 50 | 325 |
+| 1 | +1 % de chance critique | 15 | 15 |
+| 2 | +2 % de chance critique | 20 | 35 |
+| 3 | +3 % de chance critique | 25 | 60 |
+| 4 | +4 % de chance critique | 25 | 85 |
+| 5 | +5 % de chance critique | 30 | 115 |
+| 6 | +6 % de chance critique | 35 | 150 |
+| 7 | +7 % de chance critique | 40 | 190 |
+| 8 | +8 % de chance critique | 40 | 230 |
+| 9 | +9 % de chance critique | 45 | 275 |
+| 10 | +10 % de chance critique | 50 | 325 |
 
 ### Frappe souveraine
 
@@ -62,16 +62,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +1,5 % d’attaque | 30 | 30 |
-| 2 | +3 % d’attaque | 40 | 70 |
-| 3 | +4,5 % d’attaque | 45 | 115 |
-| 4 | +6 % d’attaque | 55 | 170 |
-| 5 | +7,5 % d’attaque | 60 | 230 |
-| 6 | +9 % d’attaque | 70 | 300 |
-| 7 | +10,5 % d’attaque | 75 | 375 |
-| 8 | +12 % d’attaque | 85 | 460 |
-| 9 | +13,5 % d’attaque | 90 | 550 |
-| 10 | +15 % d’attaque | 100 | 650 |
+| 1 | +2,5 % d’attaque | 30 | 30 |
+| 2 | +5 % d’attaque | 40 | 70 |
+| 3 | +7,5 % d’attaque | 45 | 115 |
+| 4 | +10 % d’attaque | 55 | 170 |
+| 5 | +12,5 % d’attaque | 60 | 230 |
+| 6 | +15 % d’attaque | 70 | 300 |
+| 7 | +17,5 % d’attaque | 75 | 375 |
+| 8 | +20 % d’attaque | 85 | 460 |
+| 9 | +22,5 % d’attaque | 90 | 550 |
+| 10 | +25 % d’attaque | 100 | 650 |
 
 ### Impact critique
 
@@ -104,16 +104,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +2 % d’attaque | 60 | 60 |
-| 2 | +4 % d’attaque | 75 | 135 |
-| 3 | +6 % d’attaque | 90 | 225 |
-| 4 | +8 % d’attaque | 105 | 330 |
-| 5 | +10 % d’attaque | 120 | 450 |
-| 6 | +12 % d’attaque | 135 | 585 |
-| 7 | +14 % d’attaque | 150 | 735 |
-| 8 | +16 % d’attaque | 165 | 900 |
-| 9 | +18 % d’attaque | 180 | 1080 |
-| 10 | +20 % d’attaque | 195 | 1275 |
+| 1 | +4 % d’attaque | 60 | 60 |
+| 2 | +8 % d’attaque | 75 | 135 |
+| 3 | +12 % d’attaque | 90 | 225 |
+| 4 | +16 % d’attaque | 105 | 330 |
+| 5 | +20 % d’attaque | 120 | 450 |
+| 6 | +24 % d’attaque | 135 | 585 |
+| 7 | +28 % d’attaque | 150 | 735 |
+| 8 | +32 % d’attaque | 165 | 900 |
+| 9 | +36 % d’attaque | 180 | 1080 |
+| 10 | +40 % d’attaque | 195 | 1275 |
 
 ### Instinct critique
 
@@ -121,16 +121,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +0,3 % de chance critique | 80 | 80 |
-| 2 | +0,6 % de chance critique | 100 | 180 |
-| 3 | +0,9 % de chance critique | 120 | 300 |
-| 4 | +1,2 % de chance critique | 140 | 440 |
-| 5 | +1,5 % de chance critique | 160 | 600 |
-| 6 | +1,8 % de chance critique | 180 | 780 |
-| 7 | +2,1 % de chance critique | 200 | 980 |
-| 8 | +2,4 % de chance critique | 220 | 1200 |
-| 9 | +2,7 % de chance critique | 240 | 1440 |
-| 10 | +3 % de chance critique | 260 | 1700 |
+| 1 | +1 % de chance critique | 80 | 80 |
+| 2 | +2 % de chance critique | 100 | 180 |
+| 3 | +3 % de chance critique | 120 | 300 |
+| 4 | +4 % de chance critique | 140 | 440 |
+| 5 | +5 % de chance critique | 160 | 600 |
+| 6 | +6 % de chance critique | 180 | 780 |
+| 7 | +7 % de chance critique | 200 | 980 |
+| 8 | +8 % de chance critique | 220 | 1200 |
+| 9 | +9 % de chance critique | 240 | 1440 |
+| 10 | +10 % de chance critique | 260 | 1700 |
 
 ### Domination
 
@@ -146,16 +146,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +2 % d’attaque | 120 | 120 |
-| 2 | +4 % d’attaque | 150 | 270 |
-| 3 | +6 % d’attaque | 180 | 450 |
-| 4 | +8 % d’attaque | 210 | 660 |
-| 5 | +10 % d’attaque | 240 | 900 |
-| 6 | +12 % d’attaque | 270 | 1170 |
-| 7 | +14 % d’attaque | 300 | 1470 |
-| 8 | +16 % d’attaque | 330 | 1800 |
-| 9 | +18 % d’attaque | 360 | 2160 |
-| 10 | +20 % d’attaque | 390 | 2550 |
+| 1 | +4 % d’attaque | 120 | 120 |
+| 2 | +8 % d’attaque | 150 | 270 |
+| 3 | +12 % d’attaque | 180 | 450 |
+| 4 | +16 % d’attaque | 210 | 660 |
+| 5 | +20 % d’attaque | 240 | 900 |
+| 6 | +24 % d’attaque | 270 | 1170 |
+| 7 | +28 % d’attaque | 300 | 1470 |
+| 8 | +32 % d’attaque | 330 | 1800 |
+| 9 | +36 % d’attaque | 360 | 2160 |
+| 10 | +40 % d’attaque | 390 | 2550 |
 
 **Total de la branche : 8275 Gouttes.**
 

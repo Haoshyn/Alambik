@@ -37,43 +37,53 @@ Il faut vaincre l’Épreuve précédente et atteindre le chapitre de campagne i
 
 **Obtention :** Épreuve · niveau 1.
 
-| Rang | Effet du passif |
+Attaque +5 à 30 % par rang selon le niveau du héros.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
-| 1 | +5 % attaque |
-| 2 | +10 % attaque |
+| 1 | +30 % attaque |
+| 2 | +60 % attaque |
 
 ### Célérité
 
 **Obtention :** Épreuve · niveau 3.
 
-| Rang | Effet du passif |
+Cadence +4 à 24 % par rang selon le niveau du héros.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
-| 1 | +4 % cadence |
-| 2 | +8 % cadence |
+| 1 | +24 % cadence |
+| 2 | +48 % cadence |
 
 ### Œil précis
 
 **Obtention :** Épreuve · niveau 4.
 
-| Rang | Effet du passif |
+Chance critique +2 à 12 points par rang selon le niveau du héros.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
-| 1 | +2 points de chance critique |
-| 2 | +4 points de chance critique |
+| 1 | +12 points de chance critique |
+| 2 | +24 points de chance critique |
 
 ### Impact critique
 
 **Obtention :** Épreuve · niveau 5.
 
-| Rang | Effet du passif |
+Dégâts critiques +5 à 30 points par rang selon le niveau du héros.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
-| 1 | +5 points de dégâts critiques |
-| 2 | +10 points de dégâts critiques |
+| 1 | +30 points de dégâts critiques |
+| 2 | +60 points de dégâts critiques |
 
 ### Projectiles vifs
 
 **Obtention :** Épreuve · niveau 5.
 
-| Rang | Effet du passif |
+Augmente la vitesse et la portée des tirs de 8 % par rang.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +8 % vitesse et portée des tirs |
 | 2 | +16 % vitesse et portée des tirs |
@@ -82,7 +92,9 @@ Il faut vaincre l’Épreuve précédente et atteindre le chapitre de campagne i
 
 **Obtention :** Épreuve · niveau 8.
 
-| Rang | Effet du passif |
+Après 10 s sans blessure, dégâts +5 % par rang.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +5 % de dégâts après 10 s sans blessure |
 | 2 | +10 % de dégâts après 10 s sans blessure |
@@ -91,7 +103,9 @@ Il faut vaincre l’Épreuve précédente et atteindre le chapitre de campagne i
 
 **Obtention :** Épreuve · niveau 9.
 
-| Rang | Effet du passif |
+Dégâts infligés et subis +10 % par rang.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | Dégâts infligés et subis +10 % |
 | 2 | Dégâts infligés et subis +20 % |
@@ -102,25 +116,31 @@ Il faut vaincre l’Épreuve précédente et atteindre le chapitre de campagne i
 
 **Obtention :** Épreuve · niveau 1.
 
-| Rang | Effet du passif |
+PV maximum +5 à 30 % par rang selon le niveau du héros.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
-| 1 | +5 % PV maximum |
-| 2 | +10 % PV maximum |
+| 1 | +30 % PV maximum |
+| 2 | +60 % PV maximum |
 
 ### Carapace
 
 **Obtention :** Épreuve · niveau 3.
 
-| Rang | Effet du passif |
+Défense +5 à 30 % par rang selon le niveau du héros.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
-| 1 | +5 % défense |
-| 2 | +10 % défense |
+| 1 | +30 % défense |
+| 2 | +60 % défense |
 
 ### Soins renforcés
 
 **Obtention :** Épreuve · niveau 6.
 
-| Rang | Effet du passif |
+Augmente les soins reçus de 5 % par rang.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +5 % soins reçus |
 | 2 | +10 % soins reçus |
@@ -129,7 +149,9 @@ Il faut vaincre l’Épreuve précédente et atteindre le chapitre de campagne i
 
 **Obtention :** Épreuve · niveau 7.
 
-| Rang | Effet du passif |
+Rend 1 % des PV maximum à l’entrée d’une salle par rang.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | 1 % des PV à l’entrée d’une salle |
 | 2 | 2 % des PV à l’entrée d’une salle |
@@ -138,7 +160,9 @@ Il faut vaincre l’Épreuve précédente et atteindre le chapitre de campagne i
 
 **Obtention :** Épreuve · niveau 2.
 
-| Rang | Effet du passif |
+Rend 2,5 % des PV maximum toutes les 6 éliminations par rang.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | 2,5 % des PV toutes les 6 éliminations |
 | 2 | 5 % des PV toutes les 6 éliminations |
@@ -149,7 +173,9 @@ Il faut vaincre l’Épreuve précédente et atteindre le chapitre de campagne i
 
 **Obtention :** Épreuve · niveau 4.
 
-| Rang | Effet du passif |
+Augmente la vitesse de déplacement de 5 % par rang.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +5 % vitesse |
 | 2 | +10 % vitesse |
@@ -158,7 +184,9 @@ Il faut vaincre l’Épreuve précédente et atteindre le chapitre de campagne i
 
 **Obtention :** Épreuve · niveau 2.
 
-| Rang | Effet du passif |
+Les tirs ralentissent les ennemis de 10 % pendant 2 s par rang.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | Ralentissement de 10 % pendant 2 s |
 | 2 | Ralentissement de 20 % pendant 2 s |
@@ -167,7 +195,9 @@ Il faut vaincre l’Épreuve précédente et atteindre le chapitre de campagne i
 
 **Obtention :** Épreuve · niveau 10.
 
-| Rang | Effet du passif |
+Augmente les gouttes gagnées de 5 % par rang.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +5 % de gouttes |
 | 2 | +10 % de gouttes |
@@ -176,7 +206,9 @@ Il faut vaincre l’Épreuve précédente et atteindre le chapitre de campagne i
 
 **Obtention :** Épreuve · niveau 11.
 
-| Rang | Effet du passif |
+Augmente l’XP de compte gagnée de 5 % par rang.
+
+| Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +5 % d’XP de compte |
 | 2 | +10 % d’XP de compte |
@@ -185,7 +217,7 @@ Il faut vaincre l’Épreuve précédente et atteindre le chapitre de campagne i
 
 Chaque niveau d’Épreuve possède un Cœur unique, garanti au plus tard après 3 victoires sans son Cœur.
 
-Chaque Cœur donne +2 % de dégâts finaux ; 11 Cœurs donnent au total +22 % (addition, sans exponentielle).
+Chaque Cœur donne +18 % de dégâts finaux ; 11 Cœurs donnent au total +198 % (addition, sans exponentielle).
 
 ## Anciennes sauvegardes
 

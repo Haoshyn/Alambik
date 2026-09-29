@@ -29,34 +29,68 @@ func configurer(salle_: Node2D) -> void:
 		if zones.size() >= nombre: break
 		var index := posmod(depart + i, TerrainsMondes.EMPLACEMENTS.size())
 		var rayon := float(profil["rayon"]) * float(TerrainsMondes.TAILLES_ZONES[alea.randi_range(0, TerrainsMondes.TAILLES_ZONES.size()-1)])
-		var marge := rayon + TerrainsMondes.MARGE_OBSTACLE
 		var decalage := Vector2(alea.randf_range(-1,1),alea.randf_range(-1,1)) * TerrainsMondes.DECALAGE_ZONE
 		var position_zone: Vector2 = salle.limites.position + (TerrainsMondes.EMPLACEMENTS[index] + decalage) * salle.limites.size
-		if not FormesSalles.contient_disque(position_zone, salle.contour_sol(), marge): continue
-		var libre := true
-		for rect: Rect2 in salle.obstacles():
-			if rect.grow(marge).has_point(position_zone):
-				libre = false
-				break
-		for precedente in zones:
-			var centre_precedent: Vector2 = precedente["position"]
-			if centre_precedent.distance_to(position_zone) < rayon + float(precedente["rayon"]) + TerrainsMondes.MARGE_OBSTACLE:
-				libre = false
-		if not libre: continue
-		var zone: Dictionary = profil.duplicate()
-		zone["position"] = position_zone
-		zone["rayon"] = rayon
-		zone["contour"] = _contour_flaque(rayon, alea)
-		zones.append(zone)
+		_placer_zone(profil, position_zone, rayon, alea)
+	# Les galeries et alcoves renouvellent les emplacements sans perdre un
+	# phenomene prevu. Le repli utilise les tailles existantes du catalogue.
+	for facteur: float in TerrainsMondes.TAILLES_ZONES:
+		if zones.size() >= nombre: break
+		for ligne: float in TerrainsMondes.LIGNES_REPLI:
+			if zones.size() >= nombre: break
+			for colonne: float in TerrainsMondes.COLONNES_REPLI:
+				if zones.size() >= nombre: break
+				var position_zone: Vector2 = salle.limites.position + Vector2(colonne, ligne) * salle.limites.size
+				_placer_zone(profil, position_zone, float(profil["rayon"]) * facteur, alea)
+
+func _placer_zone(profil: Dictionary, position_zone: Vector2, rayon: float, alea: RandomNumberGenerator) -> void:
+	var forme := _contour_flaque(rayon, alea)
+	var emprise := Rect2(forme[0], Vector2.ZERO)
+	for point in forme: emprise = emprise.expand(point)
+	var marge := TerrainsMondes.MARGE_OBSTACLE
+	var contour: PackedVector2Array = salle.contour_sol()
+	var section := FormesSalles.section_horizontale(contour, position_zone.y)
+	var milieu: float = salle.limites.get_center().x
+	var garde := Reglages.HEROS_RAYON + marge
+	var minimum := section.x + marge - emprise.position.x
+	var maximum := milieu - garde - emprise.end.x
+	if position_zone.x > milieu:
+		minimum = milieu + garde - emprise.position.x
+		maximum = section.y - marge - emprise.end.x
+	if minimum > maximum: return
+	position_zone.x = clampf(position_zone.x, minimum, maximum)
+	var placee := PackedVector2Array()
+	for point in forme: placee.append(position_zone + point)
+	# Le vrai polygone allonge sert au placement, comme au rendu et a l'effet.
+	# Son disque de reference ne suffit plus pour tester les murs ou les couverts.
+	var degagements := Geometry2D.offset_polygon(placee, marge, Geometry2D.JOIN_ROUND)
+	if degagements.size() != 1: return
+	var degagement: PackedVector2Array = degagements[0]
+	if not Geometry2D.clip_polygons(degagement, contour).is_empty(): return
+	for rect: Rect2 in salle.obstacles():
+		var espace := rect.grow(marge)
+		var bloc := PackedVector2Array([espace.position, Vector2(espace.end.x, espace.position.y), espace.end, Vector2(espace.position.x, espace.end.y)])
+		if not Geometry2D.intersect_polygons(placee, bloc).is_empty(): return
+	for precedente: Dictionary in zones:
+		var centre: Vector2 = precedente["position"]
+		var autre := PackedVector2Array()
+		for point: Vector2 in precedente["contour"]: autre.append(centre + point)
+		if not Geometry2D.intersect_polygons(degagement, autre).is_empty(): return
+	var zone: Dictionary = profil.duplicate()
+	zone["position"] = position_zone
+	zone["rayon"] = rayon
+	zone["contour"] = forme
+	zones.append(zone)
 
 func _contour_flaque(rayon: float, alea: RandomNumberGenerator) -> PackedVector2Array:
 	var points := PackedVector2Array()
 	var phase := alea.randf_range(0,TAU)
-	var rotation_flaque := alea.randf_range(0,TAU)
-	var proportions := Vector2(alea.randf_range(.70,1.0),1.0)
-	for i in 28:
-		var angle := i * TAU / 28.0
-		var distance := rayon * (.81 + .10 * sin(angle * 3 + phase) + .06 * sin(angle * 5 - phase))
+	var rotation_flaque := alea.randf_range(-TerrainsMondes.ROTATION_FLAQUE, TerrainsMondes.ROTATION_FLAQUE)
+	var intervalle := TerrainsMondes.PROPORTIONS_FLAQUES
+	var proportions := Vector2(alea.randf_range(intervalle.position.x, intervalle.end.x), alea.randf_range(intervalle.position.y, intervalle.end.y))
+	for i in TerrainsMondes.SOMMETS_FLAQUE:
+		var angle := i * TAU / TerrainsMondes.SOMMETS_FLAQUE
+		var distance := rayon * (.88 + .075 * sin(angle * 2 + phase) + .035 * sin(angle * 3 - phase) + .02 * sin(angle * 5 + phase))
 		points.append((Vector2(cos(angle),sin(angle)) * distance * proportions).rotated(rotation_flaque))
 	return points
 

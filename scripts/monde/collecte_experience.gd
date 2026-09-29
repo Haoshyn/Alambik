@@ -27,12 +27,13 @@ func _physics_process(_delta: float) -> void:
 	var restants: Array[Dictionary] = []
 	var experience := 0
 	var obstacles: Array = _salle.obstacles()
+	var contour: PackedVector2Array = _salle.contour_sol() if _salle.has_method("contour_sol") else PackedVector2Array()
 	for depot in _depots:
 		var point: Vector2 = depot["position"]
 		# Le segment conserve les ramassages meme pendant un deplacement rapide.
 		var proche := Geometry2D.get_closest_point_to_segment(point, _position_precedente, position_heros)
 		if point.distance_to(proche) <= Reglages.MINE_XP_RAYON_RAMASSAGE \
-				and Geometrie.ligne_libre(point, proche, obstacles):
+				and Geometrie.ligne_libre(point, proche, obstacles, 0.0, contour):
 			experience += int(depot["experience"])
 		else:
 			restants.append(depot)

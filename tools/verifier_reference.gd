@@ -205,7 +205,10 @@ func _verifier_attribution_permanente(reference: Dictionary) -> void:
 		_verifier(is_equal_approx(somme, float(total[cle])), "Sources permanentes et socle totalisent 100 % : " + cle)
 	for index in parts.size():
 		var part: Dictionary = parts[index]
-		proportions[Attribution.SOURCES_PERMANENTES[index]] = float(part["dps"]) / float(total["dps"]) * 100.0
+		var proportion := float(part["dps"]) / float(total["dps"])
+		proportions[Attribution.SOURCES_PERMANENTES[index]] = proportion * 100.0
+		_verifier(proportion >= 0.18 and proportion <= 0.22,
+			"Chaque source approche 20 % du DPS permanent de reference : " + Attribution.SOURCES_PERMANENTES[index])
 	var arrivee := Modeles.mesurer(reference)
 	var gain := float(arrivee["dps"]) - float(total["dps"])
 	var facteur := float(arrivee["dps"]) / float(total["dps"])

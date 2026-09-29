@@ -18,8 +18,11 @@ valeurs ; les six `../../statistiques_jeu/liste_*.md` sont des sorties généré
 | Vraies offres et distributions par salle | [simulation_augments.gd](simulation_augments.gd), `simuler`, `une_run`, `calendrier` | `DraftLogique`, `ProgressionAugments`, `Modeles` |
 | Budget, possessions et achats légaux d'un parcours | [compte_simule.gd](compte_simule.gd), `recevoir`, `acheter`, `configuration` | `ButinsRun`, coûts et calculateurs du jeu |
 | Retries, durées, murs et lots de farm | [parcours_progression.gd](parcours_progression.gd), présentation dans [synthese_progression.gd](synthese_progression.gd) | `CompteSimule`, vagues et simulation des augments |
+| Cibles et dispersion des quatre boss, build équilibré financé | [rythme_boss.gd](rythme_boss.gd), `mesurer`, `rapport` | `Parcours`, autres tirages légaux ; contrôle `../verifier_parcours.gd` et profil DEV |
 | Retour offensif après cinq ou six Épreuves | [retour_campagne.gd](retour_campagne.gd), `scenario`, `mesurer`, `rapport` | `CompteSimule`, `Parcours` ; contrôle `../verifier_retour_campagne.gd` |
 | Progression équilibrée/offensive, deux défenses, sur-farm et critiques | [equilibrage_progression.gd](equilibrage_progression.gd), `rapport` | `RetourCampagne.mesurer`, achats réels ; contrôle `../verifier_equilibrage_progression.gd` |
+| Premières salles sans augment, gains d'achats, reprises et entrées financées | [rythme_progression.gd](rythme_progression.gd), `entree`, `achats`, `rapport`, `_entrees_renforcees` | `Parcours`, achats réels ; contrôle `../verifier_rythme_progression.gd` |
+| Effort à 50 %, 75 % et maximum des cinq progressions | [maturation_progression.gd](maturation_progression.gd), `progression`, `parcours`, `rapport` | `CompteSimule`, durées et achats réels ; contrôle `../verifier_maturation_progression.gd` |
 
 Contrôle ciblé : `godot --headless --path . --script res://tools/verifier_reference.gd`
 pour le profil, l'optimum et les contributions ; `tools/verifier_augments.gd`

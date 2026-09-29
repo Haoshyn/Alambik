@@ -3,6 +3,9 @@ extends Node
 const PROFIL := preload("res://dev_temporaire/profil.gd")
 const SESSION := preload("res://dev_temporaire/session.gd")
 const MENU := preload("res://scenes/menu.tscn")
+const Modeles = preload("res://tools/statistiques/modeles.gd")
+const Parcours = preload("res://tools/statistiques/parcours_progression.gd")
+const RythmeBoss = preload("res://tools/statistiques/rythme_boss.gd")
 var _erreurs: Array[String] = []
 var _controles := 0
 
@@ -34,6 +37,7 @@ func _ready() -> void:
 			monde, compte.niveau_compte, compte.gouttes, compte.pierres_forge, compte.objets.size(),
 			compte.rangs_passifs.size(), compte.nombre_coeurs_mana(), compte.runs])
 		compte.free()
+	_verifier_combat_monde_trois()
 	_verifier_session()
 	for format: Vector2i in [Vector2i(720, 1280), Vector2i(1080, 2340)]:
 		get_tree().root.size = format
@@ -88,6 +92,76 @@ func _verifier_profil(compte: Node, monde: int) -> void:
 	var bis := PROFIL.construire(monde)
 	_exiger(SESSION.capturer(compte) == SESSION.capturer(bis), "Profil reproductible")
 	bis.free()
+
+func _configuration_combat(compte: Node) -> Dictionary:
+	return {"niveau": compte.niveau_compte, "attributs": compte.attributs.duplicate(true),
+		"maitrises": compte.rangs_competences.duplicate(true), "passifs": compte.passifs_equipes_effectifs(),
+		"arme": compte.projectile_equipe, "forge_arme": compte.niveau_arme(compte.projectile_equipe),
+		"familier": compte.familier_equipe, "forge_familier": compte.niveau_familier(compte.familier_equipe),
+		"bijoux": compte.equipements.duplicate(true), "forge_bijoux": compte.forge_niveaux.duplicate(true),
+		"coeurs": compte.nombre_coeurs_mana()}
+
+func _verifier_combat_monde_trois() -> void:
+	var compte := PROFIL.construire(2)
+	var equilibre := _configuration_combat(compte)
+	var stats_equilibres := Modeles.mesurer(equilibre)
+	var butin_equilibre: int = compte.gain_gouttes(100)
+	compte.reinitialiser_attributs()
+	while compte.points_attributs_disponibles() > 0: compte.augmenter_attribut("force")
+	compte.reinitialiser_arbre()
+	# Concentrer le meme budget sur les rangs qui donnent le plus de DPS.
+	while true:
+		var choix := ""
+		var rendement := -INF
+		var configuration := _configuration_combat(compte)
+		var dps := float(Modeles.mesurer(configuration)["dps"])
+		for id: String in ArbreCompetences.BRANCHES["Offensif"]:
+			if not compte.peut_acheter_competence(id): continue
+			var essai := configuration.duplicate(true)
+			essai["maitrises"][id] = compte.rang_competence(id) + 1
+			var gain := (float(Modeles.mesurer(essai)["dps"]) / dps - 1.0) / float(compte.cout_competence(id))
+			if gain > rendement:
+				choix = id
+				rendement = gain
+		if choix.is_empty(): break
+		compte.acheter_competence(choix)
+	var offensif := _configuration_combat(compte)
+	var stats_offensifs := Modeles.mesurer(offensif)
+	_exiger(float(stats_offensifs["dps"]) >= float(stats_equilibres["dps"]) * 1.2, "Le focus offensif conserve un avantage sensible de degats")
+	_exiger(float(stats_offensifs["pv_effectifs"]) <= float(stats_equilibres["pv_effectifs"]) * 0.8, "Le focus offensif reste moins resistant")
+	_exiger(compte.gain_gouttes(100) <= float(butin_equilibre) * 0.9, "Le focus offensif recolte moins sans Sagesse et maitrises utilitaires")
+	var sans_passifs := offensif.duplicate(true)
+	sans_passifs["passifs"] = {}
+	var sans_soins := Stats.depuis_reglages(sans_passifs["maitrises"], {}, Modeles.bonus_equipement(sans_passifs),
+		int(sans_passifs["niveau"]), sans_passifs["attributs"])
+	var avec_soins := Stats.depuis_reglages(equilibre["maitrises"], equilibre["passifs"], Modeles.bonus_equipement(equilibre),
+		int(equilibre["niveau"]), equilibre["attributs"])
+	_exiger(sans_soins.pv_max * sans_soins.soin_mult < avec_soins.pv_max * avec_soins.soin_mult * 0.75, "Le budget de soins du profil sans defense reste faible")
+	_exiger(is_zero_approx(ArbreCompetences.soin_par_salle(sans_passifs["maitrises"])) and is_zero_approx(Passifs.soin_moisson(sans_passifs["passifs"])), "Aucune regeneration passive offerte au profil pur offensif")
+	var chapitre := 2 * Chapitres.CHAPITRES_PAR_MONDE
+	var boss_equilibres := RythmeBoss.mesurer(equilibre, chapitre)
+	for salle: Dictionary in boss_equilibres["salles"]:
+		var mediane := float(salle["duree"]["mediane"])
+		_exiger(mediane >= float(salle["cible_min"]) and mediane <= float(salle["cible_max"]),
+			"Chaque boss DEV equilibre du monde trois doit rejoindre la cible : salle " + str(salle["salle"]))
+	for paire: Array in [["equilibre", equilibre], ["offensif", offensif], ["sans_passifs", sans_passifs]]:
+		var configuration: Dictionary = paire[1]
+		var mesure := Modeles.mesurer(configuration)
+		for id: String in ["encrier_rampant", "plume_sentinelle", "tache_veloce"]:
+			var ennemi := Parcours.ennemi("grimoire", chapitre, 1, id)
+			var attaques := ceili(float(ennemi["pv"]) / float(mesure["tir_normal"]))
+			_exiger(attaques >= 2 and attaques <= 4, "Entree du monde trois sans banaliser les OS ni imposer trop de coups : " + str(paire[0]) + " " + id)
+		var cohorte := Parcours.cohorte(configuration, chapitre, 8, PROFIL.GRAINE,
+			{"politique": "equilibre" if str(paire[0]) == "equilibre" else "tout_offensif"})
+		var boss: Dictionary = cohorte["boss_final"]
+		if str(paire[0]) != "equilibre":
+			_exiger(float(boss["mediane"]) < float(boss_equilibres["salles"].back()["duree"]["mediane"]),
+				"Le boss doit tomber plus vite avec le focus offensif : " + str(paire[0]))
+		print("Combat DEV monde 3 %s : %.1f degats, %.1f DPS, %.1f PV effectifs, boss %.1f s [P10 %.1f ; P90 %.1f]." % [str(paire[0]), float(mesure["tir_normal"]), float(mesure["dps"]), float(mesure["pv_effectifs"]), float(boss["mediane"]), float(boss["p10"]), float(boss["p90"])])
+	var plume := Parcours.ennemi("grimoire", chapitre, 1, "plume_sentinelle")
+	_exiger(float(stats_offensifs["pv_effectifs"]) / float(plume["degats"]) <= 3.5, "Le full offensif encaisse trop au monde trois")
+	_exiger(float(stats_equilibres["pv_effectifs"]) / float(plume["degats"]) >= 4.0, "Le profil equilibre doit conserver une marge de survie")
+	compte.free()
 
 func _verifier_session() -> void:
 	ReglagesJoueur.reinitialiser_progression()

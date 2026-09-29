@@ -35,6 +35,9 @@ Contrôle dédié : lancer Godot avec `--headless` sur
 `res://tools/verifier_dev_temporaire.tscn`, en isolant `APPDATA` et `LOCALAPPDATA`
 dans un chemin contenant `verification_dev_temporaire`. Il couvre les cinq
 profils, les budgets, la régression, la restauration et les clics du menu sur
-deux formats portrait. Les arguments `--preparer-reprise-dev`, puis
+deux formats portrait. À l'entrée du monde 3, il compare aussi le profil
+équilibré, le même budget concentré en Force et maîtrises offensives, puis
+ce profil sans passifs : dégâts, résistance, soins, butin et durées des boss.
+Les arguments `--preparer-reprise-dev`, puis
 `--verifier-reprise-dev` dans un second processus et le même profil isolé
 contrôlent la conservation après redémarrage.

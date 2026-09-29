@@ -119,6 +119,6 @@ func _ouvrir_detail(id: String, type: String) -> void:
 	else:
 		col.add_child(StyleAzur.texte(str(d["description"]), 30))
 		var rang_max := Passifs.rang_max(id)
-		col.add_child(StyleAzur.texte("Rang 1 : %s\nRang %d : %s" % [Passifs.resume_rang(id, 1), rang_max, Passifs.resume_rang(id, rang_max)], 28))
+		col.add_child(StyleAzur.texte("Rang 1 : %s\nRang %d : %s" % [Passifs.resume_rang(id, 1, ReglagesJoueur.niveau_compte_effectif()), rang_max, Passifs.resume_rang(id, rang_max, ReglagesJoueur.niveau_compte_effectif())], 28))
 		col.add_child(StyleAzur.texte("Les doublons améliorent ce passif, jusqu’au rang %d. %s" % [rang_max, Passifs.progression_rang(id)], 26, StyleAzur.ATTENUE))
 		col.add_child(StyleAzur.texte("Cœurs de mana : +%d %% de dégâts chacun, au maximum %d (+%d %%)." % [roundi(Reglages.COEUR_MANA_BONUS_FINAL * 100.0), Epreuves.nombre(), roundi(Reglages.COEUR_MANA_BONUS_FINAL * Epreuves.nombre() * 100.0)], 26, StyleAzur.ATTENUE))

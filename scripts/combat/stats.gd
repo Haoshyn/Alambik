@@ -46,8 +46,8 @@ static func composer_statistique(base: float, attributs_bruts: float, equipement
 static func depuis_reglages(rangs: Dictionary = {}, passifs: Dictionary = {}, objets: Dictionary = {},
 		niveau := 1, attributs: Dictionary = {}, _specialisation := "") -> Stats:
 	var s := Stats.new()
-	var bonus_attributs := Personnage.bonus(attributs)
-	var bonus_passifs: Dictionary = Passifs.bonus_stats(passifs)
+	var bonus_attributs := Personnage.bonus(attributs, niveau)
+	var bonus_passifs: Dictionary = Passifs.bonus_stats(passifs, niveau)
 	s.etapes_permanentes["attaque"] = composer_statistique(base_degats(niveau),
 		float(bonus_attributs["attaque_base"]), float(objets.get("attaque_base", 0.0)),
 		1.0 + float(bonus_attributs["attaque_mult"]), 1.0 + float(objets.get("attaque_mult", 0.0)),

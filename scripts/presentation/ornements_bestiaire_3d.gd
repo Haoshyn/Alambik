@@ -21,24 +21,21 @@ static func construire(forme: String, monde: int, matiere: Material) -> MeshInst
 			match monde:
 				1:
 					var pierre := SphereMesh.new()
-					pierre.radius = .125
-					pierre.height = .17
-					pierre.radial_segments = 5
-					pierre.rings = 2
-					_ajouter(outil, pierre, point, Vector3(0,0,cote*.3), couleur.darkened(.25))
+					pierre.radius = .105
+					pierre.height = .18
+					pierre.radial_segments = 8
+					pierre.rings = 3
+					_ajouter(outil, pierre, point + Vector3(0,.035,0), Vector3(0,0,cote*.3), couleur.darkened(.15))
 				2:
-					var nageoire := PrismMesh.new()
-					nageoire.size = Vector3(.07,.31,.19)
-					_ajouter(outil, nageoire, point, Vector3(.25,0,-cote*.65), couleur)
+					var nageoire := _feuille(Vector3(.11,.30,.055))
+					_ajouter(outil, nageoire, point, Vector3(-.15,0,-cote*.55), couleur)
 				3:
 					for i in 2:
-						var plume := PrismMesh.new()
-						plume.size = Vector3(.05,.27-i*.06,.075)
-						_ajouter(outil, plume, point + Vector3(cote*i*.045,0,-i*.06), Vector3(.4,0,-cote*.8), couleur)
+						var plume := _feuille(Vector3(.09,.23-i*.045,.035))
+						_ajouter(outil, plume, point + Vector3(cote*i*.045,0,-i*.04), Vector3(.20,0,-cote*.70), couleur, true)
 				4:
-					var flamme := PrismMesh.new()
-					flamme.size = Vector3(.09,.25,.12)
-					_ajouter(outil, flamme, point + Vector3(0,.025,0), Vector3(.22,0,-cote*.40), couleur)
+					var flamme := _feuille(Vector3(.13,.25,.05))
+					_ajouter(outil, flamme, point, Vector3(.15,0,-cote*.35), couleur)
 		_formes[cle] = outil.commit()
 	var instance := MeshInstance3D.new()
 	instance.name = "SignatureDuMonde"
@@ -46,15 +43,43 @@ static func construire(forme: String, monde: int, matiere: Material) -> MeshInst
 	instance.material_override = matiere
 	return instance
 
-static func _ajouter(outil: SurfaceTool, forme: PrimitiveMesh, point: Vector3, rotation: Vector3, couleur: Color) -> void:
+static func _feuille(taille: Vector3) -> ArrayMesh:
+	# Une section ovale epaisse garde un contour courbe sous toutes les orientations.
+	var outil := SurfaceTool.new()
+	outil.begin(Mesh.PRIMITIVE_TRIANGLES)
+	outil.set_smooth_group(0)
+	var largeurs := [0.06, 0.75, 1.0, 0.62, 0.01]
+	const FACES := 8
+	for ligne in largeurs.size():
+		var t := float(ligne) / float(largeurs.size() - 1)
+		for cote in FACES:
+			var angle := float(cote) * TAU / FACES
+			outil.set_uv(Vector2(float(cote) / FACES, t))
+			outil.add_vertex(Vector3(cos(angle) * taille.x * float(largeurs[ligne]) * .5,
+				t * taille.y, sin(angle) * taille.z * .5 + sin(t * PI) * .018))
+	for ligne in largeurs.size() - 1:
+		for cote in FACES:
+			var a := ligne * FACES + cote
+			var b := ligne * FACES + (cote + 1) % FACES
+			for indice in [a, b, b + FACES, a, b + FACES, a + FACES]: outil.add_index(indice)
+	for cote in range(1, FACES - 1):
+		for indice in [0, cote + 1, cote]: outil.add_index(indice)
+		var dernier := (largeurs.size() - 1) * FACES
+		for indice in [dernier, dernier + cote, dernier + cote + 1]: outil.add_index(indice)
+	outil.generate_normals()
+	return outil.commit()
+
+static func _ajouter(outil: SurfaceTool, forme: Mesh, point: Vector3, rotation: Vector3, couleur: Color, papier := false) -> void:
 	var tableaux := forme.surface_get_arrays(0)
 	var sommets: PackedVector3Array = tableaux[Mesh.ARRAY_VERTEX]
 	var normales: PackedVector3Array = tableaux[Mesh.ARRAY_NORMAL]
+	var uv: PackedVector2Array = tableaux[Mesh.ARRAY_TEX_UV]
 	var indices: PackedInt32Array = tableaux[Mesh.ARRAY_INDEX]
 	var axe := Basis.from_euler(rotation)
 	for i in indices:
-		outil.set_color(couleur)
-		outil.set_uv(Vector2(.25,.75))
+		var modelage := .88 + .12 * maxf(normales[i].y, 0.0)
+		outil.set_color(Color(couleur.r * modelage, couleur.g * modelage, couleur.b * modelage, 1.0))
+		outil.set_uv(Vector2(.0175, .5175 if papier else .0175) + uv[i] * .465)
 		outil.set_uv2(Vector2.ZERO)
 		outil.set_normal(axe * normales[i])
 		outil.add_vertex(point + axe * sommets[i])

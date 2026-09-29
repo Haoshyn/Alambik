@@ -39,10 +39,29 @@ static func segment_coupe_rect(a: Vector2, b: Vector2, rect: Rect2) -> bool:
 
 # La marge compte : un projectile a un rayon, donc une ligne qui frole un bloc
 # de quelques pixels est en realite bouchee.
-static func ligne_libre(a: Vector2, b: Vector2, obstacles: Array, marge := 0.0) -> bool:
+static func ligne_libre(a: Vector2, b: Vector2, obstacles: Array, marge := 0.0, contour := PackedVector2Array()) -> bool:
 	for rect in obstacles:
 		if segment_coupe_rect(a, b, (rect as Rect2).grow(marge)):
 			return false
+	return contour.is_empty() or segment_dans_contour(a, b, contour, marge)
+
+static func segment_dans_contour(a: Vector2, b: Vector2, contour: PackedVector2Array, marge := 0.0) -> bool:
+	if not Geometry2D.is_point_in_polygon(a, contour) or not Geometry2D.is_point_in_polygon(b, contour): return false
+	var cadre := Rect2(a, b - a).abs().grow(marge + .01)
+	var seuil := maxf(0.0, marge - .01)
+	for i in contour.size():
+		var c := contour[i]
+		var d := contour[(i + 1) % contour.size()]
+		if maxf(c.x, d.x) < cadre.position.x or minf(c.x, d.x) > cadre.end.x \
+				or maxf(c.y, d.y) < cadre.position.y or minf(c.y, d.y) > cadre.end.y: continue
+		# Deux extremites dans le sol peuvent etre separees par le mur d'une alcove.
+		if Geometry2D.segment_intersects_segment(a, b, c, d) != null: return false
+		if marge <= 0.0: continue
+		var distance := minf(a.distance_to(Geometry2D.get_closest_point_to_segment(a, c, d)),
+			b.distance_to(Geometry2D.get_closest_point_to_segment(b, c, d)))
+		distance = minf(distance, c.distance_to(Geometry2D.get_closest_point_to_segment(c, a, b)))
+		distance = minf(distance, d.distance_to(Geometry2D.get_closest_point_to_segment(d, a, b)))
+		if distance < seuil: return false
 	return true
 
 # Une limite d'arene decrit le bord du sol, mais un personnage est un disque.
@@ -80,10 +99,7 @@ static func origine_projectile(origine: Vector2, direction: Vector2, limites: Re
 	if not resultat.is_finite(): return resultat
 	var sortie := resultat + avance * degagement
 	if not FormesSalles.contient_disque(sortie, contour, marge): return Vector2.INF
-	if not ligne_libre(resultat, sortie, obstacles, marge): return Vector2.INF
-	for i in contour.size():
-		if Geometry2D.segment_intersects_segment(resultat, sortie, contour[i], contour[(i + 1) % contour.size()]) != null:
-			return Vector2.INF
+	if not ligne_libre(resultat, sortie, obstacles, marge, contour): return Vector2.INF
 	return resultat
 
 # Ou viser pour toucher une cible en mouvement. L'anticipation est bornee : au

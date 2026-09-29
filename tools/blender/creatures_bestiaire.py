@@ -16,10 +16,13 @@ def encrier():
     b.boule('Encre', (0,0,.49), (.185,.17,.038), 'encre')
     for c in (-1,1):
         courbe('Coulure', [(c*.19,-.10,.51),(c*.22,-.17,.41),(c*.18,-.22,.28)], [.034,.036,.016], 'encre')
-    with articulation('tete_0', (0,.16,.51)):
-        couvercle = b.cone('Couvercle', (0,.18,.68), .20, .19, .045, 'cuivre')
-        couvercle.rotation_euler.x = .65
-        gemme((0,.055,.73), .073)
+    b.tige('Charniere', (-.095,.20,.54), (.095,.20,.54), .024, 'cuivre')
+    with articulation('tete_0', (0,.20,.54)) as couvercle:
+        b.cone('Couvercle', (0,0,.56), .205, .19, .038, 'cuivre')
+        b.anneau('Bord_du_couvercle', (0,0,.555), .19, .013, 'cuivre')
+        pierre = b.cone('Pierre_du_couvercle', (0,-.015,.598), .061, .028, .035, 'magie', 4)
+        pierre.rotation_euler.z = math.pi/4
+    couvercle.rotation_euler.x = -.62
     regard(-.24,.365,.107,.060)
     pattes()
 

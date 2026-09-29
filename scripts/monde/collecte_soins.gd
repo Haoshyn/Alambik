@@ -94,6 +94,7 @@ func _physics_process(_delta: float) -> void:
 	var restants: Array[Vector2] = []
 	var nombre := 0
 	var obstacles: Array = _salle.obstacles()
+	var contour: PackedVector2Array = _salle.contour_sol() if _salle.has_method("contour_sol") else PackedVector2Array()
 	var soin_unitaire := SOINS.soin_base(float(_heros.stats.pv_max)) * maxf(0.0, float(_heros.stats.soin_mult))
 	var manquants := maxf(0.0, float(_heros.stats.pv_max) - float(_heros.stats.pv))
 	var necessaires := ceili(manquants / soin_unitaire) if soin_unitaire > 0.0 else 0
@@ -101,7 +102,7 @@ func _physics_process(_delta: float) -> void:
 		var proche := Geometry2D.get_closest_point_to_segment(point, _position_precedente, position_heros)
 		if nombre < necessaires \
 				and point.distance_to(proche) <= SOINS.RAYON_RAMASSAGE \
-				and Geometrie.ligne_libre(point, proche, obstacles):
+				and Geometrie.ligne_libre(point, proche, obstacles, 0.0, contour):
 			nombre += 1
 		else:
 			restants.append(point)
@@ -132,11 +133,9 @@ func _position_depot(point: Vector2, decalage: Vector2) -> Vector2:
 			if ecart < distance:
 				distance = ecart
 				resultat = sortie
-	# Le decalage des doubles depots ne doit franchir ni muret ni bord arrondi.
-	if not Geometrie.ligne_libre(point, resultat, obstacles): return point
-	if _salle.has_method("contour_sol"):
-		var contour: PackedVector2Array = _salle.contour_sol()
-		if not Geometry2D.is_point_in_polygon(resultat, contour): return point
+	# Les doubles depots restent du meme cote des murets et des renfoncements.
+	var contour: PackedVector2Array = _salle.contour_sol() if _salle.has_method("contour_sol") else PackedVector2Array()
+	if not Geometrie.ligne_libre(point, resultat, obstacles, 0.0, contour): return point
 	return resultat
 
 func _afficher() -> void:

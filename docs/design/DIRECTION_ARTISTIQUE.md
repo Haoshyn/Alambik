@@ -9,19 +9,27 @@ elles conservent les idées historiques sans définir le rendu actuel.
 - Fantasy alchimique originale, lumineuse et aventureuse : encre, fioles,
   grimoires, sceaux et magie. La lisibilité sur téléphone prime sur l'ornement.
 - Le combat utilise des modèles et effets 3D sur une simulation 2D.
-- Le héros est le mage sculpté, avec son chapeau, ses textures, ses animations
-  et une arme tenue séparée qui suit l'équipement.
+- Le héros est Aster V7 : sorcier anime aux proportions de jeu vidéo, robe
+  bleu nuit et ivoire, ornements dorés, grand chapeau et baguette. Le rendu
+  reprend ses matières peintes et ses contours fins. L'arme standard est sa
+  baguette intégrée ; les autres armes suivent l'équipement. Le tir rapide
+  à l'arrêt anime le bras et légèrement le buste, avec les pieds stables.
 - Les onze monstres communs et les vingt boss sont des objets alchimiques
   vivants : encriers à pattes, plumes, grimoires ouverts, masques et fioles.
   Leurs volumes distinguent l'encre sombre, la céramique mate, le tissu,
-  le parchemin ivoire et les montures patinées. Un atlas peint partagé,
-  des ombres de creux et des lumières par sommet remplacent les surfaces
-  uniformément brillantes. Plis souples, pans fins, paupières sculptées et
-  pierres taillées précisent les silhouettes. Les variantes changent les teintes, les proportions
+  le parchemin ivoire, le cuivre satiné et l'acier. Un atlas peint partagé,
+  des UV continus, des ombres de creux douces et des lumières par sommet
+  donnent du relief aux matières ; une petite carte partagée règle leurs reflets.
+  Plis souples, pans fins, paupières sculptées et pierres taillées précisent
+  les silhouettes. Les plumes suivent leurs nervures, les couvercles leur
+  charnière et les pattes leurs joints. Les variantes changent les teintes, les proportions
   et de courts appendices minéraux, aquatiques, aériens ou ardents.
 - Pattes, bras, couvertures, ailes, têtes et bouchons sont articulés séparément.
-  Les pattes plient sur deux segments ; leurs appuis restent dans le monde
-  pendant la marche, puis se reposent à l'arrêt. Les êtres flottants inclinent
+  Les pattes plient sur deux segments avec un pli stable ; leur cadence suit
+  la distance parcourue et reste bornée en course. À faible vitesse, les appuis
+  restent dans le monde ; en course rapide, ils accompagnent l'excès de
+  translation pour garder des gestes lisibles. Les pieds se reposent à l'arrêt.
+  Les êtres flottants inclinent
   leur corps dans le déplacement ; pages et pans suivent avec du retard.
   Préparation, frappe et recul gardent les volumes rigides, sans pulsation
   permanente du corps. Le gel immobilise aussi les membres.
@@ -68,31 +76,60 @@ elles conservent les idées historiques sans définir le rendu actuel.
   Ces volumes sont construits dans `scripts/presentation/ornements_monde.gd` ;
   leurs silhouettes sont originales et leurs palettes viennent de
   `data/presentation/decors_mondes.gd`.
-- Le fond de salle est une matière minérale continue et mate, avec des
-  nuances fondues et quelques veines courtes ; aucun quadrillage ne recouvre
-  toute l'arène. Sa couleur suit le monde : lavande, sable, turquoise pâle,
-  gris perle ou cendre. Les couleurs des sommets gardent ce fond dans un
-  seul maillage, sans texture répétée.
-  Deux matières secondaires complètent chaque monde : parquet et mosaïque
-  pour Encre ; terre battue et pavés moussus pour Terre ; calcaire et petits
-  émaux pour Eau ; pierre érodée et ardoises pour Air ; briques et plaques
-  pour Feu.
-  Chaque monde possède une composition différente. Les proportions et les
-  contours des zones sont déformés selon la salle, avec des raccords en
-  gradins ou érodés selon la matière. Le résultat reste stable entre deux
-  constructions de la même salle.
-  Grain du parquet, fissures, rivets et quelques pages, feuilles, plumes ou
-  éclats restent mats et discrets. La marque centrale reste sans halo.
-  Le tout est découpé sur le contour physique, avec une frise d'émail incrustée.
+- Le sol associe l'enduit ciré B à une bordure d'émail de fantaisie.
+  La matière est continue, talochée et légèrement satinée, avec de larges
+  passages d'outil visibles de près. La peinture originale, ses origines et
+  les anciennes sources conservées figurent dans `assets/visual/sols/ORIGINE.md`.
+  Violet pour Encre, sauge dorée pour Terre, turquoise pour Eau, bleu ciel
+  pour Air, mauve et ambre pour Feu. Les pigments restent présents de près.
+  Chaque étage répartit de grandes reprises plus chaudes, des plages
+  patinées et un passage légèrement poli. Leurs limites sont irrégulières
+  et fondues dans la matière ; le centre reste
+  calme. Le sens de la taloche change aussi dans les reprises. Les nuances
+  et les déformations de la peinture appartiennent au même maillage de sol.
+  Une bordure d'émail coloré et un filet doré suivent les parois.
+  Aucun livre, feuille, médaillon ni grand pictogramme n'est plaqué au sol.
+  La bordure est construite par `scripts/presentation/bordures_sol.gd`,
+  dans un seul maillage texturé avec des couleurs de sommets. Elle reste
+  sous les flaques et les acteurs, découpée sur le contour réel.
+  Le décalage de la frise et le cadrage de la peinture varient également. La graine
+  dépend du monde, de l'étage et de la variante ; la même salle garde son
+  dessin à chaque reconstruction. Ces détails restent sous les acteurs,
+  sans halo ni couleur de danger.
+  En campagne, les profils alternent galeries étroites, salles allongées,
+  cours arrondies, murs ondulés, renfoncements et alcôves. La largeur reste
+  bornée à celle de référence, y compris au fond des alcôves. Proportions,
+  arrondis, côté et emplacement des reliefs varient de façon déterministe
+  par étage. Les collisions et la présentation partagent ces mêmes parois ;
+  le passage central reste libre.
+  La géométrie du sol et des bordures est découpée sur ce contour réel,
+  avec une frise d'émail et de cuivre. Les modes annexes gardent leurs contours.
+  Les décors des rives sont des volumes proches des vrais murs, y compris
+  dans les galeries étroites et près des alcôves. Lanternes serties, établis
+  de potions, jarres, champignons, coraux, carillons, cristaux et appareils
+  forment des ensembles distincts. Leur nombre, leur emplacement, leur
+  orientation et leur échelle changent par étage. Leur emprise entière
+  reste hors du contour jouable ; aucun nouvel obstacle invisible n'est ajouté.
+  Les murets et rochers portent également des lanternes ou massifs miniatures,
+  dans l'emprise du couvert physique, pour habiter le cadre près du héros.
   Les appareils hauts restent sur les côtés et au fond. Les couverts portent
-  des reliures, fioles, plantes ou creusets en gardant leur emprise de collision.
-  Les courants des canaux extérieurs et les moulins s'arrêtent en effets réduits.
-  Le sol reste sous les ombres des acteurs ; les éléments immobiles sont
-  regroupés pour limiter les appels de dessin sur téléphone.
-- Les zones de terrain actives sont des flaques petites ou moyennes aux
-  contours organiques, distinctes des grandes zones de matériaux du sol.
-  Encre violette, sables ocres, eau turquoise et lave orangée ont un liseré
-  irrégulier et des reflets, stries ou veines propres à leur matière. La
+  des reliures, fioles, plantes ou creusets en gardant leur emprise de collision ;
+  leurs surfaces reprennent la céramique peinte de l'atlas original du bestiaire.
+  Les bains des appareils et les moulins s'arrêtent en effets réduits.
+  Les textures utilisent mipmaps et compression pour Android. Les éléments
+  immobiles sont regroupés par matière en conservant les UV et les couleurs
+  des sommets, pour limiter les appels de dessin sur téléphone.
+  L'export d'aperçu convertit les couleurs de sommets sRGB en linéaire pour
+  que les peintures ne soient pas éclaircies lors du rendu Blender.
+  Les sols y conservent aussi leur absence d'ombre portée.
+- Les zones de terrain actives sont de grandes nappes allongées aux contours
+  organiques, distinctes des nuances et reprises de l'enduit. Leur rive reste
+  fine ; la profondeur vient de nuances et de reflets sur une surface basse.
+  Encre visqueuse violette, sables ocres striés, eau turquoise et lave à veines
+  chaudes ont des peintures et normales originales, générées par
+  `tools/generer_matieres_terrains.gd` et conservées dans
+  `assets/visual/terrains/`, avec leurs origines. Les petits glissements des
+  reflets d'encre et d'eau se figent en effets réduits. La
   silhouette 3D reprend le polygone de la simulation, sous les ombres des
   acteurs. Les rafales d'Air sont indiquées par des flèches pâles, visibles
   avant et pendant la poussée ; elles disparaissent pendant l'accalmie.
@@ -270,8 +307,15 @@ elles conservent les idées historiques sans définir le rendu actuel.
 - Menus, cartes, paramètres, pause, récompenses et HUD partagent le même kit.
   Dans le HUD, le temps de salle reste en bandeau, les ressources sont en deux
   compteurs et une commande de pause ronde. Aucun bouton de sort n'est affiché.
-  La transition
-  d'entrée reprend le portail sur un halo discret et un cartouche de monde.
+  Le démarrage conserve l'illustration Alambic, son logo et sa fiole entiers ;
+  le fond prolonge ses bords selon le format et les zones sûres de l'écran.
+  L'entrée en partie montre l'île animée du monde choisi sur un dégradé indigo,
+  son nom en Grenze, le niveau et sa phrase d'ambiance sans cartouche.
+  Mine et Épreuves utilisent leur illustration dédiée. Trois points discrets
+  accompagnent le chargement ; les effets réduits gardent l'image fixe.
+  Les passages entre étages reprennent ce même écran avec « Étage X / Y »
+  sous le niveau. Le total vient de la run ; le composant et l'illustration
+  sont réutilisés jusqu'à la fin de la tentative.
   La simulation, les silhouettes de combat et les couleurs de danger gardent
   leurs règles de lisibilité ; cette refonte concerne l'habillage d'interface.
 - Le rendu mobile et les changements de format doivent être jugés dans le jeu :
@@ -320,7 +364,11 @@ Références pour les rôles et les contrastes :
   `scripts/presentation/materiaux_apprenti.gd`, `scripts/presentation/arme_tenue_3d.gd`.
 - Interface : `scripts/presentation/style_azur.gd`, `ui/`,
   `assets/visual/interface/ORIGINE.md`, `assets/visual/arcane/ORIGINE.md`.
-- Génération du héros : `tools/blender/mage_sculpte.py` et ses modules.
+- Héros : `scenes/3d/aster.tscn`, `scripts/presentation/modele_aster.gd`,
+  `animation_heros_3d.gd`, `tir_heros_3d.gd` et `shaders/aster_*.gdshader`.
+  Source éditable et provenance : `assets/3d/sources/characters/aster/`.
+  Les anciens générateurs `tools/blender/mage_sculpte.py` et leurs modules
+  restent conservés, sans définir le héros actif.
 - Génération du bestiaire : `tools/blender/bestiaire_sculpte.py`,
   `creatures_bestiaire.py`, `souverains_bestiaire.py` et `sculpture_bestiaire.py`.
   Origine : `assets/3d/ORIGINE_BESTIAIRE.md`.

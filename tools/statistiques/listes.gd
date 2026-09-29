@@ -74,7 +74,7 @@ static func augments() -> String:
 static func items() -> String:
 	var lignes := entete("Liste des items", [
 		"Forge de 0 à %d. Prix du prochain achat depuis le niveau n : %d + %d × n + %d × n² Pierres, arrondi au multiple de %d le plus proche." % [Reglages.FORGE_NIVEAU_MAX, Reglages.FORGE_COUT_BASE, Reglages.FORGE_COUT_PAR_NIVEAU, Reglages.FORGE_COUT_QUADRATIQUE, Reglages.COUT_PAS_ARRONDI],
-		"Arme : attaque brute = (%s + %s × forge) × %s^(niveau de provenance − 1)." % [nombre(CatalogueProjectiles.ATTAQUE_BASE), nombre(CatalogueProjectiles.FORGE_ATTAQUE_PAR_NIVEAU), nombre(Reglages.EQUIPEMENT_CROISSANCE_PAR_PALIER, 3)],
+		"Arme : attaque brute = (%s + %s × min(forge, %d) + %s × max(forge − %d, 0)) × %s^(niveau de provenance − 1)." % [nombre(CatalogueProjectiles.ATTAQUE_BASE), nombre(CatalogueProjectiles.FORGE_ATTAQUE_PAR_NIVEAU), CatalogueProjectiles.FORGE_RANGS_INITIAUX, nombre(CatalogueProjectiles.FORGE_ATTAQUE_PAR_NIVEAU_TARDIF), CatalogueProjectiles.FORGE_RANGS_INITIAUX, nombre(Reglages.EQUIPEMENT_CROISSANCE_PAR_PALIER, 3)],
 		"Familier : attaque propre = (base du modèle + %s × forge) × le même facteur de provenance." % nombre(CatalogueFamiliers.FORGE_ATTAQUE_PAR_NIVEAU),
 		"Bijoux : les valeurs brutes sont multipliées par %s^(%d × indice du monde), indice de 0 à %d. Les pourcentages ne le sont pas." % [nombre(Reglages.EQUIPEMENT_CROISSANCE_PAR_PALIER, 3), Chapitres.CHAPITRES_PAR_MONDE, Chapitres.MONDES.size() - 1],
 		"Les tableaux donnent les statistiques finales de CHAQUE objet à CHAQUE niveau, provenance déjà appliquée.",
@@ -193,11 +193,12 @@ static func passifs() -> String:
 			var d: Dictionary = Passifs.CATALOGUE[id]
 			if str(d["categorie"]) != categorie: continue
 			lignes.append_array(["### " + str(d["nom"]), "",
-				"**Obtention :** %s." % Epreuves.provenance(id), ""])
+				"**Obtention :** %s." % Epreuves.provenance(id), "",
+				str(d["description"]), ""])
 			var rangs: Array = []
 			for rang in range(1, Passifs.rang_max(id) + 1):
 				rangs.append([rang, Passifs.resume_rang(id, rang)])
-			tableau(lignes, ["Rang", "Effet du passif"], rangs)
+			tableau(lignes, ["Rang", "Effet au niveau maximal du héros"], rangs)
 	lignes.append_array(["## Cœurs de mana des Épreuves", "",
 		"Chaque niveau d’Épreuve possède un Cœur unique, garanti au plus tard après %d victoires sans son Cœur." % Reglages.EPREUVE_GARANTIE_COEUR,
 		"",
@@ -226,8 +227,8 @@ static func monstres() -> String:
 		]
 		if d.has("recharge") and str(d["cerveau"]) != "poursuivant":
 			statistiques.append(["Intervalle d’attaque", nombre(float(d["recharge"])) + " s"])
-		if str(d["cerveau"]) in ["poursuivant", "rampant", "veloce"]:
-			statistiques.append(["Contact du corps", "Dégâts immédiats ; délai entre contacts %s s" % nombre(BestiaireMondes.POURSUITE_CONTACT_RECHARGE)])
+		var recharge_contact := BestiaireMondes.BOSS_DEGATS_CONTACT_RECHARGE if str(d["cerveau"]) == "boss" else BestiaireMondes.POURSUITE_CONTACT_RECHARGE
+		statistiques.append(["Contact du corps", "Dégâts immédiats ; délai entre contacts %s s" % nombre(recharge_contact)])
 		if str(d["cerveau"]) == "veloce":
 			statistiques.append_array([
 				["Durée de charge en terrain libre", nombre(float(d["duree_charge"])) + " s ; trajet annoncé arrêté au premier mur ou obstacle"],
@@ -297,7 +298,7 @@ static func _rythme_monstres(lignes: Array[String]) -> void:
 		"Les tireurs utilisent la portée réelle de leurs projectiles sans attendre leur distance de placement ; les tireurs fuyards gardent leur recul. Les phaseurs se téléportent aussi de loin, vers une place libre annoncée. Les invocateurs appellent à distance et restent capables de tirer une fois leurs renforts épuisés.", "",
 		"Une charge exige une cible atteignable et une voie libre, y compris après la préparation et avant un enchaînement. Le déplacement suit exactement le segment annoncé, limité par les murs et obstacles. Un ralentissement empêchant de couvrir ce segment avant le départ annule la charge ; après le départ, il allonge le trajet dans le temps sans raccourcir sa distance.", "",
 		"Les boomerangs des boss sont plus épais, saturés et bordés de sombre. Leur éventail compte %d branches ; leur plafond de vitesse est %s px/s avant progression, contre %s px/s pour les monstres ordinaires. La portée totale couvre les deux trajets ; un mur provoque le retour." % [ProjectilesEnnemis.RETOUR_BOSS_ANGLES.size(), nombre(ProjectilesEnnemis.RETOUR_BOSS_VITESSE_MAX), nombre(ProjectilesEnnemis.RETOUR_VITESSE_MAX)], "",
-		"Les tirs lents partent sans tracé préalable. Une annonce est requise dès %s px/s de vitesse réelle, ou si le temps avant impact est inférieur à %s s après prise en compte des hitboxes. La règle suit la progression et les plafonds des trajectoires. Les impacts de zone et les frappes préparées gardent leur avertissement ; le corps des poursuivants et chargeurs blesse dès le contact." % [nombre(ProjectilesEnnemis.VITESSE_ANNONCE), nombre(ProjectilesEnnemis.REACTION_SANS_ANNONCE)], "",
+		"Les tirs lents partent sans tracé préalable. Une annonce est requise dès %s px/s de vitesse réelle, ou si le temps avant impact est inférieur à %s s après prise en compte des hitboxes. La règle suit la progression et les plafonds des trajectoires. Les impacts de zone et les frappes préparées gardent leur avertissement ; tout monstre ou boss vivant blesse dès le contact physique, même gelé, après son apparition. Les murs protègent du contact et les cadavres ne blessent pas." % [nombre(ProjectilesEnnemis.VITESSE_ANNONCE), nombre(ProjectilesEnnemis.REACTION_SANS_ANNONCE)], "",
 		"Quand elle est nécessaire, l’annonce ordinaire dure au moins %s s, celle d’une salve de boss %s s. La visée annoncée reste verrouillée jusqu’au départ." % [nombre(Reglages.ENNEMI_TELEGRAPHE_MIN), nombre(BestiaireMondes.BOSS_ANNONCE_TIR)], "",
 		"Le tisseur lance %d rubans sans annonce ni anticipation : écart %s px, amplitude %s px, fréquence initiale %s Hz. La fréquence suit ensuite la hausse de vitesse. Il recule si le temps de vol devient inférieur à %s s ; son passage reste ouvert à tous les niveaux." % [int(tisseur["projectiles"]), nombre(float(tisseur["ecart_lateral"])), nombre(float(tisseur["amplitude"])), nombre(float(tisseur["frequence"])), nombre(BestiaireMondes.TISSEUR_REACTION_MIN)], "",
 		"Salle de référence : %s × %s px ; zoom caméra %s. Les variantes de forme appliquent leurs proportions à cette taille." % [nombre(Reglages.ARENE_TAILLE.x), nombre(Reglages.ARENE_TAILLE.y), nombre(Reglages.ARENE_CAMERA_ZOOM, 4)], ""])

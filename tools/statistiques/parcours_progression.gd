@@ -24,13 +24,13 @@ const HYPOTHESES := [
 	"Les vagues sont nettoyées successivement : annonce d'apparition et délai de nettoyage réels. Les départs forcés de vagues peuvent les faire se chevaucher dans le jeu ; ce petit temps d'attente constitue ici une borne prudente.",
 	"Les élites sont tirés avec la graine de salle réelle, au plus un par vague nettoyée. Les renforts invoqués ne donnent aucune récompense inventée.",
 	"Un choix prend 4 secondes et une transition 2 secondes. Marcher jusqu'aux portails, lire les menus et faire les achats ne sont pas chronométrés.",
-	"Un mur du modèle signifie qu'un boss demande plus de 120 secondes de tir utile ou que la réserve entière supporte moins de trois contacts d'un Encrier rampant de la salle. Il ne prédit ni mort humaine ni nombre d'essais nécessaire.",
+	"En campagne, un mur du modèle suit la borne haute de la cible du rang de boss ; les annexes gardent leur seuil propre. Une réserve entière supportant moins de trois contacts d'un Encrier rampant de la salle est aussi un mur. Le modèle ne prédit ni mort humaine ni nombre d'essais nécessaire.",
 	"Le parcours commence par une défaite imposée en salle 9 : seules huit salles et un boss paient. Le retry réutilise le compte amélioré mais repart sans augment.",
 	"Chaque victoire de parcours est une décision du modèle selon ces seuils ; les coffres utilisent ensuite le vrai booléen victoire et les seules salles validées. Les tirages, garanties, accès et coûts sont ceux du jeu.",
 	"Les lots adaptatifs contiennent trois Mines, trois Épreuves ou deux replays d'un chapitre déjà terminé. Le comparatif mixte impose trois replays, trois Mines puis trois Épreuves avant de réessayer. Un bloc dépassant 40 minutes est signalé ; vingt cycles servent de limite de diagnostic, sans inventer une victoire.",
 	"La Mine dure réellement 300 secondes avant son boss. Un modèle continu de dégâts abat sa file de monstres, respecte son plafond, ramasse leur XP et choisit les offres légales ; les blessures ne sont pas simulées.",
 	"L'allocation progressive vise 40 Force, 50 Vitalité, 25 Agilité et 30 Intelligence. Les achats maximisent le gain logarithmique par coût, avec un poids explicite pour les ressources. Aucun objet manquant ni rang de forge n'est offert.",
-	"Une défaite conventionnelle dure la moitié du combat concerné, plafonnée à 120 secondes ; ce temps d'échec est une hypothèse et n'est pas une mesure de survie. Les contacts des Épreuves utilisent leur boss, ceux de la campagne et de la Mine utilisent l'Encrier rampant.",
+	"Une défaite conventionnelle dure la moitié du combat concerné, plafonnée au seuil du rang de boss ; ce temps d'échec est une hypothèse et n'est pas une mesure de survie. Les contacts des Épreuves utilisent leur boss, ceux de la campagne et de la Mine utilisent l'Encrier rampant.",
 	"Les Épreuves proposent exactement quatre augments, après leurs quatre premiers boss. Leur XP ne donne pas d'autres choix dans le runtime.",
 	"La référence de campagne et de Mine désactive le légendaire bonus : elle conserve un légendaire garanti au niveau prévu, trois épiques et les autres choix rares. Les offres restent aléatoires. Le bonus réel est réservé aux distributions d'augments ; il ne finance pas les critères de progression.",
 	"Les Gouttes issues des cœurs inutilisés ne sont pas créditées : sans blessures ni trajets simulés, le modèle ne peut pas savoir lesquels seront convertis à PV pleins.",
@@ -84,11 +84,11 @@ static func ennemi(mode: String, chapitre: int, salle: int, id: String, niveau_a
 	var pv := float(base["pv"])
 	var degats := float(base["degats"])
 	if mode == "grimoire":
-		pv *= Chapitres.facteur_pv(chapitre, salle)
+		pv *= Chapitres.facteur_pv(chapitre, salle, boss)
 		degats *= Chapitres.facteur_degats(chapitre, salle)
 		if boss:
 			var signature := str(base.get("rang_boss", "miniboss")) == "signature"
-			pv *= Reglages.BOSS_SIGNATURE_PV_MULT if signature else ProgressionStatistiques.facteur_miniboss(Chapitres.palier(chapitre))
+			pv *= Chapitres.facteur_boss_signature(chapitre) if signature else ProgressionStatistiques.facteur_miniboss(Chapitres.palier(chapitre))
 			degats *= Reglages.BOSS_SIGNATURE_DEGATS_MULT if signature else Reglages.MINIBOSS_DEGATS_MULT
 	elif mode == "epreuves":
 		var progression := clampf(float(salle - 1) / 4.0, 0.0, 1.0)
@@ -121,6 +121,8 @@ static func campagne(configuration: Dictionary, chapitre: int, graine := GRAINE_
 		var rng := RandomNumberGenerator.new()
 		rng.seed = graine + chapitre * 104729 + numero * 7919
 		var boss := Chapitres.est_boss(chapitre, numero)
+		var signature := boss and numero == Reglages.SALLES_PAR_RUN and bool(Chapitres.par_index(chapitre)["boss_signature"])
+		var limite := float(options.get("boss_limite", Reglages.CAMPAGNE_BOSS_DUREE_SIGNATURE.y if signature else Reglages.CAMPAGNE_BOSS_DUREE_NORMALE.y))
 		for vague: Array in vagues:
 			var index_elite := -1
 			if not boss and chapitre >= RangsEnnemis.PREMIER_CHAPITRE_ELITES and numero >= RangsEnnemis.PREMIERE_SALLE_ELITES:
@@ -138,7 +140,8 @@ static func campagne(configuration: Dictionary, chapitre: int, graine := GRAINE_
 		var attente := float(vagues.size()) * (Reglages.APPARITION_BOSS_ANNONCE if boss else Reglages.APPARITION_ANNONCE) \
 			+ float(maxi(0, vagues.size() - 1)) * Reglages.DELAI_VAGUE_NETTOYEE
 		var duree := combat + attente + choix * SECONDES_CHOIX + (SECONDES_TRANSITION if numero > 1 else 0.0)
-		resultat.append({"salle": numero, "boss": boss, "pv_ennemis": pv_total, "vagues": vagues.size(), "elites": elites,
+		resultat.append({"salle": numero, "boss": boss, "boss_signature": signature, "limite_boss": limite,
+			"pv_ennemis": pv_total, "vagues": vagues.size(), "elites": elites,
 			"dps": mesure["dps"], "pv_effectifs": mesure["pv_effectifs"], "temps_combat": combat, "duree": duree,
 			"contacts": float(mesure["pv_effectifs"]) / float(ennemi("grimoire", chapitre, numero, "encrier_rampant")["degats"]),
 			"inventaire": etat["inventaire_combat"], "inventaire_apres": etat["inventaire_apres"]})
@@ -177,7 +180,7 @@ static func _resumer_rencontres(salles: Array[Dictionary], evenements: Array, op
 			if float(salle["contacts"]) < float(options.get("contacts_min", CONTACTS_MIN)):
 				mur = int(salle["salle"])
 				raison = "contacts"
-			elif bool(salle["boss"]) and float(salle["temps_combat"]) > float(options.get("boss_limite", BOSS_LIMITE)):
+			elif bool(salle["boss"]) and float(salle["temps_combat"]) > float(salle.get("limite_boss", options.get("boss_limite", BOSS_LIMITE))):
 				mur = int(salle["salle"])
 				raison = "duree_boss"
 	return {"salles": salles, "evenements": evenements, "duree": duree,
@@ -402,7 +405,7 @@ static func _tenter(compte: RefCounted, mode: String, chapitre: int, niveau: int
 			if numero == mur:
 				# Une defaite conventionnelle consomme la moitie de la rencontre,
 				# sans valider son XP de compte, son coffre ni ses choix de sortie.
-				duree += minf(float(salle["temps_combat"]) * 0.5, float(options.get("boss_limite", BOSS_LIMITE)))
+				duree += minf(float(salle["temps_combat"]) * 0.5, float(salle.get("limite_boss", options.get("boss_limite", BOSS_LIMITE))))
 				inventaire = salle["inventaire"]
 				break
 			duree += float(salle["duree"])

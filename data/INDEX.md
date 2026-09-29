@@ -18,7 +18,8 @@
 | Identité des tirs ennemis et frappes des boss | [mondes/projectiles_ennemis.gd](mondes/projectiles_ennemis.gd), [attaques_contact_boss.gd](mondes/attaques_contact_boss.gd) ; contours dans [presentation/formes_tirs.gd](presentation/formes_tirs.gd) |
 | Rencontres et géométrie | [mondes/vagues.gd](mondes/vagues.gd), [formes_salles.gd](mondes/formes_salles.gd), [terrains_mondes.gd](mondes/terrains_mondes.gd) |
 | Placement et mobilité des boss | [mondes/deplacements_boss.gd](mondes/deplacements_boss.gd) |
-| Animation et décor | `presentation/` : animations de combat, décors, projectiles, visuels 3D |
+| Animation et décor | `presentation/` : animations de combat, décors, projectiles, visuels 3D ; [matières du bestiaire](presentation/matieres_bestiaire.gd) |
+| Peintures et normales des nappes de terrain | [presentation/decors_terrains.gd](presentation/decors_terrains.gd) ; sources et origines dans `../assets/visual/terrains/` |
 | Musiques et bruitages | `audio/` : musiques et effets sonores |
 
 Les anciennes identités conservées dans les catalogues servent aux sauvegardes.

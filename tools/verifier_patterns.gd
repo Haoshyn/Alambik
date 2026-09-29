@@ -47,6 +47,7 @@ func _executer() -> void:
 	_verifier_mobilite_boss()
 	_verifier_eventails_retour()
 	_verifier_geometrie()
+	await _verifier_alcoves()
 	await _verifier_tirs_de_bord()
 	await _verifier_boss()
 	await _verifier_annonces_boss()
@@ -135,6 +136,11 @@ func _verifier_tisseur() -> void:
 		ennemi.free()
 
 func _verifier_annonces_monstres() -> void:
+	var anciennes_limites: Rect2 = _salle.limites
+	var ancien_contour: PackedVector2Array = _salle._contour
+	# Les tireurs a longue portee doivent viser une cible encore dans la salle.
+	_salle.limites.size.y = Reglages.ARENE_TAILLE.y * FormesSalles.LONGUEUR_MAX
+	_salle._contour = FormesSalles.contour(_salle.limites, 0)
 	for chapitre in [0, 17, 34]:
 		for id: String in ["plume_sentinelle", "folio_orbiteur", "miroir_encre", "cachet_phaseur"]:
 			var d := _profil(id, chapitre)
@@ -181,6 +187,8 @@ func _verifier_annonces_monstres() -> void:
 				ennemi._agir_miroir(0.0)
 				_verifier(str(ennemi._etat) == "pulse" and float(ennemi._minuterie) > 0.0, "Depart proche protege le temps de reaction")
 			ennemi.free()
+	_salle.limites = anciennes_limites
+	_salle._contour = ancien_contour
 
 func _verifier_esquive_tirs_rapides() -> void:
 	var marge_minimale := INF
@@ -378,6 +386,76 @@ func _verifier_trajets_charges() -> void:
 	_salle._obstacles.clear()
 	print("Charges : trajets annonces et parcourus concordants, neuf contours, 30/60/120 Hz et ralentissements.")
 
+func _verifier_alcoves() -> void:
+	var largeurs: Dictionary = {}
+	var longueurs: Dictionary = {}
+	for chapitre in Chapitres.nombre():
+		for numero in range(1, Reglages.SALLES_PAR_RUN + 1):
+			var taille := FormesSalles.taille(numero, chapitre, 0, "grimoire")
+			var limites := Rect2(Vector2(-87, 231), taille)
+			var contour := FormesSalles.contour_salle(limites, numero, chapitre, 0, "grimoire")
+			var contexte := "%d/%d" % [chapitre, numero]
+			largeurs[roundi(taille.x)] = true
+			longueurs[roundi(taille.y)] = true
+			_verifier(taille.x <= Reglages.ARENE_TAILLE.x and taille.y >= Reglages.ARENE_TAILLE.y, "Salle jamais plus large ni plus courte : " + contexte)
+			_verifier(taille == FormesSalles.taille(numero, chapitre, 12345, "grimoire"), "Dimensions stables apres changement de graine")
+			_verifier(not Geometry2D.triangulate_polygon(contour).is_empty(), "Contour triangulable : " + contexte)
+			_verifier(Geometry2D.offset_polygon(contour, -Reglages.HEROS_RAYON - 2.0).size() == 1, "Toute la salle reste accessible au heros : " + contexte)
+			var entree := Vector2(limites.get_center().x, limites.end.y - 120.0)
+			var portail := Vector2(limites.get_center().x, limites.position.y + 180.0)
+			_verifier(Geometrie.ligne_libre(entree, portail, [], FormesSalles.MARGE_APPARITION, contour), "Passage central ouvert jusqu'au portail : " + contexte)
+			for point in contour:
+				_verifier(limites.grow(.01).has_point(point), "Alcove contenue dans la largeur de salle : " + contexte)
+			for definition: Dictionary in TerrainsMondes.obstacles(numero, chapitre):
+				var rect: Rect2 = definition["rect"]
+				rect = Rect2(limites.position + rect.position * taille, rect.size * taille)
+				for point: Vector2 in [rect.position, rect.end, Vector2(rect.end.x, rect.position.y), Vector2(rect.position.x, rect.end.y)]:
+					_verifier(Geometry2D.is_point_in_polygon(point, contour), "Couvert entier dans les nouvelles parois : " + contexte)
+	_verifier(largeurs.size() > 30 and longueurs.size() > 30, "Proportions variees sur le parcours")
+	# Deux baies sont reliees par le centre, avec un mur entre elles sur la gauche.
+	var ancien_contour: PackedVector2Array = _salle._contour
+	var anciennes_limites: Rect2 = _salle.limites
+	_salle.limites = Rect2(0, 0, 1000, 1600)
+	_salle._contour = PackedVector2Array([Vector2(0,0), Vector2(1000,0), Vector2(1000,1600), Vector2(0,1600),
+		Vector2(0,1100), Vector2(140,1100), Vector2(140,500), Vector2(0,500)])
+	var contour: PackedVector2Array = _salle._contour
+	var a := Vector2(70,350)
+	var b := Vector2(70,1250)
+	_verifier(Geometry2D.is_point_in_polygon(a, contour) and Geometry2D.is_point_in_polygon(b, contour), "Deux extremites sur le sol des baies")
+	_verifier(not Geometrie.ligne_libre(a, b, [], 0.0, contour), "Le mur protege entre deux alcoves")
+	_verifier(Geometrie.ligne_libre(Vector2(500,350), Vector2(500,1250), [], 40.0, contour), "Trajet central libre entre les alcoves")
+	_verifier(not Geometrie.ligne_libre(Vector2(170,600), Vector2(170,1000), [], 40.0, contour), "Encombrement du projectile contre le renfoncement")
+	for enfant in _salle.get_children():
+		if enfant is StaticBody2D: enfant.free()
+	_salle._construire_murs_perimetre()
+	await physics_frame
+	for frequence: int in [30, 60, 120]:
+		var acteur := _acteur_test("tache_veloce", 0, a)
+		var rayon: float = acteur.get_node("CollisionShape2D").shape.radius
+		acteur._charge.preparer(acteur, Vector2.DOWN, 1100.0, rayon)
+		var fin: Vector2 = acteur._charge.fin
+		_verifier(absf(fin.y - (500.0 - rayon - acteur.safe_margin)) < .1, "Charge arretee au premier mur, avant la seconde baie")
+		for image in frequence * 4:
+			acteur._charge.avancer(acteur, 350.0, 1.0 / frequence)
+			if acteur._charge.terminee: break
+		_verifier(acteur._charge.terminee and acteur.position.distance_to(fin) < .2, "Charge physique conforme au trace dans une salle concave")
+		acteur.free()
+	for id: String in ["encrier_rampant", "tache_veloce"]:
+		for sens in 2:
+			_cible.position = b if sens == 0 else a
+			var acteur := _acteur_test(id, 0, a if sens == 0 else b)
+			for image in 60 * 30:
+				acteur._physics_process(1.0 / 60.0)
+				if acteur.position.distance_to(_cible.position) < 100.0: break
+			_verifier(acteur.position.distance_to(_cible.position) < 100.0, "Ennemi contourne le mur entre les alcoves : " + id)
+			_verifier(FormesSalles.contient_disque(acteur.position, contour, acteur._rayon_collision() - .1), "Ennemi reste dans le sol pendant le contournement")
+			acteur.free()
+	for enfant in _salle.get_children():
+		if enfant is StaticBody2D: enfant.free()
+	_salle._contour = ancien_contour
+	_salle.limites = anciennes_limites
+	print("Salles : proportions bornees, acces, couverts et alcoves sur toute la campagne ; charges concaves a 30/60/120 Hz.")
+
 func _verifier_teleportations() -> void:
 	for chapitre: int in [0, 7, 14, 21, 34]:
 		for position_cible: Vector2 in [Vector2(600, 1500), Vector2(100, 1750)]:
@@ -413,6 +491,10 @@ func _verifier_teleportations() -> void:
 	_salle._obstacles.clear()
 
 func _verifier_portees_attaques() -> void:
+	var anciennes_limites: Rect2 = _salle.limites
+	var ancien_contour: PackedVector2Array = _salle._contour
+	_salle.limites.size.y = Reglages.ARENE_TAILLE.y * FormesSalles.LONGUEUR_MAX
+	_salle._contour = FormesSalles.contour(_salle.limites, 0)
 	for chapitre: int in [0, 17, 34]:
 		for id: String in ["plume_sentinelle", "folio_orbiteur", "marge_harceleuse", "miroir_encre", "fuseau_tisseur"]:
 			var ennemi := _acteur_test(id, chapitre, Vector2(600, 250))
@@ -440,6 +522,8 @@ func _verifier_portees_attaques() -> void:
 			_verifier(tirs.is_empty() and ennemi._etat == "repos", "Pas de cast dans un obstacle : " + id)
 			_salle._obstacles.clear()
 			ennemi.free()
+	_salle.limites = anciennes_limites
+	_salle._contour = ancien_contour
 	var scribe := _acteur_test("scribe_essaimeur", 0, Vector2(600, 250))
 	_cible.position = Vector2(600, 1700)
 	scribe._recharge = 0.0

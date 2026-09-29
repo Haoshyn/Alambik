@@ -12,13 +12,13 @@ func preparer(acteur: CharacterBody2D, direction: Vector2, distance: float, rayo
 	debut = acteur.global_position
 	var libre := 0.0
 	var borne := distance
-	# Les contours de salle sont convexes. La marge physique est incluse dans
-	# le meme segment pour l'annonce et le mouvement, sans glisser sur les murs.
+	# Le segment complet s'arrete au premier mur, meme si une alcove permet
+	# de retrouver du sol plus loin. L'annonce et le mouvement partagent ce trajet.
 	for i in 18:
 		var essai := (libre + borne) * .5
 		var point := debut + direction * essai
 		if FormesSalles.contient_disque(point, contour, rayon + acteur.safe_margin) \
-				and Geometrie.ligne_libre(debut, point, obstacles, rayon + acteur.safe_margin):
+				and Geometrie.ligne_libre(debut, point, obstacles, rayon, contour):
 			libre = essai
 		else:
 			borne = essai

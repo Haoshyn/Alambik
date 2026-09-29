@@ -1,12 +1,17 @@
 class_name TerrainsMondes
 extends RefCounted
 
-# Les petites zones restent laterales : le couloir central, l'entree et le
+# Les nappes restent laterales : le couloir central, l'entree et le
 # portail demeurent libres, meme avec deux phenomenes. Le vent concerne
 # toute la salle lorsqu'il est present, sans creer d'obstacle.
 const EMPLACEMENTS := [Vector2(.18,.30), Vector2(.82,.61), Vector2(.20,.67), Vector2(.80,.34), Vector2(.23,.46), Vector2(.77,.76), Vector2(.18,.80), Vector2(.82,.48)]
-const TAILLES_ZONES := [.72, 1.0, 1.28]
+const TAILLES_ZONES := [.90, 1.05, 1.20]
+const PROPORTIONS_FLAQUES := Rect2(.82, 1.32, .16, .24)
+const ROTATION_FLAQUE := .20
+const SOMMETS_FLAQUE := 64
 const DECALAGE_ZONE := Vector2(.025,.035)
+const COLONNES_REPLI := [.24, .28, .72, .76]
+const LIGNES_REPLI := [.20, .29, .38, .47, .56, .65, .74, .82]
 const MURETS := [0, 1, 2, 3, 1, 0, 2]
 const MARGE_OBSTACLE := 28.0
 const DELAI_ACTIVATION := 1.5
@@ -18,15 +23,15 @@ const VENT_MONTEE := .6
 const VENT_DESCENTE := .8
 const VENT_ANNONCE := .8
 const VENT_DIRECTIONS := [Vector2.RIGHT, Vector2(-.70710678,.70710678), Vector2.UP, Vector2(.70710678,.70710678), Vector2.LEFT, Vector2(.70710678,-.70710678), Vector2.DOWN, Vector2(-.70710678,-.70710678)]
-const SABLE_VITESSE_INITIALE := .80
-const SABLE_VITESSE_MINIMALE := .60
-const SABLE_DUREE_ENFONCEMENT := 2.5
+const SABLE_VITESSE_INITIALE := .70
+const SABLE_VITESSE_MINIMALE := .40
+const SABLE_DUREE_ENFONCEMENT := 1.5
 const PROFILS := [
-	{"type":"encre", "rayon":86.0, "vitesse":.70, "degats":0.0, "couleur":Color("65518e")},
-	{"type":"sable", "rayon":85.0, "vitesse":1.0, "degats":0.0, "couleur":Color("c9aa70")},
-	{"type":"eau", "rayon":91.0, "vitesse":.70, "degats":0.0, "couleur":Color("389ec0")},
+	{"type":"encre", "rayon":150.0, "vitesse":.45, "degats":0.0, "couleur":Color("65518e")},
+	{"type":"sable", "rayon":145.0, "vitesse":1.0, "degats":0.0, "couleur":Color("c9aa70")},
+	{"type":"eau", "rayon":156.0, "vitesse":.50, "degats":0.0, "couleur":Color("389ec0")},
 	{"type":"vent", "rayon":0.0, "vitesse":1.0, "degats":0.0, "couleur":Color("b6e9e2")},
-	{"type":"lave", "rayon":82.0, "vitesse":1.0, "degats":.06, "couleur":Color("db662c")},
+	{"type":"lave", "rayon":148.0, "vitesse":1.0, "degats":.06, "couleur":Color("db662c")},
 ]
 # Forme, composition, murets, nombre de zones : un parcours fixe de vingt
 # etages. Le chapitre apporte une declinaison fixe, jamais la graine de run.

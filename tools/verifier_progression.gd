@@ -13,6 +13,7 @@ func _init() -> void:
 	_verifier_equipement()
 	_verifier_familiers()
 	_verifier_statistiques()
+	_verifier_progression_sources()
 	_verifier_campagne_fin()
 	_verifier_experience_mine()
 	for erreur: String in _erreurs:
@@ -37,7 +38,6 @@ func _verifier_courbes() -> void:
 		ProgressionStatistiques.facteur_degats(dernier)), "Dégâts hors campagne")
 	var pv_precedents := 0.0
 	var degats_precedents := 0.0
-	var ratio_degats_precedent := 1.0
 	for chapitre in Chapitres.nombre():
 		var pv := ProgressionStatistiques.facteur_pv(chapitre)
 		var degats := ProgressionStatistiques.facteur_degats(chapitre)
@@ -46,8 +46,7 @@ func _verifier_courbes() -> void:
 		if chapitre > 0:
 			var ratio_pv := pv / pv_precedents
 			var ratio_degats := degats / degats_precedents
-			_verifier(ratio_pv > 1.0 and ratio_degats >= ratio_degats_precedent, "PV croissants et acceleration des degats")
-			ratio_degats_precedent = ratio_degats
+			_verifier(ratio_pv > 1.0 and ratio_degats > 1.0 and ratio_degats <= 1.25, "Croissance progressive sans mur brutal de degats")
 		pv_precedents = pv
 		degats_precedents = degats
 		var pv_salle_precedents := 0.0
@@ -69,8 +68,9 @@ func _verifier_courbes() -> void:
 		_verifier(is_equal_approx(Chapitres.facteur_degats(chapitre, 100),
 			Chapitres.facteur_degats(chapitre, Chapitres.salles(chapitre))), "Salle supérieure bornée")
 	_verifier(is_equal_approx(Chapitres.facteur_pv(0, 1), 1.0) and is_equal_approx(Chapitres.facteur_degats(0, 1), 1.0), "Salle initiale normalisee a un")
-	_verifier(Chapitres.facteur_pv(1, 1) >= 2.0 and Chapitres.facteur_pv(1, 1) <= 3.0, "La marche initiale suit les petits gains permanents")
-	_verifier(Chapitres.facteur_pv(0, 19) >= 4.0 and Chapitres.facteur_pv(0, 19) <= 5.0, "Courbe de run moderee apres reduction des augments")
+	_verifier(Chapitres.facteur_pv(1, 1) > 1.0 and Chapitres.facteur_pv(1, 1) <= 1.3, "Le niveau deux reste accessible avant les augments")
+	_verifier(Chapitres.facteur_pv(0, 19) >= 12.0 and Chapitres.facteur_pv(0, 19) <= 14.0, "Les monstres suivent la montee des augments")
+	_verifier(Chapitres.facteur_pv(0, 19, true) >= 4.0 and Chapitres.facteur_pv(0, 19, true) <= 5.0, "Les boss conservent leur rythme de combat")
 
 func _verifier_accueil() -> void:
 	var stats := Stats.depuis_reglages({}, {}, {"attaque_base": CatalogueProjectiles.attaque_base("standard", 0)})
@@ -202,6 +202,30 @@ func _verifier_statistiques() -> void:
 	_verifier(is_equal_approx(Stats.base_degats(Personnage.NIVEAU_MAX), Reglages.TIR_DEGATS * (1.0 + 29.0 * Reglages.NIVEAU_DEGATS_PAR_NIVEAU)), "Petit socle ATK du niveau")
 	_verifier(Personnage.points_depenses(attributs) == Personnage.points_totaux(Personnage.NIVEAU_MAX),
 		"Exemple équipé dans le budget des attributs")
+
+func _verifier_progression_sources() -> void:
+	var attributs := {"force": 40, "agilite": 25, "intelligence": 30}
+	var passifs := {"vigueur": 2, "celerite": 2, "oeil_precis": 2}
+	var precedent := Stats.depuis_reglages({}, passifs, {}, 1, attributs)
+	for niveau in range(2, Personnage.NIVEAU_MAX + 1):
+		var courant := Stats.depuis_reglages({}, passifs, {}, niveau, attributs)
+		_verifier(courant.degats > precedent.degats and courant.cadence > precedent.cadence
+			and courant.critique > precedent.critique, "Les sources acquises grandissent avec le heros : %d" % niveau)
+		precedent = courant
+	var totaux := Personnage.points_totaux(Personnage.NIVEAU_MAX)
+	var debut := Personnage.bonus({"force": 1}, Personnage.NIVEAU_MAX)
+	var avant := Personnage.bonus({"force": totaux - 1}, Personnage.NIVEAU_MAX)
+	var fin := Personnage.bonus({"force": totaux}, Personnage.NIVEAU_MAX)
+	_verifier(float(fin["attaque_base"]) > float(avant["attaque_base"]), "Chaque point offensif reste utile")
+	_verifier(float(fin["attaque_base"]) - float(avant["attaque_base"]) < float(debut["attaque_base"]),
+		"Concentrer tous les points en Force reduit leur rendement")
+	for niveau in [1, 4, Personnage.NIVEAU_MAX]:
+		var simple := Passifs.bonus_stats({"vigueur": 1}, niveau)
+		var double := Passifs.bonus_stats({"vigueur": 2}, niveau)
+		_verifier(is_equal_approx(float(double["attaque_mult"]), 2.0 * float(simple["attaque_mult"])),
+			"Un doublon double le bonus au niveau courant : %d" % niveau)
+		_verifier(Passifs.resume_rang("vigueur", 2, niveau) == "+%s %% attaque" % Passifs._pourcentage(float(double["attaque_mult"])),
+			"La fiche du passif affiche le bonus réellement utilise : %d" % niveau)
 
 func _verifier_familiers() -> void:
 	var attaque_depart := Reglages.TIR_DEGATS + CatalogueProjectiles.attaque_base("standard", 0)

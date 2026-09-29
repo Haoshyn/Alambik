@@ -36,7 +36,7 @@ function Executer-Controle([string]$Nom, [string[]]$ArgumentsGodot) {
         $sortie | Write-Output
         throw "Controle $Nom echoue (code $codeGodot). Journal : $journal"
     }
-    $sortie | Where-Object { $_ -match '^(OK|Listes|Verification|Vérification|Progression|Référence|Augments :|Projectiles :|Simulation augments :|Parcours :|Retour campagne :|Equilibrage progression :)' } | Write-Output
+    $sortie | Where-Object { $_ -match '^(OK|Listes|Verification|Vérification|Progression|Référence|Augments :|Projectiles :|Simulation augments :|Parcours :|Retour campagne :|Equilibrage progression :|Rythme progression :|Maturation progression :)' } | Write-Output
 }
 
 try {
@@ -61,9 +61,12 @@ try {
     Executer-Controle -Nom 'parcours' -ArgumentsGodot @('--script', 'res://tools/verifier_parcours.gd')
     Executer-Controle -Nom 'retour_campagne' -ArgumentsGodot @('--script', 'res://tools/verifier_retour_campagne.gd')
     Executer-Controle -Nom 'equilibrage_progression' -ArgumentsGodot @('--script', 'res://tools/verifier_equilibrage_progression.gd')
+    Executer-Controle -Nom 'rythme_progression' -ArgumentsGodot @('--script', 'res://tools/verifier_rythme_progression.gd')
+    Executer-Controle -Nom 'maturation_progression' -ArgumentsGodot @('--script', 'res://tools/verifier_maturation_progression.gd')
     Executer-Controle -Nom 'soins' -ArgumentsGodot @('--script', 'res://tools/verifier_soins_run.gd')
     Executer-Controle -Nom 'migrations' -ArgumentsGodot @('--script', 'res://tools/verifier_migrations.gd')
     Executer-Controle -Nom 'scenes' -ArgumentsGodot @('res://tools/verifier_scenes.tscn')
+    Executer-Controle -Nom 'heros_aster' -ArgumentsGodot @('res://tools/verifier_heros_aster.tscn')
     Write-Output "OK : controles termines. Journaux : $dossierControle"
 }
 finally {

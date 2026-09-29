@@ -561,7 +561,7 @@ func reinitialiser_attributs() -> void:
 	maitrise_changee.emit()
 
 func bonus_attributs() -> Dictionary:
-	return Personnage.bonus(attributs)
+	return Personnage.bonus(attributs, niveau_compte_effectif())
 
 func specialisation_effective() -> String:
 	return specialisation if Personnage.SPECIALISATIONS.has(specialisation) else ""

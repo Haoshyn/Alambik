@@ -1,29 +1,68 @@
 # État courant — 28 septembre 2026
 
 Alambik est un roguelite de tir portrait Android sous Godot 4.7.1 : simulation
-2D, présentation 3D. Le héros sculpté, la clairière animée, les cinq mondes,
+2D, présentation 3D. Le héros Aster V7, la clairière animée, les cinq mondes,
 les annonces de danger et le kit d'interface Émail arcanique restent actifs.
 
+Aster remplace le précédent mage en combat. Son
+repos, sa course, ses réactions aux dégâts et sa chute suivent les états du
+jeu. Le tir à l'arrêt conserve un léger mouvement du buste, avec les pieds
+stables ; les rafales prolongent le geste sans remettre la pose à zéro. Un
+ordre de déplacement annule aussi les tirs déjà préparés. Les armes équipées
+suivent la nouvelle main. Le modèle Blender et les anciennes sources du mage
+sont conservés. Le contrôle dédié couvre le rig, les appuis pendant les
+rafales, la priorité des dégâts et l'interruption du tir ; le coût sur
+téléphone reste à mesurer.
+
 Les décors de combat ont cinq signatures alchimiques : scriptorium,
-distillerie végétale, fontaines, moulins et forge. Chaque salle mélange trois
-matières de sol en zones irrégulières. Le fond minéral est continu et mat,
-avec des nuances fondues et quelques veines ; le quadrillage généralisé est
-retiré. Pages, feuilles ou éclats restent rares. Les compositions diffèrent
-par monde et les contours se déforment selon la salle. Frises d'émail et
-couverts habillés suivent les contours et collisions existants.
-Les contrôles dédiés exercent les neuf formes, les origines décalées, la
-présence des matières, la stabilité des variantes, les effets réduits et les
-transitions dans les trois modes sur deux formats. Les aperçus Blender
-permettent de revoir les volumes ; le rendu et le coût réels sur Android
-restent à vérifier sur appareil.
+distillerie végétale, fontaines, moulins et forge. Leurs sols adoptent
+l'enduit ciré B coloré par monde, avec des reprises asymétriques et une
+bordure d'émail et de cuivre. Les livres, feuilles, médaillons et arabesques
+dessinés au sol sont retirés. Les décors en volume suivent les vrais murs :
+lanternes de verre, établis de potions, jarres, champignons, coraux, carillons,
+cristaux et appareils alchimiques. Nombre, emplacement, taille et orientation
+varient par étage. Leur emprise reste hors du passage, y compris dans les
+alcôves. Les murets et rochers portent aussi de petits volumes propres au
+monde, contenus dans leur emprise physique. Les traces de taloche, les reprises
+plus claires et le polissage restent déterministes. Les nuances appartiennent
+à un maillage de sol,
+et la bordure est regroupée dans un second, tous deux découpés sur les
+parois réelles et sous les acteurs. Les coins varient aussi
+en campagne, avec des galeries étroites, des salles allongées, des parois
+ondulées, des renfoncements et des alcôves arrondies ou angulaires. Aucune
+salle ne dépasse la largeur de référence. Dimensions et reliefs sont stables
+par étage ; collisions et décor partagent le même contour. Le passage
+central reste dégagé.
+Frises d'émail et couverts peints complètent les ateliers.
+Les contrôles dédiés exercent les neuf profils, les vingt étages de chaque
+monde, les origines décalées, les textures, les volumes de décor, les variations
+de teinte, la conservation des UV, la stabilité des variantes et les effets
+réduits. L'accès, les couverts et les proportions sont contrôlés sur toute
+la campagne. Les transitions dans les trois modes sur deux formats, les
+terrains, les patterns et la progression sont vérifiés. Les aperçus Blender
+utilisent la géométrie exportée du jeu, avec conversion des couleurs de
+sommets sRGB en linéaire pour conserver
+les pigments et respect des surfaces de sol sans ombre portée. Le rendu et
+le coût réels sur Android restent à vérifier sur appareil.
+
+Le chargement entre étages reprend celui du lancement : île illustrée du
+monde, fond indigo, nom et niveau, avec le numéro d'étage et le total issus
+de la run. Mine et Épreuves conservent leur illustration dédiée. Le même
+composant est réutilisé pendant la tentative ; le voile bloque les commandes
+pendant le passage et respecte les effets réduits.
 
 Les terrains de campagne sont actifs dans les cinq mondes : encre et eau
 ralentissantes, sables mouvants progressifs, rafales annoncées et lave à
 dégâts périodiques. Leurs contours irréguliers sont partagés par la simulation
-et le rendu. Le contrôle dédié parcourt les salles de campagne, vérifie les
-ralentissements, les tirs dans l'eau, la cadence des dégâts, la poussée avec
-collision et les effets réduits. Les chiffres viennent du catalogue et
-figurent dans les statistiques générées.
+et le rendu. Les flaques forment maintenant de grandes nappes allongées,
+avec une rive fine, des nuances de profondeur, une peinture originale et
+des normales de surface. L'encre et l'eau ralentissent davantage ; le sable
+atteint plus vite son ralentissement maximal. Le placement réserve le passage
+central et teste le polygone entier contre les parois, les couverts et les
+autres nappes. Le contrôle dédié parcourt les salles de campagne, vérifie la
+vitesse réelle du héros, les tirs dans l'eau, la cadence des dégâts, la
+poussée avec collision, les matières et les effets réduits. Les chiffres
+viennent du catalogue et figurent dans les statistiques générées.
 
 ## Jeu et progression
 
@@ -60,9 +99,15 @@ figurent dans les statistiques générées.
   des runs, une seconde légendaire remplace une rare ou une épique hors niveau 5.
 - Sorcier et Moine restent sélectionnables, avec des bonus actuellement nuls.
 - Attributs, trois branches de maîtrises, armes, bijoux, familiers et forge
-  portent une progression permanente plus mesurée. Leurs gains, ceux des
-  passifs et des Cœurs ont été réduits avec les courbes ennemies. La forge du familier conserve un effet
+  portent la progression permanente. Les cinq familles de dégâts visent une
+  contribution comparable sur le compte complet de référence. Les attributs
+  offensifs et les statistiques de passifs montent progressivement avec le
+  niveau ; leur répartition effective dépend des choix et des acquisitions.
+  La forge d'arme démarre plus vite puis ralentit. La forge du familier conserve un effet
   utile avec les bonus permanents du héros.
+  Un contrôle économique compare aussi les étapes à 50 %, 75 % et maximum
+  sur deux parcours avec achats réels. Il recherche des temps de complétion
+  proches, en particulier entre le héros et les dernières maîtrises.
 - Le familier patrouille dans la salle et alterne déplacement, visée et tir
   depuis sa propre position. Ses tirs traversent les murs, avec une forme
   propre à chaque familier et une durée de vie bornée par la portée.
@@ -78,31 +123,53 @@ figurent dans les statistiques générées.
   lentement sur un nombre limité de murs. Les boss de contact approchent,
   annoncent une frappe à direction fixe, puis récupèrent sans attaquer.
 - Les onze monstres et vingt boss ont des modèles reconstruits avec des
-  membres articulés, un atlas de matières peintes mates et des variantes dans
-  les cinq mondes. Les pattes plient au genou et prennent appui au sol ; les
+  membres articulés, un atlas peint affiné et des variantes dans les cinq mondes.
+  Papier et tissu restent mats ; cuivre et acier ont leurs propres reflets.
+  Les UV, les plumes, les charnières et les ornements des variantes sont repris.
+  Les pattes plient au genou et prennent appui au sol ; les
   corps gardent leurs proportions pendant les gestes. Les tirs portent des
   biseaux et des cœurs lumineux animés. Gel, effets réduits, appuis, arrêt,
-  disparition sans collision et budgets sont contrôlés par `tools/verifier_bestiaire.gd`.
+  disparition sans collision, UV, normales, matières partagées et budgets
+  sont contrôlés par `tools/verifier_bestiaire.gd`.
   Planches et aperçu animé Blender utilisent les poses calculées par Godot.
   L'aperçu met en scène une approche lente, l'arrêt et le tir ; le rendu et la fluidité
   sur téléphone restent à valider en partie.
 - La croissance des monstres est fixe et composée par niveau et salle,
-  avec renfort des PV après le chapitre initial, puis plafonnement de ce
-  renfort et croissance plus lente après les premiers chapitres. Les dégâts gardent leur courbe
-  distincte et les marches en salles 5, 10 et 15 restent en place.
+  avec transition progressive des PV après le chapitre initial, puis
+  plafonnement du renfort et croissance composée vers la fin. Les dégâts gardent leur courbe
+  distincte, avec renfort borné après le premier monde ; les boss de campagne
+  ont aussi un renfort de niveau borné. Les marches en salles 5, 10 et 15 restent en place.
   Les contrôles recherchent des éliminations en une attaque exceptionnelles
   sur les parcours ordinaires, équilibrés comme offensifs, et comparent le
   sur-farm ainsi que le remplacement de deux choix par de fortes défenses.
   Les ennemis ne dépendent jamais du build ; aucun plancher de coups n'est ajouté.
+  Un contrôle mesure aussi les premières salles sans augment, les gains
+  des achats et un calendrier de reprises croissant, payé avec le vrai butin.
+  Ce calendrier décrit une hypothèse de simulation, pas un nombre de reprises imposé.
+  La lecture compare aussi les entrées des comptes qui financent réellement
+  leurs annexes face aux murs : omettre Mine, passifs et Cœurs reste un stress
+  sous-équipé. Le profil DEV après le monde 2 est contrôlé en équilibre,
+  avec Force et maîtrises offensives, puis sans passifs : dégâts, résistance,
+  soins, butin et dispersion des boss.
   Les premières vagues sont allégées et leurs attaques plus lisibles.
-  Les boss d’Aventure disposent d’une réserve de PV renforcée ; les dégâts
-  des premières annexes sont contrôlés à leur déblocage.
+  Les durées des boss d’Aventure prennent le build équilibré au niveau attendu
+  comme référence, avec une cible distincte pour les fins de monde et une
+  endurance fixe propre à chaque monde. Le contrôle rejoue les comptes
+  financés sur d'autres offres, pour distinguer médiane et dispersion des augments.
+  Le full offensif reste plus rapide ; aucun temps minimal n'est imposé en jeu.
+  Les cibles et mesures figurent dans la liste mathématique ; les durées
+  réelles, avec esquives et motifs de boss, restent à vérifier en partie.
+  Les dégâts des premières annexes sont contrôlés à leur déblocage.
+  Tous les monstres et boss blessent au contact physique, y compris les tireurs,
+  les corps gelés et les boss hors charge. Les murs, recharges et délais
+  d'invulnérabilité restent pris en compte ; apparitions et cadavres ne blessent pas.
 - Les tirs lents partent sans annonce. Les tirs rapides, ou trop proches
   pour laisser réagir, annoncent leur visée. Vitesse et rythme progressent
   avec le niveau et l'avancée de la tentative ; les annonces gardent un plancher.
   Le tisseur tire sans annonce ni prédiction, avec un passage entre ses rubans.
   Les tirs de boss utilisent le contour réel de la salle dès leur annonce.
-  Les salles sont légèrement plus étroites et longues, la caméra plus reculée.
+  Les salles varient en largeur et en longueur ; la caméra suit le héros
+  dans leurs limites et garde son recul.
 - Les sentinelles anticipent une course régulière puis verrouillent leur visée.
   Les contrôles sur les cinq mondes et les élites vérifient l’impact à mi-distance,
   l’esquive par changement de direction et la marge latérale au fond de salle.
@@ -122,8 +189,10 @@ figurent dans les statistiques générées.
   Les phaseurs se téléportent aussi de loin, vers une arrivée libre annoncée.
   Les invocateurs agissent à distance et restent actifs après épuisement des renforts.
   Les dashs partagent un trajet unique entre annonce et déplacement, arrêté
-  aux murs et obstacles. Les contrôles couvrent les neuf contours, plusieurs
-  fréquences physiques, les ralentissements, l’esquive et les changements de phase.
+  au premier mur ou obstacle, même entre deux alcôves. Les vérifications
+  de tir, de contact et de collecte respectent les renfoncements.
+  Les contrôles couvrent les neuf contours, plusieurs fréquences physiques,
+  les ralentissements, l’esquive et les changements de phase.
   Ces comportements sont vérifiés en simulation ; le ressenti reste à jouer sur appareil.
 - Les sources permanentes se combinent par étages. Leur répartition est
   mesurée avant les augments, qui démultiplient ensuite le DPS de la run.
