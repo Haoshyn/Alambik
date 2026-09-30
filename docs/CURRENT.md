@@ -4,6 +4,14 @@ Alambik est un roguelite de tir portrait Android sous Godot 4.7.1 : simulation
 2D, présentation 3D. Le héros Aster V7, la clairière animée, les cinq mondes,
 les annonces de danger et le kit d'interface Émail arcanique restent actifs.
 
+Le paysage de la clairière, prairie comprise, reste fixe. Le vent suit des
+feuilles précises du premier plan et quatre rameaux articulés. Clairière et
+îles composent leurs animations sans arrondi au pixel, à la résolution
+affichée ; les effets réduits conservent une image figée. Le contrôle dédié
+vérifie les attaches, les zones de pierre et de bois exclues du vent, le
+cadrage portrait et l'arrêt des fonds cachés. La fluidité sur téléphone
+reste à apprécier sur appareil.
+
 Aster remplace le précédent mage en combat. Son
 repos, sa course, ses réactions aux dégâts et sa chute suivent les états du
 jeu. Le tir à l'arrêt conserve un léger mouvement du buste, avec les pieds
@@ -77,6 +85,10 @@ viennent du catalogue et figurent dans les statistiques générées.
   campagne ; les répétitions restent possibles et les acquisitions conservées.
 - Seize passifs à deux rangs, quatre emplacements équipés. Les sorts actifs,
   ultimes, commandes associées et anciennes animations autonomes sont retirés.
+  Leur menu garde la clairière commune sans filtre propre, quatre sceaux
+  équipés et une collection ouverte. Chaque passif possède un SVG distinct
+  issu de la banque ; la collection affiche le bonus calculé au rang courant,
+  ou l'aperçu du premier rang avant découverte. Les détails restent dans la fiche.
 - Un bouton **DEV** temporaire dans l'accueil prépare un compte après la fin
   du monde choisi avec un peu de farm : attributs, maîtrises, équipement, forge,
   passifs, Cœurs et ressources suivent les récompenses et achats du jeu.
@@ -120,16 +132,16 @@ viennent du catalogue et figurent dans les statistiques générées.
 - Attributs, trois branches de maîtrises, armes, bijoux, familiers et forge
   portent la progression permanente. Les cinq familles de dégâts visent une
   contribution comparable sur le compte complet de référence. Les attributs
-  offensifs et les statistiques de passifs montent progressivement avec le
-  niveau ; leur répartition effective dépend des choix et des acquisitions.
-  La forge d'arme démarre plus vite puis ralentit. La forge du familier conserve un effet
-  utile avec les bonus permanents du héros.
-  Le rééquilibrage du 29 septembre renforce bijoux, familiers et rares faibles,
-  réduit les armes dominantes et conserve un gain de forge d'arme après les
-  premiers achats. Le familier partage aussi les augments d'attaque ; sa forge
-  n'est plus plafonnée par l'arme. Les Cœurs sont ajustés avec ce nouveau socle.
-  Le repère de fin est environ mille dégâts par impact normal sans augment,
-  face aux dix dégâts du héros nu. Les courbes fixes des ennemis sont recalibrées
+  donnent des gains bruts entiers par point, croissants par palier de niveau,
+  sans rendement décroissant. Les points déjà investis profitent du nouveau
+  palier. Les statistiques de passifs suivent des pourcentages entiers.
+  Les maîtrises composent leurs rangs et leurs nœuds ; les taux offensifs
+  tardifs dépassent les premiers. Les Cœurs composent leur gain relatif.
+  La forge renforce les valeurs acquises avec des gains bruts arrondis et
+  croissants. Le familier partage les augments d'attaque ; sa forge garde
+  son attaque propre. Les unités d'attaque, de PV et de Défense sont agrandies
+  ensemble. Les impacts de référence se lisent dans la liste mathématique.
+  Les courbes fixes des ennemis sont recalibrées
   en distinguant les entrées sans augment et la puissance acquise dans la run.
   Héros affiche le bonus actuel de chaque attribut et le gain du prochain point
   à son niveau, calculés par le runtime, sans modification des commandes.
@@ -138,8 +150,7 @@ viennent du catalogue et figurent dans les statistiques générées.
   Les fiches d'équipement restent ouvertes après achat ou équipement ; elles
   montrent les valeurs actuelles, le prochain rang, le gain, le coût et les
   pierres manquantes. Une forge réussie a un retour visible. Les cadres et
-  transitions d'Équipement et de ses fiches sont affinés. Le fond des Passifs
-  reprend une nuance bleue plus claire, sans rectangle derrière les textes.
+  transitions d'Équipement et de ses fiches sont affinés.
   Un contrôle économique compare aussi les étapes à 50 %, 75 % et maximum
   sur deux parcours avec achats réels. Il recherche des temps de complétion
   proches, en particulier entre le héros et les dernières maîtrises.

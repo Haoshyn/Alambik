@@ -35,11 +35,12 @@ entre le niveau maximum du héros et les dernières maîtrises. Ce sont des
 critères de simulation, sans verrouillage d'une progression par une autre.
 Le build complet comprend cinq objets équipés forgés, tous les arbres,
 tous les passifs et Cœurs ; forger toute la collection reste un objectif en plus.
-Les attributs offensifs et les statistiques de passifs gagnent progressivement
-en puissance avec le niveau du héros. Concentrer les points dans un seul
-attribut offensif réduit leur rendement ; répartir les points reste utile.
-Les premiers rangs de forge d'arme lancent le build, puis leur gain ralentit
-pour laisser les autres familles de progression prendre leur place. Les choix
+Les gains bruts par point sont entiers et augmentent par paliers avec le
+niveau du héros, y compris pour les points déjà investis. Les derniers points
+conservent leur rendement ; critique, cadence et résistance donnent un intérêt
+à répartir les investissements. Les statistiques des passifs suivent ces paliers.
+La forge compose les gains sur les statistiques acquises : les derniers rangs
+donnent des gains bruts supérieurs aux premiers. Les choix
 de run démultiplient ce socle et doivent expliquer la majeure partie du DPS
 de fin de tentative ; ils ne sont pas une sixième tranche à ramener à 20 %.
 
@@ -51,9 +52,10 @@ Une spécialisation offensive conserve son avantage de dégâts. Les PV, les
 soins et le rendement du butin dépendent des points, équipements, maîtrises
 et passifs réellement choisis ; concentrer ses investissements en dégâts
 laisse une faible marge aux blessures et finance moins de rangs par coffre.
-Le premier monde demande très peu de répétitions ; le besoin de
-renforcement augmente vers la fin de campagne. Les premières salles doivent
-rester accessibles avec l'équipement attendu, avant les augments aléatoires.
+Le début avance sans répétitions obligatoires ; de courts renforcements peuvent
+devenir utiles avant la fin du premier monde, puis le besoin augmente vers la
+fin de campagne. Les premières salles doivent rester accessibles avec les
+achats financés du parcours, avant les augments aléatoires.
 Avec des rares seuls, une progression ordinaire doit garder plusieurs attaques
 par monstre intact. Les choix offensifs et les critiques accélèrent ensuite
 les rencontres. Un mixte avec plusieurs choix offensifs ordinaires doit rester
@@ -205,7 +207,7 @@ hypothèses sont dans `statistiques_jeu/liste_mathematique.md`.
 Sorcier et Moine restent sélectionnables. Leurs bonus sont temporairement
 neutres ; aucun build ne reçoit d'avantage de classe.
 
-Le niveau de compte augmente légèrement le socle d'attaque et de PV, puis
+Le niveau de compte compose la croissance du socle d'attaque et de PV, puis
 donne des points à répartir. Force, Vitalité, Agilité, Intelligence et Sagesse
 ont chacune un effet actuel ; Intelligence n'est plus liée à des sorts.
 
@@ -215,20 +217,22 @@ Les trois bijoux apportent une base d'attaque commune, en plus de leur
 spécialité. Chaque rang de forge renforce cette base et la statistique
 principale. Les fiches montrent le gain suivant et son coût avant achat.
 La forge augmente les statistiques du modèle ; sa provenance renforce ses
-valeurs brutes. Les pourcentages s'additionnent dans chaque source ; les
+valeurs brutes. Les rangs et nœuds de maîtrises composent leurs facteurs ; les
 étages équipement, maîtrises et passifs se multiplient. Les augments agissent
 ensuite sur les tirs et statistiques de run ; les Cœurs sont le dernier facteur
 de dégâts. Ils font partie de la progression permanente.
 
-Le repère demandé est un impact normal d'environ mille dégâts sans augment
-sur un compte complet, pour dix dégâts au départ sans équipement. Ce sont
-des impacts, pas le DPS ni les critiques. Les bijoux et le familier doivent
+Les unités de combat sont agrandies ensemble : attaque, PV des deux camps et
+référence de Défense. Les nombres augmentent ensuite réellement avec les
+points, les rangs et les facteurs composés. Les impacts du début au compte
+complet se lisent dans la liste mathématique, séparément du DPS et des critiques.
+Les bijoux et le familier doivent
 apporter un gain visible ; leur utilité offensive et défensive se lit objet
 par objet dans la liste mathématique. Chaque rang de forge du familier augmente
 ses dégâts, indépendamment de l'arme ; il partage les facteurs permanents
 et les augments d'attaque, sans recevoir les critiques ni les salves du héros.
-La forge d'arme ralentit après ses premiers achats, avec un gain continu
-plus sensible sur les rangs suivants. Les ennemis gardent des courbes fixes,
+Chaque gain brut de forge est arrondi dans le calcul, et ne diminue jamais
+sur les rangs suivants. Les ennemis gardent des courbes fixes,
 recalibrées avec les achats et offres réels, sans lire les statistiques du joueur.
 
 Héros affiche le bonus total de chaque attribut et le gain du prochain point
@@ -244,6 +248,10 @@ sauvegardes, sans réapparaître dans les butins actuels.
 Les trois branches de maîtrises sont Offensif, Défensif et Utilitaire.
 Les nœuds ordinaires ont plusieurs rangs ; les pouvoirs majeurs s'achètent
 une fois. Les coûts, prérequis et effets sont détaillés par rang dans les listes.
+Un rang de statistique multiplie la valeur déjà acquise ; les nœuds tardifs
+renforcent davantage que les premiers. Les Cœurs composent également leurs
+gains, ce qui conserve leur utilité relative jusqu'au dernier. Les points de
+critique s'additionnent avant le plafond de chance.
 
 Seize passifs remplacent les sorts actifs et ultimes. Quatre peuvent être
 équipés simultanément, chacun sur deux rangs. Ils renforcent les statistiques,

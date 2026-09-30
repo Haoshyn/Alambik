@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 256 256">
+<title>vitalite</title>
+<desc>Silhouette Wenrexa Necklace, banque tools/sources_svg ; habillage Alambik.</desc>
+<defs>
+<linearGradient id="email" x1="0" y1="0" x2=".75" y2="1"><stop stop-color="#e3fff0"/><stop offset=".38" stop-color="#8ed5c5"/><stop offset=".77" stop-color="#479ca4"/><stop offset="1" stop-color="#3d637c"/></linearGradient>
+<linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff5dc"/><stop offset=".48" stop-color="#e5c695"/><stop offset="1" stop-color="#a08077"/></linearGradient>
+<linearGradient id="reflet" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#ffffff" stop-opacity=".3"/><stop offset=".55" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
+</defs>
+<path d="M150.207,83.081c1.559,2.849-30.943,1-30.943,1S102.831,40.246,4.23,16.2C2.714,17.554,11.966.725,11.966,0.725S122.7,61.691,236.3.725c-1.453-3.884,15.472,7.736,15.472,7.736S150.139,59.356,150.207,83.081Zm-14.471,18.207A77.356,77.356,0,1,1,58.38,178.644,77.356,77.356,0,0,1,135.736,101.288ZM159,237c5.168-.752,36.381-13.625,39-49-0.2-3.824-5.717-5.617-7-1,0,0-7.269,33.019-39,42C151.82,229.773,153.832,237.751,159,237Z" transform="translate(23 26) scale(.82)" fill="#19283c" fill-rule="evenodd" opacity=".65"/>
+<path d="M150.207,83.081c1.559,2.849-30.943,1-30.943,1S102.831,40.246,4.23,16.2C2.714,17.554,11.966.725,11.966,0.725S122.7,61.691,236.3.725c-1.453-3.884,15.472,7.736,15.472,7.736S150.139,59.356,150.207,83.081Zm-14.471,18.207A77.356,77.356,0,1,1,58.38,178.644,77.356,77.356,0,0,1,135.736,101.288ZM159,237c5.168-.752,36.381-13.625,39-49-0.2-3.824-5.717-5.617-7-1,0,0-7.269,33.019-39,42C151.82,229.773,153.832,237.751,159,237Z" transform="translate(23 20) scale(.82)" fill="url(#email)" fill-rule="evenodd" stroke="#283951" stroke-width="5" stroke-linejoin="round"/>
+<path d="M150.207,83.081c1.559,2.849-30.943,1-30.943,1S102.831,40.246,4.23,16.2C2.714,17.554,11.966.725,11.966,0.725S122.7,61.691,236.3.725c-1.453-3.884,15.472,7.736,15.472,7.736S150.139,59.356,150.207,83.081Zm-14.471,18.207A77.356,77.356,0,1,1,58.38,178.644,77.356,77.356,0,0,1,135.736,101.288ZM159,237c5.168-.752,36.381-13.625,39-49-0.2-3.824-5.717-5.617-7-1,0,0-7.269,33.019-39,42C151.82,229.773,153.832,237.751,159,237Z" transform="translate(23 20) scale(.82)" fill="url(#reflet)" fill-rule="evenodd" stroke="#e3fff0" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M128 149C104 128 100 145 108 156L128 179 148 156C156 145 152 128 128 149Z" fill="#fff1d4" stroke="#3d637c" stroke-width="3"/>
+</svg>

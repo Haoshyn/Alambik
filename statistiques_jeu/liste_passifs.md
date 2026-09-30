@@ -3,7 +3,7 @@
 ## Logique mathématique
 
 - 4 emplacements équipables. Un passif non équipé ne donne aucun bonus.
-- 2 rangs par passif. Bonus = valeur du rang 1 × rang ; un doublon passe au rang 2.
+- 2 rangs par passif. Un doublon passe au rang 2 : les bonus de statistiques se composent et conservent leur gain relatif ; les points de critique s’additionnent. Les taux de niveau suivent les paliers du héros.
 - Pour l’attaque, les PV, la défense et la cadence, les bonus des passifs s’additionnent entre eux, puis multiplient les statistiques déjà obtenues. Un +30 % d’attaque de passifs multiplie donc cette attaque par 1,30.
 - Les soins, la vitesse de déplacement et celle des projectiles gardent un cumul additif avec les autres sources permanentes. Les critiques s’ajoutent en points ; la chance est plafonnée à 100 %.
 - Audace et Reprise de souffle s’additionnent dans un même facteur de dégâts finaux : 1 + Audace + Reprise active + éventuel Élan offensif du bijou. Reprise exige une période sans blessure ; Audace augmente aussi les dégâts subis.
@@ -37,78 +37,78 @@ Il faut vaincre l’Épreuve précédente et atteindre le chapitre de campagne i
 
 **Obtention :** Épreuve · niveau 1.
 
-Attaque +5 à 30 % par rang selon le niveau du héros.
+Attaque +5 à 40 % par rang selon le niveau, cumul composé.
 
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
-| 1 | +30 % attaque |
-| 2 | +60 % attaque |
+| 1 | +40 % attaque |
+| 2 | +96 % attaque |
 
 ### Célérité
 
 **Obtention :** Épreuve · niveau 3.
 
-Cadence +4 à 24 % par rang selon le niveau du héros.
+Cadence +5 à 30 % par rang selon le niveau, cumul composé.
 
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
-| 1 | +24 % cadence |
-| 2 | +48 % cadence |
+| 1 | +30 % cadence |
+| 2 | +69 % cadence |
 
 ### Œil précis
 
 **Obtention :** Épreuve · niveau 4.
 
-Chance critique +2 à 12 points par rang selon le niveau du héros.
+Chance critique +2 à 15 points par rang selon le niveau du héros.
 
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
-| 1 | +12 points de chance critique |
-| 2 | +24 points de chance critique |
+| 1 | +15 points de chance critique |
+| 2 | +30 points de chance critique |
 
 ### Impact critique
 
 **Obtention :** Épreuve · niveau 5.
 
-Dégâts critiques +5 à 30 points par rang selon le niveau du héros.
+Dégâts critiques +5 à 40 points par rang selon le niveau du héros.
 
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
-| 1 | +30 points de dégâts critiques |
-| 2 | +60 points de dégâts critiques |
+| 1 | +40 points de dégâts critiques |
+| 2 | +80 points de dégâts critiques |
 
 ### Projectiles vifs
 
 **Obtention :** Épreuve · niveau 5.
 
-Augmente la vitesse et la portée des tirs de 8 % par rang.
+Vitesse et portée des tirs +8 % par rang, cumul composé.
 
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +8 % vitesse et portée des tirs |
-| 2 | +16 % vitesse et portée des tirs |
+| 2 | +16,6 % vitesse et portée des tirs |
 
 ### Reprise de souffle
 
 **Obtention :** Épreuve · niveau 8.
 
-Après 10 s sans blessure, dégâts +5 % par rang.
+Après 10 s sans blessure, dégâts +5 % par rang, cumul composé.
 
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +5 % de dégâts après 10 s sans blessure |
-| 2 | +10 % de dégâts après 10 s sans blessure |
+| 2 | +10,3 % de dégâts après 10 s sans blessure |
 
 ### Audace
 
 **Obtention :** Épreuve · niveau 9.
 
-Dégâts infligés et subis +10 % par rang.
+Dégâts infligés et subis +10 % par rang, cumul composé.
 
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | Dégâts infligés et subis +10 % |
-| 2 | Dégâts infligés et subis +20 % |
+| 2 | Dégâts infligés et subis +21 % |
 
 ## Défensif
 
@@ -116,34 +116,34 @@ Dégâts infligés et subis +10 % par rang.
 
 **Obtention :** Épreuve · niveau 1.
 
-PV maximum +5 à 30 % par rang selon le niveau du héros.
+PV maximum +5 à 40 % par rang selon le niveau, cumul composé.
 
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
-| 1 | +30 % PV maximum |
-| 2 | +60 % PV maximum |
+| 1 | +40 % PV maximum |
+| 2 | +96 % PV maximum |
 
 ### Carapace
 
 **Obtention :** Épreuve · niveau 3.
 
-Défense +5 à 30 % par rang selon le niveau du héros.
+Défense +5 à 40 % par rang selon le niveau, cumul composé.
 
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
-| 1 | +30 % défense |
-| 2 | +60 % défense |
+| 1 | +40 % défense |
+| 2 | +96 % défense |
 
 ### Soins renforcés
 
 **Obtention :** Épreuve · niveau 6.
 
-Augmente les soins reçus de 5 % par rang.
+Soins reçus +5 % par rang, cumul composé.
 
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +5 % soins reçus |
-| 2 | +10 % soins reçus |
+| 2 | +10,3 % soins reçus |
 
 ### Récupération
 
@@ -173,12 +173,12 @@ Rend 2,5 % des PV maximum toutes les 6 éliminations par rang.
 
 **Obtention :** Épreuve · niveau 4.
 
-Augmente la vitesse de déplacement de 5 % par rang.
+Vitesse +5 % par rang, cumul composé.
 
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +5 % vitesse |
-| 2 | +10 % vitesse |
+| 2 | +10,3 % vitesse |
 
 ### Sang-froid
 
@@ -195,29 +195,29 @@ Les tirs ralentissent les ennemis de 10 % pendant 2 s par rang.
 
 **Obtention :** Épreuve · niveau 10.
 
-Augmente les gouttes gagnées de 5 % par rang.
+Gouttes gagnées +5 % par rang, cumul composé.
 
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +5 % de gouttes |
-| 2 | +10 % de gouttes |
+| 2 | +10,3 % de gouttes |
 
 ### Savoir pratique
 
 **Obtention :** Épreuve · niveau 11.
 
-Augmente l’XP de compte gagnée de 5 % par rang.
+XP de compte gagnée +5 % par rang, cumul composé.
 
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +5 % d’XP de compte |
-| 2 | +10 % d’XP de compte |
+| 2 | +10,3 % d’XP de compte |
 
 ## Cœurs de mana des Épreuves
 
 Chaque niveau d’Épreuve possède un Cœur unique, garanti au plus tard après 3 victoires sans son Cœur.
 
-Chaque Cœur donne +15 % de dégâts finaux ; 11 Cœurs donnent au total +165 % (addition, sans exponentielle).
+Chaque Cœur multiplie les dégâts déjà acquis par 1,15. Avec 11 Cœurs, le facteur final atteint ×4,65 (+365,24 %). Le dernier Cœur conserve donc le même gain relatif que le premier.
 
 ## Anciennes sauvegardes
 

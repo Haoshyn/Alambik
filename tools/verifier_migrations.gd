@@ -42,7 +42,7 @@ func _verifier_catalogue() -> void:
 		var base := Passifs.bonus_stats({id: 1})
 		var double := Passifs.bonus_stats({id: 2})
 		for cle: String in base:
-			_verifier(is_equal_approx(float(double[cle]), 2.0 * float(base[cle])), "Bonus double : " + id)
+			_verifier(float(double[cle]) >= 2.0 * float(base[cle]) - 0.00001, "Le doublon conserve et renforce le bonus : " + id)
 	_verifier(Epreuves.candidats(1, {"vigueur": 1}) == ["vitalite"], "Priorite aux acquisitions manquantes")
 	_verifier(Epreuves.candidats(1, {"vigueur": 2, "vitalite": 2}).is_empty(), "Aucun passif maximal dans le tirage")
 

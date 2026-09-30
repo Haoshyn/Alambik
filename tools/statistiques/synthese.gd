@@ -91,7 +91,7 @@ static func _ordre_formules(lignes: Array[String], profil: Dictionary, total: Di
 	var pv: Dictionary = etapes["pv"]
 	lignes.append_array(["## Ordre réel des calculs", "",
 		"Le héros nu au niveau %d possède **%s ATK** et **%s PV** avant de répartir ses %d points. Ce socle de niveau est compté séparément des attributs." % [int(profil["niveau"]), n(float(attaque["base"])), n(float(pv["base"])), Personnage.points_totaux(int(profil["niveau"]))], "",
-		"L’attaque brute vaut **%s niveau + %s attributs + %s équipement = %s**. On applique ensuite les pourcentages de l’équipement, puis les maîtrises, les passifs et les augments. Les pourcentages s’additionnent à l’intérieur d’une source ; les facteurs des sources se multiplient." % [n(float(attaque["base"])), n(float(attaque["attributs_bruts"])), n(float(attaque["equipement_brut"])), n(float(attaque["brut"]))], ""])
+		"L’attaque brute vaut **%s niveau + %s attributs + %s équipement = %s**. On applique ensuite l’équipement, les maîtrises, les passifs et les augments. Les maîtrises composent leurs rangs et leurs nœuds ; les bonus des objets équipés et des augments s’additionnent dans leur famille. Les facteurs des sources se multiplient." % [n(float(attaque["base"])), n(float(attaque["attributs_bruts"])), n(float(attaque["equipement_brut"])), n(float(attaque["brut"]))], ""])
 	var calculs: Array = []
 	for definition: Array in [["attaque", "Attaque", "facteur_attaque_augments"],
 		["pv", "PV", "facteur_pv_augments"], ["defense", "Défense", "facteur_defense_augments"],
@@ -129,7 +129,7 @@ static func _sources_directes(lignes: Array[String], profil: Dictionary) -> void
 		["Cinq équipements, forge maximum", resume_bonus(Modeles.bonus_equipement(profil)) + ". S’y ajoutent la forme et le rythme de l’arme, le tir du familier et l’effet d’anneau."],
 		["Toutes les maîtrises", resume_bonus(bonus_maitrises) + ". Dégâts subis −%s %%." % n(ArbreCompetences.reduction_degats(maitrises) * 100.0)],
 		["Quatre passifs au rang maximum", resume_bonus(Passifs.bonus_stats(profil["passifs"]))],
-		["Tous les Cœurs", "+%s %% de dégâts finaux." % n(int(profil["coeurs"]) * Reglages.COEUR_MANA_BONUS_FINAL * 100.0)],
+		["Tous les Cœurs", "+%s %% de dégâts finaux." % n((Reglages.multiplicateur_coeurs(int(profil["coeurs"])) - 1.0) * 100.0)],
 		["Sorcier ou Moine", "Aucun bonus actuellement."]])
 	lignes.append_array(["Les autres effets de soins, collecte et économie sont détaillés par rang dans les [maîtrises](liste_maitrises.md) et les [passifs](liste_passifs.md). Ils ne sont pas transformés artificiellement en dégâts dans la fiche.", ""])
 
@@ -177,10 +177,16 @@ static func _attributs(lignes: Array[String], profil: Dictionary) -> void:
 	var points := Personnage.points_totaux(Personnage.NIVEAU_MAX)
 	lignes.append_array(["## Attributs : le vrai maximum disponible", "",
 		"Au niveau **%d**, le compte possède **%d points à répartir au total**. On peut tous les placer dans un attribut, mais les maxima de la dernière colonne ne sont pas cumulables. La fiche utilise tous les points ; leurs bonus bruts sont renforcés ensuite par les maîtrises et les passifs." % [Personnage.NIVEAU_MAX, points], ""])
-	lignes.append("Les attributs offensifs prennent progressivement leur puissance avec le niveau du héros. Leur rendement décroît quand on concentre davantage de points dans le même attribut ; la Vitalité et la Sagesse gardent leur calcul par point.")
+	lignes.append("Les gains bruts par point sont entiers et montent par paliers avec le niveau du héros. Chaque point conserve son rendement au niveau courant ; les points déjà investis profitent également des nouveaux paliers. L’Agilité renforce les critiques et l’Intelligence la cadence, ce qui conserve l’intérêt de répartir ses points.")
 	lignes.append("")
-	lignes.append("Pour Force, Agilité et Intelligence, le poids de p points vaut **2 × %s × p / (%s + p)**. Au niveau n, on le multiplie par **%s + (1 − %s) × ((n − 1) / (%d − 1))²**, puis par le coefficient de l’attribut. Le gain d’un point est la différence entre p + 1 et p au même niveau, pas un bonus constant par point." % [n(Personnage.POINTS_RENDEMENT), n(Personnage.POINTS_RENDEMENT), n(Personnage.PUISSANCE_INITIALE), n(Personnage.PUISSANCE_INITIALE), Personnage.NIVEAU_MAX])
+	lignes.append("Bonus = points investis × gain par point du palier courant. Les paliers changent tous les %d niveaux ; il n’y a aucune fraction cachée d’ATK, de PV ou de Défense dans le gain d’un point." % Personnage.NIVEAUX_PAR_PALIER)
 	lignes.append("")
+	var paliers: Array = []
+	for niveau in range(1, Personnage.NIVEAU_MAX + 1, Personnage.NIVEAUX_PAR_PALIER):
+		paliers.append(["%d–%d" % [niveau, mini(Personnage.NIVEAU_MAX, niveau + Personnage.NIVEAUX_PAR_PALIER - 1)],
+			resume_bonus(Personnage.gain_point("force", 0, niveau)), resume_bonus(Personnage.gain_point("vitalite", 0, niveau)),
+			resume_bonus(Personnage.gain_point("intelligence", 0, niveau))])
+	Listes.tableau(lignes, ["Niveaux du héros", "Un point de Force", "Un point de Vitalité", "Un point d’Intelligence"], paliers)
 	var attributs: Dictionary = profil["attributs"]
 	var donnees: Array = []
 	for id: String in Personnage.ATTRIBUTS:

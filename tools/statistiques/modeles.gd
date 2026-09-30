@@ -59,7 +59,7 @@ static func mesurer(configuration: Dictionary) -> Dictionary:
 		bonus_conditionnel += Passifs.bonus_reprise(passifs)
 		if "elan_offensif" in effets:
 			bonus_conditionnel += EffetsBijoux.ELAN_BONUS_PAR_ATTAQUE * EffetsBijoux.ELAN_CUMULS_MAX
-	var facteur_coeurs := 1.0 + clampi(int(configuration.get("coeurs", 0)), 0, Epreuves.nombre()) * Reglages.COEUR_MANA_BONUS_FINAL
+	var facteur_coeurs := Reglages.multiplicateur_coeurs(int(configuration.get("coeurs", 0)))
 	var final := (1.0 + bonus_conditionnel) * facteur_coeurs
 	var impact_moyen := 1.0
 	if "cinquieme_impact" in effets:

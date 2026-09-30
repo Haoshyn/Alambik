@@ -13,30 +13,33 @@ const AUDACE_BONUS := 0.10
 const RECUPERATION_PART := 0.01
 const BUTIN_BONUS := 0.05
 const EXPERIENCE_BONUS := 0.05
-const STAT_PAR_RANG := 0.30
-const CADENCE_PAR_RANG := 0.24
-const CRITIQUE_PAR_RANG := 0.12
-const PUISSANCE_INITIALE := 1.0 / 6.0
+const PALIERS_STAT := [5, 10, 15, 20, 30, 40]
+const PALIERS_CADENCE := [5, 10, 15, 20, 25, 30]
+const PALIERS_CRITIQUE := [2, 3, 5, 7, 10, 15]
+const STAT_PAR_RANG := PALIERS_STAT[-1] / 100.0
+const CADENCE_PAR_RANG := PALIERS_CADENCE[-1] / 100.0
+const CRITIQUE_PAR_RANG := PALIERS_CRITIQUE[-1] / 100.0
 const CHAMPS_PROGRESSIFS := ["attaque_mult", "pv_mult", "defense_mult", "cadence", "critique", "degats_critiques"]
 
-# Chaque valeur est celle du rang 1 ; le second exemplaire double le bonus.
+# Le second exemplaire renforce la statistique deja acquise. Les taux de
+# niveau sont des pourcentages entiers, identiques en fiche et en combat.
 const CATALOGUE := {
-	"vigueur": {"nom": "Vigueur", "description": "Attaque +%.0f à %.0f %% par rang selon le niveau du héros." % [STAT_PAR_RANG * PUISSANCE_INITIALE * 100.0, STAT_PAR_RANG * 100.0], "categorie": "Offensif", "icone": "puissance", "bonus": {"attaque_mult": STAT_PAR_RANG}},
-	"vitalite": {"nom": "Vitalité", "description": "PV maximum +%.0f à %.0f %% par rang selon le niveau du héros." % [STAT_PAR_RANG * PUISSANCE_INITIALE * 100.0, STAT_PAR_RANG * 100.0], "categorie": "Défensif", "icone": "robustesse", "bonus": {"pv_mult": STAT_PAR_RANG}},
-	"carapace": {"nom": "Carapace", "description": "Défense +%.0f à %.0f %% par rang selon le niveau du héros." % [STAT_PAR_RANG * PUISSANCE_INITIALE * 100.0, STAT_PAR_RANG * 100.0], "categorie": "Défensif", "icone": "rempart", "bonus": {"defense_mult": STAT_PAR_RANG}},
-	"celerite": {"nom": "Célérité", "description": "Cadence +%.0f à %.0f %% par rang selon le niveau du héros." % [CADENCE_PAR_RANG * PUISSANCE_INITIALE * 100.0, CADENCE_PAR_RANG * 100.0], "categorie": "Offensif", "icone": "celerite", "bonus": {"cadence": CADENCE_PAR_RANG}},
-	"pas_leger": {"nom": "Pas léger", "description": "Augmente la vitesse de déplacement de 5 % par rang.", "categorie": "Utilitaire", "icone": "elan", "bonus": {"vitesse": 0.05}},
-	"oeil_precis": {"nom": "Œil précis", "description": "Chance critique +%.0f à %.0f points par rang selon le niveau du héros." % [CRITIQUE_PAR_RANG * PUISSANCE_INITIALE * 100.0, CRITIQUE_PAR_RANG * 100.0], "categorie": "Offensif", "icone": "precision", "bonus": {"critique": CRITIQUE_PAR_RANG}},
-	"impact_critique": {"nom": "Impact critique", "description": "Dégâts critiques +%.0f à %.0f points par rang selon le niveau du héros." % [STAT_PAR_RANG * PUISSANCE_INITIALE * 100.0, STAT_PAR_RANG * 100.0], "categorie": "Offensif", "icone": "frappe_lourde", "bonus": {"degats_critiques": STAT_PAR_RANG}},
-	"projectiles_vifs": {"nom": "Projectiles vifs", "description": "Augmente la vitesse et la portée des tirs de 8 % par rang.", "categorie": "Offensif", "icone": "trajectoire", "bonus": {"projectile": 0.08}},
-	"soins_renforces": {"nom": "Soins renforcés", "description": "Augmente les soins reçus de 5 % par rang.", "categorie": "Défensif", "icone": "regeneration", "bonus": {"soin": 0.05}},
+	"vigueur": {"nom": "Vigueur", "description": "Attaque +%d à %d %% par rang selon le niveau, cumul composé." % [PALIERS_STAT[0], STAT_PAR_RANG * 100.0], "categorie": "Offensif", "icone": "puissance", "bonus": {"attaque_mult": STAT_PAR_RANG}},
+	"vitalite": {"nom": "Vitalité", "description": "PV maximum +%d à %d %% par rang selon le niveau, cumul composé." % [PALIERS_STAT[0], STAT_PAR_RANG * 100.0], "categorie": "Défensif", "icone": "robustesse", "bonus": {"pv_mult": STAT_PAR_RANG}},
+	"carapace": {"nom": "Carapace", "description": "Défense +%d à %d %% par rang selon le niveau, cumul composé." % [PALIERS_STAT[0], STAT_PAR_RANG * 100.0], "categorie": "Défensif", "icone": "rempart", "bonus": {"defense_mult": STAT_PAR_RANG}},
+	"celerite": {"nom": "Célérité", "description": "Cadence +%d à %d %% par rang selon le niveau, cumul composé." % [PALIERS_CADENCE[0], CADENCE_PAR_RANG * 100.0], "categorie": "Offensif", "icone": "celerite", "bonus": {"cadence": CADENCE_PAR_RANG}},
+	"pas_leger": {"nom": "Pas léger", "description": "Vitesse +5 % par rang, cumul composé.", "categorie": "Utilitaire", "icone": "elan", "bonus": {"vitesse": 0.05}},
+	"oeil_precis": {"nom": "Œil précis", "description": "Chance critique +%d à %d points par rang selon le niveau du héros." % [PALIERS_CRITIQUE[0], CRITIQUE_PAR_RANG * 100.0], "categorie": "Offensif", "icone": "precision", "bonus": {"critique": CRITIQUE_PAR_RANG}},
+	"impact_critique": {"nom": "Impact critique", "description": "Dégâts critiques +%d à %d points par rang selon le niveau du héros." % [PALIERS_STAT[0], STAT_PAR_RANG * 100.0], "categorie": "Offensif", "icone": "frappe_lourde", "bonus": {"degats_critiques": STAT_PAR_RANG}},
+	"projectiles_vifs": {"nom": "Projectiles vifs", "description": "Vitesse et portée des tirs +8 % par rang, cumul composé.", "categorie": "Offensif", "icone": "trajectoire", "bonus": {"projectile": 0.08}},
+	"soins_renforces": {"nom": "Soins renforcés", "description": "Soins reçus +5 % par rang, cumul composé.", "categorie": "Défensif", "icone": "regeneration", "bonus": {"soin": 0.05}},
 	"recuperation": {"nom": "Récupération", "description": "Rend 1 % des PV maximum à l’entrée d’une salle par rang.", "categorie": "Défensif", "icone": "regeneration"},
 	"moisson_vitale": {"nom": "Moisson vitale", "description": "Rend 2,5 % des PV maximum toutes les 6 éliminations par rang.", "categorie": "Défensif", "icone": "moisson_vitale"},
 	"sang_froid": {"nom": "Sang-froid", "description": "Les tirs ralentissent les ennemis de 10 % pendant 2 s par rang.", "categorie": "Utilitaire", "icone": "sang_froid"},
-	"rempart_initial": {"nom": "Reprise de souffle", "description": "Après 10 s sans blessure, dégâts +5 % par rang.", "categorie": "Offensif", "icone": "rempart_initial"},
-	"audace": {"nom": "Audace", "description": "Dégâts infligés et subis +10 % par rang.", "categorie": "Offensif", "icone": "audace"},
-	"butin_precieux": {"nom": "Butin précieux", "description": "Augmente les gouttes gagnées de 5 % par rang.", "categorie": "Utilitaire", "icone": "abondance"},
-	"savoir_pratique": {"nom": "Savoir pratique", "description": "Augmente l’XP de compte gagnée de 5 % par rang.", "categorie": "Utilitaire", "icone": "savoir"},
+	"rempart_initial": {"nom": "Reprise de souffle", "description": "Après 10 s sans blessure, dégâts +5 % par rang, cumul composé.", "categorie": "Offensif", "icone": "rempart_initial"},
+	"audace": {"nom": "Audace", "description": "Dégâts infligés et subis +10 % par rang, cumul composé.", "categorie": "Offensif", "icone": "audace"},
+	"butin_precieux": {"nom": "Butin précieux", "description": "Gouttes gagnées +5 % par rang, cumul composé.", "categorie": "Utilitaire", "icone": "abondance"},
+	"savoir_pratique": {"nom": "Savoir pratique", "description": "XP de compte gagnée +5 % par rang, cumul composé.", "categorie": "Utilitaire", "icone": "savoir"},
 }
 
 static func contient(id: String) -> bool:
@@ -56,9 +59,18 @@ static func bonus_stats(passifs: Dictionary, niveau := Personnage.NIVEAU_MAX) ->
 	for id: String in passifs:
 		var bonus: Dictionary = donnees(id).get("bonus", {})
 		for cle: String in bonus:
-			var croissance := Personnage.facteur_progression(niveau, PUISSANCE_INITIALE) if cle in CHAMPS_PROGRESSIFS else 1.0
-			resultat[cle] = float(resultat.get(cle, 0.0)) + float(bonus[cle]) * rang_passif(passifs, id) * croissance
+			var taux := taux_par_rang(cle, float(bonus[cle]), niveau)
+			var rang := rang_passif(passifs, id)
+			var valeur := taux * float(rang) if cle in ["critique", "degats_critiques"] \
+				else pow(1.0 + taux, rang) - 1.0
+			resultat[cle] = float(resultat.get(cle, 0.0)) + valeur
 	return resultat
+
+static func taux_par_rang(champ: String, taux: float, niveau: int) -> float:
+	if champ not in CHAMPS_PROGRESSIFS: return taux
+	var paliers: Array = PALIERS_CADENCE if champ == "cadence" \
+		else (PALIERS_CRITIQUE if champ == "critique" else PALIERS_STAT)
+	return float(paliers[Personnage.palier_niveau(niveau)]) / 100.0
 
 static func _bonus(passifs: Dictionary, cle: String, niveau := Personnage.NIVEAU_MAX) -> float:
 	return float(bonus_stats(passifs, niveau).get(cle, 0.0))
@@ -85,19 +97,19 @@ static func seuil_moisson(_passifs: Dictionary) -> int:
 	return MOISSON_SEUIL
 
 static func bonus_reprise(passifs: Dictionary) -> float:
-	return REPRISE_DEGATS * rang_passif(passifs, "rempart_initial")
+	return pow(1.0 + REPRISE_DEGATS, rang_passif(passifs, "rempart_initial")) - 1.0
 
 static func bonus_audace(passifs: Dictionary) -> float:
-	return AUDACE_BONUS * rang_passif(passifs, "audace")
+	return pow(1.0 + AUDACE_BONUS, rang_passif(passifs, "audace")) - 1.0
 
 static func ralentissement_sang_froid(passifs: Dictionary) -> float:
 	return SANG_FROID_RALENTISSEMENT * rang_passif(passifs, "sang_froid")
 
 static func multiplicateur_gouttes(passifs: Dictionary) -> float:
-	return 1.0 + BUTIN_BONUS * rang_passif(passifs, "butin_precieux")
+	return pow(1.0 + BUTIN_BONUS, rang_passif(passifs, "butin_precieux"))
 
 static func multiplicateur_experience(passifs: Dictionary) -> float:
-	return 1.0 + EXPERIENCE_BONUS * rang_passif(passifs, "savoir_pratique")
+	return pow(1.0 + EXPERIENCE_BONUS, rang_passif(passifs, "savoir_pratique"))
 
 static func nombre_debloques(rangs: Dictionary, tout_debloque := false) -> int:
 	if tout_debloque: return CATALOGUE.size()
@@ -130,4 +142,4 @@ static func resume_rang(id: String, rang: int, niveau_heros := Personnage.NIVEAU
 	return ""
 
 static func progression_rang(_id: String) -> String:
-	return "Un doublon obtenu en Épreuve porte ce passif au rang 2 et double son bonus."
+	return "Un doublon obtenu en Épreuve porte ce passif au rang 2 et renforce la valeur acquise."

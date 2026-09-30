@@ -3,14 +3,13 @@ extends RefCounted
 
 const TAILLE_ACCUEIL := Vector2(948, 1659)
 const PAYSAGE := preload("res://assets/visual/interface/clairiere_vivante/paysage.png")
-const VENT_PAYSAGE := preload("res://assets/visual/interface/clairiere_vivante/vent_paysage.svg")
 const VENT_VEGETATION := [
 	preload("res://assets/visual/interface/clairiere_vivante/vent_haut_gauche.svg"),
 	preload("res://assets/visual/interface/clairiere_vivante/vent_haut_droite.svg"),
 	preload("res://assets/visual/interface/clairiere_vivante/vent_bas.svg"),
 ]
-# Ces amplitudes restent visibles lorsque les 948 px de peinture tiennent sur un telephone.
-const VENT := {"amplitude_px": Vector2(12.0, 9.0), "vitesse": 1.85}
+# Le vent reste dans les feuilles detourees ; la prairie appartient au paysage fixe.
+const VENT := {"amplitude_px": 4.0, "vitesse": 1.15}
 const EAU := {"amplitude_px": Vector2(6.5, 2.6), "vitesse": 2.4, "reflets": 0.10}
 const CASCADE := {"vitesse": 1.6, "ecoulement_px": 4.5, "vitesse_ecoulement": 7.2}
 const VEGETATION_FIXE := [

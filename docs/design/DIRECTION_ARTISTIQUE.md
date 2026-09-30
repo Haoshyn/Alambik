@@ -192,8 +192,10 @@ elles conservent les idées historiques sans définir le rendu actuel.
   `tools/variantes_svg_menu.py` crée des variantes colorées du menu dans
   `assets/visual/interface/menu/` sans modifier les SVG sources.
   `tools/generer_glyphes_menus.py` compose les 30 glyphes de maîtrise et les cinq
-  familiers depuis ces silhouettes SVG. Les passifs réemploient les glyphes
-  existants de `assets/visual/azur/glyphes/`.
+  familiers depuis ces silhouettes SVG. `tools/generer_glyphes_passifs.py`
+  compose les seize glyphes de `assets/visual/interface/menu/passifs/glyphes/`
+  depuis seize silhouettes distinctes, également différentes de celles des
+  maîtrises et familiers. Émail corail, jade et lilas, sans halo ni image incorporée.
 - Les cadres de `interface/cadres/` s'étirent en neuf zones avec coins fixes.
   Les cases, cartes et actions secondaires ont des angles coupés et un filet
   léger ; les compteurs sont arrondis, Jouer prend une forme de capsule et les
@@ -221,23 +223,24 @@ elles conservent les idées historiques sans définir le rendu actuel.
   proche avec quatre rameaux découpés, reflets du lac, cascade et nuages/brumes.
   Le ciel en dégradé et les nuages sont derrière la silhouette des montagnes ;
   les branches passent devant.
-  Quatre rameaux détachés oscillent autour de leurs attaches ; les troncs,
-  montagnes, rives et pierres restent fixes. Des masques SVG localisent aussi
-  le frémissement des feuilles et des touffes d'herbe dans les peintures :
-  un même vent irrégulier traverse les plans, avec des amplitudes en pixels
-  calibrées pour rester visibles sur téléphone. Les ondes du lac sont larges,
-  les reflets bien mobiles et la cascade soutenue ; les feuilles et l'herbe
-  oscillent franchement sans déplacer les troncs ni les rochers.
+  Quatre rameaux détachés oscillent autour de leurs attaches. Le paysage,
+  y compris la prairie, les montagnes et les rives, reste entièrement fixe.
+  Les masques SVG suivent des feuilles précises du premier plan, avec une
+  souplesse décroissante vers leur attache ; les troncs et les rochers sont
+  exclus. Un vent doux traverse ces feuilles avec des phases distinctes.
+  Les ondes du lac sont larges, les reflets mobiles et la cascade soutenue.
   Les reflets du lac bougent dans un masque intérieur ; la cascade associe
   quatre images fondues à un courant descendant limité à son intérieur, et les
   nuages et brumes traversent lentement le cadre dans un seul sens, avec un
   retour hors champ. Six silhouettes de nuages se suivent à vitesse commune :
   cinq autres passent avant qu'une silhouette revienne, environ 3 min 38 s
-  plus tard. La clairière reste visible sous les onglets. Dans Passifs, un
-  voile indigo progressif l'atténue davantage derrière la collection ;
-  l'illustration du monde choisi apparaît seulement dans Aventure. Les autres
-  pages gardent un voile de lecture léger, plus sombre dans Maîtrises pour
-  laisser lire sa constellation. La sélection de campagne garde la clairière,
+  plus tard. La clairière reste visible sous les onglets. Passifs garde le
+  même fond que Héros et Équipement, sans voile propre ni filtre coloré.
+  Ses quatre emplacements surmontent une collection ouverte, ponctuée de
+  glyphes SVG et de filets fins ; les textes libres gardent un contour et une
+  ombre pour le contraste. L'illustration du monde choisi apparaît seulement
+  dans Aventure. Les pages gardent un voile de lecture léger, plus sombre dans
+  Maîtrises pour laisser lire sa constellation. La sélection de campagne garde la clairière,
   le bandeau de niveau et les cinq onglets, mais masque les commandes d'Aventure
   et l'île de fond, déjà représentée sur sa carte. Son titre de monde reste
   libre au-dessus d'une grande île ; les détails du niveau et les commandes
@@ -253,20 +256,22 @@ elles conservent les idées historiques sans définir le rendu actuel.
   affiche le bonus actuel, le rang suivant et le prérequis utile ; la
   réinitialisation reste accessible dans un bouton plus ample, centré en haut,
   avec une police extra-grasse et une couleur claire contrastée.
-- Passifs commence directement par ses filtres Tous, Offensif, Défensif et
-  Utilitaire, puis quatre médaillons
-  équipés sur une ligne dès que la largeur le permet, sans bandeau de niveau
-  ni slogan. Seule la collection défile sous ces commandes fixes. Le fond
-  reprend la clairière sous un voile bleu brume plus clair, sans peinture élémentaire. Chaque entrée garde une
-  légère couleur autour du glyphe et un filet inférieur, sans cadre fermé.
+- Passifs reprend le titre en émail des autres menus, puis les quatre
+  médaillons équipés sur une ligne dès que la largeur le permet.
+  Le titre de collection, son compteur, le tri et les filtres Tous, Offensif,
+  Défensif et Utilitaire précèdent la liste. Seule la collection défile sous
+  ces commandes fixes. Le fond garde la clairière commune sans filtre propre.
+  Chaque entrée associe son SVG, le rang et le bonus calculé à un filet
+  inférieur, sans cadre fermé ni halo coloré. Avant découverte, le bonus
+  annoncé est celui du premier rang.
   Les titres, indications, noms, rangs et descriptions sont posés directement
   sur ce fond : aucun petit rectangle sombre sous le texte, y compris dans
   les fiches. Les cadres enluminés des filtres et les médaillons sont conservés.
   Toute l'entrée ouvre les détails ; les commandes d'équipement
   sont dans la fiche. Le glissement continue à faire défiler la collection.
   Les glyphes, cadres, textes, boutons et filtres restent des éléments indépendants.
-  Les catégories et les emplacements occupent un bandeau plus généreux, avec
-  des légendes colorées lisibles et des mipmaps pour les icônes réduites.
+  Les catégories et les emplacements gardent des légendes lisibles et des
+  mipmaps pour les icônes réduites.
   La mention « Maîtrise requise » est supprimée et ne réserve plus de hauteur.
   Les rangs et états affichés proviennent des données réelles du jeu.
 - Les îles gardent leur silhouette fixe ; leurs matières s'animent dans des zones
@@ -275,6 +280,10 @@ elles conservent les idées historiques sans définir le rendu actuel.
   sprites distincts. La pierre et les silhouettes restent stables.
   L'option d'effets réduits fige les horloges sans masquer de couche ; les
   animations s'arrêtent aussi lorsque la page est cachée.
+  Clairière et îles composent leurs plans dans un rendu sans arrondi au pixel,
+  dimensionné aux pixels affichés. Cela conserve les petits déplacements des
+  nuages, des brumes et des rameaux sans changer le rendu des commandes.
+  Les effets réduits gardent une image figée, recalculée seulement si nécessaire.
 - L'accueil reste `ui/accueil_clairiere.tscn` pour conserver les références.
   Le bas contient les cinq onglets Héros, Équipement, Aventure, Maîtrises et
   Passifs : les libellés colorés restent visibles ; l'onglet actif grandit légèrement.

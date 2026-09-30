@@ -26,6 +26,7 @@
 | Profils DEV payés, combat équilibré ou offensif à l'entrée du monde 3, restauration du compte | [verifier_dev_temporaire.tscn](verifier_dev_temporaire.tscn) ; profil isolé contenant `verification_dev_temporaire`. |
 | Cœurs au sol, fins de rencontre et retrait du tutoriel | [verifier_soins_run.gd](verifier_soins_run.gd) |
 | Contrôles de sauvegarde ancienne et passifs | [verifier_migrations.gd](verifier_migrations.gd) |
+| Menu Passifs : SVG distincts, cadrage portrait, filtres, tri, fiches et équipement | [verifier_passifs.tscn](verifier_passifs.tscn) |
 | Instanciation des écrans et des trois modes ; chargements illustrés, numéros d'étage et cadrage portrait | [verifier_scenes.gd](verifier_scenes.gd) |
 | Décors des cinq mondes : enduit, bordures, volumes hors du passage, vingt étages, contours, UV, budget et effets réduits | [verifier_decors.tscn](verifier_decors.tscn) ; `-- --exporter=DOSSIER` produit les GLB avec couleurs linéaires pour [blender/apercu_decors.py](blender/apercu_decors.py), avec `--rapproche`, `--planche`, `--etages` ou `--formes` (galerie étroite, salle longue, alcôves et renfoncement). `--etages --rapproche` compare la matière et les décors de près. Transitions 3D dans `verifier_scenes.gd`. |
 | Flaques et rafales : placement, collisions, ralentissement, lave et rendu | [verifier_terrains.tscn](verifier_terrains.tscn) ; utilise un profil de vérification isolé. |
@@ -37,7 +38,8 @@
 | Armes tenues | [blender/armes_tenues.py](blender/armes_tenues.py) |
 | Kit d'interface | [generer_email_arcanique.py](generer_email_arcanique.py), [refonte_svg.py](refonte_svg.py), [signatures_svg.py](signatures_svg.py) |
 | Glyphes des menus | [generer_glyphes_menus.py](generer_glyphes_menus.py) |
-| Clairière animée | [generer_clairiere_vivante.py](generer_clairiere_vivante.py) |
+| Seize glyphes SVG distincts des passifs | [generer_glyphes_passifs.py](generer_glyphes_passifs.py) |
+| Clairière animée | [generer_clairiere_vivante.py](generer_clairiere_vivante.py) ; sols et attaches fixes, rendu continu et effets réduits dans [verifier_fonds.tscn](verifier_fonds.tscn) |
 | Deux esquisses musicales et sources originales | [audio/composer.py](audio/composer.py), [audio/masteriser_originaux.py](audio/masteriser_originaux.py), [compositions](../assets/audio/COMPOSITIONS.md) |
 | Icône d'application | [preparer_identite.gd](preparer_identite.gd) |
 

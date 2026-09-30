@@ -74,8 +74,7 @@ static func augments() -> String:
 static func items() -> String:
 	var lignes := entete("Liste des items", [
 		"Forge de 0 à %d. Prix du prochain achat depuis le niveau n : %d + %d × n + %d × n² Pierres, arrondi au multiple de %d le plus proche." % [Reglages.FORGE_NIVEAU_MAX, Reglages.FORGE_COUT_BASE, Reglages.FORGE_COUT_PAR_NIVEAU, Reglages.FORGE_COUT_QUADRATIQUE, Reglages.COUT_PAS_ARRONDI],
-		"Arme : attaque brute = (%s + %s × min(forge, %d) + %s × max(forge − %d, 0)) × %s^(niveau de provenance − 1)." % [nombre(CatalogueProjectiles.ATTAQUE_BASE), nombre(CatalogueProjectiles.FORGE_ATTAQUE_PAR_NIVEAU), CatalogueProjectiles.FORGE_RANGS_INITIAUX, nombre(CatalogueProjectiles.FORGE_ATTAQUE_PAR_NIVEAU_TARDIF), CatalogueProjectiles.FORGE_RANGS_INITIAUX, nombre(Reglages.EQUIPEMENT_CROISSANCE_PAR_PALIER, 3)],
-		"Familier : attaque propre = (base du modèle + %s × forge) × le même facteur de provenance." % nombre(CatalogueFamiliers.FORGE_ATTAQUE_PAR_NIVEAU),
+		"Arme : base %s ATK, puis chaque forge ajoute %s %% de l’attaque acquise, arrondis au multiple de %s. Familier : même calcul à %s %% de son attaque propre. Les gains bruts ne diminuent jamais." % [nombre(CatalogueProjectiles.ATTAQUE_BASE), nombre(CatalogueProjectiles.FORGE_CROISSANCE * 100.0), nombre(Reglages.STATISTIQUE_PAS), nombre(CatalogueFamiliers.FORGE_CROISSANCE * 100.0)],
 		"Bijoux : les valeurs brutes sont multipliées par %s^(%d × indice du monde), indice de 0 à %d. Les pourcentages ne le sont pas." % [nombre(Reglages.EQUIPEMENT_CROISSANCE_PAR_PALIER, 3), Chapitres.CHAPITRES_PAR_MONDE, Chapitres.MONDES.size() - 1],
 		"Les tableaux donnent les statistiques finales de CHAQUE objet à CHAQUE niveau, provenance déjà appliquée.",
 		"L’attaque de l’arme et des bijoux s’ajoute à la base du héros. L’attaque du familier reste séparée.",
@@ -139,9 +138,9 @@ static func items() -> String:
 static func maitrises() -> String:
 	var lignes := entete("Liste des maîtrises", [
 		"Un nœud normal possède %d rangs ; un pouvoir majeur s’achète une seule fois." % Reglages.MAITRISE_RANG_MAX,
-		"Bonus du nœud = bonus d’un rang × rang acquis. Les bonus d’une même statistique s’additionnent.",
+		"Facteur du nœud = (1 + taux du rang)^rangs acquis. Les facteurs des nœuds d’une même statistique se multiplient. Les points de critique s’additionnent.",
 		"Coût du prochain rang = coût initial × (1 + %s × rangs déjà acquis), arrondi au multiple de %d." % [nombre(Reglages.MAITRISE_COUT_AJOUT_PAR_RANG), Reglages.COUT_PAS_ARRONDI],
-		"L’attaque est un pourcentage de l’attaque brute du héros ; elle ne donne pas des dégâts fixes.",
+		"Un rang augmente l’attaque déjà acquise. Par exemple, +4 % fait passer 100 à 104, et 300 à 312. Les nœuds offensifs tardifs ont un taux supérieur aux premiers.",
 		"Dégâts moyens d’un tir, hors augments et bonus finaux = attaque × coefficient de l’arme × [1 + chance critique × (coefficient critique − 1)].",
 		"Une maîtrise de critique agit sur ce dernier facteur. La cadence augmente les tirs par seconde, pas les dégâts d’un tir.",
 		"Les prérequis demandent au moins un rang dans le nœud précédent, pas son maximum.",
@@ -173,7 +172,7 @@ static func maitrises() -> String:
 static func passifs() -> String:
 	var lignes := entete("Liste des passifs", [
 		"%d emplacements équipables. Un passif non équipé ne donne aucun bonus." % Passifs.EMPLACEMENTS,
-		"%d rangs par passif. Bonus = valeur du rang 1 × rang ; un doublon passe au rang 2." % Passifs.RANG_MAX,
+		"%d rangs par passif. Un doublon passe au rang 2 : les bonus de statistiques se composent et conservent leur gain relatif ; les points de critique s’additionnent. Les taux de niveau suivent les paliers du héros." % Passifs.RANG_MAX,
 		"Pour l’attaque, les PV, la défense et la cadence, les bonus des passifs s’additionnent entre eux, puis multiplient les statistiques déjà obtenues. Un +30 % d’attaque de passifs multiplie donc cette attaque par 1,30.",
 		"Les soins, la vitesse de déplacement et celle des projectiles gardent un cumul additif avec les autres sources permanentes. Les critiques s’ajoutent en points ; la chance est plafonnée à 100 %.",
 		"Audace et Reprise de souffle s’additionnent dans un même facteur de dégâts finaux : 1 + Audace + Reprise active + éventuel Élan offensif du bijou. Reprise exige une période sans blessure ; Audace augmente aussi les dégâts subis.",
@@ -202,7 +201,7 @@ static func passifs() -> String:
 	lignes.append_array(["## Cœurs de mana des Épreuves", "",
 		"Chaque niveau d’Épreuve possède un Cœur unique, garanti au plus tard après %d victoires sans son Cœur." % Reglages.EPREUVE_GARANTIE_COEUR,
 		"",
-		"Chaque Cœur donne +%s %% de dégâts finaux ; %d Cœurs donnent au total +%s %% (addition, sans exponentielle)." % [nombre(Reglages.COEUR_MANA_BONUS_FINAL * 100.0), Epreuves.nombre(), nombre(Reglages.COEUR_MANA_BONUS_FINAL * Epreuves.nombre() * 100.0)],
+		"Chaque Cœur multiplie les dégâts déjà acquis par %s. Avec %d Cœurs, le facteur final atteint ×%s (+%s %%). Le dernier Cœur conserve donc le même gain relatif que le premier." % [nombre(1.0 + Reglages.COEUR_MANA_BONUS_FINAL), Epreuves.nombre(), nombre(Reglages.multiplicateur_coeurs(Epreuves.nombre())), nombre((Reglages.multiplicateur_coeurs(Epreuves.nombre()) - 1.0) * 100.0)],
 		"", "## Anciennes sauvegardes", "",
 		"Les anciens sorts et ultimes sont convertis en passifs lors du chargement d’une ancienne sauvegarde.", ""])
 	return "\n".join(lignes).strip_edges() + "\n"

@@ -36,7 +36,7 @@ function Executer-Controle([string]$Nom, [string[]]$ArgumentsGodot) {
         $sortie | Write-Output
         throw "Controle $Nom echoue (code $codeGodot). Journal : $journal"
     }
-    $sortie | Where-Object { $_ -match '^(OK|Listes|Verification|Vérification|Progression|Référence|Valeur des sources :|Augments :|Reequilibrage :|Projectiles :|Simulation augments :|Parcours :|Retour campagne :|Equilibrage progression :|Rythme progression :|Maturation progression :)' } | Write-Output
+    $sortie | Where-Object { $_ -match '^(OK|Listes|Verification|Vérification|Progression|Référence|Valeur des sources :|Augments :|Reequilibrage :|Projectiles :|Simulation augments :|Parcours :|Retour campagne :|Equilibrage progression :|Rythme progression :|Maturation progression :|Passifs :)' } | Write-Output
 }
 
 try {
@@ -44,6 +44,7 @@ try {
     $env:APPDATA = $profilControle
     $env:LOCALAPPDATA = $profilControle
     Executer-Controle -Nom 'import' -ArgumentsGodot @('--editor', '--import')
+    Executer-Controle -Nom 'fonds' -ArgumentsGodot @('res://tools/verifier_fonds.tscn')
     Executer-Controle -Nom 'decors' -ArgumentsGodot @('res://tools/verifier_decors.tscn')
     Executer-Controle -Nom 'terrains' -ArgumentsGodot @('res://tools/verifier_terrains.tscn')
     $argumentsStatistiques = @('--script', 'res://tools/statistiques/exporter.gd')
@@ -67,6 +68,7 @@ try {
     Executer-Controle -Nom 'maturation_progression' -ArgumentsGodot @('--script', 'res://tools/verifier_maturation_progression.gd')
     Executer-Controle -Nom 'soins' -ArgumentsGodot @('--script', 'res://tools/verifier_soins_run.gd')
     Executer-Controle -Nom 'migrations' -ArgumentsGodot @('--script', 'res://tools/verifier_migrations.gd')
+    Executer-Controle -Nom 'passifs' -ArgumentsGodot @('res://tools/verifier_passifs.tscn')
     Executer-Controle -Nom 'scenes' -ArgumentsGodot @('res://tools/verifier_scenes.tscn')
     Executer-Controle -Nom 'heros_aster' -ArgumentsGodot @('res://tools/verifier_heros_aster.tscn')
     Write-Output "OK : controles termines. Journaux : $dossierControle"

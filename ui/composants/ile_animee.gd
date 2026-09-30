@@ -1,5 +1,5 @@
 class_name IleAnimee
-extends Control
+extends "res://ui/composants/plans_peints.gd"
 
 const DONNEES := preload("res://data/presentation/animations_decors.gd")
 const MOUVEMENT := preload("res://shaders/ile_vivante.gdshader")
@@ -15,10 +15,7 @@ var _temps := 0.0
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_corps = Control.new()
-	_corps.name = "PlansIle"
-	_corps.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_corps)
+	_corps = _creer_plans("PlansIle")
 	_image = TextureRect.new()
 	_image.name = "MatieresAnimees"
 	_image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -84,6 +81,7 @@ func _replacer() -> void:
 		return
 	_image.size = size
 	_animer()
+	_actualiser_vue()
 
 func _actualiser_effets() -> void:
 	set_process(is_visible_in_tree() and not ReglagesJoueur.effets_reduits)

@@ -1,4 +1,4 @@
-extends Control
+extends "res://ui/composants/plans_peints.gd"
 
 const DONNEES := preload("res://data/presentation/animations_decors.gd")
 const MOUVEMENT_EAU := preload("res://shaders/eau_clairiere.gdshader")
@@ -20,11 +20,8 @@ func _ready() -> void:
 		return
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	clip_contents = true
-	_plateau = Control.new()
-	_plateau.name = "PlansClairiere"
+	_plateau = _creer_plans("PlansClairiere")
 	_plateau.size = DONNEES.TAILLE_ACCUEIL
-	_plateau.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_plateau)
 
 	_construire_ciel()
 	for donnees: Dictionary in DONNEES.NUAGES:
@@ -46,7 +43,6 @@ func _ready() -> void:
 
 	var paysage := _ajouter_plan("PaysageFixe", DONNEES.PAYSAGE)
 	paysage.size = DONNEES.TAILLE_ACCUEIL
-	_ajouter_vent(paysage, DONNEES.VENT_PAYSAGE)
 	var lac := _ajouter_plan("RefletsDuLac", DONNEES.REFLETS_LAC)
 	lac.position = DONNEES.POSITION_LAC
 	var matiere_lac := _ajouter_matiere(lac, MOUVEMENT_EAU)

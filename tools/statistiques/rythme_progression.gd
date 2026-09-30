@@ -115,7 +115,7 @@ static func _entrees_renforcees() -> Dictionary:
 	for parcours: Dictionary in Parcours.rapport()["cohorte_comptes"]:
 		for action: Dictionary in parcours["actions"]:
 			var chapitre := int(action["chapitre"])
-			if str(action["mode"]) != "grimoire" or not bool(action["victoire"]) or chapitre not in [14, 21, 28, 35]: continue
+			if str(action["mode"]) != "grimoire" or not bool(action["victoire"]) or chapitre not in [2, 3, 4, 5, 6, 7, 14, 21, 28, 35]: continue
 			var mesure := entree(action["avant"]["configuration"], chapitre - 1, int(action["graine"]))
 			if not groupes.has(chapitre): groupes[chapitre] = {"attaques": [], "secondes": [], "dps": [], "boss": []}
 			groupes[chapitre]["attaques"].append(float(mesure["attaques"]["mediane"]))

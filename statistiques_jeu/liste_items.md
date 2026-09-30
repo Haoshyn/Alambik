@@ -3,9 +3,8 @@
 ## Logique mathématique
 
 - Forge de 0 à 20. Prix du prochain achat depuis le niveau n : 30 + 10 × n + 1 × n² Pierres, arrondi au multiple de 5 le plus proche.
-- Arme : attaque brute = (4 + 1 × min(forge, 2) + 0,35 × max(forge − 2, 0)) × 1,008^(niveau de provenance − 1).
-- Familier : attaque propre = (base du modèle + 2 × forge) × le même facteur de provenance.
-- Bijoux : les valeurs brutes sont multipliées par 1,008^(7 × indice du monde), indice de 0 à 4. Les pourcentages ne le sont pas.
+- Arme : base 400 ATK, puis chaque forge ajoute 12 % de l’attaque acquise, arrondis au multiple de 10. Familier : même calcul à 11 % de son attaque propre. Les gains bruts ne diminuent jamais.
+- Bijoux : les valeurs brutes sont multipliées par 1,01^(7 × indice du monde), indice de 0 à 4. Les pourcentages ne le sont pas.
 - Les tableaux donnent les statistiques finales de CHAQUE objet à CHAQUE niveau, provenance déjà appliquée.
 - L’attaque de l’arme et des bijoux s’ajoute à la base du héros. L’attaque du familier reste séparée.
 - Les effets des bijoux se débloquent au niveau 10. Les anciens bijoux sont conservés pour les sauvegardes ; ils ne tombent plus.
@@ -51,27 +50,27 @@ Tir 100 %.
 
 | Niveau de forge | Attaque brute ajoutée (points) |
 | --- | --- |
-| 0 | +4 |
-| 1 | +5 |
-| 2 | +6 |
-| 3 | +6,35 |
-| 4 | +6,7 |
-| 5 | +7,05 |
-| 6 | +7,4 |
-| 7 | +7,75 |
-| 8 | +8,1 |
-| 9 | +8,45 |
-| 10 | +8,8 |
-| 11 | +9,15 |
-| 12 | +9,5 |
-| 13 | +9,85 |
-| 14 | +10,2 |
-| 15 | +10,55 |
-| 16 | +10,9 |
-| 17 | +11,25 |
-| 18 | +11,6 |
-| 19 | +11,95 |
-| 20 | +12,3 |
+| 0 | +400 |
+| 1 | +450 |
+| 2 | +500 |
+| 3 | +560 |
+| 4 | +630 |
+| 5 | +710 |
+| 6 | +800 |
+| 7 | +900 |
+| 8 | +1 010 |
+| 9 | +1 130 |
+| 10 | +1 270 |
+| 11 | +1 420 |
+| 12 | +1 590 |
+| 13 | +1 780 |
+| 14 | +1 990 |
+| 15 | +2 230 |
+| 16 | +2 500 |
+| 17 | +2 800 |
+| 18 | +3 140 |
+| 19 | +3 520 |
+| 20 | +3 940 |
 
 ### Aiguille vive
 
@@ -84,27 +83,27 @@ Tir 85 %, cadence +20 %, portée −10 %.
 
 | Niveau de forge | Attaque brute ajoutée (points) |
 | --- | --- |
-| 0 | +4,1 |
-| 1 | +5,12 |
-| 2 | +6,15 |
-| 3 | +6,5 |
-| 4 | +6,86 |
-| 5 | +7,22 |
-| 6 | +7,58 |
-| 7 | +7,94 |
-| 8 | +8,3 |
-| 9 | +8,65 |
-| 10 | +9,01 |
-| 11 | +9,37 |
-| 12 | +9,73 |
-| 13 | +10,09 |
-| 14 | +10,45 |
-| 15 | +10,81 |
-| 16 | +11,16 |
-| 17 | +11,52 |
-| 18 | +11,88 |
-| 19 | +12,24 |
-| 20 | +12,6 |
+| 0 | +410 |
+| 1 | +460 |
+| 2 | +520 |
+| 3 | +580 |
+| 4 | +650 |
+| 5 | +730 |
+| 6 | +820 |
+| 7 | +920 |
+| 8 | +1 030 |
+| 9 | +1 150 |
+| 10 | +1 290 |
+| 11 | +1 440 |
+| 12 | +1 610 |
+| 13 | +1 800 |
+| 14 | +2 020 |
+| 15 | +2 260 |
+| 16 | +2 530 |
+| 17 | +2 830 |
+| 18 | +3 170 |
+| 19 | +3 550 |
+| 20 | +3 980 |
 
 ### Sceptre de cuivre
 
@@ -117,27 +116,27 @@ Tir 150 %, cadence −30 %.
 
 | Niveau de forge | Attaque brute ajoutée (points) |
 | --- | --- |
-| 0 | +4,2 |
-| 1 | +5,24 |
-| 2 | +6,29 |
-| 3 | +6,66 |
-| 4 | +7,03 |
-| 5 | +7,4 |
-| 6 | +7,76 |
-| 7 | +8,13 |
-| 8 | +8,5 |
-| 9 | +8,86 |
-| 10 | +9,23 |
-| 11 | +9,6 |
-| 12 | +9,97 |
-| 13 | +10,33 |
-| 14 | +10,7 |
-| 15 | +11,07 |
-| 16 | +11,43 |
-| 17 | +11,8 |
-| 18 | +12,17 |
-| 19 | +12,54 |
-| 20 | +12,9 |
+| 0 | +420 |
+| 1 | +470 |
+| 2 | +530 |
+| 3 | +590 |
+| 4 | +660 |
+| 5 | +740 |
+| 6 | +830 |
+| 7 | +930 |
+| 8 | +1 040 |
+| 9 | +1 160 |
+| 10 | +1 300 |
+| 11 | +1 460 |
+| 12 | +1 640 |
+| 13 | +1 840 |
+| 14 | +2 060 |
+| 15 | +2 310 |
+| 16 | +2 590 |
+| 17 | +2 900 |
+| 18 | +3 250 |
+| 19 | +3 640 |
+| 20 | +4 080 |
 
 ### Branche astrale
 
@@ -150,27 +149,27 @@ Tir 105 %, traverse 1 ennemi.
 
 | Niveau de forge | Attaque brute ajoutée (points) |
 | --- | --- |
-| 0 | +4,3 |
-| 1 | +5,37 |
-| 2 | +6,45 |
-| 3 | +6,82 |
-| 4 | +7,2 |
-| 5 | +7,57 |
-| 6 | +7,95 |
-| 7 | +8,33 |
-| 8 | +8,7 |
-| 9 | +9,08 |
-| 10 | +9,45 |
-| 11 | +9,83 |
-| 12 | +10,21 |
-| 13 | +10,58 |
-| 14 | +10,96 |
-| 15 | +11,33 |
-| 16 | +11,71 |
-| 17 | +12,09 |
-| 18 | +12,46 |
-| 19 | +12,84 |
-| 20 | +13,21 |
+| 0 | +440 |
+| 1 | +490 |
+| 2 | +550 |
+| 3 | +620 |
+| 4 | +690 |
+| 5 | +770 |
+| 6 | +860 |
+| 7 | +960 |
+| 8 | +1 080 |
+| 9 | +1 210 |
+| 10 | +1 360 |
+| 11 | +1 520 |
+| 12 | +1 700 |
+| 13 | +1 900 |
+| 14 | +2 130 |
+| 15 | +2 390 |
+| 16 | +2 680 |
+| 17 | +3 000 |
+| 18 | +3 360 |
+| 19 | +3 760 |
+| 20 | +4 210 |
 
 ### Bâton à étincelles
 
@@ -183,27 +182,27 @@ Tir 110 %, chance critique +3 %.
 
 | Niveau de forge | Attaque brute ajoutée (points) |
 | --- | --- |
-| 0 | +4,4 |
-| 1 | +5,5 |
-| 2 | +6,6 |
-| 3 | +6,99 |
-| 4 | +7,37 |
-| 5 | +7,76 |
-| 6 | +8,14 |
-| 7 | +8,53 |
-| 8 | +8,91 |
-| 9 | +9,3 |
-| 10 | +9,68 |
-| 11 | +10,07 |
-| 12 | +10,45 |
-| 13 | +10,84 |
-| 14 | +11,22 |
-| 15 | +11,61 |
-| 16 | +11,99 |
-| 17 | +12,38 |
-| 18 | +12,76 |
-| 19 | +13,15 |
-| 20 | +13,53 |
+| 0 | +450 |
+| 1 | +500 |
+| 2 | +560 |
+| 3 | +630 |
+| 4 | +710 |
+| 5 | +800 |
+| 6 | +900 |
+| 7 | +1 010 |
+| 8 | +1 130 |
+| 9 | +1 270 |
+| 10 | +1 420 |
+| 11 | +1 590 |
+| 12 | +1 780 |
+| 13 | +1 990 |
+| 14 | +2 230 |
+| 15 | +2 500 |
+| 16 | +2 800 |
+| 17 | +3 140 |
+| 18 | +3 520 |
+| 19 | +3 940 |
+| 20 | +4 410 |
 
 ### Prisme jumeau
 
@@ -216,27 +215,27 @@ Tir 110 %, chance critique +3 %.
 
 | Niveau de forge | Attaque brute ajoutée (points) |
 | --- | --- |
-| 0 | +4,51 |
-| 1 | +5,63 |
-| 2 | +6,76 |
-| 3 | +7,16 |
-| 4 | +7,55 |
-| 5 | +7,95 |
-| 6 | +8,34 |
-| 7 | +8,73 |
-| 8 | +9,13 |
-| 9 | +9,52 |
-| 10 | +9,92 |
-| 11 | +10,31 |
-| 12 | +10,71 |
-| 13 | +11,1 |
-| 14 | +11,49 |
-| 15 | +11,89 |
-| 16 | +12,28 |
-| 17 | +12,68 |
-| 18 | +13,07 |
-| 19 | +13,47 |
-| 20 | +13,86 |
+| 0 | +460 |
+| 1 | +520 |
+| 2 | +580 |
+| 3 | +650 |
+| 4 | +730 |
+| 5 | +820 |
+| 6 | +920 |
+| 7 | +1 030 |
+| 8 | +1 150 |
+| 9 | +1 290 |
+| 10 | +1 440 |
+| 11 | +1 610 |
+| 12 | +1 800 |
+| 13 | +2 020 |
+| 14 | +2 260 |
+| 15 | +2 530 |
+| 16 | +2 830 |
+| 17 | +3 170 |
+| 18 | +3 550 |
+| 19 | +3 980 |
+| 20 | +4 460 |
 
 ### Diapason de verre
 
@@ -249,27 +248,27 @@ Tir 90 %, cadence +30 %.
 
 | Niveau de forge | Attaque brute ajoutée (points) |
 | --- | --- |
-| 0 | +4,62 |
-| 1 | +5,77 |
-| 2 | +6,93 |
-| 3 | +7,33 |
-| 4 | +7,73 |
-| 5 | +8,14 |
-| 6 | +8,54 |
-| 7 | +8,95 |
-| 8 | +9,35 |
-| 9 | +9,75 |
-| 10 | +10,16 |
-| 11 | +10,56 |
-| 12 | +10,97 |
-| 13 | +11,37 |
-| 14 | +11,77 |
-| 15 | +12,18 |
-| 16 | +12,58 |
-| 17 | +12,99 |
-| 18 | +13,39 |
-| 19 | +13,79 |
-| 20 | +14,2 |
+| 0 | +480 |
+| 1 | +540 |
+| 2 | +600 |
+| 3 | +670 |
+| 4 | +750 |
+| 5 | +840 |
+| 6 | +940 |
+| 7 | +1 050 |
+| 8 | +1 180 |
+| 9 | +1 320 |
+| 10 | +1 480 |
+| 11 | +1 660 |
+| 12 | +1 860 |
+| 13 | +2 080 |
+| 14 | +2 330 |
+| 15 | +2 610 |
+| 16 | +2 920 |
+| 17 | +3 270 |
+| 18 | +3 660 |
+| 19 | +4 100 |
+| 20 | +4 590 |
 
 ### Cornue draconique
 
@@ -282,27 +281,27 @@ Tir 110 %, cadence +10 %, attaque +5 %.
 
 | Niveau de forge | Attaque brute ajoutée (points) |
 | --- | --- |
-| 0 | +4,73 |
-| 1 | +5,91 |
-| 2 | +7,09 |
-| 3 | +7,51 |
-| 4 | +7,92 |
-| 5 | +8,33 |
-| 6 | +8,75 |
-| 7 | +9,16 |
-| 8 | +9,58 |
-| 9 | +9,99 |
-| 10 | +10,4 |
-| 11 | +10,82 |
-| 12 | +11,23 |
-| 13 | +11,64 |
-| 14 | +12,06 |
-| 15 | +12,47 |
-| 16 | +12,89 |
-| 17 | +13,3 |
-| 18 | +13,71 |
-| 19 | +14,13 |
-| 20 | +14,54 |
+| 0 | +490 |
+| 1 | +550 |
+| 2 | +620 |
+| 3 | +690 |
+| 4 | +770 |
+| 5 | +860 |
+| 6 | +960 |
+| 7 | +1 080 |
+| 8 | +1 210 |
+| 9 | +1 360 |
+| 10 | +1 520 |
+| 11 | +1 700 |
+| 12 | +1 900 |
+| 13 | +2 130 |
+| 14 | +2 390 |
+| 15 | +2 680 |
+| 16 | +3 000 |
+| 17 | +3 360 |
+| 18 | +3 760 |
+| 19 | +4 210 |
+| 20 | +4 720 |
 
 ### Aiguille du néant
 
@@ -315,27 +314,27 @@ Tir 115 %, cadence +10 %, traverse 1 ennemi.
 
 | Niveau de forge | Attaque brute ajoutée (points) |
 | --- | --- |
-| 0 | +4,84 |
-| 1 | +6,05 |
-| 2 | +7,26 |
-| 3 | +7,69 |
-| 4 | +8,11 |
-| 5 | +8,54 |
-| 6 | +8,96 |
-| 7 | +9,38 |
-| 8 | +9,81 |
-| 9 | +10,23 |
-| 10 | +10,65 |
-| 11 | +11,08 |
-| 12 | +11,5 |
-| 13 | +11,93 |
-| 14 | +12,35 |
-| 15 | +12,77 |
-| 16 | +13,2 |
-| 17 | +13,62 |
-| 18 | +14,04 |
-| 19 | +14,47 |
-| 20 | +14,89 |
+| 0 | +510 |
+| 1 | +570 |
+| 2 | +640 |
+| 3 | +720 |
+| 4 | +810 |
+| 5 | +910 |
+| 6 | +1 020 |
+| 7 | +1 140 |
+| 8 | +1 280 |
+| 9 | +1 430 |
+| 10 | +1 600 |
+| 11 | +1 790 |
+| 12 | +2 000 |
+| 13 | +2 240 |
+| 14 | +2 510 |
+| 15 | +2 810 |
+| 16 | +3 150 |
+| 17 | +3 530 |
+| 18 | +3 950 |
+| 19 | +4 420 |
+| 20 | +4 950 |
 
 ### Alambic souverain
 
@@ -348,27 +347,27 @@ Tir 115 %, cadence +10 %.
 
 | Niveau de forge | Attaque brute ajoutée (points) |
 | --- | --- |
-| 0 | +4,96 |
-| 1 | +6,2 |
-| 2 | +7,44 |
-| 3 | +7,87 |
-| 4 | +8,31 |
-| 5 | +8,74 |
-| 6 | +9,18 |
-| 7 | +9,61 |
-| 8 | +10,04 |
-| 9 | +10,48 |
-| 10 | +10,91 |
-| 11 | +11,35 |
-| 12 | +11,78 |
-| 13 | +12,21 |
-| 14 | +12,65 |
-| 15 | +13,08 |
-| 16 | +13,52 |
-| 17 | +13,95 |
-| 18 | +14,38 |
-| 19 | +14,82 |
-| 20 | +15,25 |
+| 0 | +520 |
+| 1 | +580 |
+| 2 | +650 |
+| 3 | +730 |
+| 4 | +820 |
+| 5 | +920 |
+| 6 | +1 030 |
+| 7 | +1 150 |
+| 8 | +1 290 |
+| 9 | +1 440 |
+| 10 | +1 610 |
+| 11 | +1 800 |
+| 12 | +2 020 |
+| 13 | +2 260 |
+| 14 | +2 530 |
+| 15 | +2 830 |
+| 16 | +3 170 |
+| 17 | +3 550 |
+| 18 | +3 980 |
+| 19 | +4 460 |
+| 20 | +5 000 |
 
 ## Familiers
 
@@ -390,27 +389,27 @@ Projectile : 1 312,5 px/s ; rayon 10 px ; longueur 26 px.
 
 | Niveau de forge | Attaque propre (points) | DPS propre (dégâts/s) |
 | --- | --- | --- |
-| 0 | 6 | 3 |
-| 1 | 8 | 4 |
-| 2 | 10 | 5 |
-| 3 | 12 | 6 |
-| 4 | 14 | 7 |
-| 5 | 16 | 8 |
-| 6 | 18 | 9 |
-| 7 | 20 | 10 |
-| 8 | 22 | 11 |
-| 9 | 24 | 12 |
-| 10 | 26 | 13 |
-| 11 | 28 | 14 |
-| 12 | 30 | 15 |
-| 13 | 32 | 16 |
-| 14 | 34 | 17 |
-| 15 | 36 | 18 |
-| 16 | 38 | 19 |
-| 17 | 40 | 20 |
-| 18 | 42 | 21 |
-| 19 | 44 | 22 |
-| 20 | 46 | 23 |
+| 0 | 600 | 300 |
+| 1 | 670 | 335 |
+| 2 | 740 | 370 |
+| 3 | 820 | 410 |
+| 4 | 910 | 455 |
+| 5 | 1 010 | 505 |
+| 6 | 1 120 | 560 |
+| 7 | 1 240 | 620 |
+| 8 | 1 380 | 690 |
+| 9 | 1 530 | 765 |
+| 10 | 1 700 | 850 |
+| 11 | 1 890 | 945 |
+| 12 | 2 100 | 1 050 |
+| 13 | 2 330 | 1 165 |
+| 14 | 2 590 | 1 295 |
+| 15 | 2 870 | 1 435 |
+| 16 | 3 190 | 1 595 |
+| 17 | 3 540 | 1 770 |
+| 18 | 3 930 | 1 965 |
+| 19 | 4 360 | 2 180 |
+| 20 | 4 840 | 2 420 |
 
 ### Salamandre de braise
 
@@ -426,27 +425,27 @@ Projectile : 1 150 px/s ; rayon 16 px ; longueur 32 px.
 
 | Niveau de forge | Attaque propre (points) | DPS propre (dégâts/s) |
 | --- | --- | --- |
-| 0 | 8,46 | 4,03 |
-| 1 | 10,57 | 5,04 |
-| 2 | 12,69 | 6,04 |
-| 3 | 14,8 | 7,05 |
-| 4 | 16,92 | 8,06 |
-| 5 | 19,03 | 9,06 |
-| 6 | 21,15 | 10,07 |
-| 7 | 23,26 | 11,08 |
-| 8 | 25,38 | 12,08 |
-| 9 | 27,49 | 13,09 |
-| 10 | 29,61 | 14,1 |
-| 11 | 31,72 | 15,11 |
-| 12 | 33,84 | 16,11 |
-| 13 | 35,95 | 17,12 |
-| 14 | 38,07 | 18,13 |
-| 15 | 40,18 | 19,13 |
-| 16 | 42,29 | 20,14 |
-| 17 | 44,41 | 21,15 |
-| 18 | 46,52 | 22,15 |
-| 19 | 48,64 | 23,16 |
-| 20 | 50,75 | 24,17 |
+| 0 | 860 | 409,52 |
+| 1 | 950 | 452,38 |
+| 2 | 1 050 | 500 |
+| 3 | 1 170 | 557,14 |
+| 4 | 1 300 | 619,05 |
+| 5 | 1 440 | 685,71 |
+| 6 | 1 600 | 761,9 |
+| 7 | 1 780 | 847,62 |
+| 8 | 1 980 | 942,86 |
+| 9 | 2 200 | 1 047,62 |
+| 10 | 2 440 | 1 161,9 |
+| 11 | 2 710 | 1 290,48 |
+| 12 | 3 010 | 1 433,33 |
+| 13 | 3 340 | 1 590,48 |
+| 14 | 3 710 | 1 766,67 |
+| 15 | 4 120 | 1 961,9 |
+| 16 | 4 570 | 2 176,19 |
+| 17 | 5 070 | 2 414,29 |
+| 18 | 5 630 | 2 680,95 |
+| 19 | 6 250 | 2 976,19 |
+| 20 | 6 940 | 3 304,76 |
 
 ### Ondine de givre
 
@@ -462,27 +461,27 @@ Projectile : 1 350 px/s ; rayon 9 px ; longueur 36 px.
 
 | Niveau de forge | Attaque propre (points) | DPS propre (dégâts/s) |
 | --- | --- | --- |
-| 0 | 7,83 | 4,12 |
-| 1 | 10,06 | 5,3 |
-| 2 | 12,3 | 6,47 |
-| 3 | 14,53 | 7,65 |
-| 4 | 16,77 | 8,83 |
-| 5 | 19,01 | 10 |
-| 6 | 21,24 | 11,18 |
-| 7 | 23,48 | 12,36 |
-| 8 | 25,71 | 13,53 |
-| 9 | 27,95 | 14,71 |
-| 10 | 30,19 | 15,89 |
-| 11 | 32,42 | 17,06 |
-| 12 | 34,66 | 18,24 |
-| 13 | 36,89 | 19,42 |
-| 14 | 39,13 | 20,6 |
-| 15 | 41,37 | 21,77 |
-| 16 | 43,6 | 22,95 |
-| 17 | 45,84 | 24,13 |
-| 18 | 48,07 | 25,3 |
-| 19 | 50,31 | 26,48 |
-| 20 | 52,55 | 27,66 |
+| 0 | 800 | 421,05 |
+| 1 | 890 | 468,42 |
+| 2 | 990 | 521,05 |
+| 3 | 1 100 | 578,95 |
+| 4 | 1 220 | 642,11 |
+| 5 | 1 350 | 710,53 |
+| 6 | 1 500 | 789,47 |
+| 7 | 1 670 | 878,95 |
+| 8 | 1 850 | 973,68 |
+| 9 | 2 050 | 1 078,95 |
+| 10 | 2 280 | 1 200 |
+| 11 | 2 530 | 1 331,58 |
+| 12 | 2 810 | 1 478,95 |
+| 13 | 3 120 | 1 642,11 |
+| 14 | 3 460 | 1 821,05 |
+| 15 | 3 840 | 2 021,05 |
+| 16 | 4 260 | 2 242,11 |
+| 17 | 4 730 | 2 489,47 |
+| 18 | 5 250 | 2 763,16 |
+| 19 | 5 830 | 3 068,42 |
+| 20 | 6 470 | 3 405,26 |
 
 ### Sylphe des orages
 
@@ -498,33 +497,33 @@ Projectile : 1 562,5 px/s ; rayon 6 px ; longueur 40 px.
 
 | Niveau de forge | Attaque propre (points) | DPS propre (dégâts/s) |
 | --- | --- | --- |
-| 0 | 7,09 | 3,94 |
-| 1 | 9,46 | 5,25 |
-| 2 | 11,82 | 6,57 |
-| 3 | 14,19 | 7,88 |
-| 4 | 16,55 | 9,19 |
-| 5 | 18,91 | 10,51 |
-| 6 | 21,28 | 11,82 |
-| 7 | 23,64 | 13,13 |
-| 8 | 26,01 | 14,45 |
-| 9 | 28,37 | 15,76 |
-| 10 | 30,74 | 17,08 |
-| 11 | 33,1 | 18,39 |
-| 12 | 35,46 | 19,7 |
-| 13 | 37,83 | 21,02 |
-| 14 | 40,19 | 22,33 |
-| 15 | 42,56 | 23,64 |
-| 16 | 44,92 | 24,96 |
-| 17 | 47,29 | 26,27 |
-| 18 | 49,65 | 27,58 |
-| 19 | 52,01 | 28,9 |
-| 20 | 54,38 | 30,21 |
+| 0 | 740 | 411,11 |
+| 1 | 820 | 455,56 |
+| 2 | 910 | 505,56 |
+| 3 | 1 010 | 561,11 |
+| 4 | 1 120 | 622,22 |
+| 5 | 1 240 | 688,89 |
+| 6 | 1 380 | 766,67 |
+| 7 | 1 530 | 850 |
+| 8 | 1 700 | 944,44 |
+| 9 | 1 890 | 1 050 |
+| 10 | 2 100 | 1 166,67 |
+| 11 | 2 330 | 1 294,44 |
+| 12 | 2 590 | 1 438,89 |
+| 13 | 2 870 | 1 594,44 |
+| 14 | 3 190 | 1 772,22 |
+| 15 | 3 540 | 1 966,67 |
+| 16 | 3 930 | 2 183,33 |
+| 17 | 4 360 | 2 422,22 |
+| 18 | 4 840 | 2 688,89 |
+| 19 | 5 370 | 2 983,33 |
+| 20 | 5 960 | 3 311,11 |
 
 ### Golem de forge
 
 **Provenance :** niveau de campagne 29.
 
-Galet de forge · héros : Défense brute +4, attaque +5 %
+Galet de forge · héros : Défense brute +400, attaque +5 %
 
 Un tir toutes les **1,8 s**. Son attaque propre reçoit une fois les bonus permanents d’attaque du héros et le facteur d’attaque des augments, sans ses critiques ni ses salves.
 
@@ -534,27 +533,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Attaque propre (points) | DPS propre (dégâts/s) |
 | --- | --- | --- |
-| 0 | 12,5 | 6,94 |
-| 1 | 15 | 8,33 |
-| 2 | 17,5 | 9,72 |
-| 3 | 20 | 11,11 |
-| 4 | 22,5 | 12,5 |
-| 5 | 25 | 13,89 |
-| 6 | 27,5 | 15,28 |
-| 7 | 30 | 16,67 |
-| 8 | 32,5 | 18,05 |
-| 9 | 35 | 19,44 |
-| 10 | 37,5 | 20,83 |
-| 11 | 40 | 22,22 |
-| 12 | 42,5 | 23,61 |
-| 13 | 45 | 25 |
-| 14 | 47,5 | 26,39 |
-| 15 | 50 | 27,78 |
-| 16 | 52,5 | 29,17 |
-| 17 | 55 | 30,55 |
-| 18 | 57,5 | 31,94 |
-| 19 | 60 | 33,33 |
-| 20 | 62,5 | 34,72 |
+| 0 | 1 320 | 733,33 |
+| 1 | 1 470 | 816,67 |
+| 2 | 1 630 | 905,56 |
+| 3 | 1 810 | 1 005,56 |
+| 4 | 2 010 | 1 116,67 |
+| 5 | 2 230 | 1 238,89 |
+| 6 | 2 480 | 1 377,78 |
+| 7 | 2 750 | 1 527,78 |
+| 8 | 3 050 | 1 694,44 |
+| 9 | 3 390 | 1 883,33 |
+| 10 | 3 760 | 2 088,89 |
+| 11 | 4 170 | 2 316,67 |
+| 12 | 4 630 | 2 572,22 |
+| 13 | 5 140 | 2 855,56 |
+| 14 | 5 710 | 3 172,22 |
+| 15 | 6 340 | 3 522,22 |
+| 16 | 7 040 | 3 911,11 |
+| 17 | 7 810 | 4 338,89 |
+| 18 | 8 670 | 4 816,67 |
+| 19 | 9 620 | 5 344,44 |
+| 20 | 10 680 | 5 933,33 |
 
 ## Bijoux actifs
 
@@ -564,27 +563,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2 · PV bruts +12 · Chance critique +4 % |
-| 1 | Attaque brute +2,1 · PV bruts +15 · Chance critique +4 % |
-| 2 | Attaque brute +2,2 · PV bruts +17 · Chance critique +4 % |
-| 3 | Attaque brute +2,3 · PV bruts +20 · Chance critique +4 % |
-| 4 | Attaque brute +2,4 · PV bruts +22 · Chance critique +4 % |
-| 5 | Attaque brute +2,5 · PV bruts +25 · Chance critique +4 % |
-| 6 | Attaque brute +2,6 · PV bruts +27 · Chance critique +4 % |
-| 7 | Attaque brute +2,7 · PV bruts +30 · Chance critique +4 % |
-| 8 | Attaque brute +2,8 · PV bruts +32 · Chance critique +4 % |
-| 9 | Attaque brute +2,9 · PV bruts +35 · Chance critique +4 % |
-| 10 | Attaque brute +3 · PV bruts +37 · Chance critique +4 % |
-| 11 | Attaque brute +3,1 · PV bruts +40 · Chance critique +4 % |
-| 12 | Attaque brute +3,2 · PV bruts +42 · Chance critique +4 % |
-| 13 | Attaque brute +3,3 · PV bruts +45 · Chance critique +4 % |
-| 14 | Attaque brute +3,4 · PV bruts +47 · Chance critique +4 % |
-| 15 | Attaque brute +3,5 · PV bruts +50 · Chance critique +4 % |
-| 16 | Attaque brute +3,6 · PV bruts +52 · Chance critique +4 % |
-| 17 | Attaque brute +3,7 · PV bruts +55 · Chance critique +4 % |
-| 18 | Attaque brute +3,8 · PV bruts +57 · Chance critique +4 % |
-| 19 | Attaque brute +3,9 · PV bruts +60 · Chance critique +4 % |
-| 20 | Attaque brute +4 · PV bruts +62 · Chance critique +4 % |
+| 0 | Attaque brute +200 · PV bruts +1200 · Chance critique +4 % |
+| 1 | Attaque brute +210 · PV bruts +1300 · Chance critique +4 % |
+| 2 | Attaque brute +220 · PV bruts +1400 · Chance critique +4 % |
+| 3 | Attaque brute +230 · PV bruts +1510 · Chance critique +4 % |
+| 4 | Attaque brute +240 · PV bruts +1630 · Chance critique +4 % |
+| 5 | Attaque brute +250 · PV bruts +1760 · Chance critique +4 % |
+| 6 | Attaque brute +270 · PV bruts +1900 · Chance critique +4 % |
+| 7 | Attaque brute +290 · PV bruts +2050 · Chance critique +4 % |
+| 8 | Attaque brute +310 · PV bruts +2210 · Chance critique +4 % |
+| 9 | Attaque brute +330 · PV bruts +2390 · Chance critique +4 % |
+| 10 | Attaque brute +350 · PV bruts +2580 · Chance critique +4 % |
+| 11 | Attaque brute +370 · PV bruts +2790 · Chance critique +4 % |
+| 12 | Attaque brute +390 · PV bruts +3010 · Chance critique +4 % |
+| 13 | Attaque brute +410 · PV bruts +3250 · Chance critique +4 % |
+| 14 | Attaque brute +430 · PV bruts +3510 · Chance critique +4 % |
+| 15 | Attaque brute +460 · PV bruts +3790 · Chance critique +4 % |
+| 16 | Attaque brute +490 · PV bruts +4090 · Chance critique +4 % |
+| 17 | Attaque brute +520 · PV bruts +4420 · Chance critique +4 % |
+| 18 | Attaque brute +550 · PV bruts +4770 · Chance critique +4 % |
+| 19 | Attaque brute +580 · PV bruts +5150 · Chance critique +4 % |
+| 20 | Attaque brute +610 · PV bruts +5560 · Chance critique +4 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -596,27 +595,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2 · Défense brute +3 · Vitesse +5 % |
-| 1 | Attaque brute +2,1 · Défense brute +3,3 · Vitesse +5 % |
-| 2 | Attaque brute +2,2 · Défense brute +3,6 · Vitesse +5 % |
-| 3 | Attaque brute +2,3 · Défense brute +3,9 · Vitesse +5 % |
-| 4 | Attaque brute +2,4 · Défense brute +4,2 · Vitesse +5 % |
-| 5 | Attaque brute +2,5 · Défense brute +4,5 · Vitesse +5 % |
-| 6 | Attaque brute +2,6 · Défense brute +4,8 · Vitesse +5 % |
-| 7 | Attaque brute +2,7 · Défense brute +5,1 · Vitesse +5 % |
-| 8 | Attaque brute +2,8 · Défense brute +5,4 · Vitesse +5 % |
-| 9 | Attaque brute +2,9 · Défense brute +5,7 · Vitesse +5 % |
-| 10 | Attaque brute +3 · Défense brute +6 · Vitesse +5 % |
-| 11 | Attaque brute +3,1 · Défense brute +6,3 · Vitesse +5 % |
-| 12 | Attaque brute +3,2 · Défense brute +6,6 · Vitesse +5 % |
-| 13 | Attaque brute +3,3 · Défense brute +6,9 · Vitesse +5 % |
-| 14 | Attaque brute +3,4 · Défense brute +7,2 · Vitesse +5 % |
-| 15 | Attaque brute +3,5 · Défense brute +7,5 · Vitesse +5 % |
-| 16 | Attaque brute +3,6 · Défense brute +7,8 · Vitesse +5 % |
-| 17 | Attaque brute +3,7 · Défense brute +8,1 · Vitesse +5 % |
-| 18 | Attaque brute +3,8 · Défense brute +8,4 · Vitesse +5 % |
-| 19 | Attaque brute +3,9 · Défense brute +8,7 · Vitesse +5 % |
-| 20 | Attaque brute +4 · Défense brute +9 · Vitesse +5 % |
+| 0 | Attaque brute +200 · Défense brute +300 · Vitesse +5 % |
+| 1 | Attaque brute +210 · Défense brute +320 · Vitesse +5 % |
+| 2 | Attaque brute +220 · Défense brute +350 · Vitesse +5 % |
+| 3 | Attaque brute +230 · Défense brute +380 · Vitesse +5 % |
+| 4 | Attaque brute +240 · Défense brute +410 · Vitesse +5 % |
+| 5 | Attaque brute +250 · Défense brute +440 · Vitesse +5 % |
+| 6 | Attaque brute +270 · Défense brute +480 · Vitesse +5 % |
+| 7 | Attaque brute +290 · Défense brute +520 · Vitesse +5 % |
+| 8 | Attaque brute +310 · Défense brute +560 · Vitesse +5 % |
+| 9 | Attaque brute +330 · Défense brute +600 · Vitesse +5 % |
+| 10 | Attaque brute +350 · Défense brute +650 · Vitesse +5 % |
+| 11 | Attaque brute +370 · Défense brute +700 · Vitesse +5 % |
+| 12 | Attaque brute +390 · Défense brute +760 · Vitesse +5 % |
+| 13 | Attaque brute +410 · Défense brute +820 · Vitesse +5 % |
+| 14 | Attaque brute +430 · Défense brute +890 · Vitesse +5 % |
+| 15 | Attaque brute +460 · Défense brute +960 · Vitesse +5 % |
+| 16 | Attaque brute +490 · Défense brute +1040 · Vitesse +5 % |
+| 17 | Attaque brute +520 · Défense brute +1120 · Vitesse +5 % |
+| 18 | Attaque brute +550 · Défense brute +1210 · Vitesse +5 % |
+| 19 | Attaque brute +580 · Défense brute +1310 · Vitesse +5 % |
+| 20 | Attaque brute +610 · Défense brute +1410 · Vitesse +5 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -628,27 +627,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2 · Butin +8 % · Attaque +5 % |
-| 1 | Attaque brute +2,1 · Butin +8 % · Attaque +5,5 % |
-| 2 | Attaque brute +2,2 · Butin +8 % · Attaque +6 % |
-| 3 | Attaque brute +2,3 · Butin +8 % · Attaque +6,5 % |
-| 4 | Attaque brute +2,4 · Butin +8 % · Attaque +7 % |
-| 5 | Attaque brute +2,5 · Butin +8 % · Attaque +7,5 % |
-| 6 | Attaque brute +2,6 · Butin +8 % · Attaque +8 % |
-| 7 | Attaque brute +2,7 · Butin +8 % · Attaque +8,5 % |
-| 8 | Attaque brute +2,8 · Butin +8 % · Attaque +9 % |
-| 9 | Attaque brute +2,9 · Butin +8 % · Attaque +9,5 % |
-| 10 | Attaque brute +3 · Butin +8 % · Attaque +10 % |
-| 11 | Attaque brute +3,1 · Butin +8 % · Attaque +10,5 % |
-| 12 | Attaque brute +3,2 · Butin +8 % · Attaque +11 % |
-| 13 | Attaque brute +3,3 · Butin +8 % · Attaque +11,5 % |
-| 14 | Attaque brute +3,4 · Butin +8 % · Attaque +12 % |
-| 15 | Attaque brute +3,5 · Butin +8 % · Attaque +12,5 % |
-| 16 | Attaque brute +3,6 · Butin +8 % · Attaque +13 % |
-| 17 | Attaque brute +3,7 · Butin +8 % · Attaque +13,5 % |
-| 18 | Attaque brute +3,8 · Butin +8 % · Attaque +14 % |
-| 19 | Attaque brute +3,9 · Butin +8 % · Attaque +14,5 % |
-| 20 | Attaque brute +4 · Butin +8 % · Attaque +15 % |
+| 0 | Attaque brute +200 · Butin +8 % · Attaque +5 % |
+| 1 | Attaque brute +210 · Butin +8 % · Attaque +6,05 % |
+| 2 | Attaque brute +220 · Butin +8 % · Attaque +7,11 % |
+| 3 | Attaque brute +230 · Butin +8 % · Attaque +8,18 % |
+| 4 | Attaque brute +240 · Butin +8 % · Attaque +9,26 % |
+| 5 | Attaque brute +250 · Butin +8 % · Attaque +10,36 % |
+| 6 | Attaque brute +270 · Butin +8 % · Attaque +11,46 % |
+| 7 | Attaque brute +290 · Butin +8 % · Attaque +12,57 % |
+| 8 | Attaque brute +310 · Butin +8 % · Attaque +13,7 % |
+| 9 | Attaque brute +330 · Butin +8 % · Attaque +14,84 % |
+| 10 | Attaque brute +350 · Butin +8 % · Attaque +15,99 % |
+| 11 | Attaque brute +370 · Butin +8 % · Attaque +17,15 % |
+| 12 | Attaque brute +390 · Butin +8 % · Attaque +18,32 % |
+| 13 | Attaque brute +410 · Butin +8 % · Attaque +19,5 % |
+| 14 | Attaque brute +430 · Butin +8 % · Attaque +20,69 % |
+| 15 | Attaque brute +460 · Butin +8 % · Attaque +21,9 % |
+| 16 | Attaque brute +490 · Butin +8 % · Attaque +23,12 % |
+| 17 | Attaque brute +520 · Butin +8 % · Attaque +24,35 % |
+| 18 | Attaque brute +550 · Butin +8 % · Attaque +25,6 % |
+| 19 | Attaque brute +580 · Butin +8 % · Attaque +26,85 % |
+| 20 | Attaque brute +610 · Butin +8 % · Attaque +28,12 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -660,27 +659,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,11 · PV bruts +13 · Dégâts critiques +10 % |
-| 1 | Attaque brute +2,22 · PV bruts +15 · Dégâts critiques +10 % |
-| 2 | Attaque brute +2,33 · PV bruts +18 · Dégâts critiques +10 % |
-| 3 | Attaque brute +2,43 · PV bruts +21 · Dégâts critiques +10 % |
-| 4 | Attaque brute +2,54 · PV bruts +23 · Dégâts critiques +10 % |
-| 5 | Attaque brute +2,64 · PV bruts +26 · Dégâts critiques +10 % |
-| 6 | Attaque brute +2,75 · PV bruts +29 · Dégâts critiques +10 % |
-| 7 | Attaque brute +2,85 · PV bruts +31 · Dégâts critiques +10 % |
-| 8 | Attaque brute +2,96 · PV bruts +34 · Dégâts critiques +10 % |
-| 9 | Attaque brute +3,07 · PV bruts +36 · Dégâts critiques +10 % |
-| 10 | Attaque brute +3,17 · PV bruts +39 · Dégâts critiques +10 % |
-| 11 | Attaque brute +3,28 · PV bruts +42 · Dégâts critiques +10 % |
-| 12 | Attaque brute +3,38 · PV bruts +44 · Dégâts critiques +10 % |
-| 13 | Attaque brute +3,49 · PV bruts +47 · Dégâts critiques +10 % |
-| 14 | Attaque brute +3,6 · PV bruts +50 · Dégâts critiques +10 % |
-| 15 | Attaque brute +3,7 · PV bruts +52 · Dégâts critiques +10 % |
-| 16 | Attaque brute +3,81 · PV bruts +55 · Dégâts critiques +10 % |
-| 17 | Attaque brute +3,91 · PV bruts +58 · Dégâts critiques +10 % |
-| 18 | Attaque brute +4,02 · PV bruts +60 · Dégâts critiques +10 % |
-| 19 | Attaque brute +4,12 · PV bruts +63 · Dégâts critiques +10 % |
-| 20 | Attaque brute +4,23 · PV bruts +66 · Dégâts critiques +10 % |
+| 0 | Attaque brute +210 · PV bruts +1290 · Dégâts critiques +10 % |
+| 1 | Attaque brute +220 · PV bruts +1390 · Dégâts critiques +10 % |
+| 2 | Attaque brute +230 · PV bruts +1500 · Dégâts critiques +10 % |
+| 3 | Attaque brute +240 · PV bruts +1620 · Dégâts critiques +10 % |
+| 4 | Attaque brute +250 · PV bruts +1750 · Dégâts critiques +10 % |
+| 5 | Attaque brute +270 · PV bruts +1890 · Dégâts critiques +10 % |
+| 6 | Attaque brute +290 · PV bruts +2040 · Dégâts critiques +10 % |
+| 7 | Attaque brute +310 · PV bruts +2200 · Dégâts critiques +10 % |
+| 8 | Attaque brute +330 · PV bruts +2380 · Dégâts critiques +10 % |
+| 9 | Attaque brute +350 · PV bruts +2570 · Dégâts critiques +10 % |
+| 10 | Attaque brute +370 · PV bruts +2780 · Dégâts critiques +10 % |
+| 11 | Attaque brute +390 · PV bruts +3000 · Dégâts critiques +10 % |
+| 12 | Attaque brute +410 · PV bruts +3240 · Dégâts critiques +10 % |
+| 13 | Attaque brute +430 · PV bruts +3500 · Dégâts critiques +10 % |
+| 14 | Attaque brute +460 · PV bruts +3780 · Dégâts critiques +10 % |
+| 15 | Attaque brute +490 · PV bruts +4080 · Dégâts critiques +10 % |
+| 16 | Attaque brute +520 · PV bruts +4410 · Dégâts critiques +10 % |
+| 17 | Attaque brute +550 · PV bruts +4760 · Dégâts critiques +10 % |
+| 18 | Attaque brute +580 · PV bruts +5140 · Dégâts critiques +10 % |
+| 19 | Attaque brute +610 · PV bruts +5550 · Dégâts critiques +10 % |
+| 20 | Attaque brute +650 · PV bruts +5990 · Dégâts critiques +10 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -692,27 +691,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,11 · PV bruts +8 · Défense brute +3,17 |
-| 1 | Attaque brute +2,22 · PV bruts +8 · Défense brute +3,49 |
-| 2 | Attaque brute +2,33 · PV bruts +8 · Défense brute +3,81 |
-| 3 | Attaque brute +2,43 · PV bruts +8 · Défense brute +4,12 |
-| 4 | Attaque brute +2,54 · PV bruts +8 · Défense brute +4,44 |
-| 5 | Attaque brute +2,64 · PV bruts +8 · Défense brute +4,76 |
-| 6 | Attaque brute +2,75 · PV bruts +8 · Défense brute +5,08 |
-| 7 | Attaque brute +2,85 · PV bruts +8 · Défense brute +5,39 |
-| 8 | Attaque brute +2,96 · PV bruts +8 · Défense brute +5,71 |
-| 9 | Attaque brute +3,07 · PV bruts +8 · Défense brute +6,03 |
-| 10 | Attaque brute +3,17 · PV bruts +8 · Défense brute +6,34 |
-| 11 | Attaque brute +3,28 · PV bruts +8 · Défense brute +6,66 |
-| 12 | Attaque brute +3,38 · PV bruts +8 · Défense brute +6,98 |
-| 13 | Attaque brute +3,49 · PV bruts +8 · Défense brute +7,3 |
-| 14 | Attaque brute +3,6 · PV bruts +8 · Défense brute +7,61 |
-| 15 | Attaque brute +3,7 · PV bruts +8 · Défense brute +7,93 |
-| 16 | Attaque brute +3,81 · PV bruts +8 · Défense brute +8,25 |
-| 17 | Attaque brute +3,91 · PV bruts +8 · Défense brute +8,56 |
-| 18 | Attaque brute +4,02 · PV bruts +8 · Défense brute +8,88 |
-| 19 | Attaque brute +4,12 · PV bruts +8 · Défense brute +9,2 |
-| 20 | Attaque brute +4,23 · PV bruts +8 · Défense brute +9,52 |
+| 0 | Attaque brute +210 · PV bruts +860 · Défense brute +320 |
+| 1 | Attaque brute +220 · PV bruts +860 · Défense brute +350 |
+| 2 | Attaque brute +230 · PV bruts +860 · Défense brute +380 |
+| 3 | Attaque brute +240 · PV bruts +860 · Défense brute +410 |
+| 4 | Attaque brute +250 · PV bruts +860 · Défense brute +440 |
+| 5 | Attaque brute +270 · PV bruts +860 · Défense brute +480 |
+| 6 | Attaque brute +290 · PV bruts +860 · Défense brute +520 |
+| 7 | Attaque brute +310 · PV bruts +860 · Défense brute +560 |
+| 8 | Attaque brute +330 · PV bruts +860 · Défense brute +600 |
+| 9 | Attaque brute +350 · PV bruts +860 · Défense brute +650 |
+| 10 | Attaque brute +370 · PV bruts +860 · Défense brute +700 |
+| 11 | Attaque brute +390 · PV bruts +860 · Défense brute +760 |
+| 12 | Attaque brute +410 · PV bruts +860 · Défense brute +820 |
+| 13 | Attaque brute +430 · PV bruts +860 · Défense brute +890 |
+| 14 | Attaque brute +460 · PV bruts +860 · Défense brute +960 |
+| 15 | Attaque brute +490 · PV bruts +860 · Défense brute +1040 |
+| 16 | Attaque brute +520 · PV bruts +860 · Défense brute +1120 |
+| 17 | Attaque brute +550 · PV bruts +860 · Défense brute +1210 |
+| 18 | Attaque brute +580 · PV bruts +860 · Défense brute +1310 |
+| 19 | Attaque brute +610 · PV bruts +860 · Défense brute +1410 |
+| 20 | Attaque brute +650 · PV bruts +860 · Défense brute +1520 |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -724,27 +723,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,11 · Attaque +10 % |
-| 1 | Attaque brute +2,22 · Attaque +10,5 % |
-| 2 | Attaque brute +2,33 · Attaque +11 % |
-| 3 | Attaque brute +2,43 · Attaque +11,5 % |
-| 4 | Attaque brute +2,54 · Attaque +12 % |
-| 5 | Attaque brute +2,64 · Attaque +12,5 % |
-| 6 | Attaque brute +2,75 · Attaque +13 % |
-| 7 | Attaque brute +2,85 · Attaque +13,5 % |
-| 8 | Attaque brute +2,96 · Attaque +14 % |
-| 9 | Attaque brute +3,07 · Attaque +14,5 % |
-| 10 | Attaque brute +3,17 · Attaque +15 % |
-| 11 | Attaque brute +3,28 · Attaque +15,5 % |
-| 12 | Attaque brute +3,38 · Attaque +16 % |
-| 13 | Attaque brute +3,49 · Attaque +16,5 % |
-| 14 | Attaque brute +3,6 · Attaque +17 % |
-| 15 | Attaque brute +3,7 · Attaque +17,5 % |
-| 16 | Attaque brute +3,81 · Attaque +18 % |
-| 17 | Attaque brute +3,91 · Attaque +18,5 % |
-| 18 | Attaque brute +4,02 · Attaque +19 % |
-| 19 | Attaque brute +4,12 · Attaque +19,5 % |
-| 20 | Attaque brute +4,23 · Attaque +20 % |
+| 0 | Attaque brute +210 · Attaque +10 % |
+| 1 | Attaque brute +220 · Attaque +11,1 % |
+| 2 | Attaque brute +230 · Attaque +12,21 % |
+| 3 | Attaque brute +240 · Attaque +13,33 % |
+| 4 | Attaque brute +250 · Attaque +14,47 % |
+| 5 | Attaque brute +270 · Attaque +15,61 % |
+| 6 | Attaque brute +290 · Attaque +16,77 % |
+| 7 | Attaque brute +310 · Attaque +17,93 % |
+| 8 | Attaque brute +330 · Attaque +19,11 % |
+| 9 | Attaque brute +350 · Attaque +20,31 % |
+| 10 | Attaque brute +370 · Attaque +21,51 % |
+| 11 | Attaque brute +390 · Attaque +22,72 % |
+| 12 | Attaque brute +410 · Attaque +23,95 % |
+| 13 | Attaque brute +430 · Attaque +25,19 % |
+| 14 | Attaque brute +460 · Attaque +26,44 % |
+| 15 | Attaque brute +490 · Attaque +27,71 % |
+| 16 | Attaque brute +520 · Attaque +28,98 % |
+| 17 | Attaque brute +550 · Attaque +30,27 % |
+| 18 | Attaque brute +580 · Attaque +31,58 % |
+| 19 | Attaque brute +610 · Attaque +32,89 % |
+| 20 | Attaque brute +650 · Attaque +34,22 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -756,27 +755,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,24 · PV bruts +13 · Vitesse +5 % |
-| 1 | Attaque brute +2,35 · PV bruts +16 · Vitesse +5 % |
-| 2 | Attaque brute +2,46 · PV bruts +19 · Vitesse +5 % |
-| 3 | Attaque brute +2,57 · PV bruts +22 · Vitesse +5 % |
-| 4 | Attaque brute +2,68 · PV bruts +25 · Vitesse +5 % |
-| 5 | Attaque brute +2,8 · PV bruts +27 · Vitesse +5 % |
-| 6 | Attaque brute +2,91 · PV bruts +30 · Vitesse +5 % |
-| 7 | Attaque brute +3,02 · PV bruts +33 · Vitesse +5 % |
-| 8 | Attaque brute +3,13 · PV bruts +36 · Vitesse +5 % |
-| 9 | Attaque brute +3,24 · PV bruts +39 · Vitesse +5 % |
-| 10 | Attaque brute +3,35 · PV bruts +41 · Vitesse +5 % |
-| 11 | Attaque brute +3,47 · PV bruts +44 · Vitesse +5 % |
-| 12 | Attaque brute +3,58 · PV bruts +47 · Vitesse +5 % |
-| 13 | Attaque brute +3,69 · PV bruts +50 · Vitesse +5 % |
-| 14 | Attaque brute +3,8 · PV bruts +53 · Vitesse +5 % |
-| 15 | Attaque brute +3,91 · PV bruts +55 · Vitesse +5 % |
-| 16 | Attaque brute +4,02 · PV bruts +58 · Vitesse +5 % |
-| 17 | Attaque brute +4,14 · PV bruts +61 · Vitesse +5 % |
-| 18 | Attaque brute +4,25 · PV bruts +64 · Vitesse +5 % |
-| 19 | Attaque brute +4,36 · PV bruts +67 · Vitesse +5 % |
-| 20 | Attaque brute +4,47 · PV bruts +69 · Vitesse +5 % |
+| 0 | Attaque brute +230 · PV bruts +1380 · Vitesse +5 % |
+| 1 | Attaque brute +240 · PV bruts +1490 · Vitesse +5 % |
+| 2 | Attaque brute +250 · PV bruts +1610 · Vitesse +5 % |
+| 3 | Attaque brute +270 · PV bruts +1740 · Vitesse +5 % |
+| 4 | Attaque brute +290 · PV bruts +1880 · Vitesse +5 % |
+| 5 | Attaque brute +310 · PV bruts +2030 · Vitesse +5 % |
+| 6 | Attaque brute +330 · PV bruts +2190 · Vitesse +5 % |
+| 7 | Attaque brute +350 · PV bruts +2370 · Vitesse +5 % |
+| 8 | Attaque brute +370 · PV bruts +2560 · Vitesse +5 % |
+| 9 | Attaque brute +390 · PV bruts +2760 · Vitesse +5 % |
+| 10 | Attaque brute +410 · PV bruts +2980 · Vitesse +5 % |
+| 11 | Attaque brute +430 · PV bruts +3220 · Vitesse +5 % |
+| 12 | Attaque brute +460 · PV bruts +3480 · Vitesse +5 % |
+| 13 | Attaque brute +490 · PV bruts +3760 · Vitesse +5 % |
+| 14 | Attaque brute +520 · PV bruts +4060 · Vitesse +5 % |
+| 15 | Attaque brute +550 · PV bruts +4380 · Vitesse +5 % |
+| 16 | Attaque brute +580 · PV bruts +4730 · Vitesse +5 % |
+| 17 | Attaque brute +610 · PV bruts +5110 · Vitesse +5 % |
+| 18 | Attaque brute +650 · PV bruts +5520 · Vitesse +5 % |
+| 19 | Attaque brute +690 · PV bruts +5960 · Vitesse +5 % |
+| 20 | Attaque brute +730 · PV bruts +6440 · Vitesse +5 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -788,27 +787,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,24 · Défense brute +3,35 · Soins reçus +8 % |
-| 1 | Attaque brute +2,35 · Défense brute +3,69 · Soins reçus +8 % |
-| 2 | Attaque brute +2,46 · Défense brute +4,02 · Soins reçus +8 % |
-| 3 | Attaque brute +2,57 · Défense brute +4,36 · Soins reçus +8 % |
-| 4 | Attaque brute +2,68 · Défense brute +4,7 · Soins reçus +8 % |
-| 5 | Attaque brute +2,8 · Défense brute +5,03 · Soins reçus +8 % |
-| 6 | Attaque brute +2,91 · Défense brute +5,37 · Soins reçus +8 % |
-| 7 | Attaque brute +3,02 · Défense brute +5,7 · Soins reçus +8 % |
-| 8 | Attaque brute +3,13 · Défense brute +6,04 · Soins reçus +8 % |
-| 9 | Attaque brute +3,24 · Défense brute +6,37 · Soins reçus +8 % |
-| 10 | Attaque brute +3,35 · Défense brute +6,71 · Soins reçus +8 % |
-| 11 | Attaque brute +3,47 · Défense brute +7,04 · Soins reçus +8 % |
-| 12 | Attaque brute +3,58 · Défense brute +7,38 · Soins reçus +8 % |
-| 13 | Attaque brute +3,69 · Défense brute +7,71 · Soins reçus +8 % |
-| 14 | Attaque brute +3,8 · Défense brute +8,05 · Soins reçus +8 % |
-| 15 | Attaque brute +3,91 · Défense brute +8,39 · Soins reçus +8 % |
-| 16 | Attaque brute +4,02 · Défense brute +8,72 · Soins reçus +8 % |
-| 17 | Attaque brute +4,14 · Défense brute +9,06 · Soins reçus +8 % |
-| 18 | Attaque brute +4,25 · Défense brute +9,39 · Soins reçus +8 % |
-| 19 | Attaque brute +4,36 · Défense brute +9,73 · Soins reçus +8 % |
-| 20 | Attaque brute +4,47 · Défense brute +10,06 · Soins reçus +8 % |
+| 0 | Attaque brute +230 · Défense brute +340 · Soins reçus +8 % |
+| 1 | Attaque brute +240 · Défense brute +370 · Soins reçus +8 % |
+| 2 | Attaque brute +250 · Défense brute +400 · Soins reçus +8 % |
+| 3 | Attaque brute +270 · Défense brute +430 · Soins reçus +8 % |
+| 4 | Attaque brute +290 · Défense brute +460 · Soins reçus +8 % |
+| 5 | Attaque brute +310 · Défense brute +500 · Soins reçus +8 % |
+| 6 | Attaque brute +330 · Défense brute +540 · Soins reçus +8 % |
+| 7 | Attaque brute +350 · Défense brute +580 · Soins reçus +8 % |
+| 8 | Attaque brute +370 · Défense brute +630 · Soins reçus +8 % |
+| 9 | Attaque brute +390 · Défense brute +680 · Soins reçus +8 % |
+| 10 | Attaque brute +410 · Défense brute +730 · Soins reçus +8 % |
+| 11 | Attaque brute +430 · Défense brute +790 · Soins reçus +8 % |
+| 12 | Attaque brute +460 · Défense brute +850 · Soins reçus +8 % |
+| 13 | Attaque brute +490 · Défense brute +920 · Soins reçus +8 % |
+| 14 | Attaque brute +520 · Défense brute +990 · Soins reçus +8 % |
+| 15 | Attaque brute +550 · Défense brute +1070 · Soins reçus +8 % |
+| 16 | Attaque brute +580 · Défense brute +1160 · Soins reçus +8 % |
+| 17 | Attaque brute +610 · Défense brute +1250 · Soins reçus +8 % |
+| 18 | Attaque brute +650 · Défense brute +1350 · Soins reçus +8 % |
+| 19 | Attaque brute +690 · Défense brute +1460 · Soins reçus +8 % |
+| 20 | Attaque brute +730 · Défense brute +1580 · Soins reçus +8 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -820,27 +819,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,24 · Chance critique +4 % · Attaque +5 % |
-| 1 | Attaque brute +2,35 · Chance critique +4 % · Attaque +5,5 % |
-| 2 | Attaque brute +2,46 · Chance critique +4 % · Attaque +6 % |
-| 3 | Attaque brute +2,57 · Chance critique +4 % · Attaque +6,5 % |
-| 4 | Attaque brute +2,68 · Chance critique +4 % · Attaque +7 % |
-| 5 | Attaque brute +2,8 · Chance critique +4 % · Attaque +7,5 % |
-| 6 | Attaque brute +2,91 · Chance critique +4 % · Attaque +8 % |
-| 7 | Attaque brute +3,02 · Chance critique +4 % · Attaque +8,5 % |
-| 8 | Attaque brute +3,13 · Chance critique +4 % · Attaque +9 % |
-| 9 | Attaque brute +3,24 · Chance critique +4 % · Attaque +9,5 % |
-| 10 | Attaque brute +3,35 · Chance critique +4 % · Attaque +10 % |
-| 11 | Attaque brute +3,47 · Chance critique +4 % · Attaque +10,5 % |
-| 12 | Attaque brute +3,58 · Chance critique +4 % · Attaque +11 % |
-| 13 | Attaque brute +3,69 · Chance critique +4 % · Attaque +11,5 % |
-| 14 | Attaque brute +3,8 · Chance critique +4 % · Attaque +12 % |
-| 15 | Attaque brute +3,91 · Chance critique +4 % · Attaque +12,5 % |
-| 16 | Attaque brute +4,02 · Chance critique +4 % · Attaque +13 % |
-| 17 | Attaque brute +4,14 · Chance critique +4 % · Attaque +13,5 % |
-| 18 | Attaque brute +4,25 · Chance critique +4 % · Attaque +14 % |
-| 19 | Attaque brute +4,36 · Chance critique +4 % · Attaque +14,5 % |
-| 20 | Attaque brute +4,47 · Chance critique +4 % · Attaque +15 % |
+| 0 | Attaque brute +230 · Chance critique +4 % · Attaque +5 % |
+| 1 | Attaque brute +240 · Chance critique +4 % · Attaque +6,05 % |
+| 2 | Attaque brute +250 · Chance critique +4 % · Attaque +7,11 % |
+| 3 | Attaque brute +270 · Chance critique +4 % · Attaque +8,18 % |
+| 4 | Attaque brute +290 · Chance critique +4 % · Attaque +9,26 % |
+| 5 | Attaque brute +310 · Chance critique +4 % · Attaque +10,36 % |
+| 6 | Attaque brute +330 · Chance critique +4 % · Attaque +11,46 % |
+| 7 | Attaque brute +350 · Chance critique +4 % · Attaque +12,57 % |
+| 8 | Attaque brute +370 · Chance critique +4 % · Attaque +13,7 % |
+| 9 | Attaque brute +390 · Chance critique +4 % · Attaque +14,84 % |
+| 10 | Attaque brute +410 · Chance critique +4 % · Attaque +15,99 % |
+| 11 | Attaque brute +430 · Chance critique +4 % · Attaque +17,15 % |
+| 12 | Attaque brute +460 · Chance critique +4 % · Attaque +18,32 % |
+| 13 | Attaque brute +490 · Chance critique +4 % · Attaque +19,5 % |
+| 14 | Attaque brute +520 · Chance critique +4 % · Attaque +20,69 % |
+| 15 | Attaque brute +550 · Chance critique +4 % · Attaque +21,9 % |
+| 16 | Attaque brute +580 · Chance critique +4 % · Attaque +23,12 % |
+| 17 | Attaque brute +610 · Chance critique +4 % · Attaque +24,35 % |
+| 18 | Attaque brute +650 · Chance critique +4 % · Attaque +25,6 % |
+| 19 | Attaque brute +690 · Chance critique +4 % · Attaque +26,85 % |
+| 20 | Attaque brute +730 · Chance critique +4 % · Attaque +28,12 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -852,27 +851,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,36 · PV bruts +14 · Vitesse d’attaque +5 % |
-| 1 | Attaque brute +2,48 · PV bruts +17 · Vitesse d’attaque +5 % |
-| 2 | Attaque brute +2,6 · PV bruts +20 · Vitesse d’attaque +5 % |
-| 3 | Attaque brute +2,72 · PV bruts +23 · Vitesse d’attaque +5 % |
-| 4 | Attaque brute +2,84 · PV bruts +26 · Vitesse d’attaque +5 % |
-| 5 | Attaque brute +2,96 · PV bruts +29 · Vitesse d’attaque +5 % |
-| 6 | Attaque brute +3,07 · PV bruts +32 · Vitesse d’attaque +5 % |
-| 7 | Attaque brute +3,19 · PV bruts +35 · Vitesse d’attaque +5 % |
-| 8 | Attaque brute +3,31 · PV bruts +38 · Vitesse d’attaque +5 % |
-| 9 | Attaque brute +3,43 · PV bruts +41 · Vitesse d’attaque +5 % |
-| 10 | Attaque brute +3,55 · PV bruts +44 · Vitesse d’attaque +5 % |
-| 11 | Attaque brute +3,66 · PV bruts +47 · Vitesse d’attaque +5 % |
-| 12 | Attaque brute +3,78 · PV bruts +50 · Vitesse d’attaque +5 % |
-| 13 | Attaque brute +3,9 · PV bruts +53 · Vitesse d’attaque +5 % |
-| 14 | Attaque brute +4,02 · PV bruts +56 · Vitesse d’attaque +5 % |
-| 15 | Attaque brute +4,14 · PV bruts +59 · Vitesse d’attaque +5 % |
-| 16 | Attaque brute +4,26 · PV bruts +61 · Vitesse d’attaque +5 % |
-| 17 | Attaque brute +4,37 · PV bruts +64 · Vitesse d’attaque +5 % |
-| 18 | Attaque brute +4,49 · PV bruts +67 · Vitesse d’attaque +5 % |
-| 19 | Attaque brute +4,61 · PV bruts +70 · Vitesse d’attaque +5 % |
-| 20 | Attaque brute +4,73 · PV bruts +73 · Vitesse d’attaque +5 % |
+| 0 | Attaque brute +250 · PV bruts +1480 · Vitesse d’attaque +5 % |
+| 1 | Attaque brute +270 · PV bruts +1600 · Vitesse d’attaque +5 % |
+| 2 | Attaque brute +290 · PV bruts +1730 · Vitesse d’attaque +5 % |
+| 3 | Attaque brute +310 · PV bruts +1870 · Vitesse d’attaque +5 % |
+| 4 | Attaque brute +330 · PV bruts +2020 · Vitesse d’attaque +5 % |
+| 5 | Attaque brute +350 · PV bruts +2180 · Vitesse d’attaque +5 % |
+| 6 | Attaque brute +370 · PV bruts +2350 · Vitesse d’attaque +5 % |
+| 7 | Attaque brute +390 · PV bruts +2540 · Vitesse d’attaque +5 % |
+| 8 | Attaque brute +410 · PV bruts +2740 · Vitesse d’attaque +5 % |
+| 9 | Attaque brute +430 · PV bruts +2960 · Vitesse d’attaque +5 % |
+| 10 | Attaque brute +460 · PV bruts +3200 · Vitesse d’attaque +5 % |
+| 11 | Attaque brute +490 · PV bruts +3460 · Vitesse d’attaque +5 % |
+| 12 | Attaque brute +520 · PV bruts +3740 · Vitesse d’attaque +5 % |
+| 13 | Attaque brute +550 · PV bruts +4040 · Vitesse d’attaque +5 % |
+| 14 | Attaque brute +580 · PV bruts +4360 · Vitesse d’attaque +5 % |
+| 15 | Attaque brute +610 · PV bruts +4710 · Vitesse d’attaque +5 % |
+| 16 | Attaque brute +650 · PV bruts +5090 · Vitesse d’attaque +5 % |
+| 17 | Attaque brute +690 · PV bruts +5500 · Vitesse d’attaque +5 % |
+| 18 | Attaque brute +730 · PV bruts +5940 · Vitesse d’attaque +5 % |
+| 19 | Attaque brute +770 · PV bruts +6420 · Vitesse d’attaque +5 % |
+| 20 | Attaque brute +820 · PV bruts +6930 · Vitesse d’attaque +5 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -884,27 +883,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,36 · Défense brute +3,55 · Chance critique +4 % |
-| 1 | Attaque brute +2,48 · Défense brute +3,9 · Chance critique +4 % |
-| 2 | Attaque brute +2,6 · Défense brute +4,26 · Chance critique +4 % |
-| 3 | Attaque brute +2,72 · Défense brute +4,61 · Chance critique +4 % |
-| 4 | Attaque brute +2,84 · Défense brute +4,97 · Chance critique +4 % |
-| 5 | Attaque brute +2,96 · Défense brute +5,32 · Chance critique +4 % |
-| 6 | Attaque brute +3,07 · Défense brute +5,67 · Chance critique +4 % |
-| 7 | Attaque brute +3,19 · Défense brute +6,03 · Chance critique +4 % |
-| 8 | Attaque brute +3,31 · Défense brute +6,38 · Chance critique +4 % |
-| 9 | Attaque brute +3,43 · Défense brute +6,74 · Chance critique +4 % |
-| 10 | Attaque brute +3,55 · Défense brute +7,09 · Chance critique +4 % |
-| 11 | Attaque brute +3,66 · Défense brute +7,45 · Chance critique +4 % |
-| 12 | Attaque brute +3,78 · Défense brute +7,8 · Chance critique +4 % |
-| 13 | Attaque brute +3,9 · Défense brute +8,16 · Chance critique +4 % |
-| 14 | Attaque brute +4,02 · Défense brute +8,51 · Chance critique +4 % |
-| 15 | Attaque brute +4,14 · Défense brute +8,87 · Chance critique +4 % |
-| 16 | Attaque brute +4,26 · Défense brute +9,22 · Chance critique +4 % |
-| 17 | Attaque brute +4,37 · Défense brute +9,58 · Chance critique +4 % |
-| 18 | Attaque brute +4,49 · Défense brute +9,93 · Chance critique +4 % |
-| 19 | Attaque brute +4,61 · Défense brute +10,28 · Chance critique +4 % |
-| 20 | Attaque brute +4,73 · Défense brute +10,64 · Chance critique +4 % |
+| 0 | Attaque brute +250 · Défense brute +370 · Chance critique +4 % |
+| 1 | Attaque brute +270 · Défense brute +400 · Chance critique +4 % |
+| 2 | Attaque brute +290 · Défense brute +430 · Chance critique +4 % |
+| 3 | Attaque brute +310 · Défense brute +460 · Chance critique +4 % |
+| 4 | Attaque brute +330 · Défense brute +500 · Chance critique +4 % |
+| 5 | Attaque brute +350 · Défense brute +540 · Chance critique +4 % |
+| 6 | Attaque brute +370 · Défense brute +580 · Chance critique +4 % |
+| 7 | Attaque brute +390 · Défense brute +630 · Chance critique +4 % |
+| 8 | Attaque brute +410 · Défense brute +680 · Chance critique +4 % |
+| 9 | Attaque brute +430 · Défense brute +730 · Chance critique +4 % |
+| 10 | Attaque brute +460 · Défense brute +790 · Chance critique +4 % |
+| 11 | Attaque brute +490 · Défense brute +850 · Chance critique +4 % |
+| 12 | Attaque brute +520 · Défense brute +920 · Chance critique +4 % |
+| 13 | Attaque brute +550 · Défense brute +990 · Chance critique +4 % |
+| 14 | Attaque brute +580 · Défense brute +1070 · Chance critique +4 % |
+| 15 | Attaque brute +610 · Défense brute +1160 · Chance critique +4 % |
+| 16 | Attaque brute +650 · Défense brute +1250 · Chance critique +4 % |
+| 17 | Attaque brute +690 · Défense brute +1350 · Chance critique +4 % |
+| 18 | Attaque brute +730 · Défense brute +1460 · Chance critique +4 % |
+| 19 | Attaque brute +770 · Défense brute +1580 · Chance critique +4 % |
+| 20 | Attaque brute +820 · Défense brute +1710 · Chance critique +4 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -916,27 +915,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,36 · Vitesse +5 % · Attaque +5 % |
-| 1 | Attaque brute +2,48 · Vitesse +5 % · Attaque +5,5 % |
-| 2 | Attaque brute +2,6 · Vitesse +5 % · Attaque +6 % |
-| 3 | Attaque brute +2,72 · Vitesse +5 % · Attaque +6,5 % |
-| 4 | Attaque brute +2,84 · Vitesse +5 % · Attaque +7 % |
-| 5 | Attaque brute +2,96 · Vitesse +5 % · Attaque +7,5 % |
-| 6 | Attaque brute +3,07 · Vitesse +5 % · Attaque +8 % |
-| 7 | Attaque brute +3,19 · Vitesse +5 % · Attaque +8,5 % |
-| 8 | Attaque brute +3,31 · Vitesse +5 % · Attaque +9 % |
-| 9 | Attaque brute +3,43 · Vitesse +5 % · Attaque +9,5 % |
-| 10 | Attaque brute +3,55 · Vitesse +5 % · Attaque +10 % |
-| 11 | Attaque brute +3,66 · Vitesse +5 % · Attaque +10,5 % |
-| 12 | Attaque brute +3,78 · Vitesse +5 % · Attaque +11 % |
-| 13 | Attaque brute +3,9 · Vitesse +5 % · Attaque +11,5 % |
-| 14 | Attaque brute +4,02 · Vitesse +5 % · Attaque +12 % |
-| 15 | Attaque brute +4,14 · Vitesse +5 % · Attaque +12,5 % |
-| 16 | Attaque brute +4,26 · Vitesse +5 % · Attaque +13 % |
-| 17 | Attaque brute +4,37 · Vitesse +5 % · Attaque +13,5 % |
-| 18 | Attaque brute +4,49 · Vitesse +5 % · Attaque +14 % |
-| 19 | Attaque brute +4,61 · Vitesse +5 % · Attaque +14,5 % |
-| 20 | Attaque brute +4,73 · Vitesse +5 % · Attaque +15 % |
+| 0 | Attaque brute +250 · Vitesse +5 % · Attaque +5 % |
+| 1 | Attaque brute +270 · Vitesse +5 % · Attaque +6,05 % |
+| 2 | Attaque brute +290 · Vitesse +5 % · Attaque +7,11 % |
+| 3 | Attaque brute +310 · Vitesse +5 % · Attaque +8,18 % |
+| 4 | Attaque brute +330 · Vitesse +5 % · Attaque +9,26 % |
+| 5 | Attaque brute +350 · Vitesse +5 % · Attaque +10,36 % |
+| 6 | Attaque brute +370 · Vitesse +5 % · Attaque +11,46 % |
+| 7 | Attaque brute +390 · Vitesse +5 % · Attaque +12,57 % |
+| 8 | Attaque brute +410 · Vitesse +5 % · Attaque +13,7 % |
+| 9 | Attaque brute +430 · Vitesse +5 % · Attaque +14,84 % |
+| 10 | Attaque brute +460 · Vitesse +5 % · Attaque +15,99 % |
+| 11 | Attaque brute +490 · Vitesse +5 % · Attaque +17,15 % |
+| 12 | Attaque brute +520 · Vitesse +5 % · Attaque +18,32 % |
+| 13 | Attaque brute +550 · Vitesse +5 % · Attaque +19,5 % |
+| 14 | Attaque brute +580 · Vitesse +5 % · Attaque +20,69 % |
+| 15 | Attaque brute +610 · Vitesse +5 % · Attaque +21,9 % |
+| 16 | Attaque brute +650 · Vitesse +5 % · Attaque +23,12 % |
+| 17 | Attaque brute +690 · Vitesse +5 % · Attaque +24,35 % |
+| 18 | Attaque brute +730 · Vitesse +5 % · Attaque +25,6 % |
+| 19 | Attaque brute +770 · Vitesse +5 % · Attaque +26,85 % |
+| 20 | Attaque brute +820 · Vitesse +5 % · Attaque +28,12 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -948,27 +947,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · PV bruts +15 · Butin +8 % |
-| 1 | Attaque brute +2,62 · PV bruts +18 · Butin +8 % |
-| 2 | Attaque brute +2,75 · PV bruts +21 · Butin +8 % |
-| 3 | Attaque brute +2,87 · PV bruts +24 · Butin +8 % |
-| 4 | Attaque brute +3 · PV bruts +27 · Butin +8 % |
-| 5 | Attaque brute +3,12 · PV bruts +31 · Butin +8 % |
-| 6 | Attaque brute +3,25 · PV bruts +34 · Butin +8 % |
-| 7 | Attaque brute +3,37 · PV bruts +37 · Butin +8 % |
-| 8 | Attaque brute +3,5 · PV bruts +40 · Butin +8 % |
-| 9 | Attaque brute +3,62 · PV bruts +43 · Butin +8 % |
-| 10 | Attaque brute +3,75 · PV bruts +46 · Butin +8 % |
-| 11 | Attaque brute +3,87 · PV bruts +49 · Butin +8 % |
-| 12 | Attaque brute +4 · PV bruts +52 · Butin +8 % |
-| 13 | Attaque brute +4,12 · PV bruts +56 · Butin +8 % |
-| 14 | Attaque brute +4,25 · PV bruts +59 · Butin +8 % |
-| 15 | Attaque brute +4,37 · PV bruts +62 · Butin +8 % |
-| 16 | Attaque brute +4,5 · PV bruts +65 · Butin +8 % |
-| 17 | Attaque brute +4,62 · PV bruts +68 · Butin +8 % |
-| 18 | Attaque brute +4,75 · PV bruts +71 · Butin +8 % |
-| 19 | Attaque brute +4,87 · PV bruts +74 · Butin +8 % |
-| 20 | Attaque brute +5 · PV bruts +77 · Butin +8 % |
+| 0 | Attaque brute +260 · PV bruts +1590 · Butin +8 % |
+| 1 | Attaque brute +280 · PV bruts +1720 · Butin +8 % |
+| 2 | Attaque brute +300 · PV bruts +1860 · Butin +8 % |
+| 3 | Attaque brute +320 · PV bruts +2010 · Butin +8 % |
+| 4 | Attaque brute +340 · PV bruts +2170 · Butin +8 % |
+| 5 | Attaque brute +360 · PV bruts +2340 · Butin +8 % |
+| 6 | Attaque brute +380 · PV bruts +2530 · Butin +8 % |
+| 7 | Attaque brute +400 · PV bruts +2730 · Butin +8 % |
+| 8 | Attaque brute +420 · PV bruts +2950 · Butin +8 % |
+| 9 | Attaque brute +450 · PV bruts +3190 · Butin +8 % |
+| 10 | Attaque brute +480 · PV bruts +3450 · Butin +8 % |
+| 11 | Attaque brute +510 · PV bruts +3730 · Butin +8 % |
+| 12 | Attaque brute +540 · PV bruts +4030 · Butin +8 % |
+| 13 | Attaque brute +570 · PV bruts +4350 · Butin +8 % |
+| 14 | Attaque brute +600 · PV bruts +4700 · Butin +8 % |
+| 15 | Attaque brute +640 · PV bruts +5080 · Butin +8 % |
+| 16 | Attaque brute +680 · PV bruts +5490 · Butin +8 % |
+| 17 | Attaque brute +720 · PV bruts +5930 · Butin +8 % |
+| 18 | Attaque brute +760 · PV bruts +6400 · Butin +8 % |
+| 19 | Attaque brute +810 · PV bruts +6910 · Butin +8 % |
+| 20 | Attaque brute +860 · PV bruts +7460 · Butin +8 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -980,27 +979,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · Défense brute +3,75 · Attaque +5 % |
-| 1 | Attaque brute +2,62 · Défense brute +4,12 · Attaque +5 % |
-| 2 | Attaque brute +2,75 · Défense brute +4,5 · Attaque +5 % |
-| 3 | Attaque brute +2,87 · Défense brute +4,87 · Attaque +5 % |
-| 4 | Attaque brute +3 · Défense brute +5,25 · Attaque +5 % |
-| 5 | Attaque brute +3,12 · Défense brute +5,62 · Attaque +5 % |
-| 6 | Attaque brute +3,25 · Défense brute +6 · Attaque +5 % |
-| 7 | Attaque brute +3,37 · Défense brute +6,37 · Attaque +5 % |
-| 8 | Attaque brute +3,5 · Défense brute +6,75 · Attaque +5 % |
-| 9 | Attaque brute +3,62 · Défense brute +7,12 · Attaque +5 % |
-| 10 | Attaque brute +3,75 · Défense brute +7,5 · Attaque +5 % |
-| 11 | Attaque brute +3,87 · Défense brute +7,87 · Attaque +5 % |
-| 12 | Attaque brute +4 · Défense brute +8,25 · Attaque +5 % |
-| 13 | Attaque brute +4,12 · Défense brute +8,62 · Attaque +5 % |
-| 14 | Attaque brute +4,25 · Défense brute +9 · Attaque +5 % |
-| 15 | Attaque brute +4,37 · Défense brute +9,37 · Attaque +5 % |
-| 16 | Attaque brute +4,5 · Défense brute +9,75 · Attaque +5 % |
-| 17 | Attaque brute +4,62 · Défense brute +10,12 · Attaque +5 % |
-| 18 | Attaque brute +4,75 · Défense brute +10,5 · Attaque +5 % |
-| 19 | Attaque brute +4,87 · Défense brute +10,87 · Attaque +5 % |
-| 20 | Attaque brute +5 · Défense brute +11,25 · Attaque +5 % |
+| 0 | Attaque brute +260 · Défense brute +400 · Attaque +5 % |
+| 1 | Attaque brute +280 · Défense brute +430 · Attaque +5 % |
+| 2 | Attaque brute +300 · Défense brute +460 · Attaque +5 % |
+| 3 | Attaque brute +320 · Défense brute +500 · Attaque +5 % |
+| 4 | Attaque brute +340 · Défense brute +540 · Attaque +5 % |
+| 5 | Attaque brute +360 · Défense brute +580 · Attaque +5 % |
+| 6 | Attaque brute +380 · Défense brute +630 · Attaque +5 % |
+| 7 | Attaque brute +400 · Défense brute +680 · Attaque +5 % |
+| 8 | Attaque brute +420 · Défense brute +730 · Attaque +5 % |
+| 9 | Attaque brute +450 · Défense brute +790 · Attaque +5 % |
+| 10 | Attaque brute +480 · Défense brute +850 · Attaque +5 % |
+| 11 | Attaque brute +510 · Défense brute +920 · Attaque +5 % |
+| 12 | Attaque brute +540 · Défense brute +990 · Attaque +5 % |
+| 13 | Attaque brute +570 · Défense brute +1070 · Attaque +5 % |
+| 14 | Attaque brute +600 · Défense brute +1160 · Attaque +5 % |
+| 15 | Attaque brute +640 · Défense brute +1250 · Attaque +5 % |
+| 16 | Attaque brute +680 · Défense brute +1350 · Attaque +5 % |
+| 17 | Attaque brute +720 · Défense brute +1460 · Attaque +5 % |
+| 18 | Attaque brute +760 · Défense brute +1580 · Attaque +5 % |
+| 19 | Attaque brute +810 · Défense brute +1710 · Attaque +5 % |
+| 20 | Attaque brute +860 · Défense brute +1850 · Attaque +5 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1012,27 +1011,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · Attaque +5 % · Dégâts critiques +10 % |
-| 1 | Attaque brute +2,62 · Attaque +5,5 % · Dégâts critiques +10 % |
-| 2 | Attaque brute +2,75 · Attaque +6 % · Dégâts critiques +10 % |
-| 3 | Attaque brute +2,87 · Attaque +6,5 % · Dégâts critiques +10 % |
-| 4 | Attaque brute +3 · Attaque +7 % · Dégâts critiques +10 % |
-| 5 | Attaque brute +3,12 · Attaque +7,5 % · Dégâts critiques +10 % |
-| 6 | Attaque brute +3,25 · Attaque +8 % · Dégâts critiques +10 % |
-| 7 | Attaque brute +3,37 · Attaque +8,5 % · Dégâts critiques +10 % |
-| 8 | Attaque brute +3,5 · Attaque +9 % · Dégâts critiques +10 % |
-| 9 | Attaque brute +3,62 · Attaque +9,5 % · Dégâts critiques +10 % |
-| 10 | Attaque brute +3,75 · Attaque +10 % · Dégâts critiques +10 % |
-| 11 | Attaque brute +3,87 · Attaque +10,5 % · Dégâts critiques +10 % |
-| 12 | Attaque brute +4 · Attaque +11 % · Dégâts critiques +10 % |
-| 13 | Attaque brute +4,12 · Attaque +11,5 % · Dégâts critiques +10 % |
-| 14 | Attaque brute +4,25 · Attaque +12 % · Dégâts critiques +10 % |
-| 15 | Attaque brute +4,37 · Attaque +12,5 % · Dégâts critiques +10 % |
-| 16 | Attaque brute +4,5 · Attaque +13 % · Dégâts critiques +10 % |
-| 17 | Attaque brute +4,62 · Attaque +13,5 % · Dégâts critiques +10 % |
-| 18 | Attaque brute +4,75 · Attaque +14 % · Dégâts critiques +10 % |
-| 19 | Attaque brute +4,87 · Attaque +14,5 % · Dégâts critiques +10 % |
-| 20 | Attaque brute +5 · Attaque +15 % · Dégâts critiques +10 % |
+| 0 | Attaque brute +260 · Attaque +5 % · Dégâts critiques +10 % |
+| 1 | Attaque brute +280 · Attaque +6,05 % · Dégâts critiques +10 % |
+| 2 | Attaque brute +300 · Attaque +7,11 % · Dégâts critiques +10 % |
+| 3 | Attaque brute +320 · Attaque +8,18 % · Dégâts critiques +10 % |
+| 4 | Attaque brute +340 · Attaque +9,26 % · Dégâts critiques +10 % |
+| 5 | Attaque brute +360 · Attaque +10,36 % · Dégâts critiques +10 % |
+| 6 | Attaque brute +380 · Attaque +11,46 % · Dégâts critiques +10 % |
+| 7 | Attaque brute +400 · Attaque +12,57 % · Dégâts critiques +10 % |
+| 8 | Attaque brute +420 · Attaque +13,7 % · Dégâts critiques +10 % |
+| 9 | Attaque brute +450 · Attaque +14,84 % · Dégâts critiques +10 % |
+| 10 | Attaque brute +480 · Attaque +15,99 % · Dégâts critiques +10 % |
+| 11 | Attaque brute +510 · Attaque +17,15 % · Dégâts critiques +10 % |
+| 12 | Attaque brute +540 · Attaque +18,32 % · Dégâts critiques +10 % |
+| 13 | Attaque brute +570 · Attaque +19,5 % · Dégâts critiques +10 % |
+| 14 | Attaque brute +600 · Attaque +20,69 % · Dégâts critiques +10 % |
+| 15 | Attaque brute +640 · Attaque +21,9 % · Dégâts critiques +10 % |
+| 16 | Attaque brute +680 · Attaque +23,12 % · Dégâts critiques +10 % |
+| 17 | Attaque brute +720 · Attaque +24,35 % · Dégâts critiques +10 % |
+| 18 | Attaque brute +760 · Attaque +25,6 % · Dégâts critiques +10 % |
+| 19 | Attaque brute +810 · Attaque +26,85 % · Dégâts critiques +10 % |
+| 20 | Attaque brute +860 · Attaque +28,12 % · Dégâts critiques +10 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1046,27 +1045,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · PV bruts +15 · Chance critique +2 % |
-| 1 | Attaque brute +2,62 · PV bruts +18 · Chance critique +2 % |
-| 2 | Attaque brute +2,75 · PV bruts +21 · Chance critique +2 % |
-| 3 | Attaque brute +2,87 · PV bruts +24 · Chance critique +2 % |
-| 4 | Attaque brute +3 · PV bruts +27 · Chance critique +2 % |
-| 5 | Attaque brute +3,12 · PV bruts +31 · Chance critique +2 % |
-| 6 | Attaque brute +3,25 · PV bruts +34 · Chance critique +2 % |
-| 7 | Attaque brute +3,37 · PV bruts +37 · Chance critique +2 % |
-| 8 | Attaque brute +3,5 · PV bruts +40 · Chance critique +2 % |
-| 9 | Attaque brute +3,62 · PV bruts +43 · Chance critique +2 % |
-| 10 | Attaque brute +3,75 · PV bruts +46 · Chance critique +2 % |
-| 11 | Attaque brute +3,87 · PV bruts +49 · Chance critique +2 % |
-| 12 | Attaque brute +4 · PV bruts +52 · Chance critique +2 % |
-| 13 | Attaque brute +4,12 · PV bruts +56 · Chance critique +2 % |
-| 14 | Attaque brute +4,25 · PV bruts +59 · Chance critique +2 % |
-| 15 | Attaque brute +4,37 · PV bruts +62 · Chance critique +2 % |
-| 16 | Attaque brute +4,5 · PV bruts +65 · Chance critique +2 % |
-| 17 | Attaque brute +4,62 · PV bruts +68 · Chance critique +2 % |
-| 18 | Attaque brute +4,75 · PV bruts +71 · Chance critique +2 % |
-| 19 | Attaque brute +4,87 · PV bruts +74 · Chance critique +2 % |
-| 20 | Attaque brute +5 · PV bruts +77 · Chance critique +2 % |
+| 0 | Attaque brute +260 · PV bruts +1590 · Chance critique +2 % |
+| 1 | Attaque brute +280 · PV bruts +1720 · Chance critique +2 % |
+| 2 | Attaque brute +300 · PV bruts +1860 · Chance critique +2 % |
+| 3 | Attaque brute +320 · PV bruts +2010 · Chance critique +2 % |
+| 4 | Attaque brute +340 · PV bruts +2170 · Chance critique +2 % |
+| 5 | Attaque brute +360 · PV bruts +2340 · Chance critique +2 % |
+| 6 | Attaque brute +380 · PV bruts +2530 · Chance critique +2 % |
+| 7 | Attaque brute +400 · PV bruts +2730 · Chance critique +2 % |
+| 8 | Attaque brute +420 · PV bruts +2950 · Chance critique +2 % |
+| 9 | Attaque brute +450 · PV bruts +3190 · Chance critique +2 % |
+| 10 | Attaque brute +480 · PV bruts +3450 · Chance critique +2 % |
+| 11 | Attaque brute +510 · PV bruts +3730 · Chance critique +2 % |
+| 12 | Attaque brute +540 · PV bruts +4030 · Chance critique +2 % |
+| 13 | Attaque brute +570 · PV bruts +4350 · Chance critique +2 % |
+| 14 | Attaque brute +600 · PV bruts +4700 · Chance critique +2 % |
+| 15 | Attaque brute +640 · PV bruts +5080 · Chance critique +2 % |
+| 16 | Attaque brute +680 · PV bruts +5490 · Chance critique +2 % |
+| 17 | Attaque brute +720 · PV bruts +5930 · Chance critique +2 % |
+| 18 | Attaque brute +760 · PV bruts +6400 · Chance critique +2 % |
+| 19 | Attaque brute +810 · PV bruts +6910 · Chance critique +2 % |
+| 20 | Attaque brute +860 · PV bruts +7460 · Chance critique +2 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1078,27 +1077,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · Défense brute +3,75 · Vitesse d’attaque +3 % |
-| 1 | Attaque brute +2,62 · Défense brute +4,12 · Vitesse d’attaque +3 % |
-| 2 | Attaque brute +2,75 · Défense brute +4,5 · Vitesse d’attaque +3 % |
-| 3 | Attaque brute +2,87 · Défense brute +4,87 · Vitesse d’attaque +3 % |
-| 4 | Attaque brute +3 · Défense brute +5,25 · Vitesse d’attaque +3 % |
-| 5 | Attaque brute +3,12 · Défense brute +5,62 · Vitesse d’attaque +3 % |
-| 6 | Attaque brute +3,25 · Défense brute +6 · Vitesse d’attaque +3 % |
-| 7 | Attaque brute +3,37 · Défense brute +6,37 · Vitesse d’attaque +3 % |
-| 8 | Attaque brute +3,5 · Défense brute +6,75 · Vitesse d’attaque +3 % |
-| 9 | Attaque brute +3,62 · Défense brute +7,12 · Vitesse d’attaque +3 % |
-| 10 | Attaque brute +3,75 · Défense brute +7,5 · Vitesse d’attaque +3 % |
-| 11 | Attaque brute +3,87 · Défense brute +7,87 · Vitesse d’attaque +3 % |
-| 12 | Attaque brute +4 · Défense brute +8,25 · Vitesse d’attaque +3 % |
-| 13 | Attaque brute +4,12 · Défense brute +8,62 · Vitesse d’attaque +3 % |
-| 14 | Attaque brute +4,25 · Défense brute +9 · Vitesse d’attaque +3 % |
-| 15 | Attaque brute +4,37 · Défense brute +9,37 · Vitesse d’attaque +3 % |
-| 16 | Attaque brute +4,5 · Défense brute +9,75 · Vitesse d’attaque +3 % |
-| 17 | Attaque brute +4,62 · Défense brute +10,12 · Vitesse d’attaque +3 % |
-| 18 | Attaque brute +4,75 · Défense brute +10,5 · Vitesse d’attaque +3 % |
-| 19 | Attaque brute +4,87 · Défense brute +10,87 · Vitesse d’attaque +3 % |
-| 20 | Attaque brute +5 · Défense brute +11,25 · Vitesse d’attaque +3 % |
+| 0 | Attaque brute +260 · Défense brute +400 · Vitesse d’attaque +3 % |
+| 1 | Attaque brute +280 · Défense brute +430 · Vitesse d’attaque +3 % |
+| 2 | Attaque brute +300 · Défense brute +460 · Vitesse d’attaque +3 % |
+| 3 | Attaque brute +320 · Défense brute +500 · Vitesse d’attaque +3 % |
+| 4 | Attaque brute +340 · Défense brute +540 · Vitesse d’attaque +3 % |
+| 5 | Attaque brute +360 · Défense brute +580 · Vitesse d’attaque +3 % |
+| 6 | Attaque brute +380 · Défense brute +630 · Vitesse d’attaque +3 % |
+| 7 | Attaque brute +400 · Défense brute +680 · Vitesse d’attaque +3 % |
+| 8 | Attaque brute +420 · Défense brute +730 · Vitesse d’attaque +3 % |
+| 9 | Attaque brute +450 · Défense brute +790 · Vitesse d’attaque +3 % |
+| 10 | Attaque brute +480 · Défense brute +850 · Vitesse d’attaque +3 % |
+| 11 | Attaque brute +510 · Défense brute +920 · Vitesse d’attaque +3 % |
+| 12 | Attaque brute +540 · Défense brute +990 · Vitesse d’attaque +3 % |
+| 13 | Attaque brute +570 · Défense brute +1070 · Vitesse d’attaque +3 % |
+| 14 | Attaque brute +600 · Défense brute +1160 · Vitesse d’attaque +3 % |
+| 15 | Attaque brute +640 · Défense brute +1250 · Vitesse d’attaque +3 % |
+| 16 | Attaque brute +680 · Défense brute +1350 · Vitesse d’attaque +3 % |
+| 17 | Attaque brute +720 · Défense brute +1460 · Vitesse d’attaque +3 % |
+| 18 | Attaque brute +760 · Défense brute +1580 · Vitesse d’attaque +3 % |
+| 19 | Attaque brute +810 · Défense brute +1710 · Vitesse d’attaque +3 % |
+| 20 | Attaque brute +860 · Défense brute +1850 · Vitesse d’attaque +3 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1110,27 +1109,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · Butin +5 % · Attaque +5 % |
-| 1 | Attaque brute +2,62 · Butin +5 % · Attaque +5,5 % |
-| 2 | Attaque brute +2,75 · Butin +5 % · Attaque +6 % |
-| 3 | Attaque brute +2,87 · Butin +5 % · Attaque +6,5 % |
-| 4 | Attaque brute +3 · Butin +5 % · Attaque +7 % |
-| 5 | Attaque brute +3,12 · Butin +5 % · Attaque +7,5 % |
-| 6 | Attaque brute +3,25 · Butin +5 % · Attaque +8 % |
-| 7 | Attaque brute +3,37 · Butin +5 % · Attaque +8,5 % |
-| 8 | Attaque brute +3,5 · Butin +5 % · Attaque +9 % |
-| 9 | Attaque brute +3,62 · Butin +5 % · Attaque +9,5 % |
-| 10 | Attaque brute +3,75 · Butin +5 % · Attaque +10 % |
-| 11 | Attaque brute +3,87 · Butin +5 % · Attaque +10,5 % |
-| 12 | Attaque brute +4 · Butin +5 % · Attaque +11 % |
-| 13 | Attaque brute +4,12 · Butin +5 % · Attaque +11,5 % |
-| 14 | Attaque brute +4,25 · Butin +5 % · Attaque +12 % |
-| 15 | Attaque brute +4,37 · Butin +5 % · Attaque +12,5 % |
-| 16 | Attaque brute +4,5 · Butin +5 % · Attaque +13 % |
-| 17 | Attaque brute +4,62 · Butin +5 % · Attaque +13,5 % |
-| 18 | Attaque brute +4,75 · Butin +5 % · Attaque +14 % |
-| 19 | Attaque brute +4,87 · Butin +5 % · Attaque +14,5 % |
-| 20 | Attaque brute +5 · Butin +5 % · Attaque +15 % |
+| 0 | Attaque brute +260 · Butin +5 % · Attaque +5 % |
+| 1 | Attaque brute +280 · Butin +5 % · Attaque +6,05 % |
+| 2 | Attaque brute +300 · Butin +5 % · Attaque +7,11 % |
+| 3 | Attaque brute +320 · Butin +5 % · Attaque +8,18 % |
+| 4 | Attaque brute +340 · Butin +5 % · Attaque +9,26 % |
+| 5 | Attaque brute +360 · Butin +5 % · Attaque +10,36 % |
+| 6 | Attaque brute +380 · Butin +5 % · Attaque +11,46 % |
+| 7 | Attaque brute +400 · Butin +5 % · Attaque +12,57 % |
+| 8 | Attaque brute +420 · Butin +5 % · Attaque +13,7 % |
+| 9 | Attaque brute +450 · Butin +5 % · Attaque +14,84 % |
+| 10 | Attaque brute +480 · Butin +5 % · Attaque +15,99 % |
+| 11 | Attaque brute +510 · Butin +5 % · Attaque +17,15 % |
+| 12 | Attaque brute +540 · Butin +5 % · Attaque +18,32 % |
+| 13 | Attaque brute +570 · Butin +5 % · Attaque +19,5 % |
+| 14 | Attaque brute +600 · Butin +5 % · Attaque +20,69 % |
+| 15 | Attaque brute +640 · Butin +5 % · Attaque +21,9 % |
+| 16 | Attaque brute +680 · Butin +5 % · Attaque +23,12 % |
+| 17 | Attaque brute +720 · Butin +5 % · Attaque +24,35 % |
+| 18 | Attaque brute +760 · Butin +5 % · Attaque +25,6 % |
+| 19 | Attaque brute +810 · Butin +5 % · Attaque +26,85 % |
+| 20 | Attaque brute +860 · Butin +5 % · Attaque +28,12 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1142,27 +1141,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · PV bruts +15 · Dégâts critiques +5 % |
-| 1 | Attaque brute +2,62 · PV bruts +18 · Dégâts critiques +5 % |
-| 2 | Attaque brute +2,75 · PV bruts +21 · Dégâts critiques +5 % |
-| 3 | Attaque brute +2,87 · PV bruts +24 · Dégâts critiques +5 % |
-| 4 | Attaque brute +3 · PV bruts +27 · Dégâts critiques +5 % |
-| 5 | Attaque brute +3,12 · PV bruts +31 · Dégâts critiques +5 % |
-| 6 | Attaque brute +3,25 · PV bruts +34 · Dégâts critiques +5 % |
-| 7 | Attaque brute +3,37 · PV bruts +37 · Dégâts critiques +5 % |
-| 8 | Attaque brute +3,5 · PV bruts +40 · Dégâts critiques +5 % |
-| 9 | Attaque brute +3,62 · PV bruts +43 · Dégâts critiques +5 % |
-| 10 | Attaque brute +3,75 · PV bruts +46 · Dégâts critiques +5 % |
-| 11 | Attaque brute +3,87 · PV bruts +49 · Dégâts critiques +5 % |
-| 12 | Attaque brute +4 · PV bruts +52 · Dégâts critiques +5 % |
-| 13 | Attaque brute +4,12 · PV bruts +56 · Dégâts critiques +5 % |
-| 14 | Attaque brute +4,25 · PV bruts +59 · Dégâts critiques +5 % |
-| 15 | Attaque brute +4,37 · PV bruts +62 · Dégâts critiques +5 % |
-| 16 | Attaque brute +4,5 · PV bruts +65 · Dégâts critiques +5 % |
-| 17 | Attaque brute +4,62 · PV bruts +68 · Dégâts critiques +5 % |
-| 18 | Attaque brute +4,75 · PV bruts +71 · Dégâts critiques +5 % |
-| 19 | Attaque brute +4,87 · PV bruts +74 · Dégâts critiques +5 % |
-| 20 | Attaque brute +5 · PV bruts +77 · Dégâts critiques +5 % |
+| 0 | Attaque brute +260 · PV bruts +1590 · Dégâts critiques +5 % |
+| 1 | Attaque brute +280 · PV bruts +1720 · Dégâts critiques +5 % |
+| 2 | Attaque brute +300 · PV bruts +1860 · Dégâts critiques +5 % |
+| 3 | Attaque brute +320 · PV bruts +2010 · Dégâts critiques +5 % |
+| 4 | Attaque brute +340 · PV bruts +2170 · Dégâts critiques +5 % |
+| 5 | Attaque brute +360 · PV bruts +2340 · Dégâts critiques +5 % |
+| 6 | Attaque brute +380 · PV bruts +2530 · Dégâts critiques +5 % |
+| 7 | Attaque brute +400 · PV bruts +2730 · Dégâts critiques +5 % |
+| 8 | Attaque brute +420 · PV bruts +2950 · Dégâts critiques +5 % |
+| 9 | Attaque brute +450 · PV bruts +3190 · Dégâts critiques +5 % |
+| 10 | Attaque brute +480 · PV bruts +3450 · Dégâts critiques +5 % |
+| 11 | Attaque brute +510 · PV bruts +3730 · Dégâts critiques +5 % |
+| 12 | Attaque brute +540 · PV bruts +4030 · Dégâts critiques +5 % |
+| 13 | Attaque brute +570 · PV bruts +4350 · Dégâts critiques +5 % |
+| 14 | Attaque brute +600 · PV bruts +4700 · Dégâts critiques +5 % |
+| 15 | Attaque brute +640 · PV bruts +5080 · Dégâts critiques +5 % |
+| 16 | Attaque brute +680 · PV bruts +5490 · Dégâts critiques +5 % |
+| 17 | Attaque brute +720 · PV bruts +5930 · Dégâts critiques +5 % |
+| 18 | Attaque brute +760 · PV bruts +6400 · Dégâts critiques +5 % |
+| 19 | Attaque brute +810 · PV bruts +6910 · Dégâts critiques +5 % |
+| 20 | Attaque brute +860 · PV bruts +7460 · Dégâts critiques +5 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1174,27 +1173,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · Défense brute +3,75 · Vitesse +3 % |
-| 1 | Attaque brute +2,62 · Défense brute +4,12 · Vitesse +3 % |
-| 2 | Attaque brute +2,75 · Défense brute +4,5 · Vitesse +3 % |
-| 3 | Attaque brute +2,87 · Défense brute +4,87 · Vitesse +3 % |
-| 4 | Attaque brute +3 · Défense brute +5,25 · Vitesse +3 % |
-| 5 | Attaque brute +3,12 · Défense brute +5,62 · Vitesse +3 % |
-| 6 | Attaque brute +3,25 · Défense brute +6 · Vitesse +3 % |
-| 7 | Attaque brute +3,37 · Défense brute +6,37 · Vitesse +3 % |
-| 8 | Attaque brute +3,5 · Défense brute +6,75 · Vitesse +3 % |
-| 9 | Attaque brute +3,62 · Défense brute +7,12 · Vitesse +3 % |
-| 10 | Attaque brute +3,75 · Défense brute +7,5 · Vitesse +3 % |
-| 11 | Attaque brute +3,87 · Défense brute +7,87 · Vitesse +3 % |
-| 12 | Attaque brute +4 · Défense brute +8,25 · Vitesse +3 % |
-| 13 | Attaque brute +4,12 · Défense brute +8,62 · Vitesse +3 % |
-| 14 | Attaque brute +4,25 · Défense brute +9 · Vitesse +3 % |
-| 15 | Attaque brute +4,37 · Défense brute +9,37 · Vitesse +3 % |
-| 16 | Attaque brute +4,5 · Défense brute +9,75 · Vitesse +3 % |
-| 17 | Attaque brute +4,62 · Défense brute +10,12 · Vitesse +3 % |
-| 18 | Attaque brute +4,75 · Défense brute +10,5 · Vitesse +3 % |
-| 19 | Attaque brute +4,87 · Défense brute +10,87 · Vitesse +3 % |
-| 20 | Attaque brute +5 · Défense brute +11,25 · Vitesse +3 % |
+| 0 | Attaque brute +260 · Défense brute +400 · Vitesse +3 % |
+| 1 | Attaque brute +280 · Défense brute +430 · Vitesse +3 % |
+| 2 | Attaque brute +300 · Défense brute +460 · Vitesse +3 % |
+| 3 | Attaque brute +320 · Défense brute +500 · Vitesse +3 % |
+| 4 | Attaque brute +340 · Défense brute +540 · Vitesse +3 % |
+| 5 | Attaque brute +360 · Défense brute +580 · Vitesse +3 % |
+| 6 | Attaque brute +380 · Défense brute +630 · Vitesse +3 % |
+| 7 | Attaque brute +400 · Défense brute +680 · Vitesse +3 % |
+| 8 | Attaque brute +420 · Défense brute +730 · Vitesse +3 % |
+| 9 | Attaque brute +450 · Défense brute +790 · Vitesse +3 % |
+| 10 | Attaque brute +480 · Défense brute +850 · Vitesse +3 % |
+| 11 | Attaque brute +510 · Défense brute +920 · Vitesse +3 % |
+| 12 | Attaque brute +540 · Défense brute +990 · Vitesse +3 % |
+| 13 | Attaque brute +570 · Défense brute +1070 · Vitesse +3 % |
+| 14 | Attaque brute +600 · Défense brute +1160 · Vitesse +3 % |
+| 15 | Attaque brute +640 · Défense brute +1250 · Vitesse +3 % |
+| 16 | Attaque brute +680 · Défense brute +1350 · Vitesse +3 % |
+| 17 | Attaque brute +720 · Défense brute +1460 · Vitesse +3 % |
+| 18 | Attaque brute +760 · Défense brute +1580 · Vitesse +3 % |
+| 19 | Attaque brute +810 · Défense brute +1710 · Vitesse +3 % |
+| 20 | Attaque brute +860 · Défense brute +1850 · Vitesse +3 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1206,27 +1205,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · Chance critique +2 % · Attaque +5 % |
-| 1 | Attaque brute +2,62 · Chance critique +2 % · Attaque +5,5 % |
-| 2 | Attaque brute +2,75 · Chance critique +2 % · Attaque +6 % |
-| 3 | Attaque brute +2,87 · Chance critique +2 % · Attaque +6,5 % |
-| 4 | Attaque brute +3 · Chance critique +2 % · Attaque +7 % |
-| 5 | Attaque brute +3,12 · Chance critique +2 % · Attaque +7,5 % |
-| 6 | Attaque brute +3,25 · Chance critique +2 % · Attaque +8 % |
-| 7 | Attaque brute +3,37 · Chance critique +2 % · Attaque +8,5 % |
-| 8 | Attaque brute +3,5 · Chance critique +2 % · Attaque +9 % |
-| 9 | Attaque brute +3,62 · Chance critique +2 % · Attaque +9,5 % |
-| 10 | Attaque brute +3,75 · Chance critique +2 % · Attaque +10 % |
-| 11 | Attaque brute +3,87 · Chance critique +2 % · Attaque +10,5 % |
-| 12 | Attaque brute +4 · Chance critique +2 % · Attaque +11 % |
-| 13 | Attaque brute +4,12 · Chance critique +2 % · Attaque +11,5 % |
-| 14 | Attaque brute +4,25 · Chance critique +2 % · Attaque +12 % |
-| 15 | Attaque brute +4,37 · Chance critique +2 % · Attaque +12,5 % |
-| 16 | Attaque brute +4,5 · Chance critique +2 % · Attaque +13 % |
-| 17 | Attaque brute +4,62 · Chance critique +2 % · Attaque +13,5 % |
-| 18 | Attaque brute +4,75 · Chance critique +2 % · Attaque +14 % |
-| 19 | Attaque brute +4,87 · Chance critique +2 % · Attaque +14,5 % |
-| 20 | Attaque brute +5 · Chance critique +2 % · Attaque +15 % |
+| 0 | Attaque brute +260 · Chance critique +2 % · Attaque +5 % |
+| 1 | Attaque brute +280 · Chance critique +2 % · Attaque +6,05 % |
+| 2 | Attaque brute +300 · Chance critique +2 % · Attaque +7,11 % |
+| 3 | Attaque brute +320 · Chance critique +2 % · Attaque +8,18 % |
+| 4 | Attaque brute +340 · Chance critique +2 % · Attaque +9,26 % |
+| 5 | Attaque brute +360 · Chance critique +2 % · Attaque +10,36 % |
+| 6 | Attaque brute +380 · Chance critique +2 % · Attaque +11,46 % |
+| 7 | Attaque brute +400 · Chance critique +2 % · Attaque +12,57 % |
+| 8 | Attaque brute +420 · Chance critique +2 % · Attaque +13,7 % |
+| 9 | Attaque brute +450 · Chance critique +2 % · Attaque +14,84 % |
+| 10 | Attaque brute +480 · Chance critique +2 % · Attaque +15,99 % |
+| 11 | Attaque brute +510 · Chance critique +2 % · Attaque +17,15 % |
+| 12 | Attaque brute +540 · Chance critique +2 % · Attaque +18,32 % |
+| 13 | Attaque brute +570 · Chance critique +2 % · Attaque +19,5 % |
+| 14 | Attaque brute +600 · Chance critique +2 % · Attaque +20,69 % |
+| 15 | Attaque brute +640 · Chance critique +2 % · Attaque +21,9 % |
+| 16 | Attaque brute +680 · Chance critique +2 % · Attaque +23,12 % |
+| 17 | Attaque brute +720 · Chance critique +2 % · Attaque +24,35 % |
+| 18 | Attaque brute +760 · Chance critique +2 % · Attaque +25,6 % |
+| 19 | Attaque brute +810 · Chance critique +2 % · Attaque +26,85 % |
+| 20 | Attaque brute +860 · Chance critique +2 % · Attaque +28,12 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1238,27 +1237,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · PV bruts +21 |
-| 1 | Attaque brute +2,62 · PV bruts +24 |
-| 2 | Attaque brute +2,75 · PV bruts +27 |
-| 3 | Attaque brute +2,87 · PV bruts +31 |
-| 4 | Attaque brute +3 · PV bruts +34 |
-| 5 | Attaque brute +3,12 · PV bruts +37 |
-| 6 | Attaque brute +3,25 · PV bruts +40 |
-| 7 | Attaque brute +3,37 · PV bruts +43 |
-| 8 | Attaque brute +3,5 · PV bruts +46 |
-| 9 | Attaque brute +3,62 · PV bruts +49 |
-| 10 | Attaque brute +3,75 · PV bruts +52 |
-| 11 | Attaque brute +3,87 · PV bruts +56 |
-| 12 | Attaque brute +4 · PV bruts +59 |
-| 13 | Attaque brute +4,12 · PV bruts +62 |
-| 14 | Attaque brute +4,25 · PV bruts +65 |
-| 15 | Attaque brute +4,37 · PV bruts +68 |
-| 16 | Attaque brute +4,5 · PV bruts +71 |
-| 17 | Attaque brute +4,62 · PV bruts +74 |
-| 18 | Attaque brute +4,75 · PV bruts +77 |
-| 19 | Attaque brute +4,87 · PV bruts +81 |
-| 20 | Attaque brute +5 · PV bruts +84 |
+| 0 | Attaque brute +260 · PV bruts +2250 |
+| 1 | Attaque brute +280 · PV bruts +2430 |
+| 2 | Attaque brute +300 · PV bruts +2620 |
+| 3 | Attaque brute +320 · PV bruts +2830 |
+| 4 | Attaque brute +340 · PV bruts +3060 |
+| 5 | Attaque brute +360 · PV bruts +3300 |
+| 6 | Attaque brute +380 · PV bruts +3560 |
+| 7 | Attaque brute +400 · PV bruts +3840 |
+| 8 | Attaque brute +420 · PV bruts +4150 |
+| 9 | Attaque brute +450 · PV bruts +4480 |
+| 10 | Attaque brute +480 · PV bruts +4840 |
+| 11 | Attaque brute +510 · PV bruts +5230 |
+| 12 | Attaque brute +540 · PV bruts +5650 |
+| 13 | Attaque brute +570 · PV bruts +6100 |
+| 14 | Attaque brute +600 · PV bruts +6590 |
+| 15 | Attaque brute +640 · PV bruts +7120 |
+| 16 | Attaque brute +680 · PV bruts +7690 |
+| 17 | Attaque brute +720 · PV bruts +8310 |
+| 18 | Attaque brute +760 · PV bruts +8970 |
+| 19 | Attaque brute +810 · PV bruts +9690 |
+| 20 | Attaque brute +860 · PV bruts +10470 |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1270,27 +1269,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · Défense brute +3,75 · Attaque +3 % |
-| 1 | Attaque brute +2,62 · Défense brute +4,12 · Attaque +3 % |
-| 2 | Attaque brute +2,75 · Défense brute +4,5 · Attaque +3 % |
-| 3 | Attaque brute +2,87 · Défense brute +4,87 · Attaque +3 % |
-| 4 | Attaque brute +3 · Défense brute +5,25 · Attaque +3 % |
-| 5 | Attaque brute +3,12 · Défense brute +5,62 · Attaque +3 % |
-| 6 | Attaque brute +3,25 · Défense brute +6 · Attaque +3 % |
-| 7 | Attaque brute +3,37 · Défense brute +6,37 · Attaque +3 % |
-| 8 | Attaque brute +3,5 · Défense brute +6,75 · Attaque +3 % |
-| 9 | Attaque brute +3,62 · Défense brute +7,12 · Attaque +3 % |
-| 10 | Attaque brute +3,75 · Défense brute +7,5 · Attaque +3 % |
-| 11 | Attaque brute +3,87 · Défense brute +7,87 · Attaque +3 % |
-| 12 | Attaque brute +4 · Défense brute +8,25 · Attaque +3 % |
-| 13 | Attaque brute +4,12 · Défense brute +8,62 · Attaque +3 % |
-| 14 | Attaque brute +4,25 · Défense brute +9 · Attaque +3 % |
-| 15 | Attaque brute +4,37 · Défense brute +9,37 · Attaque +3 % |
-| 16 | Attaque brute +4,5 · Défense brute +9,75 · Attaque +3 % |
-| 17 | Attaque brute +4,62 · Défense brute +10,12 · Attaque +3 % |
-| 18 | Attaque brute +4,75 · Défense brute +10,5 · Attaque +3 % |
-| 19 | Attaque brute +4,87 · Défense brute +10,87 · Attaque +3 % |
-| 20 | Attaque brute +5 · Défense brute +11,25 · Attaque +3 % |
+| 0 | Attaque brute +260 · Défense brute +400 · Attaque +3 % |
+| 1 | Attaque brute +280 · Défense brute +430 · Attaque +3 % |
+| 2 | Attaque brute +300 · Défense brute +460 · Attaque +3 % |
+| 3 | Attaque brute +320 · Défense brute +500 · Attaque +3 % |
+| 4 | Attaque brute +340 · Défense brute +540 · Attaque +3 % |
+| 5 | Attaque brute +360 · Défense brute +580 · Attaque +3 % |
+| 6 | Attaque brute +380 · Défense brute +630 · Attaque +3 % |
+| 7 | Attaque brute +400 · Défense brute +680 · Attaque +3 % |
+| 8 | Attaque brute +420 · Défense brute +730 · Attaque +3 % |
+| 9 | Attaque brute +450 · Défense brute +790 · Attaque +3 % |
+| 10 | Attaque brute +480 · Défense brute +850 · Attaque +3 % |
+| 11 | Attaque brute +510 · Défense brute +920 · Attaque +3 % |
+| 12 | Attaque brute +540 · Défense brute +990 · Attaque +3 % |
+| 13 | Attaque brute +570 · Défense brute +1070 · Attaque +3 % |
+| 14 | Attaque brute +600 · Défense brute +1160 · Attaque +3 % |
+| 15 | Attaque brute +640 · Défense brute +1250 · Attaque +3 % |
+| 16 | Attaque brute +680 · Défense brute +1350 · Attaque +3 % |
+| 17 | Attaque brute +720 · Défense brute +1460 · Attaque +3 % |
+| 18 | Attaque brute +760 · Défense brute +1580 · Attaque +3 % |
+| 19 | Attaque brute +810 · Défense brute +1710 · Attaque +3 % |
+| 20 | Attaque brute +860 · Défense brute +1850 · Attaque +3 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1302,27 +1301,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · Soins reçus +4 % · Attaque +5 % |
-| 1 | Attaque brute +2,62 · Soins reçus +4 % · Attaque +5,5 % |
-| 2 | Attaque brute +2,75 · Soins reçus +4 % · Attaque +6 % |
-| 3 | Attaque brute +2,87 · Soins reçus +4 % · Attaque +6,5 % |
-| 4 | Attaque brute +3 · Soins reçus +4 % · Attaque +7 % |
-| 5 | Attaque brute +3,12 · Soins reçus +4 % · Attaque +7,5 % |
-| 6 | Attaque brute +3,25 · Soins reçus +4 % · Attaque +8 % |
-| 7 | Attaque brute +3,37 · Soins reçus +4 % · Attaque +8,5 % |
-| 8 | Attaque brute +3,5 · Soins reçus +4 % · Attaque +9 % |
-| 9 | Attaque brute +3,62 · Soins reçus +4 % · Attaque +9,5 % |
-| 10 | Attaque brute +3,75 · Soins reçus +4 % · Attaque +10 % |
-| 11 | Attaque brute +3,87 · Soins reçus +4 % · Attaque +10,5 % |
-| 12 | Attaque brute +4 · Soins reçus +4 % · Attaque +11 % |
-| 13 | Attaque brute +4,12 · Soins reçus +4 % · Attaque +11,5 % |
-| 14 | Attaque brute +4,25 · Soins reçus +4 % · Attaque +12 % |
-| 15 | Attaque brute +4,37 · Soins reçus +4 % · Attaque +12,5 % |
-| 16 | Attaque brute +4,5 · Soins reçus +4 % · Attaque +13 % |
-| 17 | Attaque brute +4,62 · Soins reçus +4 % · Attaque +13,5 % |
-| 18 | Attaque brute +4,75 · Soins reçus +4 % · Attaque +14 % |
-| 19 | Attaque brute +4,87 · Soins reçus +4 % · Attaque +14,5 % |
-| 20 | Attaque brute +5 · Soins reçus +4 % · Attaque +15 % |
+| 0 | Attaque brute +260 · Soins reçus +4 % · Attaque +5 % |
+| 1 | Attaque brute +280 · Soins reçus +4 % · Attaque +6,05 % |
+| 2 | Attaque brute +300 · Soins reçus +4 % · Attaque +7,11 % |
+| 3 | Attaque brute +320 · Soins reçus +4 % · Attaque +8,18 % |
+| 4 | Attaque brute +340 · Soins reçus +4 % · Attaque +9,26 % |
+| 5 | Attaque brute +360 · Soins reçus +4 % · Attaque +10,36 % |
+| 6 | Attaque brute +380 · Soins reçus +4 % · Attaque +11,46 % |
+| 7 | Attaque brute +400 · Soins reçus +4 % · Attaque +12,57 % |
+| 8 | Attaque brute +420 · Soins reçus +4 % · Attaque +13,7 % |
+| 9 | Attaque brute +450 · Soins reçus +4 % · Attaque +14,84 % |
+| 10 | Attaque brute +480 · Soins reçus +4 % · Attaque +15,99 % |
+| 11 | Attaque brute +510 · Soins reçus +4 % · Attaque +17,15 % |
+| 12 | Attaque brute +540 · Soins reçus +4 % · Attaque +18,32 % |
+| 13 | Attaque brute +570 · Soins reçus +4 % · Attaque +19,5 % |
+| 14 | Attaque brute +600 · Soins reçus +4 % · Attaque +20,69 % |
+| 15 | Attaque brute +640 · Soins reçus +4 % · Attaque +21,9 % |
+| 16 | Attaque brute +680 · Soins reçus +4 % · Attaque +23,12 % |
+| 17 | Attaque brute +720 · Soins reçus +4 % · Attaque +24,35 % |
+| 18 | Attaque brute +760 · Soins reçus +4 % · Attaque +25,6 % |
+| 19 | Attaque brute +810 · Soins reçus +4 % · Attaque +26,85 % |
+| 20 | Attaque brute +860 · Soins reçus +4 % · Attaque +28,12 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1334,27 +1333,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · PV bruts +15 · Vitesse +3 % |
-| 1 | Attaque brute +2,62 · PV bruts +18 · Vitesse +3 % |
-| 2 | Attaque brute +2,75 · PV bruts +21 · Vitesse +3 % |
-| 3 | Attaque brute +2,87 · PV bruts +24 · Vitesse +3 % |
-| 4 | Attaque brute +3 · PV bruts +27 · Vitesse +3 % |
-| 5 | Attaque brute +3,12 · PV bruts +31 · Vitesse +3 % |
-| 6 | Attaque brute +3,25 · PV bruts +34 · Vitesse +3 % |
-| 7 | Attaque brute +3,37 · PV bruts +37 · Vitesse +3 % |
-| 8 | Attaque brute +3,5 · PV bruts +40 · Vitesse +3 % |
-| 9 | Attaque brute +3,62 · PV bruts +43 · Vitesse +3 % |
-| 10 | Attaque brute +3,75 · PV bruts +46 · Vitesse +3 % |
-| 11 | Attaque brute +3,87 · PV bruts +49 · Vitesse +3 % |
-| 12 | Attaque brute +4 · PV bruts +52 · Vitesse +3 % |
-| 13 | Attaque brute +4,12 · PV bruts +56 · Vitesse +3 % |
-| 14 | Attaque brute +4,25 · PV bruts +59 · Vitesse +3 % |
-| 15 | Attaque brute +4,37 · PV bruts +62 · Vitesse +3 % |
-| 16 | Attaque brute +4,5 · PV bruts +65 · Vitesse +3 % |
-| 17 | Attaque brute +4,62 · PV bruts +68 · Vitesse +3 % |
-| 18 | Attaque brute +4,75 · PV bruts +71 · Vitesse +3 % |
-| 19 | Attaque brute +4,87 · PV bruts +74 · Vitesse +3 % |
-| 20 | Attaque brute +5 · PV bruts +77 · Vitesse +3 % |
+| 0 | Attaque brute +260 · PV bruts +1590 · Vitesse +3 % |
+| 1 | Attaque brute +280 · PV bruts +1720 · Vitesse +3 % |
+| 2 | Attaque brute +300 · PV bruts +1860 · Vitesse +3 % |
+| 3 | Attaque brute +320 · PV bruts +2010 · Vitesse +3 % |
+| 4 | Attaque brute +340 · PV bruts +2170 · Vitesse +3 % |
+| 5 | Attaque brute +360 · PV bruts +2340 · Vitesse +3 % |
+| 6 | Attaque brute +380 · PV bruts +2530 · Vitesse +3 % |
+| 7 | Attaque brute +400 · PV bruts +2730 · Vitesse +3 % |
+| 8 | Attaque brute +420 · PV bruts +2950 · Vitesse +3 % |
+| 9 | Attaque brute +450 · PV bruts +3190 · Vitesse +3 % |
+| 10 | Attaque brute +480 · PV bruts +3450 · Vitesse +3 % |
+| 11 | Attaque brute +510 · PV bruts +3730 · Vitesse +3 % |
+| 12 | Attaque brute +540 · PV bruts +4030 · Vitesse +3 % |
+| 13 | Attaque brute +570 · PV bruts +4350 · Vitesse +3 % |
+| 14 | Attaque brute +600 · PV bruts +4700 · Vitesse +3 % |
+| 15 | Attaque brute +640 · PV bruts +5080 · Vitesse +3 % |
+| 16 | Attaque brute +680 · PV bruts +5490 · Vitesse +3 % |
+| 17 | Attaque brute +720 · PV bruts +5930 · Vitesse +3 % |
+| 18 | Attaque brute +760 · PV bruts +6400 · Vitesse +3 % |
+| 19 | Attaque brute +810 · PV bruts +6910 · Vitesse +3 % |
+| 20 | Attaque brute +860 · PV bruts +7460 · Vitesse +3 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1366,27 +1365,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · Défense brute +3,75 · Chance critique +2 % |
-| 1 | Attaque brute +2,62 · Défense brute +4,12 · Chance critique +2 % |
-| 2 | Attaque brute +2,75 · Défense brute +4,5 · Chance critique +2 % |
-| 3 | Attaque brute +2,87 · Défense brute +4,87 · Chance critique +2 % |
-| 4 | Attaque brute +3 · Défense brute +5,25 · Chance critique +2 % |
-| 5 | Attaque brute +3,12 · Défense brute +5,62 · Chance critique +2 % |
-| 6 | Attaque brute +3,25 · Défense brute +6 · Chance critique +2 % |
-| 7 | Attaque brute +3,37 · Défense brute +6,37 · Chance critique +2 % |
-| 8 | Attaque brute +3,5 · Défense brute +6,75 · Chance critique +2 % |
-| 9 | Attaque brute +3,62 · Défense brute +7,12 · Chance critique +2 % |
-| 10 | Attaque brute +3,75 · Défense brute +7,5 · Chance critique +2 % |
-| 11 | Attaque brute +3,87 · Défense brute +7,87 · Chance critique +2 % |
-| 12 | Attaque brute +4 · Défense brute +8,25 · Chance critique +2 % |
-| 13 | Attaque brute +4,12 · Défense brute +8,62 · Chance critique +2 % |
-| 14 | Attaque brute +4,25 · Défense brute +9 · Chance critique +2 % |
-| 15 | Attaque brute +4,37 · Défense brute +9,37 · Chance critique +2 % |
-| 16 | Attaque brute +4,5 · Défense brute +9,75 · Chance critique +2 % |
-| 17 | Attaque brute +4,62 · Défense brute +10,12 · Chance critique +2 % |
-| 18 | Attaque brute +4,75 · Défense brute +10,5 · Chance critique +2 % |
-| 19 | Attaque brute +4,87 · Défense brute +10,87 · Chance critique +2 % |
-| 20 | Attaque brute +5 · Défense brute +11,25 · Chance critique +2 % |
+| 0 | Attaque brute +260 · Défense brute +400 · Chance critique +2 % |
+| 1 | Attaque brute +280 · Défense brute +430 · Chance critique +2 % |
+| 2 | Attaque brute +300 · Défense brute +460 · Chance critique +2 % |
+| 3 | Attaque brute +320 · Défense brute +500 · Chance critique +2 % |
+| 4 | Attaque brute +340 · Défense brute +540 · Chance critique +2 % |
+| 5 | Attaque brute +360 · Défense brute +580 · Chance critique +2 % |
+| 6 | Attaque brute +380 · Défense brute +630 · Chance critique +2 % |
+| 7 | Attaque brute +400 · Défense brute +680 · Chance critique +2 % |
+| 8 | Attaque brute +420 · Défense brute +730 · Chance critique +2 % |
+| 9 | Attaque brute +450 · Défense brute +790 · Chance critique +2 % |
+| 10 | Attaque brute +480 · Défense brute +850 · Chance critique +2 % |
+| 11 | Attaque brute +510 · Défense brute +920 · Chance critique +2 % |
+| 12 | Attaque brute +540 · Défense brute +990 · Chance critique +2 % |
+| 13 | Attaque brute +570 · Défense brute +1070 · Chance critique +2 % |
+| 14 | Attaque brute +600 · Défense brute +1160 · Chance critique +2 % |
+| 15 | Attaque brute +640 · Défense brute +1250 · Chance critique +2 % |
+| 16 | Attaque brute +680 · Défense brute +1350 · Chance critique +2 % |
+| 17 | Attaque brute +720 · Défense brute +1460 · Chance critique +2 % |
+| 18 | Attaque brute +760 · Défense brute +1580 · Chance critique +2 % |
+| 19 | Attaque brute +810 · Défense brute +1710 · Chance critique +2 % |
+| 20 | Attaque brute +860 · Défense brute +1850 · Chance critique +2 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1398,27 +1397,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · Butin +5 % · Attaque +5 % |
-| 1 | Attaque brute +2,62 · Butin +5 % · Attaque +5,5 % |
-| 2 | Attaque brute +2,75 · Butin +5 % · Attaque +6 % |
-| 3 | Attaque brute +2,87 · Butin +5 % · Attaque +6,5 % |
-| 4 | Attaque brute +3 · Butin +5 % · Attaque +7 % |
-| 5 | Attaque brute +3,12 · Butin +5 % · Attaque +7,5 % |
-| 6 | Attaque brute +3,25 · Butin +5 % · Attaque +8 % |
-| 7 | Attaque brute +3,37 · Butin +5 % · Attaque +8,5 % |
-| 8 | Attaque brute +3,5 · Butin +5 % · Attaque +9 % |
-| 9 | Attaque brute +3,62 · Butin +5 % · Attaque +9,5 % |
-| 10 | Attaque brute +3,75 · Butin +5 % · Attaque +10 % |
-| 11 | Attaque brute +3,87 · Butin +5 % · Attaque +10,5 % |
-| 12 | Attaque brute +4 · Butin +5 % · Attaque +11 % |
-| 13 | Attaque brute +4,12 · Butin +5 % · Attaque +11,5 % |
-| 14 | Attaque brute +4,25 · Butin +5 % · Attaque +12 % |
-| 15 | Attaque brute +4,37 · Butin +5 % · Attaque +12,5 % |
-| 16 | Attaque brute +4,5 · Butin +5 % · Attaque +13 % |
-| 17 | Attaque brute +4,62 · Butin +5 % · Attaque +13,5 % |
-| 18 | Attaque brute +4,75 · Butin +5 % · Attaque +14 % |
-| 19 | Attaque brute +4,87 · Butin +5 % · Attaque +14,5 % |
-| 20 | Attaque brute +5 · Butin +5 % · Attaque +15 % |
+| 0 | Attaque brute +260 · Butin +5 % · Attaque +5 % |
+| 1 | Attaque brute +280 · Butin +5 % · Attaque +6,05 % |
+| 2 | Attaque brute +300 · Butin +5 % · Attaque +7,11 % |
+| 3 | Attaque brute +320 · Butin +5 % · Attaque +8,18 % |
+| 4 | Attaque brute +340 · Butin +5 % · Attaque +9,26 % |
+| 5 | Attaque brute +360 · Butin +5 % · Attaque +10,36 % |
+| 6 | Attaque brute +380 · Butin +5 % · Attaque +11,46 % |
+| 7 | Attaque brute +400 · Butin +5 % · Attaque +12,57 % |
+| 8 | Attaque brute +420 · Butin +5 % · Attaque +13,7 % |
+| 9 | Attaque brute +450 · Butin +5 % · Attaque +14,84 % |
+| 10 | Attaque brute +480 · Butin +5 % · Attaque +15,99 % |
+| 11 | Attaque brute +510 · Butin +5 % · Attaque +17,15 % |
+| 12 | Attaque brute +540 · Butin +5 % · Attaque +18,32 % |
+| 13 | Attaque brute +570 · Butin +5 % · Attaque +19,5 % |
+| 14 | Attaque brute +600 · Butin +5 % · Attaque +20,69 % |
+| 15 | Attaque brute +640 · Butin +5 % · Attaque +21,9 % |
+| 16 | Attaque brute +680 · Butin +5 % · Attaque +23,12 % |
+| 17 | Attaque brute +720 · Butin +5 % · Attaque +24,35 % |
+| 18 | Attaque brute +760 · Butin +5 % · Attaque +25,6 % |
+| 19 | Attaque brute +810 · Butin +5 % · Attaque +26,85 % |
+| 20 | Attaque brute +860 · Butin +5 % · Attaque +28,12 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1430,27 +1429,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · PV bruts +15 · Vitesse d’attaque +3 % |
-| 1 | Attaque brute +2,62 · PV bruts +18 · Vitesse d’attaque +3 % |
-| 2 | Attaque brute +2,75 · PV bruts +21 · Vitesse d’attaque +3 % |
-| 3 | Attaque brute +2,87 · PV bruts +24 · Vitesse d’attaque +3 % |
-| 4 | Attaque brute +3 · PV bruts +27 · Vitesse d’attaque +3 % |
-| 5 | Attaque brute +3,12 · PV bruts +31 · Vitesse d’attaque +3 % |
-| 6 | Attaque brute +3,25 · PV bruts +34 · Vitesse d’attaque +3 % |
-| 7 | Attaque brute +3,37 · PV bruts +37 · Vitesse d’attaque +3 % |
-| 8 | Attaque brute +3,5 · PV bruts +40 · Vitesse d’attaque +3 % |
-| 9 | Attaque brute +3,62 · PV bruts +43 · Vitesse d’attaque +3 % |
-| 10 | Attaque brute +3,75 · PV bruts +46 · Vitesse d’attaque +3 % |
-| 11 | Attaque brute +3,87 · PV bruts +49 · Vitesse d’attaque +3 % |
-| 12 | Attaque brute +4 · PV bruts +52 · Vitesse d’attaque +3 % |
-| 13 | Attaque brute +4,12 · PV bruts +56 · Vitesse d’attaque +3 % |
-| 14 | Attaque brute +4,25 · PV bruts +59 · Vitesse d’attaque +3 % |
-| 15 | Attaque brute +4,37 · PV bruts +62 · Vitesse d’attaque +3 % |
-| 16 | Attaque brute +4,5 · PV bruts +65 · Vitesse d’attaque +3 % |
-| 17 | Attaque brute +4,62 · PV bruts +68 · Vitesse d’attaque +3 % |
-| 18 | Attaque brute +4,75 · PV bruts +71 · Vitesse d’attaque +3 % |
-| 19 | Attaque brute +4,87 · PV bruts +74 · Vitesse d’attaque +3 % |
-| 20 | Attaque brute +5 · PV bruts +77 · Vitesse d’attaque +3 % |
+| 0 | Attaque brute +260 · PV bruts +1590 · Vitesse d’attaque +3 % |
+| 1 | Attaque brute +280 · PV bruts +1720 · Vitesse d’attaque +3 % |
+| 2 | Attaque brute +300 · PV bruts +1860 · Vitesse d’attaque +3 % |
+| 3 | Attaque brute +320 · PV bruts +2010 · Vitesse d’attaque +3 % |
+| 4 | Attaque brute +340 · PV bruts +2170 · Vitesse d’attaque +3 % |
+| 5 | Attaque brute +360 · PV bruts +2340 · Vitesse d’attaque +3 % |
+| 6 | Attaque brute +380 · PV bruts +2530 · Vitesse d’attaque +3 % |
+| 7 | Attaque brute +400 · PV bruts +2730 · Vitesse d’attaque +3 % |
+| 8 | Attaque brute +420 · PV bruts +2950 · Vitesse d’attaque +3 % |
+| 9 | Attaque brute +450 · PV bruts +3190 · Vitesse d’attaque +3 % |
+| 10 | Attaque brute +480 · PV bruts +3450 · Vitesse d’attaque +3 % |
+| 11 | Attaque brute +510 · PV bruts +3730 · Vitesse d’attaque +3 % |
+| 12 | Attaque brute +540 · PV bruts +4030 · Vitesse d’attaque +3 % |
+| 13 | Attaque brute +570 · PV bruts +4350 · Vitesse d’attaque +3 % |
+| 14 | Attaque brute +600 · PV bruts +4700 · Vitesse d’attaque +3 % |
+| 15 | Attaque brute +640 · PV bruts +5080 · Vitesse d’attaque +3 % |
+| 16 | Attaque brute +680 · PV bruts +5490 · Vitesse d’attaque +3 % |
+| 17 | Attaque brute +720 · PV bruts +5930 · Vitesse d’attaque +3 % |
+| 18 | Attaque brute +760 · PV bruts +6400 · Vitesse d’attaque +3 % |
+| 19 | Attaque brute +810 · PV bruts +6910 · Vitesse d’attaque +3 % |
+| 20 | Attaque brute +860 · PV bruts +7460 · Vitesse d’attaque +3 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1462,27 +1461,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · PV bruts +6 · Défense brute +3,75 |
-| 1 | Attaque brute +2,62 · PV bruts +6 · Défense brute +4,12 |
-| 2 | Attaque brute +2,75 · PV bruts +6 · Défense brute +4,5 |
-| 3 | Attaque brute +2,87 · PV bruts +6 · Défense brute +4,87 |
-| 4 | Attaque brute +3 · PV bruts +6 · Défense brute +5,25 |
-| 5 | Attaque brute +3,12 · PV bruts +6 · Défense brute +5,62 |
-| 6 | Attaque brute +3,25 · PV bruts +6 · Défense brute +6 |
-| 7 | Attaque brute +3,37 · PV bruts +6 · Défense brute +6,37 |
-| 8 | Attaque brute +3,5 · PV bruts +6 · Défense brute +6,75 |
-| 9 | Attaque brute +3,62 · PV bruts +6 · Défense brute +7,12 |
-| 10 | Attaque brute +3,75 · PV bruts +6 · Défense brute +7,5 |
-| 11 | Attaque brute +3,87 · PV bruts +6 · Défense brute +7,87 |
-| 12 | Attaque brute +4 · PV bruts +6 · Défense brute +8,25 |
-| 13 | Attaque brute +4,12 · PV bruts +6 · Défense brute +8,62 |
-| 14 | Attaque brute +4,25 · PV bruts +6 · Défense brute +9 |
-| 15 | Attaque brute +4,37 · PV bruts +6 · Défense brute +9,37 |
-| 16 | Attaque brute +4,5 · PV bruts +6 · Défense brute +9,75 |
-| 17 | Attaque brute +4,62 · PV bruts +6 · Défense brute +10,12 |
-| 18 | Attaque brute +4,75 · PV bruts +6 · Défense brute +10,5 |
-| 19 | Attaque brute +4,87 · PV bruts +6 · Défense brute +10,87 |
-| 20 | Attaque brute +5 · PV bruts +6 · Défense brute +11,25 |
+| 0 | Attaque brute +260 · PV bruts +660 · Défense brute +400 |
+| 1 | Attaque brute +280 · PV bruts +660 · Défense brute +430 |
+| 2 | Attaque brute +300 · PV bruts +660 · Défense brute +460 |
+| 3 | Attaque brute +320 · PV bruts +660 · Défense brute +500 |
+| 4 | Attaque brute +340 · PV bruts +660 · Défense brute +540 |
+| 5 | Attaque brute +360 · PV bruts +660 · Défense brute +580 |
+| 6 | Attaque brute +380 · PV bruts +660 · Défense brute +630 |
+| 7 | Attaque brute +400 · PV bruts +660 · Défense brute +680 |
+| 8 | Attaque brute +420 · PV bruts +660 · Défense brute +730 |
+| 9 | Attaque brute +450 · PV bruts +660 · Défense brute +790 |
+| 10 | Attaque brute +480 · PV bruts +660 · Défense brute +850 |
+| 11 | Attaque brute +510 · PV bruts +660 · Défense brute +920 |
+| 12 | Attaque brute +540 · PV bruts +660 · Défense brute +990 |
+| 13 | Attaque brute +570 · PV bruts +660 · Défense brute +1070 |
+| 14 | Attaque brute +600 · PV bruts +660 · Défense brute +1160 |
+| 15 | Attaque brute +640 · PV bruts +660 · Défense brute +1250 |
+| 16 | Attaque brute +680 · PV bruts +660 · Défense brute +1350 |
+| 17 | Attaque brute +720 · PV bruts +660 · Défense brute +1460 |
+| 18 | Attaque brute +760 · PV bruts +660 · Défense brute +1580 |
+| 19 | Attaque brute +810 · PV bruts +660 · Défense brute +1710 |
+| 20 | Attaque brute +860 · PV bruts +660 · Défense brute +1850 |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |
@@ -1494,27 +1493,27 @@ Projectile : 1 075 px/s ; rayon 18 px ; longueur 36 px.
 
 | Niveau de forge | Bonus de l’objet |
 | --- | --- |
-| 0 | Attaque brute +2,5 · Attaque +8 % |
-| 1 | Attaque brute +2,62 · Attaque +8,5 % |
-| 2 | Attaque brute +2,75 · Attaque +9 % |
-| 3 | Attaque brute +2,87 · Attaque +9,5 % |
-| 4 | Attaque brute +3 · Attaque +10 % |
-| 5 | Attaque brute +3,12 · Attaque +10,5 % |
-| 6 | Attaque brute +3,25 · Attaque +11 % |
-| 7 | Attaque brute +3,37 · Attaque +11,5 % |
-| 8 | Attaque brute +3,5 · Attaque +12 % |
-| 9 | Attaque brute +3,62 · Attaque +12,5 % |
-| 10 | Attaque brute +3,75 · Attaque +13 % |
-| 11 | Attaque brute +3,87 · Attaque +13,5 % |
-| 12 | Attaque brute +4 · Attaque +14 % |
-| 13 | Attaque brute +4,12 · Attaque +14,5 % |
-| 14 | Attaque brute +4,25 · Attaque +15 % |
-| 15 | Attaque brute +4,37 · Attaque +15,5 % |
-| 16 | Attaque brute +4,5 · Attaque +16 % |
-| 17 | Attaque brute +4,62 · Attaque +16,5 % |
-| 18 | Attaque brute +4,75 · Attaque +17 % |
-| 19 | Attaque brute +4,87 · Attaque +17,5 % |
-| 20 | Attaque brute +5 · Attaque +18 % |
+| 0 | Attaque brute +260 · Attaque +8 % |
+| 1 | Attaque brute +280 · Attaque +9,08 % |
+| 2 | Attaque brute +300 · Attaque +10,17 % |
+| 3 | Attaque brute +320 · Attaque +11,27 % |
+| 4 | Attaque brute +340 · Attaque +12,39 % |
+| 5 | Attaque brute +360 · Attaque +13,51 % |
+| 6 | Attaque brute +380 · Attaque +14,64 % |
+| 7 | Attaque brute +400 · Attaque +15,79 % |
+| 8 | Attaque brute +420 · Attaque +16,95 % |
+| 9 | Attaque brute +450 · Attaque +18,12 % |
+| 10 | Attaque brute +480 · Attaque +19,3 % |
+| 11 | Attaque brute +510 · Attaque +20,49 % |
+| 12 | Attaque brute +540 · Attaque +21,7 % |
+| 13 | Attaque brute +570 · Attaque +22,91 % |
+| 14 | Attaque brute +600 · Attaque +24,14 % |
+| 15 | Attaque brute +640 · Attaque +25,38 % |
+| 16 | Attaque brute +680 · Attaque +26,64 % |
+| 17 | Attaque brute +720 · Attaque +27,9 % |
+| 18 | Attaque brute +760 · Attaque +29,18 % |
+| 19 | Attaque brute +810 · Attaque +30,48 % |
+| 20 | Attaque brute +860 · Attaque +31,78 % |
 
 | À partir du niveau | Effet débloqué | Détail |
 | --- | --- | --- |

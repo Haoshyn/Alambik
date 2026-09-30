@@ -11,7 +11,7 @@ const CHAPITRES_PAR_MONDE := 7
 const PV_PREMIER_BOSS_MULT := 0.70
 
 const MONDES := [
-	{"id":"encre", "numero":"I", "nom":"Encre", "sous_titre":"Les pages débordent de magie.", "boss_signature":"archiscribe_encres", "pv_signature_mult":1.40, "teinte":Color("aa8dc7")},
+	{"id":"encre", "numero":"I", "nom":"Encre", "sous_titre":"Les pages débordent de magie.", "boss_signature":"archiscribe_encres", "pv_signature_mult":0.85, "teinte":Color("aa8dc7")},
 	{"id":"terre", "numero":"II", "nom":"Terre", "sous_titre":"Les sables mouvants gagnent les vieux jardins.", "boss_signature":"gardien_runes", "pv_signature_mult":0.90, "teinte":Color("b4bd78")},
 	{"id":"eau", "numero":"III", "nom":"Eau", "sous_titre":"Les marées ont gagné le sanctuaire.", "boss_signature":"reine_givre", "pv_signature_mult":0.95, "teinte":Color("4dbac4")},
 	{"id":"air", "numero":"IV", "nom":"Air", "sous_titre":"Les souffles traversent les terrasses.", "boss_signature":"maitre_orages", "pv_signature_mult":1.30, "teinte":Color("79c9b7")},

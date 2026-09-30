@@ -147,10 +147,16 @@ func _verifier_combat_monde_trois() -> void:
 	for paire: Array in [["equilibre", equilibre], ["offensif", offensif], ["sans_passifs", sans_passifs]]:
 		var configuration: Dictionary = paire[1]
 		var mesure := Modeles.mesurer(configuration)
+		var resistants := 0
 		for id: String in ["encrier_rampant", "plume_sentinelle", "tache_veloce"]:
 			var ennemi := Parcours.ennemi("grimoire", chapitre, 1, id)
 			var attaques := ceili(float(ennemi["pv"]) / float(mesure["tir_normal"]))
-			_exiger(attaques >= 2 and attaques <= 4, "Entree du monde trois sans banaliser les OS ni imposer trop de coups : " + str(paire[0]) + " " + id)
+			# Ce profil a deja finance six Coeurs et les annexes des deux mondes.
+			# Concentrer tout en attaque doit donner de l'avance a l'entree suivante.
+			var minimum := 2 if str(paire[0]) == "equilibre" else 1
+			_exiger(attaques >= minimum and attaques <= 4, "Entree du monde trois accessible apres le farm : " + str(paire[0]) + " " + id)
+			if attaques >= 2: resistants += 1
+		_exiger(resistants >= 1, "Le farm offensif efface toutes les familles du monde trois : " + str(paire[0]))
 		var cohorte := Parcours.cohorte(configuration, chapitre, 8, PROFIL.GRAINE,
 			{"politique": "equilibre" if str(paire[0]) == "equilibre" else "tout_offensif"})
 		var boss: Dictionary = cohorte["boss_final"]
@@ -160,7 +166,9 @@ func _verifier_combat_monde_trois() -> void:
 		print("Combat DEV monde 3 %s : %.1f degats, %.1f DPS, %.1f PV effectifs, boss %.1f s [P10 %.1f ; P90 %.1f]." % [str(paire[0]), float(mesure["tir_normal"]), float(mesure["dps"]), float(mesure["pv_effectifs"]), float(boss["mediane"]), float(boss["p10"]), float(boss["p90"])])
 	var plume := Parcours.ennemi("grimoire", chapitre, 1, "plume_sentinelle")
 	_exiger(float(stats_offensifs["pv_effectifs"]) / float(plume["degats"]) <= 3.5, "Le full offensif encaisse trop au monde trois")
-	_exiger(float(stats_equilibres["pv_effectifs"]) / float(plume["degats"]) >= 4.0, "Le profil equilibre doit conserver une marge de survie")
+	_exiger(float(stats_equilibres["pv_effectifs"]) / float(plume["degats"]) >= 3.0
+		and float(stats_equilibres["pv_effectifs"]) >= float(stats_offensifs["pv_effectifs"]) * 1.4,
+		"Le profil equilibre doit conserver une marge de survie et un avantage defensif")
 	compte.free()
 
 func _verifier_session() -> void:

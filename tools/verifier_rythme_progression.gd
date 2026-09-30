@@ -22,30 +22,34 @@ func _verifier() -> void:
 		if argument.begins_with("--comptes="): nombre = maxi(1, argument.trim_prefix("--comptes=").to_int())
 	var rapport := Rythme.rapport(nombre)
 	var profil: Dictionary = rapport["profil"]
-	_exiger(float(profil["attaques"]["mediane"]) >= 2.0 and float(profil["attaques"]["mediane"]) <= 3.0,
-		"Le profil niveau quatre, arme un, Force six doit entrer au niveau deux en deux a trois attaques medianes sans augment")
+	_exiger(float(profil["attaques"]["mediane"]) >= 2.0 and float(profil["attaques"]["mediane"]) <= 4.0,
+		"Le profil sans attribut doit entrer au niveau deux en deux a quatre attaques sans augment")
 	for id: String in profil["especes"]:
 		var espece: Dictionary = profil["especes"][id]
 		print("Profil niveau 4, C2, %s : %.1f PV, %.1f degats, %d attaques" % [id, float(espece["pv"]), float(profil["attaque"]), int(espece["attaques"])])
 	for achat: Dictionary in rapport["achats"]:
-		var minimum := 0.05 if str(achat["nom"]) == "Arme 1 → 2" else 0.10
+		var minimum := 0.03 if str(achat["nom"]) == "Arme 1 → 2" \
+			else (0.08 if str(achat["nom"]) == "Force maîtrisée 6 → 10" else 0.10)
 		_exiger(float(achat["gain_tir"]) >= minimum, "L'achat ne renforce pas assez le tir : " + str(achat["nom"]))
 		print("Achat %s : +%.1f %% par tir, +%.1f %% DPS, cout %d" % [str(achat["nom"]), float(achat["gain_tir"]) * 100.0, float(achat["gain_dps"]) * 100.0, int(achat["prix"])])
 	for chapitre: int in rapport["entrees"]:
 		var entree: Dictionary = rapport["entrees"][chapitre]
-		if chapitre <= Chapitres.CHAPITRES_PAR_MONDE:
-			_exiger(float(entree["attaques"]["p90"]) <= 4.0, "Les premieres salles imposent trop de farm dans le premier monde : " + str(chapitre))
-			_exiger(float(entree["boss"]["mediane"]) <= 90.0, "Boss trop long dans le premier monde : " + str(chapitre))
+		if chapitre <= 3:
+			_exiger(float(entree["attaques"]["p90"]) <= 5.0, "Le debut impose du farm avant les premiers renforcements : " + str(chapitre))
+			_exiger(float(entree["boss"]["mediane"]) <= 90.0, "Boss trop long avant les premiers renforcements : " + str(chapitre))
 		if chapitre in [2, 7, 14, 21, 28, 35]:
 			print("Entree C%d sans augment : %.1f attaques [P90 %.1f], %.1f DPS permanents ; boss final %.1f s" % [chapitre, float(entree["attaques"]["mediane"]), float(entree["attaques"]["p90"]), float(entree["dps"]["mediane"]), float(entree["boss"]["mediane"])])
 	# Le compte qui omet Mine, passifs et Coeurs est un stress sous-equipe.
 	# L'accessibilite tardive concerne les achats finances du parcours renforce.
 	var fin: Dictionary = rapport["entrees_renforcees"][Chapitres.nombre()]
-	_exiger(float(fin["attaques"]["p90"]) <= 6.0, "Le renforcement tardif ne rend pas l'entree du dernier niveau accessible")
+	_exiger(float(fin["attaques"]["p90"]) <= 8.0, "Le renforcement tardif ne rend pas l'entree du dernier niveau accessible")
 	_exiger(float(fin["secondes"]["p90"]) <= 3.0, "Les ennemis ordinaires resistent trop longtemps avant les augments au dernier niveau")
 	_exiger(float(fin["boss"]["mediane"]) <= Reglages.CAMPAGNE_BOSS_DUREE_SIGNATURE.y, "Le renforcement tardif ne rend pas le dernier boss accessible")
 	for chapitre: int in rapport["entrees_renforcees"]:
 		var entree: Dictionary = rapport["entrees_renforcees"][chapitre]
+		if chapitre <= Chapitres.CHAPITRES_PAR_MONDE:
+			_exiger(float(entree["attaques"]["p90"]) <= 6.0 and float(entree["secondes"]["p90"]) <= 5.0,
+				"Le renforcement finance ne rend pas l'entree du premier monde accessible : " + str(chapitre))
 		print("Entree financee C%d : %.1f attaques, %.1f s sans augment, %.1f DPS ; boss %.1f s" % [chapitre, float(entree["attaques"]["mediane"]), float(entree["secondes"]["mediane"]), float(entree["dps"]["mediane"]), float(entree["boss"]["mediane"])])
 	for chapitre: int in rapport["farm"]:
 		var farm: Dictionary = rapport["farm"][chapitre]

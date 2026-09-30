@@ -59,9 +59,12 @@ void fragment() {
 		float cycle = fract(temps_animation * vitesse * 0.07);
 		vec4 premier = texture(TEXTURE, UV - vec2(0.0, cycle * 0.028));
 		vec4 second = texture(TEXTURE, UV - vec2(0.0, fract(cycle + 0.5) * 0.028));
-		float interieur = min(matiere_fluide(premier.rgb) * premier.a, matiere_fluide(second.rgb) * second.a);
-		vec3 ecoulement = mix(second.rgb, premier.rgb, 1.0 - abs(cycle * 2.0 - 1.0));
-		couleur.rgb = mix(couleur.rgb, ecoulement, chute * interieur * 0.78);
+		// Chaque retour de texture est invisible, avec une vitesse de fondu nulle.
+		float fondu = 0.5 - 0.5 * cos(cycle * 6.283185);
+		vec3 courant_premier = mix(couleur.rgb, premier.rgb, matiere_fluide(premier.rgb) * premier.a);
+		vec3 courant_second = mix(couleur.rgb, second.rgb, matiere_fluide(second.rgb) * second.a);
+		vec3 ecoulement = mix(courant_second, courant_premier, fondu);
+		couleur.rgb = mix(couleur.rgb, ecoulement, chute * 0.78);
 	}
 	float eclat = pow(0.5 + 0.5 * sin(courant * 2.4 + UV.x * 63.0), 6.0);
 	couleur.rgb += accent.rgb * eclat * (chute * 0.025 + bassin * 0.035);

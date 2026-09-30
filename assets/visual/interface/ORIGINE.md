@@ -11,8 +11,10 @@ dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.
   `tools/generer_email_arcanique.py` reste un point d’entrée compatible vers
   cette refonte. Les SVG Wenrexa fournis dans `tools/sources_svg/` restent intacts ;
   `tools/generer_glyphes_menus.py` compose leurs silhouettes en glyphes colorés
-  indépendants pour les maîtrises et familiers. Les passifs utilisent les
-  glyphes existants de `../azur/glyphes/`.
+  indépendants pour les maîtrises et familiers. `tools/generer_glyphes_passifs.py`
+  compose les seize SVG de `menu/passifs/glyphes/` depuis seize autres
+  silhouettes de cette banque : une par passif, avec émail corail, jade ou
+  lilas, contours fins et gravures originales. Aucune image incorporée.
 - `cadres/` : surfaces séparées pour cases, cartes, boutons, compteurs, panneaux,
   navigation et zones de texte, avec variantes sélectionnées, pressées et focus.
   Les surfaces de 128 px logiques s'étirent en neuf zones avec coins de
@@ -64,10 +66,14 @@ dans les contrôles. Palette détaillée dans `docs/design/DIRECTION_ARTISTIQUE.
   Source : `exec-aeb726d3-ffae-47b3-8a2b-6ee132a74d37.png`. Les régions sont
   normalisées dans `data/presentation/animations_decors.gd` pour conserver leur cadrage
   avec l'atlas importé à 768 px de large pour mobile.
-  Les quatre `vent_*.svg` sont des masques vectoriels originaux ajoutés le
-  26 septembre 2026 : rouge pour les feuilles, vert pour l'herbe, noir pour
-  les zones immobiles. Ils pilotent `vegetation_clairiere.gdshader` sans
-  retoucher les peintures PNG.
+  Les `vent_haut_gauche.svg`, `vent_haut_droite.svg` et `vent_bas.svg` sont des
+  masques vectoriels originaux ajoutés le 26 septembre 2026, redécoupés le
+  30 septembre sur des feuilles précises : rouge pour les pointes souples,
+  noir pour les attaches, le bois et la pierre. Ils pilotent
+  `vegetation_clairiere.gdshader` sans retoucher les peintures PNG.
+  `vent_paysage.svg` conserve l'ancien masque comme source ; il n'est plus
+  appliqué. Le paysage et la prairie restent fixes. `ui/composants/plans_peints.gd`
+  compose les animations sans arrondi au pixel, à la résolution affichée.
 - `campagne_encre.png`, `campagne_terre.png`, `campagne_eau.png`,
   `campagne_air.png` et `campagne_feu.png` : cinq illustrations transparentes
   et indépendantes pour le choix du monde. Sources ImageGen respectives :
@@ -102,8 +108,9 @@ Les SVG actifs sont autonomes sans image incorporée.
 
 - `menu/passifs/fonds_elementaires.png` : atlas original de six ambiances peintes
   (onde, givre, braise, foudre, acide, vortex), créé avec ImageGen le 26 septembre
-  2026. Source `exec-e3d26700-adb9-4a22-a9dd-d983b6fb9bbe.png`. Le shader
-  `carte_passif_peinte.gdshader` choisit la région et protège la lecture.
+  2026. Source `exec-e3d26700-adb9-4a22-a9dd-d983b6fb9bbe.png`. Ancienne étude
+  conservée avec `carte_passif_peinte.gdshader` ; le menu Passifs utilise
+  désormais la clairière commune et les glyphes SVG autonomes.
 - `menu/cadre_enlumine.svg` et `menu/contour_enlumine.svg` : cadres vectoriels
   originaux, bord métallique champagne, relief violet et feuilles gravées aux coins.
 - Police Grenze : famille variable d’Omnibus-Type, provenant du

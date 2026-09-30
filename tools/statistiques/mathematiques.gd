@@ -128,14 +128,14 @@ static func _formules(lignes: Array[String]) -> void:
 	lignes.append_array(["### Ce qui s’additionne et ce qui se multiplie", ""])
 	var formules: Array[String] = [
 		"Attaque brute = base du héros à son niveau + Force + Intelligence + attaque de l’arme + attaque des trois bijoux.",
-		"Attaque permanente = attaque brute × (1 + pourcentages d’équipement) × (1 + pourcentages de maîtrises) × (1 + pourcentages de passifs). Les bonus d’une même source s’additionnent ; les sources se multiplient.",
+		"Attaque permanente = attaque brute × facteur d’équipement × produit des facteurs de maîtrises × facteur de passifs. Pour les maîtrises, chaque rang multiplie la statistique acquise et les nœuds se composent. Les objets équipés additionnent leurs bonus ; les sources se multiplient.",
 		"Attaque de run = attaque permanente × (1 + somme des bonus d’attaque des augments). Aucun augment ne réduit l’attaque en échange de défense.",
 		"Dégâts d’un projectile = attaque permanente × (1 + bonus directs d'attaque et de projectile des augments) × coefficient de l’arme × puissance des tirs cumulés × bonus finaux × éventuel critique. Élan vital chargé renforce toute l’attaque suivante. Le tir après coefficient d’arme constitue la référence à 100 %.",
 		"Cadence = base × facteur d’attributs × facteur d’équipement × facteur de maîtrises × facteur de passifs × facteur des augments × facteur de l’arme.",
 		"DPS frontal héros = dégâts moyens d’un projectile × poids des projectiles frontaux × salves × cadence.",
 		"Critique moyen = 1 + chance critique × (coefficient critique − 1). Chance plafonnée à 100 %% ; critique de base ×%s. Couronne incisive convertit une part de la chance au-delà du plafond en dégâts critiques." % n(Reglages.CRITIQUE_MULT_BASE),
 		"Pour les augments de critique, A = somme des chances ajoutées, D = somme des puissances ajoutées et K = A × D − somme(chance du choix × puissance du même choix). Avec Q la chance finale et B la chance permanente, la puissance ajoutée vaut D − K × (Q − B) / (A × Q), avant conversion de l'excédent. Si A ou Q est nul, il n'y a pas de correction. Ce calcul conserve chaque gain individuel et retire le croisement entre choix distincts.",
-		"Bonus finaux = (1 + %s × nombre de Cœurs) × (1 + Audace + Reprise de souffle active + Élan offensif actif)." % n(Reglages.COEUR_MANA_BONUS_FINAL),
+		"Bonus finaux = (1 + %s)^nombre de Cœurs × (1 + Audace + Reprise de souffle active + Élan offensif actif)." % n(Reglages.COEUR_MANA_BONUS_FINAL),
 		"Cinquième impact est un facteur moyen supplémentaire de ×%s sur le héros quand l’anneau correspondant est équipé et forgé." % n(1.0 + (EffetsBijoux.IMPACT_MULTIPLICATEUR - 1.0) / float(EffetsBijoux.IMPACT_ATTAQUES)),
 		"DPS familier = attaque propre × facteur permanent d’attaque × facteur d’attaque des augments × bonus finaux / intervalle. Chaque rang de forge reste utile. Pas de critique ni de salve du héros.",
 		"DPS total = DPS frontal héros + DPS périodique + DPS familier. Les classes ajoutent 0 % à toutes ces sources.", "",
@@ -180,10 +180,10 @@ static func _tirs_multiples(lignes: Array[String]) -> void:
 
 static func _heros(lignes: Array[String]) -> void:
 	lignes.append_array(["### Bases du héros et attributs", "",
-		"Au niveau 1 : %s PV ; %s Défense ; %s attaque ; %s tirs/s. Chaque niveau ajoute %s %% des PV initiaux et %s %% de l’attaque initiale, en plus des points à répartir. Au niveau maximal, le socle seul vaut %s PV et %s attaque." % [n(Reglages.HEROS_PV), n(Reglages.HEROS_DEFENSE), n(Reglages.TIR_DEGATS), n(Reglages.HEROS_CADENCE), n(Reglages.NIVEAU_PV_PAR_NIVEAU * 100.0), n(Reglages.NIVEAU_DEGATS_PAR_NIVEAU * 100.0), n(Stats.base_pv(Personnage.NIVEAU_MAX)), n(Stats.base_degats(Personnage.NIVEAU_MAX))],
+		"Au niveau 1 : %s PV ; %s Défense ; %s attaque ; %s tirs/s. Chaque niveau compose %s %% de PV et %s %% d’attaque sur le socle précédent, arrondi au multiple de %s, en plus des points à répartir. Au niveau maximal, le socle seul vaut %s PV et %s attaque." % [n(Reglages.HEROS_PV), n(Reglages.HEROS_DEFENSE), n(Reglages.TIR_DEGATS), n(Reglages.HEROS_CADENCE), n(Reglages.NIVEAU_PV_PAR_NIVEAU * 100.0), n(Reglages.NIVEAU_DEGATS_PAR_NIVEAU * 100.0), n(Reglages.STATISTIQUE_PAS), n(Stats.base_pv(Personnage.NIVEAU_MAX)), n(Stats.base_degats(Personnage.NIVEAU_MAX))],
 		"Chaque niveau après le premier donne %d points, jusqu’au niveau %d : %d points au total." % [Personnage.POINTS_PAR_NIVEAU, Personnage.NIVEAU_MAX, Personnage.points_totaux(Personnage.NIVEAU_MAX)]])
-	lignes.append("Pour un attribut offensif recevant p points : poids effectif = 2 × %s × p / (%s + p). Son bonus vaut coefficient du catalogue × poids effectif × croissance du héros. La Vitalité et la Sagesse conservent leur calcul linéaire." % [n(Personnage.POINTS_RENDEMENT), n(Personnage.POINTS_RENDEMENT)])
-	lignes.append("Avec t = (niveau − 1) / (%d − 1), la croissance des attributs offensifs vaut %s + (1 − %s) × t² ; celle des statistiques de passifs vaut %s + (1 − %s) × t². Les bonus de rang restent proportionnels au rang acquis ; les pouvoirs conditionnels et utilitaires des passifs conservent leurs règles." % [Personnage.NIVEAU_MAX, n(Personnage.PUISSANCE_INITIALE), n(Personnage.PUISSANCE_INITIALE), n(Passifs.PUISSANCE_INITIALE, 4), n(Passifs.PUISSANCE_INITIALE, 4)])
+	lignes.append("Un attribut recevant p points donne p × gain du palier courant. Force, Vitalité et Intelligence ont des gains bruts entiers qui grandissent tous les %d niveaux. Les points déjà acquis profitent également du nouveau palier ; aucun rendement décroissant ne réduit les derniers points." % Personnage.NIVEAUX_PAR_PALIER)
+	lignes.append("Les taux des passifs suivent les mêmes paliers de niveau, en pourcentages entiers. Leurs statistiques se composent entre rangs et conservent leur gain relatif ; les points de critique s’additionnent. Les effets de soin et autres pouvoirs gardent leurs conditions propres.")
 	var attributs: Array = []
 	for id: String in Personnage.ATTRIBUTS:
 		var d: Dictionary = Personnage.ATTRIBUTS[id]

@@ -446,7 +446,7 @@ func nombre_coeurs_mana() -> int:
 	return total
 
 func multiplicateur_coeurs_mana() -> float:
-	return 1.0 + float(nombre_coeurs_mana()) * Reglages.COEUR_MANA_BONUS_FINAL
+	return Reglages.multiplicateur_coeurs(nombre_coeurs_mana())
 
 func definir_reglages_audio(musique: float, effets: float) -> void:
 	volume_musique = clampf(musique, 0.0, 1.0)

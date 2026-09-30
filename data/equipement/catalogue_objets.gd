@@ -11,7 +11,7 @@ const PROFILS := [
 	{"defense_base": 3.0, "attaque_base": 2.0},
 	{"attaque_mult": 0.05, "attaque_base": 2.0},
 ]
-const FORGE_PAR_STAT := {"pv_base": 2.5, "defense_base": 0.30, "attaque_mult": 0.005, "attaque_base": 0.10}
+const FORGE_CROISSANCE_PAR_STAT := {"pv_base": 0.08, "defense_base": 0.08, "attaque_mult": 0.01, "attaque_base": 0.06}
 const STATS_BRUTES := ["pv_base", "defense_base", "attaque_base"]
 const STATS_PRINCIPALES := ["pv_base", "defense_base", "attaque_mult"]
 
@@ -105,13 +105,18 @@ static func bonus_objet(id: String, niveau: int, _monde_reference := -1) -> Dict
 	var profil: Dictionary = donnees["profil"]
 	# Les modeles historiques restent au dernier monde actif, sans bonus de monde retire.
 	var monde := clampi(int(donnees["monde"]), 0, Chapitres.MONDES.size() - 1)
-	var croissance := pow(Reglages.EQUIPEMENT_CROISSANCE_PAR_PALIER,
-		monde * Chapitres.CHAPITRES_PAR_MONDE)
+	var provenance := monde * Chapitres.CHAPITRES_PAR_MONDE
 	for champ in profil:
-		var forge_par := float(FORGE_PAR_STAT.get(champ, 0.0)) \
+		var croissance := float(FORGE_CROISSANCE_PAR_STAT.get(champ, 0.0)) \
 			if champ == str(donnees["stat_principale"]) or champ == "attaque_base" else 0.0
-		resultat[champ] = (float(profil[champ]) + forge_par * float(forge)) \
-			* (croissance if champ in STATS_BRUTES else 1.0)
+		var base := float(profil[champ])
+		if champ in STATS_BRUTES:
+			resultat[champ] = Reglages.statistique_forge(base * Reglages.ECHELLE_STATISTIQUES,
+				forge if croissance > 0.0 else 0, croissance, provenance)
+		elif croissance > 0.0:
+			resultat[champ] = (1.0 + base) * pow(1.0 + croissance, forge) - 1.0
+		else:
+			resultat[champ] = base
 	return resultat
 
 static func description_bonus(id: String, niveau: int) -> String:

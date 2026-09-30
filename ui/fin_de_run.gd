@@ -61,7 +61,7 @@ func afficher(victoire: bool, salle_atteinte: int) -> void:
 		_ajouter_gain(StyleAzur.vignette(passif, 76), str(Passifs.donnees(passif)["nom"]), "Passif obtenu · Rang %d / %d" % [ReglagesJoueur.rang_passif(passif), Passifs.RANG_MAX])
 	if bool(gains.get("coeur_mana", false)):
 		_ajouter_gain(StyleAzur.illustration("astrolabe", 76), "Cœur de mana obtenu",
-			"+%d %% de dégâts finaux · %d / %d" % [roundi(Reglages.COEUR_MANA_BONUS_FINAL * 100.0), ReglagesJoueur.nombre_coeurs_mana(), Epreuves.nombre()])
+			"+%d %% aux dégâts acquis · %d / %d" % [roundi(Reglages.COEUR_MANA_BONUS_FINAL * 100.0), ReglagesJoueur.nombre_coeurs_mana(), Epreuves.nombre()])
 	if _recompenses.get_child_count() == 0:
 		_recompenses.add_child(StyleAzur.texte("Le coffre est vide.\nTerminez une salle pour commencer à le remplir.", 30, StyleAzur.ENCRE))
 	_afficher_ameliorations_disponibles()

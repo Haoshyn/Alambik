@@ -131,7 +131,7 @@ func _rafraichir() -> void:
 			var donnees: Dictionary = Passifs.donnees(str(id))
 			noms.append(str(donnees["nom"]))
 			_symboles.add_child(StyleAzur.vignette(str(id), 76))
-		_details.text = "Passifs possibles : %s\nCœur de mana : %s · +%d %% de dégâts\nUn cœur par niveau, %d au maximum." % [
+		_details.text = "Passifs possibles : %s\nCœur de mana : %s · +%d %% aux dégâts acquis\nUn cœur par niveau, %d au maximum." % [
 			" · ".join(noms), "obtenu" if ReglagesJoueur.coeur_mana_obtenu(_niveau) else "à trouver", roundi(Reglages.COEUR_MANA_BONUS_FINAL * 100.0), Epreuves.nombre()]
 	if _niveau > debloque:
 		_details.text += "\n%s" % (

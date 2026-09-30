@@ -10,8 +10,8 @@ extends RefCounted
 
 # Le niveau apporte un petit socle ; les points repartis portent l'essentiel
 # de sa progression et restent distincts des multiplicateurs permanents.
-const NIVEAU_DEGATS_PAR_NIVEAU := 0.01
-const NIVEAU_PV_PAR_NIVEAU := 0.005
+const NIVEAU_DEGATS_PAR_NIVEAU := 0.02
+const NIVEAU_PV_PAR_NIVEAU := 0.01
 const NIVEAU_CADENCE_PAR_NIVEAU := 0.0
 # Plafond commun au bareme d'XP et aux outils de dotation complete.
 const NIVEAU_REFERENCE_FIN := 30
@@ -23,9 +23,13 @@ const PROGRESSION_ECART_PLAFONDS := 0.20
 const PROGRESSION_ECART_HEROS_MAITRISES := 0.10
 
 # Bases lisibles du premier chapitre, avant equipement et maitrises.
-const HEROS_PV := 100.0
-const HEROS_DEFENSE := 10.0
-const DEFENSE_REFERENCE := 100.0
+# La meme unite s'applique aux attaques, aux PV et a la reference de defense.
+# Agrandir les nombres ne change donc ni les coups supportes ni la reduction.
+const ECHELLE_STATISTIQUES := 100.0
+const STATISTIQUE_PAS := 10.0
+const HEROS_PV := 100.0 * ECHELLE_STATISTIQUES
+const HEROS_DEFENSE := 10.0 * ECHELLE_STATISTIQUES
+const DEFENSE_REFERENCE := 100.0 * ECHELLE_STATISTIQUES
 const CRITIQUE_MULT_BASE := 1.50
 const HEROS_VITESSE := 728.0
 const HEROS_ACCELERATION := 3100.0
@@ -59,7 +63,7 @@ const ENNEMI_CONTACT_MARGE := 24.0
 const PHASE_ANNONCE := 0.85
 const PHASE_PREPARATION_TIR := 0.70
 
-const TIR_DEGATS := 10.0
+const TIR_DEGATS := 10.0 * ECHELLE_STATISTIQUES
 const MODS_PLANCHER := 0.05
 # Mesure : la creature la plus rapide file a 704 px/s. A 900, le projectile
 # n'allait qu'a 1,28 fois sa vitesse et se faisait esquiver systematiquement ;
@@ -131,7 +135,7 @@ const SALLES_PAR_RUN := 20
 # de prendre de l'avance sans adapter la difficulte au joueur.
 const CAMPAGNE_PV_PAR_CHAPITRE := 1.045
 const CAMPAGNE_PV_CHAPITRES_INITIAUX := 7
-const CAMPAGNE_PV_PAR_CHAPITRE_TARDIF := 1.11
+const CAMPAGNE_PV_PAR_CHAPITRE_TARDIF := 1.15
 const CAMPAGNE_PV_BOSS_RENFORT_TARDIF := 1.10
 const CAMPAGNE_PV_BOSS_TRANSITION_TARDIVE := 0.93
 # Reperes du build equilibre. La borne haute
@@ -141,10 +145,10 @@ const CAMPAGNE_BOSS_DUREE_SIGNATURE := Vector2(25.0, 60.0)
 const CAMPAGNE_PV_ACCELERATION := 1.0
 # Le renfort arrive progressivement : les premieres salles restent accessibles
 # sans augment. La croissance composee reporte le besoin de farm vers la fin.
-const CAMPAGNE_PV_RENFORT_INITIAL := 1.9
-const CAMPAGNE_PV_TRANSITION := 0.94
-const CAMPAGNE_PV_TRANSITION_EXPOSANT := 1.5
-const CAMPAGNE_DEGATS_PAR_CHAPITRE := 1.04
+const CAMPAGNE_PV_RENFORT_INITIAL := 4.0
+const CAMPAGNE_PV_TRANSITION := 0.93
+const CAMPAGNE_PV_TRANSITION_EXPOSANT := 2.0
+const CAMPAGNE_DEGATS_PAR_CHAPITRE := 1.06
 const CAMPAGNE_DEGATS_ACCELERATION := 1.0002
 # Apres le premier monde, le socle seul ne suffit plus a encaisser longtemps.
 # Le renfort borne preserve une marge pour les comptes qui investissent en PV.
@@ -178,7 +182,7 @@ const MAITRISE_RANG_MAX := 10
 const MAITRISE_COUT_AJOUT_PAR_RANG := 0.25
 const COUT_PAS_ARRONDI := 5
 const GOUTTES_MULT_PAR_CHAPITRE := 1.055
-const EQUIPEMENT_CROISSANCE_PAR_PALIER := 1.008
+const EQUIPEMENT_CROISSANCE_PAR_PALIER := 1.01
 
 # Un court lot de victoires donne une amelioration certaine, meme sans chance.
 const EPREUVE_GARANTIE_CAPACITE := 2
@@ -213,6 +217,19 @@ static func experience_compte_requise(niveau: int) -> int:
 	var profondeur := maxi(0, niveau - 1)
 	return maxi(1, roundi(XP_COMPTE_BASE + float(profondeur) * XP_COMPTE_PENTE
 		+ float(profondeur * profondeur) * XP_COMPTE_QUADRATIQUE))
+
+static func statistique_arrondie(valeur: float) -> float:
+	return float(roundi(valeur / STATISTIQUE_PAS)) * STATISTIQUE_PAS
+
+static func statistique_forge(base: float, niveau: int, croissance: float, provenance := 0) -> float:
+	var valeur := statistique_arrondie(base * pow(EQUIPEMENT_CROISSANCE_PAR_PALIER, maxi(0, provenance)))
+	# Arrondir chaque achat garde des gains entiers qui ne diminuent jamais.
+	for rang in clampi(niveau, 0, FORGE_NIVEAU_MAX):
+		valeur += maxf(STATISTIQUE_PAS, statistique_arrondie(valeur * croissance))
+	return valeur
+
+static func multiplicateur_coeurs(nombre: int) -> float:
+	return pow(1.0 + COEUR_MANA_BONUS_FINAL, clampi(nombre, 0, Epreuves.nombre()))
 
 static func cout_maitrise(cout_base: int, rang_acquis: int) -> int:
 	var brut := float(cout_base) * (1.0 + MAITRISE_COUT_AJOUT_PAR_RANG * float(maxi(0, rang_acquis)))
@@ -274,7 +291,7 @@ const PLAFOND_ENNEMIS := 10
 const MINIBOSS_PV_MULT := 4.56
 const BOSS_SIGNATURE_PV_MULT := 5.00
 # Reserve supplementaire commune a la campagne, la Mine et les Epreuves.
-const BOSS_ENDURANCE_MULT := 0.70
+const BOSS_ENDURANCE_MULT := 0.55
 const MINIBOSS_DEGATS_MULT := 1.00
 const BOSS_SIGNATURE_DEGATS_MULT := 1.10
 const BOSS_PROJECTILE_VITESSE_MULT := 2.625

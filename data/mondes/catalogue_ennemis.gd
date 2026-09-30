@@ -157,6 +157,8 @@ static func _construire() -> Dictionary:
 	for definition in signatures:
 		tous[definition[0]] = _creer_boss(definition, "signature")
 	for id: String in tous:
+		tous[id]["pv"] = float(tous[id]["pv"]) * Reglages.ECHELLE_STATISTIQUES
+		tous[id]["degats"] = float(tous[id]["degats"]) * Reglages.ECHELLE_STATISTIQUES
 		ProjectilesEnnemis.enrichir(tous[id], id)
 		AttaquesContactBoss.enrichir(tous[id], id)
 	return tous

@@ -1,20 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="368" height="500" viewBox="0 0 368 500">
   <defs>
-    <radialGradient id="feuilles"><stop offset="0" stop-color="#ff0000"/><stop offset="0.48" stop-color="#eb0000"/><stop offset="1" stop-color="#000000"/></radialGradient>
+    <linearGradient id="feuilles" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff0000"/><stop offset="0.55" stop-color="#b80000"/><stop offset="1" stop-color="#000000"/>
+    </linearGradient>
   </defs>
   <rect width="368" height="500" fill="#000000"/>
   <g fill="url(#feuilles)">
-    <ellipse cx="179" cy="32" rx="91" ry="31"/>
-    <ellipse cx="284" cy="31" rx="115" ry="43"/>
-    <ellipse cx="318" cy="76" rx="64" ry="27"/>
-    <ellipse cx="210" cy="99" rx="69" ry="33"/>
-    <ellipse cx="110" cy="100" rx="67" ry="41"/>
-    <ellipse cx="86" cy="138" rx="55" ry="29"/>
-    <ellipse cx="159" cy="198" rx="62" ry="42"/>
-    <ellipse cx="230" cy="253" rx="48" ry="21"/>
-    <ellipse cx="312" cy="285" rx="34" ry="40"/>
-    <ellipse cx="307" cy="344" rx="51" ry="38"/>
-    <ellipse cx="354" cy="395" rx="34" ry="46"/>
-    <ellipse cx="354" cy="465" rx="29" ry="35"/>
+    <path d="M154 12 Q174 1 190 13 L193 34 Q174 46 158 30 Z"/>
+    <path d="M211 6 Q228 0 241 15 L240 33 Q219 41 208 24 Z"/>
+    <path d="M262 15 Q280 6 292 23 L289 42 Q271 53 259 34 Z"/>
+    <path d="M317 36 Q335 24 351 41 L349 59 Q329 73 316 54 Z"/>
+    <path d="M287 65 Q306 55 317 73 L311 91 Q292 97 283 82 Z"/>
+    <path d="M220 64 Q239 52 253 69 L250 90 Q231 99 219 82 Z"/>
+    <path d="M175 77 Q193 67 208 83 L206 103 Q188 113 174 95 Z"/>
+    <path d="M103 82 Q121 66 138 81 L140 101 Q121 118 105 101 Z"/>
+    <path d="M54 109 Q75 92 93 108 L94 126 Q77 139 58 126 Z"/>
+    <path d="M83 134 Q99 122 112 137 L112 158 Q94 166 82 151 Z"/>
+    <path d="M141 197 Q161 184 178 201 L174 220 Q154 230 142 213 Z"/>
+    <path d="M221 239 Q239 229 249 245 L247 263 Q230 269 220 253 Z"/>
+    <path d="M288 274 Q306 259 318 277 L316 298 Q297 309 288 292 Z"/>
+    <path d="M280 336 Q297 320 312 337 L313 357 Q293 368 280 352 Z"/>
+    <path d="M337 386 Q352 376 363 391 L365 411 Q350 424 337 406 Z"/>
+    <path d="M331 450 Q348 438 359 453 L358 475 Q340 485 330 468 Z"/>
   </g>
 </svg>

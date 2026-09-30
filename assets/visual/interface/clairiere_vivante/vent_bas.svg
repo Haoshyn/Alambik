@@ -1,21 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="948" height="499" viewBox="0 0 948 499">
   <defs>
-    <radialGradient id="feuilles"><stop offset="0" stop-color="#ff0000"/><stop offset="0.42" stop-color="#e50000"/><stop offset="1" stop-color="#000000"/></radialGradient>
+    <linearGradient id="feuilles" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff0000"/><stop offset="0.55" stop-color="#b80000"/><stop offset="1" stop-color="#000000"/>
+    </linearGradient>
   </defs>
   <rect width="948" height="499" fill="#000000"/>
   <g fill="url(#feuilles)">
-    <ellipse cx="47" cy="44" rx="55" ry="37"/>
-    <ellipse cx="85" cy="80" rx="68" ry="33"/>
-    <ellipse cx="81" cy="134" rx="65" ry="26"/>
-    <ellipse cx="174" cy="147" rx="52" ry="33"/>
-    <ellipse cx="318" cy="292" rx="38" ry="25"/>
-    <ellipse cx="450" cy="429" rx="45" ry="27"/>
-    <ellipse cx="50" cy="373" rx="40" ry="30"/>
-    <ellipse cx="134" cy="411" rx="70" ry="22"/>
-    <ellipse cx="252" cy="481" rx="105" ry="21"/>
-    <ellipse cx="896" cy="91" rx="62" ry="58"/>
-    <ellipse cx="812" cy="208" rx="85" ry="48"/>
-    <ellipse cx="885" cy="253" rx="57" ry="87"/>
-    <ellipse cx="920" cy="428" rx="57" ry="57"/>
+    <path d="M31 14 Q52 3 72 16 L80 35 Q54 45 36 31 Z"/>
+    <path d="M4 46 Q24 33 41 48 L53 64 Q30 76 10 62 Z"/>
+    <path d="M73 59 Q91 42 111 57 L125 77 Q104 91 84 77 Z"/>
+    <path d="M35 106 Q57 93 76 109 L89 126 Q67 139 43 124 Z"/>
+    <path d="M126 129 Q145 114 163 132 L172 151 Q149 164 133 148 Z"/>
+    <path d="M182 153 Q197 139 215 156 L225 174 Q205 188 188 174 Z"/>
+    <path d="M299 281 Q320 264 341 283 L348 300 Q325 311 306 297 Z"/>
+    <path d="M21 351 Q42 338 60 355 L68 376 Q46 385 29 369 Z"/>
+    <path d="M85 389 Q105 374 122 389 L139 410 Q116 421 94 404 Z"/>
+    <path d="M163 405 Q183 389 202 406 L209 424 Q188 437 169 422 Z"/>
+    <path d="M251 453 Q271 438 290 455 L300 475 Q278 487 259 471 Z"/>
+    <path d="M817 38 Q836 17 855 35 L863 61 Q841 76 825 58 Z"/>
+    <path d="M892 34 Q910 15 927 32 L933 56 Q913 72 898 54 Z"/>
+    <path d="M852 96 Q873 79 891 97 L898 120 Q875 134 859 117 Z"/>
+    <path d="M762 184 Q782 171 803 186 L819 205 Q795 218 776 202 Z"/>
+    <path d="M864 224 Q884 210 904 230 L908 252 Q886 261 868 243 Z"/>
+    <path d="M903 400 Q924 387 940 405 L947 428 Q925 440 909 420 Z"/>
   </g>
 </svg>

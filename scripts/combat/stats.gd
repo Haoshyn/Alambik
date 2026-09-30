@@ -20,10 +20,12 @@ var etapes_permanentes: Dictionary = {}
 
 # Le socle du niveau reste distinct des points que le joueur choisit de repartir.
 static func base_pv(niveau: int) -> float:
-	return Reglages.HEROS_PV * (1.0 + float(maxi(0, niveau - 1)) * Reglages.NIVEAU_PV_PAR_NIVEAU)
+	return Reglages.statistique_arrondie(Reglages.HEROS_PV
+		* pow(1.0 + Reglages.NIVEAU_PV_PAR_NIVEAU, clampi(niveau, 1, Personnage.NIVEAU_MAX) - 1))
 
 static func base_degats(niveau: int) -> float:
-	return Reglages.TIR_DEGATS * (1.0 + float(maxi(0, niveau - 1)) * Reglages.NIVEAU_DEGATS_PAR_NIVEAU)
+	return Reglages.statistique_arrondie(Reglages.TIR_DEGATS
+		* pow(1.0 + Reglages.NIVEAU_DEGATS_PAR_NIVEAU, clampi(niveau, 1, Personnage.NIVEAU_MAX) - 1))
 
 static func base_cadence(niveau: int) -> float:
 	return Reglages.HEROS_CADENCE * (1.0 + float(maxi(0, niveau - 1)) * Reglages.NIVEAU_CADENCE_PAR_NIVEAU)
@@ -31,8 +33,8 @@ static func base_cadence(niveau: int) -> float:
 static func composer_statistique(base: float, attributs_bruts: float, equipement_brut: float,
 		facteur_attributs: float, facteur_equipement: float,
 		facteur_maitrises: float, facteur_passifs: float) -> Dictionary:
-	# Le combat et les explications lisent ces memes etapes. Les bonus d'une
-	# source sont sommes avant cet appel ; les sources se multiplient ensuite.
+	# Le combat et les explications lisent ces memes etapes. Chaque source
+	# calcule son facteur avant cet appel ; les sources se multiplient ensuite.
 	var brut := base + attributs_bruts + equipement_brut
 	var apres_equipement := brut * facteur_attributs * facteur_equipement
 	var apres_maitrises := apres_equipement * facteur_maitrises

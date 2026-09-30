@@ -28,6 +28,9 @@ static func _avec_descriptions(types: Dictionary) -> Dictionary:
 	for id: String in types:
 		var donnees: Dictionary = types[id]
 		var passif: Dictionary = donnees["passif"]
+		donnees["attaque"] = float(donnees["attaque"]) * Reglages.ECHELLE_STATISTIQUES
+		if passif.has("defense_base"):
+			passif["defense_base"] = float(passif["defense_base"]) * Reglages.ECHELLE_STATISTIQUES
 		var morceaux: Array[String] = []
 		for champ: String in passif:
 			var regle: Array = libelles[champ]
@@ -36,7 +39,7 @@ static func _avec_descriptions(types: Dictionary) -> Dictionary:
 		donnees["description"] = str(donnees["forme"]) + " · héros : " + ", ".join(morceaux)
 	return types
 
-const FORGE_ATTAQUE_PAR_NIVEAU := 2.0
+const FORGE_CROISSANCE := 0.11
 const DEPLACEMENT_DUREE := 0.75
 const VISEE_DUREE := 0.30
 const DEPLACEMENT_VITESSE := 245.0
@@ -82,9 +85,8 @@ static func disponibles(niveau_campagne: int) -> Array[String]:
 
 static func attaque(id: String, niveau_forge: int) -> float:
 	var donnees: Dictionary = TYPES.get(id, TYPES["homoncule_encre"])
-	var croissance := pow(Reglages.EQUIPEMENT_CROISSANCE_PAR_PALIER, niveau_deblocage(id) - 1)
-	return (float(donnees["attaque"]) + float(clampi(niveau_forge, 0, Reglages.FORGE_NIVEAU_MAX)) \
-		* FORGE_ATTAQUE_PAR_NIVEAU) * croissance
+	return Reglages.statistique_forge(float(donnees["attaque"]), niveau_forge,
+		FORGE_CROISSANCE, niveau_deblocage(id) - 1)
 
 static func attaque_combat(id: String, niveau_forge: int, bonus_attaque_permanent: float,
 		facteur_attaque_run := 1.0) -> float:

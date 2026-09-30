@@ -7,24 +7,24 @@ const SPECIALISATION_DEFAUT := "sorcier"
 
 # Les attributs construisent la base que les maitrises et les passifs
 # multiplient ensuite ; chaque point reste utile quel que soit l'equipement.
-const FORCE_ATTAQUE_PAR_POINT := 0.80
-const AGILITE_CRITIQUE_PAR_POINT := 0.004
-const AGILITE_DEGATS_CRITIQUES_PAR_POINT := 0.008
-const INTELLIGENCE_ATTAQUE_PAR_POINT := 0.24
-const INTELLIGENCE_CADENCE_PAR_POINT := 0.004
-const PUISSANCE_INITIALE := 0.25
-const POINTS_RENDEMENT := 40.0
-const CHAMPS_OFFENSIFS := ["attaque_base", "critique", "degats_critiques", "cadence"]
+const NIVEAUX_PAR_PALIER := 5
+const FORCE_ATTAQUE_PAR_POINT := [40, 50, 60, 80, 100, 120]
+const VITALITE_PV_PAR_POINT := [100, 120, 140, 160, 180, 200]
+const VITALITE_DEFENSE_PAR_POINT := [10, 12, 14, 16, 18, 20]
+const INTELLIGENCE_ATTAQUE_PAR_POINT := [10, 10, 20, 20, 30, 40]
+const INTELLIGENCE_CADENCE_PAR_POINT := [0.005, 0.005, 0.01, 0.01, 0.015, 0.02]
+const AGILITE_CRITIQUE_PAR_POINT := 0.005
+const AGILITE_DEGATS_CRITIQUES_PAR_POINT := 0.02
 const ATTRIBUTS := {
 	"force": {"nom": "Force", "attaque_base": FORCE_ATTAQUE_PAR_POINT,
-		"description": "Attaque brute ; gains progressifs avec le niveau et les points."},
-	"vitalite": {"nom": "Vitalité", "pv_base": 1.0, "defense_base": 0.10,
-		"description": "PV et Défense bruts ; gains constants par point."},
+		"description": "Attaque brute ; gains entiers croissants avec le niveau."},
+	"vitalite": {"nom": "Vitalité", "pv_base": VITALITE_PV_PAR_POINT, "defense_base": VITALITE_DEFENSE_PAR_POINT,
+		"description": "PV et Défense bruts ; gains entiers croissants avec le niveau."},
 	"agilite": {"nom": "Agilité", "critique": AGILITE_CRITIQUE_PAR_POINT, "degats_critiques": AGILITE_DEGATS_CRITIQUES_PAR_POINT,
-		"description": "Chance et dégâts critiques ; gains progressifs avec le niveau et les points."},
+		"description": "Chance et dégâts critiques ; chaque point renforce les attaques acquises."},
 	"intelligence": {"nom": "Intelligence", "attaque_base": INTELLIGENCE_ATTAQUE_PAR_POINT, "cadence": INTELLIGENCE_CADENCE_PAR_POINT,
-		"description": "Attaque brute et cadence ; gains progressifs avec le niveau et les points."},
-	"sagesse": {"nom": "Sagesse", "butin": 0.007,
+		"description": "Attaque brute et cadence ; gains croissants avec le niveau."},
+	"sagesse": {"nom": "Sagesse", "butin": 0.01,
 		"description": "Butin supplémentaire ; gains constants par point."},
 }
 
@@ -62,14 +62,14 @@ static func points_depenses(attributs: Dictionary) -> int:
 		total += maxi(0, int(attributs.get(id, 0)))
 	return total
 
-static func facteur_progression(niveau: int, initial: float) -> float:
-	var progression := float(clampi(niveau, 1, NIVEAU_MAX) - 1) / float(NIVEAU_MAX - 1)
-	return lerpf(initial, 1.0, progression * progression)
+static func palier_niveau(niveau: int) -> int:
+	return int((clampi(niveau, 1, NIVEAU_MAX) - 1) / NIVEAUX_PAR_PALIER)
 
-static func poids_points(points: int) -> float:
-	# Repartir les points offensifs reste utile : concentrer tout en Force
-	# ne doit pas effacer les autres attributs ni les combats de campagne.
-	return 2.0 * POINTS_RENDEMENT * float(maxi(0, points)) / (POINTS_RENDEMENT + float(maxi(0, points)))
+static func valeur_par_point(valeur: Variant, niveau: int) -> float:
+	if valeur is Array:
+		var paliers: Array = valeur
+		return float(paliers[mini(palier_niveau(niveau), paliers.size() - 1)])
+	return float(valeur)
 
 static func bonus(attributs: Dictionary, niveau := NIVEAU_MAX) -> Dictionary:
 	var resultat := {"attaque_base": 0.0, "pv_base": 0.0, "defense_base": 0.0,
@@ -79,10 +79,8 @@ static func bonus(attributs: Dictionary, niveau := NIVEAU_MAX) -> Dictionary:
 		var rang := maxi(0, int(attributs.get(id, 0)))
 		var donnees: Dictionary = ATTRIBUTS[id]
 		for champ in resultat:
-			var poids := float(rang)
-			if champ in CHAMPS_OFFENSIFS:
-				poids = poids_points(rang) * facteur_progression(niveau, PUISSANCE_INITIALE)
-			resultat[champ] = float(resultat[champ]) + float(donnees.get(champ, 0.0)) * poids
+			resultat[champ] = float(resultat[champ]) \
+				+ valeur_par_point(donnees.get(champ, 0.0), niveau) * float(rang)
 	return resultat
 
 static func gain_point(id: String, points: int, niveau: int) -> Dictionary:

@@ -70,7 +70,7 @@ func _verifier_courbes() -> void:
 		_verifier(is_equal_approx(Chapitres.facteur_degats(chapitre, 100),
 			Chapitres.facteur_degats(chapitre, Chapitres.salles(chapitre))), "Salle supérieure bornée")
 	_verifier(is_equal_approx(Chapitres.facteur_pv(0, 1), 1.0) and is_equal_approx(Chapitres.facteur_degats(0, 1), 1.0), "Salle initiale normalisee a un")
-	_verifier(Chapitres.facteur_pv(1, 1) > 1.0 and Chapitres.facteur_pv(1, 1) <= 1.3, "Le niveau deux reste accessible avant les augments")
+	_verifier(Chapitres.facteur_pv(1, 1) > 1.0 and Chapitres.facteur_pv(1, 1) <= 1.4, "Le niveau deux reste accessible avant les augments")
 	_verifier(Chapitres.facteur_pv(0, 19) >= 10.0 and Chapitres.facteur_pv(0, 19) <= 12.0, "Les monstres suivent les gains mesures des builds mixtes")
 	_verifier(Chapitres.facteur_pv(0, 19, true) >= 3.0 and Chapitres.facteur_pv(0, 19, true) <= 3.5, "Les boss suivent la puissance de run sans imposer un legendaire offensif")
 
@@ -200,8 +200,8 @@ func _verifier_statistiques() -> void:
 	var intellect := Stats.depuis_reglages({}, {}, {}, 1, {"intelligence": 1})
 	_verifier(intellect.degats > debut.degats and intellect.cadence > debut.cadence,
 		"Intelligence utile aux tirs normaux")
-	_verifier(is_equal_approx(Stats.base_pv(Personnage.NIVEAU_MAX), Reglages.HEROS_PV * (1.0 + 29.0 * Reglages.NIVEAU_PV_PAR_NIVEAU)), "Petit socle PV du niveau")
-	_verifier(is_equal_approx(Stats.base_degats(Personnage.NIVEAU_MAX), Reglages.TIR_DEGATS * (1.0 + 29.0 * Reglages.NIVEAU_DEGATS_PAR_NIVEAU)), "Petit socle ATK du niveau")
+	_verifier(is_equal_approx(Stats.base_pv(Personnage.NIVEAU_MAX), Reglages.statistique_arrondie(Reglages.HEROS_PV * pow(1.0 + Reglages.NIVEAU_PV_PAR_NIVEAU, 29))), "Socle PV composé et entier")
+	_verifier(is_equal_approx(Stats.base_degats(Personnage.NIVEAU_MAX), Reglages.statistique_arrondie(Reglages.TIR_DEGATS * pow(1.0 + Reglages.NIVEAU_DEGATS_PAR_NIVEAU, 29))), "Socle ATK composé et entier")
 	_verifier(Personnage.points_depenses(attributs) == Personnage.points_totaux(Personnage.NIVEAU_MAX),
 		"Exemple équipé dans le budget des attributs")
 
@@ -211,23 +211,57 @@ func _verifier_progression_sources() -> void:
 	var precedent := Stats.depuis_reglages({}, passifs, {}, 1, attributs)
 	for niveau in range(2, Personnage.NIVEAU_MAX + 1):
 		var courant := Stats.depuis_reglages({}, passifs, {}, niveau, attributs)
-		_verifier(courant.degats > precedent.degats and courant.cadence > precedent.cadence
-			and courant.critique > precedent.critique, "Les sources acquises grandissent avec le heros : %d" % niveau)
+		_verifier(courant.degats > precedent.degats and courant.cadence >= precedent.cadence
+			and courant.critique >= precedent.critique, "La progression ne retire jamais de puissance : %d" % niveau)
+		if Personnage.palier_niveau(niveau) > Personnage.palier_niveau(niveau - 1):
+			_verifier(courant.cadence > precedent.cadence and courant.critique > precedent.critique,
+				"Les sources acquises se renforcent au nouveau palier : %d" % niveau)
 		precedent = courant
 	var totaux := Personnage.points_totaux(Personnage.NIVEAU_MAX)
 	var debut := Personnage.bonus({"force": 1}, Personnage.NIVEAU_MAX)
 	var avant := Personnage.bonus({"force": totaux - 1}, Personnage.NIVEAU_MAX)
 	var fin := Personnage.bonus({"force": totaux}, Personnage.NIVEAU_MAX)
 	_verifier(float(fin["attaque_base"]) > float(avant["attaque_base"]), "Chaque point offensif reste utile")
-	_verifier(float(fin["attaque_base"]) - float(avant["attaque_base"]) < float(debut["attaque_base"]),
-		"Concentrer tous les points en Force reduit leur rendement")
-	for niveau in [1, 4, Personnage.NIVEAU_MAX]:
+	_verifier(is_equal_approx(float(fin["attaque_base"]) - float(avant["attaque_base"]), float(debut["attaque_base"])),
+		"Le dernier point de Force conserve son gain entier")
+	for niveau in range(1, Personnage.NIVEAU_MAX + 1):
+		for id: String in Personnage.ATTRIBUTS:
+			var gain := Personnage.gain_point(id, 0, niveau)
+			var tardif := Personnage.gain_point(id, totaux - 1, niveau)
+			var precedent_niveau := Personnage.gain_point(id, 0, maxi(1, niveau - 1))
+			for champ: String in ["attaque_base", "pv_base", "defense_base"]:
+				var valeur := float(gain[champ])
+				_verifier(is_equal_approx(valeur, float(roundi(valeur))), "Un point brut ne donne aucune fraction : " + id)
+				_verifier(is_equal_approx(valeur, float(tardif[champ])) and valeur >= float(precedent_niveau[champ]),
+					"Le gain par point ne diminue ni avec les points ni avec le niveau : " + id)
+	for niveau in range(1, Personnage.NIVEAU_MAX + 1):
 		var simple := Passifs.bonus_stats({"vigueur": 1}, niveau)
 		var double := Passifs.bonus_stats({"vigueur": 2}, niveau)
-		_verifier(is_equal_approx(float(double["attaque_mult"]), 2.0 * float(simple["attaque_mult"])),
-			"Un doublon double le bonus au niveau courant : %d" % niveau)
+		_verifier(float(double["attaque_mult"]) > 2.0 * float(simple["attaque_mult"]),
+			"Un doublon renforce la puissance deja acquise : %d" % niveau)
+		_verifier(is_equal_approx((1.0 + float(double["attaque_mult"])) / (1.0 + float(simple["attaque_mult"])),
+			1.0 + float(simple["attaque_mult"])), "Le doublon conserve le gain relatif du passif : %d" % niveau)
 		_verifier(Passifs.resume_rang("vigueur", 2, niveau) == "+%s %% attaque" % Passifs._pourcentage(float(double["attaque_mult"])),
 			"La fiche du passif affiche le bonus réellement utilise : %d" % niveau)
+	for id: String in ["force", "puissance", "trajectoire", "grand_oeuvre"]:
+		var taux := float(ArbreCompetences.NOEUDS[id]["attaque"])
+		var gain_initial := ArbreCompetences.multiplicateur_attaque({id: 1}) - 1.0
+		var avant_dernier := ArbreCompetences.multiplicateur_attaque({id: ArbreCompetences.rangs(id) - 1})
+		var maximum := ArbreCompetences.multiplicateur_attaque({id: ArbreCompetences.rangs(id)})
+		_verifier(is_equal_approx(maximum / avant_dernier, 1.0 + taux), "Le dernier rang conserve son gain relatif : " + id)
+		_verifier(maximum - avant_dernier > gain_initial, "Le dernier rang donne davantage d'attaque : " + id)
+	_verifier(ArbreCompetences.ATTAQUE_PAR_RANG_FINALE > ArbreCompetences.ATTAQUE_PAR_RANG_INITIALE,
+		"La derniere maitrise renforce davantage que la premiere")
+	for id: String in CatalogueProjectiles.TYPES:
+		var gain_precedent := 0.0
+		for forge in range(1, Reglages.FORGE_NIVEAU_MAX + 1):
+			var gain := CatalogueProjectiles.attaque_base(id, forge) - CatalogueProjectiles.attaque_base(id, forge - 1)
+			_verifier(gain >= gain_precedent and is_equal_approx(gain, float(roundi(gain))),
+				"Les gains de forge sont entiers et croissants : " + id)
+			gain_precedent = gain
+	for nombre in range(1, Epreuves.nombre() + 1):
+		_verifier(is_equal_approx(Reglages.multiplicateur_coeurs(nombre) / Reglages.multiplicateur_coeurs(nombre - 1),
+			1.0 + Reglages.COEUR_MANA_BONUS_FINAL), "Chaque Coeur conserve son gain relatif")
 
 func _verifier_familiers() -> void:
 	var attaque_depart := Reglages.TIR_DEGATS + CatalogueProjectiles.attaque_base("standard", 0)

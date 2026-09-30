@@ -3,10 +3,8 @@ extends RefCounted
 
 # Une arme forgeable apporte de l'attaque de base a toutes les attaques.
 # Son coefficient de tir ne concerne que sa forme de projectile.
-const ATTAQUE_BASE := 4.0
-const FORGE_ATTAQUE_PAR_NIVEAU := 1.0
-const FORGE_RANGS_INITIAUX := 2
-const FORGE_ATTAQUE_PAR_NIVEAU_TARDIF := 0.35
+const ATTAQUE_BASE := 4.0 * Reglages.ECHELLE_STATISTIQUES
+const FORGE_CROISSANCE := 0.12
 static var TYPES := _avec_descriptions({
 	"standard": {"nom": "Baguette d’acier", "monde": 1, "niveau": 1, "coefficient_tir": 1.0},
 	"veloce": {"nom": "Aiguille vive", "monde": 2, "niveau": 4, "coefficient_tir": 0.85, "cadence_mult": 1.20, "portee_mult": 0.90},
@@ -49,13 +47,8 @@ static func contient(id: String) -> bool:
 static func attaque_base(id: String, niveau_forge: int) -> float:
 	if not contient(id):
 		return 0.0
-	var croissance := pow(Reglages.EQUIPEMENT_CROISSANCE_PAR_PALIER, niveau_deblocage(id) - 1)
-	var forge := clampi(niveau_forge, 0, Reglages.FORGE_NIVEAU_MAX)
-	var initial := mini(forge, FORGE_RANGS_INITIAUX)
-	# Les premiers achats lancent le build ; les autres familles prennent
-	# ensuite leur place sans laisser la forge dominer le compte complet.
-	return (ATTAQUE_BASE + FORGE_ATTAQUE_PAR_NIVEAU * float(initial)
-		+ FORGE_ATTAQUE_PAR_NIVEAU_TARDIF * float(forge - initial)) * croissance
+	return Reglages.statistique_forge(ATTAQUE_BASE, niveau_forge, FORGE_CROISSANCE,
+		niveau_deblocage(id) - 1)
 
 static func niveau_deblocage(id: String) -> int:
 	return int(TYPES.get(id, TYPES["standard"]).get("niveau", 1))

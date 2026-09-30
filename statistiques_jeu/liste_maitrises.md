@@ -3,9 +3,9 @@
 ## Logique mathématique
 
 - Un nœud normal possède 10 rangs ; un pouvoir majeur s’achète une seule fois.
-- Bonus du nœud = bonus d’un rang × rang acquis. Les bonus d’une même statistique s’additionnent.
+- Facteur du nœud = (1 + taux du rang)^rangs acquis. Les facteurs des nœuds d’une même statistique se multiplient. Les points de critique s’additionnent.
 - Coût du prochain rang = coût initial × (1 + 0,25 × rangs déjà acquis), arrondi au multiple de 5.
-- L’attaque est un pourcentage de l’attaque brute du héros ; elle ne donne pas des dégâts fixes.
+- Un rang augmente l’attaque déjà acquise. Par exemple, +4 % fait passer 100 à 104, et 300 à 312. Les nœuds offensifs tardifs ont un taux supérieur aux premiers.
 - Dégâts moyens d’un tir, hors augments et bonus finaux = attaque × coefficient de l’arme × [1 + chance critique × (coefficient critique − 1)].
 - Une maîtrise de critique agit sur ce dernier facteur. La cadence augmente les tirs par seconde, pas les dégâts d’un tir.
 - Les prérequis demandent au moins un rang dans le nœud précédent, pas son maximum.
@@ -20,16 +20,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +4 % d’attaque | 10 | 10 |
-| 2 | +8 % d’attaque | 15 | 25 |
-| 3 | +12 % d’attaque | 15 | 40 |
-| 4 | +16 % d’attaque | 20 | 60 |
-| 5 | +20 % d’attaque | 20 | 80 |
-| 6 | +24 % d’attaque | 25 | 105 |
-| 7 | +28 % d’attaque | 25 | 130 |
-| 8 | +32 % d’attaque | 30 | 160 |
-| 9 | +36 % d’attaque | 30 | 190 |
-| 10 | +40 % d’attaque | 35 | 225 |
+| 1 | +2 % d’attaque | 10 | 10 |
+| 2 | +4 % d’attaque | 15 | 25 |
+| 3 | +6,1 % d’attaque | 15 | 40 |
+| 4 | +8,2 % d’attaque | 20 | 60 |
+| 5 | +10,4 % d’attaque | 20 | 80 |
+| 6 | +12,6 % d’attaque | 25 | 105 |
+| 7 | +14,9 % d’attaque | 25 | 130 |
+| 8 | +17,2 % d’attaque | 30 | 160 |
+| 9 | +19,5 % d’attaque | 30 | 190 |
+| 10 | +21,9 % d’attaque | 35 | 225 |
 
 ### Œil sûr
 
@@ -62,16 +62,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +2,5 % d’attaque | 30 | 30 |
-| 2 | +5 % d’attaque | 40 | 70 |
-| 3 | +7,5 % d’attaque | 45 | 115 |
-| 4 | +10 % d’attaque | 55 | 170 |
-| 5 | +12,5 % d’attaque | 60 | 230 |
-| 6 | +15 % d’attaque | 70 | 300 |
-| 7 | +17,5 % d’attaque | 75 | 375 |
-| 8 | +20 % d’attaque | 85 | 460 |
-| 9 | +22,5 % d’attaque | 90 | 550 |
-| 10 | +25 % d’attaque | 100 | 650 |
+| 1 | +2 % d’attaque | 30 | 30 |
+| 2 | +4 % d’attaque | 40 | 70 |
+| 3 | +6,1 % d’attaque | 45 | 115 |
+| 4 | +8,2 % d’attaque | 55 | 170 |
+| 5 | +10,4 % d’attaque | 60 | 230 |
+| 6 | +12,6 % d’attaque | 70 | 300 |
+| 7 | +14,9 % d’attaque | 75 | 375 |
+| 8 | +17,2 % d’attaque | 85 | 460 |
+| 9 | +19,5 % d’attaque | 90 | 550 |
+| 10 | +21,9 % d’attaque | 100 | 650 |
 
 ### Impact critique
 
@@ -79,16 +79,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +1 % de dégâts critiques | 40 | 40 |
-| 2 | +2 % de dégâts critiques | 50 | 90 |
-| 3 | +3 % de dégâts critiques | 60 | 150 |
-| 4 | +4 % de dégâts critiques | 70 | 220 |
-| 5 | +5 % de dégâts critiques | 80 | 300 |
-| 6 | +6 % de dégâts critiques | 90 | 390 |
-| 7 | +7 % de dégâts critiques | 100 | 490 |
-| 8 | +8 % de dégâts critiques | 110 | 600 |
-| 9 | +9 % de dégâts critiques | 120 | 720 |
-| 10 | +10 % de dégâts critiques | 130 | 850 |
+| 1 | +2 % de dégâts critiques | 40 | 40 |
+| 2 | +4 % de dégâts critiques | 50 | 90 |
+| 3 | +6 % de dégâts critiques | 60 | 150 |
+| 4 | +8 % de dégâts critiques | 70 | 220 |
+| 5 | +10 % de dégâts critiques | 80 | 300 |
+| 6 | +12 % de dégâts critiques | 90 | 390 |
+| 7 | +14 % de dégâts critiques | 100 | 490 |
+| 8 | +16 % de dégâts critiques | 110 | 600 |
+| 9 | +18 % de dégâts critiques | 120 | 720 |
+| 10 | +20 % de dégâts critiques | 130 | 850 |
 
 ### Catalyse absolue
 
@@ -104,16 +104,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +4 % d’attaque | 60 | 60 |
-| 2 | +8 % d’attaque | 75 | 135 |
-| 3 | +12 % d’attaque | 90 | 225 |
-| 4 | +16 % d’attaque | 105 | 330 |
-| 5 | +20 % d’attaque | 120 | 450 |
-| 6 | +24 % d’attaque | 135 | 585 |
-| 7 | +28 % d’attaque | 150 | 735 |
-| 8 | +32 % d’attaque | 165 | 900 |
-| 9 | +36 % d’attaque | 180 | 1080 |
-| 10 | +40 % d’attaque | 195 | 1275 |
+| 1 | +3 % d’attaque | 60 | 60 |
+| 2 | +6,1 % d’attaque | 75 | 135 |
+| 3 | +9,3 % d’attaque | 90 | 225 |
+| 4 | +12,6 % d’attaque | 105 | 330 |
+| 5 | +15,9 % d’attaque | 120 | 450 |
+| 6 | +19,4 % d’attaque | 135 | 585 |
+| 7 | +23 % d’attaque | 150 | 735 |
+| 8 | +26,7 % d’attaque | 165 | 900 |
+| 9 | +30,5 % d’attaque | 180 | 1080 |
+| 10 | +34,4 % d’attaque | 195 | 1275 |
 
 ### Instinct critique
 
@@ -121,16 +121,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +1 % de chance critique | 80 | 80 |
-| 2 | +2 % de chance critique | 100 | 180 |
-| 3 | +3 % de chance critique | 120 | 300 |
-| 4 | +4 % de chance critique | 140 | 440 |
-| 5 | +5 % de chance critique | 160 | 600 |
-| 6 | +6 % de chance critique | 180 | 780 |
-| 7 | +7 % de chance critique | 200 | 980 |
-| 8 | +8 % de chance critique | 220 | 1200 |
-| 9 | +9 % de chance critique | 240 | 1440 |
-| 10 | +10 % de chance critique | 260 | 1700 |
+| 1 | +2 % de chance critique | 80 | 80 |
+| 2 | +4 % de chance critique | 100 | 180 |
+| 3 | +6 % de chance critique | 120 | 300 |
+| 4 | +8 % de chance critique | 140 | 440 |
+| 5 | +10 % de chance critique | 160 | 600 |
+| 6 | +12 % de chance critique | 180 | 780 |
+| 7 | +14 % de chance critique | 200 | 980 |
+| 8 | +16 % de chance critique | 220 | 1200 |
+| 9 | +18 % de chance critique | 240 | 1440 |
+| 10 | +20 % de chance critique | 260 | 1700 |
 
 ### Domination
 
@@ -138,7 +138,7 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +7,5 % d’attaque | 400 | 400 |
+| 1 | +10 % d’attaque | 400 | 400 |
 
 ### Grand Œuvre
 
@@ -147,15 +147,15 @@
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
 | 1 | +4 % d’attaque | 120 | 120 |
-| 2 | +8 % d’attaque | 150 | 270 |
-| 3 | +12 % d’attaque | 180 | 450 |
-| 4 | +16 % d’attaque | 210 | 660 |
-| 5 | +20 % d’attaque | 240 | 900 |
-| 6 | +24 % d’attaque | 270 | 1170 |
-| 7 | +28 % d’attaque | 300 | 1470 |
-| 8 | +32 % d’attaque | 330 | 1800 |
-| 9 | +36 % d’attaque | 360 | 2160 |
-| 10 | +40 % d’attaque | 390 | 2550 |
+| 2 | +8,2 % d’attaque | 150 | 270 |
+| 3 | +12,5 % d’attaque | 180 | 450 |
+| 4 | +17 % d’attaque | 210 | 660 |
+| 5 | +21,7 % d’attaque | 240 | 900 |
+| 6 | +26,5 % d’attaque | 270 | 1170 |
+| 7 | +31,6 % d’attaque | 300 | 1470 |
+| 8 | +36,9 % d’attaque | 330 | 1800 |
+| 9 | +42,3 % d’attaque | 360 | 2160 |
+| 10 | +48 % d’attaque | 390 | 2550 |
 
 **Total de la branche : 8275 Gouttes.**
 
@@ -167,16 +167,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +1,5 % de PV maximum | 10 | 10 |
-| 2 | +3 % de PV maximum | 15 | 25 |
-| 3 | +4,5 % de PV maximum | 15 | 40 |
-| 4 | +6 % de PV maximum | 20 | 60 |
-| 5 | +7,5 % de PV maximum | 20 | 80 |
-| 6 | +9 % de PV maximum | 25 | 105 |
-| 7 | +10,5 % de PV maximum | 25 | 130 |
-| 8 | +12 % de PV maximum | 30 | 160 |
-| 9 | +13,5 % de PV maximum | 30 | 190 |
-| 10 | +15 % de PV maximum | 35 | 225 |
+| 1 | +1 % de PV maximum | 10 | 10 |
+| 2 | +2 % de PV maximum | 15 | 25 |
+| 3 | +3 % de PV maximum | 15 | 40 |
+| 4 | +4,1 % de PV maximum | 20 | 60 |
+| 5 | +5,1 % de PV maximum | 20 | 80 |
+| 6 | +6,2 % de PV maximum | 25 | 105 |
+| 7 | +7,2 % de PV maximum | 25 | 130 |
+| 8 | +8,3 % de PV maximum | 30 | 160 |
+| 9 | +9,4 % de PV maximum | 30 | 190 |
+| 10 | +10,5 % de PV maximum | 35 | 225 |
 
 ### Défense
 
@@ -186,14 +186,14 @@
 | --- | --- | --- | --- |
 | 1 | +2 % de défense | 15 | 15 |
 | 2 | +4 % de défense | 20 | 35 |
-| 3 | +6 % de défense | 25 | 60 |
-| 4 | +8 % de défense | 25 | 85 |
-| 5 | +10 % de défense | 30 | 115 |
-| 6 | +12 % de défense | 35 | 150 |
-| 7 | +14 % de défense | 40 | 190 |
-| 8 | +16 % de défense | 40 | 230 |
-| 9 | +18 % de défense | 45 | 275 |
-| 10 | +20 % de défense | 50 | 325 |
+| 3 | +6,1 % de défense | 25 | 60 |
+| 4 | +8,2 % de défense | 25 | 85 |
+| 5 | +10,4 % de défense | 30 | 115 |
+| 6 | +12,6 % de défense | 35 | 150 |
+| 7 | +14,9 % de défense | 40 | 190 |
+| 8 | +17,2 % de défense | 40 | 230 |
+| 9 | +19,5 % de défense | 45 | 275 |
+| 10 | +21,9 % de défense | 50 | 325 |
 
 ### Vitalité souveraine
 
@@ -209,16 +209,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +1,5 % de PV maximum | 30 | 30 |
-| 2 | +3 % de PV maximum | 40 | 70 |
-| 3 | +4,5 % de PV maximum | 45 | 115 |
-| 4 | +6 % de PV maximum | 55 | 170 |
-| 5 | +7,5 % de PV maximum | 60 | 230 |
-| 6 | +9 % de PV maximum | 70 | 300 |
-| 7 | +10,5 % de PV maximum | 75 | 375 |
-| 8 | +12 % de PV maximum | 85 | 460 |
-| 9 | +13,5 % de PV maximum | 90 | 550 |
-| 10 | +15 % de PV maximum | 100 | 650 |
+| 1 | +2 % de PV maximum | 30 | 30 |
+| 2 | +4 % de PV maximum | 40 | 70 |
+| 3 | +6,1 % de PV maximum | 45 | 115 |
+| 4 | +8,2 % de PV maximum | 55 | 170 |
+| 5 | +10,4 % de PV maximum | 60 | 230 |
+| 6 | +12,6 % de PV maximum | 70 | 300 |
+| 7 | +14,9 % de PV maximum | 75 | 375 |
+| 8 | +17,2 % de PV maximum | 85 | 460 |
+| 9 | +19,5 % de PV maximum | 90 | 550 |
+| 10 | +21,9 % de PV maximum | 100 | 650 |
 
 ### Robustesse
 
@@ -226,16 +226,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +2 % de défense | 40 | 40 |
-| 2 | +4 % de défense | 50 | 90 |
-| 3 | +6 % de défense | 60 | 150 |
-| 4 | +8 % de défense | 70 | 220 |
-| 5 | +10 % de défense | 80 | 300 |
-| 6 | +12 % de défense | 90 | 390 |
-| 7 | +14 % de défense | 100 | 490 |
-| 8 | +16 % de défense | 110 | 600 |
-| 9 | +18 % de défense | 120 | 720 |
-| 10 | +20 % de défense | 130 | 850 |
+| 1 | +3 % de défense | 40 | 40 |
+| 2 | +6,1 % de défense | 50 | 90 |
+| 3 | +9,3 % de défense | 60 | 150 |
+| 4 | +12,6 % de défense | 70 | 220 |
+| 5 | +15,9 % de défense | 80 | 300 |
+| 6 | +19,4 % de défense | 90 | 390 |
+| 7 | +23 % de défense | 100 | 490 |
+| 8 | +26,7 % de défense | 110 | 600 |
+| 9 | +30,5 % de défense | 120 | 720 |
+| 10 | +34,4 % de défense | 130 | 850 |
 
 ### Carapace absolue
 
@@ -251,16 +251,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +2 % de PV maximum | 60 | 60 |
-| 2 | +4 % de PV maximum | 75 | 135 |
-| 3 | +6 % de PV maximum | 90 | 225 |
-| 4 | +8 % de PV maximum | 105 | 330 |
-| 5 | +10 % de PV maximum | 120 | 450 |
-| 6 | +12 % de PV maximum | 135 | 585 |
-| 7 | +14 % de PV maximum | 150 | 735 |
-| 8 | +16 % de PV maximum | 165 | 900 |
-| 9 | +18 % de PV maximum | 180 | 1080 |
-| 10 | +20 % de PV maximum | 195 | 1275 |
+| 1 | +3 % de PV maximum | 60 | 60 |
+| 2 | +6,1 % de PV maximum | 75 | 135 |
+| 3 | +9,3 % de PV maximum | 90 | 225 |
+| 4 | +12,6 % de PV maximum | 105 | 330 |
+| 5 | +15,9 % de PV maximum | 120 | 450 |
+| 6 | +19,4 % de PV maximum | 135 | 585 |
+| 7 | +23 % de PV maximum | 150 | 735 |
+| 8 | +26,7 % de PV maximum | 165 | 900 |
+| 9 | +30,5 % de PV maximum | 180 | 1080 |
+| 10 | +34,4 % de PV maximum | 195 | 1275 |
 
 ### Bastion
 
@@ -268,16 +268,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +2,5 % de défense | 80 | 80 |
-| 2 | +5 % de défense | 100 | 180 |
-| 3 | +7,5 % de défense | 120 | 300 |
-| 4 | +10 % de défense | 140 | 440 |
-| 5 | +12,5 % de défense | 160 | 600 |
-| 6 | +15 % de défense | 180 | 780 |
-| 7 | +17,5 % de défense | 200 | 980 |
-| 8 | +20 % de défense | 220 | 1200 |
-| 9 | +22,5 % de défense | 240 | 1440 |
-| 10 | +25 % de défense | 260 | 1700 |
+| 1 | +4 % de défense | 80 | 80 |
+| 2 | +8,2 % de défense | 100 | 180 |
+| 3 | +12,5 % de défense | 120 | 300 |
+| 4 | +17 % de défense | 140 | 440 |
+| 5 | +21,7 % de défense | 160 | 600 |
+| 6 | +26,5 % de défense | 180 | 780 |
+| 7 | +31,6 % de défense | 200 | 980 |
+| 8 | +36,9 % de défense | 220 | 1200 |
+| 9 | +42,3 % de défense | 240 | 1440 |
+| 10 | +48 % de défense | 260 | 1700 |
 
 ### Colosse
 
@@ -293,16 +293,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +2 % de PV maximum | 120 | 120 |
-| 2 | +4 % de PV maximum | 150 | 270 |
-| 3 | +6 % de PV maximum | 180 | 450 |
-| 4 | +8 % de PV maximum | 210 | 660 |
-| 5 | +10 % de PV maximum | 240 | 900 |
-| 6 | +12 % de PV maximum | 270 | 1170 |
-| 7 | +14 % de PV maximum | 300 | 1470 |
-| 8 | +16 % de PV maximum | 330 | 1800 |
-| 9 | +18 % de PV maximum | 360 | 2160 |
-| 10 | +20 % de PV maximum | 390 | 2550 |
+| 1 | +4 % de PV maximum | 120 | 120 |
+| 2 | +8,2 % de PV maximum | 150 | 270 |
+| 3 | +12,5 % de PV maximum | 180 | 450 |
+| 4 | +17 % de PV maximum | 210 | 660 |
+| 5 | +21,7 % de PV maximum | 240 | 900 |
+| 6 | +26,5 % de PV maximum | 270 | 1170 |
+| 7 | +31,6 % de PV maximum | 300 | 1470 |
+| 8 | +36,9 % de PV maximum | 330 | 1800 |
+| 9 | +42,3 % de PV maximum | 360 | 2160 |
+| 10 | +48 % de PV maximum | 390 | 2550 |
 
 **Total de la branche : 8275 Gouttes.**
 
@@ -314,16 +314,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +1,5 % aux soins | 10 | 10 |
-| 2 | +3 % aux soins | 15 | 25 |
-| 3 | +4,5 % aux soins | 15 | 40 |
-| 4 | +6 % aux soins | 20 | 60 |
-| 5 | +7,5 % aux soins | 20 | 80 |
-| 6 | +9 % aux soins | 25 | 105 |
-| 7 | +10,5 % aux soins | 25 | 130 |
-| 8 | +12 % aux soins | 30 | 160 |
-| 9 | +13,5 % aux soins | 30 | 190 |
-| 10 | +15 % aux soins | 35 | 225 |
+| 1 | +2 % aux soins | 10 | 10 |
+| 2 | +4 % aux soins | 15 | 25 |
+| 3 | +6,1 % aux soins | 15 | 40 |
+| 4 | +8,2 % aux soins | 20 | 60 |
+| 5 | +10,4 % aux soins | 20 | 80 |
+| 6 | +12,6 % aux soins | 25 | 105 |
+| 7 | +14,9 % aux soins | 25 | 130 |
+| 8 | +17,2 % aux soins | 30 | 160 |
+| 9 | +19,5 % aux soins | 30 | 190 |
+| 10 | +21,9 % aux soins | 35 | 225 |
 
 ### Prospection
 
@@ -333,14 +333,14 @@
 | --- | --- | --- | --- |
 | 1 | +2 % de butin | 15 | 15 |
 | 2 | +4 % de butin | 20 | 35 |
-| 3 | +6 % de butin | 25 | 60 |
-| 4 | +8 % de butin | 25 | 85 |
-| 5 | +10 % de butin | 30 | 115 |
-| 6 | +12 % de butin | 35 | 150 |
-| 7 | +14 % de butin | 40 | 190 |
-| 8 | +16 % de butin | 40 | 230 |
-| 9 | +18 % de butin | 45 | 275 |
-| 10 | +20 % de butin | 50 | 325 |
+| 3 | +6,1 % de butin | 25 | 60 |
+| 4 | +8,2 % de butin | 25 | 85 |
+| 5 | +10,4 % de butin | 30 | 115 |
+| 6 | +12,6 % de butin | 35 | 150 |
+| 7 | +14,9 % de butin | 40 | 190 |
+| 8 | +17,2 % de butin | 40 | 230 |
+| 9 | +19,5 % de butin | 45 | 275 |
+| 10 | +21,9 % de butin | 50 | 325 |
 
 ### Distillation
 
@@ -356,16 +356,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +0,5 % d’attaque | 30 | 30 |
-| 2 | +1 % d’attaque | 40 | 70 |
-| 3 | +1,5 % d’attaque | 45 | 115 |
-| 4 | +2 % d’attaque | 55 | 170 |
-| 5 | +2,5 % d’attaque | 60 | 230 |
-| 6 | +3 % d’attaque | 70 | 300 |
-| 7 | +3,5 % d’attaque | 75 | 375 |
-| 8 | +4 % d’attaque | 85 | 460 |
-| 9 | +4,5 % d’attaque | 90 | 550 |
-| 10 | +5 % d’attaque | 100 | 650 |
+| 1 | +1 % d’attaque | 30 | 30 |
+| 2 | +2 % d’attaque | 40 | 70 |
+| 3 | +3 % d’attaque | 45 | 115 |
+| 4 | +4,1 % d’attaque | 55 | 170 |
+| 5 | +5,1 % d’attaque | 60 | 230 |
+| 6 | +6,2 % d’attaque | 70 | 300 |
+| 7 | +7,2 % d’attaque | 75 | 375 |
+| 8 | +8,3 % d’attaque | 85 | 460 |
+| 9 | +9,4 % d’attaque | 90 | 550 |
+| 10 | +10,5 % d’attaque | 100 | 650 |
 
 ### Étude
 
@@ -374,15 +374,15 @@
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
 | 1 | +3 % d’XP de compte | 40 | 40 |
-| 2 | +6 % d’XP de compte | 50 | 90 |
-| 3 | +9 % d’XP de compte | 60 | 150 |
-| 4 | +12 % d’XP de compte | 70 | 220 |
-| 5 | +15 % d’XP de compte | 80 | 300 |
-| 6 | +18 % d’XP de compte | 90 | 390 |
-| 7 | +21 % d’XP de compte | 100 | 490 |
-| 8 | +24 % d’XP de compte | 110 | 600 |
-| 9 | +27 % d’XP de compte | 120 | 720 |
-| 10 | +30 % d’XP de compte | 130 | 850 |
+| 2 | +6,1 % d’XP de compte | 50 | 90 |
+| 3 | +9,3 % d’XP de compte | 60 | 150 |
+| 4 | +12,6 % d’XP de compte | 70 | 220 |
+| 5 | +15,9 % d’XP de compte | 80 | 300 |
+| 6 | +19,4 % d’XP de compte | 90 | 390 |
+| 7 | +23 % d’XP de compte | 100 | 490 |
+| 8 | +26,7 % d’XP de compte | 110 | 600 |
+| 9 | +30,5 % d’XP de compte | 120 | 720 |
+| 10 | +34,4 % d’XP de compte | 130 | 850 |
 
 ### Double récolte
 
@@ -398,16 +398,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +0,5 % de cadence | 60 | 60 |
-| 2 | +1 % de cadence | 75 | 135 |
-| 3 | +1,5 % de cadence | 90 | 225 |
-| 4 | +2 % de cadence | 105 | 330 |
-| 5 | +2,5 % de cadence | 120 | 450 |
-| 6 | +3 % de cadence | 135 | 585 |
-| 7 | +3,5 % de cadence | 150 | 735 |
-| 8 | +4 % de cadence | 165 | 900 |
-| 9 | +4,5 % de cadence | 180 | 1080 |
-| 10 | +5 % de cadence | 195 | 1275 |
+| 1 | +1 % de cadence | 60 | 60 |
+| 2 | +2 % de cadence | 75 | 135 |
+| 3 | +3 % de cadence | 90 | 225 |
+| 4 | +4,1 % de cadence | 105 | 330 |
+| 5 | +5,1 % de cadence | 120 | 450 |
+| 6 | +6,2 % de cadence | 135 | 585 |
+| 7 | +7,2 % de cadence | 150 | 735 |
+| 8 | +8,3 % de cadence | 165 | 900 |
+| 9 | +9,4 % de cadence | 180 | 1080 |
+| 10 | +10,5 % de cadence | 195 | 1275 |
 
 ### Veine profonde
 
@@ -415,16 +415,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +3 % de pierres | 80 | 80 |
-| 2 | +6 % de pierres | 100 | 180 |
-| 3 | +9 % de pierres | 120 | 300 |
-| 4 | +12 % de pierres | 140 | 440 |
-| 5 | +15 % de pierres | 160 | 600 |
-| 6 | +18 % de pierres | 180 | 780 |
-| 7 | +21 % de pierres | 200 | 980 |
-| 8 | +24 % de pierres | 220 | 1200 |
-| 9 | +27 % de pierres | 240 | 1440 |
-| 10 | +30 % de pierres | 260 | 1700 |
+| 1 | +4 % de pierres | 80 | 80 |
+| 2 | +8,2 % de pierres | 100 | 180 |
+| 3 | +12,5 % de pierres | 120 | 300 |
+| 4 | +17 % de pierres | 140 | 440 |
+| 5 | +21,7 % de pierres | 160 | 600 |
+| 6 | +26,5 % de pierres | 180 | 780 |
+| 7 | +31,6 % de pierres | 200 | 980 |
+| 8 | +36,9 % de pierres | 220 | 1200 |
+| 9 | +42,3 % de pierres | 240 | 1440 |
+| 10 | +48 % de pierres | 260 | 1700 |
 
 ### Prescience
 
@@ -440,16 +440,16 @@
 
 | Rang | Bonus acquis | Achat du rang (Gouttes) | Coût cumulé (Gouttes) |
 | --- | --- | --- | --- |
-| 1 | +2 % de butin · +2 % d’XP de compte | 120 | 120 |
-| 2 | +4 % de butin · +4 % d’XP de compte | 150 | 270 |
-| 3 | +6 % de butin · +6 % d’XP de compte | 180 | 450 |
-| 4 | +8 % de butin · +8 % d’XP de compte | 210 | 660 |
-| 5 | +10 % de butin · +10 % d’XP de compte | 240 | 900 |
-| 6 | +12 % de butin · +12 % d’XP de compte | 270 | 1170 |
-| 7 | +14 % de butin · +14 % d’XP de compte | 300 | 1470 |
-| 8 | +16 % de butin · +16 % d’XP de compte | 330 | 1800 |
-| 9 | +18 % de butin · +18 % d’XP de compte | 360 | 2160 |
-| 10 | +20 % de butin · +20 % d’XP de compte | 390 | 2550 |
+| 1 | +4 % de butin · +4 % d’XP de compte | 120 | 120 |
+| 2 | +8,2 % de butin · +8,2 % d’XP de compte | 150 | 270 |
+| 3 | +12,5 % de butin · +12,5 % d’XP de compte | 180 | 450 |
+| 4 | +17 % de butin · +17 % d’XP de compte | 210 | 660 |
+| 5 | +21,7 % de butin · +21,7 % d’XP de compte | 240 | 900 |
+| 6 | +26,5 % de butin · +26,5 % d’XP de compte | 270 | 1170 |
+| 7 | +31,6 % de butin · +31,6 % d’XP de compte | 300 | 1470 |
+| 8 | +36,9 % de butin · +36,9 % d’XP de compte | 330 | 1800 |
+| 9 | +42,3 % de butin · +42,3 % d’XP de compte | 360 | 2160 |
+| 10 | +48 % de butin · +48 % d’XP de compte | 390 | 2550 |
 
 **Total de la branche : 8275 Gouttes.**
 
