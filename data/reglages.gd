@@ -134,9 +134,10 @@ const CAMPAGNE_PV_CHAPITRES_INITIAUX := 7
 const CAMPAGNE_PV_PAR_CHAPITRE_TARDIF := 1.11
 const CAMPAGNE_PV_BOSS_RENFORT_TARDIF := 1.10
 const CAMPAGNE_PV_BOSS_TRANSITION_TARDIVE := 0.93
-# Cibles du build equilibre ; elles ne bornent jamais un combat joue.
-const CAMPAGNE_BOSS_DUREE_NORMALE := Vector2(30.0, 45.0)
-const CAMPAGNE_BOSS_DUREE_SIGNATURE := Vector2(45.0, 60.0)
+# Reperes du build equilibre. La borne haute
+# sert au confort du modele ; aucune borne ne limite un combat joue.
+const CAMPAGNE_BOSS_DUREE_NORMALE := Vector2(15.0, 45.0)
+const CAMPAGNE_BOSS_DUREE_SIGNATURE := Vector2(25.0, 60.0)
 const CAMPAGNE_PV_ACCELERATION := 1.0
 # Le renfort arrive progressivement : les premieres salles restent accessibles
 # sans augment. La croissance composee reporte le besoin de farm vers la fin.
@@ -152,11 +153,12 @@ const CAMPAGNE_DEGATS_TRANSITION_TARDIVE := 0.90
 # Les monstres ordinaires suivent la puissance des augments. Les boss gardent
 # leur propre rythme de PV pour eviter d'allonger tous leurs combats.
 const CAMPAGNE_PV_PAR_SALLE := 1.12
+const CAMPAGNE_PV_PAR_SALLE_TARDIF := 1.08
 const CAMPAGNE_PV_BOSS_PAR_SALLE := 1.045
 const CAMPAGNE_DEGATS_PAR_SALLE := 1.023
 # Les paliers suivent les choix deja recus, sans lire l'inventaire du joueur.
-const CAMPAGNE_PV_PALIERS := {2: 1.08, 4: 1.45, 9: 1.70, 15: 1.20}
-const CAMPAGNE_PV_BOSS_PALIERS := {3: 1.08, 5: 1.15, 10: 1.70, 15: 1.20}
+const CAMPAGNE_PV_PALIERS := {2: 1.08, 4: 1.45, 9: 1.20, 15: 1.10}
+const CAMPAGNE_PV_BOSS_PALIERS := {3: 1.08, 5: 1.15, 10: 1.05, 15: 1.10}
 const CAMPAGNE_DEGATS_PALIERS := {5: 1.05, 10: 1.05, 15: 1.05}
 # Les premiers choix restent accessibles avant le crescendo geometrique.
 const DEFI_MONTEE_PV := 1.0       # x2 entre la premiere et la derniere rencontre
@@ -242,7 +244,7 @@ const MINE_INTERVALLE_FIN := 0.45
 const MINE_PLAFOND_DEBUT := 4
 const MINE_PLAFOND_FIN := 14
 const MINE_PV_MULT := 0.75
-const MINE_DEGATS_MULT := 0.60
+const MINE_DEGATS_MULT := 0.64
 const MINE_MONTEE_PV := 2.0
 const MINE_MONTEE_DEGATS := 1.0
 const MINE_BOSS_PV_MULT := 12.0

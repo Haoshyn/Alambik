@@ -53,12 +53,12 @@ func _verifier_specialisation(rapport: Dictionary) -> void:
 		"La politique tout offensive valorise une hausse de defense")
 	_exiger(Retour.Simulation.score_choix(avant, attaque, "tout_offensif") > 0.0,
 		"La politique tout offensive ignore une hausse de degats")
-	# Six Epreuves sont un renforcement volontaire avant le monde initial.
-	# Leur avantage se resorbe ensuite ; aucun plancher de coups n'existe en jeu.
+	# Le sur-farm garde une avance a l'entree du monde suivant. Les epiques et
+	# legendaires peuvent effacer des rencontres ; verifier les rares seuls.
 	for chapitre: int in rapport["progression"]:
 		var mesure: Dictionary = rapport["progression"][chapitre]
-		_exiger(float(mesure["une_attaque"]["mediane"]) <= (0.20 if chapitre <= Chapitres.CHAPITRES_PAR_MONDE else 0.05),
-			"Eliminations en une attaque trop courantes apres les Epreuves : " + str(chapitre))
+		_exiger(float(mesure["rares_attaque"]["mediane"]) <= Retour.limite_retour_farm(chapitre),
+			"Eliminations avec rares seuls trop courantes apres les Epreuves : " + str(chapitre))
 
 func _verifier_comptes(rapport: Dictionary) -> void:
 	for exemple: Dictionary in rapport["exemples"]:

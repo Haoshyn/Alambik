@@ -32,7 +32,7 @@ des systemes de jeu correspondants.
 - Passifs : presentation actuelle entierement conservee, dont les filtres
   Tous, Offensif, Defensif, Utilitaire
   et les quatre emplacements Passif 1 a 4. Le fond reprend la clairiere sous
-  un voile indigo progressif, plus calme derriere la collection.
+  un voile bleu brume progressif, plus calme derriere la collection.
   Aucun rectangle sombre sous Collection des passifs, les indications de
   limite/rangs/provenance, les noms, A decouvrir ou les descriptions. Aucun
   empilement de cadres de texte dans les fiches. Les glyphes et accents de
@@ -40,3 +40,5 @@ des systemes de jeu correspondants.
 
 L'etat valide le 27 septembre 2026 est la reference des cinq menus ; les
 retouches deja demandees ne sont pas une autorisation permanente de les reprendre.
+Les retouches d'Equipement, de ses fiches et du fond des Passifs demandees
+le 30 septembre 2026 deviennent la reference de ces elements.

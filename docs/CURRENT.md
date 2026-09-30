@@ -1,4 +1,4 @@
-# État courant — 28 septembre 2026
+# État courant — 30 septembre 2026
 
 Alambik est un roguelite de tir portrait Android sous Godot 4.7.1 : simulation
 2D, présentation 3D. Le héros Aster V7, la clairière animée, les cinq mondes,
@@ -86,15 +86,33 @@ viennent du catalogue et figurent dans les statistiques générées.
   conditionnel dans le menu, sans modification des systèmes permanents.
   Les cinq profils, la régression, la restauration et les commandes en portrait
   sont vérifiés sans fenêtre ; le rendu sur appareil reste à vérifier.
-- Vingt-six augments : douze rares, neuf épiques et cinq
-  légendaires. Ils modifient les statistiques ou les tirs ordinaires.
-  Les gains trop faibles de dégâts et de résistance sont renforcés, avec leurs effets conservés.
+- Vingt-sept augments : treize rares, neuf épiques et cinq
+  légendaires. Les choix de soins, mobilité et tir spécialisé ont un socle
+  de combat plus régulier. Élan vital garde son bonus après déplacement en
+  plus d'une hausse permanente d'attaque. Parmi les rares, Encrage vif lance
+  un trait périodique et Sceau de ruine fait tomber une météorite de zone.
+  Les satellites alchimiques ajoutent
+  deux cercles de contact originaux autour du héros, actifs en mouvement,
+  avec délai partagé par ennemi et protection par les murs. Leurs dégâts
+  ne reçoivent ni critiques, ni salves, ni rebonds, ni diagonales.
   Aucun malus ordinaire d'attaque, de PV, de cadence ou de mobilité.
   Salve est rare et unique ; Tir double est rare et cumulable deux fois.
-  Salve, Tir double et Battement triple appliquent chacun −20 % aux projectiles,
-  par multiplication. Battement triple reste légendaire et ajoute deux salves.
+  Salve et Battement triple sont exclusifs. Le légendaire donne trois salves
+  atténuées ; un ancien inventaire commun garde seulement cette variante.
+  Les gains de débit des salves, tirs parallèles et cadence s'additionnent,
+  en ajustant la puissance des impacts. Les bonus directs d'attaque et de
+  projectile s'additionnent aussi ; les critiques retirent les croisements
+  entre choix distincts. Les légendaires donnent un gain marqué et mesuré.
+  Des comparaisons éprouvent un mixte avec Égide et quatre choix offensifs
+  ordinaires contre les variantes frontales et toutes les diagonales guidées.
+  Les PV ordinaires montent plus doucement après la salle du légendaire,
+  avec des paliers ordinaires et boss recalés ; la courbe de dégâts de campagne
+  est conservée. L'endurance du dernier boss est légèrement réduite et les
+  dégâts de Mine sont légèrement relevés pour garder une pression de survie.
+  Ricochet conserve sa limite et sa perte de puissance avec Perforation.
   Les pourcentages restent arrondis ; les gains de résistance effective et
-  de DPS de même rareté sont comparables. La défense n'a plus de prime systématique.
+  de DPS des rares sont comparables, en tenant compte des conditions de leurs
+  effets. La défense n'a plus de prime systématique.
   Dix niveaux donnent dix choix, sans communs ni choix bonus de salle :
   légendaire garantie au niveau 5, trois épiques et autres rares. Dans 10 %
   des runs, une seconde légendaire remplace une rare ou une épique hors niveau 5.
@@ -115,6 +133,13 @@ viennent du catalogue et figurent dans les statistiques générées.
   en distinguant les entrées sans augment et la puissance acquise dans la run.
   Héros affiche le bonus actuel de chaque attribut et le gain du prochain point
   à son niveau, calculés par le runtime, sans modification des commandes.
+  Tous les bijoux ont une base d'attaque commune et chaque rang de forge
+  la renforce, en plus de la statistique principale et du pouvoir de palier.
+  Les fiches d'équipement restent ouvertes après achat ou équipement ; elles
+  montrent les valeurs actuelles, le prochain rang, le gain, le coût et les
+  pierres manquantes. Une forge réussie a un retour visible. Les cadres et
+  transitions d'Équipement et de ses fiches sont affinés. Le fond des Passifs
+  reprend une nuance bleue plus claire, sans rectangle derrière les textes.
   Un contrôle économique compare aussi les étapes à 50 %, 75 % et maximum
   sur deux parcours avec achats réels. Il recherche des temps de complétion
   proches, en particulier entre le héros et les dernières maîtrises.
@@ -241,7 +266,8 @@ systèmes retirés et les inventaires se trouvent hors dépôt dans
 `../Alambik_sauvegardes/refonte_2026-09-26_233554/`.
 
 `tools/verifier.ps1` contrôle l'import Godot, la concordance des listes,
-les courbes et achats, les augments, les parcours équilibrés et le retour
+les courbes et achats, les augments, les satellites, les effets périodiques et transactions de forge,
+les parcours équilibrés et le retour
 offensif après cinq ou six Épreuves, l'affichage des dégâts, les soins, les migrations et les scènes. Les runs
 utilisent un profil isolé : cinq onglets sur deux formats portrait et les
 trois modes. La sélection de campagne est contrôlée par des clics réels dans

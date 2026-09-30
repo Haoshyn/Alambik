@@ -16,6 +16,8 @@ var _obstacles: Node3D
 var _lumiere: DirectionalLight3D
 var _familier: Node3D
 var _terrain: Node3D
+var _satellites: Node3D
+var _meteorite: Node3D
 
 func _ready() -> void:
 	process_priority = 100
@@ -51,6 +53,12 @@ func charger(chemin: String) -> PackedScene:
 func relier(salle_: Node2D, heros_: Node2D, fond: Node2D, familier: Node2D) -> void:
 	salle = salle_
 	heros = heros_
+	_satellites = preload("res://scripts/presentation/satellites_alchimiques_3d.gd").new()
+	_satellites.logique = heros.get_node("SatellitesAlchimiques")
+	add_child(_satellites)
+	_meteorite = preload("res://scripts/presentation/meteorite_alchimique_3d.gd").new()
+	_meteorite.logique = heros.get_node("EffetsPeriodiquesAugments")
+	add_child(_meteorite)
 	_terrain = preload("res://scripts/presentation/terrain_elementaire_3d.gd").new()
 	_terrain.salle = salle
 	add_child(_terrain)
@@ -111,6 +119,8 @@ func _process(delta: float) -> void:
 		return
 	if is_instance_valid(_familier): _familier.mettre_a_jour(delta)
 	if is_instance_valid(_terrain): _terrain.mettre_a_jour(delta)
+	if is_instance_valid(_satellites): _satellites.mettre_a_jour(delta)
+	if is_instance_valid(_meteorite): _meteorite.mettre_a_jour(delta)
 	Pont3D.cadrer(camera,get_viewport().get_visible_rect().size,get_viewport().canvas_transform)
 	_lumiere.shadow_enabled = not ReglagesJoueur.effets_reduits and (OS.get_name() != "Android" or Visuels3D.OMBRES_ANDROID)
 	var limites: Rect2 = salle.get("limites")

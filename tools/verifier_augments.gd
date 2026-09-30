@@ -7,15 +7,16 @@ const CLES_AUTORISEES := [
 	"critique_add", "degats_critiques_add", "conversion_critique", "invulnerabilite_add", "boucliers_salle_add",
 	"salves_add", "degats_salve_mult", "rebonds_add", "perforations_add", "nb_projectiles_add",
 	"projectiles_lateraux_add", "angle_eventail_add", "ecart_lateral_min",
+	"tirs_paralleles_add",
 	"degats_projectile_mult", "degats_finaux_projectile_mult", "drapeaux",
 ]
 const DRAPEAUX_AUTORISES := ["homing", "perfore_tout", "perforation_sans_perte", "indelebile",
-	"egide", "courageux", "elan_vital", "ricochet_perforation_infinie"]
+	"egide", "courageux", "elan_vital", "satellites_alchimiques", "trait_periodique", "meteorite_alchimique"]
 const IDS_ATTENDUS := ["salve", "tir_multiple", "homing", "cadence_febrile", "avidite",
 	"sceau_garde", "sceau_ruine", "pointe_lucide", "peau_cuivre", "pas_brume", "encrage_vif",
 	"baume_profond", "ricochet", "perforation", "spirale", "trait_transpercant", "peau_de_pierre",
 	"elan_vital", "garde_remanente", "encre_mordante", "noyau_pesant", "frappe_lourde", "egide",
-	"courageux", "battement_triple", "couronne_incisive"]
+	"courageux", "battement_triple", "couronne_incisive", "satellites_alchimiques"]
 const FACTEURS := ["attaque_mult", "cadence_mult", "vitesse_mult", "portee_mult", "pv_max_mult", "pv_max_final_mult",
 	"defense_mult", "deplacement_mult", "soin_mult", "degats_subis_mult", "experience_mult", "gouttes_mult"]
 
@@ -53,7 +54,7 @@ func _exiger(condition: bool, message: String) -> void:
 		_erreurs.append(message)
 
 func _verifier_catalogue() -> void:
-	_exiger(CatalogueReactifs.ids().size() == IDS_ATTENDUS.size(), "Le catalogue doit contenir 26 augments")
+	_exiger(CatalogueReactifs.ids().size() == IDS_ATTENDUS.size(), "Le catalogue doit contenir 27 augments")
 	for id: String in IDS_ATTENDUS:
 		_exiger(CatalogueReactifs.par_id(id) != null, "Augment absent : " + id)
 	for id in CatalogueReactifs.ids():
@@ -78,8 +79,8 @@ func _verifier_catalogue() -> void:
 					if cle == "degats_subis_mult":
 						_exiger(valeur <= 1.0, "Malus de dégâts subis : " + id)
 					elif cle in ["degats_salve_mult", "degats_finaux_projectile_mult"]:
-						_exiger(id in ["salve", "tir_multiple", "battement_triple"] and is_equal_approx(valeur, 0.80),
-							"Seuls les augments de tirs multiples réduisent les projectiles de 20 % : " + id)
+						_exiger(id in ["salve", "tir_multiple", "battement_triple"] and is_equal_approx(valeur, 0.55 if id == "battement_triple" else 0.70),
+							"Les reductions de tirs doivent respecter leur budget : " + id)
 					else:
 						_exiger(valeur >= 1.0, "Malus ordinaire interdit : " + id + "/" + cle)
 
@@ -149,7 +150,7 @@ func _verifier_profils() -> void:
 
 func _verifier_valeur_defense() -> void:
 	var comparaisons: Array[Dictionary] = [
-		{"defense": "sceau_garde", "attaque": "sceau_ruine"},
+		{"defense": "sceau_garde", "attaque": "cadence_febrile"},
 		{"defense": "peau_de_pierre", "attaque": "noyau_pesant"},
 		{"defense": "egide", "attaque": "frappe_lourde"},
 	]
@@ -165,10 +166,10 @@ func _verifier_valeur_defense() -> void:
 		_exiger(gain_survie >= gain_dps * 0.85 and gain_survie <= gain_dps * 1.15,
 			"Les gains offensif et defensif de meme rarete doivent rester comparables : " + id_defense + "/" + id_attaque)
 	var egide := mesurer(["egide"])
-	_exiger(float(egide["vie_effective"]) <= 1.8 and float(egide["vie_effective"]) >= 1.5,
-		"Egide doit rester dans le budget d'un legendaire")
-	_exiger(float(mesurer(["egide", "peau_de_pierre"])["vie_effective"]) <= 2.5,
-		"Deux defenses ne doivent pas multiplier la resistance par six")
+	_exiger(float(egide["vie_effective"]) >= 1.50 and float(egide["vie_effective"]) <= 1.90,
+		"Egide doit renforcer la survie sans tripler la resistance")
+	_exiger(float(mesurer(["egide", "peau_de_pierre"])["vie_effective"]) > float(egide["vie_effective"]),
+		"Peau de pierre doit conserver un gain apres Egide")
 
 static func mesurer(inventaire: Array) -> Dictionary:
 	var stats := Stats.depuis_reglages()
@@ -182,13 +183,15 @@ static func mesurer(inventaire: Array) -> Dictionary:
 		/ (1.0 + stats.critique * (Reglages.CRITIQUE_MULT_BASE + stats.degats_critiques - 1.0))
 	var dps_central := tir.degats * tir.cadence * float(tir.salves) * tir.degats_finaux_projectile_mult \
 		* critique_moyen / (base.degats * base.cadence)
+	var dps_periodique := ReglagesAugments.debit_periodique(stats.degats * Mods.facteur_attaque_run(mods),
+		inventaire.count("encrage_vif"), "sceau_ruine" in inventaire) / (base.degats * base.cadence)
 	var somme_projectiles := 0.0
 	for index in tir.nb_projectiles:
 		somme_projectiles += tir.facteur_projectile(index)
 	var vie_effective := Mods.facteur_heros(mods, "pv_max_mult") \
 		* (Reglages.DEFENSE_REFERENCE + stats.defense * Mods.facteur_heros(mods, "defense_mult")) \
 		/ (Reglages.DEFENSE_REFERENCE + stats.defense) / Mods.facteur_heros(mods, "degats_subis_mult")
-	return {"dps_central": dps_central, "dps_tous_projectiles": dps_central * somme_projectiles,
+	return {"dps_central": dps_central + dps_periodique, "dps_tous_projectiles": dps_central * somme_projectiles + dps_periodique,
 		"pv": Mods.facteur_heros(mods, "pv_max_mult"), "defense": Mods.facteur_heros(mods, "defense_mult"),
 		"degats_subis": Mods.facteur_heros(mods, "degats_subis_mult"), "vie_effective": vie_effective,
 		"boucliers": Mods.bonus_heros(mods, "boucliers_salle_add")}
@@ -213,25 +216,25 @@ func _verifier_tirs_et_ordre() -> void:
 	_exiger(base.salves == 1 and base.nb_projectiles == 1 and is_equal_approx(base.degats, stats.degats), "Le tir de base a été muté")
 	var lateral := Mods.appliquer(base, Mods.depuis_l_inventaire(["spirale"]))
 	_exiger(lateral.nb_projectiles == base.nb_projectiles + 2 and lateral.projectiles_lateraux == 2
-		and is_equal_approx(lateral.facteur_projectile(1), 0.65) and is_equal_approx(lateral.facteur_projectile(2), 0.65)
-		and is_equal_approx(lateral.degats, base.degats), "Éventail doit ajouter deux diagonales à 65 % sans réduire l'attaque")
+		and is_equal_approx(lateral.facteur_projectile(1), 0.30) and is_equal_approx(lateral.facteur_projectile(2), 0.30)
+		and is_equal_approx(lateral.degats, base.degats), "Éventail doit ajouter deux diagonales à 30 % sans réduire l'attaque")
 	var cadence := Mods.appliquer(base, Mods.depuis_l_inventaire(["cadence_febrile"]))
 	_exiger(is_equal_approx(cadence.cadence, base.cadence * float(CatalogueReactifs.par_id("cadence_febrile").mods["cadence_mult"])), "Cadence febrile doit appliquer son bonus une seule fois")
 	var ricochet := Mods.appliquer(base, Mods.depuis_l_inventaire(["ricochet"]))
 	_exiger(ricochet.rebonds == 3, "Ricochet doit accorder trois rebonds")
 	var perforation := Mods.appliquer(base, Mods.depuis_l_inventaire(["perforation"]))
 	_exiger("perfore_tout" in perforation.drapeaux and "perforation_sans_perte" in perforation.drapeaux
-		and is_equal_approx(perforation.degats, base.degats * 1.15), "Perforation doit traverser sans perte avec 15 % de dégâts de projectile")
+		and is_equal_approx(perforation.degats, base.degats * 1.20), "Perforation doit traverser sans perte avec 20 % de dégâts de projectile")
 	_exiger(is_equal_approx(Mods.facteur_attaque_run(Mods.depuis_l_inventaire(["perforation"])), 1.0),
 		"Le bonus de Perforation ne doit pas augmenter l'attaque des familiers")
 	var trajectoires := Mods.appliquer(base, Mods.depuis_l_inventaire(["ricochet", "perforation"]))
-	_exiger("ricochet_perforation_infinie" in trajectoires.drapeaux,
-		"Ricochet et Perforation doivent activer leurs rebonds illimités sans perte")
+	_exiger("ricochet_perforation_infinie" not in trajectoires.drapeaux and trajectoires.rebonds == 3,
+		"Perforation ne doit pas supprimer la limite de Ricochet")
 	var indelebile := Mods.appliquer(base, Mods.depuis_l_inventaire(["trait_transpercant"]))
 	_exiger("indelebile" in indelebile.drapeaux and is_equal_approx(indelebile.vitesse, base.vitesse * 1.20),
 		"Tir indélébile doit conserver son effet et ses 20 % de vitesse")
 	var force := Mods.appliquer(base, Mods.depuis_l_inventaire(["frappe_lourde", "salve", "tir_multiple"]))
-	_exiger(is_equal_approx(force.degats, base.degats * float(CatalogueReactifs.par_id("frappe_lourde").mods["attaque_mult"])) and is_equal_approx(force.degats_finaux_projectile_mult, 0.64),
+	_exiger(is_equal_approx(force.degats, base.degats * float(CatalogueReactifs.par_id("frappe_lourde").mods["attaque_mult"])) and is_equal_approx(force.degats_finaux_projectile_mult, 0.45),
 		"Force cataclysmique doit renforcer l'attaque sans annuler les couts de Salve et Tir double")
 
 func _verifier_multiplication_tirs() -> void:
@@ -240,16 +243,17 @@ func _verifier_multiplication_tirs() -> void:
 	var familier_reference := CatalogueFamiliers.attaque_combat("homoncule_encre", Reglages.FORGE_NIVEAU_MAX,
 		stats.bonus_attaque)
 	var scenarios: Array[Dictionary] = [
-		{"ids": ["salve"], "salves": 2, "projectiles": 1, "malus": 0.80, "dps": 1.60},
-		{"ids": ["tir_multiple"], "salves": 1, "projectiles": 2, "malus": 0.80, "dps": 1.60},
-		{"ids": ["tir_multiple", "tir_multiple"], "salves": 1, "projectiles": 3, "malus": 0.64, "dps": 1.92},
-		{"ids": ["battement_triple"], "salves": 3, "projectiles": 1, "malus": 0.80, "dps": 2.4},
-		{"ids": ["battement_triple", "salve"], "salves": 4, "projectiles": 1, "malus": 0.64, "dps": 2.56},
-		{"ids": ["battement_triple", "tir_multiple"], "salves": 3, "projectiles": 2, "malus": 0.64, "dps": 3.84},
-		{"ids": ["battement_triple", "tir_multiple", "salve"], "salves": 4, "projectiles": 2, "malus": 0.512, "dps": 4.096},
-		{"ids": ["salve", "tir_multiple"], "salves": 2, "projectiles": 2, "malus": 0.64, "dps": 2.56},
+		{"ids": ["salve"], "salves": 2, "projectiles": 1, "malus": 0.70, "dps": 1.40},
+		{"ids": ["tir_multiple"], "salves": 1, "projectiles": 2, "malus": 0.70, "dps": 1.40},
+		{"ids": ["tir_multiple", "tir_multiple"], "salves": 1, "projectiles": 3, "malus": 0.60, "dps": 1.80},
+		{"ids": ["battement_triple"], "salves": 3, "projectiles": 1, "malus": 0.55, "dps": 1.65},
+		{"ids": ["battement_triple", "salve"], "salves": 3, "projectiles": 1, "malus": 0.55, "dps": 1.65},
+		{"ids": ["battement_triple", "tir_multiple"], "salves": 3, "projectiles": 2, "malus": 2.05 / 6.0, "dps": 2.05},
+		{"ids": ["battement_triple", "tir_multiple", "salve"], "salves": 3, "projectiles": 2, "malus": 2.05 / 6.0, "dps": 2.05},
+		{"ids": ["salve", "tir_multiple"], "salves": 2, "projectiles": 2, "malus": 0.45, "dps": 1.80},
 		{"ids": ["battement_triple", "salve", "tir_multiple", "tir_multiple"],
-			"salves": 4, "projectiles": 3, "malus": 0.4096, "dps": 4.9152},
+			"salves": 3, "projectiles": 3, "malus": 2.45 / 9.0, "dps": 2.45},
+		{"ids": ["salve", "tir_multiple", "tir_multiple"], "salves": 2, "projectiles": 3, "malus": 2.20 / 6.0, "dps": 2.20},
 	]
 	for scenario: Dictionary in scenarios:
 		var inventaire: Array = scenario["ids"]
@@ -275,15 +279,15 @@ func _verifier_multiplication_tirs() -> void:
 			and is_equal_approx(tir_inverse.degats_finaux_projectile_mult, tir.degats_finaux_projectile_mult)
 			and tir_inverse.decalages() == tir.decalages(), "L'ordre des choix modifie le tir : " + contexte)
 	var details := DetailsReactif.texte(CatalogueReactifs.par_id("tir_multiple"), 2)
-	_exiger(details.contains("0,64") and details.contains("2 projectiles frontaux parallèles"),
+	_exiger(details.contains("0,6") and details.contains("2 projectiles frontaux parallèles"),
 		"La carte Tir double ne décrit pas ses deux copies")
 	var details_triple := DetailsReactif.texte(CatalogueReactifs.par_id("battement_triple"))
-	_exiger(details_triple.contains("0,8") and details_triple.contains("2 salves"),
-		"La carte Battement triple doit annoncer ses deux salves supplémentaires et ses projectiles à 80 %")
+	_exiger(details_triple.contains("×0,55") and details_triple.contains("2 salves") and details_triple.contains("Alternative à Salve"),
+		"La carte Battement triple doit annoncer ses salves attenuees et leur exclusivite")
 	stats.attaque_base = 1000.0
 	stats.bonus_attaque = 0.0
 	stats.degats = stats.attaque_reelle()
-	var degats_attendus := [1500.0, 1200.0, 960.0]
+	var degats_attendus := [1500.0, 1050.0, 675.0]
 	var inventaire_lourd: Array[String] = []
 	for nombre_malus in degats_attendus.size():
 		if nombre_malus > 0:
@@ -291,8 +295,8 @@ func _verifier_multiplication_tirs() -> void:
 		var tir_lourd := CatalogueProjectiles.appliquer("lourd",
 			Mods.appliquer(Tir.de_base(stats), Mods.depuis_l_inventaire(inventaire_lourd)))
 		_exiger(is_equal_approx(tir_lourd.degats * tir_lourd.degats_finaux_projectile_mult, float(degats_attendus[nombre_malus])),
-			"Le Sceptre de cuivre ne respecte pas la chaîne 1500 → 1200 → 960")
-	print("Tirs cumulés : %d combinaisons vérifiées ; Tir double ×1,6 puis ×1,92 ; arme lourde 1500 → 1200 → 960." % scenarios.size())
+			"Le Sceptre de cuivre ne respecte pas la chaîne 1500 → 1050 → 675")
+	print("Tirs cumulés : %d combinaisons vérifiées ; Tir double ×1,4 puis ×1,8 ; arme lourde 1500 → 1050 → 675." % scenarios.size())
 
 func _verifier_projectiles_paralleles() -> void:
 	var script_salle := load("res://scripts/monde/salle.gd") as GDScript
@@ -335,8 +339,8 @@ func _verifier_projectiles_paralleles() -> void:
 				for index in range(frontaux, tir.nb_projectiles):
 					var projectile := projectiles[index] as Node2D
 					var tir_reel: Tir = projectile.get("tir")
-					_exiger(is_equal_approx(tir_reel.degats, tir.degats * 0.65),
-						"Les diagonales doivent garder 65 % de la puissance du tir : " + contexte)
+					_exiger(is_equal_approx(tir_reel.degats, tir.degats * 0.30),
+						"Les diagonales doivent garder 30 % de la puissance du tir : " + contexte)
 				_exiger(ecart > 2.0 * Reglages.TIR_RAYON, "Les projectiles frontaux se superposent : " + contexte)
 				salle.free()
 	print("Projectiles parallèles : créations réelles standard/Prisme avec zéro, une ou deux copies d'Éventail vérifiées.")
@@ -368,12 +372,13 @@ func _verifier_trajectoires() -> void:
 			projectile.call("_sur_contact", cible)
 			projectile.call("_sur_contact", cible)
 			_exiger(cible.coups == 1, "Un projectile doit frapper chaque ennemi une seule fois : " + str(inventaire))
-			_exiger(cible.degats.size() == 1 and is_equal_approx(cible.degats[0], tir.degats),
-				"Perforation perd de la puissance pendant sa trajectoire : " + str(inventaire))
+			var rebonds := mini(index, tir.rebonds)
+			_exiger(cible.degats.size() == 1 and is_equal_approx(cible.degats[0], tir.degats * pow(1.0 - Reglages.REBOND_PERTE, rebonds)),
+				"Les rebonds doivent perdre de la puissance meme avec Perforation : " + str(inventaire))
 			if index < cibles.size() - 1:
 				_exiger(not bool(projectile.get("_termine")), "La trajectoire illimitée s'arrête trop tôt : " + str(inventaire))
-		_exiger(is_equal_approx(float(projectile.get("_facteur_degats")), 1.0),
-			"La synergie de trajectoires doit conserver toute sa puissance : " + str(inventaire))
+		_exiger(is_equal_approx(float(projectile.get("_facteur_degats")), pow(1.0 - Reglages.REBOND_PERTE, tir.rebonds)),
+			"Perforation ne doit pas annuler la perte des rebonds : " + str(inventaire))
 		projectile.free()
 	for cible in cibles:
 		cible.coups = 0
@@ -411,7 +416,7 @@ func _verifier_trajectoires() -> void:
 		if is_instance_valid(cible):
 			cible.free()
 	jeu.set("tirs_touches", touches_initiales)
-	print("Trajectoires : huit ennemis sans perte ni double impact ; Tir indélébile traverse les obstacles.")
+	print("Trajectoires : traversées sans double impact, rebonds limités avec perte ; Tir indélébile traverse les obstacles.")
 
 func _creer_projectile(scene: PackedScene, tir: Tir) -> Area2D:
 	var projectile := scene.instantiate() as Area2D
@@ -549,7 +554,7 @@ func _verifier_elan(script: GDScript, inventaire: Array[String], jeu: Node) -> v
 	heros.call("_process", Reglages.TIR_DELAI_ARRET + 0.01)
 	heros.call("_avancer_rafale", 1.0)
 	heros.call("_avancer_tirs_prepares", Reglages.TIR_PREPARATION + 0.01)
-	_exiger(degats_emis.size() == 4, "L'attaque chargée doit émettre les quatre salves de Battement triple et Salve")
+	_exiger(degats_emis.size() == 3, "L'ancien cumul de Salve et Battement triple doit emettre trois salves")
 	for degats in degats_emis:
 		_exiger(is_equal_approx(degats, tir_base.degats * (1.0 + ReglagesAugments.ELAN_VITAL_BONUS_DEGATS)), "Toutes les salves de l'attaque chargee doivent recevoir le meme bonus")
 	_exiger(not bool(heros.get("_elan_chargee")), "La première attaque doit consommer la charge d'Élan")
@@ -558,7 +563,7 @@ func _verifier_elan(script: GDScript, inventaire: Array[String], jeu: Node) -> v
 	heros.call("_process", Reglages.TIR_DELAI_ARRET + 0.01)
 	heros.call("_avancer_rafale", 1.0)
 	heros.call("_avancer_tirs_prepares", Reglages.TIR_PREPARATION + 0.01)
-	_exiger(degats_emis.size() == 4, "L'attaque suivante doit conserver ses quatre salves")
+	_exiger(degats_emis.size() == 3, "L'attaque suivante doit conserver ses trois salves")
 	for degats in degats_emis:
 		_exiger(is_equal_approx(degats, tir_base.degats), "Élan ne doit pas renforcer une seconde attaque sans recharge")
 	cible.free()

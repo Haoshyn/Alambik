@@ -18,7 +18,7 @@ static func entree(configuration: Dictionary, chapitre: int, graine: int) -> Dic
 	config["augments"] = []
 	var mesure := Modeles.mesurer(config)
 	var critique_moyen := 1.0 + float(mesure["critique"]) * (float(mesure["coefficient_critique"]) - 1.0)
-	var attaque := float(mesure["dps_heros"]) / (float(mesure["cadence"]) * critique_moyen * float(mesure["impact_moyen"]))
+	var attaque := float(mesure["dps_frontal"]) / (float(mesure["cadence"]) * critique_moyen * float(mesure["impact_moyen"]))
 	var attaques: Array[float] = []
 	var durees: Array[float] = []
 	var contacts: Array[float] = []

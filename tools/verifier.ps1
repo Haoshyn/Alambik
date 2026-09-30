@@ -36,7 +36,7 @@ function Executer-Controle([string]$Nom, [string[]]$ArgumentsGodot) {
         $sortie | Write-Output
         throw "Controle $Nom echoue (code $codeGodot). Journal : $journal"
     }
-    $sortie | Where-Object { $_ -match '^(OK|Listes|Verification|Vérification|Progression|Référence|Valeur des sources :|Augments :|Projectiles :|Simulation augments :|Parcours :|Retour campagne :|Equilibrage progression :|Rythme progression :|Maturation progression :)' } | Write-Output
+    $sortie | Where-Object { $_ -match '^(OK|Listes|Verification|Vérification|Progression|Référence|Valeur des sources :|Augments :|Reequilibrage :|Projectiles :|Simulation augments :|Parcours :|Retour campagne :|Equilibrage progression :|Rythme progression :|Maturation progression :)' } | Write-Output
 }
 
 try {
@@ -54,6 +54,7 @@ try {
     Executer-Controle -Nom 'reference' -ArgumentsGodot @('--script', 'res://tools/verifier_reference.gd')
     Executer-Controle -Nom 'sources' -ArgumentsGodot @('--script', 'res://tools/verifier_sources.gd')
     Executer-Controle -Nom 'augments' -ArgumentsGodot @('--script', 'res://tools/verifier_augments.gd')
+    Executer-Controle -Nom 'reequilibrage' -ArgumentsGodot @('--script', 'res://tools/verifier_reequilibrage.gd')
     Executer-Controle -Nom 'niveaux_augments' -ArgumentsGodot @('--script', 'res://tools/verifier_niveaux_augments.gd')
     Executer-Controle -Nom 'projectiles' -ArgumentsGodot @('--script', 'res://tools/verifier_projectiles.gd')
     Executer-Controle -Nom 'bestiaire' -ArgumentsGodot @('--script', 'res://tools/verifier_bestiaire.gd')

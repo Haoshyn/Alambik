@@ -72,7 +72,8 @@ static func _ajouter_annexe(groupe: Dictionary, mode: String, mesure: Dictionary
 static func _ajouter(groupe: Dictionary, chapitre: int, mesure: Dictionary) -> void:
 	if not groupe.has(chapitre):
 		groupe[chapitre] = {"un_projectile": [], "une_attaque": [], "avec_critiques": [],
-			"attaques": [], "contacts": [], "contacts_min": [], "boss": []}
+			"attaques": [], "contacts": [], "contacts_min": [], "boss": [],
+			"rares_projectile": [], "rares_attaque": [], "rares_critique": [], "rares_coups": []}
 	var ligne: Dictionary = groupe[chapitre]
 	var nombre := float(mesure["monstres"])
 	ligne["un_projectile"].append(float(mesure["un_projectile"]) / nombre)
@@ -82,6 +83,11 @@ static func _ajouter(groupe: Dictionary, chapitre: int, mesure: Dictionary) -> v
 	ligne["contacts"].append(float(_distribution(mesure["contacts"])["mediane"]))
 	ligne["contacts_min"].append(float(mesure["contacts_min"]))
 	ligne["boss"].append(float(mesure["boss_secondes"].back()))
+	var nombre_rares := float(maxi(1, int(mesure["monstres_rares"])))
+	ligne["rares_projectile"].append(float(mesure["projectiles_rares"]) / nombre_rares)
+	ligne["rares_attaque"].append(float(mesure["attaques_rares"]) / nombre_rares)
+	ligne["rares_critique"].append(float(mesure["critiques_rares"]) / nombre_rares)
+	ligne["rares_coups"].append(float(_distribution(mesure["coups_rares"])["mediane"]))
 
 static func _distribution(valeurs: Array) -> Dictionary:
 	var nombres: Array[float] = []
@@ -94,7 +100,7 @@ static func _augments() -> Dictionary:
 		var config := {} if nom == "debut" else Modeles.complet()
 		var base := Modeles.mesurer(config)
 		var mesures := {}
-		for id: String in ["sceau_ruine", "sceau_garde", "noyau_pesant", "peau_de_pierre", "frappe_lourde", "egide"]:
+		for id: String in ["cadence_febrile", "sceau_ruine", "sceau_garde", "noyau_pesant", "peau_de_pierre", "frappe_lourde", "egide"]:
 			config["augments"] = [id]
 			var mesure := Modeles.mesurer(config)
 			mesures[id] = {"dps": float(mesure["dps_heros"]) / float(base["dps_heros"]),

@@ -12,6 +12,7 @@
 | Profil maximal, équipement optimal et répartition des contributions | [verifier_reference.gd](verifier_reference.gd) |
 | Impact du début à la fin, objets utiles, rares et gains d’attribut | [verifier_sources.gd](verifier_sources.gd) |
 | Contrôles des choix et cumuls de run | [verifier_augments.gd](verifier_augments.gd) |
+| Utilité des rares, puissance légendaire, satellites, effets périodiques, paiement de forge et fiches en portrait | [verifier_reequilibrage.gd](verifier_reequilibrage.gd) |
 | Dix niveaux, écrans de choix et paiement des cœurs inutilisés | [verifier_niveaux_augments.gd](verifier_niveaux_augments.gd) |
 | Projectiles, collisions, familiers autonomes et contact de tous les monstres et boss | [verifier_projectiles.gd](verifier_projectiles.gd) |
 | Modeles ennemis, articulations, gel, disparition et budgets 3D | [verifier_bestiaire.gd](verifier_bestiaire.gd) ; planches via [blender/apercu_bestiaire.py](blender/apercu_bestiaire.py) |

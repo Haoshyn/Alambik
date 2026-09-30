@@ -38,6 +38,10 @@ elles conservent les idées historiques sans définir le rendu actuel.
   utiles, retirent l'oscillation de repos et raccourcissent la disparition.
 - Les silhouettes, impacts et télégraphes doivent rester distincts. Les effets
   décoratifs ne masquent pas les dangers et ne rendent pas les hitbox ambiguës.
+- Les effets des rares portent un émail turquoise et un cœur ivoire : cercles
+  orbitaux, trait périodique et météorite facettée. L'anneau de chute annonce
+  sa zone réelle ; le mode réduit conserve les positions et les gestes utiles.
+  Les formes sont procédurales et originales.
 - Les dégâts infligés s'affichent en petits nombres crème au-dessus de la
   cible : impulsion brève, légère montée, puis fondu. La braise est dorée.
   Les grands nombres sont abrégés, les impacts proches regroupés, avec un
@@ -253,7 +257,7 @@ elles conservent les idées historiques sans définir le rendu actuel.
   Utilitaire, puis quatre médaillons
   équipés sur une ligne dès que la largeur le permet, sans bandeau de niveau
   ni slogan. Seule la collection défile sous ces commandes fixes. Le fond
-  reprend la clairière sous un voile indigo calme, sans peinture élémentaire. Chaque entrée garde une
+  reprend la clairière sous un voile bleu brume plus clair, sans peinture élémentaire. Chaque entrée garde une
   légère couleur autour du glyphe et un filet inférieur, sans cadre fermé.
   Les titres, indications, noms, rangs et descriptions sont posés directement
   sur ce fond : aucun petit rectangle sombre sous le texte, y compris dans
@@ -295,6 +299,11 @@ elles conservent les idées historiques sans définir le rendu actuel.
   son contenu, sans fenêtre superposée.
   Les transitions entre onglets restent courtes et disparaissent avec les
   effets réduits.
+  Les fiches d'Équipement et de Passifs utilisent un cadre bleu émaillé avec
+  gravures fines aux coins et un voile bleuté. Leur ouverture et leur fermeture
+  restent brèves ; les effets réduits donnent un affichage immédiat. Une action
+  de forge actualise la fiche en place, montre son gain suivant et confirme
+  l'achat par un court éclat. Les sous-onglets d'Équipement se fondent doucement.
 - Héros et Équipement regroupent leurs informations de progression dans
   un cartouche fin ; les attributs et les branches de Maîtrises gardent leurs
   accents propres. Les sceaux Offensif, Défensif et Utilitaire prennent chacun

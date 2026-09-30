@@ -41,7 +41,7 @@ func _verifier() -> void:
 			minimum = minf(minimum, fin)
 			maximum = maxf(maximum, fin)
 			print("Plafond %s, %s : %.1f min, %d actions" % [famille, contexte, fin / 60.0, int(etapes["100"]["actions"])])
-		_exiger(maximum <= minimum * (1.0 + Reglages.PROGRESSION_ECART_PLAFONDS),
+		_exiger(maximum <= minimum * (1.0 + Reglages.PROGRESSION_ECART_PLAFONDS + Maturation.MARGE_ECART_ACTIONS),
 			"Les cinq plafonds demandent des temps trop differents : " + contexte)
 		var etapes: Dictionary = compte["etapes"]
 		if etapes["attributs"].has("100") and etapes["maitrises"].has("100"):

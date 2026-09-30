@@ -41,6 +41,8 @@ var _courage_vie_disponible := true
 var _elan_mouvement := 0.0
 var _elan_chargee := false
 var _puissance_attaque_elan := 1.0
+var _satellites: SatellitesAlchimiques
+var _effets_periodiques: EffetsPeriodiquesAugments
 
 func _ready() -> void:
 	add_to_group("heros")
@@ -51,6 +53,14 @@ func _ready() -> void:
 	add_to_group("cibles_ennemis")
 	tir_courant = Tir.de_base(stats)
 	recalculer()
+	_satellites = SatellitesAlchimiques.new()
+	_satellites.name = "SatellitesAlchimiques"
+	_satellites.heros = self
+	add_child(_satellites)
+	_effets_periodiques = EffetsPeriodiquesAugments.new()
+	_effets_periodiques.name = "EffetsPeriodiquesAugments"
+	_effets_periodiques.heros = self
+	add_child(_effets_periodiques)
 	stats.soin_restant = stats.pv_max * Reglages.SOIN_COMBAT_PAR_SALLE * stats.soin_mult
 
 func definir_intention(direction: Vector2, intensite := 1.0) -> void:
@@ -94,6 +104,8 @@ func recalculer() -> void:
 		_boucliers_accordes = boucliers_par_salle
 
 func preparer_nouvelle_salle() -> void:
+	if is_instance_valid(_satellites): _satellites.preparer_nouvelle_salle()
+	if is_instance_valid(_effets_periodiques): _effets_periodiques.preparer_nouvelle_salle()
 	bouclier = 0
 	_boucliers_accordes = 0
 	_tirs_prepares.clear()

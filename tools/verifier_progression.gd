@@ -59,7 +59,9 @@ func _verifier_courbes() -> void:
 			_verifier(is_finite(degats_salle) and degats_salle >= degats_salle_precedents,
 				"Dégâts chapitre %d salle %d" % [chapitre, salle])
 			if salle > 1:
-				_verifier(is_equal_approx(pv_salle / pv_salle_precedents, Reglages.CAMPAGNE_PV_PAR_SALLE * float(Reglages.CAMPAGNE_PV_PALIERS.get(salle, 1.0))), "Marche PV appliquee exactement une fois")
+				var apres_legendaire := salle > int(ProgressionAugments.SALLES_NIVEAUX[ProgressionAugments.NIVEAU_LEGENDAIRE - 1])
+				var croissance := Reglages.CAMPAGNE_PV_PAR_SALLE_TARDIF if apres_legendaire else Reglages.CAMPAGNE_PV_PAR_SALLE
+				_verifier(is_equal_approx(pv_salle / pv_salle_precedents, croissance * float(Reglages.CAMPAGNE_PV_PALIERS.get(salle, 1.0))), "Marche PV appliquee exactement une fois")
 				_verifier(is_equal_approx(degats_salle / degats_salle_precedents, Reglages.CAMPAGNE_DEGATS_PAR_SALLE * float(Reglages.CAMPAGNE_DEGATS_PALIERS.get(salle, 1.0))), "Marche degats appliquee exactement une fois")
 			pv_salle_precedents = pv_salle
 			degats_salle_precedents = degats_salle
@@ -69,8 +71,8 @@ func _verifier_courbes() -> void:
 			Chapitres.facteur_degats(chapitre, Chapitres.salles(chapitre))), "Salle supérieure bornée")
 	_verifier(is_equal_approx(Chapitres.facteur_pv(0, 1), 1.0) and is_equal_approx(Chapitres.facteur_degats(0, 1), 1.0), "Salle initiale normalisee a un")
 	_verifier(Chapitres.facteur_pv(1, 1) > 1.0 and Chapitres.facteur_pv(1, 1) <= 1.3, "Le niveau deux reste accessible avant les augments")
-	_verifier(Chapitres.facteur_pv(0, 19) >= 24.0 and Chapitres.facteur_pv(0, 19) <= 25.0, "Les monstres suivent les rares renforces")
-	_verifier(Chapitres.facteur_pv(0, 19, true) >= 5.5 and Chapitres.facteur_pv(0, 19, true) <= 6.0, "Les boss suivent la puissance de run renforcee")
+	_verifier(Chapitres.facteur_pv(0, 19) >= 10.0 and Chapitres.facteur_pv(0, 19) <= 12.0, "Les monstres suivent les gains mesures des builds mixtes")
+	_verifier(Chapitres.facteur_pv(0, 19, true) >= 3.0 and Chapitres.facteur_pv(0, 19, true) <= 3.5, "Les boss suivent la puissance de run sans imposer un legendaire offensif")
 
 func _verifier_accueil() -> void:
 	var stats := Stats.depuis_reglages({}, {}, {"attaque_base": CatalogueProjectiles.attaque_base("standard", 0)})

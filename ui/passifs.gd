@@ -66,7 +66,7 @@ func _construire_fond() -> void:
 	var nuance := Gradient.new()
 	nuance.offsets = PackedFloat32Array([0.0, 0.38, 1.0])
 	# La clairiere reste perceptible ; la collection repose sur la partie la plus calme.
-	nuance.colors = PackedColorArray([Color("343c685c"), Color("25314acc"), Color("302e50b8")])
+	nuance.colors = PackedColorArray([Color("56879865"), Color("41657fce"), Color("4f698ddd")])
 	var texture := GradientTexture2D.new()
 	texture.gradient = nuance
 	texture.width = 4
@@ -382,6 +382,8 @@ func _ouvrir_fiche(index: int) -> void:
 	var donnees: Dictionary = _catalogue()[id]
 	if is_instance_valid(_fiche_popup): _fiche_popup.queue_free()
 	var fiche := FenetreFiche.new()
+	fiche.presentation_soignee = true
+	fiche.accent = FOND_PASSIF.accent_pour(id)
 	fiche.set_meta("surface_lecture", false)
 	fiche.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	var parent_fiche: Node = get_parent().get_parent() if integre_menu else self

@@ -7,6 +7,9 @@ const ETAPES := [0.50, 0.75, 1.0]
 const FAMILLES := ["attributs", "equipement", "maitrises", "passifs", "coeurs"]
 const STRATEGIES := ["campagne", "mixte"]
 const CYCLES_MAX := 160
+# Les plafonds sont mesures apres des activites entieres : conserver une petite
+# marge de mesure sans modifier les couts ni les recompenses du joueur.
+const MARGE_ECART_ACTIONS := 0.005
 static var _cache: Dictionary = {}
 
 # Comparer les plafonds sur un meme compte, sans continuer a farmer une monnaie

@@ -11,6 +11,8 @@
 | Ennemis et boss | [combat/ennemi.gd](combat/ennemi.gd), [boss.gd](combat/boss.gd), [capacites_ennemis.gd](combat/capacites_ennemis.gd), [cerveaux.gd](combat/cerveaux.gd) |
 | Degats du corps de tous les monstres et boss, croisement et protection par les murs | [combat/contact_physique.gd](combat/contact_physique.gd) ; controle dans `../tools/verifier_projectiles.gd` |
 | Augments : données de choix, effets, offres, texte | [augments/reactif.gd](augments/reactif.gd), [mods.gd](augments/mods.gd), [draft_logique.gd](augments/draft_logique.gd), [details_reactif.gd](augments/details_reactif.gd) |
+| Cercles de contact des satellites alchimiques | [combat/satellites_alchimiques.gd](combat/satellites_alchimiques.gd), [rendu](presentation/satellites_alchimiques_3d.gd) ; paramètres dans `../data/augments/reglages_augments.gd` |
+| Trait périodique et météorite des rares | [combat/effets_periodiques_augments.gd](combat/effets_periodiques_augments.gd), [rendu de chute](presentation/meteorite_alchimique_3d.gd) ; paramètres dans `../data/augments/reglages_augments.gd` |
 | Salle et échelle des ennemis | [monde/salle.gd](monde/salle.gd) |
 | Approche, flancs et orbites des boss | [combat/deplacement_boss.gd](combat/deplacement_boss.gd), valeurs dans `../data/mondes/deplacements_boss.gd` ; contrôle dans `../tools/verifier_patterns.gd` |
 | Trajet annoncé et exécuté des charges | [combat/trajet_charge.gd](combat/trajet_charge.gd), partagé par les monstres, les boss et leurs annonces ; contrôle dans `../tools/verifier_patterns.gd` |

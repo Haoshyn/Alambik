@@ -1,10 +1,16 @@
 class_name CatalogueReactifs
 extends RefCounted
 
-# Chaque choix renforce les statistiques ou les tirs ordinaires du heros.
+# Les choix renforcent le heros, ses tirs ou les cercles de contact alchimiques.
 const PROJECTILE := "projectile"
 const HEROS := "heros"
 const SCEAU := "sceau"
+
+# Deux variantes d'une meme attaque ne forment pas une quatrieme salve.
+const INCOMPATIBILITES := {
+	"salve": ["battement_triple"],
+	"battement_triple": ["salve"],
+}
 
 const ICONES_COMMUNES := {
 	"battement_triple": "salve",
@@ -26,13 +32,13 @@ static var TOUS := {
 		{"salves_add": 1, "degats_salve_mult": ReglagesAugments.MALUS_TIRS_MULT},
 		Color(0.62, 0.86, 0.96), "triple_barre", 1, PROJECTILE, Reactif.RARE),
 	"tir_multiple": Reactif.creer("tir_multiple", "Tir double",
-		"Un projectile frontal parallèle supplémentaire. Chaque copie réduit les dégâts de tous les projectiles.",
+		"Un projectile frontal parallèle supplémentaire. Les copies partagent une puissance atténuée ; la seconde copie conserve un vrai gain.",
 		{"nb_projectiles_add": 1, "ecart_lateral_min": ReglagesAugments.TIR_DOUBLE_ECART,
-			"degats_finaux_projectile_mult": ReglagesAugments.MALUS_TIRS_MULT},
+			"tirs_paralleles_add": 1},
 		Color(0.98, 0.82, 0.42), "eventail", ReglagesAugments.COPIES_MAX, PROJECTILE, Reactif.RARE),
 	"homing": Reactif.creer("homing", "Traque alchimique",
 		"Les projectiles s'orientent vers les ennemis.",
-		{"degats_projectile_mult": 1.20, "critique_add": 0.05, "drapeaux": ["homing"]},
+		{"degats_projectile_mult": 1.30, "critique_add": 0.05, "drapeaux": ["homing"]},
 		Color(0.72, 0.88, 1.00), "oeil", 1, PROJECTILE, Reactif.RARE),
 	"cadence_febrile": Reactif.creer("cadence_febrile", "Cadence fébrile",
 		"Des attaques plus fréquentes.", {"cadence_mult": 1.30},
@@ -46,12 +52,12 @@ static var TOUS := {
 		{"degats_subis_mult": 0.75},
 		Color(0.62, 0.82, 1.00), "hexagone", 1, SCEAU, Reactif.RARE),
 	"sceau_ruine": Reactif.creer("sceau_ruine", "Sceau de ruine",
-		"Une attaque renforcée.",
-		{"attaque_mult": 1.35},
+		"Une météorite d'encre tombe régulièrement sur un ennemi et frappe la zone autour de lui, même en mouvement.",
+		{"attaque_mult": 1.20, "drapeaux": ["meteorite_alchimique"]},
 		Color(0.80, 0.34, 0.86), "cristal", 1, SCEAU, Reactif.RARE),
 	"pointe_lucide": Reactif.creer("pointe_lucide", "Pointe lucide",
 		"Des critiques plus fréquents et plus puissants.",
-		{"critique_add": 0.20, "degats_critiques_add": 0.40},
+		{"critique_add": 0.20, "degats_critiques_add": 0.55},
 		Color("9edcea"), "oeil", ReglagesAugments.COPIES_MAX, HEROS, Reactif.RARE),
 	"peau_cuivre": Reactif.creer("peau_cuivre", "Peau de cuivre",
 		"Plus de défense et de vitalité.",
@@ -62,8 +68,8 @@ static var TOUS := {
 		{"pv_max_mult": 1.20, "deplacement_mult": 1.25, "invulnerabilite_add": 0.40},
 		Color("a3daca"), "sillage", ReglagesAugments.COPIES_MAX, HEROS, Reactif.RARE),
 	"encrage_vif": Reactif.creer("encrage_vif", "Encrage vif",
-		"Des projectiles plus rapides et une attaque renforcée.",
-		{"attaque_mult": 1.30, "vitesse_mult": 1.25},
+		"Un trait d'émail supplémentaire part régulièrement vers un ennemi visible, même en mouvement. Une seconde copie renforce ce trait.",
+		{"attaque_mult": 1.25, "vitesse_mult": 1.25, "drapeaux": ["trait_periodique"]},
 		Color("a6bff2"), "lance", ReglagesAugments.COPIES_MAX, PROJECTILE, Reactif.RARE),
 	"baume_profond": Reactif.creer("baume_profond", "Baume profond",
 		"Plus d'attaque, de réserve de vie et de soins reçus, sans soin immédiat.",
@@ -72,7 +78,7 @@ static var TOUS := {
 
 	"ricochet": Reactif.creer("ricochet", "Ricochet",
 		"Les projectiles rebondissent vers d'autres ennemis, en perdant de la puissance.",
-		{"degats_projectile_mult": 1.20, "rebonds_add": 2},
+		{"degats_projectile_mult": 1.35, "rebonds_add": 3},
 		Color(0.62, 0.86, 0.96), "zigzag", 1, PROJECTILE, Reactif.EPIQUE),
 	"perforation": Reactif.creer("perforation", "Perforation",
 		"Les projectiles renforcés traversent les ennemis. Les rebonds gardent leur limite et leur perte de puissance.",
@@ -84,11 +90,11 @@ static var TOUS := {
 		Color(0.94, 0.78, 1.00), "eventail", ReglagesAugments.COPIES_MAX, PROJECTILE, Reactif.EPIQUE),
 	"trait_transpercant": Reactif.creer("trait_transpercant", "Tir indélébile",
 		"Les tirs accélèrent et poursuivent leur cible à travers les murs et les autres ennemis.",
-		{"degats_projectile_mult": 1.25, "vitesse_mult": 1.20, "drapeaux": ["indelebile"]},
+		{"degats_projectile_mult": 1.35, "vitesse_mult": 1.20, "drapeaux": ["indelebile"]},
 		Color(0.78, 0.94, 0.90), "lance", 1, PROJECTILE, Reactif.EPIQUE),
 	"peau_de_pierre": Reactif.creer("peau_de_pierre", "Peau de pierre",
 		"Plus de vitalité et des dégâts reçus réduits.",
-		{"pv_max_mult": 1.35, "degats_subis_mult": 0.95},
+		{"pv_max_mult": 1.40, "degats_subis_mult": 0.95},
 		Color(0.68, 0.66, 0.60), "hexagone", 1, HEROS, Reactif.EPIQUE),
 	"elan_vital": Reactif.creer("elan_vital", "Élan vital",
 		"L'attaque augmente en permanence. Se déplacer charge un bonus pour toutes les salves de la prochaine attaque.",
@@ -96,7 +102,7 @@ static var TOUS := {
 		Color(0.56, 0.98, 0.86), "sillage", 1, HEROS, Reactif.EPIQUE),
 	"garde_remanente": Reactif.creer("garde_remanente", "Garde rémanente",
 		"Davantage de vitalité et un coup bloqué dans chaque salle.",
-		{"pv_max_mult": 1.30, "boucliers_salle_add": 1},
+		{"pv_max_mult": 1.40, "boucliers_salle_add": 1},
 		Color("b7caef"), "hexagone", 1, HEROS, Reactif.EPIQUE),
 	"encre_mordante": Reactif.creer("encre_mordante", "Encre mordante",
 		"Des projectiles plus puissants.",
@@ -104,12 +110,12 @@ static var TOUS := {
 		Color("abd98c"), "fiole", 1, PROJECTILE, Reactif.EPIQUE),
 	"noyau_pesant": Reactif.creer("noyau_pesant", "Noyau pesant",
 		"Une attaque plus forte.",
-		{"attaque_mult": 1.40},
+		{"attaque_mult": 1.45},
 		Color("d5ac8b"), "masse", ReglagesAugments.COPIES_MAX, PROJECTILE, Reactif.EPIQUE),
 	"satellites_alchimiques": Reactif.creer("satellites_alchimiques", "Satellites alchimiques",
 		"Deux cercles d'émail gravitent autour du héros et frappent les ennemis proches, même en mouvement. L'attaque augmente aussi à distance.",
-		{"attaque_mult": 1.10, "drapeaux": ["satellites_alchimiques"]},
-		Color("86e8d1"), "hexagone", 1, HEROS, Reactif.EPIQUE),
+		{"attaque_mult": 1.20, "drapeaux": ["satellites_alchimiques"]},
+		Color("86e8d1"), "hexagone", 1, HEROS, Reactif.RARE),
 
 	"frappe_lourde": Reactif.creer("frappe_lourde", "Force cataclysmique",
 		"Un bonus majeur d'attaque. Les réductions propres aux tirs multiples restent actives.",
@@ -121,15 +127,15 @@ static var TOUS := {
 		Color(0.88, 0.92, 1.00), "hexagone", 1, HEROS, Reactif.LEGENDAIRE),
 	"courageux": Reactif.creer("courageux", "Courage indomptable",
 		"Renforce l'attaque, la cadence, les PV et la défense. Une seconde vie complète par tentative.",
-		{"attaque_mult": 1.15, "cadence_mult": 1.15, "pv_max_mult": 1.15, "defense_mult": 1.15, "drapeaux": ["courageux"]},
+		{"attaque_mult": 1.20, "cadence_mult": 1.20, "pv_max_mult": 1.20, "defense_mult": 1.20, "drapeaux": ["courageux"]},
 		Color(0.98, 0.42, 0.40), "flamme", 1, HEROS, Reactif.LEGENDAIRE),
 	"battement_triple": Reactif.creer("battement_triple", "Battement triple",
-		"Deux salves supplémentaires. La réduction de salve la plus forte s'applique ; les réductions de Tir double restent actives.",
-		{"salves_add": 2, "degats_salve_mult": ReglagesAugments.MALUS_BATTEMENT_MULT},
+		"Trois salves atténuées. Alternative à Salve, sans cumul ; les réductions de Tir double restent actives.",
+		{"salves_add": 2, "degats_salve_mult": ReglagesAugments.PUISSANCE_BATTEMENT_MULT},
 		Color("ffce81"), "triple_barre", 1, PROJECTILE, Reactif.LEGENDAIRE),
 	"couronne_incisive": Reactif.creer("couronne_incisive", "Couronne incisive",
 		"Des critiques plus fréquents et plus puissants. Une part de la chance excédentaire devient des dégâts critiques.",
-		{"critique_add": 0.30, "degats_critiques_add": 0.60, "conversion_critique": 0.25},
+		{"critique_add": 0.35, "degats_critiques_add": 0.75, "conversion_critique": 0.50},
 		Color("ffd98b"), "etoile", 1, HEROS, Reactif.LEGENDAIRE),
 
 }

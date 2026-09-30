@@ -11,7 +11,7 @@ const PROFILS := [
 	{"defense_base": 3.0, "attaque_base": 2.0},
 	{"attaque_mult": 0.05, "attaque_base": 2.0},
 ]
-const FORGE_PAR_STAT := {"pv_base": 2.5, "defense_base": 0.30, "attaque_mult": 0.005, "attaque_base": 0.15}
+const FORGE_PAR_STAT := {"pv_base": 2.5, "defense_base": 0.30, "attaque_mult": 0.005, "attaque_base": 0.10}
 const STATS_BRUTES := ["pv_base", "defense_base", "attaque_base"]
 const STATS_PRINCIPALES := ["pv_base", "defense_base", "attaque_mult"]
 

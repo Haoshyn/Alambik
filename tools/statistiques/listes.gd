@@ -43,13 +43,13 @@ static func _cellule(texte: String) -> String:
 
 static func augments() -> String:
 	var lignes := entete("Liste des augments", [
-		"Chaque choix ne dure que pour la tentative en cours. Aucun augment ne crée une attaque autonome.",
+		"Chaque choix ne dure que pour la tentative en cours. Les rares proposent aussi des satellites de contact, un trait périodique et une météorite de zone, actifs en mouvement. Les épiques et légendaires renforcent le build avec des gains mesurés.",
 		"Dans une même famille, les bonus positifs s’additionnent : deux bonus de 40 % donnent +80 %. Aucun bonus de défense ne coûte de l’attaque, de la cadence ou des PV.",
-		"Les seules réductions concernent la multiplication des tirs : Salve, Battement triple et chaque Tir double multiplient indépendamment les dégâts de tous les projectiles par %s. Les diagonales ont leur propre puissance et Ricochet perd de la puissance entre cibles." % nombre(ReglagesAugments.MALUS_TIRS_MULT),
+		"Salve applique ×%s aux projectiles ; Battement triple applique ×%s. Ces variantes sont exclusives. Tir double applique ×%s pour une copie et ×%s pour deux copies lorsqu'il est seul. Les gains de débit des salves, tirs parallèles et cadence s'additionnent : leur cumul atténue les impacts. Les diagonales ont leur propre puissance et Ricochet garde sa limite et ses pertes, même avec Perforation." % [nombre(ReglagesAugments.MALUS_TIRS_MULT), nombre(ReglagesAugments.PUISSANCE_BATTEMENT_MULT), nombre(ReglagesAugments.puissance_tirs_paralleles(1)), nombre(ReglagesAugments.puissance_tirs_paralleles(2))],
 		"Le groupe des bonus de run multiplie une seule fois les statistiques permanentes.",
-		"Critique : les points de chance s’ajoutent, jusqu’à 100 %. Les points de dégâts critiques s’ajoutent au coefficient critique.",
+		"Les bonus directs d'attaque et de projectile des augments s'additionnent. Critique : les points de chance s’ajoutent, jusqu’à 100 %. Chaque augment garde son gain propre ; le croisement entre la chance d'un choix et la puissance d'un autre est retiré. Les fiches montrent les bonus de base avant cette combinaison.",
 		"Salves et projectiles supplémentaires ne garantissent pas que tous les tirs atteignent la même cible.",
-		"Les malus restent actifs avec les légendaires. Les classes Sorcier et Moine n’ajoutent aucun bonus.",
+		"Les réductions de Tir double restent actives avec les légendaires. Les classes Sorcier et Moine n’ajoutent aucun bonus.",
 		"Augmenter les PV maximum ne soigne pas, sauf Égide qui rend toute la vie à son acquisition. Égide multiplie les PV après les autres bonus. Un bouclier revient à chaque salle sans cumuler les charges des salles précédentes.",
 		"Couronne incisive convertit une part du critique excédant 100 % en dégâts critiques, selon sa fiche. Sans Couronne, cet excédent est perdu. Les soins indiqués sont multipliés par les bonus de soins et limités aux PV manquants.",
 		"Campagne et Mine : %d niveaux donnent %d choix, sans commun. Le niveau %d garantit un légendaire ; %d autres niveaux tirés sans remise donnent un épique, les %d restants un rare. Aucun choix supplémentaire n’est ajouté avant un boss." % [ProgressionAugments.niveau_max(), ProgressionAugments.niveau_max(), ProgressionAugments.NIVEAU_LEGENDAIRE, ProgressionAugments.NOMBRE_EPIQUES, ProgressionAugments.niveau_max() - ProgressionAugments.NOMBRE_EPIQUES - 1],

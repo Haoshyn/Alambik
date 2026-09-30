@@ -43,8 +43,8 @@ pour laisser les autres familles de progression prendre leur place. Les choix
 de run démultiplient ce socle et doivent expliquer la majeure partie du DPS
 de fin de tentative ; ils ne sont pas une sixième tranche à ramener à 20 %.
 
-Les gains offensifs et défensifs doivent rester comparables. Attributs,
-maîtrises, équipement, passifs, Cœurs et augments apportent des gains modestes,
+Les gains offensifs et défensifs des rares doivent rester comparables. Attributs,
+maîtrises, équipement, passifs et Cœurs apportent des gains progressifs,
 avec des PV et dégâts ennemis recalibrés sur ce niveau de puissance.
 Les cinq sources de dégâts donnent des gains permanents visibles.
 Une spécialisation offensive conserve son avantage de dégâts. Les PV, les
@@ -54,10 +54,13 @@ laisse une faible marge aux blessures et finance moins de rangs par coffre.
 Le premier monde demande très peu de répétitions ; le besoin de
 renforcement augmente vers la fin de campagne. Les premières salles doivent
 rester accessibles avec l'équipement attendu, avant les augments aléatoires.
-Une progression ordinaire doit garder plusieurs attaques par monstre intact,
-même en se spécialisant en dégâts. Les critiques et circonstances favorables
-peuvent exceptionnellement le tuer en une attaque. Un fort sur-farm peut
+Avec des rares seuls, une progression ordinaire doit garder plusieurs attaques
+par monstre intact. Les choix offensifs et les critiques accélèrent ensuite
+les rencontres. Un mixte avec plusieurs choix offensifs ordinaires doit rester
+viable avec un légendaire défensif. Un fort sur-farm peut
 dépasser le chapitre suivant ; le chapitre d'après doit reprendre une marge.
+Les reprises après plusieurs Épreuves peuvent conserver une avance au début
+du monde suivant ; les rencontres du milieu de ce monde reprennent une marge.
 Le jeu ne force jamais un nombre minimum de coups, ne plafonne pas les dégâts
 et n'adapte pas les ennemis au build.
 
@@ -208,6 +211,9 @@ ont chacune un effet actuel ; Intelligence n'est plus liée à des sorts.
 
 Un équipement complet comprend une arme, un familier, un anneau, un bracelet
 et un collier. Chaque modèle possède une identité et des chiffres fixes.
+Les trois bijoux apportent une base d'attaque commune, en plus de leur
+spécialité. Chaque rang de forge renforce cette base et la statistique
+principale. Les fiches montrent le gain suivant et son coût avant achat.
 La forge augmente les statistiques du modèle ; sa provenance renforce ses
 valeurs brutes. Les pourcentages s'additionnent dans chaque source ; les
 étages équipement, maîtrises et passifs se multiplient. Les augments agissent
@@ -251,32 +257,54 @@ La migration conserve le reste de la progression.
 
 ## Augments
 
-Les vingt-six augments modifient les statistiques ou les tirs existants.
-Ils ne créent plus de météores, zones de dégâts, gardiens, flaques ni attaques
-autonomes. Les légendaires donnent une orientation au build et un gain mesuré
-de puissance. Aucun augment ordinaire ne retire d'attaque, de cadence, de PV
+Les vingt-sept augments proposent treize rares, neuf épiques et cinq
+légendaires. Les rares associent des bonus directs et des mécaniques
+originales : Encrage vif lance un trait périodique, Sceau de ruine fait
+tomber une météorite de zone et les satellites alchimiques gravitent autour
+du héros et frappent au contact, même en mouvement. Le délai par ennemi est
+partagé entre les cercles ; les murs protègent et les dégâts ne se multiplient
+pas avec critiques, salves, rebonds ou diagonales. Les listes de DPS à distance
+excluent ce contact conditionnel ; les effets périodiques y sont mesurés
+sur une cible immobile touchée à chaque déclenchement. Ils fonctionnent
+pendant le déplacement et ont leurs propres délais, sans critiques ni
+multiplication par les salves ou rebonds. Il n'y a ni sort actif ni ultime.
+Les rares doivent être utiles dans une même fourchette de puissance,
+avec des conditions et une originalité qui distinguent les choix. Les
+épiques et légendaires donnent des gains marqués et mesurés. Les combinaisons
+favorables gardent un avantage sans rendre obligatoire un tirage offensif précis.
+Aucun augment ordinaire ne retire d'attaque, de cadence, de PV
 ou de mobilité en échange d'un autre bonus.
 
 Salve est un choix rare unique. Tir double ajoute des projectiles parallèles
-et peut être acquis deux fois. Chaque acquisition réduit de 20 % les dégâts de tous
-les projectiles après le coefficient de l'arme. Battement triple ajoute deux
-salves, reste légendaire et applique aussi une réduction de 20 % à tous les
-projectiles ; il conserve les réductions des autres choix.
+et peut être acquis deux fois. Les projectiles supplémentaires ont un coût
+en puissance après le coefficient de l'arme. Battement triple donne trois
+salves atténuées et ne se cumule pas avec Salve : les deux choix sont exclusifs.
+Un ancien inventaire possédant les deux conserve seulement la variante triple.
+Tir double garde un gain utile à la seconde acquisition.
 
-Les bonus positifs de même famille s'additionnent. Les réductions des tirs
-multiples se multiplient et restent applicables aux légendaires. Choisir
+Les bonus directs d'attaque et de projectile de run s'additionnent. Les gains de
+débit des salves, tirs parallèles et cadence s'additionnent aussi : leurs impacts
+s'atténuent lorsqu'on les combine. Les augments de critique gardent leurs gains
+propres sans multiplier la chance d'un choix par la puissance d'un autre. Choisir
 l'offensive laisse passer une occasion de renforcer sa survie ; une défense
 renforcée ne réduit jamais les dégâts déjà acquis. Les gains des sources
 permanentes et des augments, les PV ennemis et leurs dégâts sont ajustés
-ensemble pour éviter une succession de multiplicateurs excessifs.
+ensemble. Après la salle du légendaire garanti, la pente des PV ordinaires
+et les paliers des boss laissent une place aux builds mixtes. Cette courbe
+reste fixe et ne lit jamais le légendaire choisi.
 
 Les pourcentages des augments sont des multiples de cinq ou de dix. Les
-gains de PV effectifs et de DPS de même rareté restent du même ordre, sans
+gains de PV effectifs et de DPS des rares restent du même ordre, sans
 prime systématique à la défense. Ajouter deux augments défensifs à un build
 offensif améliore sa survie au prix de deux choix offensifs ; cela ne doit
-pas lui permettre de rester très résistant tout en éliminant les rencontres
-en une attaque. Soins, boucliers et seconde vie sont présentés séparément
+pas lui donner une offensive gratuite. Une légendaire défensive laisse un
+avantage de survie et doit permettre de finir avec d'autres choix offensifs cohérents.
+Soins, boucliers et seconde vie sont présentés séparément
 de la résistance permanente. Le déblocage progressif des augments est reporté.
+Les choix de soins, de mobilité et les mécaniques conditionnelles gardent
+un socle de combat mesurable. Ricochet conserve sa limite et sa perte par
+rebond avec Perforation. Les diagonales couvrent les côtés avec une puissance
+atténuée, sans remplacer une amélioration offensive directe sur une seule cible.
 
 En campagne et en Mine, dix niveaux donnent dix augments : trois épiques,
 une légendaire garantie au niveau 5, et les autres en rares. Aucun commun,

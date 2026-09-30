@@ -31,6 +31,8 @@ var _bilan: VBoxContainer
 var _onglets_atelier: Array[Button] = []
 var _page_collection: Label
 var _fiche_popup: FenetreFiche
+var _transition_atelier: Tween
+var _message_forge := ""
 
 func _ready() -> void:
 	var col := StyleAzur.page(self,"Équipement",integre_menu)
@@ -126,6 +128,13 @@ func _changer_atelier(index: int) -> void:
 	_familiers.visible = index == 2
 	_bijoux.visible = index == 0
 	_bilan.visible = index == 0
+	if is_instance_valid(_transition_atelier): _transition_atelier.kill()
+	for atelier: Control in [_armes, _familiers, _bijoux]: atelier.modulate.a = 1.0
+	if not ReglagesJoueur.effets_reduits:
+		var atelier: Control = [_bijoux, _armes, _familiers][index]
+		atelier.modulate.a = 0.0
+		_transition_atelier = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		_transition_atelier.tween_property(atelier, "modulate:a", 1.0, 0.20)
 	for i in _onglets_atelier.size():
 		StyleAzur.onglet_symbolique(_onglets_atelier[i], [StyleAzur.icone(0), StyleAzur.icone_arme("standard"), StyleAzur.glyphe("familier_gardien")][i], i == index,
 			[StyleAzur.OR_VIF, StyleAzur.ROUGE_VIF, StyleAzur.VERT_VIF][i])
@@ -181,7 +190,7 @@ func _styler_carte(bouton: Button, accent: Color, selection: bool, vide := false
 		var intensite := 0.07 if vide else 0.28 if selection else 0.17
 		if etat == "hover": intensite += 0.10
 		if etat == "pressed": intensite += 0.16
-		style.bg_color = Color("172743f0").lerp(accent, intensite)
+		style.bg_color = Color("2c4561f5").lerp(accent, intensite)
 		style.border_color = Color("6e89aa") if vide else accent.lightened(0.18 if selection else 0.04)
 		style.set_border_width_all(2 if selection else 1)
 		style.border_width_bottom = 4 if selection else 2
@@ -196,7 +205,9 @@ func _styler_carte(bouton: Button, accent: Color, selection: bool, vide := false
 	bouton.add_theme_color_override("font_disabled_color", Color("a9b8d1"))
 
 func _nombre(valeur: float) -> String:
-	return String.num(valeur, 1).trim_suffix(".0").replace(".", ",")
+	var texte := String.num(valeur, 2)
+	while texte.contains(".") and texte.ends_with("0"): texte = texte.trim_suffix("0")
+	return texte.trim_suffix(".").replace(".", ",")
 
 func _pourcentage(valeur: float) -> String:
 	return _nombre(valeur * 100.0)
@@ -267,6 +278,7 @@ func _ameliorer() -> void:
 	if _objet_selectionne.is_empty():
 		return
 	if ReglagesJoueur.ameliorer_objet(_objet_selectionne):
+		_message_forge = "Forge réussie · niveau %d" % ReglagesJoueur.niveau_objet(_objet_selectionne)
 		Sons.jouer("fusion", -10.0)
 		_rafraichir()
 
@@ -282,15 +294,52 @@ func _rafraichir() -> void:
 	_afficher_familiers()
 
 func _nouvelle_fiche(titre: String, glyphe: String) -> FenetreFiche:
-	if is_instance_valid(_fiche_popup):
-		_fiche_popup.queue_free()
-	_fiche_popup = FenetreFiche.new()
-	_fiche_popup.largeur_max = 760.0
-	_fiche_popup.hauteur_max = 700.0
-	var parent_fiche: Node = get_parent().get_parent() if integre_menu else self
-	parent_fiche.add_child(_fiche_popup)
+	if is_instance_valid(_fiche_popup) and _fiche_popup.visible and not _fiche_popup.fermeture_en_cours():
+		_fiche_popup.vider()
+	else:
+		if is_instance_valid(_fiche_popup): _fiche_popup.queue_free()
+		_fiche_popup = FenetreFiche.new()
+		_fiche_popup.presentation_soignee = true
+		_fiche_popup.set_meta("surface_lecture", false)
+		_fiche_popup.largeur_max = 820.0
+		_fiche_popup.hauteur_max = 1100.0
+		var parent_fiche: Node = get_parent().get_parent() if integre_menu else self
+		parent_fiche.add_child(_fiche_popup)
 	_fiche_popup.configurer(titre, glyphe)
+	if not _message_forge.is_empty():
+		var confirmation := StyleAzur.texte(_message_forge, 28, StyleAzur.VERT_VIF)
+		confirmation.name = "ConfirmationForge"
+		_fiche_popup.contenu.add_child(confirmation)
+		_fiche_popup.souligner_validation()
+		_message_forge = ""
 	return _fiche_popup
+
+func _lecture_fiche(fiche: FenetreFiche) -> VBoxContainer:
+	var lecture := VBoxContainer.new()
+	lecture.add_theme_constant_override("separation", 16)
+	fiche.contenu.add_child(lecture)
+	return lecture
+
+func _progression_forge(fiche: FenetreFiche, actuel: Dictionary, suivant: Dictionary, niveau: int, cout: int) -> void:
+	if niveau >= Reglages.FORGE_NIVEAU_MAX:
+		fiche.contenu.add_child(StyleAzur.texte("Forge au niveau maximum", 27, StyleAzur.CUIVRE))
+		return
+	var progression := VBoxContainer.new()
+	progression.name = "ProgressionForge"
+	progression.add_theme_constant_override("separation", 10)
+	fiche.contenu.add_child(progression)
+	progression.add_child(StyleAzur.texte("Niveau %d → %d" % [niveau, niveau + 1], 30, StyleAzur.OR_VIF))
+	var libelles := {"attaque_base": "Attaque brute", "pv_base": "PV bruts", "defense_base": "Défense brute", "attaque_mult": "Attaque", "attaque_familier": "Attaque du familier"}
+	for champ: String in suivant:
+		var avant := float(actuel.get(champ, 0.0))
+		var apres := float(suivant[champ])
+		if is_equal_approx(avant, apres): continue
+		var pourcent := champ.ends_with("_mult")
+		var unite := " %" if pourcent else ""
+		var facteur := 100.0 if pourcent else 1.0
+		progression.add_child(StyleAzur.texte("%s  %s%s → %s%s  (+%s%s)" % [str(libelles.get(champ, champ)), _nombre(avant * facteur), unite, _nombre(apres * facteur), unite, _nombre((apres - avant) * facteur), unite], 26, StyleAzur.MENTHE))
+	var manque := maxi(0, cout - ReglagesJoueur.pierres_forge)
+	progression.add_child(StyleAzur.texte("%d pierres · réserve %d%s" % [cout, ReglagesJoueur.pierres_forge, " · il manque %d" % manque if manque > 0 else ""], 26, StyleAzur.CUIVRE))
 
 func _action_fiche(ligne: BoxContainer, titre: String, symbole: String, couleur: Color, action: Callable, actif := true) -> void:
 	var bouton := StyleAzur.bouton(titre, action)
@@ -325,14 +374,13 @@ func _ouvrir_fiche_objet() -> void:
 	var niveau := ReglagesJoueur.niveau_objet(_objet_selectionne)
 	var equipe := str(ReglagesJoueur.equipements.get(_slot_selectionne, "")) == _objet_selectionne
 	fiche.contenu.add_child(StyleAzur.texte("%s · Niveau %d%s" % [NOMS_SLOTS[_slot_selectionne], niveau, " · Équipé" if equipe else ""], 28, StyleAzur.OR_VIF))
-	var lecture := StyleAzur.plaque(fiche.contenu)
+	var lecture := _lecture_fiche(fiche)
 	lecture.add_child(StyleAzur.image(StyleAzur.icone_objet(_objet_selectionne), 132))
 	lecture.add_child(StyleAzur.texte(CatalogueObjets.description_bonus(_objet_selectionne, niveau), 27))
 	lecture.add_child(StyleAzur.texte(CatalogueObjets.description_effets(_objet_selectionne, niveau), 23, StyleAzur.ATTENUE))
-	if niveau < Reglages.FORGE_NIVEAU_MAX:
-		fiche.contenu.add_child(StyleAzur.texte("Forge : %d pierres · Vous en avez %d" % [ReglagesJoueur.cout_forge(_objet_selectionne), ReglagesJoueur.pierres_forge], 25, StyleAzur.CUIVRE))
-	else:
-		fiche.contenu.add_child(StyleAzur.texte("Forge au niveau maximum", 25, StyleAzur.CUIVRE))
+	_progression_forge(fiche, CatalogueObjets.bonus_objet(_objet_selectionne, niveau), CatalogueObjets.bonus_objet(_objet_selectionne, niveau + 1), niveau, ReglagesJoueur.cout_forge(_objet_selectionne))
+	if niveau < Reglages.FORGE_NIVEAU_MAX and niveau + 1 in EffetsBijoux.PALIERS:
+		fiche.contenu.add_child(StyleAzur.texte("Ce rang débloque le pouvoir de la relique", 27, StyleAzur.OR_VIF))
 	var ligne := _actions_fiche(fiche)
 	_action_fiche(ligne, "Équiper", "validation", StyleAzur.VERT_VIF, func(): _agir_objet("equiper"), not equipe)
 	_action_fiche(ligne, "Retirer", "non", StyleAzur.CORAIL, func(): _agir_objet("retirer"), equipe)
@@ -352,7 +400,7 @@ func _ouvrir_fiche_arme() -> void:
 	var equipe := _arme_selectionnee == ReglagesJoueur.projectile_equipe_effectif()
 	var fiche := _nouvelle_fiche(str(arme["nom"]), "forge")
 	fiche.contenu.add_child(StyleAzur.texte("Niveau %d%s" % [niveau, " · Équipée" if equipe else ""], 27, StyleAzur.ROUGE_VIF))
-	var lecture := StyleAzur.plaque(fiche.contenu)
+	var lecture := _lecture_fiche(fiche)
 	var image_arme := TextureRect.new()
 	image_arme.texture = StyleAzur.icone_arme(_arme_selectionnee)
 	image_arme.custom_minimum_size = Vector2(132, 132)
@@ -361,8 +409,7 @@ func _ouvrir_fiche_arme() -> void:
 	lecture.add_child(image_arme)
 	lecture.add_child(StyleAzur.texte("Attaque +%s · Tir %s %% · Cadence ×%.2f" % [_nombre(CatalogueProjectiles.attaque_base(_arme_selectionnee, niveau)), _pourcentage(float(arme["coefficient_tir"])), float(arme.get("cadence_mult", 1.0))], 27))
 	lecture.add_child(StyleAzur.texte(str(arme["description"]), 26))
-	if niveau < Reglages.FORGE_NIVEAU_MAX:
-		fiche.contenu.add_child(StyleAzur.texte("Prochain niveau : attaque +%s · Forge : %d pierres" % [_nombre(CatalogueProjectiles.attaque_base(_arme_selectionnee, niveau + 1)), ReglagesJoueur.cout_forge_arme(_arme_selectionnee)], 25, StyleAzur.CUIVRE))
+	_progression_forge(fiche, {"attaque_base": CatalogueProjectiles.attaque_base(_arme_selectionnee, niveau)}, {"attaque_base": CatalogueProjectiles.attaque_base(_arme_selectionnee, niveau + 1)}, niveau, ReglagesJoueur.cout_forge_arme(_arme_selectionnee))
 	var ligne := _actions_fiche(fiche)
 	_action_fiche(ligne, "Équiper", "validation", StyleAzur.VERT_VIF, func(): _agir_arme(false), disponible and not equipe)
 	_action_fiche(ligne, "Forge", "forge", StyleAzur.OR_VIF, func(): _agir_arme(true), disponible and niveau < Reglages.FORGE_NIVEAU_MAX and ReglagesJoueur.pierres_forge >= ReglagesJoueur.cout_forge_arme(_arme_selectionnee))
@@ -381,12 +428,11 @@ func _ouvrir_fiche_familier() -> void:
 	var equipe := _familier_selectionne == ReglagesJoueur.familier_equipe_effectif()
 	var fiche := _nouvelle_fiche(str(familier["nom"]), "astrolabe")
 	fiche.contenu.add_child(StyleAzur.texte("Niveau %d%s" % [niveau, " · Équipé" if equipe else ""], 27, StyleAzur.VERT_VIF))
-	var lecture := StyleAzur.plaque(fiche.contenu)
+	var lecture := _lecture_fiche(fiche)
 	lecture.add_child(StyleAzur.texte("Attaque %s · une attaque toutes les %s s" % [_nombre(CatalogueFamiliers.attaque(_familier_selectionne, niveau)), _nombre(float(familier["intervalle"]))], 27))
 	lecture.add_child(StyleAzur.texte(str(familier["description"]), 26))
 	lecture.add_child(StyleAzur.texte("Bonus d’attaque permanents et de run partagés, sans critique ni salve du héros.", 25))
-	if niveau < Reglages.FORGE_NIVEAU_MAX:
-		fiche.contenu.add_child(StyleAzur.texte("Forge : %d pierres" % Reglages.cout_forge(niveau), 25, StyleAzur.CUIVRE))
+	_progression_forge(fiche, {"attaque_familier": CatalogueFamiliers.attaque(_familier_selectionne, niveau)}, {"attaque_familier": CatalogueFamiliers.attaque(_familier_selectionne, niveau + 1)}, niveau, Reglages.cout_forge(niveau))
 	var ligne := _actions_fiche(fiche)
 	_action_fiche(ligne, "Équiper", "validation", StyleAzur.VERT_VIF, func(): _agir_familier(false), disponible and not equipe)
 	_action_fiche(ligne, "Forge", "forge", StyleAzur.OR_VIF, func(): _agir_familier(true), disponible and niveau < Reglages.FORGE_NIVEAU_MAX and ReglagesJoueur.pierres_forge >= Reglages.cout_forge(niveau))
@@ -424,6 +470,7 @@ func _equiper_arme() -> void:
 
 func _ameliorer_arme() -> void:
 	if ReglagesJoueur.ameliorer_arme(_arme_selectionnee):
+		_message_forge = "Forge réussie · niveau %d" % ReglagesJoueur.niveau_arme(_arme_selectionnee)
 		Sons.jouer("fusion", -10.0)
 		_rafraichir()
 
@@ -457,6 +504,9 @@ func _creer_carte_atelier(grille: GridContainer, nom: String, texture: Texture2D
 	bouton.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bouton.pressed.connect(action)
 	grille.add_child(bouton)
+	var gravure := CadreAtelier.new()
+	gravure.accent = accent
+	bouton.add_child(gravure)
 	var marges := MarginContainer.new()
 	marges.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	marges.add_theme_constant_override("margin_left", 13)
@@ -474,7 +524,7 @@ func _creer_carte_atelier(grille: GridContainer, nom: String, texture: Texture2D
 	cadre_image.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	cadre_image.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var fond_image := StyleBoxFlat.new()
-	fond_image.bg_color = Color("172844").lerp(accent, 0.27)
+	fond_image.bg_color = Color("354f6c").lerp(accent, 0.20)
 	fond_image.border_color = accent
 	fond_image.set_border_width_all(2)
 	fond_image.set_corner_radius_all(16)
@@ -561,6 +611,7 @@ func _equiper_familier() -> void:
 
 func _ameliorer_familier() -> void:
 	if ReglagesJoueur.ameliorer_familier(_familier_selectionne):
+		_message_forge = "Forge réussie · niveau %d" % ReglagesJoueur.niveau_familier(_familier_selectionne)
 		Sons.jouer("fusion", -10.0)
 		_rafraichir()
 

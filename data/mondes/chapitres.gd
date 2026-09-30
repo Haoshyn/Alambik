@@ -15,7 +15,7 @@ const MONDES := [
 	{"id":"terre", "numero":"II", "nom":"Terre", "sous_titre":"Les sables mouvants gagnent les vieux jardins.", "boss_signature":"gardien_runes", "pv_signature_mult":0.90, "teinte":Color("b4bd78")},
 	{"id":"eau", "numero":"III", "nom":"Eau", "sous_titre":"Les marées ont gagné le sanctuaire.", "boss_signature":"reine_givre", "pv_signature_mult":0.95, "teinte":Color("4dbac4")},
 	{"id":"air", "numero":"IV", "nom":"Air", "sous_titre":"Les souffles traversent les terrasses.", "boss_signature":"maitre_orages", "pv_signature_mult":1.30, "teinte":Color("79c9b7")},
-	{"id":"feu", "numero":"V", "nom":"Feu", "sous_titre":"La lave affleure au bord des forges.", "boss_signature":"roi_braises", "pv_signature_mult":1.25, "teinte":Color("ed9857")},
+	{"id":"feu", "numero":"V", "nom":"Feu", "sous_titre":"La lave affleure au bord des forges.", "boss_signature":"roi_braises", "pv_signature_mult":1.20, "teinte":Color("ed9857")},
 ]
 
 # Garder les identites retirees pour les bijoux des anciennes sauvegardes.
@@ -103,9 +103,13 @@ static func facteur_pv(index: int, salle: int, boss := false) -> float:
 	var renfort := ProgressionStatistiques.facteur_boss(palier(index)) if boss else 1.0
 	var premier_boss: int = int(par_index(index)["bosses"][0])
 	if boss and salle == premier_boss: renfort *= PV_PREMIER_BOSS_MULT
+	# La rampe est fixe et commence apres la salle du legendaire garanti,
+	# quel que soit le choix offensif ou defensif du joueur.
+	var salle_tardive: int = ProgressionAugments.SALLES_NIVEAUX[ProgressionAugments.NIVEAU_LEGENDAIRE - 1] + 1
 	return float(par_index(index)["pv_mult"]) * renfort * ProgressionStatistiques.facteur_salle(salle,
 		Reglages.CAMPAGNE_PV_BOSS_PAR_SALLE if boss else Reglages.CAMPAGNE_PV_PAR_SALLE,
-		Reglages.CAMPAGNE_PV_BOSS_PALIERS if boss else Reglages.CAMPAGNE_PV_PALIERS)
+		Reglages.CAMPAGNE_PV_BOSS_PALIERS if boss else Reglages.CAMPAGNE_PV_PALIERS,
+		0.0 if boss else Reglages.CAMPAGNE_PV_PAR_SALLE_TARDIF, salle_tardive)
 
 static func facteur_degats(index: int, salle: int) -> float:
 	return float(par_index(index)["degats_mult"]) * ProgressionStatistiques.facteur_salle(salle,

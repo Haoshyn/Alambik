@@ -29,6 +29,7 @@ static func generer() -> String:
 	_equilibrage_progression(lignes)
 	_rythme_progression(lignes)
 	_rythme_boss(lignes)
+	_nuance_augments(lignes)
 	_maturation_progression(lignes)
 	SyntheseProgression.ajouter(lignes)
 	lignes.append_array(["## Les formules, en détail", "",
@@ -129,14 +130,17 @@ static func _formules(lignes: Array[String]) -> void:
 		"Attaque brute = base du héros à son niveau + Force + Intelligence + attaque de l’arme + attaque des trois bijoux.",
 		"Attaque permanente = attaque brute × (1 + pourcentages d’équipement) × (1 + pourcentages de maîtrises) × (1 + pourcentages de passifs). Les bonus d’une même source s’additionnent ; les sources se multiplient.",
 		"Attaque de run = attaque permanente × (1 + somme des bonus d’attaque des augments). Aucun augment ne réduit l’attaque en échange de défense.",
-		"Dégâts d’un projectile = attaque de run × coefficient de l’arme × bonus de projectile (Perforation, Élan vital chargé) × malus indépendants de Salve, Battement triple et chaque Tir double × bonus finaux × éventuel critique. Le tir après coefficient d’arme constitue la référence à 100 %.",
+		"Dégâts d’un projectile = attaque permanente × (1 + bonus directs d'attaque et de projectile des augments) × coefficient de l’arme × puissance des tirs cumulés × bonus finaux × éventuel critique. Élan vital chargé renforce toute l’attaque suivante. Le tir après coefficient d’arme constitue la référence à 100 %.",
 		"Cadence = base × facteur d’attributs × facteur d’équipement × facteur de maîtrises × facteur de passifs × facteur des augments × facteur de l’arme.",
 		"DPS frontal héros = dégâts moyens d’un projectile × poids des projectiles frontaux × salves × cadence.",
 		"Critique moyen = 1 + chance critique × (coefficient critique − 1). Chance plafonnée à 100 %% ; critique de base ×%s. Couronne incisive convertit une part de la chance au-delà du plafond en dégâts critiques." % n(Reglages.CRITIQUE_MULT_BASE),
+		"Pour les augments de critique, A = somme des chances ajoutées, D = somme des puissances ajoutées et K = A × D − somme(chance du choix × puissance du même choix). Avec Q la chance finale et B la chance permanente, la puissance ajoutée vaut D − K × (Q − B) / (A × Q), avant conversion de l'excédent. Si A ou Q est nul, il n'y a pas de correction. Ce calcul conserve chaque gain individuel et retire le croisement entre choix distincts.",
 		"Bonus finaux = (1 + %s × nombre de Cœurs) × (1 + Audace + Reprise de souffle active + Élan offensif actif)." % n(Reglages.COEUR_MANA_BONUS_FINAL),
 		"Cinquième impact est un facteur moyen supplémentaire de ×%s sur le héros quand l’anneau correspondant est équipé et forgé." % n(1.0 + (EffetsBijoux.IMPACT_MULTIPLICATEUR - 1.0) / float(EffetsBijoux.IMPACT_ATTAQUES)),
 		"DPS familier = attaque propre × facteur permanent d’attaque × facteur d’attaque des augments × bonus finaux / intervalle. Chaque rang de forge reste utile. Pas de critique ni de salve du héros.",
-		"DPS total = DPS héros + DPS familier. Les classes ajoutent 0 % à toutes ces sources.", "",
+		"DPS total = DPS frontal héros + DPS périodique + DPS familier. Les classes ajoutent 0 % à toutes ces sources.", "",
+		"Traits périodiques et météorites : attaque de run × coefficient propre × bonus finaux / intervalle, sur une cible immobile touchée à chaque déclenchement. Sans coefficient d’arme, critique, salve, diagonale, rebond ou Cinquième impact ; aucune prime de zone n’est ajoutée.", "",
+		"Satellites alchimiques : %s %% de l’attaque de run par contact, sans coefficient d’arme, critique, salve, diagonale ou rebond, puis bonus finaux. Les %d cercles partagent un délai de %s s par ennemi. Leur contact est exclu des DPS à distance des tableaux, comme la charge d’Élan vital ; le bonus permanent d’attaque reste inclus." % [n(ReglagesAugments.SATELLITES_PART_ATTAQUE * 100.0), ReglagesAugments.SATELLITES_NOMBRE, n(ReglagesAugments.SATELLITES_INTERVALLE_IMPACT)], "",
 		"PV = (PV de base au niveau du héros + Vitalité + valeurs brutes des bijoux) × facteur d’équipement × facteur de maîtrises × facteur de passifs × facteur des augments. Égide multiplie le résultat après la somme des bonus de PV des autres augments.",
 		"Défense = (base + Vitalité + valeurs brutes des bijoux/familiers) × facteur d’équipement × facteur de maîtrises × facteur de passifs × facteur des augments.",
 		"Dégâts reçus = dégâts ennemis × facteur des augments × (1 + Audace) × (1 − réduction des maîtrises) × %s / (%s + Défense)." % [n(Reglages.DEFENSE_REFERENCE), n(Reglages.DEFENSE_REFERENCE)],
@@ -150,7 +154,8 @@ static func _tirs_multiples(lignes: Array[String]) -> void:
 	stats.degats = 1000.0
 	var base_arme := CatalogueProjectiles.appliquer("lourd", Tir.de_base(stats)).degats
 	lignes.append_array(["### Tir double, Salve et Battement triple", "",
-		"**Tir double** ajoute un projectile parallèle. **Salve** ajoute une répétition de l’attaque. **Battement triple**, légendaire, ajoute deux répétitions. Chacun applique son propre coefficient ×%s aux dégâts de tous les projectiles ; leurs réductions se multiplient et restent actives avec les autres légendaires." % n(ReglagesAugments.MALUS_TIRS_MULT), "",
+		"**Tir double** ajoute un projectile parallèle ; seul, une copie applique ×%s et deux copies ×%s aux dégâts de chaque projectile. **Salve** ajoute une répétition et applique ×%s. **Battement triple**, légendaire, ajoute deux répétitions à ×%s. Les deux variantes de salves sont exclusives. Un ancien inventaire possédant les deux conserve seulement les trois salves atténuées du légendaire, sans gain supplémentaire." % [n(ReglagesAugments.puissance_tirs_paralleles(1)), n(ReglagesAugments.puissance_tirs_paralleles(2)), n(ReglagesAugments.MALUS_TIRS_MULT), n(ReglagesAugments.PUISSANCE_BATTEMENT_MULT)], "",
+		"Avec S salves de puissance P, F tirs frontaux de puissance Q et C le multiplicateur de cadence de run, le débit frontal relatif vaut **S × P + F × Q + C − 2**. La puissance de chaque impact vaut ce débit divisé par S × F × C. Les gestes et projectiles sont conservés ; leurs gains s'additionnent. Il n'y a aucun plafond de dégâts.", "",
 		"Exemple avec %s ATK et le Sceptre de cuivre : le coefficient d’arme porte le projectile à %s dégâts, qui devient notre référence à 100 %%. Les critiques et autres bonus finaux sont laissés de côté dans ce tableau." % [n(stats.degats), n(base_arme)], ""])
 	var exemples: Array = [
 		["Arme seule", []], ["Tir double", ["tir_multiple"]],
@@ -171,7 +176,7 @@ static func _tirs_multiples(lignes: Array[String]) -> void:
 	var triple_salve := Mods.appliquer(Tir.de_base(stats), Mods.depuis_l_inventaire(["battement_triple", "salve"]))
 	var gain_salve := float(triple_salve.salves) * triple_salve.degats_finaux_projectile_mult \
 		/ (float(triple.salves) * triple.degats_finaux_projectile_mult)
-	lignes.append_array(["Avec Battement triple, Salve fait passer de %d à %d salves, avec %s %% des dégâts de base par projectile : **×%s**, soit **+%s %% de DPS idéal** par rapport à Battement triple seul. Deux réductions de %s %% laissent **%s %%** des dégâts ; l’ajout d’un Tir double en laisse **%s %%**. Aucun légendaire n’annule ces réductions." % [triple.salves, triple_salve.salves, n(triple_salve.degats_finaux_projectile_mult * 100.0), n(gain_salve, 4), n((gain_salve - 1.0) * 100.0), n((1.0 - ReglagesAugments.MALUS_TIRS_MULT) * 100.0), n(pow(ReglagesAugments.MALUS_TIRS_MULT, 2) * 100.0), n(pow(ReglagesAugments.MALUS_TIRS_MULT, 3) * 100.0)], ""])
+	lignes.append_array(["Avec Battement triple, Salve fait passer de %d à %d salves, avec %s %% des dégâts de base par projectile : **×%s**, soit **+%s %% de DPS idéal** par rapport à Battement triple seul. Le choix reste utile dans les deux ordres d’acquisition." % [triple.salves, triple_salve.salves, n(triple_salve.degats_finaux_projectile_mult * 100.0), n(gain_salve, 4), n((gain_salve - 1.0) * 100.0)], ""])
 
 static func _heros(lignes: Array[String]) -> void:
 	lignes.append_array(["### Bases du héros et attributs", "",
@@ -224,7 +229,7 @@ static func _equilibrage_progression(lignes: Array[String]) -> void:
 		"%d comptes par scénario, avec les mêmes graines. Tous commencent par l'échec en salle 9 puis la victoire au premier chapitre. Le parcours ordinaire enchaîne ensuite la campagne, équilibré ou tout offensif. Retour Épreuves ajoute six victoires à l'Épreuve 1. Sur-farm ajoute cinq Épreuves et six victoires supplémentaires au chapitre 1, avant de reprendre le chapitre 2." % int(rapport["nombre"]), "",
 		"Chaque victoire est supposée : ces résultats mesurent la puissance du compte, pas un taux de réussite humain. Les ressources et achats sont conservés entre chapitres et viennent du vrai butin. Aucune maîtrise, forge ou pièce d'équipement maximale n'est accordée gratuitement.", "",
 		"Le cas « Offensif + deux défenses » reprend le même compte offensif, mais remplace son choix légendaire par Égide et un choix épique par Peau de pierre, après leurs niveaux réels. Le nombre de choix, les raretés et les limites de copies sont conservés ; ces deux remplacements sont un stress volontaire, sans prétendre qu'ils figurent toujours dans les offres.", "",
-		"Une attaque additionne ses salves et tous ses projectiles frontaux sur la même cible. Les critiques sont calculés par une loi binomiale : chaque salve a son propre tirage, commun à ses projectiles. Les rebonds, le familier, Élan vital chargé et les effets conditionnels ne donnent pas d'élimination gratuite dans ce taux. Les élites sont exclues, ce qui privilégie les éliminations faciles.", "",
+		"Une attaque additionne ses salves et tous ses projectiles frontaux sur la même cible. Les critiques sont calculés par une loi binomiale : chaque salve a son propre tirage, commun à ses projectiles. Les effets périodiques, rebonds, familier et Élan vital chargé ne donnent pas d'élimination gratuite dans ce taux. Les contrôles stricts des rares portent sur la phase sans épique ni légendaire ; les raretés supérieures peuvent produire une run exceptionnelle. Les élites sont exclues, ce qui privilégie les éliminations faciles.", "",
 		"Les lignes donnent des médianes de comptes, plus le P90 du taux avec critiques pour montrer les tirages favorables. Contacts équivalents = PV effectifs / dégâts bruts : 2,3 signifie mort au troisième coup identique, sans soin, esquive, bouclier ou seconde vie. Ce tableau prend le monstre médian ; le minimum est conservé dans les mesures détaillées. Le boss inclut familier et critiques moyens, avec %s %% de tir utile." % n(RetourCampagne.Parcours.TIR_UTILE_BOSS * 100.0), ""])
 	var noms := {"equilibre": "Équilibré", "offensif": "Offensif", "offensif_deux_defenses": "Offensif + deux défenses", "retour_epreuves": "Retour Épreuves", "surfarm": "Sur-farm offensif"}
 	var tableau: Array = []
@@ -247,9 +252,9 @@ static func _equilibrage_progression(lignes: Array[String]) -> void:
 	Listes.tableau(lignes, ["Parcours", "Annexe", "Contacts équivalents", "Boss final, s"], annexes)
 	var augment: Dictionary = rapport["augments"]["debut"]
 	lignes.append_array(["### Budget des bonus offensifs et défensifs", "",
-		"Comparaison d'un seul choix de même rareté sur le héros initial. Les multiplicateurs de survie excluent le soin immédiat d'Égide. Le gain au-dessus de ×1 reste comparable, avec une tolérance de 15 % ; la défense n'a plus de prime systématique.", ""])
+		"Comparaison d'un seul choix de même rareté sur le héros initial. Les rares visent une utilité comparable ; effets périodiques mesurés sur une cible immobile, sans prime multicible. Les épiques et légendaires gardent une puissance supérieure. Les multiplicateurs de survie excluent le soin immédiat d'Égide.", ""])
 	var paires: Array = []
-	for paire: Array in [["sceau_ruine", "sceau_garde"], ["noyau_pesant", "peau_de_pierre"], ["frappe_lourde", "egide"]]:
+	for paire: Array in [["cadence_febrile", "sceau_garde"], ["noyau_pesant", "peau_de_pierre"], ["frappe_lourde", "egide"]]:
 		paires.append([CatalogueReactifs.par_id(paire[0]).nom, "×" + n(float(augment[paire[0]]["dps"])),
 			CatalogueReactifs.par_id(paire[1]).nom, "×" + n(float(augment[paire[1]]["survie"]))])
 	Listes.tableau(lignes, ["Choix offensif", "DPS héros", "Choix défensif", "PV effectifs"], paires)
@@ -313,6 +318,26 @@ static func _rythme_boss(lignes: Array[String]) -> void:
 	Listes.tableau(lignes, ["Niveau", "Salle", "Boss", "Cible, s", "P25, s", "Médiane, s", "P75, s", "P10–P90, s"], donnees)
 	lignes.append("")
 
+static func _nuance_augments(lignes: Array[String]) -> void:
+	lignes.append_array(["## Écart entre un build mixte et les combos offensifs", "",
+		"Même équipement et progression permanente dans chaque comparaison. Le mixte possède une Égide, six rares dont Cadence, Encrage et Traque, puis Encre mordante et deux épiques défensifs : quatre choix offensifs ordinaires, sans Salve ni Tir double. Les autres cas utilisent six rares, trois épiques et une seule légendaire, avec les limites de copies du jeu.", "",
+		"La borne idéale additionne tous les tirs, y compris les diagonales guidées, sur une seule cible. Elle exagère la précision réelle pour éprouver le cumul le plus favorable. Une tentative sans aucun choix offensif conserve logiquement moins de dégâts et n'est pas cette référence. Aucun plafond de DPS n'est appliqué en jeu.", ""])
+	var tableaux: Array = []
+	var debut := {}
+	var complet := Modeles.complet()
+	debut["augments"] = ProfilsAugments.NUANCE["mixte_sans_combo"]
+	complet["augments"] = ProfilsAugments.NUANCE["mixte_sans_combo"]
+	var dps_debut := float(Modeles.mesurer(debut)["dps"])
+	var dps_complet := float(Modeles.mesurer(complet)["dps"])
+	var cas := ProfilsAugments.cas_nuance()
+	for nom: String in cas:
+		debut["augments"] = cas[nom]
+		complet["augments"] = cas[nom]
+		tableaux.append([nom, "×" + n(float(Modeles.mesurer(debut)["dps_tous_projectiles"]) / dps_debut),
+			"×" + n(float(Modeles.mesurer(complet)["dps_tous_projectiles"]) / dps_complet)])
+	Listes.tableau(lignes, ["Choix de run", "DPS idéal / mixte au départ", "DPS idéal / mixte au compte complet"], tableaux)
+	lignes.append("")
+
 static func _calendrier_reprises() -> String:
 	var etapes: Array[String] = []
 	for chapitre: int in RythmeProgression.REPRISES:
@@ -323,7 +348,7 @@ static func _maturation_progression(lignes: Array[String]) -> void:
 	var rapport := MaturationProgression.rapport()
 	var couts: Dictionary = rapport["couts"]
 	lignes.append_array(["## Effort pour atteindre les cinq plafonds", "",
-		"La cible porte aussi sur le temps de progression : les cinq plafonds doivent rester dans une même période, avec au plus %s %% d’écart de temps total dans les parcours de référence. Le niveau maximum du héros doit rester à moins de %s %% du temps nécessaire aux dernières maîtrises. Ces marges contrôlent un modèle de progression ; elles ne garantissent pas le temps d’un joueur." % [n(Reglages.PROGRESSION_ECART_PLAFONDS * 100.0, 0), n(Reglages.PROGRESSION_ECART_HEROS_MAITRISES * 100.0, 0)], "",
+		"La cible porte aussi sur le temps de progression : les cinq plafonds doivent rester dans une même période, avec au plus %s %% d’écart de temps total dans les parcours de référence. La vérification ajoute %s point de pourcentage de tolérance de mesure, car les plafonds sont relevés après des activités entières. Le niveau maximum du héros doit rester à moins de %s %% du temps nécessaire aux dernières maîtrises. Ces marges contrôlent un modèle de progression ; elles ne garantissent pas le temps d’un joueur." % [n(Reglages.PROGRESSION_ECART_PLAFONDS * 100.0, 0), n(MaturationProgression.MARGE_ECART_ACTIONS * 100.0, 1), n(Reglages.PROGRESSION_ECART_HEROS_MAITRISES * 100.0, 0)], "",
 		"Chaque compte part de zéro, paie tous ses achats et conserve les anciennes forges. Le scénario comprend l’échec initial en salle 9, puis les %d chapitres. Campagne prioritaire réserve les annexes à la fin ; Mixte ajoute une Mine et une Épreuve tous les trois chapitres quand elles sont accessibles. Les victoires sont supposées pour comparer l’économie, avec les vrais tirages, garanties, bonus économiques et durées de combat du modèle." % Chapitres.nombre(), "",
 		"Ensuite, chaque cycle peut contenir deux replays du dernier chapitre, une Mine et trois Épreuves. Une activité n’est répétée que si sa progression manque encore : continuer à récolter une monnaie après avoir tout acheté fausserait la comparaison. Ce calendrier est une hypothèse de farm, pas une obligation de jeu.", "",
 		"Le maximum signifie : niveau %d et tous ses points, les cinq emplacements équipés forge %d, les trois arbres complets, les %d passifs rang %d et leurs statistiques arrivées à maturité, puis les %d Cœurs. Forger toute la collection d’armes et de bijoux dépasse ce build complet et reste un objectif supplémentaire." % [Personnage.NIVEAU_MAX, Reglages.FORGE_NIVEAU_MAX, Passifs.CATALOGUE.size(), Passifs.RANG_MAX, Epreuves.nombre()], "",
@@ -353,8 +378,8 @@ static func _ennemis(lignes: Array[String]) -> void:
 		"", "Avec p = niveau global − 1 et a = min(p, %d) : **facteur PV de niveau = %s^a × %s^(a × (a − 1) / 2) × %s^(p − a) × [1 + %s × (1 − %s^(p^%s))]**." % [Reglages.CAMPAGNE_PV_CHAPITRES_INITIAUX, n(Reglages.CAMPAGNE_PV_PAR_CHAPITRE, 4), n(Reglages.CAMPAGNE_PV_ACCELERATION, 4), n(Reglages.CAMPAGNE_PV_PAR_CHAPITRE_TARDIF, 4), n(Reglages.CAMPAGNE_PV_RENFORT_INITIAL), n(Reglages.CAMPAGNE_PV_TRANSITION), n(Reglages.CAMPAGNE_PV_TRANSITION_EXPOSANT)],
 		"Avec b = max(p − %d, 0), **facteur dégâts de niveau = %s^p × %s^(p × (p − 1) / 2) × [1 + %s × (1 − %s^b)]**. Les non-boss appliquent aussi le coefficient global %s." % [Reglages.CAMPAGNE_PV_CHAPITRES_INITIAUX, n(Reglages.CAMPAGNE_DEGATS_PAR_CHAPITRE, 4), n(Reglages.CAMPAGNE_DEGATS_ACCELERATION, 4), n(Reglages.CAMPAGNE_DEGATS_RENFORT_TARDIF), n(Reglages.CAMPAGNE_DEGATS_TRANSITION_TARDIVE), n(Reglages.ENNEMI_DEGATS_MULT)], "",
 		"Le premier chapitre reste à ×1. Le renfort arrive progressivement, puis tend vers ×%s. La croissance composée des niveaux suivants laisse davantage de place au renforcement vers la fin de campagne. Les dégâts gardent leur courbe distincte. Un changement de monde n’ajoute pas une seconde hausse cachée." % n(1.0 + Reglages.CAMPAGNE_PV_RENFORT_INITIAL),
-		"", "Dans une tentative : facteur PV = %s^(salle − 1) × produit des paliers franchis ; facteur dégâts = %s^(salle − 1) × produit de leurs paliers. Les deux commencent à ×1." % [n(Reglages.CAMPAGNE_PV_PAR_SALLE, 4), n(Reglages.CAMPAGNE_DEGATS_PAR_SALLE, 4)],
-		"Entre deux salles : +%s %% de PV et +%s %% de dégâts, avec les hausses supplémentaires du tableau. Ces paliers s’appliquent à l’entrée des salles indiquées et ne donnent aucun choix d’augment supplémentaire." % [n((Reglages.CAMPAGNE_PV_PAR_SALLE - 1.0) * 100.0), n((Reglages.CAMPAGNE_DEGATS_PAR_SALLE - 1.0) * 100.0)],
+		"", "Dans une tentative, les PV ordinaires croissent de +%s %% par salle jusqu'à la salle du légendaire garanti, puis de +%s %% par salle. Les paliers du tableau s'ajoutent à cette courbe fixe. Les dégâts gardent le facteur %s^(salle − 1) × produit de leurs paliers. Les deux commencent à ×1." % [n((Reglages.CAMPAGNE_PV_PAR_SALLE - 1.0) * 100.0), n((Reglages.CAMPAGNE_PV_PAR_SALLE_TARDIF - 1.0) * 100.0), n(Reglages.CAMPAGNE_DEGATS_PAR_SALLE, 4)],
+		"La pente des PV change après la salle %d, que le choix légendaire soit offensif ou défensif. Les dégâts gagnent +%s %% entre deux salles, avec les hausses supplémentaires du tableau. Ces paliers s’appliquent à l’entrée des salles indiquées et ne donnent aucun choix d’augment supplémentaire." % [ProgressionAugments.SALLES_NIVEAUX[ProgressionAugments.NIVEAU_LEGENDAIRE - 1], n((Reglages.CAMPAGNE_DEGATS_PAR_SALLE - 1.0) * 100.0)],
 		"Les boss de campagne ajoutent un renfort de niveau [1 + %s × (1 − %s^b)], puis leur propre croissance de PV par salle : %s^(salle − 1), avec leurs propres paliers dans le tableau. Ils conservent ainsi des durées de combat distinctes de l’endurance des monstres ordinaires. Le renfort de dégâts après le premier monde rend les investissements en résistance utiles ; il tend vers ×%s sans s’emballer." % [n(Reglages.CAMPAGNE_PV_BOSS_RENFORT_TARDIF), n(Reglages.CAMPAGNE_PV_BOSS_TRANSITION_TARDIVE), n(Reglages.CAMPAGNE_PV_BOSS_PAR_SALLE, 4), n(1.0 + Reglages.CAMPAGNE_DEGATS_RENFORT_TARDIF)],
 		"Le premier boss, à l’étage %d de chaque niveau, ajoute ×%s à ses PV pour alléger le combat avant le premier légendaire. Ce facteur concerne la campagne et figure dans les calculs de progression et les simulations ; les boss des autres étages et des annexes gardent leur endurance." % [int(Chapitres.par_index(0)["bosses"][0]), n(Chapitres.PV_PREMIER_BOSS_MULT)],
 		"", "Les facteurs sont bornés à la dernière campagne. Ils ne lisent jamais les achats, les morts ni le build du joueur.", "", "### Facteurs par niveau, avant la salle", ""])

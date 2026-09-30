@@ -7,6 +7,13 @@ const NOMBRE_COMPTES := 24
 const CHAPITRES := [1, 2, 3, 6]
 static var _rapport_cache: Dictionary = {}
 
+# Six repetitions constituent un sur-farm volontaire. Les deux entrees du
+# monde suivant conservent une avance ; le milieu du monde reprend sa marge.
+static func limite_retour_farm(chapitre: int) -> float:
+	if chapitre <= Chapitres.CHAPITRES_PAR_MONDE: return 0.20
+	if chapitre <= Chapitres.CHAPITRES_PAR_MONDE + 2: return 0.25
+	return 0.05
+
 # La victoire annoncee par le scenario est supposee, jamais deduite d'un taux
 # de survie. Les recompenses restent celles des vraies salles validees.
 static func scenario(graine: int, epreuves_successives: bool) -> Dictionary:
@@ -43,6 +50,8 @@ static func mesurer(configuration: Dictionary, chapitre: int, graine: int, polit
 	var run := Simulation.une_run(configuration, politique, graine, false)
 	var resultat := {"monstres": 0, "un_projectile": 0, "une_attaque": 0,
 		"une_attaque_critique": 0.0, "attaques": [], "contacts": [],
+		"monstres_rares": 0, "projectiles_rares": 0,
+		"attaques_rares": 0, "critiques_rares": 0.0, "coups_rares": [],
 		"premiere_salle": [], "boss_secondes": [], "boss_attaques": [], "contacts_min": INF}
 	for etat: Dictionary in run["salles"]:
 		var salle := int(etat["salle"])
@@ -54,7 +63,12 @@ static func mesurer(configuration: Dictionary, chapitre: int, graine: int, polit
 			config["augments"] = inventaire_deux_defenses(etat["inventaire_combat"])
 			mesure = Modeles.mesurer(config)
 		var critique_moyen := 1.0 + float(mesure["critique"]) * (float(mesure["coefficient_critique"]) - 1.0)
-		var attaque_normale := float(mesure["dps_heros"]) / (float(mesure["cadence"]) * critique_moyen * float(mesure["impact_moyen"]))
+		# Les effets periodiques ont leur propre temps ; ils ne font pas partie
+		# d'une attaque instantanee du heros.
+		var attaque_normale := float(mesure["dps_frontal"]) / (float(mesure["cadence"]) * critique_moyen * float(mesure["impact_moyen"]))
+		var avec_puissance_majeure := false
+		for id: String in etat["inventaire_combat"]:
+			if CatalogueReactifs.par_id(id).rarete in [Reactif.EPIQUE, Reactif.LEGENDAIRE]: avec_puissance_majeure = true
 		var vagues := Vagues.pour_salle(salle, chapitre, graine, "grimoire")
 		for vague: Array in vagues:
 			for id: String in vague:
@@ -69,6 +83,12 @@ static func mesurer(configuration: Dictionary, chapitre: int, graine: int, polit
 				if pv <= attaque_normale: resultat["une_attaque"] = int(resultat["une_attaque"]) + 1
 				resultat["une_attaque_critique"] = float(resultat["une_attaque_critique"]) + probabilite_une_attaque(pv, attaque_normale, mesure)
 				resultat["attaques"].append(float(ceili(pv / attaque_normale)))
+				if not avec_puissance_majeure:
+					resultat["monstres_rares"] = int(resultat["monstres_rares"]) + 1
+					if pv <= float(mesure["tir_normal"]): resultat["projectiles_rares"] = int(resultat["projectiles_rares"]) + 1
+					if pv <= attaque_normale: resultat["attaques_rares"] = int(resultat["attaques_rares"]) + 1
+					resultat["critiques_rares"] = float(resultat["critiques_rares"]) + probabilite_une_attaque(pv, attaque_normale, mesure)
+					resultat["coups_rares"].append(float(ceili(pv / attaque_normale)))
 				resultat["contacts"].append(float(mesure["pv_effectifs"]) / float(ennemi["degats"]))
 				resultat["contacts_min"] = minf(float(resultat["contacts_min"]), float(mesure["pv_effectifs"]) / float(ennemi["degats"]))
 				if salle == 1:
@@ -176,13 +196,16 @@ static func rapport(nombre := NOMBRE_COMPTES) -> Dictionary:
 		"comptes_sans_contact_mortel": comptes_sans_contact_mortel, "progression": {}}
 	for chapitre: int in progression:
 		var taux: Array[float] = []
+		var taux_rares: Array[float] = []
 		var boss: Array[float] = []
 		var contacts: Array[float] = []
 		for mesure: Dictionary in progression[chapitre]:
 			taux.append(float(mesure["une_attaque"]) / float(mesure["monstres"]))
+			taux_rares.append(float(mesure["attaques_rares"]) / float(maxi(1, int(mesure["monstres_rares"]))))
 			boss.append(float(mesure["boss_secondes"].back()))
 			contacts.append(float(mesure["contacts_min"]))
 		resultat["progression"][chapitre] = {"une_attaque": Simulation.distribution(taux),
+			"rares_attaque": Simulation.distribution(taux_rares),
 			"boss_final": Simulation.distribution(boss), "contacts_min": Simulation.distribution(contacts)}
 	if nombre == NOMBRE_COMPTES: _rapport_cache = resultat
 	return resultat

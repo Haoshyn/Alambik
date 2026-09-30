@@ -9,21 +9,34 @@ Les ennemis dépendent du niveau, de la salle et du mode, jamais du build
 actuel. Toute comparaison de dégâts doit préciser attaque brute, critiques,
 cadence, nombre de cibles et conditions des bonus.
 
-Les augments modifient des statistiques ou des tirs existants. Les passifs
+Les augments modifient des statistiques ou des tirs existants ; les rares
+proposent aussi des cercles de contact, un trait periodique et une meteorite
+de zone. Ces effets automatiques agissent meme en mouvement. Les passifs
 viennent des Épreuves. Aucun sort actif ni ultime. Les classes sont conservées
 avec bonus neutres jusqu'à une demande explicite de les redéfinir.
 
-Les augments donnent des gains moderes et restent utiles. Aucun compromis attaque/defense, PV/cadence
+Les rares ont une utilite comparable et des effets distincts. Les epiques et
+legendaires donnent des gains marques sans rendre obligatoire un combo offensif.
+Aucun compromis attaque/defense, PV/cadence
 ou mobilite : les seules pertes sont celles des tirs multiples et rebonds.
-Salve, Tir double et Battement triple reduisent chaque projectile de 20 %
-par acquisition ; aucun legendaire n'annule ces reductions. Les valeurs de
+Les reductions des tirs viennent de ReglagesAugments. Salve et Battement
+triple sont exclusifs ; un ancien inventaire commun conserve seulement les
+trois salves attenuees du legendaire. Le debit des salves, tirs paralleles et
+cadence partage un cumul additif. Attaque et puissance des projectiles de run
+s'additionnent aussi. Les choix critiques conservent leurs gains propres, sans
+croisement multiplicatif entre leurs bonus. Aucun legendaire n'annule les
+reductions. Les copies de Tir double gardent un gain utile. Les valeurs de
 pourcentage des augments sont des multiples de cinq. Les choix de niveau
 suivent ProgressionAugments : aucun commun ni choix bonus lie a une salle.
-Les gains de resistance effective et de DPS de meme rarete doivent etre
-comparables ; la defense ne doit plus depasser systematiquement l'attaque.
-Les sources permanentes et les augments donnent chacun de petits gains.
+Les gains de resistance effective et de DPS des rares doivent etre
+comparables, selon les conditions des effets ; la defense ne doit plus
+depasser systematiquement l'attaque.
+Les sources permanentes progressent par petits gains ; le rare reste utile,
+l'epique puissant et le legendaire exceptionnel.
 Sur une progression ordinaire, eliminer un monstre intact en une attaque
-reste exceptionnel, y compris avec un build offensif. Un fort sur-farm peut
+reste exceptionnel avec des rares seuls ; les choix offensifs accelerent
+ensuite les rencontres. Un mixte avec quelques choix offensifs reste viable,
+meme avec un legendaire defensif. Un fort sur-farm peut
 depasser le chapitre suivant, puis le chapitre d'apres doit reprendre une marge.
 Aucun plancher de coups, plafond de degats ou ajustement au build ne garantit
 ce resultat : verifier les courbes fixes et les achats reels en simulation.

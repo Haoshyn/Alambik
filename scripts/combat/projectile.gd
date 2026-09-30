@@ -51,6 +51,8 @@ func _ready() -> void:
 	couleur = Palette.TIR_ENNEMI_HALO if hostile else Palette.teinte_du_tir(tir.effets)
 	if "trait_familier" in tir.drapeaux:
 		couleur = Color("66dfd3")
+	if "trait_periodique" in tir.drapeaux:
+		couleur = Color("86e8d1")
 	if hostile:
 		add_to_group("tirs_ennemis")
 		collision_layer = 16
@@ -171,11 +173,6 @@ func _sur_contact(corps: Node) -> void:
 	if "perfore_tout" in tir.drapeaux:
 		return
 	match PrioriteProjectile.apres_impact(_rebonds_restants, _perforations_restantes):
-		"rebond":
-			_rebonds_restants -= 1
-			_facteur_degats *= 1.0 - Reglages.REBOND_PERTE
-			if not _rebondir_vers_une_autre_cible():
-				_finir()
 		"perforation":
 			_perforations_restantes -= 1
 			if "perforation_sans_perte" not in tir.drapeaux:

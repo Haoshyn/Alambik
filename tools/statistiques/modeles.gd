@@ -46,7 +46,8 @@ static func mesurer(configuration: Dictionary) -> Dictionary:
 	var passifs: Dictionary = configuration.get("passifs", {})
 	var attributs: Dictionary = configuration.get("attributs", {})
 	var stats := Stats.depuis_reglages(maitrises, passifs, bonus, int(configuration.get("niveau", 1)), attributs)
-	var mods := Mods.depuis_l_inventaire(configuration.get("augments", []))
+	var inventaire: Array = configuration.get("augments", [])
+	var mods := Mods.depuis_l_inventaire(inventaire)
 	var tir := CatalogueProjectiles.appliquer(arme, Mods.appliquer(Tir.de_base(stats), mods))
 	var chance_brute := stats.critique + stats.critique_excedentaire + Mods.bonus_heros(mods, "critique_add")
 	var critique := clampf(chance_brute, 0.0, 1.0)
@@ -71,7 +72,10 @@ static func mesurer(configuration: Dictionary) -> Dictionary:
 		tous += facteur
 		if index < tir.nb_projectiles - tir.projectiles_lateraux:
 			frontaux += facteur
-	var dps_heros := degats_tir * frontaux * tir.cadence * tir.salves
+	var dps_frontal := degats_tir * frontaux * tir.cadence * tir.salves
+	var dps_periodique := ReglagesAugments.debit_periodique(stats.degats * Mods.facteur_attaque_run(mods),
+		inventaire.count("encrage_vif"), "sceau_ruine" in inventaire) * final
+	var dps_heros := dps_frontal + dps_periodique
 	var dps_familier := 0.0
 	if CatalogueFamiliers.contient(familier):
 		var d: Dictionary = CatalogueFamiliers.TYPES[familier]
@@ -99,8 +103,9 @@ static func mesurer(configuration: Dictionary) -> Dictionary:
 		"degats_projectile_mult": tir.degats_finaux_projectile_mult,
 		"vitesse": stats.vitesse * Mods.facteur_heros(mods, "deplacement_mult"),
 		"tir_moyen": degats_tir, "cadence": tir.cadence, "critique": critique,
-		"dps_heros": dps_heros, "dps_familier": dps_familier, "dps": dps_heros + dps_familier,
-		"dps_tous_projectiles": degats_tir * tous * tir.cadence * tir.salves + dps_familier,
+		"dps_heros": dps_heros, "dps_frontal": dps_frontal, "dps_periodique": dps_periodique,
+		"dps_familier": dps_familier, "dps": dps_heros + dps_familier,
+		"dps_tous_projectiles": degats_tir * tous * tir.cadence * tir.salves + dps_periodique + dps_familier,
 		"pv": pv, "defense": defense, "degats_subis": degats_subis, "pv_effectifs": pv / degats_subis}
 
 static func paliers_sources() -> Array[Dictionary]:

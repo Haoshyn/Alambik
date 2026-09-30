@@ -32,9 +32,13 @@ static func _courbe_chapitre(palier: int, croissance: float, acceleration: float
 	var p := float(palier_borne(palier))
 	return pow(croissance, p) * pow(acceleration, p * (p - 1.0) / 2.0)
 
-static func facteur_salle(salle: int, croissance: float, paliers: Dictionary) -> float:
+static func facteur_salle(salle: int, croissance: float, paliers: Dictionary,
+		croissance_tardive := 0.0, premiere_salle_tardive := 0) -> float:
 	var numero := clampi(salle, 1, Reglages.SALLES_PAR_RUN)
-	var facteur := pow(croissance, numero - 1)
+	var salles_tardives := maxi(0, numero - premiere_salle_tardive + 1) \
+		if croissance_tardive > 0.0 and premiere_salle_tardive > 1 else 0
+	var facteur := pow(croissance, numero - 1 - salles_tardives)
+	if salles_tardives > 0: facteur *= pow(croissance_tardive, salles_tardives)
 	for palier: int in paliers:
 		if numero >= palier:
 			facteur *= float(paliers[palier])

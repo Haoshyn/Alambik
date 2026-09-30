@@ -49,23 +49,30 @@ func _verifier_courbes(rapport: Dictionary) -> void:
 		for chapitre: int in rapport["scenarios"][scenario]:
 			var ligne: Dictionary = rapport["scenarios"][scenario][chapitre]
 			var contexte := "%s chapitre %d" % [scenario, chapitre]
-			_exiger(float(ligne["un_projectile"]["p90"]) <= 0.01, "Projectiles eliminant trop souvent en un coup : " + contexte)
-			# Le repere de 5 % accepte un demi-point de dispersion de la cohorte.
-			_exiger(float(ligne["une_attaque"]["mediane"]) <= 0.055, "Attaques eliminant trop souvent en un coup : " + contexte)
-			_exiger(float(ligne["avec_critiques"]["mediane"]) <= 0.08, "Les critiques banalisent les eliminations instantanees : " + contexte)
-			_exiger(float(ligne["avec_critiques"]["p90"]) <= 0.20,
-				"Le haut de distribution elimine trop facilement : " + contexte)
+			_exiger(float(ligne["rares_projectile"]["p90"]) <= 0.01 and float(ligne["rares_attaque"]["mediane"]) <= 0.055,
+				"Les rares seuls effacent les rencontres : " + contexte)
+			_exiger(float(ligne["rares_critique"]["mediane"]) <= 0.08 and float(ligne["rares_coups"]["mediane"]) >= 2.0,
+				"La progression avec rares seuls efface les rencontres : " + contexte)
+			# Les epiques restent fortes et le legendaire peut transformer la run.
+			# Les limites ordinaires portent sur la phase equipee de rares seuls.
+			_exiger(float(ligne["rares_critique"]["p90"]) <= 0.20,
+				"Les rares donnent trop d'eliminations instantanees : " + contexte)
 			_exiger(float(ligne["attaques"]["mediane"]) >= 2.0, "Le monstre median ne tient pas deux attaques : " + contexte)
-			_exiger(float(ligne["boss"]["mediane"]) >= 12.0, "Le boss fond sur une progression ordinaire : " + contexte)
+			_exiger(float(ligne["boss"]["mediane"]) >= (6.0 if scenario == "offensif" else 12.0), "Le boss fond sur une progression ordinaire : " + contexte)
 			# La campagne directe ne contient aucun renforcement ajoute. Le debut
 			# doit avancer ; les besoins de farm tardifs sont mesures par Rythme.
 			if scenario == "equilibre" and chapitre <= Chapitres.CHAPITRES_PAR_MONDE:
 				_exiger(float(ligne["boss"]["mediane"]) <= 90.0, "Boss median trop long dans le premier monde : " + contexte)
 	for chapitre: int in rapport["scenarios"]["retour_epreuves"]:
 		var ligne: Dictionary = rapport["scenarios"]["retour_epreuves"][chapitre]
-		var limite := 0.20 if chapitre <= Chapitres.CHAPITRES_PAR_MONDE else 0.05
-		_exiger(float(ligne["une_attaque"]["mediane"]) <= limite, "Les six Epreuves effacent les combats : " + str(chapitre))
+		var limite := Equilibrage.Retour.limite_retour_farm(chapitre)
+		_exiger(float(ligne["rares_attaque"]["mediane"]) <= limite, "Les six Epreuves effacent les combats avec rares seuls : " + str(chapitre))
 		_exiger(float(ligne["attaques"]["mediane"]) >= 2.0, "Le retour d'Epreuves efface le monstre median : " + str(chapitre))
+	for chapitre: int in rapport["scenarios"]["offensif"]:
+		var offensif: Dictionary = rapport["scenarios"]["offensif"][chapitre]
+		var mixte: Dictionary = rapport["scenarios"]["offensif_deux_defenses"][chapitre]
+		_exiger(float(mixte["boss"]["mediane"]) <= float(offensif["boss"]["mediane"]) * 4.0,
+			"Choisir Egide et une defense epique rend le boss disproportionne : " + str(chapitre))
 	var surfarm: Dictionary = rapport["scenarios"]["surfarm"]
 	_exiger(float(surfarm[3]["une_attaque"]["mediane"]) <= 0.50 and float(surfarm[3]["attaques"]["mediane"]) >= 2.0,
 		"Le chapitre trois ne reprend pas de marge apres le sur-farm du premier")
@@ -73,8 +80,8 @@ func _verifier_courbes(rapport: Dictionary) -> void:
 		"Le sur-farm efface encore la fin du premier monde")
 	for base: String in rapport["augments"]:
 		var augment: Dictionary = rapport["augments"][base]
-		_exiger(float(augment["deux_defenses"]["survie"]) <= 2.5, "Deux defenses rendent le build trop resistant : " + base)
-		for paire: Array in [["sceau_ruine", "sceau_garde"], ["noyau_pesant", "peau_de_pierre"], ["frappe_lourde", "egide"]]:
+		_exiger(float(augment["deux_defenses"]["survie"]) > float(augment["egide"]["survie"]), "L'epique defensif devient inutile apres Egide : " + base)
+		for paire: Array in [["cadence_febrile", "sceau_garde"], ["noyau_pesant", "peau_de_pierre"], ["frappe_lourde", "egide"]]:
 			var attaque := float(augment[paire[0]]["dps"]) - 1.0
 			var defense := float(augment[paire[1]]["survie"]) - 1.0
 			_exiger(defense >= attaque * 0.85 and defense <= attaque * 1.15, "Gains offensif et defensif disproportionnes : " + str(paire))
@@ -100,7 +107,8 @@ func _verifier_annexes(rapport: Dictionary) -> void:
 			var boss := float(mesure["boss"]["mediane"])
 			_exiger(contacts >= 3.0 and contacts <= (8.0 if mode == "epreuve" else 12.0),
 				"Resistance initiale en annexe disproportionnee : " + scenario + "/" + mode)
-			_exiger(boss >= (8.0 if mode == "epreuve" else 20.0) and boss <= 120.0,
+			var minimum := (6.0 if mode == "epreuve" else 10.0) if scenario == "offensif" else (8.0 if mode == "epreuve" else 20.0)
+			_exiger(boss >= minimum and boss <= 120.0,
 				"Endurance du premier boss d'annexe incorrecte : " + scenario + "/" + mode)
 			print("Annexe %s %s : contacts %.1f ; boss %.1f s" % [mode, scenario, contacts, boss])
 

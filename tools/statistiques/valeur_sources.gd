@@ -89,7 +89,7 @@ static func ajouter(lignes: Array[String]) -> void:
 static func _ajouter_augments(lignes: Array[String], profil: Dictionary) -> void:
 	lignes.append_array(["### Valeur d’un choix d’augment", "",
 		"Chaque ligne ajoute une seule copie à un profil sans augment. Les gains sont relatifs au même profil avant le choix : ils ne s’additionnent pas entre lignes. La seconde copie est comparée à la première déjà acquise. Départ et fin utilisent exactement les mêmes règles de combat.", "",
-		"Un 0 % de DPS ou de PV effectifs ne signifie pas un effet absent : les trajectoires, dégâts multicibles, mobilité, soins, boucliers, résurrections et gains économiques sont indiqués dans la colonne d’utilité, sans leur inventer une conversion en DPS monocible.", ""])
+		"Un 0 % de DPS ou de PV effectifs ne signifie pas un effet absent : les trajectoires, dégâts multicibles, mobilité, soins, boucliers, résurrections et gains économiques sont indiqués dans la colonne d’utilité, sans leur inventer une conversion en DPS monocible. Trait périodique et météorite comptent un impact à chaque déclenchement sur une cible immobile, sans prime de zone ; le contact des satellites est exclu.", ""])
 	var debut := augments({})
 	var fin := augments(profil)
 	var donnees: Array = []
@@ -108,12 +108,12 @@ static func _ajouter_augments(lignes: Array[String], profil: Dictionary) -> void
 	Listes.tableau(lignes, ["Augment", "Rareté", "DPS au départ", "DPS au compte complet", "PV effectifs au compte complet", "Gain de la 2e copie au compte complet", "Utilité hors mesure"], donnees)
 	var cas: Array = []
 	for inventaire: Array in [["battement_triple"], ["tir_multiple"], ["couronne_incisive", "pointe_lucide"]]:
-		var id_cible := "salve" if "battement_triple" in inventaire else ("tir_multiple" if "tir_multiple" in inventaire else "pointe_lucide")
+		var id_cible := "tir_multiple" if "battement_triple" in inventaire or "tir_multiple" in inventaire else "pointe_lucide"
 		for mesure: Dictionary in augments(profil, inventaire):
 			if str(mesure["id"]) != id_cible: continue
 			cas.append([", ".join(inventaire), CatalogueReactifs.par_id(id_cible).nom, _pourcentage(float(mesure["gain_dps"]))])
 	lignes.append_array(["### Rendements réduits par les cumuls", "",
-		"Les bonus d’une même famille s’additionnent et les tirs multiples gardent leur réduction par acquisition. Leur rendement dépend donc des choix déjà faits. Ces cas rendent visible un gain marginal plus faible que le gain de la première acquisition.", ""])
+		"Les bonus directs d'attaque et de projectile s'additionnent, tout comme les gains de débit des tirs multiples et de cadence. Salve et Battement triple sont exclusifs. Les critiques retirent le croisement entre les bonus de choix distincts. Le rendement dépend donc des choix déjà faits. Ces cas rendent visible le gain marginal d’une acquisition.", ""])
 	Listes.tableau(lignes, ["Déjà acquis", "Choix ajouté", "Gain de DPS total"], cas)
 
 static func _pourcentage(valeur: float) -> String:
@@ -124,14 +124,16 @@ static func _utilite(id: String) -> String:
 		"avidite": return "XP de run et Gouttes"
 		"homing": return "Suivi des cibles mobiles"
 		"ricochet": return "Dégâts sur d’autres cibles"
-		"perforation": return "Traverse les ennemis ; synergie avec Ricochet"
+		"perforation": return "Traverse les ennemis ; rebonds limités avec perte"
 		"spirale": return "Dégâts diagonaux sur d’autres cibles"
 		"trait_transpercant": return "Traverse murs et ennemis ; poursuite"
 		"elan_vital": return "Bonus sur l’attaque chargée après déplacement"
+		"satellites_alchimiques": return "Contact des cercles, même en mouvement ; sans critique ni salve"
 		"pas_brume": return "Mobilité et invulnérabilité après blessure"
 		"baume_profond": return "Soins reçus"
 		"garde_remanente": return "Un coup bloqué par salle"
 		"courageux": return "Une seconde vie complète"
 		"egide": return "Soin complet à l’acquisition"
-		"encrage_vif": return "Projectiles plus rapides"
+		"encrage_vif": return "Trait périodique en mouvement ; projectiles plus rapides"
+		"sceau_ruine": return "Météorite en mouvement ; dégâts de zone"
 	return "—"

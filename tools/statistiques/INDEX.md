@@ -16,6 +16,7 @@ valeurs ; les six `../../statistiques_jeu/liste_*.md` sont des sorties généré
 | Effets des terrains des mondes | [mathematiques.gd](mathematiques.gd), `_terrains` | `TerrainsMondes` ; contrôle `../verifier_terrains.tscn` |
 | Budget du scénario sans farm | [profil_campagne.gd](profil_campagne.gd), `budget`, `construire` | `ButinsRun`, coûts de forge et maîtrises |
 | Trois orientations d'augments comparables | [profils_augments.gd](profils_augments.gd), `PROFILS` | `CatalogueReactifs` ; budget commun de raretés |
+| Écart entre mixte sans combo et variantes offensives | [profils_augments.gd](profils_augments.gd), `cas_nuance` | `Modeles`, équipements identiques, une légendaire ; contrôle `../verifier_reequilibrage.gd` |
 | Vraies offres et distributions par salle | [simulation_augments.gd](simulation_augments.gd), `simuler`, `une_run`, `calendrier` | `DraftLogique`, `ProgressionAugments`, `Modeles` |
 | Budget, possessions et achats légaux d'un parcours | [compte_simule.gd](compte_simule.gd), `recevoir`, `acheter`, `configuration` | `ButinsRun`, coûts et calculateurs du jeu |
 | Retries, durées, murs et lots de farm | [parcours_progression.gd](parcours_progression.gd), présentation dans [synthese_progression.gd](synthese_progression.gd) | `CompteSimule`, vagues et simulation des augments |

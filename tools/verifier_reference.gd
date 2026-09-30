@@ -79,7 +79,7 @@ func _verifier_legalite(configuration: Dictionary) -> void:
 		_verifier(int(copies[id]) <= reactif.copies_permises(), "Copies légales : " + id)
 	_verifier(raretes == {Reactif.RARE: 6, Reactif.EPIQUE: 3, Reactif.LEGENDAIRE: 1}, "Budget de référence : dix choix sans légendaire bonus")
 	var mesure := Modeles.mesurer(configuration)
-	_verifier(is_equal_approx(float(mesure["degats_projectile_mult"]), pow(ReglagesAugments.MALUS_TIRS_MULT, 2)), "Réductions indépendantes de Salve et Tir double")
+	_verifier(is_equal_approx(float(mesure["degats_projectile_mult"]), 23.0 / 60.0), "Salve, Tir double et cadence partagent leur gain de débit")
 	_verifier(is_finite(float(mesure["dps"])) and float(mesure["dps"]) > 0.0, "DPS de référence valide")
 
 func _verifier_profils_augments() -> void:
