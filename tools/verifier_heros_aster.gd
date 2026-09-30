@@ -40,6 +40,7 @@ func _ready() -> void:
 	var squelette := proxy.modele.find_child("Skeleton3D",true,false) as Skeleton3D
 	_exiger(proxy.modele.find_child("Aster_Body",true,false) != null, "Le nouveau modele Aster n'est pas le heros du jeu")
 	if squelette != null and squelette.find_bone("Hips") >= 0:
+		_verifier_reperes(proxy.modele)
 		_verifier_animation(proxy, squelette)
 		_verifier_impact_en_rafale()
 		proxy._arme_tenue.changer("royal")
@@ -56,8 +57,20 @@ func _ready() -> void:
 	if _erreurs.is_empty(): print("OK : Aster, animations, tir stationnaire et prise des armes.")
 	get_tree().quit(0 if _erreurs.is_empty() else 1)
 
+func _verifier_reperes(modele: Node3D) -> void:
+	# Une attache peut exister tout en etant decalee de sa geometrie de repos.
+	var baguette := modele.find_child("Aster_Wand",true,false) as MeshInstance3D
+	var visage := modele.find_child("Aster_Face",true,false) as MeshInstance3D
+	_exiger(visage != null and visage.mesh.get_blend_shape_count() > 0, "Les expressions du visage sont perdues")
+	for nom: String in ["Aster_PriseArme","Aster_PointeBaguette"]:
+		var repere := modele.find_child(nom,true,false) as Node3D
+		_exiger(repere != null, "Repere du modele manquant : " + nom)
+		if repere != null and baguette != null:
+			var local := baguette.global_transform.affine_inverse() * repere.global_position
+			_exiger(baguette.get_aabb().grow(.025).has_point(local), "Repere hors du manche de repos : " + nom)
+
 func _verifier_animation(proxy: Node3D, squelette: Skeleton3D) -> void:
-	for clip: String in ["repos","marche","course","attaque","touche","mort","visee"]:
+	for clip: String in ["repos","marche","course","attaque","touche","mort","visee","incantation"]:
 		_exiger(proxy.lecteur.has_animation(clip), "Animation manquante : " + clip)
 	for mesh: MeshInstance3D in proxy.modele.find_children("*","MeshInstance3D",true,false):
 		if mesh.skin != null:

@@ -13,7 +13,7 @@ Le VRM original, ses métadonnées et son empreinte sont conservés dans le pack
 
 ## Travail propre à cette version
 
-Proportions adaptées, cheveux ajustés au chapeau, suppression de la tenue d'origine, nouvelle robe, manches, mantelet, doublures, bottes, chapeau, plumes, broches, grimoire, baguette, accessoires, poids des vêtements, os secondaires, adaptation des animations, shaders et démo Godot.
+Proportions manga compactes approuvées le 30 septembre 2026, cheveux ajustés au chapeau, suppression de la tenue d'origine, nouvelle robe, manches, mantelet, doublures, bottes, chapeau, plumes, broches, grimoire, baguette, accessoires, poids des vêtements, os secondaires, adaptation des animations, shaders et démo Godot. Le squelette de repos, les formes du visage et le déplacement du bassin suivent la nouvelle silhouette ; les rotations des huit animations sont conservées.
 
 Les textures décoratives `Costume_Painted`, `Navy_Fabric`, `Teal_Fabric` et `Ivory_Fabric` proviennent des assets générés précédemment pour ce projet. Le visage utilise les textures de la base VRoid citée ci-dessus. Les cheveux sont recolorés avec des couleurs de sommets.
 
@@ -34,4 +34,4 @@ La V7 ajoute un mouvement original du buste et de l’épaule à Attack, avec ba
 
 ## Intégration dans Alambik
 
-Le modèle dérive de la V7 approuvée. La chute Death01 de la même bibliothèque Quaternius CC0 a été adaptée au squelette et au volume du chapeau pour les besoins du jeu. Le fichier Blender conserve toutes les actions et les textures intégrées.
+Le modèle dérive de la V7 approuvée et reprend ses proportions manga validées dans l’aperçu. La chute Death01 de la même bibliothèque Quaternius CC0 a été adaptée au squelette et au volume du chapeau pour les besoins du jeu. Le fichier Blender conserve toutes les actions et les textures intégrées. Les repères de repos `Aster_PriseArme` et `Aster_PointeBaguette` suivent le manche de la baguette et sont exportés dans le GLB.

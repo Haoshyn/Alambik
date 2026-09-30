@@ -1,8 +1,9 @@
 # État courant — 30 septembre 2026
 
 Alambik est un roguelite de tir portrait Android sous Godot 4.7.1 : simulation
-2D, présentation 3D. Le héros Aster V7, la clairière animée, les cinq mondes,
-les annonces de danger et le kit d'interface Émail arcanique restent actifs.
+2D, présentation 3D. Le héros Aster V7 aux proportions manga, la clairière
+animée, les cinq mondes, les annonces de danger et le kit d'interface
+Émail arcanique restent actifs.
 
 Le paysage de la clairière, prairie comprise, reste fixe. Le vent suit des
 feuilles précises du premier plan et quatre rameaux articulés. Clairière et
@@ -12,8 +13,10 @@ vérifie les attaches, les zones de pierre et de bois exclues du vent, le
 cadrage portrait et l'arrêt des fonds cachés. La fluidité sur téléphone
 reste à apprécier sur appareil.
 
-Aster remplace le précédent mage en combat. Son
-repos, sa course, ses réactions aux dégâts et sa chute suivent les états du
+Aster possède une silhouette plus compacte, avec une tête légèrement agrandie,
+des jambes et un buste raccourcis. Son squelette, ses expressions et les prises
+d’armes suivent ces proportions ; la barre de vie accompagne la nouvelle hauteur.
+Son repos, sa course, ses réactions aux dégâts et sa chute suivent les états du
 jeu. Le tir à l'arrêt conserve un léger mouvement du buste, avec les pieds
 stables ; les rafales prolongent le geste sans remettre la pose à zéro. Un
 ordre de déplacement annule aussi les tirs déjà préparés. Les armes équipées

@@ -4,7 +4,6 @@ extends Node3D
 const OS_BRAS := ["UpperArm.R", "Forearm.R", "Hand.R"]
 const OS_BUSTE := ["Spine", "Chest", "UpperChest", "Head", "UpperArm.L"]
 const OS_CONTROLES := OS_BRAS + OS_BUSTE
-const POINTE_REPOS := Vector3(-0.683, 1.360, 0.468)
 const OMEGA_GESTE := 44.0
 const OMEGA_VISEE := 40.0
 const OMEGA_BUSTE := 26.0
@@ -24,6 +23,7 @@ var _retrait: Dictionary = {}
 var _projection: Dictionary = {}
 var _indices: Array[int] = []
 var _baguette := -1
+var _pointe_locale := Vector3.ZERO
 var _base: Dictionary = {}
 
 func obtenir_squelette() -> Skeleton3D:
@@ -43,6 +43,11 @@ func preparer(lecteur: AnimationPlayer) -> void:
 		assert(index >= 0, "Os manquant : " + nom)
 		_indices.append(index)
 	_baguette = squelette.find_bone("Wand")
+	var modele := lecteur.get_node(lecteur.root_node)
+	var pointe := modele.find_child("Aster_PointeBaguette",true,false) as Node3D
+	assert(pointe != null, "Repere de pointe Aster manquant")
+	var repos := squelette.global_transform.affine_inverse() * pointe.global_position
+	_pointe_locale = squelette.get_bone_global_rest(_baguette).affine_inverse() * repos
 	_pret = _lire_pose(lecteur.get_animation("visee"), 0.0)
 	_retrait = _lire_pose(lecteur.get_animation("attaque"), 0.025)
 	_projection = _lire_pose(lecteur.get_animation("attaque"), 0.05)
@@ -129,5 +134,4 @@ func appliquer(delta: float, influence := 1.0) -> void:
 		squelette.set_bone_pose(index, base.interpolate_with(cible, poids*clampf(influence,0.0,1.0)))
 	# Les poses finales restent appliquees jusqu a la prochaine avance du lecteur.
 	squelette.force_update_all_bone_transforms()
-	var skin := squelette.get_bone_global_pose(_baguette) * squelette.get_bone_global_rest(_baguette).affine_inverse()
-	origine_baguette = squelette.global_transform * (skin * POINTE_REPOS)
+	origine_baguette = squelette.global_transform * (squelette.get_bone_global_pose(_baguette) * _pointe_locale)

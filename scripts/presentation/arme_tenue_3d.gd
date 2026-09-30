@@ -25,9 +25,11 @@ func preparer(modele: Node3D, identifiant: String, lecture_directe: bool) -> voi
 	if squelette.find_bone(os) < 0: return
 	if os == "Wand":
 		_baguette_aster = modele.find_child("Aster_Wand",true,false) as Node3D
-		# La prise du GLB est exprimee dans le meme repere que ses poids.
-		var prise := Transform3D(Basis(Vector3.RIGHT,PI*.5),Vector3(-.683,1.360,.026))
-		_prise_aster = squelette.get_bone_global_rest(squelette.find_bone(os)).affine_inverse() * prise
+		# Le repere exporte garde la prise sur le manche apres une retouche du rig.
+		var prise := modele.find_child("Aster_PriseArme",true,false) as Node3D
+		assert(prise != null, "Repere de prise Aster manquant")
+		var repos := squelette.global_transform.affine_inverse() * prise.global_transform
+		_prise_aster = squelette.get_bone_global_rest(squelette.find_bone(os)).affine_inverse() * repos
 	_attache = BoneAttachment3D.new()
 	_attache.name = "PriseArmeDroite"
 	squelette.add_child(_attache)

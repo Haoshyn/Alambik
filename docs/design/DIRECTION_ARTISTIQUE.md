@@ -9,7 +9,8 @@ elles conservent les idées historiques sans définir le rendu actuel.
 - Fantasy alchimique originale, lumineuse et aventureuse : encre, fioles,
   grimoires, sceaux et magie. La lisibilité sur téléphone prime sur l'ornement.
 - Le combat utilise des modèles et effets 3D sur une simulation 2D.
-- Le héros est Aster V7 : sorcier anime aux proportions de jeu vidéo, robe
+- Le héros est Aster V7 : sorcier anime aux proportions manga compactes,
+  tête légèrement agrandie, jambes et buste raccourcis, robe
   bleu nuit et ivoire, ornements dorés, grand chapeau et baguette. Le rendu
   reprend ses matières peintes et ses contours fins. L'arme standard est sa
   baguette intégrée ; les autres armes suivent l'équipement. Le tir rapide
