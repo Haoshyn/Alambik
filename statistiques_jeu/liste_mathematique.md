@@ -732,11 +732,11 @@ Exemple avec 1 000 ATK et le Sceptre de cuivre : le coefficient d’arme porte
 | Salve | 1 | 2 | 1 050 | 2 100 | ×1,4 |
 | Tir double + Salve | 2 | 2 | 675 | 2 700 | ×1,8 |
 | Battement triple | 1 | 3 | 825 | 2 475 | ×1,65 |
-| Battement triple + Salve | 1 | 3 | 825 | 2 475 | ×1,65 |
+| Battement triple + Salve (ancien inventaire) | 1 | 3 | 825 | 2 475 | ×1,65 |
 | Tir double + Battement triple | 2 | 3 | 512,5 | 3 075 | ×2,05 |
-| Tir double + Battement triple + Salve | 2 | 3 | 512,5 | 3 075 | ×2,05 |
+| Tir double + Battement triple + Salve (ancien inventaire) | 2 | 3 | 512,5 | 3 075 | ×2,05 |
 
-Avec Battement triple, Salve fait passer de 3 à 3 salves, avec 55 % des dégâts de base par projectile : **×1**, soit **+0 % de DPS idéal** par rapport à Battement triple seul. Le choix reste utile dans les deux ordres d’acquisition.
+Dans un ancien inventaire possédant Battement triple et Salve, le nombre de salves reste de 3 à 3, avec 55 % des dégâts de base par projectile : **×1**, soit **+0 % de DPS idéal** par rapport à Battement triple seul. Le cumul ne donne aucun gain supplémentaire, dans les deux ordres d’acquisition. Les nouvelles offres excluent ce cumul.
 
 ### Bases du héros et attributs
 

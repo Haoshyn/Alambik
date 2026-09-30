@@ -162,9 +162,9 @@ static func _tirs_multiples(lignes: Array[String]) -> void:
 		["Tir double ×2", ["tir_multiple", "tir_multiple"]], ["Salve", ["salve"]],
 		["Tir double + Salve", ["tir_multiple", "salve"]],
 		["Battement triple", ["battement_triple"]],
-		["Battement triple + Salve", ["battement_triple", "salve"]],
+		["Battement triple + Salve (ancien inventaire)", ["battement_triple", "salve"]],
 		["Tir double + Battement triple", ["tir_multiple", "battement_triple"]],
-		["Tir double + Battement triple + Salve", ["tir_multiple", "battement_triple", "salve"]]]
+		["Tir double + Battement triple + Salve (ancien inventaire)", ["tir_multiple", "battement_triple", "salve"]]]
 	var donnees: Array = []
 	for exemple: Array in exemples:
 		var tir := CatalogueProjectiles.appliquer("lourd", Mods.appliquer(Tir.de_base(stats), Mods.depuis_l_inventaire(exemple[1])))
@@ -176,7 +176,7 @@ static func _tirs_multiples(lignes: Array[String]) -> void:
 	var triple_salve := Mods.appliquer(Tir.de_base(stats), Mods.depuis_l_inventaire(["battement_triple", "salve"]))
 	var gain_salve := float(triple_salve.salves) * triple_salve.degats_finaux_projectile_mult \
 		/ (float(triple.salves) * triple.degats_finaux_projectile_mult)
-	lignes.append_array(["Avec Battement triple, Salve fait passer de %d à %d salves, avec %s %% des dégâts de base par projectile : **×%s**, soit **+%s %% de DPS idéal** par rapport à Battement triple seul. Le choix reste utile dans les deux ordres d’acquisition." % [triple.salves, triple_salve.salves, n(triple_salve.degats_finaux_projectile_mult * 100.0), n(gain_salve, 4), n((gain_salve - 1.0) * 100.0)], ""])
+	lignes.append_array(["Dans un ancien inventaire possédant Battement triple et Salve, le nombre de salves reste de %d à %d, avec %s %% des dégâts de base par projectile : **×%s**, soit **+%s %% de DPS idéal** par rapport à Battement triple seul. Le cumul ne donne aucun gain supplémentaire, dans les deux ordres d’acquisition. Les nouvelles offres excluent ce cumul." % [triple.salves, triple_salve.salves, n(triple_salve.degats_finaux_projectile_mult * 100.0), n(gain_salve, 4), n((gain_salve - 1.0) * 100.0)], ""])
 
 static func _heros(lignes: Array[String]) -> void:
 	lignes.append_array(["### Bases du héros et attributs", "",
