@@ -16,7 +16,8 @@ const IDS_ATTENDUS := ["salve", "tir_multiple", "homing", "cadence_febrile", "av
 	"sceau_garde", "sceau_ruine", "pointe_lucide", "peau_cuivre", "pas_brume", "encrage_vif",
 	"baume_profond", "ricochet", "perforation", "spirale", "trait_transpercant", "peau_de_pierre",
 	"elan_vital", "garde_remanente", "encre_mordante", "noyau_pesant", "frappe_lourde", "egide",
-	"courageux", "battement_triple", "couronne_incisive", "satellites_alchimiques"]
+	"courageux", "battement_triple", "couronne_incisive", "satellites_alchimiques",
+	"trait_alchimique", "meteorite_alchimique"]
 const FACTEURS := ["attaque_mult", "cadence_mult", "vitesse_mult", "portee_mult", "pv_max_mult", "pv_max_final_mult",
 	"defense_mult", "deplacement_mult", "soin_mult", "degats_subis_mult", "experience_mult", "gouttes_mult"]
 
@@ -54,7 +55,7 @@ func _exiger(condition: bool, message: String) -> void:
 		_erreurs.append(message)
 
 func _verifier_catalogue() -> void:
-	_exiger(CatalogueReactifs.ids().size() == IDS_ATTENDUS.size(), "Le catalogue doit contenir 27 augments")
+	_exiger(CatalogueReactifs.ids().size() == IDS_ATTENDUS.size(), "Le catalogue doit contenir 29 augments")
 	for id: String in IDS_ATTENDUS:
 		_exiger(CatalogueReactifs.par_id(id) != null, "Augment absent : " + id)
 	for id in CatalogueReactifs.ids():
@@ -62,6 +63,10 @@ func _verifier_catalogue() -> void:
 		_exiger(reactif.id == id and reactif.copies_permises() > 0, "Identifiant ou limite invalide : " + id)
 		_exiger(reactif.rarete in [Reactif.RARE, Reactif.EPIQUE, Reactif.LEGENDAIRE], "Un augment possède une rareté retirée : " + id)
 		_exiger(not DetailsReactif.lignes(reactif).is_empty(), "Carte sans chiffres : " + id)
+		if reactif.rarete == Reactif.RARE:
+			_exiger(DetailsReactif.lignes(reactif).size() <= 3, "Carte rare trop longue : " + id)
+			if reactif.mods.has("drapeaux"):
+				_exiger(reactif.mods.size() == 1, "Un effet rare ne doit pas ajouter de statistiques : " + id)
 		for cle: String in reactif.mods:
 			_exiger(cle in CLES_AUTORISEES, "Effet sans contrôle : " + id + "/" + cle)
 			if cle == "drapeaux":
@@ -79,7 +84,7 @@ func _verifier_catalogue() -> void:
 					if cle == "degats_subis_mult":
 						_exiger(valeur <= 1.0, "Malus de dégâts subis : " + id)
 					elif cle in ["degats_salve_mult", "degats_finaux_projectile_mult"]:
-						_exiger(id in ["salve", "tir_multiple", "battement_triple"] and is_equal_approx(valeur, 0.55 if id == "battement_triple" else 0.70),
+						_exiger(id in ["salve", "tir_multiple", "battement_triple"] and is_equal_approx(valeur, 0.80 if id == "battement_triple" else 0.70),
 							"Les reductions de tirs doivent respecter leur budget : " + id)
 					else:
 						_exiger(valeur >= 1.0, "Malus ordinaire interdit : " + id + "/" + cle)
@@ -166,8 +171,8 @@ func _verifier_valeur_defense() -> void:
 		_exiger(gain_survie >= gain_dps * 0.85 and gain_survie <= gain_dps * 1.15,
 			"Les gains offensif et defensif de meme rarete doivent rester comparables : " + id_defense + "/" + id_attaque)
 	var egide := mesurer(["egide"])
-	_exiger(float(egide["vie_effective"]) >= 1.50 and float(egide["vie_effective"]) <= 1.90,
-		"Egide doit renforcer la survie sans tripler la resistance")
+	_exiger(float(egide["vie_effective"]) >= 2.10 and float(egide["vie_effective"]) <= 2.40,
+		"Egide doit donner un gain legendaire majeur de resistance")
 	_exiger(float(mesurer(["egide", "peau_de_pierre"])["vie_effective"]) > float(egide["vie_effective"]),
 		"Peau de pierre doit conserver un gain apres Egide")
 
@@ -184,7 +189,7 @@ static func mesurer(inventaire: Array) -> Dictionary:
 	var dps_central := tir.degats * tir.cadence * float(tir.salves) * tir.degats_finaux_projectile_mult \
 		* critique_moyen / (base.degats * base.cadence)
 	var dps_periodique := ReglagesAugments.debit_periodique(stats.degats * Mods.facteur_attaque_run(mods),
-		inventaire.count("encrage_vif"), "sceau_ruine" in inventaire) / (base.degats * base.cadence)
+		inventaire.count("trait_alchimique"), "meteorite_alchimique" in inventaire) / (base.degats * base.cadence)
 	var somme_projectiles := 0.0
 	for index in tir.nb_projectiles:
 		somme_projectiles += tir.facteur_projectile(index)
@@ -224,7 +229,7 @@ func _verifier_tirs_et_ordre() -> void:
 	_exiger(ricochet.rebonds == 3, "Ricochet doit accorder trois rebonds")
 	var perforation := Mods.appliquer(base, Mods.depuis_l_inventaire(["perforation"]))
 	_exiger("perfore_tout" in perforation.drapeaux and "perforation_sans_perte" in perforation.drapeaux
-		and is_equal_approx(perforation.degats, base.degats * 1.20), "Perforation doit traverser sans perte avec 20 % de dégâts de projectile")
+		and is_equal_approx(perforation.degats, base.degats * 1.25), "Perforation doit traverser sans perte avec 25 % de dégâts de projectile")
 	_exiger(is_equal_approx(Mods.facteur_attaque_run(Mods.depuis_l_inventaire(["perforation"])), 1.0),
 		"Le bonus de Perforation ne doit pas augmenter l'attaque des familiers")
 	var trajectoires := Mods.appliquer(base, Mods.depuis_l_inventaire(["ricochet", "perforation"]))
@@ -246,13 +251,13 @@ func _verifier_multiplication_tirs() -> void:
 		{"ids": ["salve"], "salves": 2, "projectiles": 1, "malus": 0.70, "dps": 1.40},
 		{"ids": ["tir_multiple"], "salves": 1, "projectiles": 2, "malus": 0.70, "dps": 1.40},
 		{"ids": ["tir_multiple", "tir_multiple"], "salves": 1, "projectiles": 3, "malus": 0.60, "dps": 1.80},
-		{"ids": ["battement_triple"], "salves": 3, "projectiles": 1, "malus": 0.55, "dps": 1.65},
-		{"ids": ["battement_triple", "salve"], "salves": 3, "projectiles": 1, "malus": 0.55, "dps": 1.65},
-		{"ids": ["battement_triple", "tir_multiple"], "salves": 3, "projectiles": 2, "malus": 2.05 / 6.0, "dps": 2.05},
-		{"ids": ["battement_triple", "tir_multiple", "salve"], "salves": 3, "projectiles": 2, "malus": 2.05 / 6.0, "dps": 2.05},
+		{"ids": ["battement_triple"], "salves": 3, "projectiles": 1, "malus": 0.80, "dps": 2.40},
+		{"ids": ["battement_triple", "salve"], "salves": 4, "projectiles": 1, "malus": 0.70, "dps": 2.80},
+		{"ids": ["battement_triple", "tir_multiple"], "salves": 3, "projectiles": 2, "malus": 2.80 / 6.0, "dps": 2.80},
+		{"ids": ["battement_triple", "tir_multiple", "salve"], "salves": 4, "projectiles": 2, "malus": 3.20 / 8.0, "dps": 3.20},
 		{"ids": ["salve", "tir_multiple"], "salves": 2, "projectiles": 2, "malus": 0.45, "dps": 1.80},
 		{"ids": ["battement_triple", "salve", "tir_multiple", "tir_multiple"],
-			"salves": 3, "projectiles": 3, "malus": 2.45 / 9.0, "dps": 2.45},
+			"salves": 4, "projectiles": 3, "malus": 3.60 / 12.0, "dps": 3.60},
 		{"ids": ["salve", "tir_multiple", "tir_multiple"], "salves": 2, "projectiles": 3, "malus": 2.20 / 6.0, "dps": 2.20},
 	]
 	for scenario: Dictionary in scenarios:
@@ -282,8 +287,8 @@ func _verifier_multiplication_tirs() -> void:
 	_exiger(details.contains("0,6") and details.contains("2 projectiles frontaux parallèles"),
 		"La carte Tir double ne décrit pas ses deux copies")
 	var details_triple := DetailsReactif.texte(CatalogueReactifs.par_id("battement_triple"))
-	_exiger(details_triple.contains("×0,55") and details_triple.contains("2 salves") and details_triple.contains("Alternative à Salve"),
-		"La carte Battement triple doit annoncer ses salves attenuees et leur exclusivite")
+	_exiger(details_triple.contains("×0,8") and details_triple.contains("2 salves") and details_triple.contains("Cumulable avec Salve"),
+		"La carte Battement triple doit annoncer ses 20 % de perte et son cumul avec Salve")
 	stats.attaque_base = 1000.0
 	stats.bonus_attaque = 0.0
 	stats.degats = stats.attaque_reelle()
@@ -554,7 +559,7 @@ func _verifier_elan(script: GDScript, inventaire: Array[String], jeu: Node) -> v
 	heros.call("_process", Reglages.TIR_DELAI_ARRET + 0.01)
 	heros.call("_avancer_rafale", 1.0)
 	heros.call("_avancer_tirs_prepares", Reglages.TIR_PREPARATION + 0.01)
-	_exiger(degats_emis.size() == 3, "L'ancien cumul de Salve et Battement triple doit emettre trois salves")
+	_exiger(degats_emis.size() == 4, "Le cumul de Salve et Battement triple doit emettre quatre salves")
 	for degats in degats_emis:
 		_exiger(is_equal_approx(degats, tir_base.degats * (1.0 + ReglagesAugments.ELAN_VITAL_BONUS_DEGATS)), "Toutes les salves de l'attaque chargee doivent recevoir le meme bonus")
 	_exiger(not bool(heros.get("_elan_chargee")), "La première attaque doit consommer la charge d'Élan")
@@ -563,7 +568,7 @@ func _verifier_elan(script: GDScript, inventaire: Array[String], jeu: Node) -> v
 	heros.call("_process", Reglages.TIR_DELAI_ARRET + 0.01)
 	heros.call("_avancer_rafale", 1.0)
 	heros.call("_avancer_tirs_prepares", Reglages.TIR_PREPARATION + 0.01)
-	_exiger(degats_emis.size() == 3, "L'attaque suivante doit conserver ses trois salves")
+	_exiger(degats_emis.size() == 4, "L'attaque suivante doit conserver ses quatre salves")
 	for degats in degats_emis:
 		_exiger(is_equal_approx(degats, tir_base.degats), "Élan ne doit pas renforcer une seconde attaque sans recharge")
 	cible.free()

@@ -29,7 +29,6 @@ static func cas_nuance() -> Dictionary:
 			if reactif.rarete != Reactif.LEGENDAIRE: continue
 			var inventaire: Array = NUANCE[nom].duplicate()
 			inventaire[-1] = id
-			if "salve" in inventaire and id == "battement_triple": continue
 			var titre := "Offensif frontal" if nom == "offensif_frontal" else "Diagonales guidées"
 			resultat[titre + " / " + reactif.nom] = inventaire
 	return resultat

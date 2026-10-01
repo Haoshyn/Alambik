@@ -24,9 +24,9 @@ const PROGRESSION_ECART_HEROS_MAITRISES := 0.10
 
 # Bases lisibles du premier chapitre, avant equipement et maitrises.
 # La meme unite s'applique aux attaques, aux PV et a la reference de defense.
-# Agrandir les nombres ne change donc ni les coups supportes ni la reduction.
-const ECHELLE_STATISTIQUES := 100.0
-const STATISTIQUE_PAS := 10.0
+# Reduire l'unite conserve les courbes, les coups supportes et la reduction.
+const ECHELLE_STATISTIQUES := 10.0
+const STATISTIQUE_PAS := 0.10 * ECHELLE_STATISTIQUES
 const HEROS_PV := 100.0 * ECHELLE_STATISTIQUES
 const HEROS_DEFENSE := 10.0 * ECHELLE_STATISTIQUES
 const DEFENSE_REFERENCE := 100.0 * ECHELLE_STATISTIQUES

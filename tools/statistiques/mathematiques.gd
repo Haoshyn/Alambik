@@ -140,7 +140,7 @@ static func _formules(lignes: Array[String]) -> void:
 		"DPS familier = attaque propre × facteur permanent d’attaque × facteur d’attaque des augments × bonus finaux / intervalle. Chaque rang de forge reste utile. Pas de critique ni de salve du héros.",
 		"DPS total = DPS frontal héros + DPS périodique + DPS familier. Les classes ajoutent 0 % à toutes ces sources.", "",
 		"Traits périodiques et météorites : attaque de run × coefficient propre × bonus finaux / intervalle, sur une cible immobile touchée à chaque déclenchement. Sans coefficient d’arme, critique, salve, diagonale, rebond ou Cinquième impact ; aucune prime de zone n’est ajoutée.", "",
-		"Satellites alchimiques : %s %% de l’attaque de run par contact, sans coefficient d’arme, critique, salve, diagonale ou rebond, puis bonus finaux. Les %d cercles partagent un délai de %s s par ennemi. Leur contact est exclu des DPS à distance des tableaux, comme la charge d’Élan vital ; le bonus permanent d’attaque reste inclus." % [n(ReglagesAugments.SATELLITES_PART_ATTAQUE * 100.0), ReglagesAugments.SATELLITES_NOMBRE, n(ReglagesAugments.SATELLITES_INTERVALLE_IMPACT)], "",
+		"Satellites alchimiques : %s %% de l’attaque de run par contact, sans coefficient d’arme, critique, salve, diagonale ou rebond, puis bonus finaux. Les %d cercles partagent un délai de %s s par ennemi. Leur contact est exclu des DPS à distance des tableaux, comme la charge d’Élan vital ; ils n'ajoutent aucune statistique." % [n(ReglagesAugments.SATELLITES_PART_ATTAQUE * 100.0), ReglagesAugments.SATELLITES_NOMBRE, n(ReglagesAugments.SATELLITES_INTERVALLE_IMPACT)], "",
 		"PV = (PV de base au niveau du héros + Vitalité + valeurs brutes des bijoux) × facteur d’équipement × facteur de maîtrises × facteur de passifs × facteur des augments. Égide multiplie le résultat après la somme des bonus de PV des autres augments.",
 		"Défense = (base + Vitalité + valeurs brutes des bijoux/familiers) × facteur d’équipement × facteur de maîtrises × facteur de passifs × facteur des augments.",
 		"Dégâts reçus = dégâts ennemis × facteur des augments × (1 + Audace) × (1 − réduction des maîtrises) × %s / (%s + Défense)." % [n(Reglages.DEFENSE_REFERENCE), n(Reglages.DEFENSE_REFERENCE)],
@@ -151,10 +151,10 @@ static func _formules(lignes: Array[String]) -> void:
 
 static func _tirs_multiples(lignes: Array[String]) -> void:
 	var stats := Stats.depuis_reglages()
-	stats.degats = 1000.0
+	stats.degats = Reglages.TIR_DEGATS
 	var base_arme := CatalogueProjectiles.appliquer("lourd", Tir.de_base(stats)).degats
 	lignes.append_array(["### Tir double, Salve et Battement triple", "",
-		"**Tir double** ajoute un projectile parallèle ; seul, une copie applique ×%s et deux copies ×%s aux dégâts de chaque projectile. **Salve** ajoute une répétition et applique ×%s. **Battement triple**, légendaire, ajoute deux répétitions à ×%s. Les deux variantes de salves sont exclusives. Un ancien inventaire possédant les deux conserve seulement les trois salves atténuées du légendaire, sans gain supplémentaire." % [n(ReglagesAugments.puissance_tirs_paralleles(1)), n(ReglagesAugments.puissance_tirs_paralleles(2)), n(ReglagesAugments.MALUS_TIRS_MULT), n(ReglagesAugments.PUISSANCE_BATTEMENT_MULT)], "",
+		"**Tir double** ajoute un projectile parallèle ; seul, une copie applique ×%s et deux copies ×%s aux dégâts de chaque projectile. **Salve** ajoute une répétition et applique ×%s. **Battement triple**, légendaire, ajoute deux répétitions à ×%s. Ils sont cumulables : quatre salves avec leurs gains de débit additionnés, dans les deux ordres d'acquisition." % [n(ReglagesAugments.puissance_tirs_paralleles(1)), n(ReglagesAugments.puissance_tirs_paralleles(2)), n(ReglagesAugments.MALUS_TIRS_MULT), n(ReglagesAugments.PUISSANCE_BATTEMENT_MULT)], "",
 		"Avec S salves de puissance P, F tirs frontaux de puissance Q et C le multiplicateur de cadence de run, le débit frontal relatif vaut **S × P + F × Q + C − 2**. La puissance de chaque impact vaut ce débit divisé par S × F × C. Les gestes et projectiles sont conservés ; leurs gains s'additionnent. Il n'y a aucun plafond de dégâts.", "",
 		"Exemple avec %s ATK et le Sceptre de cuivre : le coefficient d’arme porte le projectile à %s dégâts, qui devient notre référence à 100 %%. Les critiques et autres bonus finaux sont laissés de côté dans ce tableau." % [n(stats.degats), n(base_arme)], ""])
 	var exemples: Array = [
@@ -162,9 +162,9 @@ static func _tirs_multiples(lignes: Array[String]) -> void:
 		["Tir double ×2", ["tir_multiple", "tir_multiple"]], ["Salve", ["salve"]],
 		["Tir double + Salve", ["tir_multiple", "salve"]],
 		["Battement triple", ["battement_triple"]],
-		["Battement triple + Salve (ancien inventaire)", ["battement_triple", "salve"]],
+		["Battement triple + Salve", ["battement_triple", "salve"]],
 		["Tir double + Battement triple", ["tir_multiple", "battement_triple"]],
-		["Tir double + Battement triple + Salve (ancien inventaire)", ["tir_multiple", "battement_triple", "salve"]]]
+		["Tir double + Battement triple + Salve", ["tir_multiple", "battement_triple", "salve"]]]
 	var donnees: Array = []
 	for exemple: Array in exemples:
 		var tir := CatalogueProjectiles.appliquer("lourd", Mods.appliquer(Tir.de_base(stats), Mods.depuis_l_inventaire(exemple[1])))
@@ -176,13 +176,13 @@ static func _tirs_multiples(lignes: Array[String]) -> void:
 	var triple_salve := Mods.appliquer(Tir.de_base(stats), Mods.depuis_l_inventaire(["battement_triple", "salve"]))
 	var gain_salve := float(triple_salve.salves) * triple_salve.degats_finaux_projectile_mult \
 		/ (float(triple.salves) * triple.degats_finaux_projectile_mult)
-	lignes.append_array(["Dans un ancien inventaire possédant Battement triple et Salve, le nombre de salves reste de %d à %d, avec %s %% des dégâts de base par projectile : **×%s**, soit **+%s %% de DPS idéal** par rapport à Battement triple seul. Le cumul ne donne aucun gain supplémentaire, dans les deux ordres d’acquisition. Les nouvelles offres excluent ce cumul." % [triple.salves, triple_salve.salves, n(triple_salve.degats_finaux_projectile_mult * 100.0), n(gain_salve, 4), n((gain_salve - 1.0) * 100.0)], ""])
+	lignes.append_array(["Ajouter Salve à Battement triple fait passer de %d à %d salves, avec %s %% des dégâts de base par projectile : **×%s**, soit **+%s %% de DPS idéal** par rapport à Battement triple seul. Le cumul fonctionne dans les deux ordres d’acquisition et reste disponible dans les offres." % [triple.salves, triple_salve.salves, n(triple_salve.degats_finaux_projectile_mult * 100.0), n(gain_salve, 4), n((gain_salve - 1.0) * 100.0)], ""])
 
 static func _heros(lignes: Array[String]) -> void:
 	lignes.append_array(["### Bases du héros et attributs", "",
 		"Au niveau 1 : %s PV ; %s Défense ; %s attaque ; %s tirs/s. Chaque niveau compose %s %% de PV et %s %% d’attaque sur le socle précédent, arrondi au multiple de %s, en plus des points à répartir. Au niveau maximal, le socle seul vaut %s PV et %s attaque." % [n(Reglages.HEROS_PV), n(Reglages.HEROS_DEFENSE), n(Reglages.TIR_DEGATS), n(Reglages.HEROS_CADENCE), n(Reglages.NIVEAU_PV_PAR_NIVEAU * 100.0), n(Reglages.NIVEAU_DEGATS_PAR_NIVEAU * 100.0), n(Reglages.STATISTIQUE_PAS), n(Stats.base_pv(Personnage.NIVEAU_MAX)), n(Stats.base_degats(Personnage.NIVEAU_MAX))],
 		"Chaque niveau après le premier donne %d points, jusqu’au niveau %d : %d points au total." % [Personnage.POINTS_PAR_NIVEAU, Personnage.NIVEAU_MAX, Personnage.points_totaux(Personnage.NIVEAU_MAX)]])
-	lignes.append("Un attribut recevant p points donne p × gain du palier courant. Force, Vitalité et Intelligence ont des gains bruts entiers qui grandissent tous les %d niveaux. Les points déjà acquis profitent également du nouveau palier ; aucun rendement décroissant ne réduit les derniers points." % Personnage.NIVEAUX_PAR_PALIER)
+	lignes.append("Un attribut recevant p points donne p × gain du palier courant. Force, Vitalité et Intelligence ont des gains bruts qui grandissent tous les %d niveaux. Les points déjà acquis profitent également du nouveau palier ; aucun rendement décroissant ne réduit les derniers points." % Personnage.NIVEAUX_PAR_PALIER)
 	lignes.append("Les taux des passifs suivent les mêmes paliers de niveau, en pourcentages entiers. Leurs statistiques se composent entre rangs et conservent leur gain relatif ; les points de critique s’additionnent. Les effets de soin et autres pouvoirs gardent leurs conditions propres.")
 	var attributs: Array = []
 	for id: String in Personnage.ATTRIBUTS:

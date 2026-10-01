@@ -31,19 +31,12 @@ static func lignes(reactif: Reactif, copies := 1) -> Array[String]:
 			resultat.append("Dégâts de chaque projectile ×%s" % _nombre(facteur, 4))
 	if mods.has("tirs_paralleles_add"):
 		resultat.append("Dégâts de chaque projectile ×%s" % _nombre(ReglagesAugments.puissance_tirs_paralleles(int(mods["tirs_paralleles_add"]) * nombre), 4))
-		resultat.append("Les copies partagent leur puissance ; une nouvelle copie ne multiplie pas les pertes")
-	for id: String in CatalogueReactifs.INCOMPATIBILITES.get(reactif.id, []):
-		resultat.append("Alternative à %s · les deux augments ne se cumulent pas" % CatalogueReactifs.par_id(id).nom)
-	if mods.has("salves_add") or mods.has("tirs_paralleles_add") or mods.has("cadence_mult"):
-		resultat.append("Les gains de cadence et de tirs multiples s’additionnent ; les cumuls atténuent la puissance des impacts")
-	if mods.has("attaque_mult") or mods.has("degats_projectile_mult"):
-		resultat.append("Les bonus directs d’attaque et de projectile des augments s’additionnent")
+	if reactif.id == "battement_triple":
+		resultat.append("Cumulable avec Salve")
 	if mods.has("critique_add"):
 		resultat.append("Chance critique +%s points" % _nombre(float(mods["critique_add"]) * 100.0 * poids))
 	if mods.has("degats_critiques_add"):
-		resultat.append("Bonus de base aux dégâts critiques +%s points" % _nombre(float(mods["degats_critiques_add"]) * 100.0 * poids))
-	if mods.has("critique_add") or mods.has("degats_critiques_add"):
-		resultat.append("Les bonus de critique partagent leur rendement avec les autres augments de critique")
+		resultat.append("Dégâts critiques +%s points" % _nombre(float(mods["degats_critiques_add"]) * 100.0 * poids))
 	if mods.has("conversion_critique"):
 		resultat.append("%s %% de la chance critique au-delà de 100 %% devient des dégâts critiques" % _nombre(float(mods["conversion_critique"]) * 100.0 * poids))
 	if mods.has("invulnerabilite_add"):
@@ -77,14 +70,12 @@ static func lignes(reactif: Reactif, copies := 1) -> Array[String]:
 	if "elan_vital" in mods.get("drapeaux", []):
 		resultat.append("Après %s s de déplacement, la prochaine attaque gagne +%s %% de dégâts sur toutes ses salves" % [_nombre(ReglagesAugments.ELAN_VITAL_CHARGE), _nombre(ReglagesAugments.ELAN_VITAL_BONUS_DEGATS * 100.0)])
 	if "satellites_alchimiques" in mods.get("drapeaux", []):
-		resultat.append("%d satellites · %s %% de l'attaque par impact · au plus un impact par ennemi toutes les %s s" % [ReglagesAugments.SATELLITES_NOMBRE, _nombre(ReglagesAugments.SATELLITES_PART_ATTAQUE * 100.0), _nombre(ReglagesAugments.SATELLITES_INTERVALLE_IMPACT)])
-		resultat.append("Frappe au contact des cercles, même en mouvement ; sans critique, salve ou rebond")
+		resultat.append("%d satellites au contact · %s %% de l'attaque par impact" % [ReglagesAugments.SATELLITES_NOMBRE, _nombre(ReglagesAugments.SATELLITES_PART_ATTAQUE * 100.0)])
+		resultat.append("Un impact par ennemi toutes les %s s, même en mouvement" % _nombre(ReglagesAugments.SATELLITES_INTERVALLE_IMPACT))
 	if "trait_periodique" in mods.get("drapeaux", []):
 		resultat.append("Un trait toutes les %s s · %s %% de l'attaque · même en mouvement" % [_nombre(ReglagesAugments.TRAIT_INTERVALLE), _nombre(ReglagesAugments.TRAIT_PART_ATTAQUE * poids * 100.0)])
-		resultat.append("Vise un ennemi visible ; sans critique, salve ou rebond")
 	if "meteorite_alchimique" in mods.get("drapeaux", []):
 		resultat.append("Une météorite toutes les %s s · %s %% de l'attaque dans un rayon de %s · même en mouvement" % [_nombre(ReglagesAugments.METEORITE_INTERVALLE), _nombre(ReglagesAugments.METEORITE_PART_ATTAQUE * 100.0), _nombre(ReglagesAugments.METEORITE_RAYON)])
-		resultat.append("Tombe sur une position ennemie ; sans critique, salve ou rebond")
 	return resultat
 
 static func texte(reactif: Reactif, copies := 1) -> String:

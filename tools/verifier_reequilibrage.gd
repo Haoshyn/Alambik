@@ -55,14 +55,18 @@ func _verifier_valeurs() -> void:
 	for profil: Dictionary in [{}, Modeles.complet()]:
 		for mesure: Dictionary in Valeur.augments(profil):
 			var meilleur_gain := maxf(float(mesure["gain_dps"]), float(mesure["gain_survie"]))
-			var contact: bool = "satellites_alchimiques" in CatalogueReactifs.par_id(str(mesure["id"])).mods.get("drapeaux", [])
-			_exiger(meilleur_gain >= (0.075 if contact or mesure["rarete"] == Reactif.EPIQUE else 0.16),
-				"Un choix n'a pas de socle utile meme sans son effet conditionnel : " + str(mesure["id"]))
+			var reactif := CatalogueReactifs.par_id(str(mesure["id"]))
+			# Guidage et contact n'ont pas de gain ideal a distance ; les effets
+			# purs restent autonomes et ne donnent pas de statistiques gratuites.
+			if reactif.mods.size() == 1 and reactif.mods.has("drapeaux"):
+				continue
+			_exiger(meilleur_gain >= (0.075 if mesure["rarete"] == Reactif.EPIQUE else 0.16),
+				"Un choix de statistiques n'a pas de gain utile : " + str(mesure["id"]))
 	var base := Modeles.mesurer({})
 	var triple := Modeles.mesurer({"augments": ["battement_triple"]})
-	_exiger(float(triple["dps"]) / float(base["dps"]) >= 1.45 and float(triple["dps"]) / float(base["dps"]) <= 1.85, "Battement triple doit renforcer le debit sans le tripler")
+	_exiger(float(triple["dps"]) / float(base["dps"]) >= 2.10, "Battement triple doit donner un gain legendaire majeur")
 	var force := Modeles.mesurer({"augments": ["frappe_lourde"]})
-	_exiger(float(force["dps"]) / float(base["dps"]) >= 1.45 and float(force["dps"]) / float(base["dps"]) <= 1.85, "Force cataclysmique doit garder un gain fort et mesure")
+	_exiger(is_equal_approx(float(force["dps"]) / float(base["dps"]), 2.20), "Force cataclysmique doit plus que doubler l'attaque")
 	var mecaniques_rares := 0
 	for id: String in CatalogueReactifs.ids():
 		var reactif := CatalogueReactifs.par_id(id)
@@ -85,15 +89,17 @@ func _verifier_valeurs() -> void:
 				_exiger(float(prochain["attaque_base"]) > float(bonus["attaque_base"]), "Une forge de bijou n'apporte rien : " + id)
 
 func _verifier_nuance() -> void:
-	_exiger("battement_triple" not in DraftLogique.candidats(["salve"], Reactif.LEGENDAIRE), "Battement triple est encore propose apres Salve")
-	_exiger("salve" not in DraftLogique.candidats(["battement_triple"], Reactif.RARE), "Salve est encore proposee apres Battement triple")
-	var chance := 0.10 + 0.20 + 0.35
+	_exiger("battement_triple" in DraftLogique.candidats(["salve"], Reactif.LEGENDAIRE), "Battement triple doit etre propose apres Salve")
+	_exiger("salve" in DraftLogique.candidats(["battement_triple"], Reactif.RARE), "Salve doit etre proposee apres Battement triple")
+	var chance := 0.10 + 0.20 + 0.45
 	var critiques := Mods.bonus_degats_critiques(Mods.depuis_l_inventaire(["pointe_lucide", "couronne_incisive"]), chance)
-	_exiger(is_equal_approx(1.0 + chance * (0.5 + critiques), 1.8275), "Les augments de critique multiplient encore leurs gains entre eux")
+	_exiger(is_equal_approx(1.0 + chance * (0.5 + critiques), 2.09), "Les augments de critique multiplient encore leurs gains entre eux")
 	for profil: Dictionary in [{}, Modeles.complet()]:
 		var cas := profil.duplicate(true)
 		cas["augments"] = ProfilsAugments.NUANCE["mixte_sans_combo"]
 		var faible := Modeles.mesurer(cas)
+		cas["augments"] = cas["augments"].filter(func(id: String) -> bool: return CatalogueReactifs.par_id(id).rarete != Reactif.LEGENDAIRE)
+		var faible_ordinaire := Modeles.mesurer(cas)
 		var pire_rapport := 0.0
 		var inventaires := ProfilsAugments.cas_nuance()
 		for nom: String in inventaires:
@@ -101,7 +107,12 @@ func _verifier_nuance() -> void:
 			var fort := Modeles.mesurer(cas)
 			var rapport := float(fort["dps_tous_projectiles"]) / float(faible["dps"])
 			pire_rapport = maxf(pire_rapport, rapport)
-			_exiger(rapport <= 4.5, "Un build coherent sans combo subit un ecart de DPS excessif : " + nom)
+			# Le proprietaire assume la puissance exceptionnelle des legendaires.
+			# La comparaison ordinaire porte sur les rares et epiques seuls.
+			cas["augments"] = cas["augments"].filter(func(id: String) -> bool: return CatalogueReactifs.par_id(id).rarete != Reactif.LEGENDAIRE)
+			var fort_ordinaire := Modeles.mesurer(cas)
+			_exiger(float(fort_ordinaire["dps_tous_projectiles"]) / float(faible_ordinaire["dps"]) <= 4.5,
+				"Un build ordinaire sans combo subit un ecart de DPS excessif : " + nom)
 		print("Nuance des builds : ecart maximal ideal %.2f ; tous les tirs et diagonales supposés toucher." % pire_rapport)
 	var base := Tir.de_base(Stats.depuis_reglages())
 	var double := Mods.appliquer(base, Mods.depuis_l_inventaire(["salve", "tir_multiple"]))
@@ -133,7 +144,7 @@ func _verifier_satellites() -> void:
 	root.add_child(cible)
 	cible.add_to_group("ennemis")
 	satellites._physics_process(0.0)
-	_exiger(cible.coups.size() == 1 and is_equal_approx(cible.coups[0], 36.0), "Les cercles doivent frapper en mouvement sans multiplier critiques, salves, diagonales ou rebonds")
+	_exiger(cible.coups.size() == 1 and is_equal_approx(cible.coups[0], 50.0), "Les cercles doivent frapper en mouvement sans multiplier critiques, salves, diagonales ou rebonds")
 	satellites._physics_process(0.30)
 	_exiger(cible.coups.size() == 1, "Les deux satellites contournent le delai partage par ennemi")
 	satellites._physics_process(0.30)
@@ -171,7 +182,7 @@ func _verifier_satellites() -> void:
 
 func _verifier_effets_periodiques() -> void:
 	var jeu := root.get_node("Jeu")
-	jeu.inventaire.assign(["encrage_vif", "sceau_ruine", "salve", "battement_triple", "tir_multiple", "spirale", "ricochet"])
+	jeu.inventaire.assign(["trait_alchimique", "meteorite_alchimique", "salve", "battement_triple", "tir_multiple", "spirale", "ricochet"])
 	var salle := SalleSatellite.new()
 	root.add_child(salle)
 	salle.add_to_group("salle")
@@ -201,7 +212,7 @@ func _verifier_effets_periodiques() -> void:
 	_exiger(salle.tirs.size() == 1, "Le trait doit partir apres trois secondes meme en mouvement")
 	if not salle.tirs.is_empty():
 		var tir: Tir = salle.tirs[0]
-		_exiger(is_equal_approx(tir.degats, 108.75) and tir.nb_projectiles == 1 and tir.salves == 1 and tir.rebonds == 0,
+		_exiger(is_equal_approx(tir.degats, 150.0) and tir.nb_projectiles == 1 and tir.salves == 1 and tir.rebonds == 0,
 			"Les tirs du build ou ses critiques multiplient le trait periodique")
 		_exiger(salle.directions[0].is_equal_approx(Vector2.RIGHT), "Le trait ne vise pas la cible visible la plus proche")
 		var projectile := load("res://scenes/projectile.tscn").instantiate() as Area2D
@@ -209,7 +220,7 @@ func _verifier_effets_periodiques() -> void:
 		root.add_child(projectile)
 		projectile.set_physics_process(false)
 		projectile.call("_sur_contact", cibles[0])
-		_exiger(is_equal_approx(cibles[0].coups[0], 108.75), "Le projectile ne conserve pas les degats du trait")
+		_exiger(is_equal_approx(cibles[0].coups[0], 150.0), "Le projectile ne conserve pas les degats du trait")
 		root.remove_child(projectile)
 		projectile.free()
 		cibles[0].coups.clear()
@@ -220,15 +231,15 @@ func _verifier_effets_periodiques() -> void:
 	root.add_child(rendu)
 	_exiger(rendu.visible and rendu.position.is_equal_approx(Pont3D.vers_monde(Vector2(300, 0), 0.06)), "La meteorite visible ne suit pas sa position d'impact")
 	effets.call("_physics_process", ReglagesAugments.METEORITE_CHUTE)
-	_exiger(cibles[0].coups.size() == 1 and is_equal_approx(cibles[0].coups[0], 181.25) \
+	_exiger(cibles[0].coups.size() == 1 and is_equal_approx(cibles[0].coups[0], 300.0) \
 		and cibles[1].coups.size() == 1 and cibles[2].coups.is_empty(), "Le souffle de meteorite doit frapper une fois les ennemis proches sans critique")
 	effets.call("_physics_process", 0.0)
 	_exiger(cibles[0].coups.size() == 1, "La meteorite frappe plusieurs fois a son impact")
-	jeu.inventaire.append("encrage_vif")
+	jeu.inventaire.append("trait_alchimique")
 	heros.call("recalculer")
 	effets.call("preparer_nouvelle_salle")
 	effets.call("_physics_process", ReglagesAugments.TRAIT_INTERVALLE)
-	_exiger(salle.tirs.size() == 2 and is_equal_approx(salle.tirs[-1].degats, 255.0), "La deuxieme copie d'Encrage vif ne renforce pas son trait")
+	_exiger(salle.tirs.size() == 2 and is_equal_approx(salle.tirs[-1].degats, 300.0), "La deuxieme copie du Trait alchimique ne renforce pas son trait")
 	salle.couverts.assign([Rect2(100, -500, 20, 1000)])
 	effets.call("preparer_nouvelle_salle")
 	effets.call("_physics_process", ReglagesAugments.METEORITE_INTERVALLE)

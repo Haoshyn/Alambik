@@ -62,7 +62,7 @@ static func facteur_attaque_run(mods_liste: Array) -> float:
 static func appliquer(base: Tir, mods_liste: Array) -> Tir:
 	var tir := base.copie()
 	var salves_ajoutees := 0
-	var puissance_salves := 1.0
+	var debit_salves := 1.0
 	var copies_paralleles := 0
 	tir.degats *= maxf(Reglages.MODS_PLANCHER,
 		facteur_attaque_run(mods_liste) + facteur_heros(mods_liste, "degats_projectile_mult") - 1.0)
@@ -71,11 +71,11 @@ static func appliquer(base: Tir, mods_liste: Array) -> Tir:
 		tir.set(champ, float(tir.get(champ)) * facteur_heros(mods_liste, cle))
 	for mod: Dictionary in mods_liste:
 		var salves := int(mod.get("salves_add", 0))
-		# Compatibilite des anciens inventaires : seule la variante la plus longue
-		# agit, avec sa propre perte de puissance, dans les deux ordres d'acquisition.
-		if salves > salves_ajoutees:
-			salves_ajoutees = salves
-			puissance_salves = float(mod.get("degats_salve_mult", 1.0))
+		# Les repetitions et leurs gains de debit s'additionnent dans les deux
+		# ordres. Leur puissance partagee ne peut effacer le gain d'un choix.
+		salves_ajoutees += salves
+		if salves > 0:
+			debit_salves += float(1 + salves) * float(mod.get("degats_salve_mult", 1.0)) - 1.0
 		tir.nb_projectiles += int(mod.get("nb_projectiles_add", 0))
 		tir.projectiles_lateraux += int(mod.get("projectiles_lateraux_add", 0))
 		tir.rebonds += int(mod.get("rebonds_add", 0))
@@ -93,5 +93,5 @@ static func appliquer(base: Tir, mods_liste: Array) -> Tir:
 				tir.drapeaux.append(drapeau)
 	tir.salves += salves_ajoutees
 	tir.degats_finaux_projectile_mult *= ReglagesAugments.puissance_tirs_cumules(
-		1 + salves_ajoutees, puissance_salves, copies_paralleles, facteur_heros(mods_liste, "cadence_mult"))
+		1 + salves_ajoutees, debit_salves / float(1 + salves_ajoutees), copies_paralleles, facteur_heros(mods_liste, "cadence_mult"))
 	return tir

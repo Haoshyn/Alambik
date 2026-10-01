@@ -9,9 +9,11 @@ Les ennemis dépendent du niveau, de la salle et du mode, jamais du build
 actuel. Toute comparaison de dégâts doit préciser attaque brute, critiques,
 cadence, nombre de cibles et conditions des bonus.
 
-Les augments modifient des statistiques ou des tirs existants ; les rares
-proposent aussi des cercles de contact, un trait periodique et une meteorite
-de zone. Ces effets automatiques agissent meme en mouvement. Les passifs
+Les rares de statistiques donnent des bonus directs courts. Les effets
+autonomes comme le guidage, les cercles de contact, le trait periodique et
+la meteorite de zone n'ajoutent pas de statistiques. Ne pas greffer un effet
+a un augment de statistiques existant : ajouter un choix distinct.
+Ces effets automatiques agissent meme en mouvement. Les passifs
 viennent des Épreuves. Aucun sort actif ni ultime. Les classes sont conservées
 avec bonus neutres jusqu'à une demande explicite de les redéfinir.
 
@@ -20,8 +22,8 @@ legendaires donnent des gains marques sans rendre obligatoire un combo offensif.
 Aucun compromis attaque/defense, PV/cadence
 ou mobilite : les seules pertes sont celles des tirs multiples et rebonds.
 Les reductions des tirs viennent de ReglagesAugments. Salve et Battement
-triple sont exclusifs ; un ancien inventaire commun conserve seulement les
-trois salves attenuees du legendaire. Le debit des salves, tirs paralleles et
+triple se cumulent en quatre salves, dans les deux ordres ; les gains de
+debit des deux choix s'additionnent. Le debit des salves, tirs paralleles et
 cadence partage un cumul additif. Attaque et puissance des projectiles de run
 s'additionnent aussi. Les choix critiques conservent leurs gains propres, sans
 croisement multiplicatif entre leurs bonus. Aucun legendaire n'annule les
@@ -32,7 +34,9 @@ Les gains de resistance effective et de DPS des rares doivent etre
 comparables, selon les conditions des effets ; la defense ne doit plus
 depasser systematiquement l'attaque.
 Les sources permanentes progressent par petits gains ; le rare reste utile,
-l'epique puissant et le legendaire exceptionnel.
+l'epique puissant et le legendaire exceptionnel, avec une puissance forte
+assumee. Reduire l'echelle commune des statistiques doit reduire aussi les
+gains bruts des attributs et les arrondis de forge, jamais les pourcentages.
 Sur une progression ordinaire, eliminer un monstre intact en une attaque
 reste exceptionnel avec des rares seuls ; les choix offensifs accelerent
 ensuite les rencontres. Un mixte avec quelques choix offensifs reste viable,

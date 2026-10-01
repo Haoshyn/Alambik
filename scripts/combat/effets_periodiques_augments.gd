@@ -77,7 +77,7 @@ func _cible_proche(exiger_ligne_libre: bool) -> Node2D:
 func _lancer_trait(cible: Node2D) -> void:
 	var tir := Tir.new()
 	tir.arme = "augment"
-	tir.degats = heros.degats_finaux(ReglagesAugments.impact_trait(heros.attaque_reelle(), Jeu.inventaire.count("encrage_vif")), "baguette", false)
+	tir.degats = heros.degats_finaux(ReglagesAugments.impact_trait(heros.attaque_reelle(), Jeu.inventaire.count("trait_alchimique")), "baguette", false)
 	tir.vitesse = ReglagesAugments.TRAIT_VITESSE
 	tir.portee = ReglagesAugments.TRAIT_PORTEE
 	tir.portee_limitee = true

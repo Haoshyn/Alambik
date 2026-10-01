@@ -2,12 +2,13 @@
 
 ## Logique mathématique
 
-- Chaque choix ne dure que pour la tentative en cours. Les rares proposent aussi des satellites de contact, un trait périodique et une météorite de zone, actifs en mouvement. Les épiques et légendaires renforcent le build avec des gains mesurés.
+- Chaque choix ne dure que pour la tentative en cours. Les rares de statistiques restent des bonus directs. Traque, Satellites, Trait alchimique et Météorite sont des effets autonomes, sans bonus de statistiques ajouté. Les épiques sont renforcés légèrement ; les légendaires peuvent transformer une run.
 - Dans une même famille, les bonus positifs s’additionnent : deux bonus de 40 % donnent +80 %. Aucun bonus de défense ne coûte de l’attaque, de la cadence ou des PV.
-- Salve applique ×0,7 aux projectiles ; Battement triple applique ×0,55. Ces variantes sont exclusives. Tir double applique ×0,7 pour une copie et ×0,6 pour deux copies lorsqu'il est seul. Les gains de débit des salves, tirs parallèles et cadence s'additionnent : leur cumul atténue les impacts. Les diagonales ont leur propre puissance et Ricochet garde sa limite et ses pertes, même avec Perforation.
+- Salve applique ×0,7 aux projectiles ; Battement triple applique ×0,8 lorsqu'il est seul. Ils se cumulent en quatre salves, avec leurs gains de débit additionnés. Tir double applique ×0,7 pour une copie et ×0,6 pour deux copies lorsqu'il est seul. Les gains de débit des salves, tirs parallèles et cadence s'additionnent : leur cumul atténue les impacts. Les diagonales ont leur propre puissance et Ricochet garde sa limite et ses pertes, même avec Perforation.
 - Le groupe des bonus de run multiplie une seule fois les statistiques permanentes.
 - Les bonus directs d'attaque et de projectile des augments s'additionnent. Critique : les points de chance s’ajoutent, jusqu’à 100 %. Chaque augment garde son gain propre ; le croisement entre la chance d'un choix et la puissance d'un autre est retiré. Les fiches montrent les bonus de base avant cette combinaison.
 - Salves et projectiles supplémentaires ne garantissent pas que tous les tirs atteignent la même cible.
+- Les effets automatiques fonctionnent aussi en mouvement et suivent l'attaque de run. Ils ne reçoivent ni critique, ni coefficient d'arme, ni salve, ni rebond. Les murs protègent du trait et du souffle de météorite ; les satellites frappent uniquement au contact.
 - Les réductions de Tir double restent actives avec les légendaires. Les classes Sorcier et Moine n’ajoutent aucun bonus.
 - Augmenter les PV maximum ne soigne pas, sauf Égide qui rend toute la vie à son acquisition. Égide multiplie les PV après les autres bonus. Un bouclier revient à chaque salle sans cumuler les charges des salles précédentes.
 - Couronne incisive convertit une part du critique excédant 100 % en dégâts critiques, selon sa fiche. Sans Couronne, cet excédent est perdu. Les soins indiqués sont multipliés par les bonus de soins et limités aux PV manquants.
@@ -25,7 +26,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Attaque +20 %<br>XP de la partie +30 %<br>Gouttes +30 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent |
+| 1 | Attaque +20 %<br>XP de la partie +30 %<br>Gouttes +30 % |
 
 ### Baume profond
 
@@ -33,8 +34,8 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Attaque +10 %<br>PV max +25 %<br>Soins reçus +35 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent |
-| 2 | Attaque +20 %<br>PV max +50 %<br>Soins reçus +70 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent |
+| 1 | Attaque +10 %<br>PV max +25 %<br>Soins reçus +35 % |
+| 2 | Attaque +20 %<br>PV max +50 %<br>Soins reçus +70 % |
 
 ### Cadence fébrile
 
@@ -42,8 +43,8 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Cadence +30 %<br>Les gains de cadence et de tirs multiples s’additionnent ; les cumuls atténuent la puissance des impacts |
-| 2 | Cadence +60 %<br>Les gains de cadence et de tirs multiples s’additionnent ; les cumuls atténuent la puissance des impacts |
+| 1 | Cadence +30 % |
+| 2 | Cadence +60 % |
 
 ### Encrage vif
 
@@ -51,8 +52,8 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Attaque +25 %<br>Vitesse des projectiles +25 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent<br>Un trait toutes les 3 s · 75 % de l'attaque · même en mouvement<br>Vise un ennemi visible ; sans critique, salve ou rebond |
-| 2 | Attaque +50 %<br>Vitesse des projectiles +50 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent<br>Un trait toutes les 3 s · 150 % de l'attaque · même en mouvement<br>Vise un ennemi visible ; sans critique, salve ou rebond |
+| 1 | Attaque +40 %<br>Vitesse des projectiles +25 % |
+| 2 | Attaque +80 %<br>Vitesse des projectiles +50 % |
 
 ### Traque alchimique
 
@@ -60,7 +61,15 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Dégâts des projectiles +30 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent<br>Chance critique +5 points<br>Les bonus de critique partagent leur rendement avec les autres augments de critique<br>Projectiles guidés |
+| 1 | Projectiles guidés |
+
+### Météorite alchimique
+
+**Maximum :** 1 copie.
+
+| Copies cumulées | Effets cumulés |
+| --- | --- |
+| 1 | Une météorite toutes les 5 s · 300 % de l'attaque dans un rayon de 120 · même en mouvement |
 
 ### Pas de brume
 
@@ -86,8 +95,8 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Chance critique +20 points<br>Bonus de base aux dégâts critiques +55 points<br>Les bonus de critique partagent leur rendement avec les autres augments de critique |
-| 2 | Chance critique +40 points<br>Bonus de base aux dégâts critiques +110 points<br>Les bonus de critique partagent leur rendement avec les autres augments de critique |
+| 1 | Chance critique +20 points<br>Dégâts critiques +55 points |
+| 2 | Chance critique +40 points<br>Dégâts critiques +110 points |
 
 ### Salve
 
@@ -95,7 +104,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | +1 salve par attaque<br>Dégâts de chaque projectile ×0,7<br>Alternative à Battement triple · les deux augments ne se cumulent pas<br>Les gains de cadence et de tirs multiples s’additionnent ; les cumuls atténuent la puissance des impacts |
+| 1 | +1 salve par attaque<br>Dégâts de chaque projectile ×0,7 |
 
 ### Satellites alchimiques
 
@@ -103,7 +112,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Attaque +20 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent<br>2 satellites · 30 % de l'attaque par impact · au plus un impact par ennemi toutes les 0,6 s<br>Frappe au contact des cercles, même en mouvement ; sans critique, salve ou rebond |
+| 1 | 2 satellites au contact · 50 % de l'attaque par impact<br>Un impact par ennemi toutes les 0,6 s, même en mouvement |
 
 ### Sceau de garde
 
@@ -119,7 +128,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Attaque +20 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent<br>Une météorite toutes les 5 s · 125 % de l'attaque dans un rayon de 120 · même en mouvement<br>Tombe sur une position ennemie ; sans critique, salve ou rebond |
+| 1 | Attaque +40 % |
 
 ### Tir double
 
@@ -127,8 +136,17 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Dégâts de chaque projectile ×0,7<br>Les copies partagent leur puissance ; une nouvelle copie ne multiplie pas les pertes<br>Les gains de cadence et de tirs multiples s’additionnent ; les cumuls atténuent la puissance des impacts<br>+1 projectile frontal parallèle par salve |
-| 2 | Dégâts de chaque projectile ×0,6<br>Les copies partagent leur puissance ; une nouvelle copie ne multiplie pas les pertes<br>Les gains de cadence et de tirs multiples s’additionnent ; les cumuls atténuent la puissance des impacts<br>+2 projectiles frontaux parallèles par salve |
+| 1 | Dégâts de chaque projectile ×0,7<br>+1 projectile frontal parallèle par salve |
+| 2 | Dégâts de chaque projectile ×0,6<br>+2 projectiles frontaux parallèles par salve |
+
+### Trait alchimique
+
+**Maximum :** 2 copies.
+
+| Copies cumulées | Effets cumulés |
+| --- | --- |
+| 1 | Un trait toutes les 3 s · 150 % de l'attaque · même en mouvement |
+| 2 | Un trait toutes les 3 s · 300 % de l'attaque · même en mouvement |
 
 ## Épiques
 
@@ -138,7 +156,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Attaque +20 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent<br>Après 0,45 s de déplacement, la prochaine attaque gagne +45 % de dégâts sur toutes ses salves |
+| 1 | Attaque +25 %<br>Après 0,45 s de déplacement, la prochaine attaque gagne +45 % de dégâts sur toutes ses salves |
 
 ### Encre mordante
 
@@ -146,7 +164,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Dégâts des projectiles +40 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent |
+| 1 | Dégâts des projectiles +45 % |
 
 ### Garde rémanente
 
@@ -154,7 +172,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | PV max +40 %<br>1 bouclier par salle · un coup bloqué chacun |
+| 1 | PV max +45 %<br>1 bouclier par salle · un coup bloqué chacun |
 
 ### Noyau pesant
 
@@ -162,8 +180,8 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Attaque +45 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent |
-| 2 | Attaque +90 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent |
+| 1 | Attaque +50 % |
+| 2 | Attaque +100 % |
 
 ### Peau de pierre
 
@@ -171,7 +189,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | PV max +40 %<br>Dégâts subis −5 % |
+| 1 | PV max +45 %<br>Dégâts subis −5 % |
 
 ### Perforation
 
@@ -179,7 +197,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Dégâts des projectiles +20 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent<br>Traverse les ennemis sans perte de traversée ; les rebonds restent limités et perdent leur puissance. Un impact maximum par ennemi et projectile. |
+| 1 | Dégâts des projectiles +25 %<br>Traverse les ennemis sans perte de traversée ; les rebonds restent limités et perdent leur puissance. Un impact maximum par ennemi et projectile. |
 
 ### Ricochet
 
@@ -187,7 +205,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Dégâts des projectiles +35 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent<br>+3 rebonds · −10 % de dégâts par rebond |
+| 1 | Dégâts des projectiles +40 %<br>+3 rebonds · −10 % de dégâts par rebond |
 
 ### Éventail
 
@@ -195,8 +213,8 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Cadence +10 %<br>Les gains de cadence et de tirs multiples s’additionnent ; les cumuls atténuent la puissance des impacts<br>+2 projectiles en diagonale par salve<br>Puissance des diagonales : 30 % |
-| 2 | Cadence +20 %<br>Les gains de cadence et de tirs multiples s’additionnent ; les cumuls atténuent la puissance des impacts<br>+4 projectiles en diagonale par salve<br>Puissance des diagonales : 30 % |
+| 1 | Cadence +15 %<br>+2 projectiles en diagonale par salve<br>Puissance des diagonales : 30 % |
+| 2 | Cadence +30 %<br>+4 projectiles en diagonale par salve<br>Puissance des diagonales : 30 % |
 
 ### Tir indélébile
 
@@ -204,7 +222,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Vitesse des projectiles +20 %<br>Dégâts des projectiles +35 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent<br>Poursuit la cible à travers les murs et les autres ennemis |
+| 1 | Vitesse des projectiles +20 %<br>Dégâts des projectiles +40 %<br>Poursuit la cible à travers les murs et les autres ennemis |
 
 ## Légendaires
 
@@ -214,7 +232,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | +2 salves par attaque<br>Dégâts de chaque projectile ×0,55<br>Alternative à Salve · les deux augments ne se cumulent pas<br>Les gains de cadence et de tirs multiples s’additionnent ; les cumuls atténuent la puissance des impacts |
+| 1 | +2 salves par attaque<br>Dégâts de chaque projectile ×0,8<br>Cumulable avec Salve |
 
 ### Courage indomptable
 
@@ -222,7 +240,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Attaque +20 %<br>Cadence +20 %<br>PV max +20 %<br>Défense +20 %<br>Les gains de cadence et de tirs multiples s’additionnent ; les cumuls atténuent la puissance des impacts<br>Les bonus directs d’attaque et de projectile des augments s’additionnent<br>Une seconde vie à 100 % des PV, une seule fois par tentative |
+| 1 | Attaque +35 %<br>Cadence +35 %<br>PV max +35 %<br>Défense +35 %<br>Une seconde vie à 100 % des PV, une seule fois par tentative |
 
 ### Couronne incisive
 
@@ -230,7 +248,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Chance critique +35 points<br>Bonus de base aux dégâts critiques +75 points<br>Les bonus de critique partagent leur rendement avec les autres augments de critique<br>50 % de la chance critique au-delà de 100 % devient des dégâts critiques |
+| 1 | Chance critique +45 points<br>Dégâts critiques +100 points<br>100 % de la chance critique au-delà de 100 % devient des dégâts critiques |
 
 ### Égide souveraine
 
@@ -238,7 +256,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Dégâts subis −10 %<br>PV max totaux ×1,5, après les autres bonus de PV<br>Rend tous les PV à l'acquisition, une seule fois |
+| 1 | Dégâts subis −20 %<br>PV max totaux ×1,8, après les autres bonus de PV<br>Rend tous les PV à l'acquisition, une seule fois |
 
 ### Force cataclysmique
 
@@ -246,4 +264,4 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Attaque +60 %<br>Les bonus directs d’attaque et de projectile des augments s’additionnent |
+| 1 | Attaque +120 % |

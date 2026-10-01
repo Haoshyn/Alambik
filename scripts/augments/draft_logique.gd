@@ -13,10 +13,6 @@ static func candidats(inventaire: Array, rarete := "", niveau := 0) -> Array[Str
 			continue
 		if copies(inventaire, id) >= reactif.copies_permises():
 			continue
-		var incompatible := false
-		for autre: String in CatalogueReactifs.INCOMPATIBILITES.get(id, []):
-			if autre in inventaire: incompatible = true
-		if incompatible: continue
 		if niveau > ProgressionAugments.DERNIER_NIVEAU_AVIDITE and id == "avidite":
 			continue
 		liste.append(id)

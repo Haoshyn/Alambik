@@ -1,4 +1,4 @@
-# État courant — 30 septembre 2026
+# État courant — 1 octobre 2026
 
 Alambik est un roguelite de tir portrait Android sous Godot 4.7.1 : simulation
 2D, présentation 3D. Le héros Aster V7 aux proportions manga, la clairière
@@ -101,23 +101,26 @@ viennent du catalogue et figurent dans les statistiques générées.
   conditionnel dans le menu, sans modification des systèmes permanents.
   Les cinq profils, la régression, la restauration et les commandes en portrait
   sont vérifiés sans fenêtre ; le rendu sur appareil reste à vérifier.
-- Vingt-sept augments : treize rares, neuf épiques et cinq
-  légendaires. Les choix de soins, mobilité et tir spécialisé ont un socle
-  de combat plus régulier. Élan vital garde son bonus après déplacement en
-  plus d'une hausse permanente d'attaque. Parmi les rares, Encrage vif lance
-  un trait périodique et Sceau de ruine fait tomber une météorite de zone.
+- Vingt-neuf augments : quinze rares, neuf épiques et cinq
+  légendaires. Les rares de statistiques gardent des bonus directs et leurs
+  cartes restent courtes. Encrage vif et Sceau de ruine renforcent les stats ;
+  Trait alchimique et Météorite alchimique sont deux choix séparés, sans
+  bonus de stats. Traque donne seulement le guidage. Élan vital garde son
+  bonus après déplacement en plus d'une hausse permanente d'attaque.
   Les satellites alchimiques ajoutent
   deux cercles de contact originaux autour du héros, actifs en mouvement,
   avec délai partagé par ennemi et protection par les murs. Leurs dégâts
   ne reçoivent ni critiques, ni salves, ni rebonds, ni diagonales.
   Aucun malus ordinaire d'attaque, de PV, de cadence ou de mobilité.
   Salve est rare et unique ; Tir double est rare et cumulable deux fois.
-  Salve et Battement triple sont exclusifs. Le légendaire donne trois salves
-  atténuées ; un ancien inventaire commun garde seulement cette variante.
+  Battement triple donne trois salves avec seulement 20 % de perte lorsqu'il
+  est seul. Il se cumule avec Salve en quatre salves dans les deux ordres.
   Les gains de débit des salves, tirs parallèles et cadence s'additionnent,
   en ajustant la puissance des impacts. Les bonus directs d'attaque et de
   projectile s'additionnent aussi ; les critiques retirent les croisements
-  entre choix distincts. Les légendaires donnent un gain marqué et mesuré.
+  entre choix distincts. Les épiques sont légèrement renforcés ; les
+  légendaires donnent des gains plus forts, avec une puissance exceptionnelle
+  assumée.
   Des comparaisons éprouvent un mixte avec Égide et quatre choix offensifs
   ordinaires contre les variantes frontales et toutes les diagonales guidées.
   Les PV ordinaires montent plus doucement après la salle du légendaire,
@@ -135,15 +138,18 @@ viennent du catalogue et figurent dans les statistiques générées.
 - Attributs, trois branches de maîtrises, armes, bijoux, familiers et forge
   portent la progression permanente. Les cinq familles de dégâts visent une
   contribution comparable sur le compte complet de référence. Les attributs
-  donnent des gains bruts entiers par point, croissants par palier de niveau,
+  donnent des gains bruts par point, croissants par palier de niveau,
   sans rendement décroissant. Les points déjà investis profitent du nouveau
   palier. Les statistiques de passifs suivent des pourcentages entiers.
   Les maîtrises composent leurs rangs et leurs nœuds ; les taux offensifs
   tardifs dépassent les premiers. Les Cœurs composent leur gain relatif.
   La forge renforce les valeurs acquises avec des gains bruts arrondis et
   croissants. Le familier partage les augments d'attaque ; sa forge garde
-  son attaque propre. Les unités d'attaque, de PV et de Défense sont agrandies
-  ensemble. Les impacts de référence se lisent dans la liste mathématique.
+  son attaque propre. Les unités d'attaque, de PV et de Défense sont divisées
+  par dix ensemble, attributs et arrondis de forge compris. Le héros commence
+  à 100 dégâts sans équipement, 140 avec la baguette initiale. Les courbes et
+  pourcentages permanents sont conservés. Les impacts de référence se lisent
+  dans la liste mathématique.
   Les courbes fixes des ennemis sont recalibrées
   en distinguant les entrées sans augment et la puissance acquise dans la run.
   Héros affiche le bonus actuel de chaque attribut et le gain du prochain point

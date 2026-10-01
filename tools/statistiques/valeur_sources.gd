@@ -113,7 +113,7 @@ static func _ajouter_augments(lignes: Array[String], profil: Dictionary) -> void
 			if str(mesure["id"]) != id_cible: continue
 			cas.append([", ".join(inventaire), CatalogueReactifs.par_id(id_cible).nom, _pourcentage(float(mesure["gain_dps"]))])
 	lignes.append_array(["### Rendements réduits par les cumuls", "",
-		"Les bonus directs d'attaque et de projectile s'additionnent, tout comme les gains de débit des tirs multiples et de cadence. Salve et Battement triple sont exclusifs. Les critiques retirent le croisement entre les bonus de choix distincts. Le rendement dépend donc des choix déjà faits. Ces cas rendent visible le gain marginal d’une acquisition.", ""])
+		"Les bonus directs d'attaque et de projectile s'additionnent, tout comme les gains de débit des tirs multiples et de cadence. Salve et Battement triple se cumulent en quatre salves. Les critiques retirent le croisement entre les bonus de choix distincts. Le rendement dépend donc des choix déjà faits. Ces cas rendent visible le gain marginal d’une acquisition.", ""])
 	Listes.tableau(lignes, ["Déjà acquis", "Choix ajouté", "Gain de DPS total"], cas)
 
 static func _pourcentage(valeur: float) -> String:
@@ -134,6 +134,7 @@ static func _utilite(id: String) -> String:
 		"garde_remanente": return "Un coup bloqué par salle"
 		"courageux": return "Une seconde vie complète"
 		"egide": return "Soin complet à l’acquisition"
-		"encrage_vif": return "Trait périodique en mouvement ; projectiles plus rapides"
-		"sceau_ruine": return "Météorite en mouvement ; dégâts de zone"
+		"encrage_vif": return "Projectiles plus rapides"
+		"trait_alchimique": return "Trait automatique en mouvement"
+		"meteorite_alchimique": return "Météorite automatique en mouvement ; dégâts de zone"
 	return "—"

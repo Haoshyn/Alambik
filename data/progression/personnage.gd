@@ -8,10 +8,10 @@ const SPECIALISATION_DEFAUT := "sorcier"
 # Les attributs construisent la base que les maitrises et les passifs
 # multiplient ensuite ; chaque point reste utile quel que soit l'equipement.
 const NIVEAUX_PAR_PALIER := 5
-const FORCE_ATTAQUE_PAR_POINT := [40, 50, 60, 80, 100, 120]
-const VITALITE_PV_PAR_POINT := [100, 120, 140, 160, 180, 200]
-const VITALITE_DEFENSE_PAR_POINT := [10, 12, 14, 16, 18, 20]
-const INTELLIGENCE_ATTAQUE_PAR_POINT := [10, 10, 20, 20, 30, 40]
+const FORCE_ATTAQUE_PAR_POINT := [0.40, 0.50, 0.60, 0.80, 1.00, 1.20]
+const VITALITE_PV_PAR_POINT := [1.00, 1.20, 1.40, 1.60, 1.80, 2.00]
+const VITALITE_DEFENSE_PAR_POINT := [0.10, 0.12, 0.14, 0.16, 0.18, 0.20]
+const INTELLIGENCE_ATTAQUE_PAR_POINT := [0.10, 0.10, 0.20, 0.20, 0.30, 0.40]
 const INTELLIGENCE_CADENCE_PAR_POINT := [0.005, 0.005, 0.01, 0.01, 0.015, 0.02]
 const AGILITE_CRITIQUE_PAR_POINT := 0.005
 const AGILITE_DEGATS_CRITIQUES_PAR_POINT := 0.02
@@ -19,7 +19,7 @@ const ATTRIBUTS := {
 	"force": {"nom": "Force", "attaque_base": FORCE_ATTAQUE_PAR_POINT,
 		"description": "Attaque brute ; gains entiers croissants avec le niveau."},
 	"vitalite": {"nom": "Vitalité", "pv_base": VITALITE_PV_PAR_POINT, "defense_base": VITALITE_DEFENSE_PAR_POINT,
-		"description": "PV et Défense bruts ; gains entiers croissants avec le niveau."},
+		"description": "PV et Défense bruts ; gains croissants avec le niveau."},
 	"agilite": {"nom": "Agilité", "critique": AGILITE_CRITIQUE_PAR_POINT, "degats_critiques": AGILITE_DEGATS_CRITIQUES_PAR_POINT,
 		"description": "Chance et dégâts critiques ; chaque point renforce les attaques acquises."},
 	"intelligence": {"nom": "Intelligence", "attaque_base": INTELLIGENCE_ATTAQUE_PAR_POINT, "cadence": INTELLIGENCE_CADENCE_PAR_POINT,
@@ -79,8 +79,9 @@ static func bonus(attributs: Dictionary, niveau := NIVEAU_MAX) -> Dictionary:
 		var rang := maxi(0, int(attributs.get(id, 0)))
 		var donnees: Dictionary = ATTRIBUTS[id]
 		for champ in resultat:
+			var unite := Reglages.ECHELLE_STATISTIQUES if champ in ["attaque_base", "pv_base", "defense_base"] else 1.0
 			resultat[champ] = float(resultat[champ]) \
-				+ valeur_par_point(donnees.get(champ, 0.0), niveau) * float(rang)
+				+ valeur_par_point(donnees.get(champ, 0.0), niveau) * unite * float(rang)
 	return resultat
 
 static func gain_point(id: String, points: int, niveau: int) -> Dictionary:

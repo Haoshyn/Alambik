@@ -52,8 +52,8 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 3 600 PV |
-| Dégâts | 1 500 dégâts |
+| Points de vie | 360 PV |
+| Dégâts | 150 dégâts |
 | Vitesse | 401,85 px/s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Dégâts du projectile | 60 % des dégâts de base |
@@ -74,8 +74,8 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 4 600 PV |
-| Dégâts | 2 000 dégâts |
+| Points de vie | 460 PV |
+| Dégâts | 200 dégâts |
 | Vitesse | 0 px/s |
 | Intervalle d’attaque | 1,7 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -103,8 +103,8 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 3 200 PV |
-| Dégâts | 1 700 dégâts |
+| Points de vie | 320 PV |
+| Dégâts | 170 dégâts |
 | Vitesse | 684 px/s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Durée de charge en terrain libre | 1,25 s ; trajet annoncé arrêté au premier mur ou obstacle |
@@ -126,8 +126,8 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 8 200 PV |
-| Dégâts | 2 200 dégâts |
+| Points de vie | 820 PV |
+| Dégâts | 220 dégâts |
 | Vitesse | 205 px/s |
 | Intervalle d’attaque | 2,95 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -155,8 +155,8 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 4 600 PV |
-| Dégâts | 2 700 dégâts |
+| Points de vie | 460 PV |
+| Dégâts | 270 dégâts |
 | Vitesse | 280 px/s |
 | Intervalle d’attaque | 1,55 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -185,8 +185,8 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 11 600 PV |
-| Dégâts | 3 300 dégâts |
+| Points de vie | 1 160 PV |
+| Dégâts | 330 dégâts |
 | Vitesse | 627 px/s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
 | Durée de charge en terrain libre | 1,6 s ; trajet annoncé arrêté au premier mur ou obstacle |
@@ -208,8 +208,8 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 3 600 PV |
-| Dégâts | 2 300 dégâts |
+| Points de vie | 360 PV |
+| Dégâts | 230 dégâts |
 | Vitesse | 340 px/s |
 | Intervalle d’attaque | 1,45 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -237,8 +237,8 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 10 000 PV |
-| Dégâts | 3 000 dégâts |
+| Points de vie | 1 000 PV |
+| Dégâts | 300 dégâts |
 | Vitesse | 190 px/s |
 | Intervalle d’attaque | 2,35 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -266,8 +266,8 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 4 400 PV |
-| Dégâts | 2 600 dégâts |
+| Points de vie | 440 PV |
+| Dégâts | 260 dégâts |
 | Vitesse | 255 px/s |
 | Intervalle d’attaque | 2,55 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -295,8 +295,8 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 7 600 PV |
-| Dégâts | 2 600 dégâts |
+| Points de vie | 760 PV |
+| Dégâts | 260 dégâts |
 | Vitesse | 260 px/s |
 | Intervalle d’attaque | 1,85 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -324,8 +324,8 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 3 200 PV |
-| Dégâts | 2 800 dégâts |
+| Points de vie | 320 PV |
+| Dégâts | 280 dégâts |
 | Vitesse | 225 px/s |
 | Intervalle d’attaque | 3,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -347,8 +347,8 @@ Salle de référence : 1 197 × 1 995 px ; zoom caméra 0,9975. Les variante
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 27 000 PV |
-| Dégâts | 1 800 dégâts |
+| Points de vie | 2 700 PV |
+| Dégâts | 180 dégâts |
 | Vitesse | 260 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -381,8 +381,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 28 000 PV |
-| Dégâts | 1 900 dégâts |
+| Points de vie | 2 800 PV |
+| Dégâts | 190 dégâts |
 | Vitesse | 285 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -405,8 +405,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 30 000 PV |
-| Dégâts | 1 500 dégâts |
+| Points de vie | 3 000 PV |
+| Dégâts | 150 dégâts |
 | Vitesse | 220 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -427,8 +427,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 28 500 PV |
-| Dégâts | 1 800 dégâts |
+| Points de vie | 2 850 PV |
+| Dégâts | 180 dégâts |
 | Vitesse | 245 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -461,8 +461,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 26 000 PV |
-| Dégâts | 1 700 dégâts |
+| Points de vie | 2 600 PV |
+| Dégâts | 170 dégâts |
 | Vitesse | 300 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -485,8 +485,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 32 000 PV |
-| Dégâts | 2 000 dégâts |
+| Points de vie | 3 200 PV |
+| Dégâts | 200 dégâts |
 | Vitesse | 235 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -507,8 +507,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 27 500 PV |
-| Dégâts | 1 800 dégâts |
+| Points de vie | 2 750 PV |
+| Dégâts | 180 dégâts |
 | Vitesse | 275 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -529,8 +529,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 30 500 PV |
-| Dégâts | 1 900 dégâts |
+| Points de vie | 3 050 PV |
+| Dégâts | 190 dégâts |
 | Vitesse | 230 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -551,8 +551,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 29 500 PV |
-| Dégâts | 2 100 dégâts |
+| Points de vie | 2 950 PV |
+| Dégâts | 210 dégâts |
 | Vitesse | 310 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -585,8 +585,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 33 000 PV |
-| Dégâts | 1 600 dégâts |
+| Points de vie | 3 300 PV |
+| Dégâts | 160 dégâts |
 | Vitesse | 210 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -607,8 +607,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 36 000 PV |
-| Dégâts | 1 800 dégâts |
+| Points de vie | 3 600 PV |
+| Dégâts | 180 dégâts |
 | Vitesse | 235 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -629,8 +629,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 38 000 PV |
-| Dégâts | 2 200 dégâts |
+| Points de vie | 3 800 PV |
+| Dégâts | 220 dégâts |
 | Vitesse | 295 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -663,8 +663,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 40 000 PV |
-| Dégâts | 1 900 dégâts |
+| Points de vie | 4 000 PV |
+| Dégâts | 190 dégâts |
 | Vitesse | 215 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -685,8 +685,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 39 000 PV |
-| Dégâts | 2 300 dégâts |
+| Points de vie | 3 900 PV |
+| Dégâts | 230 dégâts |
 | Vitesse | 270 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -707,8 +707,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 42 000 PV |
-| Dégâts | 2 100 dégâts |
+| Points de vie | 4 200 PV |
+| Dégâts | 210 dégâts |
 | Vitesse | 225 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -729,8 +729,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 41 000 PV |
-| Dégâts | 2 200 dégâts |
+| Points de vie | 4 100 PV |
+| Dégâts | 220 dégâts |
 | Vitesse | 250 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -751,8 +751,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 44 000 PV |
-| Dégâts | 2 400 dégâts |
+| Points de vie | 4 400 PV |
+| Dégâts | 240 dégâts |
 | Vitesse | 285 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -787,8 +787,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 46 000 PV |
-| Dégâts | 2 300 dégâts |
+| Points de vie | 4 600 PV |
+| Dégâts | 230 dégâts |
 | Vitesse | 205 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -821,8 +821,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 49 000 PV |
-| Dégâts | 2 500 dégâts |
+| Points de vie | 4 900 PV |
+| Dégâts | 250 dégâts |
 | Vitesse | 275 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |
@@ -855,8 +855,8 @@ Approche limitée et abandonnée si le joueur reste inaccessible. L’annonce co
 
 | Statistique | Valeur de base |
 | --- | --- |
-| Points de vie | 52 000 PV |
-| Dégâts | 2 500 dégâts |
+| Points de vie | 5 200 PV |
+| Dégâts | 250 dégâts |
 | Vitesse | 240 px/s |
 | Intervalle d’attaque | 1,2 s |
 | Contact du corps | Dégâts immédiats ; délai entre contacts 1 s |

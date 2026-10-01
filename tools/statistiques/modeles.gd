@@ -74,7 +74,7 @@ static func mesurer(configuration: Dictionary) -> Dictionary:
 			frontaux += facteur
 	var dps_frontal := degats_tir * frontaux * tir.cadence * tir.salves
 	var dps_periodique := ReglagesAugments.debit_periodique(stats.degats * Mods.facteur_attaque_run(mods),
-		inventaire.count("encrage_vif"), "sceau_ruine" in inventaire) * final
+		inventaire.count("trait_alchimique"), "meteorite_alchimique" in inventaire) * final
 	var dps_heros := dps_frontal + dps_periodique
 	var dps_familier := 0.0
 	if CatalogueFamiliers.contient(familier):

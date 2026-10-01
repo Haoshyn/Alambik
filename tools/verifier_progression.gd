@@ -231,7 +231,7 @@ func _verifier_progression_sources() -> void:
 			var precedent_niveau := Personnage.gain_point(id, 0, maxi(1, niveau - 1))
 			for champ: String in ["attaque_base", "pv_base", "defense_base"]:
 				var valeur := float(gain[champ])
-				_verifier(is_equal_approx(valeur, float(roundi(valeur))), "Un point brut ne donne aucune fraction : " + id)
+				_verifier(is_equal_approx(valeur * 10.0, roundf(valeur * 10.0)), "Un point brut respecte l'unite reduite : " + id)
 				_verifier(is_equal_approx(valeur, float(tardif[champ])) and valeur >= float(precedent_niveau[champ]),
 					"Le gain par point ne diminue ni avec les points ni avec le niveau : " + id)
 	for niveau in range(1, Personnage.NIVEAU_MAX + 1):

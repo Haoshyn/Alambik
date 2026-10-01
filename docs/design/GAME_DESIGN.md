@@ -222,8 +222,10 @@ valeurs brutes. Les rangs et nœuds de maîtrises composent leurs facteurs ; les
 ensuite sur les tirs et statistiques de run ; les Cœurs sont le dernier facteur
 de dégâts. Ils font partie de la progression permanente.
 
-Les unités de combat sont agrandies ensemble : attaque, PV des deux camps et
-référence de Défense. Les nombres augmentent ensuite réellement avec les
+Les unités de combat sont réduites ensemble : attaque, PV des deux camps et
+référence de Défense, avec les gains bruts d'attributs et les arrondis de forge.
+Les courbes de progression et les pourcentages sont conservés.
+Les nombres augmentent ensuite réellement avec les
 points, les rangs et les facteurs composés. Les impacts du début au compte
 complet se lisent dans la liste mathématique, séparément du DPS et des critiques.
 Les bijoux et le familier doivent
@@ -265,20 +267,23 @@ La migration conserve le reste de la progression.
 
 ## Augments
 
-Les vingt-sept augments proposent treize rares, neuf épiques et cinq
-légendaires. Les rares associent des bonus directs et des mécaniques
-originales : Encrage vif lance un trait périodique, Sceau de ruine fait
-tomber une météorite de zone et les satellites alchimiques gravitent autour
+Les vingt-neuf augments proposent quinze rares, neuf épiques et cinq
+légendaires. Les rares de statistiques donnent des bonus directs courts.
+Encrage vif et Sceau de ruine gardent cette responsabilité ; les effets
+automatiques sont proposés séparément : Trait alchimique lance un trait
+périodique, Météorite alchimique fait tomber une orbe de zone et les satellites gravitent autour
 du héros et frappent au contact, même en mouvement. Le délai par ennemi est
 partagé entre les cercles ; les murs protègent et les dégâts ne se multiplient
 pas avec critiques, salves, rebonds ou diagonales. Les listes de DPS à distance
 excluent ce contact conditionnel ; les effets périodiques y sont mesurés
 sur une cible immobile touchée à chaque déclenchement. Ils fonctionnent
 pendant le déplacement et ont leurs propres délais, sans critiques ni
-multiplication par les salves ou rebonds. Il n'y a ni sort actif ni ultime.
+multiplication par les salves ou rebonds. Les effets rares autonomes, y compris
+le guidage de Traque, n'ajoutent pas de statistiques. Il n'y a ni sort actif ni ultime.
 Les rares doivent être utiles dans une même fourchette de puissance,
 avec des conditions et une originalité qui distinguent les choix. Les
-épiques et légendaires donnent des gains marqués et mesurés. Les combinaisons
+épiques sont légèrement renforcés et les légendaires peuvent donner une
+puissance exceptionnelle assumée. Les combinaisons
 favorables gardent un avantage sans rendre obligatoire un tirage offensif précis.
 Aucun augment ordinaire ne retire d'attaque, de cadence, de PV
 ou de mobilité en échange d'un autre bonus.
@@ -286,8 +291,9 @@ ou de mobilité en échange d'un autre bonus.
 Salve est un choix rare unique. Tir double ajoute des projectiles parallèles
 et peut être acquis deux fois. Les projectiles supplémentaires ont un coût
 en puissance après le coefficient de l'arme. Battement triple donne trois
-salves atténuées et ne se cumule pas avec Salve : les deux choix sont exclusifs.
-Un ancien inventaire possédant les deux conserve seulement la variante triple.
+salves avec une faible perte de puissance lorsqu'il est seul. Il se cumule
+avec Salve en quatre salves, dans les deux ordres ; leurs gains de débit
+s'additionnent.
 Tir double garde un gain utile à la seconde acquisition.
 
 Les bonus directs d'attaque et de projectile de run s'additionnent. Les gains de
@@ -309,8 +315,9 @@ pas lui donner une offensive gratuite. Une légendaire défensive laisse un
 avantage de survie et doit permettre de finir avec d'autres choix offensifs cohérents.
 Soins, boucliers et seconde vie sont présentés séparément
 de la résistance permanente. Le déblocage progressif des augments est reporté.
-Les choix de soins, de mobilité et les mécaniques conditionnelles gardent
-un socle de combat mesurable. Ricochet conserve sa limite et sa perte par
+Les choix de soins et de mobilité donnent leurs statistiques directes ;
+les effets autonomes se mesurent selon leurs conditions de déclenchement.
+Ricochet conserve sa limite et sa perte par
 rebond avec Perforation. Les diagonales couvrent les côtés avec une puissance
 atténuée, sans remplacer une amélioration offensive directe sur une seule cible.
 

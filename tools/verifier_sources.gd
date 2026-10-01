@@ -22,6 +22,8 @@ func _verifier() -> void:
 	var fin := Modeles.mesurer(profil)
 	var nu := Modeles.mesurer({"arme": "", "familier": ""})
 	_exiger(is_equal_approx(float(nu["tir_normal"]), Reglages.TIR_DEGATS), "Le heros nu utilise l'unite de combat commune")
+	_exiger(is_equal_approx(float(nu["tir_normal"]), 100.0), "Le heros sans equipement commence a 100 degats")
+	_exiger(is_equal_approx(CatalogueProjectiles.attaque_base("standard", 0), 40.0), "L'arme initiale apporte 40 ATK")
 	_exiger(float(fin["tir_normal"]) >= float(nu["tir_normal"]) * 100.0,
 		"Le compte complet doit multiplier son impact initial au moins par cent")
 	for retrait: Dictionary in Valeur.equipement(profil):
