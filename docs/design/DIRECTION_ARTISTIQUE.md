@@ -39,6 +39,24 @@ elles conservent les idées historiques sans définir le rendu actuel.
   utiles, retirent l'oscillation de repos et raccourcissent la disparition.
 - Les silhouettes, impacts et télégraphes doivent rester distincts. Les effets
   décoratifs ne masquent pas les dangers et ne rendent pas les hitbox ambiguës.
+- Les cinq familiers suivent une direction de petites créatures fantasy
+  élégantes, à l'anatomie soignée, choisie par le propriétaire le 7 octobre.
+  L'homoncule est un renard violet au museau fin et à la queue d'encre ; la
+  salamandre a un corps reptilien allongé, quatre pattes pliées et une crête
+  ambrée ; l'ondine associe une anatomie de loutre à des branchies et une queue
+  nageoire ; le sylphe a un bec, de grandes ailes à rémiges et une queue
+  divisée ; le golem est un petit gardien de pierre à épaules et avant-bras
+  marqués. Crâne, nuque, thorax et bassin sont sculptés d'un seul tenant.
+  Les yeux restent petits, intégrés au visage, avec des arcades et des reflets
+  discrets. La silhouette porte l'identité ; les accessoires restent limités.
+  Leurs couleurs peintes passent du dos coloré aux plans ventraux ivoire.
+  Ces anatomies animales les distinguent des objets vivants du bestiaire.
+  Les GLB sont dans `assets/3d/familiers/`, les sources Blender et la référence
+  originale dans `assets/3d/sources/familiers/`, les générateurs dans
+  `tools/blender/familiers_*.py`. `modeles_familiers_3d.gd` charge les sculptures
+  et leurs pivots anatomiques. La peinture par sommet tient sur une matière
+  par pivot, sans lumière ni transparence supplémentaires. Les gestes suivent
+  le déplacement et le tir réel ; le repos se fige en effets réduits.
 - Les effets des rares portent un émail turquoise et un cœur ivoire : cercles
   orbitaux, trait périodique et météorite facettée. L'anneau de chute annonce
   sa zone réelle ; le mode réduit conserve les positions et les gestes utiles.
@@ -52,7 +70,11 @@ elles conservent les idées historiques sans définir le rendu actuel.
   rendus 2D et 3D. Le volume et sa lueur suivent les dimensions de collision ;
   les grosses boules, les traits et les lames revenantes se distinguent par
   leur contour, leur mouvement et leur rythme. Teinte et petits sceaux gardent
-  la variante du monde lisible. Les tirs des familiers portent des accents froids.
+  la variante du monde lisible. Les tirs des familiers ont leurs propres
+  contours propres, avec des volumes magiques effilés ivoire et azur, des
+  nervures lumineuses et des sillages courbes. Leur construction 3D appartient à
+  `scripts/presentation/formes_projectiles_familiers.gd`. La signature alliée
+  reste opaque et reconnaissable en effets réduits ; le halo discret se retire.
 - Les traits ennemis fins ont un volume épaissi, une teinte saturée et un bord
   sombre opaque. Le reflet reste localisé ; leur lisibilité ne dépend pas du
   halo ni des effets complets. Le sillage des tirs rapides est court et effilé

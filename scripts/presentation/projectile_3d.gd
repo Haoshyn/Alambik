@@ -38,7 +38,7 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 	var cle := _couleur.to_html()+str(hostile)+tir.arme
 	if not _matieres.has(cle):
 		var mat: ShaderMaterial
-		if not hostile:
+		if not hostile and not _familier:
 			mat = ShaderMaterial.new()
 			mat.shader = preload("res://shaders/perle_magique.gdshader")
 			mat.set_shader_parameter("teinte",_couleur)
@@ -53,8 +53,11 @@ func preparer(cible: Node2D, _scene: PackedScene, type: String) -> void:
 	modele = Node3D.new()
 	add_child(modele)
 	if hostile or _familier:
-		_tourbillon = preload("res://scripts/presentation/formes_projectiles_hostiles.gd").construire(tir.silhouette, _couleur,
-			tir.longueur / (tir.rayon * 2.0), tir.variante_visuelle if hostile else -1)
+		if _familier and not hostile:
+			_tourbillon = preload("res://scripts/presentation/formes_projectiles_familiers.gd").construire(tir.silhouette, _couleur)
+		else:
+			_tourbillon = preload("res://scripts/presentation/formes_projectiles_hostiles.gd").construire(tir.silhouette, _couleur,
+				tir.longueur / (tir.rayon * 2.0), tir.variante_visuelle)
 		_tourbillon.scale = Vector3(tir.rayon, tir.rayon, tir.longueur * .5) * Pont3D.ECHELLE
 		modele.add_child(_tourbillon)
 		_coeur_hostile = _tourbillon.get_node("Coeur")
@@ -108,11 +111,14 @@ func mettre_a_jour(_delta: float) -> void:
 	if _tourbillon != null:
 		_temps_visuel += _delta
 		_halo_hostile.visible = not ReglagesJoueur.effets_reduits
-		var pulsation := 1.0 if ReglagesJoueur.effets_reduits else 1.0 + sin(_temps_visuel * 11.0) * .055
+		var pulsation := 1.0 if ReglagesJoueur.effets_reduits else 1.0 + sin(_temps_visuel * 11.0) * (.025 if _familier else .055)
 		_coeur_hostile.scale = Vector3.ONE * pulsation
-		if str(logique.tir.silhouette) in preload("res://data/presentation/formes_tirs.gd").BOULES:
+		if _familier:
+			_coeur_hostile.rotation.y = 0.0
+			_rotation_tourbillon = 0.0
+		elif str(logique.tir.silhouette) in preload("res://data/presentation/formes_tirs.gd").BOULES:
 			_coeur_hostile.rotation.y = 0.0 if ReglagesJoueur.effets_reduits else -_temps_visuel * 1.8
-		if not ReglagesJoueur.effets_reduits and logique.tir.longueur <= logique.tir.rayon * 2.0:
+		if not _familier and not ReglagesJoueur.effets_reduits and logique.tir.longueur <= logique.tir.rayon * 2.0:
 			_rotation_tourbillon += _delta * float(RenduProjectile.profil(str(logique.tir.silhouette))["rotation"])
 		# L'anamorphose s'applique apres l'orientation : l'encombrement suit la 2D.
 		modele.rotation.y = 0.0

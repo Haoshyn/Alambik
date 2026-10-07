@@ -441,6 +441,8 @@ func _rendus() -> void:
 				for couleur: Color in couleurs:
 					if couleur.is_equal_approx(RENDU.CONTOUR_HOSTILE): bord_sombre = true
 			_exiger(bord_sombre, "Contour opaque lisible sans halo : " + id)
+		else:
+			_verifier_talisman(proxy, id)
 		for reduit in [false, true]:
 			root.get_node("ReglagesJoueur").effets_reduits = reduit
 			proxy.mettre_a_jour(.1)
@@ -449,5 +451,62 @@ func _rendus() -> void:
 				var sommets: PackedVector3Array = proxy._ruban.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 				for point: Vector3 in sommets:
 					_exiger(absf(point.x) <= RENDU.TRAINEE_HOSTILE_LONGUEUR_MAX * Pont3D.ECHELLE + .001, "Trainee rapide bornee, sans faux rayon dangereux : " + id)
+			else:
+				_exiger(proxy._halo_hostile.visible == not reduit, "Halo allie masque en effets reduits : " + id)
+				if reduit:
+					_exiger(proxy._coeur_hostile.scale.is_equal_approx(Vector3.ONE) and is_zero_approx(proxy._rotation_tourbillon), "Talisman allie fige en effets reduits : " + id)
+				_verifier_emprise_talisman(proxy, projectile, id)
 		_exiger(proxy.modele.get_child_count() > 0, "Volume absent : " + id)
 		await _vider()
+
+func _verifier_talisman(proxy: Node3D, id: String) -> void:
+	var formes := preload("res://scripts/presentation/formes_projectiles_familiers.gd")
+	var couleur: Color = RENDU.profil(id)["couleur"]
+	var copie := formes.construire(id, couleur)
+	var triangles := 0
+	var opaque := true
+	var sombre := false
+	var ivoire := false
+	for piece: MeshInstance3D in proxy._tourbillon.get_children():
+		_exiger(piece.mesh == (copie.get_node(NodePath(piece.name)) as MeshInstance3D).mesh, "Maillage allie non partage : " + id)
+		var tableaux := piece.mesh.surface_get_arrays(0)
+		var sommets: PackedVector3Array = tableaux[Mesh.ARRAY_VERTEX]
+		triangles += int(sommets.size() / 3)
+		if piece.name == "Halo": continue
+		var matiere := piece.mesh.surface_get_material(0) as StandardMaterial3D
+		opaque = opaque and matiere != null and matiere.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED
+		var couleurs: PackedColorArray = tableaux[Mesh.ARRAY_COLOR]
+		for teinte in couleurs:
+			opaque = opaque and is_equal_approx(teinte.a, 1.0)
+			sombre = sombre or teinte.is_equal_approx(RENDU.CONTOUR_HOSTILE)
+			ivoire = ivoire or teinte.is_equal_approx(RENDU.FAMILIER_IVOIRE)
+	_exiger(opaque and ivoire and not sombre, "Talisman allie opaque ivoire sans bord hostile : " + id)
+	_exiger(triangles <= 1200 and proxy._tourbillon.get_child_count() == 3, "Budget du talisman allie depasse : " + id)
+	var contour := FORMES.contour(id)
+	for ennemi: String in ProjectilesEnnemis.PROFILS:
+		_exiger(contour != FORMES.contour(ennemi), "Contour allie partage avec un monstre : " + id)
+	copie.free()
+
+func _verifier_emprise_talisman(proxy: Node3D, projectile: Node2D, id: String) -> void:
+	# Verifier la projection reelle : le relief ne doit pas deborder de la capsule logique.
+	var tir: Tir = projectile.tir
+	var inclinaison := deg_to_rad(Pont3D.INCLINAISON)
+	var emprise_valide := true
+	var distance_max := 0.0
+	for angle in [0.0, PI * .5, PI, PI * 1.5]:
+		var direction := Vector2.from_angle(angle)
+		projectile.direction = direction
+		projectile._trainee.assign([projectile.position, projectile.position - direction * 200.0])
+		proxy.mettre_a_jour(0.0)
+		var bout := direction * maxf(0.0, tir.longueur * .5 - tir.rayon)
+		for piece: MeshInstance3D in proxy._tourbillon.get_children():
+			if piece.name == "Halo": continue
+			var sommets: PackedVector3Array = piece.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+			for sommet in sommets:
+				var point := piece.global_transform * sommet
+				var projete := Vector2(point.x, point.z * sin(inclinaison) - point.y * cos(inclinaison)) / Pont3D.ECHELLE - projectile.position
+				var proche := Geometry2D.get_closest_point_to_segment(projete, -bout, bout)
+				var distance := projete.distance_to(proche)
+				distance_max = maxf(distance_max, distance)
+				emprise_valide = emprise_valide and distance <= tir.rayon + .01
+	_exiger(emprise_valide, "Le relief du talisman depasse sa capsule : %s (%.3f / %.3f)" % [id, distance_max, tir.rayon])

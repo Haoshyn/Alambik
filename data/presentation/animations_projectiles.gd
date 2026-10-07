@@ -32,11 +32,11 @@ const PROFILS := {
 	"gardien_runes": {"couleur": Color("eda267"), "rotation": .5, "trainee": .16},
 	"devoreur_neant": {"couleur": Color("ed68c1"), "rotation": -.8, "trainee": .18},
 	"grand_alambic": {"couleur": Color("ffc460"), "rotation": .6, "trainee": .19},
-	"homoncule_encre": {"couleur": Color("66dfd3"), "rotation": 0.0, "trainee": .06},
-	"salamandre": {"couleur": Color("a1f2a5"), "rotation": 1.0, "trainee": .08},
-	"ondine": {"couleur": Color("92e9ff"), "rotation": 0.0, "trainee": .05},
-	"sylphe": {"couleur": Color("d4edff"), "rotation": 0.0, "trainee": .04},
-	"golem": {"couleur": Color("78dcca"), "rotation": .5, "trainee": .09},
+	"homoncule_encre": {"couleur": Color("aacfe9"), "rotation": 0.0, "trainee": .06},
+	"salamandre": {"couleur": Color("bdded4"), "rotation": 0.0, "trainee": .08},
+	"ondine": {"couleur": Color("94d5e7"), "rotation": 0.0, "trainee": .05},
+	"sylphe": {"couleur": Color("bddef0"), "rotation": 0.0, "trainee": .04},
+	"golem": {"couleur": Color("aacfcf"), "rotation": 0.0, "trainee": .09},
 	"trait": {"couleur": Color("ff614c"), "rotation": 0.0, "trainee": 0.075},
 	"aiguille": {"couleur": Color("ff536b"), "rotation": 0.0, "trainee": 0.070},
 	"eclat": {"couleur": Color("ff982f"), "rotation": 2.4, "trainee": 0.095},
@@ -44,6 +44,8 @@ const PROFILS := {
 	"vrille": {"couleur": Color("ff6b47"), "rotation": 6.0, "trainee": 0.095},
 }
 const REFLET := Color("fff0b9")
+const FAMILIER_IVOIRE := Color("fff4dc")
+const FAMILIER_AZUR := Color("79bfd4")
 const POINTS_TRAINEE := 8
 const POINTS_TRAINEE_REDUITS := 3
 const CONTOUR_HOSTILE := Color("24112f")

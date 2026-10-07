@@ -379,7 +379,7 @@ Déplacement : 0,75 s à 245 px/s ; visée immobile : 0,3 s, puis repos jusqu’
 
 **Provenance :** niveau de campagne 1.
 
-Goutte spectrale · héros : chance critique +5 %
+Goutte nacrée · héros : chance critique +5 %
 
 Un tir toutes les **2 s**. Son attaque propre reçoit une fois les bonus permanents d’attaque du héros et le facteur d’attaque des augments, sans ses critiques ni ses salves.
 
@@ -415,7 +415,7 @@ Projectile : 1 312,5 px/s ; rayon 10 px ; longueur 26 px.
 
 **Provenance :** niveau de campagne 8.
 
-Orbe cerclé · héros : attaque +8 %
+Rosette solaire · héros : attaque +8 %
 
 Un tir toutes les **2,1 s**. Son attaque propre reçoit une fois les bonus permanents d’attaque du héros et le facteur d’attaque des augments, sans ses critiques ni ses salves.
 
@@ -451,7 +451,7 @@ Projectile : 1 150 px/s ; rayon 16 px ; longueur 32 px.
 
 **Provenance :** niveau de campagne 15.
 
-Larme de givre · héros : cadence +8 %
+Navette de givre · héros : cadence +8 %
 
 Un tir toutes les **1,9 s**. Son attaque propre reçoit une fois les bonus permanents d’attaque du héros et le facteur d’attaque des augments, sans ses critiques ni ses salves.
 
@@ -487,7 +487,7 @@ Projectile : 1 350 px/s ; rayon 9 px ; longueur 36 px.
 
 **Provenance :** niveau de campagne 22.
 
-Éclair fin · héros : vitesse +8 %, attaque +5 %
+Plume de vent · héros : vitesse +8 %, attaque +5 %
 
 Un tir toutes les **1,8 s**. Son attaque propre reçoit une fois les bonus permanents d’attaque du héros et le facteur d’attaque des augments, sans ses critiques ni ses salves.
 
@@ -523,7 +523,7 @@ Projectile : 1 562,5 px/s ; rayon 6 px ; longueur 40 px.
 
 **Provenance :** niveau de campagne 29.
 
-Galet de forge · héros : Défense brute +40, attaque +5 %
+Sceau quadrilobe · héros : Défense brute +40, attaque +5 %
 
 Un tir toutes les **1,8 s**. Son attaque propre reçoit une fois les bonus permanents d’attaque du héros et le facteur d’attaque des augments, sans ses critiques ni ses salves.
 

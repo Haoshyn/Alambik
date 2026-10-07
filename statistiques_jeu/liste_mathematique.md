@@ -69,7 +69,7 @@ Le matériel ci-dessous maximise le DPS frontal continu total parmi **6250 combi
 | Emplacement | Modèle | Forge | Statistiques et effet |
 | --- | --- | --- | --- |
 | Arme | Alambic souverain | 20 | +500 ATK brute. Tir 115 %, cadence +10 %. |
-| Familier | Ondine de givre | 20 | 647 attaque propre, un tir toutes les 1,9 s. Larme de givre · héros : cadence +8 % |
+| Familier | Ondine de givre | 20 | 647 attaque propre, un tir toutes les 1,9 s. Navette de givre · héros : cadence +8 % |
 | Anneau | Anneau · Air | 20 | Attaque brute +82 · PV bruts +693 · Vitesse d’attaque +5 %<br>Chaque attaque n° 5 inflige 50 % de dégâts supplémentaires. |
 | Bracelet | Bracelet · Feu | 20 | Attaque brute +86 · Défense brute +185 · Attaque +5 %<br>La première blessure mortelle de l’aventure laisse le héros à 1 PV. |
 | Collier | Collier · Feu | 20 | Attaque brute +86 · Attaque +28,12 % · Dégâts critiques +10 %<br>Attaque +10 % tant que le collier est équipé. |

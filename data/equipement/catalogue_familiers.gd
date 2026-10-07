@@ -6,19 +6,19 @@ extends RefCounted
 static var TYPES := _avec_descriptions({
 	"homoncule_encre": {"nom": "Homoncule d’encre", "niveau": 1, "attaque": 6.0,
 		"intervalle": 2.0, "passif": {"critique": 0.05},
-		"forme": "Goutte spectrale"},
+		"forme": "Goutte nacrée"},
 	"salamandre": {"nom": "Salamandre de braise", "niveau": 8, "attaque": 8.0,
 		"intervalle": 2.1, "passif": {"attaque_mult": 0.08},
-		"forme": "Orbe cerclé"},
+		"forme": "Rosette solaire"},
 	"ondine": {"nom": "Ondine de givre", "niveau": 15, "attaque": 7.0,
 		"intervalle": 1.9, "passif": {"cadence": 0.08},
-		"forme": "Larme de givre"},
+		"forme": "Navette de givre"},
 	"sylphe": {"nom": "Sylphe des orages", "niveau": 22, "attaque": 6.0,
 		"intervalle": 1.8, "passif": {"vitesse": 0.08, "attaque_mult": 0.05},
-		"forme": "Éclair fin"},
+		"forme": "Plume de vent"},
 	"golem": {"nom": "Golem de forge", "niveau": 29, "attaque": 10.0,
 		"intervalle": 1.8, "passif": {"defense_base": 4.0, "attaque_mult": 0.05},
-		"forme": "Galet de forge"},
+		"forme": "Sceau quadrilobe"},
 })
 
 static func _avec_descriptions(types: Dictionary) -> Dictionary:

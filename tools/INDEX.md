@@ -15,6 +15,8 @@
 | Utilité des rares, puissance légendaire, satellites, effets périodiques, paiement de forge et fiches en portrait | [verifier_reequilibrage.gd](verifier_reequilibrage.gd) |
 | Dix niveaux, écrans de choix et paiement des cœurs inutilisés | [verifier_niveaux_augments.gd](verifier_niveaux_augments.gd) |
 | Projectiles, collisions, familiers autonomes et contact de tous les monstres et boss | [verifier_projectiles.gd](verifier_projectiles.gd) |
+| Cinq modèles de familiers, changement d'identité, gestes, effets réduits et budget 3D | [verifier_familiers.gd](verifier_familiers.gd) ; `-- --exporter=DOSSIER`, puis [rendu Blender](blender/apercu_bestiaire.py) avec `familiers` ou `familiers_poses` |
+| Sculptures Blender des cinq compagnons | [familiers_sculptes.py](blender/familiers_sculptes.py) ; modules `familiers_quadrupedes.py` et `familiers_aerien_mineral.py`, sources `../assets/3d/sources/familiers/` |
 | Modeles ennemis, articulations, gel, disparition et budgets 3D | [verifier_bestiaire.gd](verifier_bestiaire.gd) ; planches via [blender/apercu_bestiaire.py](blender/apercu_bestiaire.py) |
 | Apercu anime des poses reelles du bestiaire | [apercu_mouvements_bestiaire.gd](apercu_mouvements_bestiaire.gd), puis [rendu Blender](blender/apercu_mouvements_bestiaire.py) |
 | Nombres de dégâts réels, regroupement des salves et effets réduits | [verifier_degats_affiches.gd](verifier_degats_affiches.gd) |

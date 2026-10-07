@@ -166,6 +166,16 @@ viennent du catalogue et figurent dans les statistiques générées.
 - Le familier patrouille dans la salle et alterne déplacement, visée et tir
   depuis sa propre position. Ses tirs traversent les murs, avec une forme
   propre à chaque familier et une durée de vie bornée par la portée.
+  Chaque identité équipée a une sculpture 3D originale : renard d'encre,
+  salamandre élancée, ondine aquatique, sylphe aux ailes plumées et gardien de
+  pierre. Corps, nuques et museaux forment des volumes continus ; des regards
+  discrets et des silhouettes animales les distinguent des objets du bestiaire.
+  Les sources Blender et la référence sont conservées dans
+  `assets/3d/sources/familiers/`. Leurs projectiles ont des volumes magiques
+  ivoire et azur, avec des contours et un rendu alliés propres.
+  Membres et recul suivent déplacement et tir ; le repos se fige en effets
+  réduits. La peinture par sommet et le regroupement des volumes fixes gardent
+  une seule matière par pivot.
 - Les dégâts infligés sont affichés par de petits nombres animés près des
   monstres et boss, avec regroupement des impacts proches et de la braise.
   Les effets réduits conservent une valeur sobre par cible. Les contrôles

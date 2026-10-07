@@ -71,6 +71,7 @@ try {
     Executer-Controle -Nom 'passifs' -ArgumentsGodot @('res://tools/verifier_passifs.tscn')
     Executer-Controle -Nom 'scenes' -ArgumentsGodot @('res://tools/verifier_scenes.tscn')
     Executer-Controle -Nom 'heros_aster' -ArgumentsGodot @('res://tools/verifier_heros_aster.tscn')
+    Executer-Controle -Nom 'familiers' -ArgumentsGodot @('--script', 'res://tools/verifier_familiers.gd')
     Write-Output "OK : controles termines. Journaux : $dossierControle"
 }
 finally {
