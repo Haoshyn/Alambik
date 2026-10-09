@@ -7,14 +7,18 @@ const SPECIALISATION_DEFAUT := "sorcier"
 
 # Les attributs construisent la base que les maitrises et les passifs
 # multiplient ensuite ; chaque point reste utile quel que soit l'equipement.
+# Chaque point donne des gains entiers : les paliers de Defense et de cadence
+# gardent la somme des anciens gains fractionnaires, et l'Agilite equilibre
+# chance et puissance ; le dernier palier de Force compense la puissance
+# critique cedee par l'Agilite sur le compte de reference.
 const NIVEAUX_PAR_PALIER := 5
-const FORCE_ATTAQUE_PAR_POINT := [0.40, 0.50, 0.60, 0.80, 1.00, 1.20]
+const FORCE_ATTAQUE_PAR_POINT := [0.40, 0.50, 0.60, 0.80, 1.00, 1.30]
 const VITALITE_PV_PAR_POINT := [1.00, 1.20, 1.40, 1.60, 1.80, 2.00]
-const VITALITE_DEFENSE_PAR_POINT := [0.10, 0.12, 0.14, 0.16, 0.18, 0.20]
+const VITALITE_DEFENSE_PAR_POINT := [0.10, 0.10, 0.10, 0.20, 0.20, 0.20]
 const INTELLIGENCE_ATTAQUE_PAR_POINT := [0.10, 0.10, 0.20, 0.20, 0.30, 0.40]
-const INTELLIGENCE_CADENCE_PAR_POINT := [0.005, 0.005, 0.01, 0.01, 0.015, 0.02]
-const AGILITE_CRITIQUE_PAR_POINT := 0.005
-const AGILITE_DEGATS_CRITIQUES_PAR_POINT := 0.02
+const INTELLIGENCE_CADENCE_PAR_POINT := [0.01, 0.01, 0.01, 0.01, 0.01, 0.02]
+const AGILITE_CRITIQUE_PAR_POINT := 0.01
+const AGILITE_DEGATS_CRITIQUES_PAR_POINT := 0.01
 const ATTRIBUTS := {
 	"force": {"nom": "Force", "attaque_base": FORCE_ATTAQUE_PAR_POINT,
 		"description": "Attaque brute ; gains entiers croissants avec le niveau."},
@@ -101,16 +105,19 @@ static func description_attribut(id: String, points: int, niveau: int) -> String
 
 static func _texte_bonus(valeurs: Dictionary) -> String:
 	var libelles := {"attaque_base": ["ATK brute", 1.0], "pv_base": ["PV", 1.0],
-		"defense_base": ["Défense", 1.0], "critique": ["pts critique", 100.0],
-		"degats_critiques": ["pts dégâts critiques", 100.0], "cadence": ["% cadence", 100.0],
+		"defense_base": ["Défense", 1.0], "critique": ["critique", 100.0],
+		"degats_critiques": ["dégâts critiques", 100.0], "cadence": ["% cadence", 100.0],
 		"butin": ["% butin", 100.0]}
 	var morceaux: Array[String] = []
 	for champ: String in libelles:
 		var valeur := float(valeurs.get(champ, 0.0))
 		if is_zero_approx(valeur): continue
 		var regle: Array = libelles[champ]
-		var nombre := String.num(valeur * float(regle[1]), 3).trim_suffix(".0").replace(".", ",")
-		morceaux.append("+%s %s" % [nombre, str(regle[0])])
+		var nombre := roundi(valeur * float(regle[1]))
+		var unite := str(regle[0])
+		if champ in ["critique", "degats_critiques"]:
+			unite = ("pt " if nombre <= 1 else "pts ") + unite
+		morceaux.append("+%d %s" % [nombre, unite])
 	return "aucun bonus" if morceaux.is_empty() else " · ".join(morceaux)
 
 static func specialisation_valide(id: String) -> String:

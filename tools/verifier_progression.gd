@@ -239,8 +239,9 @@ func _verifier_progression_sources() -> void:
 		var double := Passifs.bonus_stats({"vigueur": 2}, niveau)
 		_verifier(float(double["attaque_mult"]) > 2.0 * float(simple["attaque_mult"]),
 			"Un doublon renforce la puissance deja acquise : %d" % niveau)
-		_verifier(is_equal_approx((1.0 + float(double["attaque_mult"])) / (1.0 + float(simple["attaque_mult"])),
-			1.0 + float(simple["attaque_mult"])), "Le doublon conserve le gain relatif du passif : %d" % niveau)
+		var compose := pow(1.0 + float(simple["attaque_mult"]), 2.0) - 1.0
+		_verifier(absf(float(double["attaque_mult"]) - compose) <= 0.0076 and is_equal_approx(float(double["attaque_mult"]) * 100.0,
+			roundf(float(double["attaque_mult"]) * 100.0)), "Le doublon garde le cumul compose en points entiers : %d" % niveau)
 		_verifier(Passifs.resume_rang("vigueur", 2, niveau) == "+%s %% attaque" % Passifs._pourcentage(float(double["attaque_mult"])),
 			"La fiche du passif affiche le bonus réellement utilise : %d" % niveau)
 	for id: String in ["force", "puissance", "trajectoire", "grand_oeuvre"]:
@@ -248,7 +249,13 @@ func _verifier_progression_sources() -> void:
 		var gain_initial := ArbreCompetences.multiplicateur_attaque({id: 1}) - 1.0
 		var avant_dernier := ArbreCompetences.multiplicateur_attaque({id: ArbreCompetences.rangs(id) - 1})
 		var maximum := ArbreCompetences.multiplicateur_attaque({id: ArbreCompetences.rangs(id)})
-		_verifier(is_equal_approx(maximum / avant_dernier, 1.0 + taux), "Le dernier rang conserve son gain relatif : " + id)
+		_verifier(is_equal_approx(maximum - 1.0, roundf((pow(1.0 + taux, ArbreCompetences.rangs(id)) - 1.0) * 100.0) / 100.0),
+			"Le dernier rang atteint le cumul compose arrondi : " + id)
+		for rang in range(1, ArbreCompetences.rangs(id) + 1):
+			var gain := ArbreCompetences.multiplicateur_attaque({id: rang}) - ArbreCompetences.multiplicateur_attaque({id: rang - 1})
+			var gain_precedent := ArbreCompetences.multiplicateur_attaque({id: rang - 1}) - ArbreCompetences.multiplicateur_attaque({id: maxi(0, rang - 2)})
+			_verifier(is_equal_approx(gain * 100.0, roundf(gain * 100.0)) and (rang == 1 or gain >= gain_precedent - 0.0001),
+				"Chaque rang ajoute des points entiers sans diminuer : %s %d" % [id, rang])
 		_verifier(maximum - avant_dernier > gain_initial, "Le dernier rang donne davantage d'attaque : " + id)
 	_verifier(ArbreCompetences.ATTAQUE_PAR_RANG_FINALE > ArbreCompetences.ATTAQUE_PAR_RANG_INITIALE,
 		"La derniere maitrise renforce davantage que la premiere")
@@ -260,8 +267,10 @@ func _verifier_progression_sources() -> void:
 				"Les gains de forge sont entiers et croissants : " + id)
 			gain_precedent = gain
 	for nombre in range(1, Epreuves.nombre() + 1):
-		_verifier(is_equal_approx(Reglages.multiplicateur_coeurs(nombre) / Reglages.multiplicateur_coeurs(nombre - 1),
-			1.0 + Reglages.COEUR_MANA_BONUS_FINAL), "Chaque Coeur conserve son gain relatif")
+		_verifier(absf(Reglages.multiplicateur_coeurs(nombre) / Reglages.multiplicateur_coeurs(nombre - 1)
+			- 1.0 - Reglages.COEUR_MANA_BONUS_FINAL) < 0.01, "Chaque Coeur conserve son gain relatif")
+		_verifier(is_equal_approx(Reglages.multiplicateur_coeurs(nombre) * 100.0, roundf(Reglages.multiplicateur_coeurs(nombre) * 100.0)),
+			"Le bonus des Coeurs est un pourcentage entier")
 
 func _verifier_familiers() -> void:
 	var attaque_depart := Reglages.TIR_DEGATS + CatalogueProjectiles.attaque_base("standard", 0)

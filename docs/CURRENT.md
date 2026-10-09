@@ -1,9 +1,50 @@
-# État courant — 1 octobre 2026
+# État courant — 9 octobre 2026
 
 Alambik est un roguelite de tir portrait Android sous Godot 4.7.1 : simulation
 2D, présentation 3D. Le héros Aster V7 aux proportions manga, la clairière
-animée, les cinq mondes, les annonces de danger et le kit d'interface
-Émail arcanique restent actifs.
+animée, les cinq mondes et les annonces de danger restent actifs. L'interface
+utilise le kit Émail serti de la refonte du 9 octobre 2026.
+
+## Refonte graphique et sonore du 9 octobre 2026
+
+À la demande du propriétaire (carte blanche, gel des menus levé pour ce
+travail), toutes les surfaces passent par `StyleBoxJeu` : émail bombé, monture
+dorée, épaisseur, reflet. Les textes utilisent Nunito très grasse avec contour ;
+la graisse des polices variables est désormais réellement appliquée (la clé
+texte `"wght"` était ignorée et tout le jeu s'affichait en graisse fine).
+HUD, cartes d'augments façon cartes à collectionner (rareté, lueur, valeurs en
+or, distribution animée), pause, fin de partie (« VICTOIRE ! », fanfare),
+navigation à onglet soulevé, accueil, Héros, Équipement, Maîtrises, Passifs et
+Paramètres suivent ce kit. Les combats gagnent des nombres de dégâts épais,
+des critiques dorés distincts, un éclair sur l'ennemi touché, des ombres de
+contact, des explosions plus fournies, une secousse de caméra et des
+micro-arrêts sur les coups marquants, une vignette, un rendu filmique contrasté
+avec halo, et des bandeaux d'annonce (boss, salle nettoyée). Les familiers, qui
+s'affichaient en silhouette blanche faute de matière lisant leur peinture par
+sommet, retrouvent leurs couleurs. Vingt-deux bruitages synthétisés (clic,
+cartes et choix par rareté, critique, explosion, gamme d'XP, niveau, salle,
+achat, victoire, défaite…) sont produits en arrière-plan au démarrage.
+Les contrôles de scènes, passifs, héros, familiers, bestiaire, projectiles et
+dégâts affichés passent ; le coût du halo, des éclairs et de la synthèse sur
+téléphone reste à mesurer sur appareil (`Visuels3D.LUEUR_ANDROID`).
+
+Aucune valeur d'amélioration n'affiche de décimale. Les cumuls composés
+(maîtrises, passifs, Cœurs, collier) donnent des points entiers par rang, non
+décroissants, jusqu'à l'arrondi du cumul. Agilité : +1 point de chance et
++1 point de dégâts critiques ; Intelligence : 1 % de cadence par point (2 % au
+dernier palier) ; Vitalité : 1 puis 2 de Défense ; le dernier palier de Force
+passe à 13 pour compenser. Familiers : tirs toutes les 2 s (golem 3 s), avec
+une attaque qui garde leur débit. Élan vital se charge en 1 s pour +60 %,
+Pas de brume donne +70 % d'invulnérabilité, les satellites frappent chaque
+seconde, Moisson vitale rend 3 % toutes les 7 éliminations, et les tirs
+multiples s'affichent en pourcentage retiré. Les parts du DPS permanent de
+référence restent à 18 / 21 / 21 / 19 / 20 %. Les contrôles d'équilibrage
+passent, sauf `rythme_progression` : en monde 1, le compte financé demande
+encore 7 attaques en C4 et jusqu'à 8 en C7 (cible : 6), comme avant ces
+changements. Ralentir la montée du renfort de PV corrige C4 mais dégrade C5
+à C7 dans la simulation ; l'arbitrage reste ouvert. Le contrôle `patterns`
+attendait l'ancienne courbe de PV sans la rampe ralentie après la salle du
+légendaire ; il suit désormais la formule du jeu et passe.
 
 Le paysage de la clairière, prairie comprise, reste fixe. Le vent suit des
 feuilles précises du premier plan et quatre rameaux articulés. Clairière et
@@ -176,10 +217,11 @@ viennent du catalogue et figurent dans les statistiques générées.
   Membres et recul suivent déplacement et tir ; le repos se fige en effets
   réduits. La peinture par sommet et le regroupement des volumes fixes gardent
   une seule matière par pivot.
-- Les dégâts infligés sont affichés par de petits nombres animés près des
-  monstres et boss, avec regroupement des impacts proches et de la braise.
-  Les effets réduits conservent une valeur sobre par cible. Les contrôles
-  couvrent les montants appliqués, le dernier coup et la durée des textes.
+- Les dégâts infligés sont affichés en nombres entiers animés près des
+  monstres et boss, avec regroupement des impacts proches et de la braise ;
+  les critiques sont plus gros et dorés. Les effets réduits conservent une
+  valeur sobre par cible. Les contrôles couvrent les montants appliqués, le
+  dernier coup, le format entier et la durée des textes.
 - Chaque tireur ennemi conserve sa silhouette de projectile dans ses motifs.
   Les traits fins sont épaissis, saturés et bordés d’un contour sombre ;
   la traînée reste visible en effets réduits, avec une longueur bornée.

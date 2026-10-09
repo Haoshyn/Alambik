@@ -186,8 +186,7 @@ func _creer_fleche_monde(nom: String, symbole: String, direction: int) -> Button
 	bouton.add_theme_constant_override("icon_max_width", 68)
 	bouton.tooltip_text = "Monde précédent" if direction < 0 else "Monde suivant"
 	bouton.accessibility_name = bouton.tooltip_text
-	var normal := StyleAzur.cercle(true)
-	normal.modulate_color = Color("e9c79b")
+	var normal := StyleAzur.cercle_teinte(Color("e9c79b"), true)
 	bouton.add_theme_stylebox_override("normal", normal)
 	_zone_monde.add_child(bouton)
 	return bouton

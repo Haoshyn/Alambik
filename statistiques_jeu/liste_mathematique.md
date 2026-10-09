@@ -1,13 +1,13 @@
 # Liste mathématique
 
-**Compte au maximum, avant les augments : 1 132 168,01 DPS permanents, 18 361,79 PV et 933,62 Défense.** Le matériel est celui optimisé pour le panier classique détaillé plus bas ; il reste identique pendant la comparaison.
+**Compte au maximum, avant les augments : 1 136 955,64 DPS permanents, 18 409,55 PV et 931,51 Défense.** Le matériel est celui optimisé pour le panier classique détaillé plus bas ; il reste identique pendant la comparaison.
 
-**Répartition de 100 % de ce DPS permanent :** Attributs **18,1 %** ; Équipement **20,9 %** ; Maîtrises **21,4 %** ; Passifs **19,3 %** ; Cœurs **20,3 %** ; socle du héros à son niveau **0 %**. Les cinq sources et le socle de niveau partagent leurs synergies ; les augments sont exclus de cette répartition.
+**Répartition de 100 % de ce DPS permanent :** Attributs **18,2 %** ; Équipement **20,9 %** ; Maîtrises **21,4 %** ; Passifs **19,1 %** ; Cœurs **20,4 %** ; socle du héros à son niveau **0 %**. Les cinq sources et le socle de niveau partagent leurs synergies ; les augments sont exclus de cette répartition.
 Cible : environ 20 % de DPS par source permanente sur ce compte complet, interactions comprises ; le contrôle accepte 18 à 24 % pour conserver l’utilité des cinq objets. Les proportions varient avec les achats, les passifs équipés et les attributs choisis ; les PV, la Défense et chaque statistique individuelle ne suivent pas ce partage de dégâts.
 
-> **Avec les augments classiques illustratifs : 1 132 168,01 → 6 309 623,86 DPS, soit ×5,57.** La run ajoute **5 177 455,85 DPS**, ce qui représente **82,06 % du DPS final** ; le socle permanent en représente les 17,94 % restants.
+> **Avec les augments classiques illustratifs : 1 136 955,64 → 6 336 978,29 DPS, soit ×5,57.** La run ajoute **5 200 022,65 DPS**, ce qui représente **82,06 % du DPS final** ; le socle permanent en représente les 17,94 % restants.
 
-Calcul : (6 309 623,86 − 1 132 168,01) / 6 309 623,86 = 1 − 1 / 5,573 = 82,06 %. Par exemple, 1 000 → 3 000 DPS signifie que les augments ajoutent 2 000 DPS, soit 66,7 % du total final. Ce panier fixe est illustratif ; la simulation présentée plus loin mesure la dispersion des résultats avec les offres réelles.
+Calcul : (6 336 978,29 − 1 136 955,64) / 6 336 978,29 = 1 − 1 / 5,5736 = 82,06 %. Par exemple, 1 000 → 3 000 DPS signifie que les augments ajoutent 2 000 DPS, soit 66,7 % du total final. Ce panier fixe est illustratif ; la simulation présentée plus loin mesure la dispersion des résultats avec les offres réelles.
 
 ## Fiche : socle permanent puis augments
 
@@ -15,35 +15,35 @@ Les contributions se calculent sans augment et s’additionnent au chiffre de d�
 
 | Statistique | Départ permanent | Sources permanentes : valeur et part du départ | Après les augments classiques |
 | --- | --- | --- | --- |
-| Attaque | **16 207,64** | Base : 178 (1,1 %)<br>Attributs : +2 874,78 (17,7 %)<br>Équipement : +4 960,75 (30,6 %)<br>Maîtrises : +5 131,54 (31,7 %)<br>Passifs : +3 062,57 (18,9 %) | **23 501,08** |
-| Dégâts moyens par projectile du héros | **187 768,19** | Base : 178 (0,1 %)<br>Attributs : +28 741,51 (15,3 %)<br>Équipement : +41 400,04 (22 %)<br>Maîtrises : +44 165,29 (23,5 %)<br>Passifs : +30 236,65 (16,1 %)<br>Cœurs : +43 046,69 (22,9 %) | **160 314,2** |
-| Attaques par seconde | **5,94** | Base : 1,6 (26,9 %)<br>Attributs : +1,55 (26 %)<br>Équipement : +0,74 (12,4 %)<br>Maîtrises : +0,34 (5,7 %)<br>Passifs : +1,72 (28,9 %) | **9,8** |
-| DPS du héros | **1 115 407,47** | Base : 284,8 (0 %)<br>Attributs : +204 411,61 (18,3 %)<br>Équipement : +230 615,13 (20,7 %)<br>Maîtrises : +238 551,75 (21,4 %)<br>Passifs : +215 790,35 (19,3 %)<br>Cœurs : +225 753,83 (20,2 %) | **6 285 321,08** |
-| DPS du familier | **16 760,54** | Équipement : +6 116,86 (36,5 %)<br>Maîtrises : +3 935,94 (23,5 %)<br>Passifs : +2 419,73 (14,4 %)<br>Cœurs : +4 288,01 (25,6 %) | **24 302,78** |
-| DPS total | **1 132 168,01** | Base : 284,8 (0 %)<br>Attributs : +204 411,61 (18,1 %)<br>Équipement : +236 731,99 (20,9 %)<br>Maîtrises : +242 487,69 (21,4 %)<br>Passifs : +218 210,09 (19,3 %)<br>Cœurs : +230 041,83 (20,3 %) | **6 309 623,86** |
-| PV maximum | **18 361,79** | Base : 1 335 (7,3 %)<br>Attributs : +3 196,98 (17,4 %)<br>Équipement : +2 215,51 (12,1 %)<br>Maîtrises : +7 043,93 (38,4 %)<br>Passifs : +4 570,38 (24,9 %) | **43 150,21** |
-| Défense | **933,62** | Base : 100 (10,7 %)<br>Attributs : +171,25 (18,3 %)<br>Équipement : +316,81 (33,9 %)<br>Maîtrises : +345,56 (37 %) | **1 447,1** |
+| Attaque | **16 673,85** | Base : 178 (1,1 %)<br>Attributs : +3 073,41 (18,4 %)<br>Équipement : +5 010,54 (30,1 %)<br>Maîtrises : +5 270,56 (31,6 %)<br>Passifs : +3 141,34 (18,8 %) | **24 177,08** |
+| Dégâts moyens par projectile du héros | **187 675,57** | Base : 178 (0,1 %)<br>Attributs : +29 138,2 (15,5 %)<br>Équipement : +41 389,98 (22,1 %)<br>Maîtrises : +44 136,09 (23,5 %)<br>Passifs : +29 507,58 (15,7 %)<br>Cœurs : +43 325,73 (23,1 %) | **160 235,12** |
+| Attaques par seconde | **5,97** | Base : 1,6 (26,8 %)<br>Attributs : +1,55 (26 %)<br>Équipement : +0,74 (12,4 %)<br>Maîtrises : +0,36 (6 %)<br>Passifs : +1,72 (28,9 %) | **9,85** |
+| DPS du héros | **1 120 284,97** | Base : 284,8 (0 %)<br>Attributs : +206 779,28 (18,5 %)<br>Équipement : +231 483,88 (20,7 %)<br>Maîtrises : +239 507,05 (21,4 %)<br>Passifs : +214 437,33 (19,1 %)<br>Cœurs : +227 792,63 (20,3 %) | **6 312 805,83** |
+| DPS du familier | **16 670,66** | Équipement : +6 081,81 (36,5 %)<br>Maîtrises : +3 919,83 (23,5 %)<br>Passifs : +2 406,11 (14,4 %)<br>Cœurs : +4 262,92 (25,6 %) | **24 172,46** |
+| DPS total | **1 136 955,64** | Base : 284,8 (0 %)<br>Attributs : +206 779,28 (18,2 %)<br>Équipement : +237 565,69 (20,9 %)<br>Maîtrises : +243 426,88 (21,4 %)<br>Passifs : +216 843,44 (19,1 %)<br>Cœurs : +232 055,55 (20,4 %) | **6 336 978,29** |
+| PV maximum | **18 409,55** | Base : 1 335 (7,3 %)<br>Attributs : +3 203,58 (17,4 %)<br>Équipement : +2 220,08 (12,1 %)<br>Maîtrises : +7 071 (38,4 %)<br>Passifs : +4 579,89 (24,9 %) | **43 262,45** |
+| Défense | **931,51** | Base : 100 (10,7 %)<br>Attributs : +170,98 (18,4 %)<br>Équipement : +316,3 (34 %)<br>Maîtrises : +344,23 (37 %) | **1 443,84** |
 
-Le tir normal vaut **74 036,16**, le critique **170 283,17**, avec **74,5 %** de chance critique. La moyenne inclut aussi Cinquième impact si l’anneau choisi le possède. Une attaque envoie **2 projectile(s) frontal(aux) × 2 salves**. Les DPS supposent que tous touchent et que les effets conditionnels d’anneau sont actifs.
+Le tir normal vaut **76 126,62**, le critique **156 059,58**, avec **87 %** de chance critique. La moyenne inclut aussi Cinquième impact si l’anneau choisi le possède. Une attaque envoie **2 projectile(s) frontal(aux) × 2 salves**. Les DPS supposent que tous touchent et que les effets conditionnels d’anneau sont actifs.
 
 ## Ordre réel des calculs
 
 Le héros nu au niveau 30 possède **178 ATK** et **1 335 PV** avant de répartir ses 145 points. Ce socle de niveau est compté séparément des attributs.
 
-L’attaque brute vaut **178 niveau + 600 attributs + 754 équipement = 1 532**. On applique ensuite l’équipement, les maîtrises, les passifs et les augments. Les maîtrises composent leurs rangs et leurs nœuds ; les bonus des objets équipés et des augments s’additionnent dans leur famille. Les facteurs des sources se multiplient.
+L’attaque brute vaut **178 niveau + 640 attributs + 754 équipement = 1 572**. On applique ensuite l’équipement, les maîtrises, les passifs et les augments. Les maîtrises composent leurs rangs et leurs nœuds ; les bonus des objets équipés et des augments s’additionnent dans leur famille. Les facteurs des sources se multiplient.
 
 | Statistique | Base brute, attributs inclus | Équipement | Maîtrises | Passifs | Augments | Résultat |
 | --- | --- | --- | --- | --- | --- | --- |
-| Attaque | 1 532 | ×1,43 | ×3,77 | ×1,96 | ×1,45 | **23 501,08** |
-| PV | 3 028 | ×1 | ×3,09 | ×1,96 | ×2,35 | **43 150,21** |
-| Défense | 385 | ×1 | ×2,42 | ×1 | ×1,55 | **1 447,1** |
-| Cadence avant l’arme | 2,56 | ×1,13 | ×1,1 | ×1,69 | ×1,65 | **8,91** |
+| Attaque | 1 572 | ×1,43 | ×3,78 | ×1,96 | ×1,45 | **24 177,08** |
+| PV | 3 028 | ×1 | ×3,1 | ×1,96 | ×2,35 | **43 262,45** |
+| Défense | 385 | ×1 | ×2,42 | ×1 | ×1,55 | **1 443,84** |
+| Cadence avant l’arme | 2,56 | ×1,13 | ×1,11 | ×1,69 | ×1,65 | **8,95** |
 
 Les valeurs affichées sont arrondies ; les calculs conservent la précision de chaque étape.
 
-Pour la cadence, les attributs donnent ×1,6 avant les autres sources et l’arme ajoute ×1,1 : la cadence finale atteint 9,8 attaques/s. Les chances et les dégâts critiques s’additionnent en points ; la chance est plafonnée à 100 % après les augments.
+Pour la cadence, les attributs donnent ×1,6 avant les autres sources et l’arme ajoute ×1,1 : la cadence finale atteint 9,85 attaques/s. Les chances et les dégâts critiques s’additionnent en points ; la chance est plafonnée à 100 % après les augments.
 
-Un projectile normal suit ensuite **23 501,08 ATK de run × 1,15 coefficient d’arme × 0,3712 malus de projectile × 1 bonus conditionnels × 4,65 Cœurs = 74 036,16 dégâts**. Les Cœurs sont le dernier facteur de dégâts ; ils ne modifient ni l’ATK de run, ni les PV, ni la Défense, ni la cadence.
+Un projectile normal suit ensuite **24 177,08 ATK de run × 1,15 coefficient d’arme × 0,3712 malus de projectile × 1 bonus conditionnels × 4,65 Cœurs = 76 126,62 dégâts**. Les Cœurs sont le dernier facteur de dégâts ; ils ne modifient ni l’ATK de run, ni les PV, ni la Défense, ni la cadence.
 
 Pour la moyenne, on applique la probabilité critique et l’effet moyen de l’anneau. Puis on multiplie par la cadence, les projectiles frontaux et les salves. Le familier utilise sa propre attaque de forge × le produit permanent des bonus d’attaque du héros, × le facteur d’attaque des augments ; ses tirs reçoivent les dégâts finaux et les Cœurs, sans critique ni salve du héros. Sa forge ne dépend plus de l’attaque de l’arme équipée.
 
@@ -51,11 +51,11 @@ Pour la moyenne, on applique la probabilité critique et l’effet moyen de l’
 
 | Source au plafond retenu | Bonus avant combinaison |
 | --- | --- |
-| Attributs répartis | +600 ATK brute ; +1 000 PV bruts ; +100 Défense brute ; +60 % cadence ; +12,5 points chance critique ; +50 points dégâts critiques |
-| Cinq équipements, forge maximum | +754 ATK brute ; +693 PV bruts ; +185 Défense brute ; +43,12 % ATK ; +13 % cadence ; +10 points dégâts critiques. S’y ajoutent la forme et le rythme de l’arme, le tir du familier et l’effet d’anneau. |
-| Toutes les maîtrises | +277,14 % ATK ; +209,39 % PV ; +142,5 % Défense ; +10,46 % cadence ; +32 points chance critique ; +20 points dégâts critiques ; +21,9 % soins. Dégâts subis −5 %. |
+| Attributs répartis | +640 ATK brute ; +1 000 PV bruts ; +100 Défense brute ; +60 % cadence ; +25 points chance critique ; +25 points dégâts critiques |
+| Cinq équipements, forge maximum | +754 ATK brute ; +693 PV bruts ; +185 Défense brute ; +43 % ATK ; +13 % cadence ; +10 points dégâts critiques. S’y ajoutent la forme et le rythme de l’arme, le tir du familier et l’effet d’anneau. |
+| Toutes les maîtrises | +278,43 % ATK ; +210,19 % PV ; +141,95 % Défense ; +11 % cadence ; +32 points chance critique ; +20 points dégâts critiques ; +22 % soins. Dégâts subis −5 %. |
 | Quatre passifs au rang maximum | +96 % ATK ; +96 % PV ; +69 % cadence ; +30 points chance critique |
-| Tous les Cœurs | +365,24 % de dégâts finaux. |
+| Tous les Cœurs | +365 % de dégâts finaux. |
 | Sorcier ou Moine | Aucun bonus actuellement. |
 
 Les autres effets de soins, collecte et économie sont détaillés par rang dans les [maîtrises](liste_maitrises.md) et les [passifs](liste_passifs.md). Ils ne sont pas transformés artificiellement en dégâts dans la fiche.
@@ -69,10 +69,10 @@ Le matériel ci-dessous maximise le DPS frontal continu total parmi **6250 combi
 | Emplacement | Modèle | Forge | Statistiques et effet |
 | --- | --- | --- | --- |
 | Arme | Alambic souverain | 20 | +500 ATK brute. Tir 115 %, cadence +10 %. |
-| Familier | Ondine de givre | 20 | 647 attaque propre, un tir toutes les 1,9 s. Navette de givre · héros : cadence +8 % |
+| Familier | Ondine de givre | 20 | 676 attaque propre, un tir toutes les 2 s. Navette de givre · héros : cadence +8 % |
 | Anneau | Anneau · Air | 20 | Attaque brute +82 · PV bruts +693 · Vitesse d’attaque +5 %<br>Chaque attaque n° 5 inflige 50 % de dégâts supplémentaires. |
 | Bracelet | Bracelet · Feu | 20 | Attaque brute +86 · Défense brute +185 · Attaque +5 %<br>La première blessure mortelle de l’aventure laisse le héros à 1 PV. |
-| Collier | Collier · Feu | 20 | Attaque brute +86 · Attaque +28,12 % · Dégâts critiques +10 %<br>Attaque +10 % tant que le collier est équipé. |
+| Collier | Collier · Feu | 20 | Attaque brute +86 · Attaque +28 % · Dégâts critiques +10 %<br>Attaque +10 % tant que le collier est équipé. |
 
 **Passifs :** Vigueur rang 2, Célérité rang 2, Œil précis rang 2, Vitalité rang 2. **Cœurs :** 11. **Maîtrises :** tous les rangs des trois branches.
 
@@ -80,8 +80,8 @@ Le matériel ci-dessous maximise le DPS frontal continu total parmi **6250 combi
 
 | Augment | Copies | Rareté | Effet cumulé |
 | --- | --- | --- | --- |
-| Salve | 1 | Rare | +1 salve par attaque<br>Dégâts de chaque projectile ×0,7 |
-| Tir double | 1 | Rare | Dégâts de chaque projectile ×0,7<br>+1 projectile frontal parallèle par salve |
+| Salve | 1 | Rare | +1 salve par attaque<br>Dégâts de chaque projectile −30 % |
+| Tir double | 1 | Rare | Dégâts de chaque projectile −30 %<br>+1 projectile frontal parallèle par salve |
 | Peau de cuivre | 1 | Rare | PV max +30 %<br>Défense +20 % |
 | Baume profond | 1 | Rare | Attaque +10 %<br>PV max +25 %<br>Soins reçus +35 % |
 | Sceau de garde | 1 | Rare | Dégâts subis −25 % |
@@ -101,18 +101,18 @@ Bonus = points investis × gain par point du palier courant. Les paliers changen
 
 | Niveaux du héros | Un point de Force | Un point de Vitalité | Un point d’Intelligence |
 | --- | --- | --- | --- |
-| 1–5 | +4 ATK brute | +10 PV bruts ; +1 Défense brute | +1 ATK brute ; +0,5 % cadence |
-| 6–10 | +5 ATK brute | +12 PV bruts ; +1,2 Défense brute | +1 ATK brute ; +0,5 % cadence |
-| 11–15 | +6 ATK brute | +14 PV bruts ; +1,4 Défense brute | +2 ATK brute ; +1 % cadence |
-| 16–20 | +8 ATK brute | +16 PV bruts ; +1,6 Défense brute | +2 ATK brute ; +1 % cadence |
-| 21–25 | +10 ATK brute | +18 PV bruts ; +1,8 Défense brute | +3 ATK brute ; +1,5 % cadence |
-| 26–30 | +12 ATK brute | +20 PV bruts ; +2 Défense brute | +4 ATK brute ; +2 % cadence |
+| 1–5 | +4 ATK brute | +10 PV bruts ; +1 Défense brute | +1 ATK brute ; +1 % cadence |
+| 6–10 | +5 ATK brute | +12 PV bruts ; +1 Défense brute | +1 ATK brute ; +1 % cadence |
+| 11–15 | +6 ATK brute | +14 PV bruts ; +1 Défense brute | +2 ATK brute ; +1 % cadence |
+| 16–20 | +8 ATK brute | +16 PV bruts ; +2 Défense brute | +2 ATK brute ; +1 % cadence |
+| 21–25 | +10 ATK brute | +18 PV bruts ; +2 Défense brute | +3 ATK brute ; +1 % cadence |
+| 26–30 | +13 ATK brute | +20 PV bruts ; +2 Défense brute | +4 ATK brute ; +2 % cadence |
 
 | Attribut | Points du profil | Bonus dans cette fiche | Gain du prochain point au même niveau | Maximum individuel : 145 points |
 | --- | --- | --- | --- | --- |
-| Force | 40 | +480 ATK brute | +12 ATK brute | +1 740 ATK brute |
+| Force | 40 | +520 ATK brute | +13 ATK brute | +1 885 ATK brute |
 | Vitalité | 50 | +1 000 PV bruts ; +100 Défense brute | +20 PV bruts ; +2 Défense brute | +2 900 PV bruts ; +290 Défense brute |
-| Agilité | 25 | +12,5 points chance critique ; +50 points dégâts critiques | +0,5 points chance critique ; +2 points dégâts critiques | +72,5 points chance critique ; +290 points dégâts critiques |
+| Agilité | 25 | +25 points chance critique ; +25 points dégâts critiques | +1 points chance critique ; +1 points dégâts critiques | +145 points chance critique ; +145 points dégâts critiques |
 | Intelligence | 30 | +120 ATK brute ; +60 % cadence | +4 ATK brute ; +2 % cadence | +580 ATK brute ; +290 % cadence |
 | Sagesse | 0 | Aucun bonus | +1 % butin | +145 % butin |
 
@@ -124,11 +124,11 @@ On retire une source permanente entière et on garde tous les autres choix ident
 
 | Source retirée | DPS restant | Perte de DPS total | PV restants | Défense restante |
 | --- | --- | --- | --- | --- |
-| Attributs | 339 065,42 | 70,05 % | 12 297,79 | 691,12 |
-| Équipement | 242 179,34 | 78,61 % | 14 159,44 | 485 |
-| Maîtrises | 204 042,79 | 81,98 % | 5 934,88 | 385 |
-| Passifs | 278 573,79 | 75,39 % | 9 368,26 | 933,62 |
-| Cœurs | 243 351,84 | 78,51 % | 18 361,79 | 933,62 |
+| Attributs | 341 215,74 | 69,99 % | 12 329,78 | 689,56 |
+| Équipement | 247 470,13 | 78,23 % | 14 196,27 | 483,9 |
+| Maîtrises | 208 938,47 | 81,62 % | 5 934,88 | 385 |
+| Passifs | 291 038,91 | 74,4 % | 9 392,63 | 931,51 |
+| Cœurs | 244 506,59 | 78,49 % | 18 409,55 | 931,51 |
 
 ### Comment lire les proportions
 
@@ -146,9 +146,9 @@ Les dégâts ci-dessous sont ceux d’un impact normal, sans critique ni augment
 | --- | --- | --- | --- |
 | Héros nu, niveau 1 | 100 | 150 | 160 |
 | Départ équipé, forge 0 | 140 | 210 | 259,6 |
-| Compte complet de référence | 86 714,94 | 199 444,35 | 1 132 168,01 |
+| Compte complet de référence | 89 163,39 | 182 784,95 | 1 136 955,64 |
 
-L’impact normal de ce compte complet représente **×867,15** celui du héros nu et **×619,39** celui du départ équipé. Ce repère n’est pas un plafond : un build spécialisé ou une arme lente change l’impact et la cadence.
+L’impact normal de ce compte complet représente **×891,63** celui du héros nu et **×636,88** celui du départ équipé. Ce repère n’est pas un plafond : un build spécialisé ou une arme lente change l’impact et la cadence.
 
 ### Utilité des cinq emplacements
 
@@ -156,11 +156,11 @@ On enlève un seul objet et on garde tous les autres choix identiques. Les perte
 
 | Objet retiré | DPS permanent restant | DPS permanent perdu | DPS perdu avec augments classiques | PV effectifs perdus |
 | --- | --- | --- | --- | --- |
-| Arme | 610 729,78 | 46,06 % | 46,57 % | 0 % |
-| Familier | 1 036 440,57 | 8,46 % | 7,44 % | 0 % |
-| Anneau | 934 026,78 | 17,5 % | 17,7 % | 22,89 % |
-| Bracelet | 1 032 188,11 | 8,83 % | 8,89 % | 23,2 % |
-| Collier | 755 446,82 | 33,27 % | 33,35 % | 0 % |
+| Arme | 620 591,8 | 45,42 % | 45,92 % | 0 % |
+| Familier | 1 040 972,76 | 8,44 % | 7,43 % | 0 % |
+| Anneau | 939 273,67 | 17,39 % | 17,58 % | 22,89 % |
+| Bracelet | 1 038 057,02 | 8,7 % | 8,76 % | 23,17 % |
+| Collier | 754 471,97 | 33,64 % | 33,72 % | 0 % |
 
 ### Ce que paie la forge de chaque objet
 
@@ -168,11 +168,11 @@ Comparaison de forge 0 au maximum sur le même compte complet. Tous les autres o
 
 | Objet forgé | DPS ajouté | Gain de DPS total | Gain de PV effectifs |
 | --- | --- | --- | --- |
-| Arme | 326 176,6 | 40,47 % | 0 % |
-| Familier | 14 688,14 | 1,31 % | 0 % |
-| Anneau | 139 128,09 | 14,01 % | 21,95 % |
-| Bracelet | 43 684,37 | 4,01 % | 22,23 % |
-| Collier | 295 574,67 | 35,33 % | 0 % |
+| Arme | 319 266,96 | 39,05 % | 0 % |
+| Familier | 14 574,5 | 1,3 % | 0 % |
+| Anneau | 138 772,29 | 13,9 % | 21,95 % |
+| Bracelet | 42 758,97 | 3,91 % | 22,19 % |
+| Collier | 295 265,89 | 35,08 % | 0 % |
 
 ### Valeur d’un choix d’augment
 
@@ -183,25 +183,25 @@ Un 0 % de DPS ou de PV effectifs ne signifie pas un effet absent : les trajectoi
 | Augment | Rareté | DPS au départ | DPS au compte complet | PV effectifs au compte complet | Gain de la 2e copie au compte complet | Utilité hors mesure |
 | --- | --- | --- | --- | --- | --- | --- |
 | Avidité | Rare | 20 % | 20 % | 0 % | Unique | XP de run et Gouttes |
-| Battement triple | Légendaire | 123,82 % | 137,93 % | 0 % | Unique | — |
+| Battement triple | Légendaire | 123,82 % | 137,95 % | 0 % | Unique | — |
 | Baume profond | Rare | 10 % | 10 % | 25 % | 9,09 % DPS ; 20 % PV effectifs | Soins reçus |
-| Cadence fébrile | Rare | 26,53 % | 29,56 % | 0 % | 22,81 % DPS ; 0 % PV effectifs | — |
-| Courage indomptable | Légendaire | 76,79 % | 81,55 % | 57,81 % | Unique | Une seconde vie complète |
-| Couronne incisive | Légendaire | 62,56 % | 76,4 % | 0 % | Unique | — |
+| Cadence fébrile | Rare | 26,53 % | 29,56 % | 0 % | 22,82 % DPS ; 0 % PV effectifs | — |
+| Courage indomptable | Légendaire | 76,79 % | 81,56 % | 57,79 % | Unique | Une seconde vie complète |
+| Couronne incisive | Légendaire | 62,56 % | 75 % | 0 % | Unique | — |
 | Égide souveraine | Légendaire | 0 % | 0 % | 125 % | Unique | Soin complet à l’acquisition |
 | Élan vital | Épique | 25 % | 25 % | 0 % | Unique | Bonus sur l’attaque chargée après déplacement |
 | Encrage vif | Rare | 40 % | 40 % | 0 % | 28,57 % DPS ; 0 % PV effectifs | Projectiles plus rapides |
-| Encre mordante | Épique | 39,8 % | 44,33 % | 0 % | Unique | — |
+| Encre mordante | Épique | 39,8 % | 44,34 % | 0 % | Unique | — |
 | Force cataclysmique | Légendaire | 120 % | 120 % | 0 % | Unique | — |
 | Garde rémanente | Épique | 0 % | 0 % | 45 % | Unique | Un coup bloqué par salle |
 | Traque alchimique | Rare | 0 % | 0 % | 0 % | Unique | Suivi des cibles mobiles |
-| Météorite alchimique | Rare | 32,36 % | 4 % | 0 % | Unique | Météorite automatique en mouvement ; dégâts de zone |
+| Météorite alchimique | Rare | 32,36 % | 4,09 % | 0 % | Unique | Météorite automatique en mouvement ; dégâts de zone |
 | Noyau pesant | Épique | 50 % | 50 % | 0 % | 33,33 % DPS ; 0 % PV effectifs | — |
 | Pas de brume | Rare | 0 % | 0 % | 20 % | 0 % DPS ; 16,67 % PV effectifs | Mobilité et invulnérabilité après blessure |
-| Peau de cuivre | Rare | 0 % | 0 % | 42,55 % | 0 % DPS ; 33,92 % PV effectifs | — |
+| Peau de cuivre | Rare | 0 % | 0 % | 42,54 % | 0 % DPS ; 33,9 % PV effectifs | — |
 | Peau de pierre | Épique | 0 % | 0 % | 52,63 % | Unique | — |
 | Perforation | Épique | 22,11 % | 24,63 % | 0 % | Unique | Traverse les ennemis ; rebonds limités avec perte |
-| Pointe lucide | Rare | 20,49 % | 39,02 % | 0 % | 18,41 % DPS ; 0 % PV effectifs | — |
+| Pointe lucide | Rare | 20,49 % | 35,35 % | 0 % | 18,2 % DPS ; 0 % PV effectifs | — |
 | Ricochet | Épique | 35,38 % | 39,41 % | 0 % | Unique | Dégâts sur d’autres cibles |
 | Salve | Rare | 35,38 % | 39,41 % | 0 % | Unique | — |
 | Satellites alchimiques | Rare | 0 % | 0 % | 0 % | Unique | Contact des cercles, même en mouvement ; sans critique ni salve |
@@ -209,7 +209,7 @@ Un 0 % de DPS ou de PV effectifs ne signifie pas un effet absent : les trajectoi
 | Sceau de ruine | Rare | 40 % | 40 % | 0 % | Unique | — |
 | Éventail | Épique | 13,27 % | 14,78 % | 0 % | 12,88 % DPS ; 0 % PV effectifs | Dégâts diagonaux sur d’autres cibles |
 | Tir double | Rare | 35,38 % | 39,41 % | 0 % | 28,27 % DPS ; 0 % PV effectifs | — |
-| Trait alchimique | Rare | 26,96 % | 3,33 % | 0 % | 3,22 % DPS ; 0 % PV effectifs | Trait automatique en mouvement |
+| Trait alchimique | Rare | 26,96 % | 3,41 % | 0 % | 3,3 % DPS ; 0 % PV effectifs | Trait automatique en mouvement |
 | Tir indélébile | Épique | 35,38 % | 39,41 % | 0 % | Unique | Traverse murs et ennemis ; poursuite |
 
 ### Rendements réduits par les cumuls
@@ -220,7 +220,7 @@ Les bonus directs d'attaque et de projectile s'additionnent, tout comme les gain
 | --- | --- | --- |
 | battement_triple | Tir double | 16,56 % |
 | tir_multiple | Tir double | 28,27 % |
-| couronne_incisive, pointe_lucide | Pointe lucide | 14,42 % |
+| couronne_incisive, pointe_lucide | Pointe lucide | 16,48 % |
 
 ## La puissance gagnée pendant une tentative
 
@@ -333,18 +333,18 @@ Un projectile désigne un seul impact. Une attaque complète additionne les salv
 
 | Victoires Épreuve 1 | Chapitre | DPS permanent | Projectiles à l’entrée | Monstres en 1 projectile | Monstres en 1 attaque | Boss final, s | Contacts minimum |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 0 | 2 | 419 | 3 | 0 % | 0 % | 9,7 | 1,9 |
-| 0 | 3 | 419 | 4 | 0 % | 0 % | 17,1 | 1,8 |
-| 0 | 4 | 419 | 6 | 0 % | 0 % | 24,7 | 1,7 |
-| 0 | 7 | 419 | 10 | 0 % | 0 % | 53,5 | 1,4 |
-| 5 | 2 | 763,8 | 2 | 1,7 % | 4,7 % | 5,4 | 1,9 |
-| 5 | 3 | 763,8 | 2 | 0 % | 0 % | 9,5 | 1,8 |
-| 5 | 4 | 763,8 | 3 | 0 % | 0 % | 13,8 | 1,7 |
-| 5 | 7 | 763,8 | 6 | 0 % | 0 % | 29,8 | 1,4 |
-| 6 | 2 | 775,6 | 2 | 2,9 % | 4,7 % | 5,3 | 1,9 |
-| 6 | 3 | 775,6 | 2 | 0 % | 0 % | 9,2 | 1,8 |
-| 6 | 4 | 775,6 | 3 | 0 % | 0 % | 13,3 | 1,7 |
-| 6 | 7 | 775,6 | 6 | 0 % | 0 % | 28,9 | 1,4 |
+| 0 | 2 | 417,5 | 3 | 0 % | 0 % | 9,8 | 1,9 |
+| 0 | 3 | 417,5 | 4 | 0 % | 0 % | 17,2 | 1,8 |
+| 0 | 4 | 417,5 | 6 | 0 % | 0 % | 24,8 | 1,7 |
+| 0 | 7 | 417,5 | 10 | 0 % | 0 % | 53,7 | 1,4 |
+| 5 | 2 | 761 | 2 | 1,7 % | 3,9 % | 5,5 | 1,9 |
+| 5 | 3 | 761 | 2 | 0 % | 0 % | 9,6 | 1,8 |
+| 5 | 4 | 761 | 3 | 0 % | 0 % | 13,8 | 1,7 |
+| 5 | 7 | 761 | 6 | 0 % | 0 % | 30 | 1,4 |
+| 6 | 2 | 771,4 | 2 | 2,9 % | 4,7 % | 5,3 | 1,9 |
+| 6 | 3 | 771,4 | 2 | 0 % | 0 % | 9,3 | 1,8 |
+| 6 | 4 | 771,4 | 3 | 0 % | 0 % | 13,4 | 1,7 |
+| 6 | 7 | 771,4 | 6 | 0 % | 0 % | 29 | 1,4 |
 
 ### Enchaîner réellement les chapitres après six Épreuves
 
@@ -353,11 +353,11 @@ Cette fois, les achats et récompenses sont conservés entre deux chapitres. Le 
 | Chapitre | Monstres en 1 attaque | Boss final, s | Contacts minimum |
 | --- | --- | --- | --- |
 | 2 | 4,7 % | 5,3 | 1,9 |
-| 3 | 0 % | 8,2 | 1,9 |
+| 3 | 0 % | 8,3 | 1,9 |
 | 4 | 0 % | 10,1 | 1,9 |
 | 5 | 0 % | 10,1 | 1,8 |
 | 6 | 0 % | 14,6 | 1,7 |
-| 7 | 0 % | 15,4 | 1,7 |
+| 7 | 0 % | 15,5 | 1,7 |
 | 8 | 0 % | 9,8 | 1,6 |
 
 Sans autre farm après les six Épreuves, **0 comptes sur 24** ne rencontrent aucun boss dépassant 120 secondes sur les 35 chapitres. Cela mesure uniquement leur puissance de tir, en supposant qu’ils survivent.
@@ -382,31 +382,31 @@ Les lignes donnent des médianes de comptes, plus le P90 du taux avec critiques 
 
 | Parcours | Chapitre | Attaques par monstre | En 1 attaque normale | Avec critiques : médiane / P90 | Contacts équivalents | Boss final, s |
 | --- | --- | --- | --- | --- | --- | --- |
-| Équilibré | 2 | 5 | 0 % | 0 % / 0 % | 9,3 | 18,4 |
-| Équilibré | 3 | 6 | 0 % | 0 % / 0 % | 9,3 | 24,9 |
-| Équilibré | 7 | 10 | 0 % | 0 % / 0 % | 9,5 | 54,5 |
-| Équilibré | 14 | 16,5 | 0 % | 0 % / 0 % | 6,7 | 141,6 |
-| Équilibré | 35 | 65,5 | 0 % | 0 % / 0 % | 2,6 | 662,4 |
-| Offensif | 2 | 3 | 0 % | 0 % / 1,4 % | 4,4 | 9,7 |
-| Offensif | 3 | 3 | 0 % | 0 % / 0,2 % | 4,3 | 12,7 |
+| Équilibré | 2 | 5 | 0 % | 0 % / 0 % | 9,3 | 19,2 |
+| Équilibré | 3 | 6 | 0 % | 0 % / 0 % | 9,3 | 24,1 |
+| Équilibré | 7 | 10 | 0 % | 0 % / 0 % | 9,5 | 51,5 |
+| Équilibré | 14 | 16 | 0 % | 0 % / 0 % | 6,6 | 139,7 |
+| Équilibré | 35 | 66,5 | 0 % | 0 % / 0 % | 2,7 | 651,8 |
+| Offensif | 2 | 3 | 0 % | 0 % / 1,4 % | 4,4 | 9,8 |
+| Offensif | 3 | 3 | 0 % | 0 % / 0,2 % | 4,3 | 12,8 |
 | Offensif | 7 | 6,5 | 0 % | 0 % / 0 % | 3,8 | 24,1 |
 | Offensif | 14 | 7 | 0 % | 0 % / 0 % | 1,7 | 49,8 |
-| Offensif | 35 | 28,5 | 0 % | 0 % / 0 % | 0,4 | 258,9 |
-| Offensif + deux défenses | 2 | 5 | 0 % | 0 % / 0 % | 10,5 | 18,2 |
-| Offensif + deux défenses | 3 | 6 | 0 % | 0 % / 0 % | 10,1 | 22,9 |
+| Offensif | 35 | 28,5 | 0 % | 0 % / 0 % | 0,4 | 259,1 |
+| Offensif + deux défenses | 2 | 5 | 0 % | 0 % / 0 % | 10,5 | 18,3 |
+| Offensif + deux défenses | 3 | 6 | 0 % | 0 % / 0 % | 10,1 | 23,1 |
 | Offensif + deux défenses | 7 | 11 | 0 % | 0 % / 0 % | 8,5 | 45,2 |
-| Offensif + deux défenses | 14 | 11 | 0 % | 0 % / 0 % | 4,1 | 95,8 |
-| Offensif + deux défenses | 35 | 48,5 | 0 % | 0 % / 0 % | 0,9 | 519,5 |
-| Retour Épreuves | 2 | 2 | 4,7 % | 26,9 % / 49,5 % | 4,5 | 5,3 |
-| Retour Épreuves | 3 | 2 | 0 % | 2,1 % / 11,1 % | 4,3 | 8,2 |
-| Retour Épreuves | 7 | 4 | 0 % | 0 % / 1,9 % | 3,9 | 15,4 |
-| Retour Épreuves | 14 | 4,5 | 0 % | 0 % / 0 % | 1,7 | 30,5 |
+| Offensif + deux défenses | 14 | 11 | 0 % | 0 % / 0 % | 4,1 | 96 |
+| Offensif + deux défenses | 35 | 49 | 0 % | 0 % / 0 % | 0,9 | 520,4 |
+| Retour Épreuves | 2 | 2 | 4,7 % | 25,7 % / 49,5 % | 4,5 | 5,3 |
+| Retour Épreuves | 3 | 2 | 0 % | 1,9 % / 10,6 % | 4,3 | 8,3 |
+| Retour Épreuves | 7 | 4 | 0 % | 0 % / 1,9 % | 3,9 | 15,5 |
+| Retour Épreuves | 14 | 4,5 | 0 % | 0 % / 0 % | 1,7 | 30,6 |
 | Retour Épreuves | 35 | 18 | 0 % | 0 % / 0 % | 0,4 | 168,3 |
 | Sur-farm offensif | 2 | 1 | 78,3 % | 87,3 % / 93,6 % | 5,2 | 2,5 |
 | Sur-farm offensif | 3 | 2 | 33,3 % | 56 % / 77,1 % | 5,1 | 4,4 |
-| Sur-farm offensif | 7 | 2 | 1,4 % | 22,2 % / 44,5 % | 4,1 | 9,5 |
-| Sur-farm offensif | 14 | 3 | 0 % | 1,9 % / 9,5 % | 1,8 | 19,3 |
-| Sur-farm offensif | 35 | 14 | 0 % | 0 % / 0 % | 0,4 | 121 |
+| Sur-farm offensif | 7 | 2 | 1,4 % | 21,4 % / 44,3 % | 4,1 | 9,5 |
+| Sur-farm offensif | 14 | 3 | 0 % | 1,9 % / 9,5 % | 1,8 | 19,5 |
+| Sur-farm offensif | 35 | 14 | 0 % | 0 % / 0 % | 0,4 | 121,4 |
 
 ### Annexes à leur premier déblocage
 
@@ -414,8 +414,8 @@ Même compte après le chapitre 1 pour l'Épreuve 1, puis après le chapitre 3 p
 
 | Parcours | Annexe | Contacts équivalents | Boss final, s |
 | --- | --- | --- | --- |
-| Équilibré | Épreuve 1 | 5,8 | 9,5 |
-| Équilibré | Mine 1 | 10,4 | 61,2 |
+| Équilibré | Épreuve 1 | 5,8 | 9,3 |
+| Équilibré | Mine 1 | 10,5 | 66,7 |
 | Offensif | Épreuve 1 | 4,4 | 6,3 |
 | Offensif | Mine 1 | 5,2 | 28,4 |
 
@@ -437,15 +437,15 @@ Le cas de départ reprend un héros niveau 4, Baguette d’acier forge 1 et Forc
 
 | Monstre du niveau 2, salle 1 | PV | Dégâts par attaque | Attaques nécessaires |
 | --- | --- | --- | --- |
-| Encrier rampant | 481,54 | 170,05 | 3 |
-| Plume-sentinelle | 615,3 | 170,05 | 4 |
-| Tache véloce | 428,03 | 170,05 | 3 |
+| Encrier rampant | 481,54 | 169,12 | 3 |
+| Plume-sentinelle | 615,3 | 169,12 | 4 |
+| Tache véloce | 428,03 | 169,12 | 3 |
 
 | Achat depuis ce profil | Coût dans sa monnaie | Dégâts par tir | Gain par tir | Gain de DPS total |
 | --- | --- | --- | --- | --- |
-| Arme 1 → 2 | 40 | 175,68 | +3,31 % | +2,95 % |
-| Arme 1 → 5 | 250 | 199,33 | +17,22 % | +15,36 % |
-| Force maîtrisée 6 → 10 | 120 | 184,07 | +8,24 % | +8,24 % |
+| Arme 1 → 2 | 40 | 174,72 | +3,31 % | +2,95 % |
+| Arme 1 → 5 | 250 | 198,24 | +17,22 % | +15,36 % |
+| Force maîtrisée 6 → 10 | 120 | 184,22 | +8,93 % | +8,93 % |
 
 Le coût d’une arme est payé en Pierres, celui d’une maîtrise en Gouttes. Les autres statistiques et l’équipement restent identiques pendant ces comparaisons.
 
@@ -457,12 +457,12 @@ Les victoires sont supposées pour isoler l’économie ; les butins, possession
 
 | Niveau | Attaques d’entrée sans augment | P90 | DPS permanent | Boss final, s |
 | --- | --- | --- | --- | --- |
-| 2 | 4 | 4 | 352,9 | 15,8 |
-| 7 | 9 | 9,7 | 694,48 | 39,2 |
-| 14 | 13 | 15,1 | 1 303,75 | 118,5 |
-| 21 | 20 | 20,7 | 2 507,4 | 184,4 |
-| 28 | 31 | 33,1 | 4 831,2 | 425,4 |
-| 35 | 35,5 | 37,4 | 16 340,57 | 250,9 |
+| 2 | 4 | 4 | 358,09 | 15,5 |
+| 7 | 9 | 9,7 | 725,98 | 37,4 |
+| 14 | 12,5 | 14,4 | 1 350,03 | 113,3 |
+| 21 | 20 | 23,8 | 2 565,59 | 202,8 |
+| 28 | 31,5 | 33,4 | 5 013,19 | 417,3 |
+| 35 | 35,5 | 36,7 | 14 310,72 | 279,5 |
 
 Ce stress n’effectue aucune Mine ni Épreuve : il ne reçoit aucun passif ni Cœur, et manque de budget de forge. Il montre le retard accumulé si ces sources sont omises ; ses victoires supposées ne signifient pas que ce compte peut terminer la campagne.
 
@@ -472,23 +472,23 @@ Les trois comptes du parcours conditionnel reçoivent uniquement les coffres des
 
 | Niveau | Attaques normales à l’entrée | Temps par monstre, s | DPS permanent | Boss final, s |
 | --- | --- | --- | --- | --- |
-| 2 | 4 | 2,8 | 352,9 | 15,2 |
-| 3 | 5 | 3,7 | 439,16 | 20,6 |
-| 4 | 7 | 5,1 | 492,19 | 33,5 |
-| 5 | 6 | 4,2 | 794,73 | 24,7 |
-| 6 | 6 | 4,4 | 931,54 | 26,3 |
-| 7 | 7 | 4,9 | 943,87 | 43,5 |
-| 14 | 5 | 3 | 3 997,73 | 37,2 |
-| 21 | 7 | 2,9 | 10 925,84 | 48,6 |
-| 28 | 5 | 1,4 | 61 253,35 | 44,7 |
-| 35 | 7 | 1,9 | 117 790,82 | 40,3 |
+| 2 | 4 | 2,8 | 358,09 | 15 |
+| 3 | 5 | 3,7 | 447,56 | 20,1 |
+| 4 | 7 | 4,9 | 510,2 | 32,4 |
+| 5 | 6 | 4 | 828,48 | 23,5 |
+| 6 | 6 | 4,1 | 980,59 | 25 |
+| 7 | 7 | 4,6 | 992,93 | 41,7 |
+| 14 | 6 | 3,2 | 3 717,05 | 38,7 |
+| 21 | 6 | 2,5 | 12 811,22 | 49,8 |
+| 28 | 6 | 1,6 | 51 169,88 | 38,3 |
+| 35 | 7 | 1,9 | 118 034,44 | 41,7 |
 
 | Niveau rejoué | Reprises | Gain médian de DPS permanent | Variation de PV effectifs |
 | --- | --- | --- | --- |
-| 14 | 1 | +4,81 % | 0 % |
-| 21 | 2 | +20,79 % | 0,14 % |
-| 28 | 3 | +39,44 % | −2,8 % |
-| 34 | 5 | +34,78 % | −0,53 % |
+| 14 | 1 | +4,34 % | 0 % |
+| 21 | 2 | +20,92 % | −2,36 % |
+| 28 | 3 | +37,29 % | −2,68 % |
+| 34 | 5 | +36,69 % | −0,76 % |
 
 Ces gains comparent le compte juste avant et juste après les reprises, sans augment. Ils incluent uniquement les achats financés et le butin effectivement reçu. Une amélioration déjà acquise profite aussi aux anciennes armes et maîtrises sauvegardées. Le ressenti et le nombre de répétitions souhaitable restent à vérifier sur téléphone.
 
@@ -504,26 +504,26 @@ Le temps estimé = PV du boss / (DPS × 70 % de tir utile), familier et critique
 
 | Niveau | Salle | Boss | Cible, s | P25, s | Médiane, s | P75, s | P10–P90, s |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Monde 1 · Niveau 7 | 5 | Ordinaire | 15–45 | 25,8 | 33,5 | 40,3 | 21,8–45 |
-| Monde 1 · Niveau 7 | 10 | Ordinaire | 15–45 | 19,5 | 26,8 | 33,8 | 16,5–47,5 |
-| Monde 1 · Niveau 7 | 15 | Ordinaire | 15–45 | 24,5 | 31 | 38,3 | 19,2–48,9 |
-| Monde 1 · Niveau 7 | 20 | Fin de monde | 25–60 | 26,1 | 35,1 | 41,5 | 21,5–54,3 |
-| Monde 2 · Niveau 7 | 5 | Ordinaire | 15–45 | 21,3 | 28,4 | 34,8 | 18,2–39,9 |
-| Monde 2 · Niveau 7 | 10 | Ordinaire | 15–45 | 17,1 | 21,9 | 31,5 | 14–39,7 |
-| Monde 2 · Niveau 7 | 15 | Ordinaire | 15–45 | 19,7 | 24,6 | 32,5 | 16,1–42 |
-| Monde 2 · Niveau 7 | 20 | Fin de monde | 25–60 | 30,8 | 39,7 | 47,9 | 25,5–57,4 |
-| Monde 3 · Niveau 7 | 5 | Ordinaire | 15–45 | 29,8 | 35,8 | 41,2 | 27,2–50,9 |
-| Monde 3 · Niveau 7 | 10 | Ordinaire | 15–45 | 20,7 | 24 | 31 | 18,5–42 |
-| Monde 3 · Niveau 7 | 15 | Ordinaire | 15–45 | 23,6 | 28,5 | 38,1 | 19,8–50,4 |
-| Monde 3 · Niveau 7 | 20 | Fin de monde | 25–60 | 35 | 41,6 | 49,9 | 31–66,9 |
-| Monde 4 · Niveau 7 | 5 | Ordinaire | 15–45 | 17,2 | 18,7 | 21,5 | 15,8–25,1 |
-| Monde 4 · Niveau 7 | 10 | Ordinaire | 15–45 | 12,3 | 13,7 | 16,1 | 10,7–21,9 |
-| Monde 4 · Niveau 7 | 15 | Ordinaire | 15–45 | 13,6 | 15,8 | 18,1 | 12,7–29,2 |
-| Monde 4 · Niveau 7 | 20 | Fin de monde | 25–60 | 25,7 | 30,1 | 35,4 | 22–47,8 |
-| Monde 5 · Niveau 7 | 5 | Ordinaire | 15–45 | 25,8 | 28,3 | 31,9 | 19,3–40,6 |
-| Monde 5 · Niveau 7 | 10 | Ordinaire | 15–45 | 17,5 | 19,8 | 22,9 | 15,7–31,7 |
-| Monde 5 · Niveau 7 | 15 | Ordinaire | 15–45 | 20,6 | 23,4 | 27,7 | 17,9–36,7 |
-| Monde 5 · Niveau 7 | 20 | Fin de monde | 25–60 | 34,4 | 39,3 | 46,2 | 29,9–59,7 |
+| Monde 1 · Niveau 7 | 5 | Ordinaire | 15–45 | 25,4 | 32 | 38,7 | 21,6–42,9 |
+| Monde 1 · Niveau 7 | 10 | Ordinaire | 15–45 | 18,7 | 25,6 | 31,8 | 16,3–45,2 |
+| Monde 1 · Niveau 7 | 15 | Ordinaire | 15–45 | 23,7 | 29,3 | 37,1 | 18,9–46,5 |
+| Monde 1 · Niveau 7 | 20 | Fin de monde | 25–60 | 25,3 | 33,4 | 39,6 | 21,3–52 |
+| Monde 2 · Niveau 7 | 5 | Ordinaire | 15–45 | 24,5 | 30,1 | 35,1 | 21,8–40,7 |
+| Monde 2 · Niveau 7 | 10 | Ordinaire | 15–45 | 18,8 | 22,9 | 30,2 | 16,7–40,1 |
+| Monde 2 · Niveau 7 | 15 | Ordinaire | 15–45 | 22,7 | 26,4 | 33,5 | 18,5–41,6 |
+| Monde 2 · Niveau 7 | 20 | Fin de monde | 25–60 | 33,7 | 42,7 | 49,3 | 30,3–61,3 |
+| Monde 3 · Niveau 7 | 5 | Ordinaire | 15–45 | 29,2 | 32 | 40,8 | 24,9–49,6 |
+| Monde 3 · Niveau 7 | 10 | Ordinaire | 15–45 | 19,2 | 23,4 | 31,5 | 17,5–40,8 |
+| Monde 3 · Niveau 7 | 15 | Ordinaire | 15–45 | 21,5 | 28,2 | 38 | 19,1–49,8 |
+| Monde 3 · Niveau 7 | 20 | Fin de monde | 25–60 | 33,8 | 38,3 | 50 | 27,3–63 |
+| Monde 4 · Niveau 7 | 5 | Ordinaire | 15–45 | 17 | 22,3 | 31 | 15,4–36,7 |
+| Monde 4 · Niveau 7 | 10 | Ordinaire | 15–45 | 13,6 | 17,7 | 23,1 | 11,5–28,5 |
+| Monde 4 · Niveau 7 | 15 | Ordinaire | 15–45 | 14,9 | 19 | 25,7 | 12,5–31,7 |
+| Monde 4 · Niveau 7 | 20 | Fin de monde | 25–60 | 28,3 | 36,4 | 49,9 | 23,3–57,5 |
+| Monde 5 · Niveau 7 | 5 | Ordinaire | 15–45 | 22,1 | 27,7 | 32,5 | 18,7–39,7 |
+| Monde 5 · Niveau 7 | 10 | Ordinaire | 15–45 | 16,8 | 19,4 | 23,6 | 14,5–31 |
+| Monde 5 · Niveau 7 | 15 | Ordinaire | 15–45 | 19,7 | 23 | 27,1 | 16,5–35 |
+| Monde 5 · Niveau 7 | 20 | Fin de monde | 25–60 | 32,6 | 38,5 | 45,9 | 27–56,5 |
 
 
 ## Écart entre un build mixte et les combos offensifs
@@ -535,16 +535,16 @@ La borne idéale additionne tous les tirs, y compris les diagonales guidées, su
 | Choix de run | DPS idéal / mixte au départ | DPS idéal / mixte au compte complet |
 | --- | --- | --- |
 | Mixte sans combo | ×1 | ×1 |
-| Offensif frontal / Battement triple | ×4,74 | ×5,59 |
-| Offensif frontal / Courage indomptable | ×4,09 | ×4,8 |
-| Offensif frontal / Couronne incisive | ×4,97 | ×5,51 |
-| Offensif frontal / Égide souveraine | ×3,19 | ×3,73 |
-| Offensif frontal / Force cataclysmique | ×4,76 | ×5,56 |
-| Diagonales guidées / Battement triple | ×3,8 | ×4,51 |
-| Diagonales guidées / Courage indomptable | ×3,53 | ×4,17 |
-| Diagonales guidées / Couronne incisive | ×3,94 | ×4,4 |
-| Diagonales guidées / Égide souveraine | ×2,52 | ×2,97 |
-| Diagonales guidées / Force cataclysmique | ×4,62 | ×5,44 |
+| Offensif frontal / Battement triple | ×4,74 | ×5,44 |
+| Offensif frontal / Courage indomptable | ×4,09 | ×4,67 |
+| Offensif frontal / Couronne incisive | ×4,97 | ×5,62 |
+| Offensif frontal / Égide souveraine | ×3,19 | ×3,63 |
+| Offensif frontal / Force cataclysmique | ×4,76 | ×5,42 |
+| Diagonales guidées / Battement triple | ×3,8 | ×4,39 |
+| Diagonales guidées / Courage indomptable | ×3,53 | ×4,06 |
+| Diagonales guidées / Couronne incisive | ×3,94 | ×4,48 |
+| Diagonales guidées / Égide souveraine | ×2,52 | ×2,9 |
+| Diagonales guidées / Force cataclysmique | ×4,62 | ×5,3 |
 
 
 ## Effort pour atteindre les cinq plafonds
@@ -567,11 +567,11 @@ Médianes de 2 comptes ; temps cumulé depuis le compte neuf, en heures. Tir uti
 
 | Famille | 50 % | 75 % | Maximum |
 | --- | --- | --- | --- |
-| Héros / attributs | 63,31 | 66,82 | 67,79 |
-| Équipement actif | 63,42 | 65,71 | 66,73 |
-| Trois arbres de maîtrises | 61,71 | 65,5 | 67,26 |
-| Passifs complets | 66,93 | 67,34 | 67,79 |
-| Cœurs de mana | 63,95 | 66 | 67,37 |
+| Héros / attributs | 64,23 | 68 | 68,88 |
+| Équipement actif | 65,22 | 66,72 | 67,73 |
+| Trois arbres de maîtrises | 63,54 | 67,08 | 68,46 |
+| Passifs complets | 67,9 | 68,52 | 68,88 |
+| Cœurs de mana | 64,88 | 67 | 68,54 |
 
 ### Mixte
 
@@ -579,11 +579,11 @@ Médianes de 2 comptes ; temps cumulé depuis le compte neuf, en heures. Tir uti
 
 | Famille | 50 % | 75 % | Maximum |
 | --- | --- | --- | --- |
-| Héros / attributs | 22,24 | 26,29 | 27,42 |
-| Équipement actif | 19,68 | 24,25 | 25,39 |
-| Trois arbres de maîtrises | 23,86 | 26,05 | 27,09 |
-| Passifs complets | 25,07 | 26,48 | 27,42 |
-| Cœurs de mana | 22,27 | 24,5 | 26,93 |
+| Héros / attributs | 22,92 | 27,12 | 28,32 |
+| Équipement actif | 20,01 | 25,07 | 26,29 |
+| Trois arbres de maîtrises | 24,81 | 27,11 | 28,01 |
+| Passifs complets | 25,95 | 27,38 | 28,32 |
+| Cœurs de mana | 22,95 | 25,34 | 27,82 |
 
 Le ressenti des premiers niveaux, la rentabilité du farm tardif et ces durées restent à confirmer sur téléphone. Un joueur privilégiant exclusivement un mode fera avancer les sources correspondantes plus vite ; les plafonds ne sont jamais verrouillés entre eux.
 
@@ -600,15 +600,15 @@ Huit graines fixes servent à décrire la dispersion des offres. Le compte du re
 | Situation | Run : médiane [P10–P90], min | Boss final : secondes | Contacts minimum équivalents |
 | --- | --- | --- | --- |
 | Compte neuf, chapitre 1 | 11,4 [10,7–15,2] | 18,8 [16,3–25] | 7 [6,2–7,3] |
-| Même chapitre après la première défaite | 10,7 [10,1–14,3] | 17,4 [15,6–23] | 7,3 [6,5–7,6] |
+| Même chapitre après la première défaite | 10,6 [10–14,3] | 17,3 [15,5–22,9] | 7,3 [6,5–7,6] |
 | Permanent maximum, chapitre 35 | 3,9 [3,7–4,6] | 4,8 [3,9–7] | 14,6 [12,9–15,4] |
 
-Avec le panier classique fixe au maximum, le boss final du chapitre 35 représente **5,4 secondes** à 70 % de tir utile, pour 6 309 623,9 DPS théoriques. La cohorte ci-dessus utilise les vrais choix proposés au fil des runs, donc peut obtenir d’autres résultats.
+Avec le panier classique fixe au maximum, le boss final du chapitre 35 représente **5,4 secondes** à 70 % de tir utile, pour 6 336 978,3 DPS théoriques. La cohorte ci-dessus utilise les vrais choix proposés au fil des runs, donc peut obtenir d’autres résultats.
 
 | Tir utile, vagues et boss | Compte neuf, min | Retry, min | Maximum chapitre 35, min |
 | --- | --- | --- | --- |
-| 50 % | 14,3 [13,4–19,3] | 13,4 [12,5–18,1] | 4,3 [4,1–5,2] |
-| 80 % | 9,8 [9,2–12,9] | 9,2 [8,7–12,2] | 3,7 [3,5–4,2] |
+| 50 % | 14,3 [13,4–19,3] | 13,3 [12,5–18] | 4,3 [4,1–5,2] |
+| 80 % | 9,8 [9,2–12,9] | 9,1 [8,6–12,1] | 3,7 [3,5–4,2] |
 
 ### Parcours et premier besoin de renforcement
 
@@ -616,18 +616,18 @@ Sans annexe ni replay volontaire après la première défaite, huit comptes renc
 
 | Méthode | Chapitres validés par le modèle | Niveau du compte | Runs campagne / Mine / Épreuve | Temps total, min | Plus long farm, min | Plus long farm + échecs, min |
 | --- | --- | --- | --- | --- | --- | --- |
-| Sans farm | 4 | 8 | 6 / 0 / 0 | 101,1 | 0 | 0 |
-| Lots selon le gain attendu, choix équilibrés | 35 | 23 | 49 / 0 / 39 | 840,3 | 7,3 | 37,9 |
-| Choix défensifs après un manque de survie | 35 | 23 | 49 / 0 / 39 | 840,3 | 7,3 | 37,9 |
-| Comparatif imposé : 3 replays + 3 Mines + 3 Épreuves | 35 | 26 | 59 / 12 / 15 | 971,9 | 122,9 | 126,1 |
+| Sans farm | 4 | 8 | 6 / 0 / 0 | 99,5 | 0 | 0 |
+| Lots selon le gain attendu, choix équilibrés | 35 | 23 | 48 / 3 / 33 | 843,2 | 17,7 | 37,5 |
+| Choix défensifs après un manque de survie | 35 | 23 | 48 / 3 / 33 | 843,2 | 17,7 | 37,5 |
+| Comparatif imposé : 3 replays + 3 Mines + 3 Épreuves | 35 | 27 | 63 / 15 / 18 | 1 030,7 | 119,3 | 122,4 |
 
 Le comparatif de neuf runs impose volontairement un gros lot : il ne constitue pas une obligation de jeu. La politique équilibrée reste la référence ; toutes les victoires et défaites du tableau pilotent réellement les coffres reçus.
 
 | Graine du compte équilibré | Chapitres | Niveau final | Farm maximum, min | Farm + échecs maximum, min |
 | --- | --- | --- | --- | --- |
-| 20260927 | 35 | 23 | 7,3 | 37,9 |
-| 20261936 | 35 | 23 | 17,4 | 31,9 |
-| 20262945 | 35 | 22 | 6,2 | 23,7 |
+| 20260927 | 35 | 23 | 17,7 | 37,5 |
+| 20261936 | 35 | 22 | 7,4 | 33,6 |
+| 20262945 | 35 | 23 | 19,6 | 42,6 |
 
 Avec le seuil fixe de sensibilité à 90 secondes, plus permissif que les cibles de campagne, le compte de référence sans farm rencontre ce critère dès le chapitre 12. Le choix du seuil change le diagnostic ; aucune formule ne garantit une réussite en deux essais.
 
@@ -637,41 +637,41 @@ Les achats indiquent des rangs de maîtrise / forge effectivement payés pendant
 
 | Chapitre | Niveau | Achats M / F | Mines / Épreuves / replays | Farm, min | Tentatives, min | Boss final, s | Contacts minimum |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 1 → 4 | 6 / 2 | 0 / 0 / 0 | 0 | 21,9 | 28,3 | 7,3 |
-| 2 | 4 → 6 | 3 / 1 | 0 / 0 / 0 | 0 | 17,6 | 16,3 | 7,2 |
-| 3 | 6 → 7 | 3 / 1 | 0 / 0 / 0 | 0 | 29,5 | 31,5 | 7,7 |
-| 4 | 7 → 8 | 5 / 1 | 0 / 0 / 0 | 0 | 28,8 | 33,5 | 6,4 |
-| 5 | 8 → 9 | 6 / 2 | 0 / 3 / 0 | 2,9 | 28,1 | 24,7 | 8,7 |
-| 6 | 9 → 10 | 4 / 1 | 0 / 0 / 0 | 0 | 23,5 | 26,3 | 7,4 |
-| 7 | 10 → 11 | 2 / 1 | 0 / 0 / 0 | 0 | 32,8 | 43,5 | 8,8 |
-| 8 | 11 → 12 | 6 / 3 | 0 / 3 / 0 | 2,4 | 43,2 | 19,7 | 11,1 |
-| 9 | 12 → 13 | 5 / 2 | 0 / 3 / 0 | 2,7 | 46,9 | 28,6 | 9,1 |
-| 10 | 13 → 13 | 2 / 1 | 0 / 0 / 0 | 0 | 32,8 | 41,3 | 9,2 |
-| 11 | 13 → 14 | 6 / 2 | 0 / 3 / 0 | 3,7 | 50,6 | 19,9 | 6,6 |
-| 12 | 14 → 15 | 3 / 2 | 0 / 0 / 0 | 0 | 22 | 26,2 | 7,5 |
-| 13 | 15 → 15 | 3 / 2 | 0 / 0 / 0 | 0 | 19,5 | 28,2 | 7,5 |
-| 14 | 15 → 15 | 2 / 1 | 0 / 0 / 0 | 0 | 20,2 | 39,1 | 7 |
-| 15 | 15 → 16 | 6 / 3 | 0 / 3 / 0 | 2,5 | 22,2 | 18,7 | 6,7 |
-| 16 | 16 → 16 | 1 / 2 | 0 / 0 / 0 | 0 | 16,1 | 22,6 | 7,4 |
-| 17 | 16 → 17 | 5 / 1 | 0 / 0 / 0 | 0 | 19,1 | 25,9 | 6,3 |
-| 18 | 17 → 17 | 2 / 1 | 0 / 0 / 0 | 0 | 21,5 | 39,6 | 7,4 |
-| 19 | 17 → 17 | 3 / 1 | 0 / 0 / 0 | 0 | 21,6 | 34,7 | 6,2 |
-| 20 | 17 → 18 | 7 / 2 | 0 / 6 / 0 | 5,4 | 29,4 | 41,7 | 6,7 |
-| 21 | 18 → 18 | 3 / 1 | 0 / 0 / 0 | 0 | 18,8 | 48,6 | 6,1 |
-| 22 | 18 → 19 | 5 / 1 | 0 / 3 / 0 | 3 | 21 | 25,6 | 5,8 |
-| 23 | 19 → 19 | 2 / 2 | 0 / 0 / 0 | 0 | 15,1 | 22,3 | 5,1 |
-| 24 | 19 → 19 | 5 / 1 | 0 / 3 / 0 | 2,9 | 19,9 | 22,9 | 5,5 |
-| 25 | 19 → 20 | 3 / 1 | 0 / 0 / 0 | 0 | 17,5 | 33 | 5,1 |
-| 26 | 20 → 20 | 7 / 2 | 0 / 6 / 0 | 7,3 | 19,5 | 26,9 | 3,9 |
-| 27 | 20 → 20 | 4 / 1 | 0 / 0 / 0 | 0 | 18,3 | 27,5 | 4,8 |
-| 28 | 20 → 21 | 6 / 3 | 0 / 3 / 0 | 3,3 | 28 | 28,1 | 5,8 |
-| 29 | 21 → 21 | 2 / 1 | 0 / 0 / 0 | 0 | 14,9 | 21,5 | 5,9 |
-| 30 | 21 → 21 | 3 / 1 | 0 / 0 / 0 | 0 | 14,1 | 27,6 | 5,4 |
-| 31 | 21 → 22 | 3 / 2 | 0 / 0 / 0 | 0 | 16 | 24,1 | 5,2 |
-| 32 | 22 → 22 | 5 / 1 | 0 / 0 / 0 | 0 | 12,8 | 20,5 | 5 |
-| 33 | 22 → 22 | 2 / 1 | 0 / 0 / 0 | 0 | 10,7 | 20,3 | 4,1 |
-| 34 | 22 → 22 | 3 / 3 | 0 / 0 / 0 | 0 | 12,7 | 21,4 | 5,4 |
-| 35 | 22 → 23 | 4 / 2 | 0 / 3 / 0 | 2,9 | 14,6 | 40,3 | 5,5 |
+| 1 | 1 → 4 | 6 / 2 | 0 / 0 / 0 | 0 | 21,9 | 28,1 | 7,3 |
+| 2 | 4 → 6 | 3 / 1 | 0 / 0 / 0 | 0 | 17,4 | 16 | 7,2 |
+| 3 | 6 → 7 | 3 / 1 | 0 / 0 / 0 | 0 | 29,1 | 31 | 7,7 |
+| 4 | 7 → 8 | 5 / 1 | 0 / 0 / 0 | 0 | 28 | 32,4 | 6,4 |
+| 5 | 8 → 9 | 6 / 2 | 0 / 3 / 0 | 2,8 | 26,9 | 23,5 | 8,7 |
+| 6 | 9 → 10 | 4 / 1 | 0 / 0 / 0 | 0 | 22,5 | 25 | 7,3 |
+| 7 | 10 → 11 | 2 / 1 | 0 / 0 / 0 | 0 | 31,6 | 41,7 | 8,8 |
+| 8 | 11 → 12 | 6 / 3 | 0 / 3 / 0 | 2,3 | 42,7 | 19,4 | 11,1 |
+| 9 | 12 → 13 | 5 / 2 | 0 / 3 / 0 | 2,7 | 46,5 | 28,3 | 9 |
+| 10 | 13 → 13 | 2 / 1 | 0 / 0 / 0 | 0 | 32,5 | 40,9 | 9,1 |
+| 11 | 13 → 14 | 7 / 2 | 0 / 3 / 0 | 3,7 | 50 | 19,6 | 6,4 |
+| 12 | 14 → 15 | 2 / 2 | 0 / 0 / 0 | 0 | 21,4 | 25,4 | 7,3 |
+| 13 | 15 → 15 | 3 / 2 | 0 / 0 / 0 | 0 | 19,4 | 28 | 7,4 |
+| 14 | 15 → 15 | 3 / 1 | 0 / 0 / 0 | 0 | 20,1 | 38,7 | 6,9 |
+| 15 | 15 → 16 | 6 / 3 | 0 / 3 / 0 | 2,5 | 22,1 | 18,5 | 6,8 |
+| 16 | 16 → 16 | 2 / 2 | 0 / 0 / 0 | 0 | 16,1 | 22,6 | 7,5 |
+| 17 | 16 → 17 | 3 / 1 | 0 / 0 / 0 | 0 | 19 | 25,8 | 6,4 |
+| 18 | 17 → 17 | 3 / 1 | 0 / 0 / 0 | 0 | 21,5 | 39,4 | 7,6 |
+| 19 | 17 → 17 | 3 / 1 | 0 / 0 / 0 | 0 | 21,6 | 34,6 | 6,3 |
+| 20 | 17 → 18 | 7 / 2 | 0 / 6 / 0 | 5,4 | 30,2 | 43,4 | 6,8 |
+| 21 | 18 → 18 | 2 / 1 | 0 / 0 / 0 | 0 | 20,8 | 54,5 | 6,4 |
+| 22 | 18 → 19 | 5 / 1 | 0 / 3 / 0 | 3,2 | 23,8 | 29,7 | 6,3 |
+| 23 | 19 → 19 | 3 / 3 | 0 / 6 / 0 | 7,5 | 34,2 | 32,9 | 6,8 |
+| 24 | 19 → 20 | 4 / 30 | 3 / 0 / 0 | 17,7 | 16,3 | 23,2 | 7,4 |
+| 25 | 20 → 20 | 4 / 1 | 0 / 0 / 0 | 0 | 14 | 24,4 | 7,5 |
+| 26 | 20 → 21 | 6 / 1 | 0 / 0 / 0 | 0 | 12,6 | 23,1 | 5,5 |
+| 27 | 21 → 21 | 3 / 1 | 0 / 0 / 0 | 0 | 11 | 13,8 | 8,8 |
+| 28 | 21 → 21 | 4 / 1 | 0 / 0 / 0 | 0 | 12,2 | 38,3 | 8,2 |
+| 29 | 21 → 21 | 4 / 2 | 0 / 0 / 0 | 0 | 14 | 19,2 | 8,1 |
+| 30 | 21 → 22 | 4 / 1 | 0 / 0 / 0 | 0 | 12,1 | 17,7 | 7,4 |
+| 31 | 22 → 22 | 2 / 1 | 0 / 0 / 0 | 0 | 19 | 33,6 | 7,3 |
+| 32 | 22 → 22 | 3 / 2 | 0 / 0 / 0 | 0 | 12,7 | 19,1 | 6,7 |
+| 33 | 22 → 22 | 3 / 1 | 0 / 0 / 0 | 0 | 16,8 | 26,1 | 6,4 |
+| 34 | 22 → 22 | 3 / 1 | 0 / 0 / 0 | 0 | 15,8 | 25 | 5,8 |
+| 35 | 22 → 23 | 4 / 0 | 0 / 3 / 0 | 2,1 | 17,4 | 57,5 | 5,8 |
 
 ### Temps supplémentaire aux seuils de confort
 
@@ -679,17 +679,16 @@ Le farm inclut les replays terminés ou ratés du chapitre précédent. Les éch
 
 | Chapitre | Mines / Épreuves / replays | Farm, min | Échecs, min | Somme avant succès, min | Gain DPS / PV effectifs |
 | --- | --- | --- | --- | --- | --- |
-| 5 | 0 / 3 / 0 | 2,9 | 3,2 | 6,1 | ×1,31 / ×1,13 |
-| 8 | 0 / 3 / 0 | 2,4 | 22,1 | 24,4 | ×1,15 / ×1,15 |
-| 9 | 0 / 3 / 0 | 2,7 | 23 | 25,7 | ×1,15 / ×1 |
-| 11 | 0 / 3 / 0 | 3,7 | 34,1 | 37,9 | ×1,31 / ×1 |
-| 15 | 0 / 3 / 0 | 2,5 | 8,5 | 11 | ×1,19 / ×1,07 |
-| 20 | 0 / 6 / 0 | 5,4 | 5,2 | 10,6 | ×1,45 / ×1,02 |
-| 22 | 0 / 3 / 0 | 3 | 2,4 | 5,4 | ×1,15 / ×1 |
-| 24 | 0 / 3 / 0 | 2,9 | 2,2 | 5,1 | ×1,15 / ×1 |
-| 26 | 0 / 6 / 0 | 7,3 | 5,3 | 12,6 | ×1,34 / ×1 |
-| 28 | 0 / 3 / 0 | 3,3 | 18,1 | 21,4 | ×1,15 / ×1 |
-| 35 | 0 / 3 / 0 | 2,9 | 1,8 | 4,7 | ×1,15 / ×1 |
+| 5 | 0 / 3 / 0 | 2,8 | 3,1 | 5,9 | ×1,32 / ×1,13 |
+| 8 | 0 / 3 / 0 | 2,3 | 21,8 | 24,1 | ×1,15 / ×1,15 |
+| 9 | 0 / 3 / 0 | 2,7 | 22,8 | 25,5 | ×1,15 / ×1 |
+| 11 | 0 / 3 / 0 | 3,7 | 33,8 | 37,5 | ×1,31 / ×1 |
+| 15 | 0 / 3 / 0 | 2,5 | 8,4 | 10,9 | ×1,19 / ×1,08 |
+| 20 | 0 / 6 / 0 | 5,4 | 5,2 | 10,6 | ×1,39 / ×1,02 |
+| 22 | 0 / 3 / 0 | 3,2 | 2,7 | 5,9 | ×1,15 / ×1 |
+| 23 | 0 / 6 / 0 | 7,5 | 17 | 24,5 | ×1,33 / ×1,04 |
+| 24 | 3 / 0 / 0 | 17,7 | 2,3 | 19,9 | ×1,62 / ×1,06 |
+| 35 | 0 / 3 / 0 | 2,1 | 1,8 | 3,9 | ×1,19 / ×1,03 |
 
 ### Hypothèses et limites
 
@@ -732,7 +731,7 @@ Les **PV effectifs** mesurent les dégâts bruts supportés avant la mort, hors 
 - DPS familier = attaque propre × facteur permanent d’attaque × facteur d’attaque des augments × bonus finaux / intervalle. Chaque rang de forge reste utile. Pas de critique ni de salve du héros.
 - DPS total = DPS frontal héros + DPS périodique + DPS familier. Les classes ajoutent 0 % à toutes ces sources.
 - Traits périodiques et météorites : attaque de run × coefficient propre × bonus finaux / intervalle, sur une cible immobile touchée à chaque déclenchement. Sans coefficient d’arme, critique, salve, diagonale, rebond ou Cinquième impact ; aucune prime de zone n’est ajoutée.
-- Satellites alchimiques : 50 % de l’attaque de run par contact, sans coefficient d’arme, critique, salve, diagonale ou rebond, puis bonus finaux. Les 2 cercles partagent un délai de 0,6 s par ennemi. Leur contact est exclu des DPS à distance des tableaux, comme la charge d’Élan vital ; ils n'ajoutent aucune statistique.
+- Satellites alchimiques : 50 % de l’attaque de run par contact, sans coefficient d’arme, critique, salve, diagonale ou rebond, puis bonus finaux. Les 2 cercles partagent un délai de 1 s par ennemi. Leur contact est exclu des DPS à distance des tableaux, comme la charge d’Élan vital ; ils n'ajoutent aucune statistique.
 - PV = (PV de base au niveau du héros + Vitalité + valeurs brutes des bijoux) × facteur d’équipement × facteur de maîtrises × facteur de passifs × facteur des augments. Égide multiplie le résultat après la somme des bonus de PV des autres augments.
 - Défense = (base + Vitalité + valeurs brutes des bijoux/familiers) × facteur d’équipement × facteur de maîtrises × facteur de passifs × facteur des augments.
 - Dégâts reçus = dégâts ennemis × facteur des augments × (1 + Audace) × (1 − réduction des maîtrises) × 1 000 / (1 000 + Défense).
@@ -740,7 +739,7 @@ Les **PV effectifs** mesurent les dégâts bruts supportés avant la mort, hors 
 
 ### Tir double, Salve et Battement triple
 
-**Tir double** ajoute un projectile parallèle ; seul, une copie applique ×0,7 et deux copies ×0,6 aux dégâts de chaque projectile. **Salve** ajoute une répétition et applique ×0,7. **Battement triple**, légendaire, ajoute deux répétitions à ×0,8. Ils sont cumulables : quatre salves avec leurs gains de débit additionnés, dans les deux ordres d'acquisition.
+**Tir double** ajoute un projectile parallèle ; seul, une copie retire 30 % et deux copies 40 % aux dégâts de chaque projectile. **Salve** ajoute une répétition et retire 30 %. **Battement triple**, légendaire, ajoute deux répétitions et retire 20 %. Ils sont cumulables : quatre salves avec leurs gains de débit additionnés, dans les deux ordres d'acquisition.
 
 Avec S salves de puissance P, F tirs frontaux de puissance Q et C le multiplicateur de cadence de run, le débit frontal relatif vaut **S × P + F × Q + C − 2**. La puissance de chaque impact vaut ce débit divisé par S × F × C. Les gestes et projectiles sont conservés ; leurs gains s'additionnent. Il n'y a aucun plafond de dégâts.
 
@@ -895,14 +894,14 @@ Les étapes s’ajoutent dans cet ordre : leur gain marginal dépend donc de ce 
 | --- | --- | --- | --- | --- | --- | --- |
 | Départ : baguette et homoncule, forge 0 | 140 | 143,5 | 229,6 + 30 = **259,6** | +0 % | 1 000 | 100 |
 | Même baguette, forge maximum seulement | 494 | 506,35 | 810,16 + 30 = **840,16** | +223,64 % | 1 000 | 100 |
-| Équipement complet de fin, forge maximum | 1 270,87 | 1 461,5 | 2 572,24 + 878,85 = **3 451,08** | +310,77 % | 1 746 | 325 |
-| Puis niveau 30 et 145 points d’attributs | 2 275,12 | 2 976,14 | 8 380,82 + 878,85 = **9 259,67** | +168,31 % | 3 081 | 425 |
-| Puis toutes les maîtrises | 8 580,44 | 15 575,86 | 48 450,51 + 3 314,49 = **51 765,01** | +459,04 % | 9 532,24 | 1 030,61 |
-| Puis quatre passifs de statistiques au rang 2 | 16 817,66 | 38 071,41 | 200 139,13 + 6 496,41 = **206 635,54** | +299,18 % | 18 683,18 | 1 030,61 |
-| Puis tous les Cœurs | 16 817,66 | 177 123,08 | 931 125,56 + 30 223,83 = **961 349,39** | +365,24 % | 18 683,18 | 1 030,61 |
-| Puis effet d’anneau pleinement actif | 16 817,66 | 194 835,39 | 1 024 238,12 + 33 246,21 = **1 057 484,33** | +10 % | 18 683,18 | 1 030,61 |
+| Équipement complet de fin, forge maximum | 1 269,84 | 1 460,32 | 2 570,16 + 877,15 = **3 447,3** | +310,32 % | 1 746 | 325 |
+| Puis niveau 30 et 145 points d’attributs | 2 332,48 | 3 252,35 | 9 158,62 + 877,15 = **10 035,77** | +191,12 % | 3 081 | 425 |
+| Puis toutes les maîtrises | 8 826,92 | 16 226,3 | 50 719,52 + 3 319,43 = **54 038,95** | +438,46 % | 9 557,03 | 1 028,29 |
+| Puis quatre passifs de statistiques au rang 2 | 17 300,76 | 38 070,75 | 201 110,05 + 6 506,08 = **207 616,13** | +284,2 % | 18 731,78 | 1 028,29 |
+| Puis tous les Cœurs | 17 300,76 | 177 028,99 | 935 161,74 + 30 253,27 = **965 415,02** | +365 % | 18 731,78 | 1 028,29 |
+| Puis effet d’anneau pleinement actif | 17 300,76 | 194 731,89 | 1 028 677,92 + 33 278,6 = **1 061 956,52** | +10 % | 18 731,78 | 1 028,29 |
 
-Maîtrises seules sur le matériel de départ : DPS 1 288,02, soit +396,16 % par rapport au départ.
+Maîtrises seules sur le matériel de départ : DPS 1 298,17, soit +400,07 % par rapport au départ.
 
 ## Choix offensifs, mixtes ou défensifs
 
@@ -911,9 +910,9 @@ La référence est le profil complet précédent, sans les bonus conditionnels d
 
 | Orientation | DPS | PV | Défense | PV effectifs | Coups bloqués par salle |
 | --- | --- | --- | --- | --- | --- |
-| Offensif | 12 744 390,15 (×13,26) | 18 683,18 | 1 030,61 | 39 935,1 (×1) | 0 |
-| Equilibre | 5 290 717,09 (×5,5) | 43 905,48 | 1 597,45 | 168 483,69 (×4,22) | 0 |
-| Defensif | 1 526 069,49 (×1,59) | 107 615,13 | 1 442,86 | 485 482,44 (×12,16) | 1 |
+| Offensif | 12 459 791,1 (×12,91) | 18 731,78 | 1 028,29 | 39 993,13 (×1) | 0 |
+| Equilibre | 5 313 503,67 (×5,5) | 44 019,69 | 1 593,85 | 168 687,55 (×4,22) | 0 |
+| Defensif | 1 532 562,72 (×1,59) | 107 895,06 | 1 439,6 | 486 096,61 (×12,15) | 1 |
 
 - **Offensif** : Salve, Tir double, Cadence fébrile, Cadence fébrile, Sceau de ruine, Pointe lucide, Encre mordante, Noyau pesant, Noyau pesant, Force cataclysmique.
 - **Equilibre** : Salve, Tir double, Cadence fébrile, Peau de cuivre, Baume profond, Sceau de garde, Tir indélébile, Peau de pierre, Encre mordante, Courage indomptable.
@@ -962,8 +961,8 @@ Dernière salle du dernier niveau : fragile 1 227 171,16 PV / 4 622,14 dé
 
 | Profil | DPS | PV effectifs | Impacts pour tuer le fragile | Contacts de fragile supportés | Coups de boss supportés | Secondes de tir idéal sur le boss |
 | --- | --- | --- | --- | --- | --- | --- |
-| Campagne seule, achats ci-dessus | 4 505,44 | 5 339,41 | 606,04 | 1,16 | 0,72 | 5 308,97 |
-| Profil développé par le farm | 1 057 484,33 | 39 935,1 | 6,3 | 8,64 | 5,36 | 22,62 |
+| Campagne seule, achats ci-dessus | 4 572,26 | 5 335,1 | 596,44 | 1,15 | 0,72 | 5 231,39 |
+| Profil développé par le farm | 1 061 956,52 | 39 993,13 | 6,3 | 8,65 | 5,36 | 22,52 |
 
 Moins de 1 coup supporté signifie qu’un seul coup tue, hors Sursis. Le temps sur le boss est théorique, avant augments et temps d’esquive.
 

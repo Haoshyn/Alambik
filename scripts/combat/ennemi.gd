@@ -7,7 +7,7 @@ signal mort(qui: Node, position: Vector2, couleur: Color)
 signal tir_demande(tir_ennemi: Tir, origine: Vector2, direction: Vector2)
 signal invocation_demandee(id: String, position: Vector2)
 signal touche(position: Vector2, couleur: Color)
-signal degats_recus(position: Vector2, montant: float, continu: bool)
+signal degats_recus(position: Vector2, montant: float, continu: bool, critique: bool)
 signal zone_demandee(point: Vector2, origine: Vector2, profil: Dictionary, degats: float)
 signal attaque_contact
 
@@ -36,6 +36,7 @@ var _direction_charge := Vector2.ZERO
 var _charge := preload("res://scripts/combat/trajet_charge.gd").new()
 var _anim := 0.0
 var _flash := 0.0
+var _critique_attendu := false
 var _apparition := 0.0
 var _invocations := 0
 var _contournement := 0.0
@@ -558,13 +559,18 @@ func _agir_volatile(_delta: float) -> void:
 			pv = 0.0
 			_mourir()
 
+# Le prochain coup recu vient d'un critique : seul l'affichage le distingue.
+func marquer_critique() -> void:
+	_critique_attendu = true
+
 func recevoir_degats(montant: float, effets: Array = [], puissances: Dictionary = {}) -> void:
 	if pv <= 0.0:
 		return
 	var facteur := (1.0 + (Reglages.ACIDE_VULNERABILITE - 1.0) * _puissance_acide) if _acide > 0.0 else 1.0
 	var degats := montant * facteur
 	pv -= degats
-	degats_recus.emit(global_position, degats, false)
+	degats_recus.emit(global_position, degats, false, _critique_attendu)
+	_critique_attendu = false
 	_flash = 1.0
 	touche.emit(global_position, donnees["couleur"])
 	for effet in effets:
@@ -606,7 +612,7 @@ func _appliquer_effets(delta: float) -> void:
 	if dot_dps > 0.0:
 		var degats := dot_dps * delta
 		pv -= degats
-		degats_recus.emit(global_position, degats, true)
+		degats_recus.emit(global_position, degats, true, false)
 		if pv <= 0.0:
 			_mourir()
 
@@ -622,8 +628,9 @@ func _mourir() -> void:
 func _draw() -> void:
 	if bool(donnees.get("elite", false)):
 		var rayon := float(donnees["rayon"])
-		draw_arc(Vector2.ZERO, rayon + 7.0, 0, TAU, 32, Color(RangsEnnemis.COULEUR_ELITE, .7), 2.0)
-		draw_string(ThemeDB.fallback_font, Vector2(-23,-rayon-31), "ÉLITE", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, RangsEnnemis.COULEUR_ELITE)
+		draw_arc(Vector2.ZERO, rayon + 7.0, 0, TAU, 32, Color(RangsEnnemis.COULEUR_ELITE, .7), 3.0, true)
+		DessinJeu.texte_centre(self, Polices.JEU_FORT, Vector2(0, -rayon - 50.0), "ÉLITE", 22,
+			RangsEnnemis.COULEUR_ELITE.lightened(0.2), Color("3a1a05"))
 	if has_meta("visuel_3d"):
 		_dessiner_telegraphe(float(donnees["rayon"]))
 		_dessiner_barre_de_vie(float(donnees["rayon"]))
@@ -667,12 +674,8 @@ func _dessiner_telegraphe(r: float) -> void:
 func _dessiner_barre_de_vie(r: float) -> void:
 	if pv >= pv_max:
 		return
-	var largeur := maxf(56.0, r * 2.2)
-	var haut := -r - 22.0
-	var barre := Rect2(-largeur / 2.0, haut, largeur, 9.0)
-	draw_rect(barre.grow(4.0), Color(0.008, 0.012, 0.022, 0.88))
-	draw_rect(barre, Color(0.20, 0.035, 0.055, 0.94))
-	var pleine := barre.grow(-2.0)
-	pleine.size.x *= clampf(pv / pv_max, 0.0, 1.0)
-	draw_rect(pleine, Palette.DANGER)
-	draw_rect(barre, Color(Palette.OR, 0.62), false, 2.0)
+	var largeur := maxf(64.0, r * 2.3)
+	var barre := Rect2(-largeur / 2.0, -r - 30.0, largeur, 16.0)
+	var elite := bool(donnees.get("elite", false))
+	var teinte := Color("ffb04a") if elite else Color("ff5d6c")
+	DessinJeu.jauge(self, barre, clampf(pv / pv_max, 0.0, 1.0), teinte.lightened(0.25), teinte.darkened(0.3))

@@ -7,14 +7,16 @@ const TIR_DOUBLE_ECART := 24.0
 const MALUS_TIRS_MULT := 0.70
 const TIR_DOUBLE_PERTE_COPIE := 0.10
 const PUISSANCE_BATTEMENT_MULT := 0.80
-const ELAN_VITAL_CHARGE := 0.45
-const ELAN_VITAL_BONUS_DEGATS := 0.45
+# Une seconde de deplacement charge un bonus plus fort que l'ancien
+# demi-pas : la valeur affichee reste entiere.
+const ELAN_VITAL_CHARGE := 1.0
+const ELAN_VITAL_BONUS_DEGATS := 0.60
 
 const SATELLITES_NOMBRE := 2
 const SATELLITES_ORBITE := 135.0
 const SATELLITES_RAYON := 22.0
 const SATELLITES_PERIODE := 2.8
-const SATELLITES_INTERVALLE_IMPACT := 0.60
+const SATELLITES_INTERVALLE_IMPACT := 1.0
 const SATELLITES_PART_ATTAQUE := 0.50
 
 const TRAIT_INTERVALLE := 3.0

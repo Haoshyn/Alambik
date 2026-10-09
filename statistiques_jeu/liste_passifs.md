@@ -4,7 +4,7 @@
 
 - 4 emplacements équipables. Un passif non équipé ne donne aucun bonus.
 - 2 rangs par passif. Un doublon passe au rang 2 : les bonus de statistiques se composent et conservent leur gain relatif ; les points de critique s’additionnent. Les taux de niveau suivent les paliers du héros.
-- Pour l’attaque, les PV, la défense et la cadence, les bonus des passifs s’additionnent entre eux, puis multiplient les statistiques déjà obtenues. Un +30 % d’attaque de passifs multiplie donc cette attaque par 1,30.
+- Pour l’attaque, les PV, la défense et la cadence, les bonus des passifs s’additionnent entre eux, puis multiplient les statistiques déjà obtenues. Un +30 % d’attaque de passifs augmente donc de 30 % l’attaque déjà acquise. Le second rang suit le cumul composé, arrondi à un pourcentage entier.
 - Les soins, la vitesse de déplacement et celle des projectiles gardent un cumul additif avec les autres sources permanentes. Les critiques s’ajoutent en points ; la chance est plafonnée à 100 %.
 - Audace et Reprise de souffle s’additionnent dans un même facteur de dégâts finaux : 1 + Audace + Reprise active + éventuel Élan offensif du bijou. Reprise exige une période sans blessure ; Audace augmente aussi les dégâts subis.
 - Ils s’obtiennent dans les Épreuves, sans dépense de Gouttes ni de Pierres. La campagne n’en offre pas.
@@ -86,7 +86,7 @@ Vitesse et portée des tirs +8 % par rang, cumul composé.
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +8 % vitesse et portée des tirs |
-| 2 | +16,6 % vitesse et portée des tirs |
+| 2 | +17 % vitesse et portée des tirs |
 
 ### Reprise de souffle
 
@@ -97,7 +97,7 @@ Après 10 s sans blessure, dégâts +5 % par rang, cumul composé.
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +5 % de dégâts après 10 s sans blessure |
-| 2 | +10,3 % de dégâts après 10 s sans blessure |
+| 2 | +11 % de dégâts après 10 s sans blessure |
 
 ### Audace
 
@@ -143,7 +143,7 @@ Soins reçus +5 % par rang, cumul composé.
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +5 % soins reçus |
-| 2 | +10,3 % soins reçus |
+| 2 | +11 % soins reçus |
 
 ### Récupération
 
@@ -160,12 +160,12 @@ Rend 1 % des PV maximum à l’entrée d’une salle par rang.
 
 **Obtention :** Épreuve · niveau 2.
 
-Rend 2,5 % des PV maximum toutes les 6 éliminations par rang.
+Rend 3 % des PV maximum toutes les 7 éliminations par rang.
 
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
-| 1 | 2,5 % des PV toutes les 6 éliminations |
-| 2 | 5 % des PV toutes les 6 éliminations |
+| 1 | 3 % des PV toutes les 7 éliminations |
+| 2 | 6 % des PV toutes les 7 éliminations |
 
 ## Utilitaire
 
@@ -178,7 +178,7 @@ Vitesse +5 % par rang, cumul composé.
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +5 % vitesse |
-| 2 | +10,3 % vitesse |
+| 2 | +11 % vitesse |
 
 ### Sang-froid
 
@@ -200,7 +200,7 @@ Gouttes gagnées +5 % par rang, cumul composé.
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +5 % de gouttes |
-| 2 | +10,3 % de gouttes |
+| 2 | +11 % de gouttes |
 
 ### Savoir pratique
 
@@ -211,13 +211,13 @@ XP de compte gagnée +5 % par rang, cumul composé.
 | Rang | Effet au niveau maximal du héros |
 | --- | --- |
 | 1 | +5 % d’XP de compte |
-| 2 | +10,3 % d’XP de compte |
+| 2 | +11 % d’XP de compte |
 
 ## Cœurs de mana des Épreuves
 
 Chaque niveau d’Épreuve possède un Cœur unique, garanti au plus tard après 3 victoires sans son Cœur.
 
-Chaque Cœur multiplie les dégâts déjà acquis par 1,15. Avec 11 Cœurs, le facteur final atteint ×4,65 (+365,24 %). Le dernier Cœur conserve donc le même gain relatif que le premier.
+Chaque Cœur ajoute 15 % aux dégâts déjà acquis. Avec 11 Cœurs, le bonus total atteint +365 %, arrondi au pourcentage entier. Le dernier Cœur conserve donc le même gain relatif que le premier.
 
 ## Anciennes sauvegardes
 

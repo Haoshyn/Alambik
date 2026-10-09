@@ -64,8 +64,9 @@ func _groupes() -> void:
 	nombres.ajouter(1, Vector2.ZERO, -10.0, 20.0)
 	nombres.ajouter(1, Vector2.ZERO, NAN, 20.0)
 	_exiger(nombres._nombres.is_empty(), "Un non-degat est affiche")
-	_exiger(Nombres.formater(12.6) == "13" and Nombres.formater(1240.0) == "1,2k"
-		and Nombres.formater(2.0e6) == "2M" and Nombres.formater(0.4) == "0,4", "Nombre compact incorrect")
+	_exiger(Nombres.formater(12.6) == "13" and Nombres.formater(1240.0) == "1240"
+		and Nombres.formater(12400.0) == "12k" and Nombres.formater(2.0e6) == "2M"
+		and Nombres.formater(0.4) == "1", "Nombre compact incorrect")
 
 func _degats_reels(id: String) -> void:
 	var salle: Node2D = load("res://scripts/monde/salle.gd").new()
@@ -86,7 +87,7 @@ func _degats_reels(id: String) -> void:
 	# La victoire de salle n'entre pas dans ce controle des impacts et de la mort.
 	salle.set("_finie", true)
 	var mesures: Array[Dictionary] = []
-	ennemi.connect("degats_recus", func(_position: Vector2, montant: float, continu: bool) -> void:
+	ennemi.connect("degats_recus", func(_position: Vector2, montant: float, continu: bool, _critique: bool) -> void:
 		mesures.append({"montant": montant, "continu": continu}))
 	ennemi.call("recevoir_degats", 10.0, ["acide"])
 	var avant := float(ennemi.get("pv"))

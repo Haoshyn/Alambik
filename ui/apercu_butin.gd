@@ -40,20 +40,20 @@ func _ready() -> void:
 	if mode == "epreuves":
 		if not (offre["passifs"] as Array).is_empty():
 			precisions.add_child(StyleAzur.texte("Garantie de ce niveau : un passif sous %d victoire(s) maximum. Le compteur repart après chaque passif obtenu." % maxi(1,Reglages.EPREUVE_GARANTIE_CAPACITE-ReglagesJoueur.epreuves_ratees(niveau_epreuve)),27,StyleAzur.ATTENUE))
-		precisions.add_child(StyleAzur.texte("Un passif au maximum. Les passifs au rang maximal sortent du tirage.\nSans passif : %.0f %%" % [(1.0 - float(offre["chance_passif"])) * 100.0], 27, StyleAzur.ATTENUE))
+		precisions.add_child(StyleAzur.texte("Un passif au maximum. Les passifs au rang maximal sortent du tirage.\nPassif : %s" % _chance(float(offre["chance_passif"])), 27, StyleAzur.ATTENUE))
 		if ReglagesJoueur.coeur_mana_obtenu(niveau_epreuve):
 			precisions.add_child(StyleAzur.texte("Cœur de mana déjà obtenu dans ce niveau.", 27, StyleAzur.CUIVRE))
 		else:
-			precisions.add_child(StyleAzur.texte("Cœur de mana : %.0f %% · garanti sous %d victoire(s) maximum. Un seul pour ce niveau." % [float(offre["chance_coeur"]) * 100.0, maxi(1, Reglages.EPREUVE_GARANTIE_COEUR - ReglagesJoueur.epreuves_sans_coeur_mana(niveau_epreuve))], 27, StyleAzur.CUIVRE))
+			precisions.add_child(StyleAzur.texte("Cœur de mana : %s · garanti sous %d victoire(s) maximum. Un seul pour ce niveau." % [_chance(float(offre["chance_coeur"])), maxi(1, Reglages.EPREUVE_GARANTIE_COEUR - ReglagesJoueur.epreuves_sans_coeur_mana(niveau_epreuve))], 27, StyleAzur.CUIVRE))
 	elif mode == "grimoire":
 		if not (offre["objets"] as Array).is_empty():
 			precisions.add_child(StyleAzur.texte("Garantie de ce niveau : objet sous %d victoire(s) complètes maximum." % maxi(1,Recompenses.GARANTIE_APRES_GRANDS_COFFRES-ReglagesJoueur.grands_coffres_rates(chapitre)),27,StyleAzur.ATTENUE))
-		precisions.add_child(StyleAzur.texte("Sans objet à la victoire : %.0f %%\nUn objet manquant garanti au plus tard au %de coffre complet du même niveau." % [(1.0 - float(offre["chance_objet"])) * 100.0, Recompenses.GARANTIE_APRES_GRANDS_COFFRES], 27, StyleAzur.ATTENUE))
+		precisions.add_child(StyleAzur.texte("Objet à la victoire : %s\nUn objet manquant garanti au plus tard au %de coffre complet du même niveau." % [_chance(float(offre["chance_objet"])), Recompenses.GARANTIE_APRES_GRANDS_COFFRES], 27, StyleAzur.ATTENUE))
 		var paliers: Array[String] = []
 		for coffre: Dictionary in Recompenses.COFFRES:
 			var palier := int(coffre["palier"])
 			if palier > 0 and palier < Reglages.SALLES_PAR_RUN:
-				paliers.append("%d salles terminées : %.1f %%" % [palier, float(coffre["chance_objet"]) * 100.0])
+				paliers.append("%d salles terminées : %s" % [palier, _chance(float(coffre["chance_objet"]))])
 		precisions.add_child(StyleAzur.texte("Même en cas de défaite, le coffre peut donner un bijou manquant :\n" + " · ".join(paliers)
 			+ ".\nLes défaites ne font pas avancer le compteur des trois victoires.", 27, StyleAzur.ATTENUE))
 	precisions.add_child(StyleAzur.texte("Gains conservés après chaque salle. Les boss améliorent le coffre.\nPassifs et Cœurs de mana : victoire en Épreuve.\nMontants avec vos bonus, hors augments.", 27, StyleAzur.ATTENUE))
@@ -80,7 +80,7 @@ func _ajouter_carte(col: VBoxContainer, id: String, type: String, chance: float)
 	textes.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	textes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	ligne.add_child(textes)
-	textes.add_child(StyleAzur.texte("GARANTI" if chance >= 1.0 else "CHANCE D’OBTENTION · %.1f %%" % (chance * 100.0), 22, StyleAzur.CUIVRE))
+	textes.add_child(StyleAzur.texte("GARANTI" if chance >= 1.0 else "CHANCE D’OBTENTION · %s" % _chance(chance).to_upper(), 22, StyleAzur.CUIVRE))
 	textes.add_child(StyleAzur.texte(str(d["nom"]), 32))
 	textes.add_child(StyleAzur.texte(_resume_objet(id, 0) if type == "objet" else str(d["description"]), 25, StyleAzur.ATTENUE))
 	var consulter := HBoxContainer.new()
@@ -95,6 +95,16 @@ func _ajouter_carte(col: VBoxContainer, id: String, type: String, chance: float)
 	marge.minimum_size_changed.connect(func(): carte.custom_minimum_size.y = maxf(204.0, marge.get_combined_minimum_size().y))
 	StyleAzur.case_objet(carte)
 	col.add_child(carte)
+
+# Les tirages sont des fractions simples : « 1 chance sur 3 » reste exact
+# sans afficher de decimale.
+static func _chance(chance: float) -> String:
+	if chance >= 0.9995: return "garanti"
+	if chance <= 0.0: return "aucune chance"
+	var sur := roundi(1.0 / chance)
+	if absf(1.0 / float(sur) - chance) < 0.0005:
+		return "1 chance sur %d" % sur
+	return "%d %%" % roundi(chance * 100.0)
 
 func _resume_objet(id: String, niveau: int) -> String:
 	return CatalogueObjets.description_bonus(id, niveau)

@@ -61,11 +61,23 @@ elles conservent les idées historiques sans définir le rendu actuel.
   orbitaux, trait périodique et météorite facettée. L'anneau de chute annonce
   sa zone réelle ; le mode réduit conserve les positions et les gestes utiles.
   Les formes sont procédurales et originales.
-- Les dégâts infligés s'affichent en petits nombres crème au-dessus de la
-  cible : impulsion brève, légère montée, puis fondu. La braise est dorée.
-  Les grands nombres sont abrégés, les impacts proches regroupés, avec un
-  contour fin pour le contraste. Les effets réduits gardent un seul nombre
-  sobre par cible, sans rebond ni dérive latérale ; impacts et braise s'y additionnent.
+- Les dégâts infligés s'affichent en nombres entiers épais (Nunito très grasse,
+  contour sombre) au-dessus de la cible : jaillissement, montée freinée et
+  dérive alternée, puis fondu. Les critiques sont plus gros, dorés, inclinés et
+  éclatent dans des rayons ; la braise est orange et plus petite. Les nombres
+  restent complets jusqu'à 9 999, puis s'abrègent sans décimale (12k, 2M).
+  Les impacts proches sont regroupés ; les dégâts subis par le héros montent
+  en rouge, précédés d'un signe moins. Les effets réduits gardent un seul
+  nombre sobre par cible, sans rebond ni dérive.
+- Retours de combat : éclair blanc bref sur l'ennemi touché, ombre de contact
+  sous chaque acteur (les ombres projetées restent coupées sur Android),
+  éclats plus nombreux, noyau lumineux aux impacts et aux morts, anneau et
+  secousse pour les élites et les boss. Les coups reçus, la mort d'un élite ou
+  d'un boss et la météorite secouent la caméra (option Secousses) ; un
+  micro-arrêt de quelques centièmes souligne les coups reçus et la chute d'un
+  boss. Une vignette indigo concentre le regard ; le rendu 3D passe en courbe
+  filmique, plus contrasté et saturé, avec un halo doux sur les éléments clairs.
+  Les effets réduits retirent halo, micro-arrêts, éclairs et jaillissements.
 - Chaque tireur possède un contour de projectile original, partagé par ses
   rendus 2D et 3D. Le volume et sa lueur suivent les dimensions de collision ;
   les grosses boules, les traits et les lames revenantes se distinguent par
@@ -161,7 +173,37 @@ elles conservent les idées historiques sans définir le rendu actuel.
   acteurs. Les rafales d'Air sont indiquées par des flèches pâles, visibles
   avant et pendant la poussée ; elles disparaissent pendant l'accalmie.
 
-## Interface — Émail arcanique (A)
+## Interface — Émail serti (refonte du 9 octobre 2026)
+
+- Demande du propriétaire : un rendu « jeu », moins sobre. Toutes les surfaces
+  passent par `scripts/interface/style_box_jeu.gd` (StyleBoxJeu) : contour
+  sombre, monture dorée en dégradé, épaisseur visible sous la face, face en
+  dégradé, reflet supérieur et filet clair. `scripts/interface/style_jeu.gd`
+  fournit les teintes (ambre pour l'action principale, améthyste par défaut,
+  azur, émeraude, rubis pour l'abandon, nuit pour les panneaux), les cartes de
+  rareté (rare azur, épique améthyste, légendaire ambre avec lueur), les textes
+  épais à contour et les animations communes (appui écrasé puis rebond avec
+  clic, distribution des cartes). `scripts/interface/dessin_jeu.gd` dessine les
+  jauges bombées, pastilles, rayons et textes des éléments tracés (HUD,
+  annonces, nombres de dégâts).
+- Le contraste vient de la typographie : Nunito 800 à 1000 avec contour sombre
+  et ombre portée, jamais d'un petit rectangle posé sous un texte. Les anciennes
+  zones de lecture ivoire deviennent de l'émail sombre ; les encres sombres sont
+  converties en teintes claires par `StyleAzur.teinte_lisible`.
+- HUD : pause ronde en émail, cartouche de salle avec badge de niveau et jauge
+  d'XP animée, pastilles de ressources, barre de boss avec trace claire des
+  dégâts récents et quatre graduations, vignette rouge pulsée quand la vie est
+  basse. Des bandeaux centraux annoncent l'arrivée d'un boss et la salle nettoyée.
+- Les cartes d'augment ressemblent à des cartes à collectionner : monture et
+  lueur de rareté, médaillon coloré (rayons tournants pour les légendaires),
+  pastilles de rareté et de rang, valeurs chiffrées en or, reflet balayant les
+  épiques et légendaires. Elles sont distribuées une à une ; la carte choisie
+  grossit, les autres s'effacent, et un arpège propre à la rareté retentit.
+- La barre de navigation soulève l'onglet actif sur une pastille à la couleur
+  de son menu ; la fin de partie affiche « VICTOIRE ! » dans des rayons dorés
+  ou une défaite sobre, avec sa fanfare.
+
+## Interface — Émail arcanique (A), état antérieur conservé quand il reste vrai
 
 - Composer la silhouette globale avant les composants : pas de succession de
   cartes uniformes ni de présentation dashboard. Héros autour de grandes jauges colorées,
@@ -189,12 +231,10 @@ elles conservent les idées historiques sans définir le rendu actuel.
   magique et champagne servent d'accents, avec des ombres indigo.
   Pas de bois sculpté, de grain ni de microgravures dans les contrôles.
   Le décor reste naturel : jardin calme et magie visible mais légère, sans thème céleste.
-- Boutons en émail mat, bord métallique fin et zones de lecture ivoire avec
-  encre bleue. Les reflets sont localisés ; éviter les grosses gemmes répétées,
-  les contours blancs continus et les ombres épaisses qui donnent un aspect
-  plastique. Les actions secondaires restent violettes ou indigo ; les actions
-  principales du menu prennent l'accent de leur page et Jouer utilise un dégradé
-  orange et braise adoucie, bordé de cuivre, avec texte crème calligraphié.
+- Boutons en émail bombé serti d'or (voir la refonte ci-dessus). Les actions
+  secondaires restent violettes ou indigo ; les actions principales du menu
+  prennent l'accent de leur page et Jouer garde son dégradé orange et braise,
+  avec un texte crème très gras à contour brun.
   Les signes magiques utilisent le cyan par touches. Les nœuds de maîtrise
   utilisent des sceaux circulaires ; les attributs du héros associent un glyphe,
   une jauge graduée animée et des commandes en émail +/− pour répartir les points. L'onglet actif agrandit
@@ -310,13 +350,12 @@ elles conservent les idées historiques sans définir le rendu actuel.
 - L'accueil reste `ui/accueil_clairiere.tscn` pour conserver les références.
   Le bas contient les cinq onglets Héros, Équipement, Aventure, Maîtrises et
   Passifs : les libellés colorés restent visibles ; l'onglet actif grandit légèrement.
-- Typographie : DM Sans gras pour la lecture, extra-gras pour les chiffres et
-  les bonus ; Grenze à graisse native 750 pour les titres, attributs, noms de
-  passifs et onglets. Fondamento reste disponible pour les anciens éléments.
-  Les textes sur illustration ont
-  une ombre nette ou un voile indigo discret ; les petites légendes ne reposent
-  jamais sur un contour épais. Garder les textes longs en DM Sans. Les trois
-  familles sont fournies avec leur licence OFL dans `assets/fonts/`.
+- Typographie : Nunito 800 pour la lecture, 900 pour les titres et 1000 pour
+  les chiffres, avec un contour sombre proportionné à la taille. La graisse des
+  polices variables est déclarée par l'étiquette numérique `wght`
+  (2003265652) : la clé texte était ignorée et laissait tout le jeu en graisse
+  fine. Grenze reste réservée au titre des chargements ; DM Sans et Fondamento
+  restent fournis. Les quatre familles ont leur licence OFL dans `assets/fonts/`.
 - Les zones sûres sont prises en compte sur les quatre côtés. La largeur de
   lecture est plafonnée ; grilles et groupes d'actions se recomposent. L'accueil
   peut défiler si sa hauteur minimale dépasse la place disponible, sans rogner

@@ -26,6 +26,15 @@ const HEROS_OS_HAUT := [
 	"UpperArm.R", "Forearm.R", "Hand.R", "UpperArm.L", "Forearm.L", "Hand.L",
 ]
 const OMBRES_ANDROID := false
+# Rendu « jeu » : courbe filmique, contraste et saturation releves, halo
+# lumineux autour des tirs et impacts clairs. Le halo reste a mesurer sur
+# telephone ; il disparait avec les effets reduits.
+const LUEUR_ANDROID := true
+const AMBIANCE_CONTRASTE := 1.12
+const AMBIANCE_SATURATION := 1.18
+const AMBIANCE_EXPOSITION := 1.05
+const LUEUR_INTENSITE := 0.55
+const LUEUR_SEUIL := 0.88
 const PARTICULES_MAX := 160
 const PARTICULES_REDUITES := 48
 const DEPOTS_EXPERIENCE_MAX := 96
@@ -35,6 +44,20 @@ const COMMUNS := {
 	"ruban": "marge_harceleuse", "miroir": "miroir_encre", "phaseur": "cachet_phaseur",
 	"fuseau": "fuseau_tisseur", "fiole": "fiole_volatile",
 }
+
+static func regler_ambiance(environnement: Environment, reduit: bool) -> void:
+	environnement.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	environnement.tonemap_exposure = AMBIANCE_EXPOSITION
+	environnement.tonemap_white = 2.4
+	environnement.adjustment_enabled = true
+	environnement.adjustment_contrast = AMBIANCE_CONTRASTE
+	environnement.adjustment_saturation = AMBIANCE_SATURATION
+	environnement.glow_enabled = not reduit and (OS.get_name() != "Android" or LUEUR_ANDROID)
+	environnement.glow_intensity = LUEUR_INTENSITE
+	environnement.glow_strength = 1.0
+	environnement.glow_bloom = 0.0
+	environnement.glow_hdr_threshold = LUEUR_SEUIL
+	environnement.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
 
 static func chemin_ennemi(donnees: Dictionary) -> String:
 	if donnees.get("cerveau", "") == "boss":

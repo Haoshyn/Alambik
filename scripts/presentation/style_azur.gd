@@ -103,21 +103,11 @@ static func icone_arme(id: String) -> Texture2D:
 	return _icones[cle]
 
 static func cadre(couleur := PANNEAU, bord := CUIVRE, rayon := 28) -> StyleBox:
-	var cle := couleur.to_html()+bord.to_html()+str(rayon)
-	if _cadres.has(cle): return _cadres[cle]
-	var nom := "cadre" if couleur.a == 0.0 else ("medaillon" if rayon >= 60 else "panneau")
-	var style := texture_etirable(nom, 24, 12 if rayon >= 60 else 48, 12 if rayon >= 60 else 36)
-	style.draw_center = couleur.a > 0.0
-	style.modulate_color = Color.WHITE.lerp(bord, 0.08)
-	if couleur.a > 0.0:
-		style.modulate_color = style.modulate_color.lerp(couleur.lightened(0.75), 0.06)
-		style.modulate_color.a = couleur.a
-	_cadres[cle] = style
-	return style
+	var accent := Color() if bord == CUIVRE else bord
+	return StyleJeu.panneau(accent, float(mini(rayon, 40)), clampf(couleur.a, 0.4, 0.97) if couleur.a > 0.0 else 0.55)
 
 static func bouton(texte: String, action := Callable(), principal := false) -> Button:
 	var b := Button.new()
-	HabillagePeint.appliquer(b)
 	b.text = texte
 	if texte.begins_with("‹") or texte.ends_with("›"):
 		var retour := texte.begins_with("‹")
@@ -132,22 +122,11 @@ static func bouton(texte: String, action := Callable(), principal := false) -> B
 	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	b.custom_minimum_size.y = Ecran.CIBLE_TACTILE
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	b.add_theme_font_override("font", Polices.CORPS)
-	if principal: b.add_theme_font_override("font",TITRE_ATELIER)
-	b.add_theme_font_size_override("font_size", 29)
+	# Email bombe : ambre pour l'action principale, amethyste pour le reste.
 	StyleInterface.styliser_bouton(b, MAGIE if principal else CUIVRE, not principal)
-	b.add_theme_stylebox_override("normal",sceau(principal))
-	b.add_theme_stylebox_override("hover",sceau(principal, Color("eee7ff")))
-	b.add_theme_stylebox_override("pressed",sceau(principal, Color.WHITE, true))
-	b.add_theme_stylebox_override("disabled",sceau(principal, Color("8993aa")))
-	for etat in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
-		b.add_theme_color_override(etat, IVOIRE)
-	b.add_theme_color_override("font_disabled_color", Color("c1c7d8"))
-	b.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
-	if principal:
-		b.add_theme_font_size_override("font_size",34)
-	b.add_theme_constant_override("outline_size",1)
-	b.add_theme_color_override("font_outline_color",OMBRE_CLAIRIERE)
+	b.add_theme_font_override("font", Polices.JEU_FORT if principal else Polices.JEU)
+	b.add_theme_font_size_override("font_size", 36 if principal else 30)
+	b.add_theme_constant_override("outline_size", 9 if principal else 7)
 	if b.icon != null: b.add_theme_constant_override("icon_max_width", 34)
 	if action.is_valid(): b.pressed.connect(action)
 	return b
@@ -183,27 +162,8 @@ static func habiller_accueil(b: Button, principal := false) -> void:
 	b.add_theme_font_size_override("font_size", 44 if principal else 30)
 
 static func action_coloree(b: Button, accent: Color, rayon := 34) -> void:
-	for etat in ["normal", "hover", "pressed", "disabled"]:
-		var style := StyleBoxFlat.new()
-		style.bg_color = accent.lightened(0.12) if etat == "hover" else accent.darkened(0.16) if etat == "pressed" else Color("78829a") if etat == "disabled" else accent
-		style.border_color = Color("fff6d9") if etat != "disabled" else Color("aeb6c9")
-		style.set_border_width_all(3)
-		style.corner_radius_top_left = rayon
-		style.corner_radius_top_right = rayon
-		style.corner_radius_bottom_left = rayon
-		style.corner_radius_bottom_right = rayon
-		style.shadow_color = Color("14203b99")
-		style.shadow_size = 7 if etat != "pressed" else 2
-		style.shadow_offset = Vector2(0, 5 if etat != "pressed" else 2)
-		for cote in [SIDE_LEFT, SIDE_RIGHT]:
-			style.set_content_margin(cote, 26)
-		for cote in [SIDE_TOP, SIDE_BOTTOM]:
-			style.set_content_margin(cote, 16)
-		b.add_theme_stylebox_override(etat, style)
-	for etat in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
-		b.add_theme_color_override(etat, Color("342747"))
-	b.add_theme_color_override("font_outline_color", Color("fff2c7"))
-	b.add_theme_color_override("font_disabled_color", Color("e7e7ef"))
+	var taille := b.get_theme_font_size("font_size") if b.has_theme_font_size_override("font_size") else 32
+	StyleJeu.habiller_bouton(b, teinte_proche(accent), taille, float(rayon))
 	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 
 static func habiller_mode(b: Button, mode: String) -> void:
@@ -213,112 +173,70 @@ static func habiller_mode(b: Button, mode: String) -> void:
 		style.modulate_color = Color("edf6fa") if etat == "hover" else Color("b6bac7") if etat == "disabled" else Color("c6c0d1") if etat == "pressed" else Color.WHITE
 		b.add_theme_stylebox_override(etat, style)
 
+# Texte de jeu : graisse epaisse et contour sombre. Le contraste vient de la
+# typographie, jamais d'un rectangle pose sous les mots.
 static func texte(contenu: String, taille := 30, couleur := TEXTE) -> Label:
 	var l := Label.new()
 	l.text = contenu
-	l.add_theme_font_override("font", Polices.TITRE if taille >= 34 else Polices.CORPS)
-	l.add_theme_font_size_override("font_size", maxi(28, taille))
-	l.add_theme_color_override("font_color",couleur)
-	l.add_theme_color_override("font_outline_color", Color("1a2644e8"))
-	l.add_theme_constant_override("outline_size", 1)
-	l.add_theme_color_override("font_shadow_color",Color("17233bd9"))
-	l.add_theme_constant_override("shadow_offset_x",0)
-	l.add_theme_constant_override("shadow_offset_y",2)
-	l.add_theme_constant_override("line_spacing",4)
+	StyleJeu.habiller_texte(l, maxi(26, taille), teinte_lisible(couleur), StyleJeu.CONTOUR_TEXTE, taille >= 34)
+	l.add_theme_constant_override("line_spacing", 2)
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	l.tree_entered.connect(func(): _adapter_encre(l, couleur))
 	return l
 
-# La surface la plus proche decide du contraste, meme dans les panneaux imbriques.
-static func _adapter_encre(label: Label, couleur: Color) -> void:
-	label.add_theme_color_override("font_color", couleur)
-	label.add_theme_color_override("font_shadow_color", Color("17233bd9"))
-	label.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
-	var ancetre := label.get_parent()
-	while ancetre != null:
-		if ancetre.has_meta("surface_lecture"):
-			if bool(ancetre.get_meta("surface_lecture")):
-				var encre := ENCRE_ATTENUE if couleur == ATTENUE else ENCRE
-				if couleur not in [TEXTE, IVOIRE, ATTENUE, ENCRE]:
-					encre = couleur.darkened(0.57)
-				label.add_theme_color_override("font_color", encre)
-				label.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
-				label.add_theme_constant_override("outline_size", 0)
-			return
-		if ancetre is BaseButton:
-			return
-		ancetre = ancetre.get_parent()
-	# Les legendes hors panneau gardent un support stable sur les decors animes.
-	var support := fond_legende(0.94, 8)
-	if couleur in [ENCRE, ENCRE_ATTENUE]:
-		support.bg_color = IVOIRE
-		label.add_theme_constant_override("outline_size", 0)
-		label.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
-	label.add_theme_stylebox_override("normal", support)
-
-static func fond_legende(opacite := 0.78, rayon := 18) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(FOND, opacite)
-	style.set_corner_radius_all(rayon)
-	return style
+# Les anciennes encres sombres etaient prevues pour des fiches claires :
+# sur l'email sombre, elles deviennent les teintes claires correspondantes.
+static func teinte_lisible(couleur: Color) -> Color:
+	if couleur == ENCRE: return TEXTE
+	if couleur == ENCRE_ATTENUE: return StyleJeu.TEXTE_DOUX
+	if couleur.get_luminance() < 0.42: return couleur.lightened(0.55)
+	return couleur
 
 static func calligraphie(contenu: String, taille: int, couleur: Color) -> Label:
 	var label := texte(contenu, taille, couleur)
-	label.add_theme_font_override("font", Polices.GRIMOIRE)
+	StyleJeu.habiller_texte(label, taille, teinte_lisible(couleur).lightened(0.12), StyleJeu.CONTOUR_TEXTE, true)
 	return label
 
-static func cadre_enlumine(accent: Color, selection := false, interieur := true) -> StyleBoxTexture:
-	var style := StyleBoxTexture.new()
-	style.texture = CADRE_ENLUMINE if interieur else CONTOUR_ENLUMINE
-	style.draw_center = interieur
-	style.modulate_color = Color.WHITE.lerp(accent.lightened(0.35), 0.24 if selection else 0.10)
-	if selection: style.modulate_color = style.modulate_color.lightened(0.10)
-	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]: style.set_texture_margin(cote, 44)
-	for cote in [SIDE_LEFT, SIDE_RIGHT]: style.set_content_margin(cote, 36)
-	for cote in [SIDE_TOP, SIDE_BOTTOM]: style.set_content_margin(cote, 22)
-	return style
+static func cadre_enlumine(accent: Color, selection := false, interieur := true) -> StyleBox:
+	var s := (StyleJeu.panneau(accent, 30.0, 0.95 if interieur else 0.45) as StyleBoxJeu).duplicate() as StyleBoxJeu
+	if selection:
+		s.lueur = Color(accent.lightened(0.3), 0.85)
+		s.lueur_taille = 14.0
+		s.monture_haut = Color("fffbe0")
+	s.content_margin_left = 30.0
+	s.content_margin_right = 30.0
+	s.content_margin_top = 18.0
+	s.content_margin_bottom = 22.0
+	return s
+
+# Teinte d'email la plus proche d'un accent historique : les anciens appels
+# gardent leur couleur dominante avec le nouveau relief.
+static func teinte_proche(accent: Color) -> String:
+	if accent.s < 0.12:
+		return "violet"
+	var h := accent.h
+	if h < 0.04 or h > 0.93: return "rubis"
+	if h < 0.17: return "ambre"
+	if h < 0.45: return "emeraude"
+	if h < 0.68: return "azur"
+	return "violet"
 
 static func bouton_enlumine(b: Button, accent: Color, taille := 36) -> void:
-	for etat in ["normal", "hover", "pressed", "focus", "disabled"]:
-		var style := cadre_enlumine(accent, etat in ["hover", "focus"])
-		if etat == "pressed": style.modulate_color = Color("c1b0d8")
-		if etat == "disabled": style.modulate_color = Color("898299")
-		b.add_theme_stylebox_override(etat, style)
-	b.add_theme_font_override("font", Polices.GRIMOIRE)
-	b.add_theme_font_size_override("font_size", taille)
-	texte_bouton_colore(b, accent.lightened(0.16))
+	StyleJeu.habiller_bouton(b, teinte_proche(accent), taille)
+	b.add_theme_font_override("font", Polices.JEU_FORT)
+	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 
 static func texte_bouton_colore(bouton_: Button, couleur: Color) -> void:
 	for etat in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
-		bouton_.add_theme_color_override(etat, couleur)
+		bouton_.add_theme_color_override(etat, teinte_lisible(couleur))
 
-static func cadre_grimoire(accent: Color, relief := false) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color("25233eef").lerp(Color(accent.darkened(0.72), 0.97), 0.28 if relief else 0.12)
-	style.border_color = CUIVRE.lerp(accent, 0.35)
-	style.set_border_width_all(2)
-	style.border_width_bottom = 4
-	style.set_corner_radius_all(28)
-	style.shadow_color = Color("17142ba0")
-	style.shadow_size = 8
-	style.shadow_offset = Vector2(0, 4)
-	for cote in [SIDE_LEFT, SIDE_RIGHT]: style.set_content_margin(cote, 24)
-	for cote in [SIDE_TOP, SIDE_BOTTOM]: style.set_content_margin(cote, 20)
-	return style
-
-static func habiller_lecture(controle: Control) -> void:
-	controle.set_meta("surface_lecture", true)
-	var style := texture_etirable("zone_texte", 24, 32, 28)
-	style.modulate_color = Color("ece8f4")
-	if controle is PanelContainer:
-		controle.add_theme_stylebox_override("panel", style)
-	elif controle is Button:
-		for etat in ["normal", "hover", "pressed", "disabled"]:
-			var variante := style.duplicate() as StyleBoxTexture
-			variante.modulate_color = Color("c9c4e7") if etat == "pressed" else Color.WHITE
-			controle.add_theme_stylebox_override(etat, variante)
+static func cadre_grimoire(accent: Color, relief := false) -> StyleBox:
+	var s := (StyleJeu.panneau(accent, 30.0, 0.96) as StyleBoxJeu).duplicate() as StyleBoxJeu
+	if relief:
+		s.lueur = Color(accent.lightened(0.25), 0.8)
+		s.lueur_taille = 12.0
+	return s
 
 static func image(index: int, cote := 128.0) -> TextureRect:
 	var t := TextureRect.new()
@@ -441,12 +359,8 @@ static func defilement(col: VBoxContainer) -> VBoxContainer:
 
 static func plaque(parent: Node, claire := false) -> VBoxContainer:
 	var panneau := PanelContainer.new()
-	panneau.set_meta("surface_lecture", claire)
-	HabillagePeint.appliquer(panneau)
-	if claire:
-		habiller_lecture(panneau)
-	else:
-		panneau.add_theme_stylebox_override("panel", cadre_grimoire(CUIVRE))
+	panneau.set_meta("surface_lecture", false)
+	panneau.add_theme_stylebox_override("panel", StyleJeu.panneau(Color(), 30.0, 0.97 if claire else 0.94))
 	parent.add_child(panneau)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation",18)
@@ -456,20 +370,9 @@ static func plaque(parent: Node, claire := false) -> VBoxContainer:
 static func cartouche_infos(parent: Node, accent: Color) -> VBoxContainer:
 	var panneau := PanelContainer.new()
 	panneau.set_meta("surface_lecture", false)
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color("253459d8").lerp(Color(accent, 0.88), 0.15)
-	style.border_color = Color(accent, 0.96)
-	style.border_width_left = 5
-	style.border_width_top = 2
-	style.border_width_bottom = 1
-	style.corner_radius_top_left = 12
-	style.corner_radius_top_right = 20
-	style.corner_radius_bottom_left = 20
-	style.corner_radius_bottom_right = 12
-	for cote in [SIDE_LEFT, SIDE_RIGHT]:
-		style.set_content_margin(cote, 24)
-	for cote in [SIDE_TOP, SIDE_BOTTOM]:
-		style.set_content_margin(cote, 14)
+	var style := (StyleJeu.panneau(accent, 24.0, 0.95) as StyleBoxJeu).duplicate() as StyleBoxJeu
+	style.content_margin_top = 16.0
+	style.content_margin_bottom = 20.0
 	panneau.add_theme_stylebox_override("panel", style)
 	parent.add_child(panneau)
 	var contenu := VBoxContainer.new()
@@ -523,28 +426,46 @@ static func fond_atelier(parent: Control, calme := false, campagne := false) -> 
 	parent.add_child(ambiance)
 
 static func case_objet(b: Button, selection := false, accent := Color.WHITE) -> void:
-	var normale := texture_etirable("case_selection" if selection else "case",24,28,24)
-	normale.modulate_color = Color.WHITE.lerp(accent, 0.42 if selection else 0.20)
-	b.add_theme_stylebox_override("normal",normale)
-	var survol := texture_etirable("case_selection",24,28,24)
-	survol.modulate_color = Color.WHITE.lerp(accent, 0.48)
-	b.add_theme_stylebox_override("hover",survol)
-	var pressee := texture_etirable("case_selection",24,28,24)
-	pressee.modulate_color = Color("c8c1f0") if accent == Color.WHITE else Color.WHITE.lerp(accent, 0.56).darkened(0.13)
-	b.add_theme_stylebox_override("pressed",pressee)
-	var desactivee := texture_etirable("case",24,28,24)
-	desactivee.modulate_color = Color("8995b5")
-	b.add_theme_stylebox_override("disabled",desactivee)
+	var teinte := "violet" if accent == Color.WHITE else teinte_proche(accent)
+	for etat in ["normal", "hover", "pressed", "disabled"]:
+		var style := (StyleJeu.panneau(accent if accent != Color.WHITE else Color(), 26.0, 0.95) as StyleBoxJeu).duplicate() as StyleBoxJeu
+		if selection or etat == "hover":
+			var t := StyleJeu.teinte(teinte)
+			style.face_haut = (t["bas"] as Color).darkened(0.25)
+			style.face_bas = (t["epaisseur"] as Color).darkened(0.1)
+			style.lueur = Color(t["haut"], 0.7) if selection else Color(0, 0, 0, 0)
+			style.lueur_taille = 10.0 if selection else 0.0
+		if etat == "pressed":
+			style.enfonce = true
+		if etat == "disabled":
+			style.face_haut = style.face_haut.darkened(0.3)
+			style.face_bas = style.face_bas.darkened(0.3)
+		b.add_theme_stylebox_override(etat, style)
 	for etat in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:
 		b.add_theme_color_override(etat,IVOIRE)
-	b.add_theme_font_override("font",Polices.CORPS)
+	b.add_theme_font_override("font",Polices.JEU)
+	b.add_theme_color_override("font_outline_color", StyleJeu.CONTOUR_TEXTE)
+	b.add_theme_constant_override("outline_size", 6)
 
-static func cercle(selection := false) -> StyleBoxTexture:
-	var style := StyleBoxTexture.new()
-	style.texture = preload("res://assets/visual/interface/cadres/rond_selection.svg") if selection else preload("res://assets/visual/interface/cadres/rond.svg")
+static func cercle(selection := false) -> StyleBox:
+	var s := (StyleJeu.boite("violet" if selection else "nuit", 200.0, "hover" if selection else "normal") as StyleBoxJeu).duplicate() as StyleBoxJeu
+	s.epaisseur = 7.0
+	if selection:
+		s.lueur = Color("d9c2ff")
+		s.lueur.a = 0.8
+		s.lueur_taille = 12.0
 	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
-		style.set_content_margin(cote, 18)
-	return style
+		s.set_content_margin(cote, 18)
+	return s
+
+# Medaillon rond dont la monture prend la couleur de l'element presente.
+static func cercle_teinte(accent: Color, selection := false) -> StyleBox:
+	var s := cercle(selection) as StyleBoxJeu
+	s.monture_haut = Color("fff6dc").lerp(accent.lightened(0.35), 0.45)
+	s.monture_bas = accent.darkened(0.25)
+	if selection:
+		s.lueur = Color(accent.lightened(0.3), 0.85)
+	return s
 
 static func cercle_mode(mode: String) -> StyleBoxTexture:
 	var style := StyleBoxTexture.new()
@@ -566,28 +487,17 @@ static func bouton_rond(texte: String, action: Callable, cote := 88.0) -> Button
 	return b
 
 static func onglet_symbolique(b: Button, symbole: Texture2D, selection: bool, accent := MAGIE) -> void:
-	var espace := StyleBoxFlat.new()
-	espace.bg_color = Color("263154e6").lerp(Color(accent, 0.92), 0.27) if selection else Color("2631549c")
-	espace.corner_radius_top_left = 20
-	espace.corner_radius_top_right = 20
-	espace.corner_radius_bottom_left = 9
-	espace.corner_radius_bottom_right = 9
-	if selection:
-		espace.border_color = accent
-		espace.border_width_bottom = 4
-		espace.border_width_top = 2
-		espace.shadow_color = Color("141c3870")
-		espace.shadow_size = 3
-	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
-		espace.set_content_margin(cote, 12)
+	var teinte := teinte_proche(accent) if selection else "nuit"
 	for etat in ["normal", "hover", "pressed", "disabled", "focus"]:
-		b.add_theme_stylebox_override(etat, espace)
+		b.add_theme_stylebox_override(etat, StyleJeu.boite(teinte, 24.0, "pressed" if etat == "pressed" else "normal"))
 	b.icon = symbole
 	b.expand_icon = true
 	b.add_theme_constant_override("icon_max_width", 56)
-	b.add_theme_color_override("font_color", accent if selection else ATTENUE)
-	b.add_theme_color_override("icon_normal_color", Color.WHITE.lerp(accent, 0.24) if selection else Color("bdc9e2"))
-	b.add_theme_font_override("font", Polices.TITRE if selection else Polices.CORPS)
+	b.add_theme_color_override("font_color", StyleJeu.TEXTE if selection else StyleJeu.TEXTE_DOUX)
+	b.add_theme_color_override("icon_normal_color", Color.WHITE if selection else Color("c9cfe6"))
+	b.add_theme_font_override("font", Polices.JEU_FORT if selection else Polices.JEU)
+	b.add_theme_color_override("font_outline_color", StyleJeu.CONTOUR_TEXTE)
+	b.add_theme_constant_override("outline_size", 7)
 
 static func medaillon(index: int, cote := 128.0) -> PanelContainer:
 	var socle := PanelContainer.new()
@@ -639,12 +549,11 @@ static func illustration(nom: String, cote := 128.0) -> TextureRect:
 static func banniere(parent: Node, titre: String, sous_titre: String, embleme := "grimoire") -> VBoxContainer:
 	var panneau := PanelContainer.new()
 	panneau.set_meta("surface_lecture", false)
-	HabillagePeint.appliquer(panneau)
-	var fond := fond_legende(0.72, 18)
-	fond.content_margin_left = 14
-	fond.content_margin_right = 18
-	fond.content_margin_top = 10
-	fond.content_margin_bottom = 12
+	var fond := (StyleJeu.panneau(Color("8f6bff"), 30.0, 0.95) as StyleBoxJeu).duplicate() as StyleBoxJeu
+	fond.content_margin_left = 18.0
+	fond.content_margin_right = 24.0
+	fond.content_margin_top = 14.0
+	fond.content_margin_bottom = 20.0
 	panneau.add_theme_stylebox_override("panel", fond)
 	parent.add_child(panneau)
 	var ligne := HBoxContainer.new()
@@ -656,10 +565,12 @@ static func banniere(parent: Node, titre: String, sous_titre: String, embleme :=
 	var col := VBoxContainer.new()
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	col.add_theme_constant_override("separation",8)
+	col.add_theme_constant_override("separation",6)
 	ligne.add_child(col)
-	col.add_child(texte(titre,36,IVOIRE))
-	if not sous_titre.is_empty(): col.add_child(texte(sous_titre,28,ATTENUE))
+	var grand := texte(titre,40,IVOIRE)
+	StyleJeu.habiller_texte(grand, 40, StyleJeu.TEXTE, StyleJeu.CONTOUR_TEXTE, true)
+	col.add_child(grand)
+	if not sous_titre.is_empty(): col.add_child(texte(sous_titre,28,StyleJeu.TEXTE_DOUX))
 	return col
 
 static func dessiner_icone(surface: CanvasItem, nom: String, rect: Rect2, teinte := Color.WHITE) -> void:

@@ -28,7 +28,16 @@ cadence partage un cumul additif. Attaque et puissance des projectiles de run
 s'additionnent aussi. Les choix critiques conservent leurs gains propres, sans
 croisement multiplicatif entre leurs bonus. Aucun legendaire n'annule les
 reductions. Les copies de Tir double gardent un gain utile. Les valeurs de
-pourcentage des augments sont des multiples de cinq. Les choix de niveau
+pourcentage des augments sont des multiples de cinq.
+
+Aucune valeur d'amelioration ne porte de decimale, quelle que soit la source
+(augments, attributs, maitrises, passifs, Coeurs, armes, familiers, bijoux,
+forge). Les cumuls composes passent par `Reglages.cumul_compose_entier` :
+gains entiers par rang, jamais decroissants, et dernier rang egal a l'arrondi
+du cumul compose. Un facteur inferieur a 1 s'affiche en pourcentage retire
+(−30 %), une duree en secondes entieres ou en pourcentage de la valeur de base.
+Si un arrondi deplace l'equilibre, compenser sur une autre valeur entiere
+plutot que reintroduire une decimale, puis relancer les controles d'equilibre. Les choix de niveau
 suivent ProgressionAugments : aucun commun ni choix bonus lie a une salle.
 Les gains de resistance effective et de DPS des rares doivent etre
 comparables, selon les conditions des effets ; la defense ne doit plus

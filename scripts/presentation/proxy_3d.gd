@@ -14,7 +14,12 @@ var _derniere_animation := ""
 var _orientation := Vector2.DOWN
 var _arme_tenue: Node3D
 var _animation_ennemi: Node3D
+var _eclat := 0.0
+var _eclat_affiche := 0.0
+var _matiere_eclat: StandardMaterial3D
+var _maillages_eclat: Array[MeshInstance3D] = []
 const RenduCombat = preload("res://data/presentation/animations_combat.gd")
+const Retours = preload("res://scripts/presentation/retours_acteurs_3d.gd")
 
 func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 	logique = cible
@@ -28,6 +33,9 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 		_animation_ennemi.preparer(donnees, modele)
 		modele.reparent(_animation_ennemi, false)
 		facteur = float(donnees["rayon"]) / (65.0 if donnees.get("cerveau", "") == "boss" else 30.0)
+		Retours.ombre(self, float(donnees["rayon"]) * Pont3D.ECHELLE * 1.15 / maxf(0.1, facteur))
+		_matiere_eclat = Retours.preparer_eclat()
+		_maillages_eclat = Retours.maillages(modele)
 		if bool(donnees.get("elite", false)):
 			var insigne := MeshInstance3D.new()
 			var forme := PrismMesh.new()
@@ -44,6 +52,7 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 			add_child(insigne)
 	if genre == "heros":
 		facteur = Reglages.HEROS_ECHELLE
+		Retours.ombre(self, Reglages.HEROS_RAYON * Pont3D.ECHELLE * 1.35 / facteur, 0.5)
 		suivi = load("res://scripts/presentation/suivi_visuel_2d.gd").new()
 		suivi.name = "SuiviVisuel3D"
 		logique.add_child(suivi)
@@ -61,8 +70,12 @@ func preparer(cible: Node2D, scene: PackedScene, type: String) -> void:
 		logique.connect("zone_demandee", func(_point, _origine, profil: Dictionary, _degats):
 			if bool(profil.get("lob", false)): _projeter_ennemi())
 		logique.connect("invocation_demandee", func(_id, _position): _projeter_ennemi())
-		logique.connect("touche", func(_position, _couleur): _animation_ennemi.toucher())
+		logique.connect("touche", func(_position, _couleur):
+			_animation_ennemi.toucher()
+			_eclat = 0.5 if ReglagesJoueur.effets_reduits else 1.0)
 		logique.connect("mort", func(_qui, _position, _couleur):
+			_eclat = 0.0
+			Retours.appliquer_eclat(_maillages_eclat, _matiere_eclat, 0.0)
 			preload("res://scripts/presentation/dissipation_ennemi_3d.gd").creer(self, _animation_ennemi))
 	logique.set_meta("visuel_3d", true)
 	logique.queue_redraw()
@@ -132,6 +145,11 @@ func mettre_a_jour(delta: float) -> void:
 	var angle := atan2(direction_monde.x, direction_monde.z) if genre == "heros" else atan2(direction.x, direction.y)
 	var ecart := angle_difference(modele.rotation.y, angle)
 	modele.rotation.y = lerp_angle(modele.rotation.y, angle, 1.0-exp(-Visuels3D.HEROS_LISSAGE_ORIENTATION*delta)) if genre == "heros" and delta > 0.0 else angle
+	if genre == "ennemi" and _matiere_eclat != null:
+		_eclat = maxf(0.0, _eclat - delta * 11.0)
+		if not is_equal_approx(_eclat, _eclat_affiche):
+			_eclat_affiche = _eclat
+			Retours.appliquer_eclat(_maillages_eclat, _matiere_eclat, _eclat)
 	if genre == "ennemi":
 		if fige:
 			modele.rotation.y = angle - ecart

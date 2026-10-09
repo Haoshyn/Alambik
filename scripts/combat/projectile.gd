@@ -159,9 +159,14 @@ func _sur_contact(corps: Node) -> void:
 	# Le Tir est partage entre tous les projectiles d'une salve : on ne le mute
 	# jamais, la perte de puissance vit dans le projectile.
 	var degats_infliges := tir.degats * _facteur_degats
+	if tir.critique and corps.has_method("marquer_critique"):
+		corps.marquer_critique()
 	corps.recevoir_degats(degats_infliges, tir.effets)
-	impact_visuel.emit(global_position, couleur, 1.0)
-	Sons.jouer("impact", -18.0, randf_range(0.9, 1.2))
+	impact_visuel.emit(global_position, couleur, 1.6 if tir.critique else 1.0)
+	if tir.critique and not hostile:
+		Sons.jouer("critique", -13.0, randf_range(0.95, 1.08))
+	else:
+		Sons.jouer("impact", -18.0, randf_range(0.9, 1.2))
 
 	if _rebonds_restants > 0:
 		_rebonds_restants -= 1

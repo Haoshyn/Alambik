@@ -60,7 +60,7 @@ func _selectionner(index: int) -> void:
 		rangs += rang
 	var suite := "Campagne entièrement terminée." if _monde == Chapitres.MONDES.size() \
 		else "Monde %d ouvert." % (_monde + 1)
-	_resume.text = "Niveau %d · ATK %.1f · PV %.0f · Défense %.1f\n%d gouttes · %d pierres\n%d bijoux · %d passifs possédés · %d équipés\n%d cœurs de mana · %d rangs de maîtrises\n%s" % [
+	_resume.text = "Niveau %d · ATK %.0f · PV %.0f · Défense %.0f\n%d gouttes · %d pierres\n%d bijoux · %d passifs possédés · %d équipés\n%d cœurs de mana · %d rangs de maîtrises\n%s" % [
 		compte.niveau_compte, stats.degats, stats.pv_max, stats.defense,
 		compte.gouttes, compte.pierres_forge, compte.objets.size(), compte.nombre_passifs_debloques(),
 		compte.passifs_equipes.size(), compte.nombre_coeurs_mana(), rangs, suite]

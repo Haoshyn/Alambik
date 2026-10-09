@@ -5,17 +5,13 @@ signal profil_demande
 signal reglages_demandes
 
 const COMPTEUR := preload("res://ui/composants/compteur_ressource.tscn")
-const CADRE_NIVEAU := preload("res://assets/visual/interface/menu/niveau_braise.svg")
-const MEDAILLON_NIVEAU := preload("res://assets/visual/interface/menu/medaillon_niveau.svg")
-const XP_FOND := preload("res://assets/visual/interface/menu/xp_fond_braise.svg")
-const XP_PLEIN := preload("res://assets/visual/interface/menu/xp_plein_braise.svg")
 
 var _profil_fond: Panel
 var _profil: Button
 var _reglages: Button
 var _niveau: Label
 var _titre_niveau: Label
-var _medaillon: TextureRect
+var _medaillon: Panel
 var _experience: ProgressBar
 var _experience_libelle: Label
 var _gouttes: CompteurRessource
@@ -26,35 +22,26 @@ func _ready() -> void:
 	_profil_fond = Panel.new()
 	_profil_fond.name = "CadreNiveau"
 	_profil_fond.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var cadre := StyleBoxTexture.new()
-	cadre.texture = CADRE_NIVEAU
-	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
-		cadre.set_texture_margin(cote, 40)
-	_profil_fond.add_theme_stylebox_override("panel", cadre)
+	_profil_fond.add_theme_stylebox_override("panel", StyleJeu.panneau(Color(), 30.0, 0.95))
 	add_child(_profil_fond)
 	_profil = StyleInterface.zone_tactile(func(): profil_demande.emit())
 	_profil.name = "Profil"
 	_profil.tooltip_text = "Voir le héros"
 	add_child(_profil)
-	_medaillon = TextureRect.new()
+	# Meme badge de niveau que dans le HUD de combat.
+	_medaillon = Panel.new()
 	_medaillon.name = "MedaillonNiveau"
-	_medaillon.texture = MEDAILLON_NIVEAU
-	_medaillon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_medaillon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_medaillon.add_theme_stylebox_override("panel", StyleJeu.boite("azur", 54.0))
 	_medaillon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_medaillon)
-	_niveau = StyleAzur.texte("", 48, Color("ffe8b0"))
-	_niveau.add_theme_font_override("font", Polices.CHIFFRES)
-	_niveau.add_theme_font_size_override("font_size", 46)
+	_niveau = StyleJeu.texte("", 46, StyleJeu.TEXTE, StyleJeu.teinte("azur")["contour_texte"], true)
 	_niveau.name = "Niveau"
 	_niveau.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_niveau.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_niveau.clip_text = true
 	add_child(_niveau)
-	_titre_niveau = StyleAzur.texte("NIVEAU", 27, Color("f7d6a0"))
+	_titre_niveau = StyleJeu.texte("NIVEAU", 28, StyleJeu.OR, StyleJeu.CONTOUR_TEXTE, true)
 	_titre_niveau.name = "TitreNiveau"
-	_titre_niveau.add_theme_font_override("font", Polices.GRIMOIRE)
-	_titre_niveau.add_theme_font_size_override("font_size", 28)
 	_titre_niveau.autowrap_mode = TextServer.AUTOWRAP_OFF
 	add_child(_titre_niveau)
 	_experience_libelle = StyleAzur.texte("", 21, Color("b9edf2"))
@@ -65,16 +52,31 @@ func _ready() -> void:
 	_experience = ProgressBar.new()
 	_experience.show_percentage = false
 	_experience.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var fond_xp := StyleBoxTexture.new()
-	fond_xp.texture = XP_FOND
-	var plein_xp := StyleBoxTexture.new()
-	plein_xp.texture = XP_PLEIN
-	for cote in [SIDE_LEFT, SIDE_RIGHT]:
-		fond_xp.set_texture_margin(cote, 14)
-		plein_xp.set_texture_margin(cote, 14)
-	for cote in [SIDE_TOP, SIDE_BOTTOM]:
-		fond_xp.set_texture_margin(cote, 8)
-		plein_xp.set_texture_margin(cote, 8)
+	var fond_xp := StyleBoxJeu.new()
+	fond_xp.rayon = 11.0
+	fond_xp.face_haut = Color("140f2e")
+	fond_xp.face_bas = Color("2a2257")
+	fond_xp.epaisseur = 0.0
+	fond_xp.reflet = 0.0
+	fond_xp.liseret = 0.0
+	fond_xp.largeur_monture = 2.0
+	fond_xp.largeur_contour = 2.0
+	fond_xp.ombre_decalage = Vector2(0, 2)
+	var plein_xp := StyleBoxJeu.new()
+	plein_xp.rayon = 9.0
+	plein_xp.face_haut = Color("8ff3ff")
+	plein_xp.face_bas = Color("2b8be6")
+	plein_xp.epaisseur = 0.0
+	plein_xp.largeur_monture = 0.0
+	plein_xp.largeur_contour = 0.0
+	plein_xp.liseret = 0.5
+	plein_xp.reflet = 0.4
+	plein_xp.ombre = Color(0, 0, 0, 0)
+	for style: StyleBoxJeu in [fond_xp, plein_xp]:
+		style.content_margin_left = 0.0
+		style.content_margin_right = 0.0
+		style.content_margin_top = 0.0
+		style.content_margin_bottom = 0.0
 	_experience.add_theme_stylebox_override("background", fond_xp)
 	_experience.add_theme_stylebox_override("fill", plein_xp)
 	add_child(_experience)

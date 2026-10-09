@@ -33,6 +33,8 @@ var _camera: Camera2D
 var _voile_salle: VOILE_TRANSITION
 var _transition_salle := false
 var _compteur_attaques_objet := 0
+var _trauma := 0.0
+var _gel_en_cours := false
 
 func _ready() -> void:
 	if OS.get_name() == "Android":
@@ -88,6 +90,7 @@ func _ready() -> void:
 	add_child(_salle)
 	_salle.ennemi_abattu.connect(_sur_ennemi_abattu)
 	_salle.experience_ramassee.connect(_sur_experience_ramassee)
+	_salle.sortie_ouverte.connect(_sur_portail_ouvert)
 
 	_heros = HEROS.instantiate()
 	add_child(_heros)
@@ -103,10 +106,19 @@ func _ready() -> void:
 	_effets = Node2D.new()
 	_effets.set_script(load("res://scripts/presentation/effets.gd"))
 	add_child(_effets)
+	_effets.secousse_demandee.connect(_secouer)
+	_effets.arret_demande.connect(_figer)
 
 
 	_couche = CanvasLayer.new()
 	add_child(_couche)
+	var vignette := ColorRect.new()
+	vignette.name = "VignetteCombat"
+	vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vignette.material = ShaderMaterial.new()
+	(vignette.material as ShaderMaterial).shader = preload("res://shaders/vignette_combat.gdshader")
+	_couche.add_child(vignette)
+	vignette.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_hud = HUD.instantiate()
 	_couche.add_child(_hud)
 	_hud.pause_demandee.connect(func() -> void:
@@ -239,6 +251,7 @@ func _physics_process(delta: float) -> void:
 
 func _process(delta: float) -> void:
 	_suivre_heros()
+	_appliquer_secousse(delta)
 	_musique_minuterie -= delta
 	if _musique_minuterie <= 0.0 and not _terminee and _panneau == null:
 		_musique_minuterie = 0.35
@@ -275,6 +288,18 @@ func _texte_argument(arguments: PackedStringArray, prefixe: String) -> String:
 		if argument.begins_with(prefixe):
 			return argument.substr(prefixe.length())
 	return ""
+
+func _appliquer_secousse(delta: float) -> void:
+	if _camera == null:
+		return
+	_trauma = maxf(0.0, _trauma - delta * 1.8)
+	var energie := _trauma * _trauma
+	if energie <= 0.0001:
+		_camera.offset = Vector2.ZERO
+		return
+	var temps := Time.get_ticks_msec() * 0.001
+	_camera.offset = Vector2(sin(temps * 61.0) + sin(temps * 23.0) * 0.5,
+		cos(temps * 57.0) + cos(temps * 19.0) * 0.5) * 16.0 * energie
 
 func _calculer_limites() -> void:
 	var taille := get_viewport().get_visible_rect().size
@@ -511,6 +536,7 @@ func _sur_tir_heros(tir_courant: Tir, origine: Vector2, direction: Vector2) -> v
 	var tir_effectif := tir_courant.copie()
 	_heros.enregistrer_attaque_objet()
 	tir_effectif.degats = _heros.degats_finaux(tir_effectif.degats, "baguette")
+	tir_effectif.critique = _heros.dernier_critique
 	if "indelebile" in tir_effectif.drapeaux:
 		var cible_initiale := _ennemi_plus_proche(origine)
 		if cible_initiale != null:
@@ -550,7 +576,37 @@ func _ennemi_plus_proche(origine: Vector2) -> Node2D:
 
 func _sur_heros_touche(position: Vector2) -> void:
 	_effets.impact(position, Palette.DANGER, 1.6)
+	_effets.degats_subis(position, _heros.dernier_degat_recu)
 	_hud.impact_degats()
+	_secouer(0.55)
+	_figer(0.05)
+
+# Secousse « trauma » : l'amplitude suit le carre de l'energie restante. La
+# camera 2D entraine aussi le rendu 3D, cadre sur sa transformation.
+func _secouer(force: float) -> void:
+	if not ReglagesJoueur.secousses_ecran or Jeu.mode_auto:
+		return
+	_trauma = clampf(_trauma + force * (0.5 if ReglagesJoueur.effets_reduits else 1.0), 0.0, 1.0)
+
+# Micro-arret sur les coups marquants : quelques centiemes de seconde figes.
+func _figer(duree: float) -> void:
+	if Jeu.mode_auto or ReglagesJoueur.effets_reduits or Capture.demandee() or _gel_en_cours:
+		return
+	_gel_en_cours = true
+	Engine.time_scale = 0.06
+	await get_tree().create_timer(duree, true, false, true).timeout
+	Engine.time_scale = 1.0
+	_gel_en_cours = false
+
+# Un micro-arret interrompu par un changement de scene ne doit jamais laisser
+# le jeu ralenti.
+func _exit_tree() -> void:
+	Engine.time_scale = 1.0
+
+func _sur_portail_ouvert() -> void:
+	if Jeu.mode_run == "grimoire":
+		_hud.annoncer("SALLE NETTOYÉE !", "Le portail est ouvert", "emeraude")
+		Sons.jouer("salle", -9.0)
 
 func _sur_bouclier_brise(position: Vector2) -> void:
 	_effets.onde(position, 200.0, Color(0.85, 0.92, 1.0), 0.5)
@@ -558,7 +614,10 @@ func _sur_bouclier_brise(position: Vector2) -> void:
 func _sur_experience_ramassee(experience: int, fin_run: bool) -> void:
 	if _terminee or Jeu.mode_run not in ["grimoire", "mine"]: return
 	# La Mine ramasse pendant le combat ; la campagne collecte apres nettoyage.
-	_niveaux_en_attente += Jeu.gagner_experience_run(experience)
+	var niveaux_gagnes := Jeu.gagner_experience_run(experience)
+	_niveaux_en_attente += niveaux_gagnes
+	if niveaux_gagnes > 0 and not fin_run:
+		Sons.jouer("niveau", -7.0)
 	if Jeu.mode_run == "grimoire":
 		_niveaux_en_attente += Jeu.garantir_niveaux_fin_salle()
 	if fin_run:

@@ -29,6 +29,7 @@ var _musiques: Array[AudioStreamPlayer] = []
 var _volumes_vises := PackedFloat32Array([-80.0, -80.0])
 var _piste_chargee := ""
 var _piste_menu_chargee := "accueil"
+var _tache_synthese := -1
 
 func pistes_disponibles() -> Array[Dictionary]:
 	return Musiques.RUNS
@@ -49,7 +50,9 @@ func _ready() -> void:
 	_vibrations_autorisees = actif and OS.has_feature("android") and not arguments.has("--auto")
 	_alea.randomize()
 	if actif:
-		_banque = SYNTHESE.creer_banque()
+		# La synthese dure plusieurs secondes sur telephone : elle remplit la
+		# banque en arriere-plan, les sons manquants restent simplement muets.
+		_tache_synthese = WorkerThreadPool.add_task(_synthetiser_banque, false, "Synthese des effets")
 	for i in EFFETS.VOIX:
 		var lecteur := AudioStreamPlayer.new()
 		lecteur.bus = BUS_EFFETS
@@ -76,6 +79,16 @@ func _ready() -> void:
 			musique.play()
 		musique_menu()
 
+func _synthetiser_banque() -> void:
+	for nom: String in SYNTHESE.noms_ordonnes():
+		if not actif:
+			return
+		_ajouter_son.call_deferred(nom, SYNTHESE.creer_variantes(nom))
+
+func _ajouter_son(nom: String, variantes: Array[AudioStreamWAV]) -> void:
+	if actif:
+		_banque[nom] = variantes
+
 func _process(delta: float) -> void:
 	_retrait_restant = maxf(0.0, _retrait_restant - delta)
 	var duree := EFFETS.ATTAQUE_RETRAIT if _retrait_restant > 0.0 else EFFETS.SORTIE_RETRAIT
@@ -101,6 +114,9 @@ func _exit_tree() -> void:
 func arreter() -> void:
 	# Les flux Ogg doivent s'arreter avant la destruction du serveur audio.
 	actif = false
+	if _tache_synthese >= 0:
+		WorkerThreadPool.wait_for_task_completion(_tache_synthese)
+		_tache_synthese = -1
 	for musique in _musiques:
 		musique.stop()
 		musique.stream = null

@@ -30,22 +30,20 @@ présentation 3D. Les demandes du propriétaire définissent le travail à réal
 
 ## Invariants
 
-### Ecrans figes par le proprietaire (27 septembre 2026)
+### Ecrans de reference (refonte du 9 octobre 2026)
 
-- Les cinq menus **Heros**, **Equipement**, **Aventure**, **Maitrises** et
-  **Passifs** sont figes dans leur etat actuel. Ne plus modifier leur
-  presentation, leurs commandes ou leur agencement sans demande explicite
-  du proprietaire concernant le menu ou l'element vise.
-- Ce gel concerne uniquement les menus, pas les systemes de jeu correspondants.
-  Il ne fige ni l'equilibrage ni la progression : ces sujets peuvent evoluer
-  selon les demandes du proprietaire sans retoucher les menus.
-- Cela couvre aussi les effets indirects d'un changement de theme, police,
-  composant partage ou ressource. Une demande sur un menu n'autorise pas une
-  retouche des autres menus. Les details visuels proteges sont dans
-  `ui/AGENTS.md`.
-- Ne plus ajouter de petits rectangles sombres derriere les titres, noms,
-  rangs, descriptions ou indications des Passifs. Garder les textes libres
-  sur des nuances calmes, avec un contraste assure par la typographie.
+- Le 9 octobre 2026, le proprietaire a demande une refonte graphique complete
+  « plus jeu, moins site internet » et leve le gel des cinq menus pour ce
+  travail. L'etat issu de cette refonte (kit Email serti, voir
+  `docs/design/DIRECTION_ARTISTIQUE.md`) devient la reference des menus
+  **Heros**, **Equipement**, **Aventure**, **Maitrises** et **Passifs**.
+- Hors demande du proprietaire visant un ecran ou un element, ne pas retoucher
+  la presentation, les commandes ou l'agencement de ces menus, y compris par
+  un changement de theme, de police, de composant partage ou de ressource.
+  L'equilibrage et la progression restent ouverts aux demandes.
+- Aucun petit rectangle sombre derriere un titre, un nom, un rang, une
+  description ou une indication : le contraste vient de la typographie
+  (graisse et contour), comme dans les Passifs.
 - Musiques conservees : First Arcade, Dynamic Arcade et Accueil originale.
   Les autres anciennes compositions sont retirees ; seules les deux nouvelles
   bases Aventure et Atelier restent ouvertes aux retouches avec le proprietaire.
@@ -53,6 +51,8 @@ présentation 3D. Les demandes du propriétaire définissent le travail à réal
 ### Regles de code
 
 - Identifiants et commentaires français sans accents ; textes joueur avec accents.
+- Toute valeur d'amelioration affichee au joueur est un entier, sans virgule ;
+  le combat applique exactement la valeur affichee (voir `data/AGENTS.md`).
 - Les commentaires expliquent une intention ou une contrainte.
 - Typer les valeurs issues de `Dictionary` ; avec `:=`, préférer `lerpf`,
   `clampf`, `maxf`, `maxi`, `absf` aux variantes renvoyant un `Variant`.

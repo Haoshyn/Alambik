@@ -153,12 +153,9 @@ func _bouton_attribut(ajouter: bool, accent: Color, action: Callable) -> Button:
 	bouton.custom_minimum_size = Vector2.ONE * Ecran.CIBLE_TACTILE
 	bouton.add_theme_font_override("font", Polices.TITRE)
 	bouton.add_theme_font_size_override("font_size", 42)
-	for etat in ["normal", "hover", "pressed", "disabled"]:
-		var style := StyleAzur.sceau(ajouter, Color.WHITE.lerp(accent, 0.3), etat == "pressed")
-		for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]: style.set_content_margin(cote, 8)
-		if etat == "disabled": style.modulate_color = Color("797386")
-		bouton.add_theme_stylebox_override(etat, style)
-	StyleAzur.texte_bouton_colore(bouton, accent.lightened(0.2))
+	StyleJeu.habiller_bouton(bouton, StyleAzur.teinte_proche(accent) if ajouter else "nuit", 46, 26.0)
+	bouton.add_theme_font_override("font", Polices.JEU_FORT)
+	bouton.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	return bouton
 
 func _modifier(id: String, sens: int) -> void:

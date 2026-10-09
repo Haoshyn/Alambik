@@ -4,7 +4,6 @@ extends Control
 signal page_demandee(index: int)
 
 const ONGLET := preload("res://ui/onglet_menu.gd")
-const FOND := preload("res://assets/visual/interface/menu/navigation_braise.svg")
 const LIBELLES := ["Héros", "Équipement", "Aventure", "Maîtrises", "Passifs"]
 const SYMBOLES := ["heros", "equipement", "aventure", "maitrises", "passifs"]
 var _socle: Panel
@@ -17,11 +16,10 @@ func _ready() -> void:
 	_socle.name = "Cadre"
 	_socle.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	_socle.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	HabillagePeint.appliquer(_socle)
-	var style_fond := StyleBoxTexture.new()
-	style_fond.texture = FOND
-	for cote in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
-		style_fond.set_texture_margin(cote, 40)
+	# Socle d'email sombre serti d'or : les onglets actifs s'y soulevent.
+	var style_fond := (StyleJeu.panneau(Color(), 34.0, 0.97) as StyleBoxJeu).duplicate() as StyleBoxJeu
+	style_fond.epaisseur = 8.0
+	style_fond.largeur_monture = 4.0
 	_socle.add_theme_stylebox_override("panel", style_fond)
 	add_child(_socle)
 	_barre = HBoxContainer.new()

@@ -12,35 +12,26 @@ joueur doit décider d'une amélioration.
 Préserver les zones sûres, le défilement et les interactions portrait. Vérifier
 les écrans touchés sans fenêtre avec un profil de sauvegarde isolé.
 
-## Choix figes du proprietaire
+## Kit et etat de reference
 
-Les cinq menus sont entierement figes dans leur etat actuel. Ne retoucher
-les elements suivants que sur demande explicite les visant, y compris
-lorsqu'un style ou un composant commun pourrait les affecter. Ce gel porte
-sur les menus uniquement, pas sur les regles, l'equilibrage ou la progression
-des systemes de jeu correspondants.
+Le kit « Email serti » (refonte du 9 octobre 2026, demandee par le
+proprietaire avec carte blanche) est la reference de tous les ecrans :
 
-- Heros : ecran conserve, textes Classe et Reinitialiser gratuit centres et
-  agrandis, points a repartir dans leur propre cartouche a droite. Conserver
-  les jauges, les attributs et le reste de l'agencement.
-- Equipement : presentation actuelle entierement conservee.
-- Aventure : presentation actuelle conservee ; les nombres des gouttes et
-  pierres sont colores, plus grands et marques, sans petit fond noir propre
-  au texte a droite du symbole.
-- Maitrises : constellation et fiche conservees ; bouton de reinitialisation
-  centre, cadre plus grand et caracteres plus grands, gras et contrastes.
-- Passifs : presentation actuelle entierement conservee, dont les filtres
-  Tous, Offensif, Defensif, Utilitaire
-  et les quatre emplacements Passif 1 a 4. La clairiere reste visible avec
-  le meme voile de lecture que Heros et Equipement, sans filtre propre.
-  Aucun rectangle sombre sous Collection des passifs, les indications de
-  limite/rangs/provenance, les noms, A decouvrir ou les descriptions. Aucun
-  empilement de cadres de texte dans les fiches. Les glyphes et accents de
-  couleur structurent la collection sans peinture elementaire chargee.
-  Chacun des seize passifs a son SVG autonome et sa silhouette distincte de
-  la banque ; aucun retour vers les anciennes icones raster.
+- Surfaces : `StyleBoxJeu` (`scripts/interface/style_box_jeu.gd`) via
+  `StyleJeu.boite`, `StyleJeu.panneau` et `StyleJeu.carte`. Ne pas revenir aux
+  aplats `StyleBoxFlat` ni aux zones de lecture ivoire pour un nouvel element.
+- Textes : `StyleJeu.texte` / `StyleAzur.texte` (Nunito tres grasse, contour
+  sombre, ombre). Aucun rectangle sombre sous un texte, dans aucun menu.
+- Elements traces (HUD, annonces, nombres de degats) : `DessinJeu`.
+- Boutons : `StyleJeu.habiller_bouton` ou `StyleAzur.bouton` ; l'appui ecrase
+  puis fait rebondir le bouton avec un clic. Ambre pour l'action principale,
+  rubis pour abandonner, amethyste par defaut.
+- Le kit est aussi compile par les outils sans fenetre : `StyleJeu` lit les
+  autoloads a l'execution (`_autoload`), jamais par leur nom global.
 
-L'etat valide le 27 septembre 2026 est la reference des cinq menus ; les
-retouches deja demandees ne sont pas une autorisation permanente de les reprendre.
-Les retouches d'Equipement, de ses fiches et de l'interface des Passifs demandees
-le 30 septembre 2026 deviennent la reference de ces elements.
+Hors demande explicite du proprietaire visant un ecran ou un element, ne pas
+retoucher la presentation des menus Heros, Equipement, Aventure, Maitrises et
+Passifs, y compris indirectement par un style, une police ou un composant
+partage. Ce gel ne porte pas sur les regles, l'equilibrage ou la progression.
+Les Passifs gardent leurs filtres Tous, Offensif, Defensif, Utilitaire, les
+quatre emplacements, la clairiere commune et un SVG autonome par passif.

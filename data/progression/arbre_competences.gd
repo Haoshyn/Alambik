@@ -2,7 +2,8 @@ class_name ArbreCompetences
 extends RefCounted
 
 # Chaque rang multiplie la valeur acquise ; les noeuds tardifs ont des taux
-# superieurs. Les points de critique restent une addition de chances.
+# superieurs. Le cumul de chaque noeud est arrondi au pourcentage entier, et
+# les points de critique restent une addition de chances.
 const MAX_RANG := Reglages.MAITRISE_RANG_MAX
 # Bareme historique pour les remboursements des anciennes sauvegardes.
 const ANCIENS_COUTS := [8, 12, 20, 35, 60, 100, 170, 280, 460, 760]
@@ -98,7 +99,7 @@ const LIBELLES_BONUS := {
 }
 
 static func _nombre(valeur: float) -> String:
-	return String.num(valeur, 1).trim_suffix(".0").replace(".", ",")
+	return str(roundi(valeur))
 
 # Ce qu'un noeud vaut a un rang donne, sans le prefixe « Rang N ». Sert a
 # comparer l'etat actuel au rang suivant : une valeur « par rang » oblige sinon
@@ -187,7 +188,7 @@ static func bonus_au_rang(id: String, rang: int, champ: String) -> float:
 	var acquis := clampi(rang, 0, rangs(id))
 	if champ in ["critique", "degats_critiques", "rerolls"]:
 		return taux * float(acquis)
-	return pow(1.0 + taux, acquis) - 1.0
+	return Reglages.cumul_compose_entier(taux, acquis, rangs(id))
 
 static func _facteur(rangs_joueur: Dictionary, champ: String) -> float:
 	var facteur := 1.0

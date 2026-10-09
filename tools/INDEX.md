@@ -2,7 +2,7 @@
 
 | Besoin | Entrée |
 |---|---|
-| Vérification complète de cette refonte, profil isolé | [verifier.ps1](verifier.ps1) |
+| Vérification complète de cette refonte, profil isolé | [verifier.ps1](verifier.ps1) ; sous Linux [verifier.sh](verifier.sh) (`tools/verifier.sh progression augments` pour un sous-ensemble, `ACTUALISER_STATISTIQUES=1` pour réécrire les listes) |
 | Actualiser ou vérifier les listes du propriétaire | [statistiques/exporter.gd](statistiques/exporter.gd) |
 | Trouver le calcul ou le texte d'une liste | [statistiques/INDEX.md](statistiques/INDEX.md) |
 | Construction des cinq listes de catalogues | [statistiques/listes.gd](statistiques/listes.gd) |

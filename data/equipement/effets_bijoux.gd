@@ -48,4 +48,4 @@ static func description(id: String) -> String:
 	return ""
 
 static func _nombre(valeur: float) -> String:
-	return String.num(valeur, 2).trim_suffix(".0").replace(".", ",")
+	return str(roundi(valeur))

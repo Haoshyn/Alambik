@@ -39,7 +39,7 @@ static func _avec_descriptions(types: Dictionary) -> Dictionary:
 	return types
 
 static func _nombre(valeur: float) -> String:
-	return String.num(valeur, 2).trim_suffix(".0").replace(".", ",")
+	return str(roundi(valeur))
 
 static func contient(id: String) -> bool:
 	return TYPES.has(id)

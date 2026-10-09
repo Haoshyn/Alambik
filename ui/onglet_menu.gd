@@ -10,6 +10,7 @@ var _illustration: TextureRect
 var _texte: Label
 var _separateur: TextureRect
 var _accent: TextureRect
+var _fond_actif: Panel
 
 const EMBLEMES := [
 	preload("res://assets/visual/interface/menu/navigation/heros.svg"),
@@ -35,6 +36,13 @@ func configurer(symbole_: String, libelle_ := "", index_icone_ := 0) -> void:
 	custom_minimum_size = Vector2(0, 136)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tooltip_text = libelle
+	# Pastille bombee derriere l'onglet actif, a la couleur de son menu.
+	_fond_actif = Panel.new()
+	_fond_actif.name = "FondActif"
+	_fond_actif.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fond_actif.add_theme_stylebox_override("panel",
+		StyleJeu.boite(StyleAzur.teinte_proche(StyleAzur.ACCENTS_MENU[index_icone]), 26.0))
+	add_child(_fond_actif)
 	_illustration = TextureRect.new()
 	_illustration.texture = EMBLEMES[index_icone]
 	_illustration.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -44,11 +52,8 @@ func configurer(symbole_: String, libelle_ := "", index_icone_ := 0) -> void:
 	add_child(_illustration)
 	_texte = StyleAzur.texte(libelle, 25, StyleAzur.ACCENTS_MENU[index_icone])
 	_texte.name = "Libelle"
-	_texte.add_theme_font_override("font", Polices.GRIMOIRE)
 	_texte.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_texte.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_texte.add_theme_constant_override("outline_size", 3)
-	_texte.add_theme_color_override("font_outline_color", StyleAzur.OMBRE_CLAIRIERE)
 	add_child(_texte)
 	_accent = TextureRect.new()
 	_accent.name = "LigneAccent"
@@ -82,16 +87,22 @@ func _process(delta: float) -> void:
 
 func _replacer() -> void:
 	if _illustration == null or size.x <= 0.0: return
-	var cote := minf(76.0, size.y * 0.51) * (1.0 + _selection * 0.10 - _pression * 0.05)
-	_illustration.position = Vector2((size.x - cote) * 0.5, 10.0 - _selection * 3.0 + _pression * 3.0)
+	var cote := minf(76.0, size.y * 0.51) * (1.0 + _selection * 0.22 - _pression * 0.06)
+	_illustration.position = Vector2((size.x - cote) * 0.5, 12.0 - _selection * 14.0 + _pression * 4.0)
 	_illustration.size = Vector2.ONE * cote
-	_illustration.modulate = Color("d6d3e5").lerp(Color.WHITE, 0.25 + _selection * 0.75)
-	var taille := 32 if actif else 28
-	while taille > 22 and Polices.GRIMOIRE.get_string_size(libelle, HORIZONTAL_ALIGNMENT_LEFT, -1, taille).x > size.x - 12:
+	_illustration.modulate = Color("aeb0c8").lerp(Color.WHITE, 0.2 + _selection * 0.8)
+	_fond_actif.position = Vector2(6.0, 4.0 - _selection * 6.0 + _pression * 3.0)
+	_fond_actif.size = Vector2(maxf(0.0, size.x - 12.0), maxf(0.0, size.y - 14.0))
+	_fond_actif.modulate.a = _selection
+	_fond_actif.visible = _selection > 0.01
+	var taille := 28 if actif else 24
+	var police: Font = Polices.JEU_FORT if actif else Polices.JEU
+	while taille > 20 and police.get_string_size(libelle, HORIZONTAL_ALIGNMENT_LEFT, -1, taille).x > size.x - 12:
 		taille -= 1
+	_texte.add_theme_font_override("font", police)
 	_texte.add_theme_font_size_override("font_size", taille)
-	_texte.add_theme_color_override("font_color", StyleAzur.ACCENTS_MENU[index_icone])
-	_texte.modulate.a = 0.92 + _selection * 0.08
+	_texte.add_theme_color_override("font_color", Color.WHITE if actif else StyleAzur.ACCENTS_MENU[index_icone])
+	_texte.modulate.a = 0.85 + _selection * 0.15
 	_texte.visible = size.x >= 105.0 or actif
 	_texte.position = Vector2(0, size.y - 63)
 	_texte.size = Vector2(size.x, 46)

@@ -111,7 +111,7 @@ func _construire_categories(parent: VBoxContainer) -> void:
 		bouton.toggle_mode = true
 		bouton.custom_minimum_size.y = 96
 		bouton.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		bouton.add_theme_font_override("font", Polices.GRIMOIRE)
+		bouton.add_theme_font_override("font", Polices.JEU_FORT)
 		bouton.add_theme_font_size_override("font_size", 30)
 		bouton.add_theme_color_override("font_outline_color", Color("17283ef0"))
 		bouton.add_theme_constant_override("outline_size", 2)
@@ -143,13 +143,12 @@ func _construire_equipes(parent: VBoxContainer) -> void:
 		medaillon.name = "Medaillon_" + str(index)
 		medaillon.custom_minimum_size = Vector2(164, 164)
 		medaillon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		medaillon.add_theme_font_override("font", Polices.GRIMOIRE)
+		medaillon.add_theme_font_override("font", Polices.JEU_FORT)
 		medaillon.add_theme_font_size_override("font_size", 28)
 		StyleAzur.texte_bouton_colore(medaillon, accent)
 		medaillon.add_theme_color_override("font_disabled_color", accent.darkened(0.1))
 		for etat in ["normal", "hover", "pressed", "disabled"]:
-			var style := StyleAzur.cercle(etat in ["hover", "pressed"])
-			style.modulate_color = Color.WHITE.lerp(accent, 0.2)
+			var style := StyleAzur.cercle_teinte(accent, etat in ["hover", "pressed"])
 			medaillon.add_theme_stylebox_override(etat, style)
 		medaillon.add_theme_stylebox_override("focus", StyleAzur.cercle(true))
 		medaillon.pressed.connect(_retirer_slot.bind(index))
@@ -235,7 +234,7 @@ func _icone_passif(id: String) -> Texture2D:
 	var texture: Texture2D = GLYPHES_PASSIFS[id]
 	return texture
 
-func _style_onglet(categorie: String, choisi: bool) -> StyleBoxTexture:
+func _style_onglet(categorie: String, choisi: bool) -> StyleBox:
 	var accent := FOND_PASSIF.accent_categorie(categorie)
 	var style := StyleAzur.cadre_enlumine(accent, choisi, choisi)
 	for cote in [SIDE_LEFT, SIDE_RIGHT]: style.set_content_margin(cote, 20)

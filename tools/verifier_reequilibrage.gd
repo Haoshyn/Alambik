@@ -145,12 +145,13 @@ func _verifier_satellites() -> void:
 	cible.add_to_group("ennemis")
 	satellites._physics_process(0.0)
 	_exiger(cible.coups.size() == 1 and is_equal_approx(cible.coups[0], 50.0), "Les cercles doivent frapper en mouvement sans multiplier critiques, salves, diagonales ou rebonds")
-	satellites._physics_process(0.30)
+	var demi_delai := ReglagesAugments.SATELLITES_INTERVALLE_IMPACT * 0.5
+	satellites._physics_process(demi_delai)
 	_exiger(cible.coups.size() == 1, "Les deux satellites contournent le delai partage par ennemi")
-	satellites._physics_process(0.30)
+	satellites._physics_process(demi_delai)
 	_exiger(cible.coups.size() == 2, "Le delai des satellites ne se recharge pas")
 	cible.position = Vector2(2000, 0)
-	satellites._physics_process(1.0)
+	satellites._physics_process(ReglagesAugments.SATELLITES_INTERVALLE_IMPACT * 1.5)
 	_exiger(cible.coups.size() == 2, "Les satellites frappent a distance")
 	cible.position = Vector2(135, 0)
 	cible.donnees["rayon"] = 0.0

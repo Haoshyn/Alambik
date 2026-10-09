@@ -29,6 +29,9 @@ var _rafale_direction := Vector2.RIGHT
 var _visee := Vector2.UP
 var _flottement := 0.0
 var _secousse := 0.0
+var _vie_retard := 1.0
+var dernier_critique := false
+var dernier_degat_recu := 0.0
 var _inclinaison := 0.0
 var _attaque := 0.0
 var _tirs_prepares: Array[Dictionary] = []
@@ -271,7 +274,7 @@ func recevoir_degats(montant: float, _effets: Array = []) -> void:
 		return
 	var passifs := ReglagesJoueur.passifs_equipes_effectifs()
 	var invulnerabilite := Reglages.HEROS_INVULNERABILITE \
-		+ Mods.bonus_heros(Jeu.mods(), "invulnerabilite_add")
+		* (1.0 + Mods.bonus_heros(Jeu.mods(), "invulnerabilite_bonus"))
 	if bouclier > 0:
 		bouclier -= 1
 		_invulnerable = invulnerabilite
@@ -287,6 +290,7 @@ func recevoir_degats(montant: float, _effets: Array = []) -> void:
 	stats.blesser(degats_apres_defenses)
 	_temps_depuis_degats = 0.0
 	_invulnerable = invulnerabilite
+	dernier_degat_recu = degats_apres_defenses
 	touchee.emit(global_position)
 	Sons.jouer("degat", -6.0)
 	if stats.est_mort():
@@ -324,8 +328,10 @@ func bonus_degats_passifs() -> float:
 
 func degats_finaux(montant: float, source := "baguette", critique_autorise := true) -> float:
 	var resultat := montant
+	dernier_critique = false
 	if critique_autorise and Jeu.rng.randf() < stats.critique:
 		resultat *= Reglages.CRITIQUE_MULT_BASE + stats.degats_critiques
+		dernier_critique = true
 	resultat *= Personnage.multiplicateur_source(ReglagesJoueur.specialisation_effective(), source)
 	resultat *= 1.0 + bonus_degats_passifs()
 	resultat *= ReglagesJoueur.multiplicateur_coeurs_mana()
@@ -382,9 +388,11 @@ func _dessiner_vie() -> void:
 	var hauteur := -133.0
 	if has_meta("visuel_3d"):
 		hauteur = -Visuels3D.HEROS_BARRE_VIE_HAUTEUR * Reglages.HEROS_ECHELLE - Visuels3D.HEROS_BARRE_VIE_MARGE
-	var barre := Rect2(-66,hauteur,132,15)
-	draw_rect(barre.grow(3),Color(0.08,0.04,0.14,0.65))
-	draw_rect(barre.grow(2),Color(0.94,0.91,1.0,0.9),false,1.5)
-	var contenu := barre.grow(-1)
-	contenu.size.x *= part
-	draw_rect(contenu,Palette.DANGER.lerp(Color("71d9b4"),part))
+	_vie_retard = maxf(part, move_toward(_vie_retard, part, get_process_delta_time() * 0.7))
+	var barre := Rect2(-74, hauteur - 4.0, 148, 24)
+	# Vert, ambre puis rubis : la couleur suffit a lire le danger.
+	var teinte := Color("7dffb0").lerp(Color("ffd25e"), clampf((0.75 - part) / 0.4, 0.0, 1.0))
+	teinte = teinte.lerp(Color("ff5d6c"), clampf((0.4 - part) / 0.25, 0.0, 1.0))
+	DessinJeu.jauge(self, barre, part, teinte.lightened(0.2), teinte.darkened(0.3), _vie_retard)
+	for i in mini(bouclier, 4):
+		DessinJeu.pastille(self, Vector2(barre.end.x + 14.0 + float(i) * 22.0, barre.get_center().y), 11.0, "azur")

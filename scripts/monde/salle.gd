@@ -7,6 +7,7 @@ extends Node2D
 signal terminee
 signal ennemi_abattu(experience: int)
 signal experience_ramassee(experience: int, fin_run: bool)
+signal sortie_ouverte
 
 const PROJECTILE := preload("res://scenes/projectile.tscn")
 const ENNEMI := preload("res://scenes/ennemi.tscn")
@@ -341,6 +342,7 @@ func _ouvrir_portail() -> void:
 	if effets != null:
 		effets.onde(position_portail(), 180.0, Palette.OR, 0.35)
 	Sons.jouer("portail", -14.0, 1.1)
+	sortie_ouverte.emit()
 	queue_redraw()
 
 func _sur_corps_dans_portail(corps: Node) -> void:
@@ -460,9 +462,9 @@ func _sur_ennemi_touche(position: Vector2, couleur: Color) -> void:
 	if effets != null:
 		effets.eclats(position, couleur.lightened(0.3), 3, 140.0, 0.5)
 
-func _sur_degats_ennemi(position: Vector2, montant: float, continu: bool, cible: int, rayon: float) -> void:
+func _sur_degats_ennemi(position: Vector2, montant: float, continu: bool, critique: bool, cible: int, rayon: float) -> void:
 	if effets != null:
-		effets.degats(cible, position, montant, rayon, continu)
+		effets.degats(cible, position, montant, rayon, continu, critique)
 
 func _sur_mort_ennemi(qui: Node, position: Vector2, couleur: Color) -> void:
 	if _finie: return
@@ -490,7 +492,8 @@ func _sur_mort_ennemi(qui: Node, position: Vector2, couleur: Color) -> void:
 			_depots_experience.deposer(position)
 		ennemi_abattu.emit(int(qui.donnees.get("experience", 1)))
 	if effets != null:
-		effets.mort(position, couleur)
+		var ampleur := 2.4 if qui.is_in_group("boss") else (1.5 if bool(qui.donnees.get("elite", false)) else 1.0)
+		effets.mort(position, couleur, ampleur)
 	if Jeu.mode_run == "mine":
 		if qui.is_in_group("boss"):
 			# La victoire depend du boss, pas du nettoyage d'une horde continue.
@@ -541,12 +544,23 @@ func _ramasser_experience(fin_run := false) -> void:
 	_nettoyer_dangers()
 	var heros := get_tree().get_first_node_in_group("heros") as Node2D
 	_depots_experience.ramasser(heros)
+	_tinter_experience(_experience_au_sol)
 	await get_tree().create_timer(Reglages.XP_RAMASSAGE_DUREE, false).timeout
 	if not is_inside_tree() or generation != _generation: return
 	var experience := _experience_au_sol
 	_experience_au_sol = 0
 	experience_ramassee.emit(experience, fin_run)
 	_collecte_en_cours = false
+
+# Une petite gamme montante accompagne les gouttes d'XP qui rejoignent le heros.
+func _tinter_experience(experience: int) -> void:
+	if experience <= 0:
+		return
+	var notes := clampi(experience / 3 + 2, 3, 8)
+	for i in notes:
+		var delai := Reglages.XP_RAMASSAGE_DUREE * (0.25 + 0.75 * float(i) / float(notes))
+		get_tree().create_timer(delai, false).timeout.connect(
+			func() -> void: Sons.jouer("xp", -16.0, 1.0 + 0.07 * float(i)))
 
 func _sur_zone_demandee(point: Vector2, origine: Vector2, profil: Dictionary, degats: float) -> void:
 	if _collecte_en_cours or _portail_ouvert or _finie: return

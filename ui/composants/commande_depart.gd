@@ -29,8 +29,10 @@ func _ready() -> void:
 	_jouer = StyleAzur.bouton("Jouer", func(): depart_demande.emit(), true)
 	_jouer.name = "Jouer"
 	StyleAzur.habiller_accueil(_jouer, true)
-	_jouer.add_theme_font_size_override("font_size", 62)
-	_jouer.add_theme_font_override("font", Polices.LOGO)
+	_jouer.add_theme_font_size_override("font_size", 64)
+	_jouer.add_theme_font_override("font", Polices.JEU_FORT)
+	_jouer.add_theme_constant_override("outline_size", 16)
+	_jouer.add_theme_color_override("font_outline_color", Color("6a1f12"))
 	add_child(_jouer)
 	_epreuve = MODE.instantiate() as BoutonModeAccueil
 	_epreuve.name = "Epreuves"

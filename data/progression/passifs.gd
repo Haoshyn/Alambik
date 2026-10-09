@@ -3,8 +3,11 @@ extends RefCounted
 
 const RANG_MAX := 2
 const EMPLACEMENTS := 4
-const MOISSON_SEUIL := 6
-const MOISSON_PART := 0.025
+# Trois pour cent toutes les sept eliminations : meme rythme de soin que
+# l'ancien 2,5 % sur six, avec une valeur entiere.
+const MOISSON_SEUIL := 7
+const MOISSON_POURCENT := 3
+const MOISSON_PART := MOISSON_POURCENT / 100.0
 const REPRISE_DELAI := 10.0
 const REPRISE_DEGATS := 0.05
 const SANG_FROID_DUREE := 2.0
@@ -34,7 +37,7 @@ const CATALOGUE := {
 	"projectiles_vifs": {"nom": "Projectiles vifs", "description": "Vitesse et portée des tirs +8 % par rang, cumul composé.", "categorie": "Offensif", "icone": "trajectoire", "bonus": {"projectile": 0.08}},
 	"soins_renforces": {"nom": "Soins renforcés", "description": "Soins reçus +5 % par rang, cumul composé.", "categorie": "Défensif", "icone": "regeneration", "bonus": {"soin": 0.05}},
 	"recuperation": {"nom": "Récupération", "description": "Rend 1 % des PV maximum à l’entrée d’une salle par rang.", "categorie": "Défensif", "icone": "regeneration"},
-	"moisson_vitale": {"nom": "Moisson vitale", "description": "Rend 2,5 % des PV maximum toutes les 6 éliminations par rang.", "categorie": "Défensif", "icone": "moisson_vitale"},
+	"moisson_vitale": {"nom": "Moisson vitale", "description": "Rend %d %% des PV maximum toutes les %d éliminations par rang." % [MOISSON_POURCENT, MOISSON_SEUIL], "categorie": "Défensif", "icone": "moisson_vitale"},
 	"sang_froid": {"nom": "Sang-froid", "description": "Les tirs ralentissent les ennemis de 10 % pendant 2 s par rang.", "categorie": "Utilitaire", "icone": "sang_froid"},
 	"rempart_initial": {"nom": "Reprise de souffle", "description": "Après 10 s sans blessure, dégâts +5 % par rang, cumul composé.", "categorie": "Offensif", "icone": "rempart_initial"},
 	"audace": {"nom": "Audace", "description": "Dégâts infligés et subis +10 % par rang, cumul composé.", "categorie": "Offensif", "icone": "audace"},
@@ -62,7 +65,7 @@ static func bonus_stats(passifs: Dictionary, niveau := Personnage.NIVEAU_MAX) ->
 			var taux := taux_par_rang(cle, float(bonus[cle]), niveau)
 			var rang := rang_passif(passifs, id)
 			var valeur := taux * float(rang) if cle in ["critique", "degats_critiques"] \
-				else pow(1.0 + taux, rang) - 1.0
+				else Reglages.cumul_compose_entier(taux, rang, RANG_MAX)
 			resultat[cle] = float(resultat.get(cle, 0.0)) + valeur
 	return resultat
 
@@ -97,19 +100,19 @@ static func seuil_moisson(_passifs: Dictionary) -> int:
 	return MOISSON_SEUIL
 
 static func bonus_reprise(passifs: Dictionary) -> float:
-	return pow(1.0 + REPRISE_DEGATS, rang_passif(passifs, "rempart_initial")) - 1.0
+	return Reglages.cumul_compose_entier(REPRISE_DEGATS, rang_passif(passifs, "rempart_initial"), RANG_MAX)
 
 static func bonus_audace(passifs: Dictionary) -> float:
-	return pow(1.0 + AUDACE_BONUS, rang_passif(passifs, "audace")) - 1.0
+	return Reglages.cumul_compose_entier(AUDACE_BONUS, rang_passif(passifs, "audace"), RANG_MAX)
 
 static func ralentissement_sang_froid(passifs: Dictionary) -> float:
 	return SANG_FROID_RALENTISSEMENT * rang_passif(passifs, "sang_froid")
 
 static func multiplicateur_gouttes(passifs: Dictionary) -> float:
-	return pow(1.0 + BUTIN_BONUS, rang_passif(passifs, "butin_precieux"))
+	return 1.0 + Reglages.cumul_compose_entier(BUTIN_BONUS, rang_passif(passifs, "butin_precieux"), RANG_MAX)
 
 static func multiplicateur_experience(passifs: Dictionary) -> float:
-	return pow(1.0 + EXPERIENCE_BONUS, rang_passif(passifs, "savoir_pratique"))
+	return 1.0 + Reglages.cumul_compose_entier(EXPERIENCE_BONUS, rang_passif(passifs, "savoir_pratique"), RANG_MAX)
 
 static func nombre_debloques(rangs: Dictionary, tout_debloque := false) -> int:
 	if tout_debloque: return CATALOGUE.size()
@@ -119,7 +122,7 @@ static func nombre_debloques(rangs: Dictionary, tout_debloque := false) -> int:
 	return nombre
 
 static func _pourcentage(valeur: float) -> String:
-	return String.num(valeur * 100.0, 1).trim_suffix(".0").replace(".", ",")
+	return str(roundi(valeur * 100.0))
 
 static func resume_rang(id: String, rang: int, niveau_heros := Personnage.NIVEAU_MAX) -> String:
 	var niveau := clampi(rang, 1, RANG_MAX)

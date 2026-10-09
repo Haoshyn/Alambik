@@ -37,6 +37,8 @@ var frequence := 0.0
 var rebonds_murs := 0
 var effets: Array[String] = []
 var drapeaux: Array[String] = []
+# Tire au moment de l'attaque ; sert uniquement au retour visuel et sonore.
+var critique := false
 
 static func de_base(stats: Stats) -> Tir:
 	var t := Tir.new()
@@ -108,6 +110,7 @@ func copie() -> Tir:
 	t.portee = portee
 	t.portee_limitee = portee_limitee
 	t.cadence = cadence
+	t.critique = critique
 	t.nb_projectiles = nb_projectiles
 	t.salves = salves
 	t.projectiles_lateraux = projectiles_lateraux

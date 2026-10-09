@@ -21,14 +21,14 @@
 | Collecte d'XP | [monde/collecte_experience.gd](monde/collecte_experience.gd) |
 | Cœurs de soin au sol | [monde/collecte_soins.gd](monde/collecte_soins.gd), paramètres dans `../data/progression/soins_run.gd` |
 | Butin et fin de run | [progression/bilan_run.gd](progression/bilan_run.gd) |
-| Style et gestes communs | `interface/` : joystick, transition, palette, polices, styles et rendu 2D de secours |
+| Style et gestes communs | `interface/` : joystick, transition, palette, polices, styles et rendu 2D de secours ; kit Émail serti dans [style_box_jeu.gd](interface/style_box_jeu.gd) (surface bombée), [style_jeu.gd](interface/style_jeu.gd) (teintes, boutons, textes, animations) et [dessin_jeu.gd](interface/dessin_jeu.gd) (jauges, pastilles, rayons du HUD) |
 | Rendu du combat | [presentation/monde_3d.gd](presentation/monde_3d.gd), [arene_3d.gd](presentation/arene_3d.gd), [proxy_3d.gd](presentation/proxy_3d.gd) |
 | Enduit coloré, bordures d'émail et décors en volume des cinq mondes | [presentation/sol_alchimique.gd](presentation/sol_alchimique.gd), [bordures_sol.gd](presentation/bordures_sol.gd), [ornements_monde.gd](presentation/ornements_monde.gd), [decors_rives.gd](presentation/decors_rives.gd), [decor_alchimique.gd](presentation/decor_alchimique.gd) ; palettes et graines dans `../data/presentation/decors_mondes.gd`, contours partagés dans `../data/mondes/formes_salles.gd`, textures et origines dans `../assets/visual/sols/ORIGINE.md` |
 | Héros Aster et tir à l'arrêt | `presentation/modele_aster.gd`, `animation_heros_3d.gd`, `tir_heros_3d.gd`, `arme_tenue_3d.gd`, `materiaux_apprenti.gd` ; contrôle `../tools/verifier_heros_aster.tscn` |
 | Sculptures et gestes des cinq familiers équipés | `presentation/suivi_familier_3d.gd`, `presentation/familier_tireur_3d.gd`, `presentation/modeles_familiers_3d.gd` ; GLB dans `../assets/3d/familiers/`, sources dans `../assets/3d/sources/familiers/` ; contrôle `../tools/verifier_familiers.gd` et planches via `../tools/blender/apercu_bestiaire.py` |
 | Projectiles alliés des familiers | `presentation/formes_projectiles_familiers.gd`, `presentation/projectile_3d.gd` ; contours dans `../data/presentation/formes_tirs.gd`, contrôle `../tools/verifier_projectiles.gd` |
 | Bestiaire articule, appuis et variantes des mondes | `presentation/animation_ennemis_3d.gd`, `animation_membres_ennemis.gd`, `appuis_bestiaire_3d.gd`, `habillage_ennemis_3d.gd`, `ornements_bestiaire_3d.gd`, `dissipation_ennemi_3d.gd` |
-| Retours visuels | `presentation/effets.gd`, `effets_3d.gd`, `animation_impacts.gd`, `annonces_ennemis.gd` |
+| Retours visuels | `presentation/effets.gd`, `effets_3d.gd`, `animation_impacts.gd`, `annonces_ennemis.gd` ; ombres de contact et éclair d'impact dans `retours_acteurs_3d.gd` ; secousse et micro-arrêts dans `run.gd` ; vignette `../shaders/vignette_combat.gdshader` |
 | Nombres de dégâts infligés | `presentation/nombres_degats.gd`, relié aux signaux de combat par `monde/salle.gd` ; contrôle dans `../tools/verifier_degats_affiches.gd` |
 | Bruitages | [audio/synthese_effets.gd](audio/synthese_effets.gd) |
 | Capture de développement | [capture.gd](capture.gd) ; bot PC dans `../sondes/` |

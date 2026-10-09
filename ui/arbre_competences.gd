@@ -39,14 +39,9 @@ func _ready() -> void:
 	reset.name = "ReinitialiserMaitrises"
 	reset.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	reset.custom_minimum_size = Vector2(620, 104)
-	reset.add_theme_font_override("font", Polices.TITRE)
-	reset.add_theme_font_size_override("font_size", 38)
-	StyleAzur.texte_bouton_colore(reset, Color("fff0c9"))
-	for etat in ["normal", "hover", "pressed", "focus"]:
-		var style_reset := StyleAzur.sceau(false, Color.WHITE, etat == "pressed")
-		for cote in [SIDE_TOP, SIDE_BOTTOM]: style_reset.set_content_margin(cote, 20)
-		for cote in [SIDE_LEFT, SIDE_RIGHT]: style_reset.set_content_margin(cote, 36)
-		reset.add_theme_stylebox_override(etat, style_reset)
+	StyleJeu.habiller_bouton(reset, "violet", 36)
+	reset.add_theme_font_override("font", Polices.JEU_FORT)
+	reset.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	col.add_child(reset)
 	var fiche := StyleAzur.plaque(col, true)
 	fiche.name = "DetailsMaitriseFixes"
@@ -187,9 +182,9 @@ func _rafraichir() -> void:
 	var accent_selection: Color = selection.get_meta("accent")
 	_embleme.modulate = Color.WHITE.lerp(accent_selection, 0.22)
 	_titre_details.text = "%s · %d / %d" % [str(n["nom"]), ReglagesJoueur.rang_competence(_selection), ArbreCompetences.rangs(_selection)]
-	_titre_details.add_theme_color_override("font_color", accent_selection.darkened(0.52))
+	_titre_details.add_theme_color_override("font_color", accent_selection.lightened(0.3))
 	StyleAzur.action_coloree(_achat, accent_selection)
-	_details.add_theme_color_override("font_color", accent_selection.darkened(0.62))
+	_details.add_theme_color_override("font_color", StyleJeu.TEXTE)
 	_message_details.text = _message
 	_message_details.visible = not _message.is_empty()
 	var rang_actuel := ReglagesJoueur.rang_competence(_selection)
@@ -218,8 +213,19 @@ func _ameliorer() -> void:
 	elif ReglagesJoueur.acheter_competence(id):
 		_message = "%s rang %d/%d : bonus permanent actif." % [noeud["nom"],
 			ReglagesJoueur.rang_competence(id), ArbreCompetences.rangs(id)]
-		Sons.jouer("fusion", -12.0)
+		Sons.jouer("achat", -9.0)
+		_celebrer(_noeuds.get(id))
 	_rafraichir()
+
+# Le noeud achete rebondit : le joueur voit ou son investissement est alle.
+func _celebrer(noeud: Variant) -> void:
+	if not noeud is Control or ReglagesJoueur.effets_reduits:
+		return
+	var bouton := noeud as Control
+	bouton.pivot_offset = bouton.size * 0.5
+	var tween := bouton.create_tween()
+	tween.tween_property(bouton, "scale", Vector2.ONE * 1.18, 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(bouton, "scale", Vector2.ONE, 0.32).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 
 func _reinitialiser() -> void:
 	var rembourses := ReglagesJoueur.reinitialiser_arbre()

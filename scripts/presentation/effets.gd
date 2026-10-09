@@ -4,6 +4,9 @@ extends Node2D
 # les dessine tous, ce qui evite de creer et detruire des dizaines de scenes
 # par seconde sur un telephone.
 
+signal secousse_demandee(force: float)
+signal arret_demande(duree: float)
+
 const GRAVITE := 220.0
 const AnimationImpacts = preload("res://scripts/presentation/animation_impacts.gd")
 const RenduCombat = preload("res://data/presentation/animations_combat.gd")
@@ -62,13 +65,26 @@ func eclats(position: Vector2, couleur: Color, nombre := 8, force := 260.0, poid
 		})
 
 func impact(position: Vector2, couleur: Color, ampleur := 1.0) -> void:
-	eclats(position, couleur, int(4 * ampleur) + 2, 270.0 * ampleur, 0.45)
+	eclats(position, couleur, int(5 * ampleur) + 3, 300.0 * ampleur, 0.45)
+	_eclair(position, couleur.lightened(0.65), 15.0 * ampleur, 0.09)
 	_ajouter_percussion(position, couleur, ampleur, false)
 
-func mort(position: Vector2, couleur: Color) -> void:
-	eclats(position, couleur, 14, 390.0, 0.82)
-	eclats(position, couleur.lightened(0.55), 6, 220.0, 0.18)
-	_ajouter_percussion(position, couleur, 1.0, true)
+# Les morts eclatent : noyau clair, debris colores, poussiere claire et anneau.
+func mort(position: Vector2, couleur: Color, ampleur := 1.0) -> void:
+	eclats(position, couleur, roundi(18 * ampleur), 430.0 * sqrt(ampleur), 0.82)
+	eclats(position, couleur.lightened(0.55), roundi(8 * ampleur), 240.0 * sqrt(ampleur), 0.18)
+	_eclair(position, Color(1.0, 0.97, 0.9), 30.0 * ampleur, 0.13)
+	_ajouter_percussion(position, couleur, ampleur, true)
+	if ampleur > 1.2:
+		onde(position, 120.0 * ampleur, couleur.lightened(0.35), 0.45)
+		secousse_demandee.emit(0.35 * ampleur)
+		arret_demande.emit(0.05 if ampleur < 2.0 else 0.2)
+
+func _eclair(position: Vector2, couleur: Color, taille: float, vie: float) -> void:
+	if ReglagesJoueur.effets_reduits:
+		return
+	_particules.append({"position": position, "precedente": position, "vitesse": Vector2.ZERO,
+		"vie": vie, "vie_max": vie, "taille": taille, "couleur": couleur, "poids": 0.0})
 
 func _ajouter_percussion(position: Vector2, couleur: Color, ampleur: float, mort: bool) -> void:
 	var plafond := RenduCombat.IMPACTS_REDUITS if ReglagesJoueur.effets_reduits else RenduCombat.IMPACTS_MAX
@@ -102,8 +118,12 @@ func onde(position: Vector2, rayon: float, couleur: Color, duree := 0.45) -> voi
 func texte(position: Vector2, contenu: String, couleur := Palette.TEXTE) -> void:
 	_textes.append({"position": position, "contenu": contenu, "vie": 0.9, "vie_max": 0.9, "couleur": couleur})
 
-func degats(cible: int, position: Vector2, montant: float, rayon: float, continu := false) -> void:
-	_nombres_degats.ajouter(cible, to_local(position), montant, rayon, continu, ReglagesJoueur.effets_reduits)
+# Les degats encaisses par le heros montent en rouge au-dessus de lui.
+func degats_subis(position: Vector2, montant: float) -> void:
+	_nombres_degats.ajouter(-1, to_local(position), montant, Reglages.HEROS_RAYON, false, ReglagesJoueur.effets_reduits, false, true)
+
+func degats(cible: int, position: Vector2, montant: float, rayon: float, continu := false, critique := false) -> void:
+	_nombres_degats.ajouter(cible, to_local(position), montant, rayon, continu, ReglagesJoueur.effets_reduits, critique)
 
 func _draw() -> void:
 	if has_meta("visuel_3d"):

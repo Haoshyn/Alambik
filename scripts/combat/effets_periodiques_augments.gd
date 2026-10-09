@@ -89,6 +89,10 @@ func _lancer_trait(cible: Node2D) -> void:
 	_salle.tirer(tir, heros.global_position, heros.global_position.direction_to(point))
 
 func _frapper_zone() -> void:
+	Sons.jouer("explosion", -11.0, randf_range(0.95, 1.1))
+	var effets: Node = _salle.get("effets")
+	if effets != null and effets.has_signal("secousse_demandee"):
+		effets.secousse_demandee.emit(0.22)
 	var obstacles: Array = _salle.obstacles()
 	var contour: PackedVector2Array = _salle.contour_sol()
 	# La chute traverse le couvert depuis le ciel ; son souffle reste dans la

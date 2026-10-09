@@ -18,6 +18,8 @@ var _familier: Node3D
 var _terrain: Node3D
 var _satellites: Node3D
 var _meteorite: Node3D
+var _environnement: Environment
+var _effets_reduits_appliques := false
 
 func _ready() -> void:
 	process_priority = 100
@@ -38,6 +40,8 @@ func _ready() -> void:
 	environnement.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environnement.environment.ambient_light_color = Color("a6b5d2")
 	environnement.environment.ambient_light_energy = 0.3
+	Visuels3D.regler_ambiance(environnement.environment, ReglagesJoueur.effets_reduits)
+	_environnement = environnement.environment
 	add_child(environnement)
 	_arene = Node3D.new()
 	_arene.set_script(ARENE)
@@ -123,6 +127,9 @@ func _process(delta: float) -> void:
 	if is_instance_valid(_meteorite): _meteorite.mettre_a_jour(delta)
 	Pont3D.cadrer(camera,get_viewport().get_visible_rect().size,get_viewport().canvas_transform)
 	_lumiere.shadow_enabled = not ReglagesJoueur.effets_reduits and (OS.get_name() != "Android" or Visuels3D.OMBRES_ANDROID)
+	if _environnement != null and ReglagesJoueur.effets_reduits != _effets_reduits_appliques:
+		_effets_reduits_appliques = ReglagesJoueur.effets_reduits
+		Visuels3D.regler_ambiance(_environnement, _effets_reduits_appliques)
 	var limites: Rect2 = salle.get("limites")
 	var numero: int = salle.get("numero")
 	if limites != _limites or numero != _numero:

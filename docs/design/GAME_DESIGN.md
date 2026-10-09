@@ -234,7 +234,10 @@ par objet dans la liste mathématique. Chaque rang de forge du familier augmente
 ses dégâts, indépendamment de l'arme ; il partage les facteurs permanents
 et les augments d'attaque, sans recevoir les critiques ni les salves du héros.
 Chaque gain brut de forge est arrondi dans le calcul, et ne diminue jamais
-sur les rangs suivants. Les ennemis gardent des courbes fixes,
+sur les rangs suivants. Aucune amélioration n'affiche de décimale : attributs,
+maîtrises, passifs, Cœurs, forge, armes, familiers et augments donnent des
+valeurs entières, et le combat applique exactement la valeur affichée. Les
+cumuls composés progressent par points entiers jamais décroissants. Les ennemis gardent des courbes fixes,
 recalibrées avec les achats et offres réels, sans lire les statistiques du joueur.
 
 Héros affiche le bonus total de chaque attribut et le gain du prochain point

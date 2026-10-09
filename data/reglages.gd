@@ -221,6 +221,32 @@ static func experience_compte_requise(niveau: int) -> int:
 static func statistique_arrondie(valeur: float) -> float:
 	return float(roundi(valeur / STATISTIQUE_PAS)) * STATISTIQUE_PAS
 
+# Toute amelioration affichee est un pourcentage entier, et le combat applique
+# exactement la valeur affichee : les cumuls composes sont arrondis ici.
+static func pourcentage_entier(valeur: float) -> float:
+	return roundf(valeur * 100.0) / 100.0
+
+# Cumul compose en points entiers : chaque rang ajoute un nombre entier de
+# points, jamais inferieur au rang precedent, et le dernier rang atteint
+# l'arrondi exact du cumul compose. Un rang final egal au premier est releve
+# d'un point pour que le dernier achat reste le plus fort.
+static func cumul_compose_entier(taux: float, rang: int, rang_max: int) -> float:
+	if rang <= 0 or rang_max <= 0 or taux <= 0.0:
+		return 0.0
+	var increments: Array[int] = []
+	var precedent := 0
+	for k in range(1, rang_max + 1):
+		var total := roundi((pow(1.0 + taux, k) - 1.0) * 100.0)
+		increments.append(total - precedent)
+		precedent = total
+	increments.sort()
+	if rang_max > 1 and increments[-1] <= increments[0]:
+		increments[-1] = increments[0] + 1
+	var somme := 0
+	for i in mini(rang, rang_max):
+		somme += increments[i]
+	return float(somme) / 100.0
+
 static func statistique_forge(base: float, niveau: int, croissance: float, provenance := 0) -> float:
 	var valeur := statistique_arrondie(base * pow(EQUIPEMENT_CROISSANCE_PAR_PALIER, maxi(0, provenance)))
 	# Arrondir chaque achat garde des gains entiers qui ne diminuent jamais.
@@ -229,7 +255,7 @@ static func statistique_forge(base: float, niveau: int, croissance: float, prove
 	return valeur
 
 static func multiplicateur_coeurs(nombre: int) -> float:
-	return pow(1.0 + COEUR_MANA_BONUS_FINAL, clampi(nombre, 0, Epreuves.nombre()))
+	return 1.0 + cumul_compose_entier(COEUR_MANA_BONUS_FINAL, clampi(nombre, 0, Epreuves.nombre()), Epreuves.nombre())
 
 static func cout_maitrise(cout_base: int, rang_acquis: int) -> int:
 	var brut := float(cout_base) * (1.0 + MAITRISE_COUT_AJOUT_PAR_RANG * float(maxi(0, rang_acquis)))

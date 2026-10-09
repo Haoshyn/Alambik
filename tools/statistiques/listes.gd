@@ -45,7 +45,7 @@ static func augments() -> String:
 	var lignes := entete("Liste des augments", [
 		"Chaque choix ne dure que pour la tentative en cours. Les rares de statistiques restent des bonus directs. Traque, Satellites, Trait alchimique et Météorite sont des effets autonomes, sans bonus de statistiques ajouté. Les épiques sont renforcés légèrement ; les légendaires peuvent transformer une run.",
 		"Dans une même famille, les bonus positifs s’additionnent : deux bonus de 40 % donnent +80 %. Aucun bonus de défense ne coûte de l’attaque, de la cadence ou des PV.",
-		"Salve applique ×%s aux projectiles ; Battement triple applique ×%s lorsqu'il est seul. Ils se cumulent en quatre salves, avec leurs gains de débit additionnés. Tir double applique ×%s pour une copie et ×%s pour deux copies lorsqu'il est seul. Les gains de débit des salves, tirs parallèles et cadence s'additionnent : leur cumul atténue les impacts. Les diagonales ont leur propre puissance et Ricochet garde sa limite et ses pertes, même avec Perforation." % [nombre(ReglagesAugments.MALUS_TIRS_MULT), nombre(ReglagesAugments.PUISSANCE_BATTEMENT_MULT), nombre(ReglagesAugments.puissance_tirs_paralleles(1)), nombre(ReglagesAugments.puissance_tirs_paralleles(2))],
+		"Salve retire %d %% aux dégâts de chaque projectile ; Battement triple en retire %d %% lorsqu'il est seul. Ils se cumulent en quatre salves, avec leurs gains de débit additionnés. Tir double retire %d %% pour une copie et %d %% pour deux copies lorsqu'il est seul. Les gains de débit des salves, tirs parallèles et cadence s'additionnent : leur cumul atténue les impacts. Les diagonales ont leur propre puissance et Ricochet garde sa limite et ses pertes, même avec Perforation." % [roundi((1.0 - ReglagesAugments.MALUS_TIRS_MULT) * 100.0), roundi((1.0 - ReglagesAugments.PUISSANCE_BATTEMENT_MULT) * 100.0), roundi((1.0 - ReglagesAugments.puissance_tirs_paralleles(1)) * 100.0), roundi((1.0 - ReglagesAugments.puissance_tirs_paralleles(2)) * 100.0)],
 		"Le groupe des bonus de run multiplie une seule fois les statistiques permanentes.",
 		"Les bonus directs d'attaque et de projectile des augments s'additionnent. Critique : les points de chance s’ajoutent, jusqu’à 100 %. Chaque augment garde son gain propre ; le croisement entre la chance d'un choix et la puissance d'un autre est retiré. Les fiches montrent les bonus de base avant cette combinaison.",
 		"Salves et projectiles supplémentaires ne garantissent pas que tous les tirs atteignent la même cible.",
@@ -76,7 +76,7 @@ static func items() -> String:
 	var lignes := entete("Liste des items", [
 		"Forge de 0 à %d. Prix du prochain achat depuis le niveau n : %d + %d × n + %d × n² Pierres, arrondi au multiple de %d le plus proche." % [Reglages.FORGE_NIVEAU_MAX, Reglages.FORGE_COUT_BASE, Reglages.FORGE_COUT_PAR_NIVEAU, Reglages.FORGE_COUT_QUADRATIQUE, Reglages.COUT_PAS_ARRONDI],
 		"Arme : base %s ATK, puis chaque forge ajoute %s %% de l’attaque acquise, arrondis au multiple de %s. Familier : même calcul à %s %% de son attaque propre. Les gains bruts ne diminuent jamais." % [nombre(CatalogueProjectiles.ATTAQUE_BASE), nombre(CatalogueProjectiles.FORGE_CROISSANCE * 100.0), nombre(Reglages.STATISTIQUE_PAS), nombre(CatalogueFamiliers.FORGE_CROISSANCE * 100.0)],
-		"Bijoux : les valeurs brutes sont multipliées par %s^(%d × indice du monde), indice de 0 à %d. Les pourcentages ne le sont pas." % [nombre(Reglages.EQUIPEMENT_CROISSANCE_PAR_PALIER, 3), Chapitres.CHAPITRES_PAR_MONDE, Chapitres.MONDES.size() - 1],
+		"Bijoux : les valeurs brutes gagnent %d %% composé par chapitre de provenance, soit %d chapitres par monde, du monde 1 au monde %d. Les pourcentages ne le sont pas." % [roundi((Reglages.EQUIPEMENT_CROISSANCE_PAR_PALIER - 1.0) * 100.0), Chapitres.CHAPITRES_PAR_MONDE, Chapitres.MONDES.size()],
 		"Les tableaux donnent les statistiques finales de CHAQUE objet à CHAQUE niveau, provenance déjà appliquée.",
 		"L’attaque de l’arme et des bijoux s’ajoute à la base du héros. L’attaque du familier reste séparée.",
 		"Les effets des bijoux se débloquent au niveau %d. Les anciens bijoux sont conservés pour les sauvegardes ; ils ne tombent plus." % int(EffetsBijoux.PALIERS[0]),
@@ -94,8 +94,8 @@ static func items() -> String:
 		lignes.append_array(["### " + str(d["nom"]), "",
 			"**Provenance :** niveau de campagne %d." % CatalogueProjectiles.niveau_deblocage(id), "",
 			str(d["description"]), "",
-			"- Coefficient par tir : **×%s**." % nombre(float(d.get("coefficient_tir", 1.0))),
-			"- Cadence propre : **×%s**." % nombre(float(d.get("cadence_mult", 1.0))), ""])
+			"- Puissance par tir : **%d %%**." % roundi(float(d.get("coefficient_tir", 1.0)) * 100.0),
+			"- Cadence propre : **%s**." % _ecart(float(d.get("cadence_mult", 1.0))), ""])
 		var niveaux: Array = []
 		for niveau in range(Reglages.FORGE_NIVEAU_MAX + 1):
 			niveaux.append([niveau, "+" + nombre(CatalogueProjectiles.attaque_base(id, niveau))])
@@ -115,7 +115,7 @@ static func items() -> String:
 		var niveaux: Array = []
 		for niveau in range(Reglages.FORGE_NIVEAU_MAX + 1):
 			var attaque := CatalogueFamiliers.attaque(id, niveau)
-			niveaux.append([niveau, nombre(attaque), nombre(attaque / float(d["intervalle"]))])
+			niveaux.append([niveau, nombre(attaque), str(roundi(attaque / float(d["intervalle"])))])
 		tableau(lignes, ["Niveau de forge", "Attaque propre (points)", "DPS propre (dégâts/s)"], niveaux)
 	lignes.append_array(["## Bijoux actifs", ""])
 	for anciens in [false, true]:
@@ -139,8 +139,8 @@ static func items() -> String:
 static func maitrises() -> String:
 	var lignes := entete("Liste des maîtrises", [
 		"Un nœud normal possède %d rangs ; un pouvoir majeur s’achète une seule fois." % Reglages.MAITRISE_RANG_MAX,
-		"Facteur du nœud = (1 + taux du rang)^rangs acquis. Les facteurs des nœuds d’une même statistique se multiplient. Les points de critique s’additionnent.",
-		"Coût du prochain rang = coût initial × (1 + %s × rangs déjà acquis), arrondi au multiple de %d." % [nombre(Reglages.MAITRISE_COUT_AJOUT_PAR_RANG), Reglages.COUT_PAS_ARRONDI],
+		"Chaque rang ajoute un nombre entier de points de pourcentage, jamais inférieur au rang précédent ; le dernier rang atteint l’arrondi du cumul composé (1 + taux du rang)^rangs. Les facteurs des nœuds d’une même statistique se multiplient. Les points de critique s’additionnent.",
+		"Coût du prochain rang = coût initial, augmenté de %d %% par rang déjà acquis, arrondi au multiple de %d." % [roundi(Reglages.MAITRISE_COUT_AJOUT_PAR_RANG * 100.0), Reglages.COUT_PAS_ARRONDI],
 		"Un rang augmente l’attaque déjà acquise. Par exemple, +4 % fait passer 100 à 104, et 300 à 312. Les nœuds offensifs tardifs ont un taux supérieur aux premiers.",
 		"Dégâts moyens d’un tir, hors augments et bonus finaux = attaque × coefficient de l’arme × [1 + chance critique × (coefficient critique − 1)].",
 		"Une maîtrise de critique agit sur ce dernier facteur. La cadence augmente les tirs par seconde, pas les dégâts d’un tir.",
@@ -174,7 +174,7 @@ static func passifs() -> String:
 	var lignes := entete("Liste des passifs", [
 		"%d emplacements équipables. Un passif non équipé ne donne aucun bonus." % Passifs.EMPLACEMENTS,
 		"%d rangs par passif. Un doublon passe au rang 2 : les bonus de statistiques se composent et conservent leur gain relatif ; les points de critique s’additionnent. Les taux de niveau suivent les paliers du héros." % Passifs.RANG_MAX,
-		"Pour l’attaque, les PV, la défense et la cadence, les bonus des passifs s’additionnent entre eux, puis multiplient les statistiques déjà obtenues. Un +30 % d’attaque de passifs multiplie donc cette attaque par 1,30.",
+		"Pour l’attaque, les PV, la défense et la cadence, les bonus des passifs s’additionnent entre eux, puis multiplient les statistiques déjà obtenues. Un +30 % d’attaque de passifs augmente donc de 30 % l’attaque déjà acquise. Le second rang suit le cumul composé, arrondi à un pourcentage entier.",
 		"Les soins, la vitesse de déplacement et celle des projectiles gardent un cumul additif avec les autres sources permanentes. Les critiques s’ajoutent en points ; la chance est plafonnée à 100 %.",
 		"Audace et Reprise de souffle s’additionnent dans un même facteur de dégâts finaux : 1 + Audace + Reprise active + éventuel Élan offensif du bijou. Reprise exige une période sans blessure ; Audace augmente aussi les dégâts subis.",
 		"Ils s’obtiennent dans les Épreuves, sans dépense de Gouttes ni de Pierres. La campagne n’en offre pas.",
@@ -202,7 +202,7 @@ static func passifs() -> String:
 	lignes.append_array(["## Cœurs de mana des Épreuves", "",
 		"Chaque niveau d’Épreuve possède un Cœur unique, garanti au plus tard après %d victoires sans son Cœur." % Reglages.EPREUVE_GARANTIE_COEUR,
 		"",
-		"Chaque Cœur multiplie les dégâts déjà acquis par %s. Avec %d Cœurs, le facteur final atteint ×%s (+%s %%). Le dernier Cœur conserve donc le même gain relatif que le premier." % [nombre(1.0 + Reglages.COEUR_MANA_BONUS_FINAL), Epreuves.nombre(), nombre(Reglages.multiplicateur_coeurs(Epreuves.nombre())), nombre((Reglages.multiplicateur_coeurs(Epreuves.nombre()) - 1.0) * 100.0)],
+		"Chaque Cœur ajoute %d %% aux dégâts déjà acquis. Avec %d Cœurs, le bonus total atteint +%d %%, arrondi au pourcentage entier. Le dernier Cœur conserve donc le même gain relatif que le premier." % [roundi(Reglages.COEUR_MANA_BONUS_FINAL * 100.0), Epreuves.nombre(), roundi((Reglages.multiplicateur_coeurs(Epreuves.nombre()) - 1.0) * 100.0)],
 		"", "## Anciennes sauvegardes", "",
 		"Les anciens sorts et ultimes sont convertis en passifs lors du chargement d’une ancienne sauvegarde.", ""])
 	return "\n".join(lignes).strip_edges() + "\n"
@@ -305,3 +305,8 @@ static func _rythme_monstres(lignes: Array[String]) -> void:
 		"Quand elle est nécessaire, l’annonce ordinaire dure au moins %s s, celle d’une salve de boss %s s. La visée annoncée reste verrouillée jusqu’au départ." % [nombre(Reglages.ENNEMI_TELEGRAPHE_MIN), nombre(BestiaireMondes.BOSS_ANNONCE_TIR)], "",
 		"Le tisseur lance %d rubans sans annonce ni anticipation : écart %s px, amplitude %s px, fréquence initiale %s Hz. La fréquence suit ensuite la hausse de vitesse. Il recule si le temps de vol devient inférieur à %s s ; son passage reste ouvert à tous les niveaux." % [int(tisseur["projectiles"]), nombre(float(tisseur["ecart_lateral"])), nombre(float(tisseur["amplitude"])), nombre(float(tisseur["frequence"])), nombre(BestiaireMondes.TISSEUR_REACTION_MIN)], "",
 		"Salle de référence : %s × %s px ; zoom caméra %s. Les variantes de forme appliquent leurs proportions à cette taille." % [nombre(Reglages.ARENE_TAILLE.x), nombre(Reglages.ARENE_TAILLE.y), nombre(Reglages.ARENE_CAMERA_ZOOM, 4)], ""])
+
+
+static func _ecart(facteur: float) -> String:
+	var ecart := roundi((facteur - 1.0) * 100.0)
+	return "normale" if ecart == 0 else "%s%d %%" % ["+" if ecart > 0 else "−", absi(ecart)]

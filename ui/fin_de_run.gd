@@ -28,7 +28,13 @@ func afficher(victoire: bool, salle_atteinte: int) -> void:
 	if _affiche: return
 	_affiche = true
 	var gains := BilanRun.finaliser(victoire, salle_atteinte)
-	StyleAzur.banniere(_bilan, "Victoire !" if victoire else "L’aventure s’achève", Jeu.nom_run(), "victoire" if victoire else "defaite")
+	var titre := _TitreFin.new()
+	titre.victoire = victoire
+	titre.sous_titre = Jeu.nom_run()
+	titre.custom_minimum_size = Vector2(0, 250)
+	titre.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_bilan.add_child(titre)
+	Sons.jouer("victoire" if victoire else "defaite", -5.0)
 	var parcours := StyleAzur.texte("%d salles terminées  ·  %d boss vaincus" % [Jeu.salles_terminees.size(), Jeu.boss_vaincus.size()], 28, StyleAzur.ATTENUE)
 	parcours.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_bilan.add_child(parcours)
@@ -223,3 +229,31 @@ static func progression_ouverture(temps: float) -> float:
 		return 1.045 * (1.0 - pow(1.0 - mouvement, 3.0))
 	var pose := (brut - 0.77) / 0.23
 	return 1.0 + 0.045 * (1.0 + cos(PI * pose)) * 0.5
+
+
+# Titre de fin : « VICTOIRE ! » dore dans des rayons, ou une defaite sobre.
+class _TitreFin:
+	extends Control
+	var victoire := true
+	var sous_titre := ""
+	var _temps := 0.0
+
+	func _process(delta: float) -> void:
+		_temps += delta
+		queue_redraw()
+
+	func _draw() -> void:
+		var centre := Vector2(size.x * 0.5, size.y * 0.45)
+		var entree := clampf(_temps / 0.35, 0.0, 1.0)
+		var echelle := 1.0 if ReglagesJoueur.effets_reduits else lerpf(1.7, 1.0, 1.0 - pow(1.0 - entree, 3.0))
+		var teinte := StyleJeu.teinte("ambre" if victoire else "rubis")
+		if victoire and not ReglagesJoueur.effets_reduits:
+			DessinJeu.rayons(self, centre, size.x * 0.55, Color(teinte["haut"], 0.35), _temps * 0.5, 18)
+			DessinJeu.halo(self, centre, size.y * 0.55, Color(teinte["haut"], 0.6))
+		draw_set_transform(centre, 0.0, Vector2.ONE * echelle)
+		var titre := "VICTOIRE !" if victoire else "DÉFAITE"
+		var couleur: Color = Color("ffe08a") if victoire else Color("ffb3ba")
+		DessinJeu.texte_centre(self, Polices.JEU_FORT, Vector2.ZERO, titre, 96, couleur, teinte["contour_texte"], size.x - 40.0)
+		draw_set_transform(Vector2.ZERO)
+		DessinJeu.texte_centre(self, Polices.JEU, Vector2(size.x * 0.5, size.y * 0.82), sous_titre, 30,
+			StyleJeu.TEXTE_DOUX, StyleJeu.CONTOUR_TEXTE, size.x - 40.0)

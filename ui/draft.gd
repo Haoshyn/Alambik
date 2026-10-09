@@ -24,7 +24,10 @@ func _ready() -> void:
 		if _rarete == Reactif.LEGENDAIRE:
 			sous_titre = "Sans relance"
 	var col := StyleAzur.page(self, "Augmentations")
-	StyleAzur.banniere(col, titre, sous_titre, "fiole")
+	var banniere := StyleAzur.banniere(col, titre, sous_titre, "fiole")
+	if campagne:
+		var titre_rarete := banniere.get_child(0) as Label
+		titre_rarete.add_theme_color_override("font_color", StyleJeu.teinte(CarteReactif.teinte_rarete(_rarete))["haut"])
 	_cartes = StyleAzur.defilement(col)
 	_cartes.add_theme_constant_override("separation", 28)
 	_espace_haut = Control.new()
@@ -57,6 +60,7 @@ func _nouveau_tirage() -> void:
 	if _propositions.is_empty():
 		_fermer_sans_choix()
 		return
+	var nouvelles: Array[CarteReactif] = []
 	for id in _propositions:
 		var reactif := CatalogueReactifs.par_id(id)
 		var carte := CarteReactif.new()
@@ -64,7 +68,9 @@ func _nouveau_tirage() -> void:
 		carte.configurer(reactif)
 		carte.choisie.connect(_sur_choix)
 		_cartes.add_child(carte)
+		nouvelles.append(carte)
 	_recentrer_cartes.call_deferred()
+	_distribuer(nouvelles)
 	var disponibles := DraftLogique.candidats(Jeu.ameliorations_effectives(),
 		_rarete, etage_recompense if campagne else 0)
 	var peut_changer := false
@@ -97,17 +103,47 @@ func _sur_reroll() -> void:
 	# La rarete est fixee a l'ouverture du niveau, jamais relancee.
 	_nouveau_tirage()
 
+# Les cartes arrivent l'une apres l'autre, comme distribuees sur la table.
+func _distribuer(cartes: Array[CarteReactif]) -> void:
+	await get_tree().process_frame
+	for index in cartes.size():
+		var carte := cartes[index]
+		if not is_instance_valid(carte):
+			continue
+		StyleJeu.entree_rebond(carte, 0.09 * float(index), 0.0, 0.06 if index % 2 == 0 else -0.06)
+		if not ReglagesJoueur.effets_reduits:
+			get_tree().create_timer(0.09 * float(index), true).timeout.connect(
+				func() -> void: Sons.jouer("carte", -12.0, 1.0 + 0.06 * float(index)))
+
 func _sur_choix(id: String) -> void:
 	if _choisi or id not in _propositions:
 		return
 	_choisi = true
+	var rarete := Reactif.RARE
 	for carte in _cartes.get_children():
 		if carte is CarteReactif:
-			carte.selectionnee = carte.reactif.id == id
+			var choisie: bool = carte.reactif.id == id
+			carte.selectionnee = choisie
 			carte.disabled = true
+			if choisie:
+				rarete = carte.reactif.rarete
+			_animer_choix(carte, choisie)
 	Jeu.ajouter_reactif(id)
-	Sons.jouer("choix", -10.0)
+	Sons.jouer({Reactif.EPIQUE: "choix_epique", Reactif.LEGENDAIRE: "choix_legendaire"}.get(rarete, "choix_rare"), -8.0)
+	# Le choix reste visible un instant avant la sortie de l'ecran.
+	await get_tree().create_timer(0.1 if ReglagesJoueur.effets_reduits else 0.38, true).timeout
 	StyleInterface.sortir_puis(self, func() -> void: termine.emit())
+
+func _animer_choix(carte: CarteReactif, choisie: bool) -> void:
+	if ReglagesJoueur.effets_reduits:
+		return
+	carte.pivot_offset = carte.size * 0.5
+	var tween := carte.create_tween().set_parallel(true)
+	if choisie:
+		tween.tween_property(carte, "scale", Vector2.ONE * 1.07, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	else:
+		tween.tween_property(carte, "modulate:a", 0.35, 0.2)
+		tween.tween_property(carte, "scale", Vector2.ONE * 0.94, 0.2)
 
 func _fermer_sans_choix() -> void:
 	if _choisi:

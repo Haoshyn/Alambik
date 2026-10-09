@@ -4,7 +4,7 @@ const PROFILS := preload("res://tools/statistiques/profils_augments.gd").PROFILS
 const CLES_AUTORISEES := [
 	"attaque_mult", "cadence_mult", "vitesse_mult", "portee_mult", "pv_max_mult", "pv_max_final_mult", "defense_mult",
 	"deplacement_mult", "soin_mult", "degats_subis_mult", "experience_mult", "gouttes_mult",
-	"critique_add", "degats_critiques_add", "conversion_critique", "invulnerabilite_add", "boucliers_salle_add",
+	"critique_add", "degats_critiques_add", "conversion_critique", "invulnerabilite_bonus", "boucliers_salle_add",
 	"salves_add", "degats_salve_mult", "rebonds_add", "perforations_add", "nb_projectiles_add",
 	"projectiles_lateraux_add", "angle_eventail_add", "ecart_lateral_min",
 	"tirs_paralleles_add",
@@ -284,10 +284,10 @@ func _verifier_multiplication_tirs() -> void:
 			and is_equal_approx(tir_inverse.degats_finaux_projectile_mult, tir.degats_finaux_projectile_mult)
 			and tir_inverse.decalages() == tir.decalages(), "L'ordre des choix modifie le tir : " + contexte)
 	var details := DetailsReactif.texte(CatalogueReactifs.par_id("tir_multiple"), 2)
-	_exiger(details.contains("0,6") and details.contains("2 projectiles frontaux parallèles"),
+	_exiger(details.contains("−40 %") and details.contains("2 projectiles frontaux parallèles"),
 		"La carte Tir double ne décrit pas ses deux copies")
 	var details_triple := DetailsReactif.texte(CatalogueReactifs.par_id("battement_triple"))
-	_exiger(details_triple.contains("×0,8") and details_triple.contains("2 salves") and details_triple.contains("Cumulable avec Salve"),
+	_exiger(details_triple.contains("−20 %") and details_triple.contains("2 salves") and details_triple.contains("Cumulable avec Salve"),
 		"La carte Battement triple doit annoncer ses 20 % de perte et son cumul avec Salve")
 	stats.attaque_base = 1000.0
 	stats.bonus_attaque = 0.0
@@ -542,15 +542,16 @@ func _verifier_elan(script: GDScript, inventaire: Array[String], jeu: Node) -> v
 	heros.call("definir_intention", Vector2.RIGHT, 0.0)
 	heros.call("_process", 1.0)
 	_exiger(not bool(heros.get("_elan_chargee")), "Élan ne doit pas charger avec une intensité de déplacement nulle")
+	var demi_charge := ReglagesAugments.ELAN_VITAL_CHARGE * 0.6
 	heros.call("definir_intention", Vector2.RIGHT)
-	heros.call("_process", 0.30)
+	heros.call("_process", demi_charge)
 	heros.call("definir_intention", Vector2.ZERO)
 	heros.call("_process", 0.01)
 	heros.call("definir_intention", Vector2.RIGHT)
-	heros.call("_process", 0.30)
+	heros.call("_process", demi_charge)
 	_exiger(not bool(heros.get("_elan_chargee")), "Élan ne doit pas cumuler deux déplacements interrompus")
-	heros.call("_process", 0.30)
-	_exiger(bool(heros.get("_elan_chargee")), "Élan doit charger après 0,6 s de déplacement continu")
+	heros.call("_process", demi_charge)
+	_exiger(bool(heros.get("_elan_chargee")), "Élan doit charger après %d s de déplacement continu" % roundi(ReglagesAugments.ELAN_VITAL_CHARGE))
 	var cible := CibleProjectile.new()
 	cible.position = Vector2(400.0, 200.0)
 	root.add_child(cible)

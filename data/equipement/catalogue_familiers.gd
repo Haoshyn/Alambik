@@ -3,21 +3,23 @@ extends RefCounted
 
 # La forge du familier renforce sa base propre. Les bonus permanents d'attaque
 # sont partages une seule fois, sans recevoir les critiques ni la cadence du heros.
+# Les intervalles sont des secondes entieres ; l'attaque de chaque tir garde
+# le debit des anciens intervalles fractionnaires. Le golem tire plus lourd.
 static var TYPES := _avec_descriptions({
 	"homoncule_encre": {"nom": "Homoncule d’encre", "niveau": 1, "attaque": 6.0,
 		"intervalle": 2.0, "passif": {"critique": 0.05},
 		"forme": "Goutte nacrée"},
-	"salamandre": {"nom": "Salamandre de braise", "niveau": 8, "attaque": 8.0,
-		"intervalle": 2.1, "passif": {"attaque_mult": 0.08},
+	"salamandre": {"nom": "Salamandre de braise", "niveau": 8, "attaque": 7.6,
+		"intervalle": 2.0, "passif": {"attaque_mult": 0.08},
 		"forme": "Rosette solaire"},
-	"ondine": {"nom": "Ondine de givre", "niveau": 15, "attaque": 7.0,
-		"intervalle": 1.9, "passif": {"cadence": 0.08},
+	"ondine": {"nom": "Ondine de givre", "niveau": 15, "attaque": 7.4,
+		"intervalle": 2.0, "passif": {"cadence": 0.08},
 		"forme": "Navette de givre"},
-	"sylphe": {"nom": "Sylphe des orages", "niveau": 22, "attaque": 6.0,
-		"intervalle": 1.8, "passif": {"vitesse": 0.08, "attaque_mult": 0.05},
+	"sylphe": {"nom": "Sylphe des orages", "niveau": 22, "attaque": 6.7,
+		"intervalle": 2.0, "passif": {"vitesse": 0.08, "attaque_mult": 0.05},
 		"forme": "Plume de vent"},
-	"golem": {"nom": "Golem de forge", "niveau": 29, "attaque": 10.0,
-		"intervalle": 1.8, "passif": {"defense_base": 4.0, "attaque_mult": 0.05},
+	"golem": {"nom": "Golem de forge", "niveau": 29, "attaque": 16.7,
+		"intervalle": 3.0, "passif": {"defense_base": 4.0, "attaque_mult": 0.05},
 		"forme": "Sceau quadrilobe"},
 })
 
@@ -34,7 +36,7 @@ static func _avec_descriptions(types: Dictionary) -> Dictionary:
 		var morceaux: Array[String] = []
 		for champ: String in passif:
 			var regle: Array = libelles[champ]
-			var valeur := String.num(float(passif[champ]) * float(regle[1]), 2).trim_suffix(".0").replace(".", ",")
+			var valeur := str(roundi(float(passif[champ]) * float(regle[1])))
 			morceaux.append("%s +%s%s" % [str(regle[0]), valeur, str(regle[2])])
 		donnees["description"] = str(donnees["forme"]) + " · héros : " + ", ".join(morceaux)
 	return types

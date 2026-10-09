@@ -10,7 +10,7 @@ signal mort(qui: Node, position: Vector2, couleur: Color)
 signal tir_demande(tir_ennemi: Tir, origine: Vector2, direction: Vector2)
 signal invocation_demandee(id: String, position: Vector2)
 signal touche(position: Vector2, couleur: Color)
-signal degats_recus(position: Vector2, montant: float, continu: bool)
+signal degats_recus(position: Vector2, montant: float, continu: bool, critique: bool)
 signal phase_changee(phase: int)
 signal zone_demandee(point: Vector2, origine: Vector2, profil: Dictionary, degats: float)
 
@@ -52,6 +52,7 @@ var _minuterie := 0.0
 var _cadence_motif := 0.0
 var _anim := 0.0
 var _flash := 0.0
+var _critique_attendu := false
 var _braise := 0.0
 var _braise_dps := 0.0
 var _givre := 0.0
@@ -118,7 +119,7 @@ func _physics_process(delta: float) -> void:
 	if dot_dps > 0.0:
 		var degats := dot_dps * delta
 		pv -= degats
-		degats_recus.emit(global_position, degats, true)
+		degats_recus.emit(global_position, degats, true, false)
 		if pv <= 0.0:
 			_mourir()
 			return
@@ -575,13 +576,18 @@ func _lancer_regle(origine: Vector2, direction: Vector2, part_degats: float,
 	else:
 		tir_demande.emit(t, origine, direction)
 
+# Le prochain coup recu vient d'un critique : seul l'affichage le distingue.
+func marquer_critique() -> void:
+	_critique_attendu = true
+
 func recevoir_degats(montant: float, effets: Array = [], puissances: Dictionary = {}) -> void:
 	if pv <= 0.0:
 		return
 	var facteur := (1.0 + (Reglages.ACIDE_VULNERABILITE - 1.0) * _puissance_acide) if _acide > 0.0 else 1.0
 	var degats := montant * facteur
 	pv -= degats
-	degats_recus.emit(global_position, degats, false)
+	degats_recus.emit(global_position, degats, false, _critique_attendu)
+	_critique_attendu = false
 	_flash = 1.0
 	touche.emit(global_position, donnees["couleur"])
 	for effet in effets:
@@ -617,7 +623,8 @@ func _mourir() -> void:
 		return
 	remove_from_group("ennemis")
 	mort.emit(self, global_position, donnees["couleur"])
-	Sons.jouer("mort", -4.0, 0.6)
+	Sons.jouer("explosion", -3.0, 0.85)
+	Sons.jouer("mort", -6.0, 0.6)
 	queue_free()
 
 func _draw() -> void:

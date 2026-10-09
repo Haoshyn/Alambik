@@ -22,7 +22,7 @@ func _ready() -> void:
 	contenu.add_child(_action("Mes améliorations", "navigation_passifs", _ouvrir_ameliorations))
 	contenu.add_child(_action("Paramètres", "parametres", _ouvrir_reglages))
 	var quitter := StyleAzur.bouton("Quitter l’aventure", _quitter_run)
-	quitter.add_theme_color_override("font_color", StyleAzur.CORAIL)
+	StyleJeu.habiller_bouton(quitter, "rubis", 30)
 	contenu.add_child(quitter)
 	col.add_child(StyleAzur.bouton("Reprendre l’aventure", _reprendre, true))
 	Capture.programmer(self)

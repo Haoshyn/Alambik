@@ -31,6 +31,7 @@ var _arrondi_sommets_avant := true
 
 
 func _ready() -> void:
+	Engine.time_scale = 1.0
 	_configurer_rendu_lisse()
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	if OS.get_name() == "Android":

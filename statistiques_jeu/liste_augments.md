@@ -4,7 +4,7 @@
 
 - Chaque choix ne dure que pour la tentative en cours. Les rares de statistiques restent des bonus directs. Traque, Satellites, Trait alchimique et Météorite sont des effets autonomes, sans bonus de statistiques ajouté. Les épiques sont renforcés légèrement ; les légendaires peuvent transformer une run.
 - Dans une même famille, les bonus positifs s’additionnent : deux bonus de 40 % donnent +80 %. Aucun bonus de défense ne coûte de l’attaque, de la cadence ou des PV.
-- Salve applique ×0,7 aux projectiles ; Battement triple applique ×0,8 lorsqu'il est seul. Ils se cumulent en quatre salves, avec leurs gains de débit additionnés. Tir double applique ×0,7 pour une copie et ×0,6 pour deux copies lorsqu'il est seul. Les gains de débit des salves, tirs parallèles et cadence s'additionnent : leur cumul atténue les impacts. Les diagonales ont leur propre puissance et Ricochet garde sa limite et ses pertes, même avec Perforation.
+- Salve retire 30 % aux dégâts de chaque projectile ; Battement triple en retire 20 % lorsqu'il est seul. Ils se cumulent en quatre salves, avec leurs gains de débit additionnés. Tir double retire 30 % pour une copie et 40 % pour deux copies lorsqu'il est seul. Les gains de débit des salves, tirs parallèles et cadence s'additionnent : leur cumul atténue les impacts. Les diagonales ont leur propre puissance et Ricochet garde sa limite et ses pertes, même avec Perforation.
 - Le groupe des bonus de run multiplie une seule fois les statistiques permanentes.
 - Les bonus directs d'attaque et de projectile des augments s'additionnent. Critique : les points de chance s’ajoutent, jusqu’à 100 %. Chaque augment garde son gain propre ; le croisement entre la chance d'un choix et la puissance d'un autre est retiré. Les fiches montrent les bonus de base avant cette combinaison.
 - Salves et projectiles supplémentaires ne garantissent pas que tous les tirs atteignent la même cible.
@@ -77,8 +77,8 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | PV max +20 %<br>Déplacement +25 %<br>Invulnérabilité après un coup +0,4 s |
-| 2 | PV max +40 %<br>Déplacement +50 %<br>Invulnérabilité après un coup +0,8 s |
+| 1 | PV max +20 %<br>Déplacement +25 %<br>Invulnérabilité après un coup +70 % |
+| 2 | PV max +40 %<br>Déplacement +50 %<br>Invulnérabilité après un coup +140 % |
 
 ### Peau de cuivre
 
@@ -104,7 +104,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | +1 salve par attaque<br>Dégâts de chaque projectile ×0,7 |
+| 1 | +1 salve par attaque<br>Dégâts de chaque projectile −30 % |
 
 ### Satellites alchimiques
 
@@ -112,7 +112,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | 2 satellites au contact · 50 % de l'attaque par impact<br>Un impact par ennemi toutes les 0,6 s, même en mouvement |
+| 1 | 2 satellites au contact · 50 % de l'attaque par impact<br>Un impact par ennemi chaque seconde, même en mouvement |
 
 ### Sceau de garde
 
@@ -136,8 +136,8 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Dégâts de chaque projectile ×0,7<br>+1 projectile frontal parallèle par salve |
-| 2 | Dégâts de chaque projectile ×0,6<br>+2 projectiles frontaux parallèles par salve |
+| 1 | Dégâts de chaque projectile −30 %<br>+1 projectile frontal parallèle par salve |
+| 2 | Dégâts de chaque projectile −40 %<br>+2 projectiles frontaux parallèles par salve |
 
 ### Trait alchimique
 
@@ -156,7 +156,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Attaque +25 %<br>Après 0,45 s de déplacement, la prochaine attaque gagne +45 % de dégâts sur toutes ses salves |
+| 1 | Attaque +25 %<br>Après 1 s de déplacement, la prochaine attaque gagne +60 % de dégâts sur toutes ses salves |
 
 ### Encre mordante
 
@@ -232,7 +232,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | +2 salves par attaque<br>Dégâts de chaque projectile ×0,8<br>Cumulable avec Salve |
+| 1 | +2 salves par attaque<br>Dégâts de chaque projectile −20 %<br>Cumulable avec Salve |
 
 ### Courage indomptable
 
@@ -256,7 +256,7 @@
 
 | Copies cumulées | Effets cumulés |
 | --- | --- |
-| 1 | Dégâts subis −20 %<br>PV max totaux ×1,8, après les autres bonus de PV<br>Rend tous les PV à l'acquisition, une seule fois |
+| 1 | Dégâts subis −20 %<br>PV max totaux +80 %, après les autres bonus de PV<br>Rend tous les PV à l'acquisition, une seule fois |
 
 ### Force cataclysmique
 

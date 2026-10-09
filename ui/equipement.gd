@@ -159,8 +159,7 @@ func _afficher_inventaire() -> void:
 		_boutons_slots[i].icon = StyleAzur.icone(2 if SLOTS[i] == "collier" else 0) if id.is_empty() else StyleAzur.icone(StyleAzur.icone_objet(id))
 		_boutons_slots[i].add_theme_color_override("icon_normal_color", Color("98a8ca") if id.is_empty() else Color.WHITE)
 		_libelles_slots[i].text = NOMS_SLOTS[SLOTS[i]]+ ("\nLibre" if id.is_empty() else "\nNiveau %d" % ReglagesJoueur.niveau_objet(id))
-		var style_slot := StyleAzur.cercle(SLOTS[i] == _slot_selectionne)
-		style_slot.modulate_color = Color.WHITE.lerp([StyleAzur.OR_VIF, StyleAzur.BLEU_VIF, StyleAzur.MAUVE_VIF][i], 0.40 if SLOTS[i] == _slot_selectionne else 0.14)
+		var style_slot := StyleAzur.cercle_teinte([StyleAzur.OR_VIF, StyleAzur.BLEU_VIF, StyleAzur.MAUVE_VIF][i], SLOTS[i] == _slot_selectionne)
 		_boutons_slots[i].add_theme_stylebox_override("normal", style_slot)
 	var ids := _objets_page()
 	var mondes: Array = Chapitres.MONDES + Chapitres.MONDES_RETIRES
@@ -185,29 +184,41 @@ func _afficher_inventaire() -> void:
 		_styler_carte(b, accent_objet, id == _objet_selectionne)
 
 func _styler_carte(bouton: Button, accent: Color, selection: bool, vide := false) -> void:
+	# Cases du coffret : emplacement creuse quand il est vide, email teinte par
+	# le monde d'origine sinon, avec une lueur sur la piece choisie.
 	for etat in ["normal", "hover", "pressed", "disabled"]:
-		var style := StyleBoxFlat.new()
-		var intensite := 0.07 if vide else 0.28 if selection else 0.17
-		if etat == "hover": intensite += 0.10
-		if etat == "pressed": intensite += 0.16
-		style.bg_color = Color("2c4561f5").lerp(accent, intensite)
-		style.border_color = Color("6e89aa") if vide else accent.lightened(0.18 if selection else 0.04)
-		style.set_border_width_all(2 if selection else 1)
-		style.border_width_bottom = 4 if selection else 2
-		style.set_corner_radius_all(15)
-		style.content_margin_left = 8
-		style.content_margin_right = 8
-		style.content_margin_top = 7
-		style.content_margin_bottom = 7
+		var style := (StyleJeu.panneau(Color() if vide else accent, 18.0, 0.6 if vide else 0.96) as StyleBoxJeu).duplicate() as StyleBoxJeu
+		style.epaisseur = 2.0 if vide else 6.0
+		style.reflet = 0.0 if vide else 0.18
+		style.liseret = 0.08 if vide else 0.35
+		if vide:
+			style.monture_haut = Color("7d82a6")
+			style.monture_bas = Color("454966")
+			style.largeur_monture = 2.0
+			style.ombre = Color(0, 0, 0, 0.0)
+		elif selection:
+			style.lueur = Color(accent.lightened(0.35), 0.85)
+			style.lueur_taille = 10.0
+		if etat == "hover" and not vide:
+			style.face_haut = style.face_haut.lightened(0.1)
+		if etat == "pressed":
+			style.enfonce = true
+		style.content_margin_left = 8.0
+		style.content_margin_right = 8.0
+		style.content_margin_top = 8.0
+		style.content_margin_bottom = 10.0
 		bouton.add_theme_stylebox_override(etat, style)
 	bouton.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	bouton.add_theme_color_override("font_color", Color("f1f5ff"))
 	bouton.add_theme_color_override("font_disabled_color", Color("a9b8d1"))
 
 func _nombre(valeur: float) -> String:
-	var texte := String.num(valeur, 2)
-	while texte.contains(".") and texte.ends_with("0"): texte = texte.trim_suffix("0")
-	return texte.trim_suffix(".").replace(".", ",")
+	return str(roundi(valeur))
+
+# Les facteurs d'arme se lisent comme les augments : un ecart entier en pourcentage.
+func _ecart(facteur: float) -> String:
+	var ecart := roundi((facteur - 1.0) * 100.0)
+	return "normale" if ecart == 0 else "%s%d %%" % ["+" if ecart > 0 else "−", absi(ecart)]
 
 func _pourcentage(valeur: float) -> String:
 	return _nombre(valeur * 100.0)
@@ -407,7 +418,7 @@ func _ouvrir_fiche_arme() -> void:
 	image_arme.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	image_arme.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	lecture.add_child(image_arme)
-	lecture.add_child(StyleAzur.texte("Attaque +%s · Tir %s %% · Cadence ×%.2f" % [_nombre(CatalogueProjectiles.attaque_base(_arme_selectionnee, niveau)), _pourcentage(float(arme["coefficient_tir"])), float(arme.get("cadence_mult", 1.0))], 27))
+	lecture.add_child(StyleAzur.texte("Attaque +%s · Tir %s %% · Cadence %s" % [_nombre(CatalogueProjectiles.attaque_base(_arme_selectionnee, niveau)), _pourcentage(float(arme["coefficient_tir"])), _ecart(float(arme.get("cadence_mult", 1.0)))], 27))
 	lecture.add_child(StyleAzur.texte(str(arme["description"]), 26))
 	_progression_forge(fiche, {"attaque_base": CatalogueProjectiles.attaque_base(_arme_selectionnee, niveau)}, {"attaque_base": CatalogueProjectiles.attaque_base(_arme_selectionnee, niveau + 1)}, niveau, ReglagesJoueur.cout_forge_arme(_arme_selectionnee))
 	var ligne := _actions_fiche(fiche)
@@ -451,10 +462,10 @@ func _resume_heros() -> String:
 	var stats := Stats.depuis_reglages(ReglagesJoueur.rangs_competences_effectifs(),
 		ReglagesJoueur.passifs_equipes_effectifs(), ReglagesJoueur.bonus_objets_effectifs(),
 		ReglagesJoueur.niveau_compte_effectif(), ReglagesJoueur.attributs, ReglagesJoueur.specialisation_effective())
-	return "Attaque %s · Défense %s · PV %d\nCritique %s %% · dégâts critiques +%s %%\nCadence %.2f /s · Cœurs %d/%d · %d pierres" % [
+	return "Attaque %s · Défense %s · PV %d\nCritique %s %% · dégâts critiques +%s %%\nCadence %d %% · Cœurs %d/%d · %d pierres" % [
 		_nombre(stats.degats), _nombre(stats.defense), roundi(stats.pv_max),
 		_pourcentage(stats.critique), _pourcentage(stats.degats_critiques),
-		stats.cadence, ReglagesJoueur.nombre_coeurs_mana(),
+		roundi(stats.cadence / Reglages.HEROS_CADENCE * 100.0), ReglagesJoueur.nombre_coeurs_mana(),
 		Epreuves.nombre(), ReglagesJoueur.pierres_forge]
 
 func _selectionner_arme(id: String) -> void:

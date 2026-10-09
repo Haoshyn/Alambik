@@ -44,25 +44,26 @@ static func styliser_bouton(bouton: Button, _accent := Palette.OR, secondaire :=
 	# le joueur doit pouvoir glisser hors du bouton pour annuler son geste.
 	bouton.focus_mode = Control.FOCUS_NONE
 	bouton.action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
+	var teinte := "violet" if secondaire else "ambre"
 	for etat in ["normal", "hover", "pressed", "focus", "disabled"]:
-		var style := StyleAzur.sceau(not secondaire, Color.WHITE, etat == "pressed")
-		if etat == "disabled": style.modulate_color = Color("8995b5")
-		bouton.add_theme_stylebox_override(etat, style)
-	bouton.add_theme_color_override("font_color", StyleAzur.TEXTE)
-	bouton.add_theme_color_override("font_hover_color", Color.WHITE)
-	bouton.add_theme_color_override("font_pressed_color", Color.WHITE)
-	bouton.add_theme_color_override("font_focus_color", Color.WHITE)
-	bouton.add_theme_color_override("font_disabled_color", Color("c1c7d8"))
-	bouton.add_theme_constant_override("outline_size", 1)
+		bouton.add_theme_stylebox_override(etat, StyleJeu.boite(teinte, 30.0, etat))
+	bouton.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	var couleurs := StyleJeu.teinte(teinte)
+	for etat in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
+		bouton.add_theme_color_override(etat, couleurs["texte"])
+	bouton.add_theme_color_override("font_disabled_color", Color("e9ebf3"))
+	bouton.add_theme_font_override("font", Polices.JEU)
+	bouton.add_theme_constant_override("outline_size", 7)
 	bouton.add_theme_constant_override("icon_max_width", 64)
 	bouton.add_theme_constant_override("h_separation", 16)
-	bouton.add_theme_color_override("font_outline_color", Color("263154cc"))
+	bouton.add_theme_color_override("font_outline_color", couleurs["contour_texte"])
 	if not bouton.has_meta("micro_animation_installee"):
 		bouton.set_meta("micro_animation_installee", true)
 		bouton.resized.connect(func() -> void: bouton.pivot_offset = bouton.size * 0.5)
 		bouton.button_down.connect(func() -> void:
+			Sons.jouer("clic", -15.0, randf_range(0.97, 1.04))
 			StyleInterface._animer_bouton(bouton,
-				Vector2.ONE * (0.985 if ReglagesJoueur.effets_reduits else 0.955), true))
+				Vector2.ONE * (0.985 if ReglagesJoueur.effets_reduits else 0.94), true))
 		bouton.button_up.connect(func() -> void:
 			StyleInterface._animer_bouton(bouton, Vector2.ONE, false))
 

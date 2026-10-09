@@ -5,7 +5,7 @@ var _visuel: Control
 var _cadre: Panel
 var _icone: TextureRect
 var _legende_fond: Panel
-var _legende_style: StyleBoxFlat
+var _legende_style: StyleBoxJeu
 var _libelle: Label
 var _condition: Label
 var _verrou: TextureRect
@@ -30,14 +30,12 @@ func _ready() -> void:
 	_legende_fond = Panel.new()
 	_legende_fond.name = "FondLegende"
 	_legende_fond.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_legende_style = StyleAzur.fond_legende(0.88, 13)
-	_legende_style.border_color = Color("c1c9e3a0")
-	_legende_style.set_border_width_all(1)
+	_legende_style = (StyleJeu.panneau(Color(), 20.0, 0.94) as StyleBoxJeu).duplicate() as StyleBoxJeu
 	_legende_fond.add_theme_stylebox_override("panel", _legende_style)
 	add_child(_legende_fond)
 	_libelle = StyleAzur.texte("", 29, StyleAzur.IVOIRE)
 	_libelle.name = "Libelle"
-	_libelle.add_theme_font_override("font", Polices.LOGO)
+	_libelle.add_theme_font_override("font", Polices.JEU_FORT)
 	_libelle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_libelle.autowrap_mode = TextServer.AUTOWRAP_OFF
 	add_child(_libelle)
@@ -56,9 +54,10 @@ func _ready() -> void:
 func configurer(icone: String, libelle: String) -> void:
 	_icone.texture = StyleAzur.texture_interface(icone)
 	_cadre.add_theme_stylebox_override("panel", StyleAzur.cercle_mode(icone))
-	_legende_style.bg_color = Color("533948f0") if icone == "mine" else Color("42365ff0")
-	_legende_style.border_color = Color("ddb788") if icone == "mine" else Color("ae9cd6")
-	_legende_style.border_width_top = 2
+	var accent := Color("e09a52") if icone == "mine" else Color("a983ff")
+	_legende_style = (StyleJeu.panneau(accent, 20.0, 0.95) as StyleBoxJeu).duplicate() as StyleBoxJeu
+	_legende_style.epaisseur = 5.0
+	_legende_fond.add_theme_stylebox_override("panel", _legende_style)
 	_libelle.add_theme_color_override("font_color", Color("ffd294") if icone == "mine" else Color("dab0ff"))
 	_libelle.text = libelle
 	tooltip_text = libelle

@@ -21,16 +21,16 @@ static func lignes(reactif: Reactif, copies := 1) -> Array[String]:
 	for cle: String in libelles:
 		_ajouter_multiplicateur(resultat, mods, cle, str(libelles[cle]), nombre)
 	if mods.has("pv_max_final_mult"):
-		resultat.append("PV max totaux ×%s, après les autres bonus de PV" % _nombre(pow(float(mods["pv_max_final_mult"]), nombre)))
+		resultat.append("PV max totaux +%s %%, après les autres bonus de PV" % _nombre((pow(float(mods["pv_max_final_mult"]), nombre) - 1.0) * 100.0))
 	if mods.has("salves_add"):
 		var salves := int(mods["salves_add"]) * nombre
 		resultat.append("+%d salve%s par attaque" % [salves, "s" if salves > 1 else ""])
 	for cle: String in ["degats_salve_mult", "degats_finaux_projectile_mult"]:
 		if mods.has(cle):
 			var facteur := float(mods[cle]) if cle == "degats_salve_mult" else pow(float(mods[cle]), nombre)
-			resultat.append("Dégâts de chaque projectile ×%s" % _nombre(facteur, 4))
+			resultat.append(_ligne_facteur(facteur))
 	if mods.has("tirs_paralleles_add"):
-		resultat.append("Dégâts de chaque projectile ×%s" % _nombre(ReglagesAugments.puissance_tirs_paralleles(int(mods["tirs_paralleles_add"]) * nombre), 4))
+		resultat.append(_ligne_facteur(ReglagesAugments.puissance_tirs_paralleles(int(mods["tirs_paralleles_add"]) * nombre)))
 	if reactif.id == "battement_triple":
 		resultat.append("Cumulable avec Salve")
 	if mods.has("critique_add"):
@@ -39,8 +39,8 @@ static func lignes(reactif: Reactif, copies := 1) -> Array[String]:
 		resultat.append("Dégâts critiques +%s points" % _nombre(float(mods["degats_critiques_add"]) * 100.0 * poids))
 	if mods.has("conversion_critique"):
 		resultat.append("%s %% de la chance critique au-delà de 100 %% devient des dégâts critiques" % _nombre(float(mods["conversion_critique"]) * 100.0 * poids))
-	if mods.has("invulnerabilite_add"):
-		resultat.append("Invulnérabilité après un coup +%s s" % _nombre(float(mods["invulnerabilite_add"]) * poids))
+	if mods.has("invulnerabilite_bonus"):
+		resultat.append("Invulnérabilité après un coup +%s %%" % _nombre(float(mods["invulnerabilite_bonus"]) * 100.0 * poids))
 	if mods.has("boucliers_salle_add"):
 		var boucliers := int(mods["boucliers_salle_add"]) * nombre
 		resultat.append("%d bouclier%s par salle · un coup bloqué chacun" % [boucliers, "s" if boucliers > 1 else ""])
@@ -71,7 +71,8 @@ static func lignes(reactif: Reactif, copies := 1) -> Array[String]:
 		resultat.append("Après %s s de déplacement, la prochaine attaque gagne +%s %% de dégâts sur toutes ses salves" % [_nombre(ReglagesAugments.ELAN_VITAL_CHARGE), _nombre(ReglagesAugments.ELAN_VITAL_BONUS_DEGATS * 100.0)])
 	if "satellites_alchimiques" in mods.get("drapeaux", []):
 		resultat.append("%d satellites au contact · %s %% de l'attaque par impact" % [ReglagesAugments.SATELLITES_NOMBRE, _nombre(ReglagesAugments.SATELLITES_PART_ATTAQUE * 100.0)])
-		resultat.append("Un impact par ennemi toutes les %s s, même en mouvement" % _nombre(ReglagesAugments.SATELLITES_INTERVALLE_IMPACT))
+		var intervalle := roundi(ReglagesAugments.SATELLITES_INTERVALLE_IMPACT)
+		resultat.append("Un impact par ennemi %s, même en mouvement" % ("chaque seconde" if intervalle == 1 else "toutes les %d s" % intervalle))
 	if "trait_periodique" in mods.get("drapeaux", []):
 		resultat.append("Un trait toutes les %s s · %s %% de l'attaque · même en mouvement" % [_nombre(ReglagesAugments.TRAIT_INTERVALLE), _nombre(ReglagesAugments.TRAIT_PART_ATTAQUE * poids * 100.0)])
 	if "meteorite_alchimique" in mods.get("drapeaux", []):
@@ -91,12 +92,11 @@ static func _ajouter_multiplicateur(resultat: Array[String], mods: Dictionary,
 	var pourcentage := (Mods.facteur_heros(exemplaires, cle) - 1.0) * 100.0
 	resultat.append("%s %s%s %%" % [nom, "+" if pourcentage >= 0.0 else "−", _nombre(absf(pourcentage))])
 
-static func _nombre(valeur: float, decimales := 2) -> String:
-	if is_equal_approx(valeur, roundf(valeur)):
-		return str(roundi(valeur))
-	var texte := String.num(valeur, decimales)
-	if texte.contains("."):
-		while texte.ends_with("0"):
-			texte = texte.trim_suffix("0")
-		texte = texte.trim_suffix(".")
-	return texte.replace(".", ",")
+# Les cartes n'affichent que des entiers : les reductions des tirs multiples
+# se lisent en pourcentage perdu plutot qu'en facteur decimal.
+static func _ligne_facteur(facteur: float) -> String:
+	var ecart := roundi((facteur - 1.0) * 100.0)
+	return "Dégâts de chaque projectile %s%d %%" % ["+" if ecart >= 0 else "−", absi(ecart)]
+
+static func _nombre(valeur: float) -> String:
+	return str(roundi(valeur))

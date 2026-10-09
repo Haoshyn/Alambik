@@ -61,7 +61,7 @@ static var TOUS := {
 		Color("d7b193"), "hexagone", ReglagesAugments.COPIES_MAX, HEROS, Reactif.RARE),
 	"pas_brume": Reactif.creer("pas_brume", "Pas de brume",
 		"Plus de vitalité, de mobilité et de répit après chaque coup reçu.",
-		{"pv_max_mult": 1.20, "deplacement_mult": 1.25, "invulnerabilite_add": 0.40},
+		{"pv_max_mult": 1.20, "deplacement_mult": 1.25, "invulnerabilite_bonus": 0.70},
 		Color("a3daca"), "sillage", ReglagesAugments.COPIES_MAX, HEROS, Reactif.RARE),
 	"encrage_vif": Reactif.creer("encrage_vif", "Encrage vif",
 		"Plus d'attaque et des projectiles plus rapides.",

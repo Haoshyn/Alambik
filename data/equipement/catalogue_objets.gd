@@ -114,7 +114,7 @@ static func bonus_objet(id: String, niveau: int, _monde_reference := -1) -> Dict
 			resultat[champ] = Reglages.statistique_forge(base * Reglages.ECHELLE_STATISTIQUES,
 				forge if croissance > 0.0 else 0, croissance, provenance)
 		elif croissance > 0.0:
-			resultat[champ] = (1.0 + base) * pow(1.0 + croissance, forge) - 1.0
+			resultat[champ] = Reglages.pourcentage_entier((1.0 + base) * pow(1.0 + croissance, forge) - 1.0)
 		else:
 			resultat[champ] = base
 	return resultat
@@ -184,4 +184,4 @@ static func description_effets(id: String, niveau: int) -> String:
 	return "\n\n".join(lignes)
 
 static func _nombre(valeur: float) -> String:
-	return String.num(valeur, 2).trim_suffix(".0").replace(".", ",")
+	return str(roundi(valeur))

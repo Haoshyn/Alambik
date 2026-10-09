@@ -152,8 +152,11 @@ func _verifier_premier_boss() -> void:
 				* ProgressionStatistiques.facteur_miniboss(Chapitres.palier(chapitre)) * Reglages.BOSS_ENDURANCE_MULT
 			var attendu := 0.70 if salle == 5 else 1.0
 			_verifier(is_equal_approx(float(d["pv"]) / ancien_pv, attendu), "PV du premier boss reduits de 30 %% uniquement a l'etage 5 : %d/%d" % [chapitre, salle])
+			# La rampe ordinaire ralentit apres la salle du legendaire garanti.
+			var salle_tardive: int = ProgressionAugments.SALLES_NIVEAUX[ProgressionAugments.NIVEAU_LEGENDAIRE - 1] + 1
 			_verifier(is_equal_approx(Chapitres.facteur_pv(chapitre, salle), float(Chapitres.par_index(chapitre)["pv_mult"]) \
-				* ProgressionStatistiques.facteur_salle(salle, Reglages.CAMPAGNE_PV_PAR_SALLE, Reglages.CAMPAGNE_PV_PALIERS)), "PV ordinaires preserves a tous les etages")
+				* ProgressionStatistiques.facteur_salle(salle, Reglages.CAMPAGNE_PV_PAR_SALLE, Reglages.CAMPAGNE_PV_PALIERS,
+				Reglages.CAMPAGNE_PV_PAR_SALLE_TARDIF, salle_tardive)), "PV ordinaires preserves a tous les etages")
 
 func _verifier_cadence_tison() -> void:
 	for chapitre: int in [28, 34]:
