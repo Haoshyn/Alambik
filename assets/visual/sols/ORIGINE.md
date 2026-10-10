@@ -68,3 +68,11 @@ L'export convertit les couleurs de sommets sRGB en linéaire, comme dans le
 rendu du jeu. Les sols conservent leur absence d'ombre portée. L'éclairage
 Blender permet le contrôle visuel ; il ne constitue pas une capture de
 gameplay Android.
+
+## Dallage multiplié
+
+`dalles_jeu.png` (512 × 512, niveaux de gris en RGB) est généré par
+`tools/generer_dalles_sol.py` le 9 octobre 2026 : motif procédural original,
+raccordable, sans ressource extérieure. Deux rangées de dalles en appareil
+décalé, nuance par dalle, grain, biseau éclairé en haut à gauche et joints
+sombres. `DecorsMondes.matiere_sol` le multiplie sur l'enduit en espace monde.

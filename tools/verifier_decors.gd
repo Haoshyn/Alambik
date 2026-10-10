@@ -192,7 +192,10 @@ func _verifier_matieres(sol: Node3D, monde: int, contour: PackedVector2Array) ->
 		if materiau == null or materiau.resource_name != "Enduit_" + str(monde): continue
 		fonds += 1
 		_exiger(materiau.albedo_texture != null and materiau.albedo_texture.resource_path == str(DecorsMondes.profil(monde)["texture"]), "Texture du mauvais monde")
-		_exiger(not materiau.texture_repeat and materiau.roughness >= .8, "L'enduit n'est pas continu et sobre")
+		_exiger(materiau.roughness >= .8, "L'enduit n'est pas sobre")
+		# Le dallage multiplie suit l'espace monde, en dalles carrees a l'ecran.
+		_exiger(materiau.detail_enabled and materiau.detail_albedo == DecorsMondes.DALLES and materiau.detail_blend_mode == BaseMaterial3D.BLEND_MODE_MUL, "Le sol perd son dallage")
+		_exiger(materiau.uv2_world_triplanar and is_equal_approx(materiau.uv2_scale.z, materiau.uv2_scale.x * sin(deg_to_rad(Pont3D.INCLINAISON))), "Dalles deformees par l'anamorphose")
 		_exiger(materiau.vertex_color_use_as_albedo and materiau.vertex_color_is_srgb, "Les zones d'enduit perdent leurs teintes")
 		_exiger(materiau.albedo_texture.get_image().has_mipmaps(), "Texture sans mipmaps")
 		for i in objet.mesh.get_surface_count():

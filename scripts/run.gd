@@ -321,6 +321,9 @@ func _calculer_limites() -> void:
 	_limites = Rect2(Vector2(Reglages.ARENE_MARGE_LATERALE,Reglages.ARENE_HAUT),FormesSalles.taille(Jeu.salle_courante, Jeu.chapitre, Jeu.graine, Jeu.mode_run))
 	if _camera != null:
 		_camera.zoom = Vector2.ONE*Reglages.ARENE_CAMERA_ZOOM
+		# ESSAI TEMPORAIRE : --zoom-essai=<facteur> pour comparer des echelles.
+		for argument in OS.get_cmdline_user_args():
+			if argument.begins_with("--zoom-essai="): _camera.zoom = Vector2.ONE*float(argument.trim_prefix("--zoom-essai="))
 	if _heros != null:
 		_heros.limites = _limites
 

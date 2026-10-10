@@ -1,12 +1,17 @@
 extends Control
 
 const ACCENTS := {
-	"Offensif": Color("f5b8a0"), "Défensif": Color("a5e7e0"),
-	"Utilitaire": Color("d6c4fa"), "Tous": Color("dbc4a0"),
+	"Offensif": Color("ff9f7a"), "Défensif": Color("6fe8c6"),
+	"Utilitaire": Color("c6a6ff"), "Tous": Color("ffd88a"),
 }
+const CADENAS := preload("res://assets/visual/interface/cadenas.svg")
 
 var identifiant := "vigueur"
 var equipe := false
+var verrouille := false
+# Centre du medaillon de l'icone, en proportion de la carte.
+var centre_embleme := Vector2(0.5, 0.0)
+var rayon_embleme := 66.0
 var _animation: Tween
 var _eclat := 0.0
 
@@ -22,14 +27,21 @@ func _ready() -> void:
 	resized.connect(queue_redraw)
 
 func _draw() -> void:
-	var accent := accent_pour(identifiant)
-	var debut := Vector2(12, size.y - 2)
-	var fin := Vector2(maxf(12, size.x - 12), size.y - 2)
-	# Un filet marque l'interaction sans teinter le decor ou encadrer les textes.
-	draw_line(debut, fin, Color(accent, 0.28 + 0.35 * _eclat), 1.5 + _eclat, true)
-	draw_line(debut, debut + Vector2(48, 0), Color(accent, 0.65), 2.0, true)
+	var accent := Color("8f93ad") if verrouille else accent_pour(identifiant)
+	var centre := Vector2(size.x * centre_embleme.x, centre_embleme.y)
+	# Medaillon creuse : la couleur de categorie se lit avant le texte.
+	draw_circle(centre + Vector2(0, 5), rayon_embleme + 6.0, Color(0.03, 0.02, 0.1, 0.5))
+	draw_circle(centre, rayon_embleme + 6.0, StyleJeu.CONTOUR)
+	draw_circle(centre, rayon_embleme + 3.0, accent.darkened(0.15))
+	draw_circle(centre, rayon_embleme, accent.darkened(0.72))
+	draw_circle(centre, rayon_embleme * 0.82, Color(accent.darkened(0.45), 0.55 + 0.3 * _eclat))
+	draw_arc(centre, rayon_embleme - 3.0, PI * 1.08, PI * 1.72, 24, Color(1, 1, 1, 0.22 + 0.2 * _eclat), 3.0, true)
 	if equipe:
-		draw_line(Vector2(2, 32), Vector2(2, size.y - 32), Color(StyleAzur.VERT_VIF, 0.8), 2.0, true)
+		draw_arc(centre, rayon_embleme + 11.0, 0.0, TAU, 64, Color(StyleAzur.VERT_VIF, 0.9), 4.0, true)
+	if verrouille:
+		var cote := 46.0
+		var coin := centre + Vector2(rayon_embleme * 0.62, rayon_embleme * 0.5)
+		draw_texture_rect(CADENAS, Rect2(coin - Vector2.ONE * cote * 0.5, Vector2.ONE * cote), false)
 
 func illuminer(actif: bool) -> void:
 	if not is_inside_tree(): return

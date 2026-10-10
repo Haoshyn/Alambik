@@ -3,6 +3,8 @@ extends Control
 
 const ILLUSTRATION := preload("res://ui/composants/illustration_accueil.gd")
 const ILE := preload("res://ui/composants/ile_animee.gd")
+# Les pages denses lisent leurs textes sur la clairiere assombrie ; l'Aventure la garde vive.
+const VOILE_PAGE := 0.62
 
 var _ile: IleAnimee
 var _voile: ColorRect
@@ -39,13 +41,13 @@ func presenter_page(secondaire: bool, masquer_monde := false) -> void:
 	_page_secondaire = secondaire
 	_monde_masque = masquer_monde
 	_ile.visible = not _monde_masque
-	_animer_voile(0.30 if secondaire else 0.0)
+	_animer_voile(VOILE_PAGE if secondaire else 0.0)
 	if secondaire:
 		_centrer_monde()
 
 func presenter_superposition(visible: bool, carte_campagne := false) -> void:
 	_ile.visible = not (_monde_masque or (visible and carte_campagne))
-	_animer_voile((0.48 if carte_campagne else 0.72) if visible else (0.30 if _page_secondaire else 0.0))
+	_animer_voile((0.48 if carte_campagne else 0.78) if visible else (VOILE_PAGE if _page_secondaire else 0.0))
 
 func _animer_voile(opacite: float) -> void:
 	_voile_cible = opacite

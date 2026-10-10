@@ -1,9 +1,13 @@
 extends RefCounted
 
-# Au pas, les points d'appui restent fixes ; la course absorbe l'exces de translation.
+# Cycle de pas dessine sous le corps : appui en ligne droite, retour en arc.
+# La cadence suit la vitesse pour que le pied pose recule au rythme du corps ;
+# l'amplitude est bornee par la portee, les pattes ne s'ecartent jamais.
 # Deux segments resolvent la pose ; aucune collision ni sonde physique en 3D.
 const Rendu = preload("res://data/presentation/animations_combat.gd")
-const APPUI_PART := .64
+const APPUI_PART := .55
+const CADENCE_MIN := 1.6
+const CADENCE_MAX := 5.2
 var pattes: Array[Dictionary] = []
 var phase := 0.0
 var vitesse := 0.0
@@ -11,9 +15,9 @@ var _modele: Node3D
 var _porteur: Node3D
 var _precedente := Vector3.ZERO
 var _initialise := false
-var _avancait := false
 var _foulee := .30
-var _decalage_appuis := Vector3.ZERO
+var _amplitude := 0.0
+var _direction := Vector3.FORWARD
 
 func preparer(modele: Node3D) -> void:
 	_modele = modele
@@ -27,9 +31,8 @@ func preparer(modele: Node3D) -> void:
 		pattes.append({"hanche":hanche, "tibia":tibia, "bout":bout,
 			"repos_hanche":hanche.transform, "repos_tibia":tibia.transform,
 			"origine":modele.to_local(bout.global_position), "groupe":groupe,
-			"ancre":Vector3.ZERO, "depart":Vector3.ZERO, "cible":Vector3.ZERO,
-			"vol":false, "retour":0.0, "cycle":0.0})
-	_foulee = .28 if pattes.size() == 2 else .46
+			"ancre":Vector3.ZERO, "vol":false})
+	_foulee = .24 if pattes.size() == 2 else .26
 
 func mesurer(delta: float) -> Vector3:
 	var position := _porteur.global_position
@@ -40,84 +43,55 @@ func mesurer(delta: float) -> Vector3:
 		trajet = Vector3.ZERO
 	var echelle := maxf(_modele.global_basis.get_scale().x, .01)
 	vitesse = trajet.length() / maxf(delta * echelle, .001)
-	var avance := trajet.length_squared() > .0000001
-	# Le premier appui part du milieu de la foulee, comme apres un arret.
-	if avance and not _avancait:
-		phase = .35
-		for patte: Dictionary in pattes:
-			patte["cycle"] = phase + float(patte["groupe"]) * .5
-	_avancait = avance
-	# La course reste lisible meme quand le corps traverse plusieurs foulees par seconde.
-	var progression := minf(trajet.length() / (echelle * _foulee), Rendu.PATTES_CADENCE_MAX * maxf(delta, 0.0))
-	phase += progression
-	# L'exces de vitesse accompagne les appuis au lieu de forcer des replacements secs.
-	_decalage_appuis = trajet - trajet.limit_length(progression * echelle * _foulee)
 	return trajet
 
 func poser(delta: float, trajet: Vector3) -> void:
 	var echelle := maxf(_modele.global_basis.get_scale().x, .01)
 	var marche := trajet.length_squared() > .0000001
+	if marche:
+		var local := _modele.global_basis.inverse() * trajet
+		local.y = 0.0
+		if local.length_squared() > .0000001:
+			_direction = _direction.slerp(local.normalized(), 1.0 - exp(-14.0 * delta)).normalized()
+	# Pied pose : il recule de toute la foulee pendant APPUI_PART du cycle.
+	var cadence := clampf(vitesse * APPUI_PART / maxf(_foulee, .01), CADENCE_MIN, CADENCE_MAX) if marche else 0.0
+	var voulue := minf(vitesse * APPUI_PART / maxf(cadence, .01), _foulee) if marche else 0.0
+	_amplitude = move_toward(_amplitude, voulue, delta * (_foulee * 6.0))
+	if _amplitude > 0.0:
+		phase += (cadence if marche else CADENCE_MIN * 1.5) * delta
+	elif not marche:
+		# Le cycle s'arrete pieds poses : aucun pietinement a l'arret.
+		phase = roundf(phase * 2.0) * .5
+	var levee := (.045 + .06 * clampf(vitesse / 4.0, 0.0, 1.0)) * minf(1.0, _amplitude / maxf(_foulee * .4, .001))
 	for patte: Dictionary in pattes:
 		var origine: Vector3 = patte["origine"]
-		var maison := _modele.to_global(origine)
-		# Le mouvement vertical du corps n'emporte pas les pieds.
-		maison.y = _porteur.global_position.y + origine.y * _modele.global_basis.get_scale().y
-		if not _initialise:
-			patte["ancre"] = maison
-			patte["depart"] = maison
-			patte["cible"] = maison
+		var cycle := fposmod(phase + float(patte["groupe"]) * .5, 1.0)
+		var avance := 0.0
+		var hauteur := 0.0
+		var vol := cycle >= APPUI_PART
+		if not vol:
+			avance = lerpf(.5, -.5, cycle / APPUI_PART)
 		else:
-			for cle in ["ancre", "depart", "cible"]:
-				var point: Vector3 = patte[cle]
-				patte[cle] = point + _decalage_appuis
-		var cycle_total := phase + float(patte["groupe"]) * .5
-		var cycle := fposmod(cycle_total, 1.0)
-		var nouveau_pas := floorf(cycle_total) > floorf(float(patte["cycle"]))
-		var vol := cycle >= APPUI_PART and marche
-		var ancre: Vector3 = patte["ancre"]
-		var foulee := trajet.normalized() * _foulee * echelle
-		if vol and (not bool(patte["vol"]) or nouveau_pas):
-			if nouveau_pas: ancre = maison - foulee * (cycle - APPUI_PART * .5)
-			patte["depart"] = ancre
-			# Viser le sol a la fin du vol, en anticipant l'avancee du corps.
-			patte["cible"] = maison + foulee * (1.0 - cycle + APPUI_PART * .5)
-			patte["retour"] = 0.0
-		if vol:
 			var t := (cycle - APPUI_PART) / (1.0 - APPUI_PART)
-			ancre = _lever(patte, t, echelle)
-		elif marche and (bool(patte["vol"]) or nouveau_pas):
-			# A basse frequence, un pas entier peut etre franchi entre deux images.
-			ancre = maison + foulee * (APPUI_PART * .5 - cycle)
-		elif not marche and (bool(patte["vol"]) or ancre.distance_to(maison) > .004 * echelle or (float(patte["retour"]) > 0.0 and float(patte["retour"]) < 1.0)):
-			# A l'arret, finir le pas une fois, sans entretenir un pietinement.
-			if float(patte["retour"]) <= 0.0:
-				patte["depart"] = ancre
-				patte["cible"] = maison
-			patte["retour"] = minf(1.0, float(patte["retour"]) + delta * 7.0)
-			ancre = _lever(patte, float(patte["retour"]), echelle)
-		else:
-			patte["retour"] = 0.0
+			avance = lerpf(-.5, .5, smoothstep(0.0, 1.0, t))
+			hauteur = sin(t * PI)
+		var cible_locale := origine + _direction * avance * _amplitude + Vector3.UP * hauteur * levee
+		var ancre := _modele.to_global(cible_locale)
+		# Le mouvement vertical du corps n'emporte pas les pieds poses.
+		ancre.y = _porteur.global_position.y + (origine.y + hauteur * levee) * _modele.global_basis.get_scale().y
 		var hanche: Node3D = patte["hanche"]
 		var tibia: Transform3D = patte["repos_tibia"]
 		var bout: Node3D = patte["bout"]
 		var repos: Transform3D = patte["repos_hanche"]
 		var repere := hanche.get_parent() as Node3D
-		var extension := repere.to_local(ancre).distance_to(repos.origin)
-		if marche and extension > (tibia.origin.length() + bout.position.length()) * .98:
-			# La limite de portee reste continue, meme en virage ou en bout de pas.
-			var visee := repere.to_local(ancre) - repos.origin
-			var portee := (tibia.origin.length() + bout.position.length()) * .98
+		var portee := (tibia.origin.length() + bout.position.length()) * .98
+		var visee := repere.to_local(ancre) - repos.origin
+		if visee.length() > portee:
 			ancre = repere.to_global(repos.origin + visee.limit_length(portee))
 		patte["ancre"] = ancre
-		patte["vol"] = vol
-		patte["cycle"] = cycle_total
+		patte["vol"] = vol and _amplitude > 0.0
 		_resoudre(patte, ancre)
 	_initialise = true
-
-func _lever(patte: Dictionary, t: float, echelle: float) -> Vector3:
-	var depart: Vector3 = patte["depart"]
-	var cible: Vector3 = patte["cible"]
-	return depart.lerp(cible, smoothstep(0.0, 1.0, t)) + Vector3.UP * sin(t * PI) * .065 * echelle
 
 func _resoudre(patte: Dictionary, cible: Vector3) -> void:
 	var hanche: Node3D = patte["hanche"]

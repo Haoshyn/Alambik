@@ -87,10 +87,10 @@ func _process(delta: float) -> void:
 
 func _replacer() -> void:
 	if _illustration == null or size.x <= 0.0: return
-	var cote := minf(76.0, size.y * 0.51) * (1.0 + _selection * 0.22 - _pression * 0.06)
-	_illustration.position = Vector2((size.x - cote) * 0.5, 12.0 - _selection * 14.0 + _pression * 4.0)
+	var cote := minf(90.0, size.y * 0.6) * (1.0 + _selection * 0.16 - _pression * 0.06)
+	_illustration.position = Vector2((size.x - cote) * 0.5, 4.0 - _selection * 16.0 + _pression * 4.0)
 	_illustration.size = Vector2.ONE * cote
-	_illustration.modulate = Color("aeb0c8").lerp(Color.WHITE, 0.2 + _selection * 0.8)
+	_illustration.modulate = Color("c4c7de").lerp(Color.WHITE, 0.35 + _selection * 0.65)
 	_fond_actif.position = Vector2(6.0, 4.0 - _selection * 6.0 + _pression * 3.0)
 	_fond_actif.size = Vector2(maxf(0.0, size.x - 12.0), maxf(0.0, size.y - 14.0))
 	_fond_actif.modulate.a = _selection

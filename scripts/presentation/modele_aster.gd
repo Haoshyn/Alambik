@@ -29,11 +29,25 @@ func _ready() -> void:
 		if noeud.skin != null:
 			noeud.skeleton = noeud.get_path_to(squelette)
 		_appliquer_matiere(noeud)
+	_proportions_chibi(squelette)
 	_visage = find_child("Aster_Face",true,false) as MeshInstance3D
 	for i in range(_visage.mesh.get_blend_shape_count()):
 		_formes[str(_visage.mesh.get_blend_shape_name(i))] = i
 	lecteur.play("repos")
 	lecteur.advance(0.0)
+
+func _proportions_chibi(squelette: Skeleton3D) -> void:
+	var pied := squelette.find_bone("Foot.L")
+	for nom: String in Visuels3D.HEROS_PROPORTIONS:
+		var os := squelette.find_bone(nom)
+		if os >= 0: squelette.set_bone_pose_scale(os, Vector3.ONE * float(Visuels3D.HEROS_PROPORTIONS[nom]))
+	# Les jambes raccourcies remontent les pieds : tout le modele descend
+	# d'autant, avec ses reperes d'arme exprimes dans le meme espace.
+	var cuisse := squelette.find_bone("Thigh.L")
+	var jambe := squelette.get_bone_global_rest(cuisse).origin.y - squelette.get_bone_global_rest(pied).origin.y
+	var perte := jambe * (1.0 - float(Visuels3D.HEROS_PROPORTIONS.get("Thigh.L", 1.0)))
+	scale = Vector3.ONE * Visuels3D.HEROS_TAILLE_CHIBI
+	position.y -= perte * Visuels3D.HEROS_TAILLE_CHIBI
 
 func _appliquer_matiere(maillage: MeshInstance3D) -> void:
 	# Isoler la baguette evite que la destruction d'un acteur invalide les
@@ -54,6 +68,8 @@ func _appliquer_matiere(maillage: MeshInstance3D) -> void:
 		matiere.set_shader_parameter("emission",.15 if originale.resource_name.contains("Gem") else 0.0)
 		matiere.set_shader_parameter("couleur_emission",originale.albedo_color)
 		matiere.set_shader_parameter("visage",1.0 if originale.resource_name == "Face" else 0.0)
+		matiere.set_shader_parameter("rehausse",Visuels3D.HEROS_REHAUSSES.get(originale.resource_name, Vector3.ONE))
+		matiere.set_shader_parameter("force_bord",Visuels3D.HEROS_FORCE_BORD)
 		if not originale.resource_name.contains("Gold") and not originale.resource_name.contains("Gem") and originale.resource_name != "Face":
 			var contour := ShaderMaterial.new()
 			contour.shader = CONTOUR

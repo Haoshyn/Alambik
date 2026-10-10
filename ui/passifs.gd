@@ -5,6 +5,7 @@ signal page_demandee(index: int)
 signal reglages
 
 const FOND_PASSIF := preload("res://ui/composants/fond_carte_passif.gd")
+const HAUTEUR_EMBLEME := 150.0
 const GLYPHES_PASSIFS := {
 	"vigueur": preload("res://assets/visual/interface/menu/passifs/glyphes/vigueur.svg"),
 	"vitalite": preload("res://assets/visual/interface/menu/passifs/glyphes/vitalite.svg"),
@@ -39,7 +40,7 @@ var _fiche_popup: FenetreFiche
 var _slots: Array[Button] = []
 var _icones_slots: Array[TextureRect] = []
 var _textes_slots: Array[Label] = []
-var _titres_slots: Array[Label] = []
+var _equipes_titre: Label
 var _rangs_slots: Array[Label] = []
 var _categories: Dictionary = {}
 
@@ -72,18 +73,18 @@ func _adapter_mise_en_page() -> void:
 	var largeur := _defilement_collection.size.x
 	var compact := largeur < 900.0
 	_grille_equipes.columns = 4 if largeur >= 620.0 else 2
-	var cote := minf(164.0, (largeur - 18.0 * (_grille_equipes.columns - 1)) / _grille_equipes.columns)
+	# Les petits ecrans gardent la hauteur pour la collection.
+	var cote := minf(150.0 if not compact else 118.0, (largeur - 60.0 - 18.0 * (_grille_equipes.columns - 1)) / _grille_equipes.columns)
 	for index in _slots.size():
 		var bloc := _slots[index].get_parent() as VBoxContainer
 		bloc.custom_minimum_size.x = 0
 		_slots[index].custom_minimum_size = Vector2.ONE * cote
-		_slots[index].add_theme_font_size_override("font_size", 28)
+		_slots[index].add_theme_font_size_override("font_size", 64)
 		_icones_slots[index].position = Vector2.ONE * cote * 0.12
 		_icones_slots[index].size = Vector2.ONE * cote * 0.76
-		_titres_slots[index].add_theme_font_size_override("font_size", 30 if compact else 32)
 		_textes_slots[index].add_theme_font_size_override("font_size", 26 if compact else 28)
 		_rangs_slots[index].add_theme_font_size_override("font_size", 25)
-	_cartes.columns = 2 if largeur >= 900.0 else 1
+	_cartes.columns = 3 if largeur >= 900.0 else 2
 	_ligne_categories.vertical = largeur < 620.0
 	_entete_collection.vertical = largeur < 800.0
 	for categorie: String in _categories:
@@ -94,9 +95,8 @@ func _adapter_mise_en_page() -> void:
 func _adapter_cartes() -> void:
 	if _cartes.get_child_count() == 0: return
 	# La taille des entrees ne change pas lorsque le filtre reduit la collection.
-	var hauteur := 236.0 if _cartes.columns == 2 else 212.0
 	for carte: Control in _cartes.get_children():
-		carte.custom_minimum_size.y = hauteur
+		carte.custom_minimum_size.y = 372.0
 
 func _construire_categories(parent: VBoxContainer) -> void:
 	var ligne := BoxContainer.new()
@@ -120,13 +120,28 @@ func _construire_categories(parent: VBoxContainer) -> void:
 		_categories[categorie] = bouton
 
 func _construire_equipes(parent: VBoxContainer) -> void:
+	# Les quatre emplacements forment un seul ensemble serti, comme une barre d'equipement.
+	var panneau := PanelContainer.new()
+	panneau.name = "PanneauEquipes"
+	var style_panneau := (StyleJeu.panneau(StyleAzur.MAUVE_VIF, 30.0, 0.95) as StyleBoxJeu).duplicate() as StyleBoxJeu
+	style_panneau.content_margin_top = 18.0
+	style_panneau.content_margin_bottom = 20.0
+	panneau.add_theme_stylebox_override("panel", style_panneau)
+	parent.add_child(panneau)
+	var colonne := VBoxContainer.new()
+	colonne.add_theme_constant_override("separation", 12)
+	panneau.add_child(colonne)
+	_equipes_titre = _texte("", 32, StyleAzur.IVOIRE, true)
+	_equipes_titre.name = "TitreEquipes"
+	_equipes_titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	colonne.add_child(_equipes_titre)
 	var grille := GridContainer.new()
 	grille.name = "PassifsEquipes"
 	grille.columns = 4
 	grille.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grille.add_theme_constant_override("h_separation", 18)
 	grille.add_theme_constant_override("v_separation", 16)
-	parent.add_child(grille)
+	colonne.add_child(grille)
 	_grille_equipes = grille
 	for index in Passifs.EMPLACEMENTS:
 		var accent := FOND_PASSIF.accent_categorie("Tous")
@@ -135,10 +150,6 @@ func _construire_equipes(parent: VBoxContainer) -> void:
 		bloc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bloc.add_theme_constant_override("separation", 8)
 		grille.add_child(bloc)
-		var titre := _texte("Passif %d" % (index + 1), 32, StyleAzur.IVOIRE, true)
-		titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		bloc.add_child(titre)
-		_titres_slots.append(titre)
 		var medaillon := Button.new()
 		medaillon.name = "Medaillon_" + str(index)
 		medaillon.custom_minimum_size = Vector2(164, 164)
@@ -164,7 +175,7 @@ func _construire_equipes(parent: VBoxContainer) -> void:
 		var legende := _texte("", 28, StyleAzur.IVOIRE, true)
 		legende.name = "NomEquipe_" + str(index)
 		legende.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		legende.custom_minimum_size.y = 64
+		legende.custom_minimum_size.y = 40
 		bloc.add_child(legende)
 		_textes_slots.append(legende)
 		var rang := _texte("", 25, StyleAzur.CUIVRE)
@@ -218,8 +229,8 @@ func _construire_collection(parent: VBoxContainer) -> void:
 	_cartes.name = "GrilleCollection"
 	_cartes.columns = 2
 	_cartes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_cartes.add_theme_constant_override("h_separation", 28)
-	_cartes.add_theme_constant_override("v_separation", 16)
+	_cartes.add_theme_constant_override("h_separation", 18)
+	_cartes.add_theme_constant_override("v_separation", 22)
 	_defilement_collection = DefilementTactile.new()
 	_defilement_collection.name = "DefilementCollection"
 	_defilement_collection.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -244,7 +255,7 @@ func _style_onglet(categorie: String, choisi: bool) -> StyleBox:
 func _rendre() -> void:
 	_collection.text = "%d / %d découverts" % [ReglagesJoueur.nombre_passifs_debloques(), Passifs.CATALOGUE.size()]
 	_statut.text = _message if not _message.is_empty() else "%d emplacements · %d rangs · À obtenir en Épreuves" % [Passifs.EMPLACEMENTS, Passifs.RANG_MAX]
-	_statut.visible = true
+	_statut.visible = not _message.is_empty() or _defilement_collection.size.x >= 900.0
 	for cat: String in _categories:
 		var bouton: Button = _categories[cat]
 		var choisi := cat == _categorie
@@ -254,6 +265,7 @@ func _rendre() -> void:
 		bouton.add_theme_stylebox_override("focus", _style_onglet(cat, true))
 		StyleAzur.texte_bouton_colore(bouton, FOND_PASSIF.accent_categorie(cat) if choisi else StyleAzur.IVOIRE)
 	var equipes := ReglagesJoueur.passifs_equipes
+	_equipes_titre.text = "Passifs équipés · %d / %d" % [equipes.size(), Passifs.EMPLACEMENTS]
 	for index in Passifs.EMPLACEMENTS:
 		var id := str(equipes[index]) if index < equipes.size() else ""
 		var vide := id.is_empty()
@@ -281,9 +293,18 @@ func _carte_passif(id: String, donnees: Dictionary, ouvert: bool, equipe: bool) 
 	var carte := PanelContainer.new()
 	carte.name = "Carte_" + id
 	carte.mouse_filter = Control.MOUSE_FILTER_PASS
-	carte.custom_minimum_size.y = 236
 	carte.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	carte.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	# Une tuile sertie par passif : le texte ne repose jamais sur la clairiere.
+	var style := (StyleJeu.panneau(accent if ouvert else Color("6d7190"), 28.0, 0.95) as StyleBoxJeu).duplicate() as StyleBoxJeu
+	for cote in [SIDE_LEFT, SIDE_RIGHT]: style.set_content_margin(cote, 16)
+	style.content_margin_top = 18.0
+	style.content_margin_bottom = 22.0
+	if equipe:
+		style.monture_haut = StyleAzur.VERT_VIF.lightened(0.4)
+		style.monture_bas = StyleAzur.VERT_VIF.darkened(0.3)
+		style.lueur = Color(StyleAzur.VERT_VIF, 0.6)
+		style.lueur_taille = 12.0
+	carte.add_theme_stylebox_override("panel", style)
 	var ouvrir := Button.new()
 	ouvrir.name = "Details_" + id
 	ouvrir.action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
@@ -298,6 +319,9 @@ func _carte_passif(id: String, donnees: Dictionary, ouvert: bool, equipe: bool) 
 	fond.name = "Ambiance_" + id
 	fond.identifiant = id
 	fond.equipe = equipe
+	fond.verrouille = not ouvert
+	fond.centre_embleme = Vector2(0.5, HAUTEUR_EMBLEME * 0.5)
+	fond.rayon_embleme = HAUTEUR_EMBLEME * 0.5 - 12.0
 	carte.add_child(fond)
 	ouvrir.mouse_entered.connect(fond.illuminer.bind(true))
 	ouvrir.mouse_exited.connect(fond.illuminer.bind(false))
@@ -305,45 +329,48 @@ func _carte_passif(id: String, donnees: Dictionary, ouvert: bool, equipe: bool) 
 	ouvrir.focus_exited.connect(fond.illuminer.bind(false))
 	ouvrir.button_down.connect(fond.illuminer.bind(true))
 	ouvrir.button_up.connect(fond.illuminer.bind(false))
-	var marge := MarginContainer.new()
-	for cote in ["left", "right"]: marge.add_theme_constant_override("margin_" + cote, 12)
-	for cote in ["top", "bottom"]: marge.add_theme_constant_override("margin_" + cote, 18)
-	carte.add_child(marge)
-	var ligne := HBoxContainer.new()
-	ligne.add_theme_constant_override("separation", 16)
-	marge.add_child(ligne)
+	var textes := VBoxContainer.new()
+	textes.add_theme_constant_override("separation", 6)
+	carte.add_child(textes)
+	var emplacement_icone := CenterContainer.new()
+	emplacement_icone.custom_minimum_size.y = HAUTEUR_EMBLEME
+	textes.add_child(emplacement_icone)
 	var icone := TextureRect.new()
 	icone.name = "Glyphe_" + id
 	icone.texture = _icone_passif(id)
-	icone.custom_minimum_size = Vector2(112, 112)
-	icone.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	icone.custom_minimum_size = Vector2.ONE * (HAUTEUR_EMBLEME - 46.0)
 	icone.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icone.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icone.modulate.a = 1.0 if ouvert else 0.78
+	# Verrouille : silhouette eteinte, la couleur revient a la decouverte.
+	icone.modulate = Color.WHITE if ouvert else Color(0.5, 0.52, 0.66, 0.9)
 	icone.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	ligne.add_child(icone)
-	var textes := VBoxContainer.new()
-	textes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	textes.add_theme_constant_override("separation", 8)
-	ligne.add_child(textes)
-	var nom := _texte(str(donnees["nom"]), 36, StyleAzur.IVOIRE, true)
+	emplacement_icone.add_child(icone)
+	var nom := _texte(str(donnees["nom"]), 32, StyleAzur.IVOIRE if ouvert else StyleJeu.TEXTE_DOUX, true)
 	nom.name = "Nom_" + id
+	nom.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	nom.autowrap_mode = TextServer.AUTOWRAP_OFF
+	nom.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	nom.clip_text = true
 	textes.add_child(nom)
 	var rang_actuel := ReglagesJoueur.rang_passif(id)
-	var rang := _texte("Rang %d / %d" % [rang_actuel, Passifs.rang_max(id)] if ouvert else "À découvrir · Rang 1", 25, accent)
+	var rang := _texte("Rang %d / %d" % [rang_actuel, Passifs.rang_max(id)] if ouvert else "À découvrir", 25, StyleJeu.OR if ouvert else Color("aeb2c8"))
 	rang.name = "Rang_" + id
+	rang.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	textes.add_child(rang)
-	var description := _texte(Passifs.resume_rang(id, maxi(1, rang_actuel), ReglagesJoueur.niveau_compte_effectif()), 28, StyleAzur.IVOIRE)
+	var description := _texte(Passifs.resume_rang(id, maxi(1, rang_actuel), ReglagesJoueur.niveau_compte_effectif()), 27, StyleAzur.IVOIRE)
 	description.name = "Description_" + id
+	description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	description.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	description.custom_minimum_size.y = 72
 	description.max_lines_visible = 2
 	description.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	textes.add_child(description)
-	var etat := _texte("Équipé" if equipe else str(donnees["categorie"]), 25, StyleAzur.VERT_VIF if equipe else accent)
+	var etat := _texte("Équipé" if equipe else str(donnees["categorie"]), 24, StyleAzur.VERT_VIF if equipe else accent)
 	etat.name = "Etat_" + id
+	etat.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	textes.add_child(etat)
 	# Les enfants decoratifs laissent toute la carte au bouton et le glissement au defilement.
-	_ignorer_souris(marge)
+	_ignorer_souris(textes)
 	return carte
 
 func _ignorer_souris(noeud: Control) -> void:

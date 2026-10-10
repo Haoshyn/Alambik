@@ -6,6 +6,7 @@ from pathlib import Path
 from xml.etree import ElementTree
 
 from generer_glyphes_menus import FAMILIERS, MAITRISES, silhouette
+from style_icone_jeu import PALETTES as PALETTES_JEU, habiller
 
 
 RACINE = Path(__file__).resolve().parent.parent
@@ -60,19 +61,14 @@ def gravure(identifiant: str) -> str:
 
 
 def composer(identifiant: str, nom_source: str, categorie: str) -> str:
-    clair, moyen, profond, ombre = PALETTES[categorie]
     trace = silhouette(nom_source)
     return f'''<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 256 256">
 <title>{identifiant.replace('_', ' ')}</title>
-<desc>Silhouette Wenrexa {nom_source}, banque tools/sources_svg ; habillage Alambik.</desc>
+<desc>Silhouette Wenrexa {nom_source}, banque tools/sources_svg ; habillage Alambik (tools/style_icone_jeu.py).</desc>
 <defs>
-<linearGradient id="email" x1="0" y1="0" x2=".75" y2="1"><stop stop-color="{clair}"/><stop offset=".38" stop-color="{moyen}"/><stop offset=".77" stop-color="{profond}"/><stop offset="1" stop-color="{ombre}"/></linearGradient>
 <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff5dc"/><stop offset=".48" stop-color="#e5c695"/><stop offset="1" stop-color="#a08077"/></linearGradient>
-<linearGradient id="reflet" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#ffffff" stop-opacity=".3"/><stop offset=".55" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
 </defs>
-<path d="{trace}" transform="translate(23 26) scale(.82)" fill="#19283c" fill-rule="evenodd" opacity=".65"/>
-<path d="{trace}" transform="translate(23 20) scale(.82)" fill="url(#email)" fill-rule="evenodd" stroke="#283951" stroke-width="5" stroke-linejoin="round"/>
-<path d="{trace}" transform="translate(23 20) scale(.82)" fill="url(#reflet)" fill-rule="evenodd" stroke="{clair}" stroke-width="1.8" stroke-linejoin="round"/>
+{habiller(trace, PALETTES_JEU[categorie])}
 {gravure(identifiant)}
 </svg>
 '''

@@ -13,7 +13,14 @@ elles conservent les idées historiques sans définir le rendu actuel.
   tête légèrement agrandie, jambes et buste raccourcis, robe
   bleu nuit et ivoire, ornements dorés, grand chapeau et baguette. Le rendu
   reprend ses matières peintes et ses contours fins. L'arme standard est sa
-  baguette intégrée ; les autres armes suivent l'équipement. Le tir rapide
+  baguette intégrée ; les autres armes suivent l'équipement.
+  Depuis le 9 octobre 2026, la silhouette passe en chibi au chargement :
+  tête et chapeau agrandis, cuisses, bras et buste raccourcis, pieds plus
+  gros, modèle abaissé pour garder les pieds au sol
+  (`Visuels3D.HEROS_PROPORTIONS`, os mis à l'échelle hors des pistes
+  d'animation). Velours et tissus nuit sont rehaussés en bleu roi et un
+  liseré de contre-jour franc détache le héros du sol. La collision reste
+  `HEROS_RAYON`. Le tir rapide
   à l'arrêt anime le bras et légèrement le buste, avec les pieds stables.
 - Les onze monstres communs et les vingt boss sont des objets alchimiques
   vivants : encriers à pattes, plumes, grimoires ouverts, masques et fioles.
@@ -26,10 +33,11 @@ elles conservent les idées historiques sans définir le rendu actuel.
   charnière et les pattes leurs joints. Les variantes changent les teintes, les proportions
   et de courts appendices minéraux, aquatiques, aériens ou ardents.
 - Pattes, bras, couvertures, ailes, têtes et bouchons sont articulés séparément.
-  Les pattes plient sur deux segments avec un pli stable ; leur cadence suit
-  la distance parcourue et reste bornée en course. À faible vitesse, les appuis
-  restent dans le monde ; en course rapide, ils accompagnent l'excès de
-  translation pour garder des gestes lisibles. Les pieds se reposent à l'arrêt.
+  Les pattes plient sur deux segments avec un pli stable. Chaque pied décrit
+  un cycle sous le corps : appui en ligne droite puis retour en arc. La
+  cadence suit la vitesse pour que le pied posé recule au rythme du corps ;
+  la foulée est bornée par la portée, les pattes ne s'écartent jamais. Le
+  corps rebondit légèrement à chaque pas ; les pieds se reposent à l'arrêt.
   Les êtres flottants inclinent
   leur corps dans le déplacement ; pages et pans suivent avec du retard.
   Préparation, frappe et recul gardent les volumes rigides, sans pulsation
@@ -116,7 +124,14 @@ elles conservent les idées historiques sans définir le rendu actuel.
   leurs silhouettes sont originales et leurs palettes viennent de
   `data/presentation/decors_mondes.gd`.
 - Le sol associe l'enduit ciré B à une bordure d'émail de fantaisie.
-  La matière est continue, talochée et légèrement satinée, avec de larges
+  Depuis le 9 octobre 2026, un dallage de pierre original
+  (`assets/visual/sols/dalles_jeu.png`, `tools/generer_dalles_sol.py`) est
+  multiplié sur l'enduit en espace monde : joints sombres, biseau éclairé en
+  haut à gauche, dalles carrées à l'écran malgré l'anamorphose. Il donne
+  l'échelle d'une arène ; la peinture et les teintes du monde restent dessous.
+  Les murs de salle sont continus et plus hauts, avec couronnement d'émail,
+  filet de cuivre et pilier serti à chaque angle ; ceux du premier plan,
+  tournés vers la caméra, restent bas. La matière est continue, talochée et légèrement satinée, avec de larges
   passages d'outil visibles de près. La peinture originale, ses origines et
   les anciennes sources conservées figurent dans `assets/visual/sols/ORIGINE.md`.
   Violet pour Encre, sauge dorée pour Terre, turquoise pour Eau, bleu ciel
@@ -206,10 +221,20 @@ elles conservent les idées historiques sans définir le rendu actuel.
 ## Interface — Émail arcanique (A), état antérieur conservé quand il reste vrai
 
 - Composer la silhouette globale avant les composants : pas de succession de
-  cartes uniformes ni de présentation dashboard. Héros autour de grandes jauges colorées,
-  maîtrises en chemins de constellation, passifs en entrées ouvertes avec glyphes
-  et fiches contextuelles à la demande,
-  parure en trois sceaux décalés. Les titres de page ont un cartouche en émail
+  cartes uniformes ni de présentation dashboard ; chaque menu a sa propre
+  composition. Héros : le portrait 3D d'Aster sur un socle lumineux, entouré
+  des cinq attributs en médaillons reliés en constellation (badge de rang,
+  ajout direct « + »), avec classe, réserve de points en joyau ambre et
+  réinitialisation ronde au-dessus, et le détail de l'attribut choisi
+  (jauge, bonus, − et +) dans un panneau en bas. Maîtrises en chemins de
+  constellation, passifs en tuiles serties avec glyphes et fiches
+  contextuelles à la demande. Équipement : vitrine commune aux trois
+  ateliers, le héros sur son socle avec les trois bijoux à gauche et l'arme
+  et le familier à droite (un toucher ouvre l'atelier concerné) ; puis les
+  statistiques en pastilles (icône, valeur dorée, libellé) et le coffret
+  serti, dont les cases vides ne complètent que la dernière rangée. Ces
+  vitrines gardent leur barre de défilement visible : leur hauteur suit leur
+  largeur. Les titres de page ont un cartouche en émail
   à bord champagne et coins enluminés ; les ressources gardent leur espace propre.
 - Réserver les cadres aux actions et aux lectures détaillées. Les légers
   chevauchements concernent les illustrations, jamais le texte ou les commandes.
@@ -258,7 +283,11 @@ elles conservent les idées historiques sans définir le rendu actuel.
   familiers depuis ces silhouettes SVG. `tools/generer_glyphes_passifs.py`
   compose les seize glyphes de `assets/visual/interface/menu/passifs/glyphes/`
   depuis seize silhouettes distinctes, également différentes de celles des
-  maîtrises et familiers. Émail corail, jade et lilas, sans halo ni image incorporée.
+  maîtrises et familiers. Depuis le 9 octobre 2026, ces 51 glyphes partagent
+  l'habillage « icône de jeu » de `tools/style_icone_jeu.py` : contour sombre
+  épais, ombre portée, trois tons en aplats (bord éclairé en haut à gauche,
+  matière, ombre franche), reflet dur et éclat. Braise pour offensif, jade
+  pour défensif, améthyste pour utilitaire ; sans halo ni image incorporée.
 - Les cadres de `interface/cadres/` s'étirent en neuf zones avec coins fixes.
   Les cases, cartes et actions secondaires ont des angles coupés et un filet
   léger ; les compteurs sont arrondis, Jouer prend une forme de capsule et les
@@ -297,13 +326,10 @@ elles conservent les idées historiques sans définir le rendu actuel.
   nuages et brumes traversent lentement le cadre dans un seul sens, avec un
   retour hors champ. Six silhouettes de nuages se suivent à vitesse commune :
   cinq autres passent avant qu'une silhouette revienne, environ 3 min 38 s
-  plus tard. La clairière reste visible sous les onglets. Passifs garde le
-  même fond que Héros et Équipement, sans voile propre ni filtre coloré.
-  Ses quatre emplacements surmontent une collection ouverte, ponctuée de
-  glyphes SVG et de filets fins ; les textes libres gardent un contour et une
-  ombre pour le contraste. L'illustration du monde choisi apparaît seulement
-  dans Aventure. Les pages gardent un voile de lecture léger, plus sombre dans
-  Maîtrises pour laisser lire sa constellation. La sélection de campagne garde la clairière,
+  plus tard. La clairière reste visible sous les onglets, assombrie par un
+  voile de lecture à 62 % sur Héros, Équipement, Maîtrises et Passifs
+  (`FondMenuVivant.VOILE_PAGE`) ; l'Aventure la garde vive. L'illustration du monde choisi apparaît seulement
+  dans Aventure. Maîtrises ajoute son propre voile pour laisser lire sa constellation. La sélection de campagne garde la clairière,
   le bandeau de niveau et les cinq onglets, mais masque les commandes d'Aventure
   et l'île de fond, déjà représentée sur sa carte. Son titre de monde reste
   libre au-dessus d'une grande île ; les détails du niveau et les commandes
@@ -313,23 +339,26 @@ elles conservent les idées historiques sans définir le rendu actuel.
   Le fond couvre l'écran à échelle uniforme.
 - Les maîtrises n'ont aucun grand fond de colonne ni anneau coloré autour des
   nœuds. Chaque sceau rond reçoit une teinte rouge, verte ou violette légère,
-  un glyphe SVG illustré unique, plus vif et plus grand, puis une capsule de
-  rang séparée juste en dessous. Les tracés entre sceaux restent champagne.
-  Les branches portent seulement Offensif, Défensif et Utilitaire. La fiche
-  affiche le bonus actuel, le rang suivant et le prérequis utile ; la
-  réinitialisation reste accessible dans un bouton plus ample, centré en haut,
-  avec une police extra-grasse et une couleur claire contrastée.
+  un glyphe SVG illustré unique, plus vif et plus grand, puis un badge de
+  rang posé sur le bas du sceau. Les tracés entre sceaux restent champagne.
+  Les branches portent seulement Offensif, Défensif et Utilitaire, titrées sur
+  une même ligne. La fiche affiche le bonus actuel, le rang suivant et le
+  prérequis utile ; la réinitialisation, rare et destructive, est un bouton
+  ardoise en fin d'arbre.
 - Passifs reprend le titre en émail des autres menus, puis les quatre
   médaillons équipés sur une ligne dès que la largeur le permet.
   Le titre de collection, son compteur, le tri et les filtres Tous, Offensif,
   Défensif et Utilitaire précèdent la liste. Seule la collection défile sous
   ces commandes fixes. Le fond garde la clairière commune sans filtre propre.
-  Chaque entrée associe son SVG, le rang et le bonus calculé à un filet
-  inférieur, sans cadre fermé ni halo coloré. Avant découverte, le bonus
-  annoncé est celui du premier rang.
-  Les titres, indications, noms, rangs et descriptions sont posés directement
-  sur ce fond : aucun petit rectangle sombre sous le texte, y compris dans
-  les fiches. Les cadres enluminés des filtres et les médaillons sont conservés.
+  Les emplacements équipés forment un seul panneau serti titré
+  « Passifs équipés · n / 4 ». Chaque passif est une tuile sertie à la
+  couleur de sa catégorie (trois colonnes, deux en format compact) : médaillon
+  creusé avec le SVG, nom, rang, bonus calculé et catégorie. Un passif
+  verrouillé a une monture ardoise, une silhouette éteinte et un cadenas ;
+  un passif équipé a une monture et un anneau verts. Avant découverte, le
+  bonus annoncé est celui du premier rang.
+  Les textes de la collection reposent dans leur tuile, jamais sur un petit
+  rectangle sombre propre, y compris dans les fiches. Les cadres enluminés des filtres et les médaillons sont conservés.
   Toute l'entrée ouvre les détails ; les commandes d'équipement
   sont dans la fiche. Le glissement continue à faire défiler la collection.
   Les glyphes, cadres, textes, boutons et filtres restent des éléments indépendants.
@@ -361,7 +390,7 @@ elles conservent les idées historiques sans définir le rendu actuel.
   peut défiler si sa hauteur minimale dépasse la place disponible, sans rogner
   les commandes ni réduire leurs cibles tactiles.
 - Les Passifs alignent les emplacements équipés et présentent chaque catégorie
-  dans une grille de deux colonnes qui défile sans pagination. Les accents
+  dans une grille de tuiles qui défile sans pagination. Les accents
   distinguent les fonctions offensives, défensives et utilitaires. Les
   fiches Passifs s'ouvrent au centre avec un seul cadre ; toucher le voile ou
   Fermer les referme sans réinitialiser la liste. Dans Maîtrises, une fiche de

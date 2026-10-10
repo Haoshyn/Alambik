@@ -35,14 +35,6 @@ func _ready() -> void:
 	add_child(voile)
 	voile.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	move_child(voile, col.get_parent().get_index())
-	var reset := StyleAzur.bouton("Réinitialiser les maîtrises", _reinitialiser)
-	reset.name = "ReinitialiserMaitrises"
-	reset.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	reset.custom_minimum_size = Vector2(620, 104)
-	StyleJeu.habiller_bouton(reset, "violet", 36)
-	reset.add_theme_font_override("font", Polices.JEU_FORT)
-	reset.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
-	col.add_child(reset)
 	var fiche := StyleAzur.plaque(col, true)
 	fiche.name = "DetailsMaitriseFixes"
 	_solde = StyleAzur.texte("",25,StyleAzur.IVOIRE)
@@ -58,7 +50,8 @@ func _ready() -> void:
 		var fond_noeud: Texture2D = FONDS_NOEUDS[index_branche]
 		var dossier: String = ["offensif", "defensif", "utilitaire"][index_branche]
 		var centre_x := 145.0 + index_branche * 315.0
-		var decalage: float = [0.0, 95.0, 40.0][index_branche]
+		# Les trois titres partagent une ligne : les branches se lisent comme des colonnes.
+		var decalage := 0.0
 		var titre := StyleAzur.calligraphie(branche, 48, accent.lightened(0.15))
 		titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		branches.placer(titre, Rect2(centre_x - 145, decalage + 20, 290, 54))
@@ -118,10 +111,19 @@ func _ready() -> void:
 			var centre := Vector2(centre_x + oscillation, 180 + rang_noeud * 276 + decalage)
 			trace.append(centre)
 			branches.placer(b, Rect2(centre - Vector2.ONE * diametre * 0.5, Vector2.ONE * diametre))
-			branches.placer(rang_fond, Rect2(centre.x - 64.0, centre.y + diametre * 0.5 + 4.0, 128.0, 46.0))
+			# Le rang est un badge pose sur le bas du sceau, comme un niveau d'objet.
+			branches.placer(rang_fond, Rect2(centre.x - 64.0, centre.y + diametre * 0.5 - 30.0, 128.0, 46.0))
 			rang_noeud += 1
 			_noeuds[id] = b
 		branches.traces.append(trace)
+	# Action rare et destructive : en fin d'arbre, en teinte secondaire.
+	var reset := StyleAzur.bouton("Réinitialiser les maîtrises", _reinitialiser)
+	reset.name = "ReinitialiserMaitrises"
+	reset.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	reset.custom_minimum_size = Vector2(560, 92)
+	StyleJeu.habiller_bouton(reset, "ardoise", 30)
+	reset.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	contenu.add_child(reset)
 	# La fiche garde sa hauteur pour ne pas deplacer les sceaux a chaque selection.
 	var lecture_fixe := DefilementTactile.new()
 	lecture_fixe.custom_minimum_size.y = 200

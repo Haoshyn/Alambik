@@ -89,6 +89,10 @@ static func composition_rives(monde: int, etage: int, variante: int) -> Array[Di
 				"famille":posmod(rang + cote + etage, 4)})
 	return decors
 
+const DALLES := preload("res://assets/visual/sols/dalles_jeu.png")
+# Largeur d'une repetition du motif (deux dalles), en unites 3D.
+const TAILLE_DALLES := 2.6
+
 static func matiere_sol(monde: int) -> StandardMaterial3D:
 	var indice := clampi(monde, 0, PROFILS.size() - 1)
 	if _matieres_sol.has(indice):
@@ -101,7 +105,34 @@ static func matiere_sol(monde: int) -> StandardMaterial3D:
 	matiere.roughness = float(profil(indice)["rugosite_sol"])
 	matiere.metallic_specular = .22
 	matiere.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
-	# Une peinture couvre toute la salle : ni repetition ni joint sous les acteurs.
-	matiere.texture_repeat = false
+	# La peinture couvre toute la salle ; un dallage multiplie en espace monde
+	# donne l'echelle et le rythme d'une arene. Ses UV sont bornes a la salle.
+	matiere.texture_repeat = true
+	matiere.detail_enabled = true
+	matiere.detail_albedo = DALLES
+	matiere.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
+	matiere.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2
+	matiere.uv2_triplanar = true
+	matiere.uv2_world_triplanar = true
+	# Le plan est etire de 1/sin(inclinaison) en profondeur : la dalle reste carree a l'ecran.
+	var repetition := 1.0 / TAILLE_DALLES
+	matiere.uv2_scale = Vector3(repetition, repetition, repetition * sin(deg_to_rad(Pont3D.INCLINAISON)))
+	_essai_sol(matiere)
 	_matieres_sol[indice] = matiere
 	return matiere
+
+# ESSAI TEMPORAIRE : --sol-essai=<png absolu> remplace l'enduit pour comparer des propositions.
+static func _essai_sol(matiere: StandardMaterial3D) -> void:
+	for argument in OS.get_cmdline_user_args():
+		if not argument.begins_with("--sol-essai="): continue
+		var image := Image.load_from_file(argument.trim_prefix("--sol-essai="))
+		image.generate_mipmaps()
+		matiere.albedo_texture = ImageTexture.create_from_image(image)
+		matiere.detail_enabled = false
+		matiere.uv1_triplanar = true
+		matiere.uv1_world_triplanar = true
+		var r := 1.0 / 3.2
+		for autre in OS.get_cmdline_user_args():
+			if autre.begins_with("--sol-echelle="): r = 1.0 / float(autre.trim_prefix("--sol-echelle="))
+		var rapport := float(image.get_width()) / image.get_height()
+		matiere.uv1_scale = Vector3(r, r, r * sin(deg_to_rad(Pont3D.INCLINAISON)) * rapport)

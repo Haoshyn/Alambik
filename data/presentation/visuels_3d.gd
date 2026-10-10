@@ -3,6 +3,17 @@ extends RefCounted
 
 # Profil de rendu uniquement : aucune statistique de combat.
 const HEROS_MODELE := "res://scenes/3d/aster.tscn"
+# Silhouette chibi d'Aster : echelle propre de chaque os, hors pistes d'animation
+# (elles n'animent que positions et rotations). La collision reste HEROS_RAYON.
+const HEROS_PROPORTIONS := {
+	"Head": 1.28, "Thigh.L": .74, "Thigh.R": .74, "UpperArm.L": .86, "UpperArm.R": .86,
+	"Spine": .9, "Foot.L": 1.25, "Foot.R": 1.25,
+}
+# Tissus nuit eclaircis vers un bleu roi, et liseré de contre-jour plus franc.
+const HEROS_REHAUSSES := {"Velvet": Vector3(2.2, 1.9, 3.0), "Midnight": Vector3(1.7, 1.55, 2.2)}
+const HEROS_FORCE_BORD := .55
+# Taille d'ensemble du modele chibi ; les pieds restent poses au sol.
+const HEROS_TAILLE_CHIBI := 1.12
 # Hauteur projetee du modele natif ; la reserve de la barre reste fixe.
 const HEROS_BARRE_VIE_HAUTEUR := 150.0
 const HEROS_BARRE_VIE_MARGE := 30.0

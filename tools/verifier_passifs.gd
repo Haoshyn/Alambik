@@ -41,7 +41,7 @@ func _demarrer() -> void:
 		_exiger(slots.size() == Passifs.EMPLACEMENTS, "Quatre emplacements disponibles")
 		_exiger(page.find_child("VoilePassifs", true, false) == null, "Aucun voile propre aux passifs")
 		var fond: Control = menu.get("_fond_menu")
-		_exiger(is_equal_approx(float(fond.get("_voile_cible")), 0.30), "Meme lecture de la clairiere que les autres pages")
+		_exiger(is_equal_approx(float(fond.get("_voile_cible")), FondMenuVivant.VOILE_PAGE), "Meme lecture de la clairiere que les autres pages")
 		var cartes: GridContainer = page.get("_cartes")
 		_exiger(cartes.get_child_count() == Passifs.CATALOGUE.size(), "Catalogue complet sans acquisition")
 		await _verifier_glissement(page)

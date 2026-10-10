@@ -3,6 +3,12 @@ signal ferme
 const SLOTS := ["anneau", "bracelet", "collier"]
 const NOMS_SLOTS := {"anneau":"Anneau", "bracelet":"Bracelet", "collier":"Collier"}
 const OBJETS_PAR_PAGE := 20
+const SOCLE := preload("res://ui/composants/socle_heros.gd")
+const PORTRAIT := preload("res://ui/composants/portrait_heros_3d.gd")
+# Bijoux a gauche, arme et familier a droite du heros (repere 960).
+const PLACES_VITRINE := [Vector2(130, 110), Vector2(130, 370), Vector2(130, 630), Vector2(830, 180), Vector2(830, 480)]
+const STATISTIQUES := [["Attaque", "force"], ["Défense", "armure"], ["PV", "vitalite"],
+	["Critique", "precision"], ["Dégâts crit.", "puissance"], ["Cadence", "cadence"]]
 var integre_menu := false
 var objet_initial := ""
 var _slot_selectionne := "anneau"
@@ -18,6 +24,10 @@ var _grille_familiers: GridContainer
 var _precedent: Button
 var _suivant: Button
 var _resume: Label
+var _valeurs_stats: Array[Label] = []
+var _aide_coffret: Label
+var _boutons_compagnons: Array[Button] = []
+var _libelles_compagnons: Array[Label] = []
 var _armes: VBoxContainer
 var _boutons_armes: Dictionary = {}
 var _lectures_armes: Dictionary = {}
@@ -45,12 +55,41 @@ func _ready() -> void:
 		onglets.add_child(onglet)
 		_onglets_atelier.append(onglet)
 	var contenu := StyleAzur.defilement(col)
+	# La vitrine deduit sa hauteur de sa largeur : une barre de defilement qui
+	# apparait puis disparait relancerait la mise en page sans fin.
+	(contenu.get_parent() as ScrollContainer).vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
+	_construire_vitrine(contenu)
 	var bilan := VBoxContainer.new()
 	contenu.add_child(bilan)
 	_bilan = bilan
+	# Fiche du heros en pastilles : une icone et un chiffre se lisent d'un coup d'oeil.
 	var infos := StyleAzur.cartouche_infos(bilan, StyleAzur.CUIVRE)
-	_resume = StyleAzur.texte("", 30, StyleAzur.MENTHE)
-	_resume.add_theme_constant_override("line_spacing", 5)
+	var grille_stats := GridContainer.new()
+	grille_stats.name = "StatistiquesHeros"
+	grille_stats.columns = 3
+	grille_stats.add_theme_constant_override("h_separation", 14)
+	grille_stats.add_theme_constant_override("v_separation", 10)
+	infos.add_child(grille_stats)
+	for entree: Array in STATISTIQUES:
+		var pastille := HBoxContainer.new()
+		pastille.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		pastille.add_theme_constant_override("separation", 10)
+		grille_stats.add_child(pastille)
+		var icone := StyleAzur.vignette(str(entree[1]), 72)
+		icone.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		pastille.add_child(icone)
+		var lecture := VBoxContainer.new()
+		lecture.add_theme_constant_override("separation", -6)
+		pastille.add_child(lecture)
+		var valeur := StyleJeu.texte("", 34, StyleJeu.OR, StyleJeu.CONTOUR_TEXTE, true)
+		valeur.autowrap_mode = TextServer.AUTOWRAP_OFF
+		lecture.add_child(valeur)
+		var libelle := StyleJeu.texte(str(entree[0]), 22, StyleJeu.TEXTE_DOUX)
+		libelle.autowrap_mode = TextServer.AUTOWRAP_OFF
+		lecture.add_child(libelle)
+		_valeurs_stats.append(valeur)
+	_resume = StyleAzur.texte("", 26, StyleAzur.MENTHE)
+	_resume.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	infos.add_child(_resume)
 	_armes = VBoxContainer.new()
 	_armes.add_theme_constant_override("separation", 20)
@@ -62,31 +101,22 @@ func _ready() -> void:
 	_bijoux = VBoxContainer.new()
 	_bijoux.add_theme_constant_override("separation", 20)
 	contenu.add_child(_bijoux)
-	var slots := CompositionArcane.new()
-	slots.hauteur = 390
-	slots.traces = [PackedVector2Array([Vector2(160,210),Vector2(465,110),Vector2(790,225)])]
-	_bijoux.add_child(StyleAzur.calligraphie("Votre parure", 44, StyleAzur.OR_VIF))
-	_bijoux.add_child(slots)
-	for i in SLOTS.size():
-		var b := StyleAzur.bouton_rond("",func(): _selectionner_slot(SLOTS[i]), 180)
-		b.expand_icon = true
-		b.add_theme_constant_override("icon_max_width",104)
-		var position_sceau := Vector2([70, 375, 700][i], [120, 20, 135][i])
-		slots.placer(b, Rect2(position_sceau, Vector2(180,180)))
-		_boutons_slots.append(b)
-		var nom := StyleAzur.texte("", 26)
-		nom.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		slots.placer(nom, Rect2(position_sceau + Vector2(-35,190), Vector2(250,70)))
-		_libelles_slots.append(nom)
-	StyleAzur.separateur(_bijoux)
-	_bijoux.add_child(StyleAzur.calligraphie("Le coffret de bijoux", 44, StyleAzur.LILAS))
+	# Le coffret est un panneau serti : titre et cases ne reposent pas sur la clairiere.
+	var coffret := StyleAzur.cartouche_infos(_bijoux, StyleAzur.LILAS)
+	coffret.add_theme_constant_override("separation", 14)
+	var titre_coffret := StyleAzur.calligraphie("Le coffret de bijoux", 40, StyleAzur.LILAS)
+	titre_coffret.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	coffret.add_child(titre_coffret)
+	_aide_coffret = StyleAzur.texte("Terminez des niveaux de campagne pour gagner des bijoux.", 26, StyleJeu.TEXTE_DOUX)
+	_aide_coffret.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	coffret.add_child(_aide_coffret)
 	var grille := GridContainer.new()
 	grille.name = "GrilleInventaire"
 	grille.columns = 5
 	_grille_inventaire = grille
 	grille.add_theme_constant_override("h_separation", 9)
 	grille.add_theme_constant_override("v_separation", 9)
-	_bijoux.add_child(grille)
+	coffret.add_child(grille)
 	for i in OBJETS_PAR_PAGE:
 		var b := StyleAzur.bouton("",func(): _selectionner_objet(i))
 		b.name = "Objet_%d" % i
@@ -101,7 +131,7 @@ func _ready() -> void:
 		_boutons_objets.append(b)
 	var pages := BoxContainer.new()
 	StyleAzur.adapter_ligne(pages)
-	_bijoux.add_child(pages)
+	coffret.add_child(pages)
 	_precedent = StyleAzur.bouton("‹ Précédent",func(): _changer_page(-1))
 	_suivant = StyleAzur.bouton("Suivant ›",func(): _changer_page(1))
 	pages.add_child(_precedent)
@@ -121,6 +151,61 @@ func _ready() -> void:
 		_rafraichir()
 		_ouvrir_fiche_objet()
 	Capture.programmer(self)
+
+# Vitrine commune aux trois ateliers : le heros sur son socle, entoure de sa
+# parure, de son arme et de son familier, comme un ecran d'equipement de jeu.
+func _construire_vitrine(parent: Control) -> void:
+	var vitrine := CompositionArcane.new()
+	vitrine.name = "Vitrine"
+	vitrine.hauteur = 790
+	vitrine.traces = [PackedVector2Array([PLACES_VITRINE[0], PLACES_VITRINE[1], PLACES_VITRINE[2]]), PackedVector2Array([PLACES_VITRINE[3], PLACES_VITRINE[4]])]
+	parent.add_child(vitrine)
+	var socle := SOCLE.new()
+	socle.name = "Socle"
+	socle.accent = StyleAzur.OR_VIF
+	vitrine.placer(socle, Rect2(250, 450, 460, 170))
+	var portrait := PORTRAIT.new()
+	portrait.name = "PortraitHeros"
+	vitrine.placer(portrait, Rect2(250, 0, 460, 800))
+	var actions := [func(): _choisir_parure(SLOTS[0]), func(): _choisir_parure(SLOTS[1]),
+		func(): _choisir_parure(SLOTS[2]), func(): _changer_atelier(1), func(): _changer_atelier(2)]
+	for i in actions.size():
+		var centre: Vector2 = PLACES_VITRINE[i]
+		var b := StyleAzur.bouton_rond("", actions[i], 164)
+		b.name = "Emplacement_" + ["anneau", "bracelet", "collier", "arme", "familier"][i]
+		b.expand_icon = true
+		b.add_theme_constant_override("icon_max_width", 104)
+		vitrine.placer(b, Rect2(centre - Vector2.ONE * 82, Vector2.ONE * 164))
+		var nom := StyleAzur.texte("", 26)
+		nom.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		# Hors conteneur, un retour a la ligne automatique relance la mise en page :
+		# les libelles portent leurs sauts de ligne explicites.
+		nom.autowrap_mode = TextServer.AUTOWRAP_OFF
+		vitrine.placer(nom, Rect2(centre + Vector2(-130, 86), Vector2(260, 70)))
+		if i < SLOTS.size():
+			_boutons_slots.append(b)
+			_libelles_slots.append(nom)
+		else:
+			_boutons_compagnons.append(b)
+			_libelles_compagnons.append(nom)
+
+func _choisir_parure(slot: String) -> void:
+	if _atelier_actif != 0: _changer_atelier(0)
+	_selectionner_slot(slot)
+
+func _afficher_vitrine() -> void:
+	var arme := ReglagesJoueur.projectile_equipe_effectif()
+	var familier := ReglagesJoueur.familier_equipe_effectif()
+	var icones := [StyleAzur.icone_arme(arme), load("res://assets/visual/interface/menu/familiers/%s.svg" % familier) as Texture2D]
+	var donnees_arme: Dictionary = CatalogueProjectiles.TYPES.get(arme, {})
+	var donnees_familier: Dictionary = CatalogueFamiliers.TYPES.get(familier, {})
+	var noms := ["Arme\n" + str(donnees_arme.get("nom", "")), "Familier\n" + str(donnees_familier.get("nom", ""))]
+	var accents := [StyleAzur.ROUGE_VIF, StyleAzur.VERT_VIF]
+	for i in _boutons_compagnons.size():
+		var b: Button = _boutons_compagnons[i]
+		b.icon = icones[i]
+		b.add_theme_stylebox_override("normal", StyleAzur.cercle_teinte(accents[i], _atelier_actif == i + 1))
+		_libelles_compagnons[i].text = noms[i]
 
 func _changer_atelier(index: int) -> void:
 	_atelier_actif = index
@@ -153,7 +238,12 @@ func _adapter_grilles() -> void:
 		_grille_familiers.columns = 2 if largeur >= 840.0 else 1
 
 func _afficher_inventaire() -> void:
-	_resume.text = _resume_heros()
+	var stats := _stats_heros()
+	var valeurs := [_nombre(stats.degats), _nombre(stats.defense), str(roundi(stats.pv_max)),
+		"%s %%" % _pourcentage(stats.critique), "+%s %%" % _pourcentage(stats.degats_critiques),
+		"%d %%" % roundi(stats.cadence / Reglages.HEROS_CADENCE * 100.0)]
+	for i in _valeurs_stats.size(): _valeurs_stats[i].text = str(valeurs[i])
+	_resume.text = "Cœurs %d/%d · %d pierres de forge" % [ReglagesJoueur.nombre_coeurs_mana(), Epreuves.nombre(), ReglagesJoueur.pierres_forge]
 	for i in SLOTS.size():
 		var id := str(ReglagesJoueur.equipements.get(SLOTS[i],""))
 		_boutons_slots[i].icon = StyleAzur.icone(2 if SLOTS[i] == "collier" else 0) if id.is_empty() else StyleAzur.icone(StyleAzur.icone_objet(id))
@@ -164,9 +254,14 @@ func _afficher_inventaire() -> void:
 	var ids := _objets_page()
 	var mondes: Array = Chapitres.MONDES + Chapitres.MONDES_RETIRES
 	_precedent.get_parent().visible = _objets_compatibles().size() > OBJETS_PAR_PAGE
+	_aide_coffret.visible = _objets_compatibles().is_empty()
+	# Les cases vides completent seulement la derniere rangee : un coffret
+	# presque vide ne doit pas remplir l'ecran de cases eteintes.
+	var colonnes := maxi(1, _grille_inventaire.columns)
+	var cases := maxi(colonnes, ceili(float(ids.size()) / colonnes) * colonnes)
 	for i in OBJETS_PAR_PAGE:
 		var b := _boutons_objets[i]
-		b.visible = true
+		b.visible = i < cases
 		b.disabled = i >= ids.size()
 		if i >= ids.size():
 			b.icon = null
@@ -303,6 +398,7 @@ func _rafraichir() -> void:
 	_afficher_inventaire()
 	_afficher_armes()
 	_afficher_familiers()
+	_afficher_vitrine()
 
 func _nouvelle_fiche(titre: String, glyphe: String) -> FenetreFiche:
 	if is_instance_valid(_fiche_popup) and _fiche_popup.visible and not _fiche_popup.fermeture_en_cours():
@@ -458,15 +554,10 @@ func _exit_tree() -> void:
 	if is_instance_valid(_fiche_popup):
 		_fiche_popup.queue_free()
 
-func _resume_heros() -> String:
-	var stats := Stats.depuis_reglages(ReglagesJoueur.rangs_competences_effectifs(),
+func _stats_heros() -> Stats:
+	return Stats.depuis_reglages(ReglagesJoueur.rangs_competences_effectifs(),
 		ReglagesJoueur.passifs_equipes_effectifs(), ReglagesJoueur.bonus_objets_effectifs(),
 		ReglagesJoueur.niveau_compte_effectif(), ReglagesJoueur.attributs, ReglagesJoueur.specialisation_effective())
-	return "Attaque %s · Défense %s · PV %d\nCritique %s %% · dégâts critiques +%s %%\nCadence %d %% · Cœurs %d/%d · %d pierres" % [
-		_nombre(stats.degats), _nombre(stats.defense), roundi(stats.pv_max),
-		_pourcentage(stats.critique), _pourcentage(stats.degats_critiques),
-		roundi(stats.cadence / Reglages.HEROS_CADENCE * 100.0), ReglagesJoueur.nombre_coeurs_mana(),
-		Epreuves.nombre(), ReglagesJoueur.pierres_forge]
 
 func _selectionner_arme(id: String) -> void:
 	_arme_selectionnee = id

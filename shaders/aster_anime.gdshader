@@ -10,6 +10,9 @@ uniform float visage = 0.0;
 uniform float metal = 0.0;
 uniform float emission = 0.0;
 uniform vec3 couleur_emission : source_color = vec3(0.0);
+// Rehausse les tissus sombres : la silhouette reste lisible vue de dessus.
+uniform vec3 rehausse = vec3(1.0);
+uniform float force_bord = 0.16;
 varying vec3 normale_monde;
 varying vec3 position_monde;
 void vertex() {
@@ -20,6 +23,7 @@ void fragment() {
  vec3 couleur=couleur_base.rgb;
  if(utiliser_texture)couleur*=texture(texture_base,UV).rgb;
  if(couleur_sommets)couleur*=COLOR.rgb;
+ couleur*=rehausse;
  vec3 normale=normalize(normale_monde);
  float ndl=dot(normale,normalize(direction_lumiere));
  float bande=smoothstep(-0.06,0.10,ndl);
@@ -28,7 +32,7 @@ void fragment() {
  vec3 v=normalize(CAMERA_POSITION_WORLD-position_monde);
  float bord=pow(1.0-max(dot(normale,v),0.0),4.0)*max(normale.x*.5+.5,0.0);
  float reflet=pow(max(dot(normale,normalize(v+normalize(direction_lumiere))),0.0),36.0);
- ALBEDO=couleur*eclairage+vec3(.20,.28,.36)*bord*.16;
+ ALBEDO=couleur*eclairage+vec3(.55,.72,1.0)*bord*force_bord;
  ALBEDO+=vec3(.85,.72,.48)*reflet*metal*.60;
  EMISSION=couleur_emission*emission*.2;
 }

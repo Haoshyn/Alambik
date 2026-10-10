@@ -79,14 +79,20 @@ func _verifier_heros() -> void:
 			for _image in 8: await process_frame
 			var descriptions: Dictionary = page.get("_descriptions")
 			var plus: Dictionary = page.get("_plus")
+			# Chaque attribut choisi dans la constellation s'explique dans le panneau du bas.
+			var panneau := page.find_child("DetailAttribut", true, false) as PanelContainer
+			var commande := page.find_child("PlusSelection", true, false) as Button
 			for id: String in Personnage.ATTRIBUTS:
+				page.call("_selectionner", id)
+				for _image in 3: await process_frame
 				var description: Label = descriptions[id]
-				var panneau := page.find_child("Attribut_" + id, true, false) as PanelContainer
 				var bouton: Button = plus[id]
+				_exiger(description.visible, "Description de l'attribut choisi masquee : " + id)
 				_exiger(description.text == Personnage.description_attribut(id, joueur.rang_attribut(id), niveau),
 					"La fiche affiche les valeurs d'un autre niveau : " + id)
 				_exiger(panneau.get_global_rect().encloses(description.get_global_rect()), "Description hors carte : " + id)
-				_exiger(not description.get_global_rect().intersects(bouton.get_global_rect()), "Description sur la commande Plus : " + id)
+				_exiger(not description.get_global_rect().intersects(commande.get_global_rect()), "Description sur la commande Plus : " + id)
+				_exiger(not panneau.get_global_rect().intersects(bouton.get_global_rect()), "Ajout direct sous le panneau : " + id)
 			page.free()
 			await process_frame
 

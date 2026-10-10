@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from xml.etree import ElementTree
 
+from style_icone_jeu import PALETTES as PALETTES_JEU, habiller
+
 
 RACINE = Path(__file__).resolve().parent.parent
 SOURCES = RACINE / "tools/sources_svg"
@@ -123,25 +125,13 @@ def mouvement(effet: str, couleur: str) -> str:
 
 
 def composer(nom_source: str, palette: tuple[str, str, str, str], effet: str, avec_mouvement: bool) -> str:
-    clair, moyen, ombre, lueur = palette
+    _, _, _, lueur = palette
     trace = silhouette(nom_source)
-    contour = "#fff2d8" if effet in ("feu", "solaire", "offensif") else "#ebf7ff"
-    decorations = mouvement(effet, lueur) if avec_mouvement else poussiere(lueur, len(nom_source) % 2 == 0)
-    anneau = (f'<circle cx="128" cy="128" r="108" fill="none" stroke="{lueur}" stroke-width="2" opacity=".28"/>'
-              if avec_mouvement else "")
-    echelle = "translate(23 23) scale(.82)"
+    # Les familiers gardent leur mouvement d'element, sous l'icone.
+    decorations = mouvement(effet, lueur) if avec_mouvement else ""
     return f'''<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 256 256">
-<defs>
-<linearGradient id="email" x1=".13" y1=".03" x2=".86" y2="1"><stop stop-color="#ffffff"/><stop offset=".13" stop-color="{clair}"/><stop offset=".46" stop-color="{moyen}"/><stop offset=".82" stop-color="{ombre}"/><stop offset="1" stop-color="{moyen}"/></linearGradient>
-<linearGradient id="reflet" x1="0" y1="0" x2=".78" y2=".88"><stop stop-color="#ffffff" stop-opacity=".76"/><stop offset=".34" stop-color="{clair}" stop-opacity=".14"/><stop offset=".8" stop-color="{ombre}" stop-opacity="0"/></linearGradient>
-<radialGradient id="halo"><stop stop-color="{lueur}" stop-opacity=".43"/><stop offset=".52" stop-color="{lueur}" stop-opacity=".16"/><stop offset="1" stop-color="{lueur}" stop-opacity="0"/></radialGradient>
-</defs>
-<circle cx="128" cy="128" r="121" fill="url(#halo)"/>{anneau}
 {decorations}
-<path d="{trace}" transform="translate(27 29) scale(.82)" fill="#0a1730" fill-rule="evenodd" opacity=".72"/>
-<path d="{trace}" transform="{echelle}" fill="url(#email)" fill-rule="evenodd" stroke="{ombre}" stroke-width="4" stroke-linejoin="round"/>
-<path d="{trace}" transform="{echelle}" fill="url(#reflet)" fill-rule="evenodd" opacity=".74"/>
-<path d="{trace}" transform="{echelle}" fill="none" stroke="{contour}" stroke-opacity=".72" stroke-width="1.5" stroke-linejoin="round"/>
+{habiller(trace, PALETTES_JEU.get(effet, PALETTES_JEU["arcane"]))}
 </svg>'''
 
 

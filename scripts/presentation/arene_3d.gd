@@ -64,17 +64,40 @@ func _bordure(parent: Node3D, contour: PackedVector2Array, monde: int, variante:
 		# Les petits arcs gardent une frise continue, sans couvert de largeur negative.
 		if longueur < .20: continue
 		var morceaux := maxi(1, ceili(longueur/1.8))
+		# Murs continus : la salle est cadree comme une arene. Le premier plan,
+		# tourne vers la camera, reste bas pour ne rien masquer du jeu.
+		var face_camera := dehors.z > .5
 		for j in morceaux:
 			var position_bord := a.lerp(b,(float(j)+.5)/morceaux)
-			if TerrainsMondes.muret_visible(variante,numero_segment):
-				var bord := DECOR.bloc(parent,position_bord+dehors*.13+Vector3(0,.16,0),Vector3(longueur/morceaux-.08,.28,.27),mur)
-				bord.rotation.y = angle
-				var couronne := DECOR.bloc(parent,position_bord+dehors*.13+Vector3(0,.32,0),Vector3(longueur/morceaux-.06,.055,.32),accent)
-				couronne.rotation.y = angle
-			else:
-				var agrafe := DECOR.bloc(parent,position_bord+dehors*.10+Vector3(0,.05,0),Vector3(.075,.035,.31),DecorsMondes.CUIVRE)
-				agrafe.rotation.y = angle
+			var haut := TerrainsMondes.muret_visible(variante,numero_segment)
+			var hauteur := .20 if face_camera else (.62 if haut else .46)
+			var bord := DECOR.bloc(parent,position_bord+dehors*.19+Vector3(0,hauteur*.5,0),Vector3(longueur/morceaux+.01,hauteur,.34),mur)
+			bord.rotation.y = angle
+			var couronne := DECOR.bloc(parent,position_bord+dehors*.20+Vector3(0,hauteur+.03,0),Vector3(longueur/morceaux+.03,.06,.38),accent)
+			couronne.rotation.y = angle
+			var liseret := DECOR.bloc(parent,position_bord+dehors*.20+Vector3(0,hauteur+.065,0),Vector3(longueur/morceaux+.03,.012,.08),DecorsMondes.CUIVRE)
+			liseret.rotation.y = angle
 			numero_segment += 1
+	_piliers(parent, contour, aire, mur, accent)
+
+func _piliers(parent: Node3D, contour: PackedVector2Array, aire: float, mur: Color, accent: Color) -> void:
+	# Un pilier serti a chaque angle marque les contours de la salle.
+	for i in contour.size():
+		var precedent := Pont3D.vers_monde(contour[(i-1+contour.size())%contour.size()])
+		var point := Pont3D.vers_monde(contour[i])
+		var suivant := Pont3D.vers_monde(contour[(i+1)%contour.size()])
+		var entrant := (point-precedent).normalized()
+		var sortant := (suivant-point).normalized()
+		if entrant.dot(sortant) > .94 or point.distance_to(precedent) < .6 or point.distance_to(suivant) < .6: continue
+		var dehors := (Vector3(entrant.z,0,-entrant.x)+Vector3(sortant.z,0,-sortant.x)).normalized() * (1.0 if aire > 0.0 else -1.0)
+		var centre := point+dehors*.34
+		var hauteur := .26 if dehors.z > .5 else .82
+		var fut := DECOR.bloc(parent,centre+Vector3(0,hauteur*.5,0),Vector3(.44,hauteur,.44),mur.darkened(.08))
+		fut.rotation.y = -atan2(sortant.z,sortant.x)
+		var chapiteau := DECOR.bloc(parent,centre+Vector3(0,hauteur+.05,0),Vector3(.54,.1,.54),accent)
+		chapiteau.rotation.y = fut.rotation.y
+		var gemme := DECOR.bloc(parent,centre+Vector3(0,hauteur+.13,0),Vector3(.18,.08,.18),DecorsMondes.CUIVRE)
+		gemme.rotation.y = fut.rotation.y + PI*.25
 
 func avancer_ambiance(delta: float, effets_reduits: bool) -> void:
 	if effets_reduits: return

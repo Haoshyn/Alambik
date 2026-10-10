@@ -12,7 +12,7 @@
 
 ## Rythme et esquive
 
-La vitesse des tirs et la recharge progressent avec le niveau et l’avancée de la tentative, indépendamment du build. Les multiplicateurs ci-dessous s’appliquent aux profils de base ; les tirs ordinaires ajoutent ×1,5 en vitesse, les boss ×2,62. Les plafonds des ricochets et des allers-retours suivent aussi la progression.
+La vitesse des tirs et la recharge progressent avec le niveau et l’avancée de la tentative, indépendamment du build. Les multiplicateurs ci-dessous s’appliquent aux profils de base ; les tirs ordinaires ajoutent ×1,5 en vitesse, les boss ×2,63. Les plafonds des ricochets et des allers-retours suivent aussi la progression.
 
 | Niveau | Vitesse début × | Vitesse fin × | Recharge début × | Recharge fin × | Annonce × |
 | --- | --- | --- | --- | --- | --- |

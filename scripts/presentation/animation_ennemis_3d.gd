@@ -67,7 +67,7 @@ func mettre_a_jour(ennemi: Node2D, delta: float, orientation: float, _vitesse: f
 	var phase := float(ennemi.get("_eclat_phase")) if _boss else 0.0
 	_hauteur = .025 + souffle * .010 if flottant else -.018 - _preparation * .018
 	if not flottant and not ReglagesJoueur.effets_reduits:
-		_hauteur -= (1.0 - cos(_appuis.phase * TAU * 2.0)) * .004 * mouvement
+		_hauteur -= (1.0 - cos(_appuis.phase * TAU * 2.0)) * .014 * mouvement
 	_hauteur += sin(clampf(phase, 0.0, 1.0) * PI) * Rendu.PHASE_HAUTEUR
 	var apparition := smoothstep(0.0, 1.0, float(ennemi.get("_apparition")))
 	var entree := lerpf(0.72, 1.0, apparition)
