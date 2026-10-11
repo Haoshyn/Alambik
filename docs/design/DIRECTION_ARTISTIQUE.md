@@ -9,18 +9,17 @@ elles conservent les idées historiques sans définir le rendu actuel.
 - Fantasy alchimique originale, lumineuse et aventureuse : encre, fioles,
   grimoires, sceaux et magie. La lisibilité sur téléphone prime sur l'ornement.
 - Le combat utilise des modèles et effets 3D sur une simulation 2D.
-- Le héros est Aster V7 : sorcier anime aux proportions manga compactes,
-  tête légèrement agrandie, jambes et buste raccourcis, robe
-  bleu nuit et ivoire, ornements dorés, grand chapeau et baguette. Le rendu
-  reprend ses matières peintes et ses contours fins. L'arme standard est sa
-  baguette intégrée ; les autres armes suivent l'équipement.
-  Depuis le 9 octobre 2026, la silhouette passe en chibi au chargement :
-  tête et chapeau agrandis, cuisses, bras et buste raccourcis, pieds plus
-  gros, modèle abaissé pour garder les pieds au sol
-  (`Visuels3D.HEROS_PROPORTIONS`, os mis à l'échelle hors des pistes
-  d'animation). Velours et tissus nuit sont rehaussés en bleu roi et un
-  liseré de contre-jour franc détache le héros du sol. La collision reste
-  `HEROS_RAYON`. Le tir rapide
+- Le héros est Aster chibi (10 octobre 2026), un modèle original de jeu
+  mobile construit par `tools/blender/heros_chibi.py` : environ deux têtes de
+  haut, tête ronde lisse, grands yeux violets à double reflet, joues roses,
+  petite bouche, mèches bleu argenté ; chapeau violet à pointe recourbée,
+  ruban d'or, gemme turquoise et étoile ; robe bleu roi en poire avec ourlet
+  et cape d'or, col et revers blancs, ceinture à boucle, manches bouffantes,
+  moufles et grosses bottes. Palette vive en aplats, liseré de contre-jour et
+  contour sombre ; le visage reste sans ombre ni contour. Il reprend le
+  squelette d'Aster V7 raccourci et ses huit actions, ainsi que la baguette
+  et le grimoire. L'ancien modèle reste dans `assets/3d/characters/aster/`.
+  La collision reste `HEROS_RAYON`. Le tir rapide
   à l'arrêt anime le bras et légèrement le buste, avec les pieds stables.
 - Les onze monstres communs et les vingt boss sont des objets alchimiques
   vivants : encriers à pattes, plumes, grimoires ouverts, masques et fioles.
